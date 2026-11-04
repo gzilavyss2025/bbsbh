@@ -38,7 +38,7 @@ Both vocabularies bottom out in the same three-step resolution, in
 `milbBrandPair` is steps 1–2 and returns **null** when neither hits;
 `milbColorPair` adds step 3. One ordering, two endings — a caller that must paint
 something reads the second, a caller whose contract is "no known colour, render
-something else" (`teamTintColor`, `teamStripeGradient`, `teamChipColors`) reads
+something else" (`teamTintColor`, `teamChipColors`) reads
 the first. Do not add a third ending: two chains once disagreed about an
 affiliate's colour.
 

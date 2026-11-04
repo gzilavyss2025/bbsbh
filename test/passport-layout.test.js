@@ -30,7 +30,6 @@ import {
   nudgeFromCollisions,
   otherPlacementsOn,
   pageCountFor,
-  pageIsFull,
   pageIsFullFor,
   pageSlots,
   placementFor,
@@ -387,11 +386,11 @@ test('stampsOnPage takes only that page, and orders top-to-bottom', () => {
 
 test('a page is full at PAGE_CAPACITY exactly, not before', () => {
   const nearly = Array.from({ length: PAGE_CAPACITY - 1 }, () => placed(1))
-  assert.equal(pageIsFull(nearly, 1), false)
-  assert.equal(pageIsFull([...nearly, placed(1)], 1), true)
+  assert.equal(pageIsFullFor(nearly, 1), false)
+  assert.equal(pageIsFullFor([...nearly, placed(1)], 1), true)
   // Stamps on another page do not fill this one.
-  assert.equal(pageIsFull([...nearly, placed(2)], 1), false)
-  assert.equal(pageIsFull([], 1), false)
+  assert.equal(pageIsFullFor([...nearly, placed(2)], 1), false)
+  assert.equal(pageIsFullFor([], 1), false)
 })
 
 test('firstOpenPage finds the first page with room, or admits there is none', () => {
@@ -438,7 +437,7 @@ test('otherPlacementsOn drops the stamp being moved, and only that one', () => {
 
 test('a move is not refused by the page it is already on', () => {
   const full = Array.from({ length: PAGE_CAPACITY }, (_, i) => owned(100 + i, 1))
-  assert.equal(pageIsFull(full, 1), true)
+  assert.equal(pageIsFullFor(full, 1), true)
   // Nine keepsakes on a page, one of them the one being moved: there is still
   // room for it to land somewhere else on that same page.
   assert.equal(pageIsFullFor(full, 1, 104), false)

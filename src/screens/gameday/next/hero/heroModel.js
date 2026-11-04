@@ -4,9 +4,6 @@ import { pitchLadder } from '../../../../api/playbyplay/pitchInfo.js'
 // The hero's pure parts: what the scorebook box draws for one at-bat entry (a computeHalfInningFeed
 // card, already clamped to the reader's cursor by its caller), and the words around it.
 
-const ORD = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th']
-export const ordinal = (n) => ORD[n] ?? ''
-
 // How a scorer splits an out between the box and the diamond (Gary, 2026-10-27): the kind of out goes
 // in the box (GO, FO, LO, PO, K, SF, SAC, GIDP, TP), the fielders who made it in the middle of the
 // diamond (6-3, F8). A hit, a walk, an error keep their code in the box and the diamond's middle empty.
@@ -51,16 +48,6 @@ export function boxModel(e) {
 
 // Exit velocity to a tenth, the ".0" dropped: 115.5, 103.
 const velo = (v) => String(Math.round(v * 10) / 10)
-
-// "103 mph · 30° · 382 ft"; a ground ball's distance is where it was fielded, so it is left out.
-export function contactLine(e) {
-  const b = e.battedBall
-  if (!b || b.exitVelo == null) return ''
-  const parts = [`${velo(b.exitVelo)} mph`]
-  if (b.launchAngle != null) parts.push(`${b.launchAngle}°`)
-  if (b.distance != null && b.trajectory !== 'ground_ball') parts.push(`${b.distance} ft`)
-  return parts.join(' · ')
-}
 
 // The same three numbers as the line, one entry each, for the hero's stat card.
 export function contactStats(e) {

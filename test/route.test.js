@@ -53,7 +53,6 @@ import {
   bookPath,
   bookStatsPath,
   profilePath,
-  notablePath,
   postseasonLivePath,
   seriesPageFor,
   seriesHref,
@@ -881,10 +880,8 @@ test('/profile is My Tally, and its path builder round-trips', () => {
   assert.deepEqual(parseRoute(profilePath()), { name: 'profile' })
 })
 
-test('/notable is the Notable games shelf, and its path builder round-trips', () => {
+test('/notable is the Notable games shelf', () => {
   assert.deepEqual(parseRoute('/notable'), { name: 'notable' })
-  assert.equal(notablePath(), '/notable')
-  assert.deepEqual(parseRoute(notablePath()), { name: 'notable' })
   assert.notEqual(parseRoute('/notable/x').name, 'notable')
 })
 

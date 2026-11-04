@@ -7,8 +7,14 @@
 // context before deleting anything this flags.
 //
 // WHAT IT WALKS. Every export in src/**/*.{js,jsx} is checked against an
-// import graph built from the WHOLE repo (src/, api/, scripts/, test/, e2e/) —
-// an export used only by a test, or only by a generator script, is still used.
+// import graph built from src/, api/, scripts/ and e2e/. An export only a test
+// (test/) imports is NOT used (#2845): ~1,000 lines of src/api code piled up that
+// way with no product caller. A test still counts for "is this file imported at
+// all", so a whole file only tests import is checked, but never for a name.
+// A generator script's import is a real use.
+// A barrel's `export { x } from './y.js'` is a use of y's x only when the barrel's own x is
+// used outside test/. The barrel's own names are not checked, only the leaf's. An ALLOWLIST
+// entry that a non-test file now uses fails too: drop it.
 // A name called elsewhere in ITS OWN file — an internal helper that also
 // happens to carry an `export` keyword nobody else reaches for — ALSO counts
 // as used: that code is reachable, so flagging it would just be noise about
@@ -47,14 +53,14 @@
 // Run by `npm run lint` (so it gates every push).
 
 import { readFileSync } from 'node:fs'
-import { dirname, extname, join, relative, resolve } from 'node:path'
+import { dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { ROOT, walk } from './lib/walk.mjs'
 
 
 const CODE_EXT = new Set(['.js', '.jsx', '.mjs'])
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git', '.vercel'])
-// Every root whose files can import from src/ and therefore count toward
-// "does anything use this" — not just src/ itself.
+// Every root whose files can import from src/. test/ is walked only to mark a file
+// as imported (see the import loop); its imports never count as a use.
 const CORPUS_ROOTS = ['src', 'api', 'scripts', 'test', 'e2e']
 // Only exports declared in these are checked — api/ and scripts/ have their
 // own conventions (Vercel handlers, one-off generators) this guard doesn't
@@ -64,7 +70,6 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
-  'src/api/history/playedForBoth.js#playedForBoth': 'Staged ahead of its first caller on purpose: #2579 slice 2 is the reader; the card (slice 3) waits for an approved wireframe. Only test/played-for-both-reader.test.js uses it today.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/api/history/retiredNumbers.js#retiredNumbersFor': 'Staged ahead of its first caller on purpose: #2598 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/retired-numbers.test.js uses it today.',
   'src/api/history/franchiseSummary.js#franchiseSummary': 'Staged ahead of its first caller on purpose: #2600 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-summary.test.js uses it today.',
@@ -74,6 +79,32 @@ const ALLOWLIST = {
   'src/lib/wpa/wpaBandColors.js#WPA_PLOT_SIZE': 'Declared "exported so Team Identity Lab\'s WPA preview can render its tile pattern at TRUE size" — the lab does not currently read it (comment may be ahead of the wiring), flagged for a maintainer to confirm rather than deleted blind.',
   'src/api/history/franchiseLeaders.js#franchiseLeaders': 'Staged ahead of its first caller on purpose: #2596 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-leaders.test.js uses it today.',
 }
+
+// Several exports of one file that share a reason: { 'path#name': reason }.
+const staged = (file, names, why) => Object.fromEntries(names.map((n) => [`${file}#${n}`, why]))
+
+Object.assign(
+  ALLOWLIST,
+  staged('src/api/gameday/moments/moments.js', ['levelFor', 'momentsForPlay'], '(#2574) staged: Gameday\'s moments dial waits for its screen. Only test/gameday-moments.test.js uses it today.'),
+  staged('src/api/ovr/ovrData.js', ['fetchOvrHistory'], '(#1703) staged: gen-ovr.mjs has the history write PAUSED until the OVR card shows it (Gary, 2026-11-04); this is its reader. test/ovr/history.test.js.'),
+  staged('src/api/history/onThisDay.js', ['onThisDay'], 'ADR-0100 ships the on-this-day shards and their reader first; the page that calls it is not built. Pinned by test/on-this-day.test.js.'),
+  staged('src/api/savant/attackAngle.js', ['fetchAttackAngles'], 'Phase C data fetch of the contact replay (docs/contact-replay.md, row C), kept with the replay models listed below; the replay card is deleted, so nothing calls it. test/savant-attack-angle.test.js.'),
+  staged('src/api/boxlines/careerSplits.js', ['DOOR_COLUMNS_WIDE', 'DOOR_EMPHASIS'], 'Card column vocabulary (ADR-0073) that names doorCells({ wide }) and the inked cell; no screen reads it today. Pinned against doorCells in test/splits-part-a.test.js and test/boxlines-card-facets.test.js.'),
+  staged('src/api/game.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
+  staged('src/api/scout/rosterStats.js', ['resetRosterReads'], 'test seam: clears the roster-read memo between cases, test/world-series/roster-card.test.js.'),
+  staged('src/lib/headshot/retry.js', ['resetSiloMisses'], 'test seam: clears the silo-miss set between cases, test/headshot.test.js.'),
+  staged('src/lib/ballpark/layout/fenceShape.js', ['fenceProblems'], 'test seam: validates every live ballpark outline, test/ballpark-layouts.test.js.'),
+  staged('src/lib/ballpark/layout/resolveLayout.js', ['allBallparkLayouts'], 'test seam: walks every live ballpark layout (coverage report and tests), test/ballpark-layouts.test.js and three more.'),
+  staged('src/lib/pitcherCard/replaySteps.js', ['replaySteps', 'countAt', 'basesAt'], 'Kept on purpose with their tests: the pure models behind the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/contactDraw.js', ['apexLabel', 'distanceLabel', 'sidePathFor'], 'Kept on purpose with their tests: the deleted at-bat replay\'s side view (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/atBat.js', ['markHomeRun'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/quality.js', ['qualityFigures'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/sideWall.js', ['wallAlong'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/motion/curves.js', ['easeStamp', 'easeUnfold'], 'Curves docs/contact-replay.md names for the kept replay models; pinned by test/motion-curves.test.js.'),
+  staged('src/lib/contracts/parseMoney.js', ['parseMoneyCell'], 'Used by the .scratch contract build scripts (.scratch/contracts/, .scratch/team-success/), which sit outside this guard\'s roots; pinned by test/parse-money.test.js.'),
+  staged('src/lib/contracts/positions.js', ['POSITIONS', 'resolveRole'], 'Used by the .scratch contract build scripts (.scratch/contracts-extensions/, .scratch/prospect-value/), which sit outside this guard\'s roots; pinned by test/contracts-positions.test.js.'),
+  staged('src/lib/runExpectancy.js', ['lookupEraRE'], 'Staged reader of the per-decade run-expectancy tables (docs/api/static-data.md); no screen reads per-count run expectancy yet. Pinned by test/run-expectancy-eras.test.js.'),
+)
 
 const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root), { skip: IGNORE_DIRS }))
 const codeFiles = allFiles.filter((f) => CODE_EXT.has(extname(f)))
@@ -110,16 +141,8 @@ function extractImports(text) {
     imports.push({ spec, names, hasDefault, hasNamespace })
   }
 
-  // Re-exports: export { a, b as c } from 'x'; export * from 'x'.
-  const reExportNamedRe = /export\s+\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]/g
-  while ((m = reExportNamedRe.exec(text))) {
-    const names = m[1]
-      .split(',')
-      .map((p) => p.trim())
-      .filter(Boolean)
-      .map((p) => (p.match(/^(\S+)\s+as\s+(\S+)$/) || [null, p])[1])
-    imports.push({ spec: m[2], names, hasDefault: false, hasNamespace: false })
-  }
+  // `export * from 'x'`. A NAMED re-export (`export { a } from 'x'`) is not an import: see
+  // extractReExports, which the graph below resolves only once the barrel's own name is used.
   const reExportStarRe = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g
   while ((m = reExportStarRe.exec(text))) {
     imports.push({ spec: m[1], names: [], hasDefault: true, hasNamespace: true })
@@ -131,6 +154,27 @@ function extractImports(text) {
   while ((m = dynRe.exec(text))) imports.push({ spec: m[1], names: [], hasDefault: true, hasNamespace: false })
 
   return imports
+}
+
+// Named re-exports: `export { a, b as c } from 'x'` (across lines too). -> [{ spec, pairs:
+// [{ orig, exported, offset }] }], `offset` being where the exported name sits in `text`.
+function extractReExports(text) {
+  const out = []
+  for (const m of text.matchAll(/export\s+\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]/g)) {
+    const pairs = []
+    let from = m.index
+    for (const part of m[1].split(',')) {
+      const p = part.trim()
+      if (!p) continue
+      const asMatch = p.match(/^(\S+)\s+as\s+(\S+)$/)
+      const [orig, exported] = asMatch ? [asMatch[1], asMatch[2]] : [p, p]
+      const offset = text.indexOf(p, from)
+      from = offset + p.length
+      pairs.push({ orig, exported, offset })
+    }
+    out.push({ spec: m[2], pairs })
+  }
+  return out
 }
 
 // Two dynamic-import shapes carry a NAMED export past a bare import(), neither
@@ -252,17 +296,27 @@ function usedElsewhereInFile(lines, skipLine, name) {
   return lines.some((line, i) => i !== skipLine && re.test(line.replace(/\/\/.*$/, '')))
 }
 
+const testDir = join(ROOT, 'test') + sep
 const usedNamed = new Map(codeFiles.map((f) => [f, new Set()]))
 const usedDefault = new Map(codeFiles.map((f) => [f, false]))
 const namespaceImported = new Map(codeFiles.map((f) => [f, false]))
 const importedAtAll = new Map(codeFiles.map((f) => [f, false]))
+const reExports = [] // { barrel, target, pairs } from a non-test file
 
 for (const fromFile of codeFiles) {
   const text = src.get(fromFile)
+  const fromTest = fromFile.startsWith(testDir)
+  for (const r of extractReExports(text)) {
+    const target = resolveSpecifier(r.spec, fromFile)
+    if (!target) continue
+    importedAtAll.set(target, true)
+    if (!fromTest) reExports.push({ barrel: fromFile, target, pairs: r.pairs })
+  }
   for (const imp of extractImports(text)) {
     const target = resolveSpecifier(imp.spec, fromFile)
     if (!target) continue
     importedAtAll.set(target, true)
+    if (fromTest) continue
     if (imp.hasNamespace) namespaceImported.set(target, true)
     if (imp.hasDefault) usedDefault.set(target, true)
     for (const n of imp.names) (n === 'default' ? usedDefault.set(target, true) : usedNamed.get(target).add(n))
@@ -271,7 +325,26 @@ for (const fromFile of codeFiles) {
     const target = resolveSpecifier(imp.spec, fromFile)
     if (!target) continue
     importedAtAll.set(target, true)
+    if (fromTest) continue
     for (const n of imp.names) (n === 'default' ? usedDefault.set(target, true) : usedNamed.get(target).add(n))
+  }
+}
+
+// A barrel's `export { x } from './y.js'` is a use of y's x only when the barrel's own `x` is used
+// outside test/ (an import of it, or a re-export of it by another barrel). Repeat to a fixed point.
+for (let changed = true; changed; ) {
+  changed = false
+  for (const { barrel, target, pairs } of reExports) {
+    for (const { orig, exported } of pairs) {
+      const barrelUsed = exported === 'default' ? usedDefault.get(barrel) : usedNamed.get(barrel).has(exported)
+      if (!barrelUsed && !namespaceImported.get(barrel)) continue
+      if (orig === 'default') {
+        if (!usedDefault.get(target)) changed = !!usedDefault.set(target, true)
+      } else if (!usedNamed.get(target).has(orig)) {
+        usedNamed.get(target).add(orig)
+        changed = true
+      }
+    }
   }
 }
 
@@ -298,6 +371,7 @@ for (const f of checkedFiles) {
     const key = `${rel}#${name}`
     if (ALLOWLIST[key]) {
       staleAllowlist.delete(key)
+      if (usedByOthers.has(name)) problems.push(`ALLOWLIST has "${key}" but a non-test file now uses it — drop the entry.`)
       continue
     }
     if (usedByOthers.has(name)) continue
@@ -306,8 +380,10 @@ for (const f of checkedFiles) {
   }
   if (exp.hasDefault && !usedDefault.get(f)) {
     const key = `${rel}#default`
-    if (ALLOWLIST[key]) staleAllowlist.delete(key)
-    else problems.push(`${rel}: the default export is not imported anywhere.`)
+    if (ALLOWLIST[key]) {
+      staleAllowlist.delete(key)
+      if (usedDefault.get(f)) problems.push(`ALLOWLIST has "${key}" but a non-test file now imports it — drop the entry.`)
+    } else problems.push(`${rel}: the default export is not imported anywhere.`)
   }
 }
 

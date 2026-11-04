@@ -1,17 +1,13 @@
 // The player page's hitting-side counterpart to test/pitcher-advanced.test.js:
 // the Advanced rate card (advancedHittingView, fed by person-fetch's
-// season/seasonAdvanced/sabermetrics bundle), the batted-ball profile
-// (battedBallView), and the league-rank chip strip (hittingRanksView). All
+// season/seasonAdvanced/sabermetrics bundle) and the league-rank chip strip (hittingRanksView). All
 // pure shaping — fixtures mirror live statsapi field names/values captured
 // for personId 661388 (William Contreras) on 2026-08-04 (seasonAdvanced
 // proportions arrive as ".406"-style strings, sabermetrics figures as
-// floats, rankings as per-league rank numbers/strings). The batted-ball
-// bucket counts below are the actual live values — they sum exactly to
-// ballsInPlay (145 + 83 + 83 + 30 = 341).
+// floats, rankings as per-league rank numbers/strings).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { advancedHittingView, battedBallView, hittingRanksView } from '../src/api/person.js'
-import { battedBallFor } from '../src/api/person/advanced.js'
+import { advancedHittingView, hittingRanksView } from '../src/api/person.js'
 
 // ---------------------------------------------------------------------------
 // advancedHittingView
@@ -58,54 +54,6 @@ test('advancedHittingView degrades to null on a missing or sparse bundle', () =>
   assert.equal(advancedHittingView({ seasonAdvanced: null, sabermetrics: null }), null)
   // A sabermetrics-only bundle (two facts: wOBA, wRC+) is below the four-fact floor.
   assert.equal(advancedHittingView({ seasonAdvanced: null, sabermetrics: SABERMETRICS }), null)
-})
-
-// ---------------------------------------------------------------------------
-// battedBallView
-// ---------------------------------------------------------------------------
-
-test('battedBallView computes share/AVG per bucket in fixed ground/line/fly/pop order', () => {
-  const view = battedBallView(SEASON_ADVANCED)
-  assert.equal(view.ballsInPlay, 341)
-  assert.deepEqual(view.rows.map((r) => r.key), ['ground', 'line', 'fly', 'pop'])
-  assert.deepEqual(view.rows.map((r) => r.name), ['Ground balls', 'Line drives', 'Fly balls', 'Pop-ups'])
-  const [ground, line, fly, pop] = view.rows
-  // ground: 107 outs + 38 hits = 145 total.
-  assert.equal(ground.share, 145 / 341)
-  assert.equal(ground.avg, 38 / 145)
-  // line: 30 + 53 = 83.
-  assert.equal(line.share, 83 / 341)
-  assert.equal(line.avg, 53 / 83)
-  // fly: 67 + 16 = 83.
-  assert.equal(fly.share, 83 / 341)
-  assert.equal(fly.avg, 16 / 83)
-  // pop: 30 + 0 = 30, zero hits but a non-zero total — avg is 0, not null.
-  assert.equal(pop.share, 30 / 341)
-  assert.equal(pop.avg, 0)
-})
-
-test('battedBallView gives a bucket with zero balls in play a null AVG', () => {
-  const view = battedBallView({
-    ballsInPlay: 50,
-    groundOuts: 0, groundHits: 0,
-    lineOuts: 50, lineHits: 0,
-    flyOuts: 0, flyHits: 0,
-    popOuts: 0, popHits: 0,
-  })
-  const [ground, line, fly, pop] = view.rows
-  assert.equal(ground.avg, null)
-  assert.equal(ground.share, 0)
-  assert.equal(line.avg, 0)
-  assert.equal(line.share, 1)
-  assert.equal(fly.avg, null)
-  assert.equal(pop.avg, null)
-})
-
-test('battedBallView returns null below the 50-ball sample floor, or with no data', () => {
-  assert.equal(battedBallView(null), null)
-  assert.equal(battedBallView({ ...SEASON_ADVANCED, ballsInPlay: 49 }), null)
-  assert.equal(battedBallView({ ...SEASON_ADVANCED, ballsInPlay: 0 }), null)
-  assert.equal(battedBallView({ ...SEASON_ADVANCED, ballsInPlay: undefined }), null)
 })
 
 // ---------------------------------------------------------------------------
@@ -177,17 +125,4 @@ test('hittingRanksView returns null with no qualifying rank or no split', () => 
     hittingRanksView([{ league: { name: 'National League' }, stat: { homeRuns: '38', rbi: '45' } }]),
     null,
   )
-})
-
-// ---------------------------------------------------------------------------
-// battedBallFor — the Advanced card's Regular/Postseason scope (#1829)
-// ---------------------------------------------------------------------------
-
-test('battedBallFor never serves the regular-season mix under the Postseason scope', () => {
-  const regular = battedBallView(SEASON_ADVANCED)
-  const block = { battedBall: regular, battedBallPost: null }
-  assert.equal(battedBallFor(block, false), regular)
-  assert.equal(battedBallFor(block, true), null)
-  const post = battedBallView({ ...SEASON_ADVANCED, ballsInPlay: 60, groundOuts: 30, groundHits: 0, lineOuts: 10, lineHits: 5, flyOuts: 10, flyHits: 5, popOuts: 0, popHits: 0 })
-  assert.equal(battedBallFor({ ...block, battedBallPost: post }, true), post)
 })

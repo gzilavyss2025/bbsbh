@@ -140,7 +140,7 @@ const BUDGETS = {
   // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
   // src/api file for one fetcher, bought with that directory's budget.
   'src/api/schedule.js': 800, // 741
-  'src/api/select.js': 800, // 770
+  'src/api/select.js': 700, // 640
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split

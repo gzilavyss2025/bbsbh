@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import test from 'node:test'
-import { CLUB_LEAGUES, clubLeague, roundName, roundTag } from '../src/lib/postseason/roundTag.js'
+import { clubLeague, roundName, roundTag } from '../src/lib/postseason/roundTag.js'
 import { seriesAbbr } from '../src/api/boxlines/rows.js'
 import { entriesFrom, gameRowsFor } from '../src/api/postseason/records.js'
 import { lastAppearanceHeading } from '../src/lib/pitcherCard/card.js'
@@ -13,9 +13,9 @@ import { gamesOf } from '../src/screens/scout/meetings/meetings.js'
 test('every club in the table has the league public/data/teams.json gives it now', () => {
   const teams = JSON.parse(fs.readFileSync(new URL('../public/data/teams.json', import.meta.url), 'utf8')).bySportId['1']
   const now = new Map(teams.map((t) => [t.id, t.leagueId === 103 ? 'AL' : 'NL']))
-  assert.equal(CLUB_LEAGUES.length, 30)
   assert.equal(now.size, 30)
-  for (const [id, league] of CLUB_LEAGUES) assert.equal(now.get(id), league, `club ${id}`)
+  // Through clubLeague: a club missing from the table reads '' and fails here.
+  for (const [id, league] of now) assert.equal(clubLeague(id), league, `club ${id}`)
 })
 
 test('a round below the World Series names its league; the World Series stays WS', () => {

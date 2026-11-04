@@ -55,24 +55,6 @@ function int(v) {
   return String(v)
 }
 
-// The tag a leader's name carries after it on the team hub's ledger, resolved
-// from the BLOCK he is ranked in rather than from his own listed position —
-// which is both the more truthful reading and the simpler one. A two-way player
-// has ONE `position` on his pool entry (taken from whichever split ranked
-// first), so reading that would tag him "DH" while he leads the club in ERA.
-// The block already knows: an arm ranked for pitching is an arm.
-//
-// Pitchers read as RHP/LHP, the way a rotation is written down, and fall back
-// to a plain "P" when no hand is on file — a pool built without `withHand`, or
-// a feed that omits it (api/statsLevels.js). Everyone else takes his own
-// position abbreviation, and an entry with neither renders NOTHING rather than
-// a dash: this tag is an aside, and MiLB feeds drop it often enough that a
-// column of dashes would read as breakage.
-export function positionTag(entry, group) {
-  if (group !== 'pitching') return entry.position || ''
-  return entry.hand ? `${entry.hand}HP` : 'P'
-}
-
 // ---------------------------------------------------------------------------
 // Category descriptors
 // ---------------------------------------------------------------------------

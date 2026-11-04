@@ -23,7 +23,6 @@ import {
   addStamp,
   adoptRemoteStamps,
   applyRemoteStamps,
-  isStamped,
   normalizePlacement,
   normalizeStamp,
   parseStamps,
@@ -36,12 +35,14 @@ import {
   seasonFromDate,
   seasonIsFull,
   serializeStamps,
+  isStamped,
   stampFor,
   stampsForSeason,
   stampsToPublish,
   toGamePk,
   unplaceStamp,
 } from '../src/lib/stamps.js'
+
 
 // ---------------------------------------------------------------------------
 // Validation and parsing

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
-import { COLUMNS, batlogView, loadBatlog, scopeRows, totalsOf } from '../src/screens/player/next/modules/batlog/batlogView.js'
+import { COLUMNS, batlogView, loadBatlog, scopeRows } from '../src/screens/player/next/modules/batlog/batlogView.js'
 
 // The batter Game Log's rows (#1890): every game of the hitting gameLog split, newest first, with
 // the club's score from fetchFinalScores (which holds today back) and the fouls store's per-game
@@ -100,7 +100,7 @@ test('a cutoff keeps the games before that day only', () => {
   assert.deepEqual(rows.map((r) => r.gamePk), [1])
 })
 
-test('the filter and the totals: games, AVG, OBP, SLG, HR, RBI over the rows it shows', () => {
+test('the scope filter splits postseason from regular-season rows', () => {
   const { rows } = batlogView([
     game('2026-05-01', 1, { atBats: 4, hits: 2, doubles: 1, baseOnBalls: 1, hitByPitch: 1, sacFlies: 0, homeRuns: 1, rbi: 2 }),
     game('2026-05-06', 2, { atBats: 5, hits: 1, doubles: 0, baseOnBalls: 0, hitByPitch: 0, sacFlies: 1, homeRuns: 0, rbi: 0 }),
@@ -109,11 +109,6 @@ test('the filter and the totals: games, AVG, OBP, SLG, HR, RBI over the rows it 
   assert.deepEqual(scopeRows(rows, 'post').map((r) => r.gamePk), [3])
   assert.deepEqual(scopeRows(rows, 'reg').map((r) => r.gamePk), [2, 1])
   assert.equal(rows[0].series, 'NLDS')
-
-  const reg = totalsOf(scopeRows(rows, 'reg'))
-  // reg: AB 9, H 3, BB 1, HBP 1, SF 1 -> AVG .333, OBP 5/12 = .417; TB = 3 + 1 (2B) + 3 (HR) = 7 -> SLG .778
-  assert.deepEqual(reg, { games: 2, avg: '.333', obp: '.417', slg: '.778', hr: 1, rbi: 2 })
-  assert.deepEqual(totalsOf([]), { games: 0, avg: '—', obp: '—', slg: '—', hr: 0, rbi: 0 })
 })
 
 test('the loader: a log with no game, or a failed fetch, ends as no view', async () => {

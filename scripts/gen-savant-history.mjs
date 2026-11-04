@@ -11,7 +11,7 @@
 // Savant did the percentile maths, so a blank cell (unqualified, or no bat
 // tracking before 2023) is simply left out of the shard. Sharded on
 // `personId % 100`, all three seasons and both player types in one shard, so a player
-// page opens ONE ~2.5 KB file (src/api/ovr/savantHistory.js).
+// page would open ONE ~2.5 KB file (no reader ships yet; #2845).
 // Run by hand: node scripts/gen-savant-history.mjs
 import { join } from 'node:path'
 import { writeShards } from './lib/io.js'

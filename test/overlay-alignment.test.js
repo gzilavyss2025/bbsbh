@@ -25,7 +25,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  HOME, VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX, buildFieldGeometry, diagramInput, plotPercent,
+  HOME, VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX, buildFieldGeometry, diagramInput,
 } from '../src/lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg, HIT_COORD_ORIGIN, HIT_COORD_FT_PER_UNIT } from '../src/lib/ballpark/hitProjection.js'
 import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
@@ -97,15 +97,3 @@ test('caught balls stay inside the wall, give or take a catch at it', () => {
   assert.ok(Math.max(...margins) <= 25, `a catch plots ${Math.max(...margins).toFixed(1)} ft past the wall`)
 })
 
-test('an HTML label lands where the SVG puts the mark, under the cropped window', () => {
-  const [minX, minY, w, h] = PLOT_VIEWBOX.split(' ').map(Number)
-  assert.deepEqual([minX, minY, w, h], [0, PLOT_SKY_CROP, VIEWBOX.w, VIEWBOX.h - PLOT_SKY_CROP])
-  // The window's corners are 0% and 100%; any point maps back through the viewBox.
-  assert.deepEqual(plotPercent({ x: 0, y: PLOT_SKY_CROP }), { left: 0, top: 0 })
-  assert.deepEqual(plotPercent({ x: VIEWBOX.w, y: VIEWBOX.h }), { left: 100, top: 100 })
-  for (const p of [HOME, hitCoordToSvg(...coordAt(-30, 330)), hitCoordToSvg(...coordAt(20, 410))]) {
-    const at = plotPercent(p)
-    near(minX + (at.left / 100) * w, p.x, 1e-9, 'x round trip')
-    near(minY + (at.top / 100) * h, p.y, 1e-9, 'y round trip')
-  }
-})

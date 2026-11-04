@@ -740,10 +740,9 @@ export function pageDay(resultsCutoff) {
   return slateToday()
 }
 
-// recentDecidedGames / allDecidedGames / allStartedGames — the pure post-fetch
-// filters over this list — moved to scheduleGames.js once this file hit the
-// 600-line size cap (ADR-0038). Split there rather than widening the budget:
-// three functions with no fetch of their own were the easiest clean cut.
+// allDecidedGames / allStartedGames / postseasonThrough — the pure post-fetch
+// filters over this list — live in scheduleGames.js (split out once this file hit the
+// 600-line size cap, ADR-0038).
 
 // The opponent from a team's most recently COMPLETED game — the Team Identity
 // Lab's WPA scenario mockups (screens/identity-lab/) use this so the "away" band

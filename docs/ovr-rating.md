@@ -307,8 +307,8 @@ seasons until tuning shows the tail needs them.
   shard, and null keys left out. One shard is about 2.5 KB on average (the largest is
   5.0 KB); a player page opens one shard. One flat file would be about 300 KB, which
   would double what the page parses. With null keys kept, two seasons were 3.0 KB.
-- A reader through `staticJsonBy` (`src/api/ovr/savantHistory.js`), then the career
-  weighting (`src/api/ovr/career.js`).
+- The career weighting is `src/api/ovr/career.js`. No reader of the shards ships yet
+  (the `savantHistory.js` reader was deleted with its dead export, #2845).
 - `public/data/war-history/` holds WAR only, with no Statcast percentiles. It
   cannot feed the buckets.
 - A hand-run generator fits (`scripts/gen-savant-history.mjs`), like

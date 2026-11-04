@@ -3,7 +3,6 @@ import test from 'node:test'
 import {
   workloadFor,
   availabilityFor,
-  workloadVsBaseline,
   bullpenStatusCounts,
   foldGameLog,
 } from '../src/api/workload.js'
@@ -127,7 +126,6 @@ test('asOfDate strictly excludes a same-day appearance', () => {
 test('unknown pitcher and null data degrade to null', () => {
   assert.equal(workloadFor(data, 'nope', '2026-07-16'), null)
   assert.equal(availabilityFor(data, 'nope', '2026-07-16'), null)
-  assert.equal(workloadVsBaseline(data, 'nope', '2026-07-16'), null)
   assert.equal(workloadFor(null, 'monthEdge', '2026-07-16'), null)
 })
 
@@ -135,14 +133,6 @@ test('starters return fresh with a last-start note', () => {
   const a = availabilityFor(data, 'starter', '2026-07-16')
   assert.equal(a.status, 'fresh')
   assert.deepEqual(a.reasons, ['last start 6 days ago'])
-})
-
-test('vs-baseline computes role and own-norm percentages', () => {
-  const v = workloadVsBaseline(data, 'steady', '2026-07-16')
-  assert.equal(v.last10, 200) // 10 apps × 20
-  assert.equal(v.ownNorm, 200) // 400 pitches / 20 g × 10
-  assert.equal(v.vsOwnPct, 0)
-  assert.equal(v.vsRolePct, 100) // (200 − 100) / 100
 })
 
 test('bucket day-span measures oldest appearance to asOf−1', () => {

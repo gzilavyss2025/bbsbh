@@ -93,17 +93,6 @@ export function compareFoulsInScope(data, scope) {
 export const MIN_BATTER_GAMES = 20
 export const MIN_PITCHER_PITCHES = 200
 
-// Literature priors for UI copy (SABR/Retrosheet + FanGraphs) — the empirical
-// "battling to two strikes via fouls" edge, so live foul counts can carry
-// meaning from day one without our own correlation study. See
-// .scratch/metric-engines/foul-tracker.md's research findings.
-export const FOUL_PRIORS = {
-  hitProbFoulRoute2K: 0.291,
-  hitProbOtherRoute2K: 0.102,
-  hitProbFoulRoute2K3Fouls: 0.335,
-  source: 'SABR BRJ 2018 (Howard), Retrosheet 1945-2015',
-}
-
 const round = (n, d = 2) => (Number.isFinite(n) ? Number(n.toFixed(d)) : n)
 
 // The 12 counts in the order the generator files them: cell = balls * 3 + strikes (#1881).

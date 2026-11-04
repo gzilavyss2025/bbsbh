@@ -14,9 +14,7 @@ import { runnerPitchLabel } from '../src/api/playbyplay/runnerNotes.js'
 import {
   computeHalfInningFeed,
   nextStepBoundary,
-  defensiveChangeFielder,
   focusWindows,
-  windowLeadIn,
 } from '../src/api/playbyplay.js'
 
 test('a pre-first-pitch pitching change is dropped from the half feed (no duplicate card)', () => {
@@ -116,25 +114,6 @@ test('a stoppage between pitches is marked as belonging to its own at-bat', () =
 
 // ---- the "now playing {position}" phrase ------------------------------------
 
-test('a switch to DH still says what he switched to', () => {
-  // A defensive SWITCH can move a fielder to DH — 8 of them in a three-day MLB
-  // sweep (Rosario, Cowser, Muncy, Polanco…). POSITION_LOWER covers the nine
-  // fielding spots because "a DH never takes the field", which is true and
-  // beside the point: the card still has to name the slot he moved INTO, and
-  // without an entry it rendered "Now playing for the Orioles" with the
-  // position silently missing.
-  const fielder = defensiveChangeFielder(buildFeed(), 20, 'DH')
-  assert.equal(fielder.position, 'designated hitter')
-})
-
-test('an unknown position abbreviation still degrades to no phrase', () => {
-  // Not every abbreviation is a place on the field ('PH' shows up on odd
-  // substitution rows) — those keep falling back to the bare "Now playing for
-  // the …" rather than inventing a position.
-  assert.equal(defensiveChangeFielder(buildFeed(), 20, 'PH').position, '')
-  assert.equal(defensiveChangeFielder(buildFeed(), 20, '').position, '')
-})
-
 test('the half-leading notes still bundle FORWARD with the first at-bat', () => {
   // Top 2's subs are announced before the half's first pitch, so there is no
   // earlier at-bat to hang them on — they open the half's first step, exactly
@@ -175,59 +154,6 @@ test('a steal announced ahead of the first pitch still belongs to the batter at 
   // Ott alone — then the steal rides with Pena's tap, not Ott's.
   assert.equal(nextStepBoundary(entries, 1), 2)
   assert.equal(nextStepBoundary(entries, 2), 4)
-})
-
-// ---- the reliever's card is repeated on the first batter he faces -----------
-
-// The relief arm each window repeats at its head (windowLeadIn), by window.
-function reliefRepeats(entries) {
-  const wins = focusWindows(entries, entries.length)
-  return wins.map((_, i) =>
-    windowLeadIn(entries, wins, i).filter((e) => e.eventType === 'pitching_substitution').map((e) => e.playerId),
-  )
-}
-const windowOf = (entries, last) => {
-  const at = entries.findIndex((e) => e.kind === 'atbat' && e.batter.last === last)
-  return focusWindows(entries, entries.length).findIndex((w) => w.start <= at && at < w.end)
-}
-
-test('the first batter a reliever faces repeats who relieved', () => {
-  const entries = computeHalfInningFeed(bottom2WithStoppages(), 2, 'bottom', 'home')
-  const repeats = reliefRepeats(entries)
-  assert.deepEqual(repeats[windowOf(entries, 'Pena')], [301])
-  // Only the FIRST batter — Quin faces him too, but the card is an entrance, not a header.
-  assert.deepEqual(repeats[windowOf(entries, 'Quin')], [])
-  assert.deepEqual(repeats[windowOf(entries, 'Ott')], [])
-})
-
-test('a change between pitches leads its own at-bat, so that at-bat does not repeat it', () => {
-  const feed = buildFeed()
-  const pena = feed.liveData.plays.allPlays.find(
-    (p) => p.about.inning === 2 && p.about.halfInning === 'bottom' && p.matchup.batter.id === 16,
-  )
-  pena.playEvents = [
-    pena.playEvents[0],
-    {
-      details: { eventType: 'pitching_substitution', description: 'Pitching Change' },
-      position: { abbreviation: 'P' },
-      player: { id: 301 },
-    },
-    ...pena.playEvents.slice(1),
-  ]
-  const entries = computeHalfInningFeed(feed, 2, 'bottom', 'home')
-  const change = entries.find((e) => e.eventType === 'pitching_substitution')
-  assert.equal(change.midAtBat, true)
-  assert.deepEqual(reliefRepeats(entries)[windowOf(entries, 'Pena')], [])
-})
-
-test('the half-opening change is the persistent header’s, never a repeat on the first batter', () => {
-  const entries = computeHalfInningFeed(buildFeed(), 2, 'top', 'away')
-  for (const r of reliefRepeats(entries)) assert.deepEqual(r, [])
-})
-
-test('windowLeadIn repeats the relief only at the head of his first batter’s window', () => {
-  const entries = computeHalfInningFeed(bottom2WithStoppages(), 2, 'bottom', 'home')
-  assert.deepEqual(reliefRepeats(entries), [[], [], [301], []])
 })
 
 // ---- which pitch a steal / caught stealing / pickoff came on ----------------

@@ -31,7 +31,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick while a half move is held (aria-disabled only), as the old running line did.
-- `stage/` times a revealed play from `stagePlay` + `stateAt` (pure timeline, `play.js`) and mounts only a
+- `stage/` times a revealed play from `stagePlay` (pure timeline, `play.js`) and mounts only a
   celebration over the batting view. The corner field is gone (Gary, 2026-10-28, #2694); its renderer and art were deleted (#2702).
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`

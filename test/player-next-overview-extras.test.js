@@ -2,7 +2,7 @@
 // count tag, the By round rows and the one-tile-lit toggle.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { chipsView, countTag, nextLit, roundRows } from '../src/screens/player/next/top/overviewView.js'
+import { roundRows } from '../src/screens/player/next/top/overviewView.js'
 
 const hitBlock = {
   group: 'hitting',
@@ -14,36 +14,6 @@ const hitBlock = {
   postseason: { title: '2026 Postseason', games: 6, tiles: [] },
   otherLevels: [],
 }
-
-test('a chip finds its hero tile by label; R and 2B have none', () => {
-  const [lg] = chipsView(hitBlock)
-  assert.deepEqual(lg.items.map((i) => [i.label, i.tile]), [['2B', null], ['R', null], ['RBI', 'RBI']])
-})
-
-test('a pitching chip reads RANK_STATS for pitching, not hitting', () => {
-  const [lg] = chipsView({ group: 'pitching', ranks: [{ league: 'AL', items: [{ label: 'Wins', rank: 1, text: '1st' }] }] })
-  assert.equal(lg.items[0].tile, 'W–L')
-})
-
-test('no ranks gives no chips', () => {
-  assert.deepEqual(chipsView({ group: 'hitting', ranks: null }), [])
-})
-
-test('count tag lists ranks, postseason and levels from counts', () => {
-  assert.equal(countTag([hitBlock]), '3 ranks · Postseason')
-  const gasser = { group: 'pitching', ranks: null, postseason: { games: 1 }, otherLevels: [{ level: 'AAA', sportId: 11 }] }
-  assert.equal(countTag([gasser]), 'Postseason · AAA')
-  assert.equal(countTag([{ ranks: [{ items: [{}] }] }]), '1 rank')
-  assert.equal(countTag([{}]), '')
-})
-
-test('one tile lights at a time; a second tap on the same chip clears it', () => {
-  const a = nextLit(null, 'hitting', 'RBI')
-  assert.deepEqual(a, { group: 'hitting', tile: 'RBI' })
-  assert.equal(nextLit(a, 'hitting', 'RBI'), null)
-  assert.deepEqual(nextLit(a, 'hitting', 'HR'), { group: 'hitting', tile: 'HR' })
-  assert.equal(nextLit(a, 'hitting', null), null)
-})
 
 const bat = (h, ab, hr) => ({ gamesPlayed: 1, atBats: ab, hits: h, homeRuns: hr, rbi: 0, strikeOuts: 0, plateAppearances: ab, avg: '.000', ops: '.000' })
 

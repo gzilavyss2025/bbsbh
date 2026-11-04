@@ -7,9 +7,12 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import {
-  ledgerRows, ledgerScale, leftOut, listOf, locationLens, rowTag, textOf, typeSentences, versus, watchList, whoFavors,
+  ledgerRows, leftOut, listOf, locationLens, rowTag, typeSentences, versus, watchList, whoFavors,
 } from '../src/screens/scout/edge/edge.js'
 import { fmtValue } from '../src/lib/scout/metrics.js'
+
+// A sentence is a list of parts: a string, or { strong } for a figure set in bold.
+const textOf = (parts) => parts.map((p) => (typeof p === 'string' ? p : p.strong)).join('')
 
 const PAIR = JSON.parse(readFileSync(new URL('./fixtures/scout/pair-601713-694192.json', import.meta.url), 'utf8'))
 const NAMES = { hitter: 'Chourio', pitcher: 'Pivetta' }
@@ -92,12 +95,6 @@ test('the location lens: hottest regions are hi2, below league is lo1 and lo2, t
   assert.deepEqual(leftOut(board), [{ name: 'Cutter', n: 44 }, { name: 'Curveball', n: 24 }])
   // A thin All map has no location lens at all.
   assert.equal(locationLens({ ...board, all: { ...board.all, thin: true } }, sides.xwoba), null)
-})
-
-test('the ledger scale holds every rate, padded', () => {
-  const s = ledgerScale(ledgerRows(board.types, sides.xwoba, 'xwoba'))
-  assert.ok(s.at(0.26) > 0 && s.at(0.391) < 100)
-  assert.equal(ledgerScale([{ value: null, league: null }]), null)
 })
 
 test('lists read as English', () => {

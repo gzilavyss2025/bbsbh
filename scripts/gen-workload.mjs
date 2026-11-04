@@ -3,7 +3,7 @@
 // (date + pitch count + start flag), season totals, and a role classification
 // (SP/RP); plus league baselines (mean/SD of rolling pitch loads by role) and a
 // winning- vs. losing-record team cohort split. The app reads it via
-// src/api/workload.js (workloadFor / availabilityFor / workloadVsBaseline).
+// src/api/workload.js (workloadFor / availabilityFor).
 //
 // It also writes public/data/workload-summary.json — thirty rows of
 // fresh/limited/down counts, about a kilobyte, so the slate can draw pen dots

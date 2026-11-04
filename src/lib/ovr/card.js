@@ -1,8 +1,6 @@
 // The OVR card as data (docs/ovr-rating.md, "The card"). Pure: a rating and a history in,
 // what the tile and the menu draw out. No React, no fetch.
-import { clamp } from '../math/number.js'
 import { SPORT_LABEL } from '../teams.js'
-import { easeOut } from '../scorecard/glide.js'
 import { changeSince, seasonSeries } from '../../api/ovr/history.js'
 import { CEILING } from '../../api/ovr/minor.js'
 import { CONSTANTS } from '../../api/ovr/rating.js'
@@ -20,10 +18,6 @@ export const SEGMENTS = 20
 
 // Lit segments of a bar for a rating on the 0-100 scale (20 shows 4, 99 shows all 20).
 export const filledSegments = (value) => Math.round((value / 100) * SEGMENTS)
-
-// The big number's count-up at progress k (0..1): from the floor to the value on the
-// app's own ease-out, and exactly the value at k >= 1.
-export const countUpValue = (k, to) => (k >= 1 ? to : Math.round(FLOOR + (to - FLOOR) * easeOut(clamp(k, 0, 1))))
 
 // Where a rating sits on the meter, as a percent of the 20-99 scale.
 const at = (v) => ((v - FLOOR) / (CAP - FLOOR)) * 100

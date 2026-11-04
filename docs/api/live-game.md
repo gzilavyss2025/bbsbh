@@ -378,11 +378,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   never `team.battingOrder`, which mutates to the current slot occupants and
   would sprout PH rows on the staging pages late in a game. It also feeds
   `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
-  pages). `selectBullpen`/`selectBench` hand every card row an `enteredIdx` (the
-  half he entered at) and `enteredAsOf` is the one place that reads it: a row is
-  struck through only at or below BOTH the reveal mark and the half on screen,
-  so a reader paging back through a game they already unsealed sees the bench
-  that half opened with (ADR-0005's amendment).
+  pages). The bench/bullpen card selectors and `enteredAsOf` went in #2845 (nothing called
+  them); ADR-0005's amendment records the rule they held.
 - `liveEdge.js` — a THIRD classification, neither reveal-only nor an ordinary
   spoiler-free selector (the plays-based live-edge reader that drove the Scores
   Unlocked pass's navigation was removed with the pass, ADR-0116). Two UNGATED
@@ -656,15 +653,12 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   card. Pinned on gamePk 823035 (`test/gameday-day-line.test.js`).
 - `gameday/stepCut.js` — the cut both modules share: `visibleAtBatCards(feed, inning,
   half, step)` and `stepCutAtBatIndex` (the last on-screen card's `atBatIndex`, or -1).
-- `gameday/reviews.js` (#2607) — `reviewsAtStep(feed, { inning, half, step,
-  revealedThrough })` gives `{ reviews, bank }`. Each review: `kind` (`abs`, `manager`
+- `gameday/reviews.js` (#2607) — `reviewsInPlay(feed, play)` gives the play's reviews. Each: `kind` (`abs`, `manager`
   when a club challenged anything else, `crew` when no club is named), `side`,
   `reason` from MLB's `/api/v1/reviewReasons` (the second letter of `reviewType`),
   `overturned` (null while `inProgress`), the player, and where it happened. ABS records
-  come from `challenges.js`' `challengesForPlay` (one walk for every surface). The bank is
-  `challenges.js`' rules walked to the step, with a refill when a club enters an extra
-  inning empty; null for a game that does not run ABS. Never reads
-  `gameData.absChallenges`. Pinned on gamePk 823036, 823169 and 815625.
+  come from `challenges.js`' `challengesForPlay` (one walk for every surface). Never reads
+  `gameData.absChallenges`. The step-level list and ABS bank (`reviewsAtStep`) were deleted in #2845. Pinned on gamePk 823036 and 823169.
 - `gameday/checkpoint.js` (#2605) — `checkpointPages(feed, { inning, half,
   revealedThrough })` gives the closed half's pages in `PAGE_ORDER` (`tally`,
   `pitching`, then `atBats` and `gameSoFar` as `built: false` until #2572), or null for a

@@ -14,8 +14,8 @@
 // changes once a day.
 //
 // The W1 rolling buckets (workloadFor), the W5 ESPN-threshold availability board
-// (availabilityFor), and the W4 own-norm/role percentages (workloadVsBaseline)
-// from .scratch/metric-engines/pitch-workload.md live here.
+// (availabilityFor) from .scratch/metric-engines/pitch-workload.md live here. The W4
+// own-norm/role percentages (workloadVsBaseline) were deleted in #2845: nothing called them.
 
 import { staticJson } from './staticJson.js'
 import { ipToOuts } from '../lib/math/innings.js'
@@ -225,32 +225,6 @@ export function bullpenStatusCounts(statuses) {
     if (s in counts) counts[s] += 1
   }
   return counts
-}
-
-// Load relative to baselines (W4): the pitcher's last-10-appearance pitch total
-// as a percentage above/below (a) his role's league baseline mean and (b) his
-// own season norm (season pitches / appearances × 10 = a typical 10-app load).
-// Null-safe: any missing input yields a null percentage rather than NaN.
-export function workloadVsBaseline(data, personId, asOfDate) {
-  const w = workloadFor(data, personId, asOfDate)
-  if (!w) return null
-
-  const last10 = w.last10.pitches
-  const roleMean = data?.baselines?.[w.role]?.last10?.mean ?? null
-
-  const season = w.season
-  const ownNorm =
-    season && season.g > 0 && season.pitches > 0 ? (season.pitches / season.g) * 10 : null
-
-  const pct = (base) => (base != null && base > 0 ? Math.round(((last10 - base) / base) * 100) : null)
-
-  return {
-    last10,
-    roleMean,
-    ownNorm: ownNorm == null ? null : Math.round(ownNorm * 10) / 10,
-    vsRolePct: pct(roleMean),
-    vsOwnPct: pct(ownNorm),
-  }
 }
 
 // ---------------------------------------------------------------------------

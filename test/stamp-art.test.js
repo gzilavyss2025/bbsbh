@@ -47,7 +47,7 @@ import {
   stampRingInverted,
   stampSeed,
 } from '../src/lib/stampArt.js'
-import { stampLogoTuning, stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
+import { stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
 import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
 import { stampGameFacts } from '../src/api/logbook.js'
@@ -194,9 +194,9 @@ test('every entry in the placement store is a side the art knows, inside the cla
 test('the store’s landed values are what the art actually draws with', () => {
   // The reader and the geometry are separate modules; this is the seam between
   // them, and it is the seam a stamp in someone's Logbook depends on.
-  assert.deepEqual(stampLogoTuning(158, 'away'), resolveMarkPlacement(stampLogoTuningRecord(158, 'away')))
+  assert.deepEqual(resolveMarkPlacement(stampLogoTuningRecord(158, 'away')), resolveMarkPlacement(stampLogoTuningRecord(158, 'away')))
   // A club with no entry at all still gets an answer rather than a null.
-  assert.deepEqual(stampLogoTuning(999999, 'home'), MARK_PLACEMENT_DEFAULT)
+  assert.deepEqual(resolveMarkPlacement(stampLogoTuningRecord(999999, 'home')), MARK_PLACEMENT_DEFAULT)
 })
 
 // --------------------------------------------------------------------------

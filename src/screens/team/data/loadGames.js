@@ -41,7 +41,7 @@ export async function loadGames(id, asOf, src = DIRECT) {
   ])
 
   // The games grid, oldest -> newest (the grid reverses it for display) — see
-  // allDecidedGames'/recentDecidedGames' own headers for why this filters on
+  // allDecidedGames' own header for why this filters on
   // `won != null` rather than Final status. The whole season's decided games,
   // since this tab shows all of them rather than the Overview's last ten.
   // Also what the Highlights rail is handed, for the same reason — a clip's

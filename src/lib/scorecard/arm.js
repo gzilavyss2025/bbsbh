@@ -75,8 +75,8 @@ export function frontierArmChange(feed, revealedThrough, at) {
   // No change: in inning 1 the club's starter, who takes the mound and so is
   // news, as HalfInning.jsx's isFreshPitcher says. Else the arm who threw his
   // club's last play, in a half already committed: he stays on, so he is not
-  // news. (selectIsFreshPitcher compares with the previous half's STARTER, so
-  // it would call a reliever who came in mid-half new again here.) Never this
+  // news. (A check against the previous half's STARTER would
+  // call a reliever who came in mid-half new again here.) Never this
   // half's first play: its pitcher is whoever FINISHED that at-bat, which a
   // change between its pitches would give away.
   if (inning === 1) return arm(starterId(feed, fielding), true)

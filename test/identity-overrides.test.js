@@ -40,7 +40,8 @@ import {
 } from '../src/lib/teams.js'
 import { TEAM_COLOR_PAIRS } from '../src/lib/brandColors.js'
 import { milbTreatmentTile, milbWpaBandColor, milbWpaLogoLayout, milbWpaWordmark } from '../src/lib/milbColors.js'
-import { stampLogoTuning } from '../src/lib/stampLogoTuning.js'
+import { stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
+import { resolveMarkPlacement } from '../src/lib/stampArt.js'
 import { wpaBandColor, wpaBandPinstripeColor } from '../src/lib/wpa/wpaBandColors.js'
 import { wpaLogoLayout, wpaWordmarkOn } from '../src/lib/wpa/wpaLogo.js'
 import { identityWriteRefusal } from '../api/identity.js'
@@ -316,12 +317,12 @@ test('an override reaches the header triad, the tile background, the brand pair 
       assert.equal(treatmentHeaderColorOverride(158, 'main').bar, '#12284B', 'the rest of the triad still ships')
       assert.equal(treatmentBgColor(158, 'city-connect'), '#ABCDEF')
       assert.equal(TEAM_COLOR_PAIRS[BREWERS][0], '#010203')
-      assert.equal(stampLogoTuning(158, 'away').offsetY, -12)
+      assert.equal(resolveMarkPlacement(stampLogoTuningRecord(158, 'away')).offsetY, -12)
     },
   )
   assert.equal(treatmentBgColor(158, 'city-connect'), '#ff6c58')
   assert.equal(TEAM_COLOR_PAIRS[BREWERS][0], '#12284B')
-  assert.equal(stampLogoTuning(158, 'away').offsetY, 9)
+  assert.equal(resolveMarkPlacement(stampLogoTuningRecord(158, 'away')).offsetY, 9)
 })
 
 test('a logo id resolves like any other leaf, and only inside the vocabulary', () => {

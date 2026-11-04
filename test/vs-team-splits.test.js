@@ -6,7 +6,6 @@ import {
   fetchVsTeamSplitsForPlayer,
   fetchVsTeamSplitsForTeams,
   vsTeamDoorLabel,
-  vsTeamRates,
   vsTeamSplitsFor,
 } from '../src/api/vsTeamSplits.js'
 import { hitterCar } from '../scripts/lib/vs-team/hitter.mjs'
@@ -183,8 +182,3 @@ test('hitterCar writes obp, slg (MLB rounding) and so beside the old keys', () =
   assert.equal(car.xbh, 5)
 })
 
-test('vsTeamRates divides by plate appearances; a shard with no so gives null', () => {
-  assert.deepEqual(vsTeamRates({ pa: 40, bb: 4, so: 10 }), { bbPct: 0.1, kPct: 0.25 })
-  assert.deepEqual(vsTeamRates({ pa: 40, bb: 4 }), { bbPct: 0.1, kPct: null })
-  assert.deepEqual(vsTeamRates({ pa: 0, bb: 0, so: 0 }), { bbPct: null, kPct: null })
-})

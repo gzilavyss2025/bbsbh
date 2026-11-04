@@ -12,7 +12,7 @@ showing a number.
 
 `box.allPositions[]` lists a player's positions in the order he actually
 played them, so its first entry is his true starting spot; `selectLineup` and
-`isPitcherByTrade` (`select.js`) use that, falling back to `box.position`
+`isPitcherByTrade` (`select.js`; removed in #2845 with the card selectors) use that, falling back to `box.position`
 only for thin MiLB feeds that omit `allPositions`. Only the reveal-gated
 strike-through may change a roster row with game events — never its position
 label or list membership.
@@ -35,7 +35,7 @@ Every neighbouring card on that screen already reads as of the half —
 bullpen were the last surface still reporting the end of the game on a page
 headed "Top 1st".
 
-`enteredAsOf(player, revealedThrough, halfIdx)` in `select.js` now owns the
+`enteredAsOf(player, revealedThrough, halfIdx)` in `select.js` (removed in #2845: nothing called it) now owns the
 decision, and keeps the LOWER of two ceilings:
 
 - **the reveal mark**, unchanged, so a substitution in a still-sealed half never

@@ -8,7 +8,7 @@ import { playerPhotosOff } from '../lib/headshot/lockout.js'
 // feed — both teams' full box score rosters (starters, bench, bullpen) — the
 // moment a game has something to step through (InningViewer passes `ready`
 // as `firstPitchThrown`). Roster membership is spoiler-free
-// (selectGameRosterIds, same footing as selectBullpen/selectBench), so this
+// (selectGameRosterIds), so this
 // needs no reveal gate of its own.
 //
 // `warmedIds` dedupes across re-renders and feed refetches so a live game's

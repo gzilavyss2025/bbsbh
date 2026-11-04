@@ -924,10 +924,6 @@ export function logbookPlacePath(gamePk) {
 export function profilePath() {
   return '/profile'
 }
-// Notable games, the shelf of no-hitters, cycles and triple plays (#2508). A fixed address.
-export function notablePath() {
-  return '/notable'
-}
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
 }

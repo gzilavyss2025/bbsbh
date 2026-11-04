@@ -49,25 +49,11 @@ export function rowTag(row, names) {
 export const versus = (metric, row) =>
   row.value == null || row.league == null ? '—' : `${fmtValue(metric, row.value)} vs ${fmtValue(metric, row.league)}`
 
-// The ledger's shared x scale for one metric: every rate on the board, padded.
-export function ledgerScale(rows) {
-  const vals = rows.flatMap((r) => [r.value, r.league]).filter((v) => v != null)
-  if (!vals.length) return null
-  const pad = 0.03
-  const lo = Math.min(...vals) - pad
-  const hi = Math.max(...vals) + pad
-  return { lo, hi, at: (v) => ((v - lo) / (hi - lo)) * 100 }
-}
-
 const pctOf = (rows) => sum(rows.map((r) => Number(r.pct)))
 const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a sentence
 // "a", "a and b", "a, b and c".
 export const listOf = (items) =>
   items.length <= 1 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
-
-// A sentence is a list of parts: a string, or { strong } for a figure the
-// panel sets in bold. The panel joins them; a test reads the text.
-export const textOf = (parts) => parts.map((p) => (typeof p === 'string' ? p : p.strong)).join('')
 
 // The by-pitch-type sentences, from `rows` on the headline metric. `names` is
 // { hitter, pitcher } (last names), `crowd` 'righties' | 'lefties'.

@@ -16,23 +16,11 @@ export function postseasonThrough(schedule, through) {
   return schedule.filter((g) => !g.gameType || g.gameType === 'R' || g.apiDate <= through)
 }
 
-// The Last 10 Games card's window (the team page's Last 10) — the
-// most recently DECIDED games from a team's fetchTeamSchedule() list, oldest
-// -> newest (the list is already sorted ascending). Filters on `won != null`,
-// which fetchTeamSchedule already cutoff-gates, NEVER on Final status
-// directly — that would bypass the cutoff and could surface the very game a
-// mid-scoring visitor opened this page from. Pulled out as its own pure
-// function (rather than left inline in the component) specifically so this
-// invariant is pinned by a test, not just a comment.
-export function recentDecidedGames(schedule, limit = 10) {
-  return schedule.filter((g) => g.won != null).slice(-limit)
-}
-
 // The same window's full backing list, oldest -> newest — the Last 10 Games
-// strip opens scrolled to recentDecidedGames' last-10 view, then grows its
+// strip opens scrolled to the last ten of it, then grows its
 // rendered window toward the front of THIS list as the user scrolls left,
-// all the way back to Opening Day. Same `won != null` filter/invariant as
-// recentDecidedGames (no separate cutoff to drift out of sync with it).
+// all the way back to Opening Day. Every consumer here holds the same
+// `won != null` invariant (no separate cutoff to drift out of sync with it).
 export function allDecidedGames(schedule) {
   return schedule.filter((g) => g.won != null)
 }
