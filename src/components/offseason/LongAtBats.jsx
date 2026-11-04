@@ -8,6 +8,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { ClubStrip } from './ClubStrip.jsx'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 
@@ -60,7 +61,7 @@ export function LongAtBats({ season }) {
     .map((r, i) => ({ ...r, key: i }))
   const clubs = [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
     .filter(Boolean)
-    .sort((a, b) => (teamAbbr({ id: a }) < teamAbbr({ id: b }) ? -1 : 1))
+    .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b })))
   const all = club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every
   const top = all[pick] ?? all[0]
   const pickClub = (id) => {
@@ -84,23 +85,7 @@ export function LongAtBats({ season }) {
       </SectionHead>
 
       <Card frame="stamped" as="div" className="seasonnote__sheet">
-        <div className="seasonnote__clubs" role="group" aria-label="Filter by club">
-          <button type="button" className="seasonnote__clubpick seasonnote__clubpick--all" aria-pressed={club === null} onClick={() => pickClub(null)}>
-            All
-          </button>
-          {clubs.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className="seasonnote__clubpick"
-              aria-pressed={club === id}
-              aria-label={teamAbbr({ id })}
-              onClick={() => pickClub(club === id ? null : id)}
-            >
-              <TeamLogo teamId={id} size={26} />
-            </button>
-          ))}
-        </div>
+        <ClubStrip clubs={clubs} value={club} onPick={pickClub} />
         <div className="seasonnote__row">
           <div className="seasonnote__longest">
             <p className="seasonnote__big">

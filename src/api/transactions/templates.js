@@ -400,7 +400,14 @@ export function cutStory(facts, { moveDate = null, clause = '' } = {}) {
   const first = arrivalSentence(facts, who, moveDate)
   // Named once: "Heuer, 30, came to ..." then "He has ...".
   const name = first ? (who.startsWith(facts.lastName ?? '\u0000') ? 'He' : facts.lastName ?? 'He') : who
-  return [first, careerSentence(facts, name), facts.debut ? lastFullSentence(facts) : null, moveSentence(facts, clause, v)].filter(Boolean).join(' ')
+  return [first, careerSentence(facts, name), facts.debut && minorsYearsSentence(facts), facts.debut ? lastFullSentence(facts) : null, moveSentence(facts, clause, v)].filter(Boolean).join(' ')
+}
+
+// A big leaguer stuck in the minors this year: his last two years down there.
+function minorsYearsSentence({ minors: m, minorsPrev: p, pitcher, season, ...f }) {
+  if (!mostlyMinors({ minors: m, ...f })) return null
+  const prev = p?.line?.games ? `, after he ${didText(p.line, pitcher)} ${minorsWhere(p)} in ${season - 1}` : ''
+  return `He ${didText(m.line, pitcher)} ${minorsWhere(m)} in ${season}${prev}.`
 }
 
 // THE INJURED LIST — the move's sentence already names the list, the injury
