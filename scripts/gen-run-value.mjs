@@ -48,7 +48,7 @@
 import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { csvObjects, num, round1, withRetry } from './lib/savant.mjs'
-import { getJson } from './lib/statsapi.mjs'
+import { getPeople } from './lib/statsapi.mjs'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'run-value.json')
@@ -126,24 +126,18 @@ function flipName(savantName) {
 // NEVER FATAL. Savant already carries a usable name and a team id on the
 // swing/take boards; this only upgrades them, so a statsapi outage costs the
 // position abbreviation and leaves everything else standing.
-const PEOPLE_CHUNK = 200
-
 async function fetchPeople(ids) {
   const map = new Map()
-  for (let i = 0; i < ids.length; i += PEOPLE_CHUNK) {
-    const chunk = ids.slice(i, i + PEOPLE_CHUNK)
-    try {
-      const body = await getJson(`/api/v1/people?personIds=${chunk.join(',')}`)
-      for (const p of body?.people ?? []) {
-        map.set(String(p.id), {
-          name: p.fullName ?? null,
-          teamId: p.currentTeam?.id ?? null,
-          pos: p.primaryPosition?.abbreviation ?? null,
-        })
-      }
-    } catch (err) {
-      console.error(`statsapi people chunk ${i / PEOPLE_CHUNK + 1}: ${err.message} — falling back to Savant names`)
-    }
+  const people = await getPeople(ids, {
+    size: 200,
+    onError: (err) => console.error(`statsapi people chunk: ${err.message} — falling back to Savant names`),
+  })
+  for (const p of people) {
+    map.set(String(p.id), {
+      name: p.fullName ?? null,
+      teamId: p.currentTeam?.id ?? null,
+      pos: p.primaryPosition?.abbreviation ?? null,
+    })
   }
   return map
 }

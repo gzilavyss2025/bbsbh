@@ -41,7 +41,7 @@ import { join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 
 const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
@@ -154,20 +154,14 @@ async function currentAffiliates() {
 // in which every player's club was ''.
 async function fetchPeople(ids) {
   const out = new Map()
-  for (let i = 0; i < ids.length; i += 100) {
-    const batch = ids.slice(i, i + 100)
-    const json = await getJson(
-      `/api/v1/people?personIds=${batch.join(',')}&hydrate=currentTeam`,
-    )
-    for (const p of json.people ?? []) {
-      out.set(String(p.id), {
-        name: p.fullName ?? '',
-        num: p.primaryNumber ?? '',
-        pos: p.primaryPosition?.abbreviation ?? '',
-        teamId: p.currentTeam?.id ?? null,
-        teamName: p.currentTeam?.name ?? '',
-      })
-    }
+  for (const p of await getPeople(ids, { hydrate: 'currentTeam' })) {
+    out.set(String(p.id), {
+      name: p.fullName ?? '',
+      num: p.primaryNumber ?? '',
+      pos: p.primaryPosition?.abbreviation ?? '',
+      teamId: p.currentTeam?.id ?? null,
+      teamName: p.currentTeam?.name ?? '',
+    })
   }
   return out
 }

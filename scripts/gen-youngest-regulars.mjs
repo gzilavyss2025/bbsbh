@@ -34,7 +34,7 @@
 // Nightly: .github/workflows/update-nightly-data.yml
 import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { levelOffseasonPhase } from '../src/lib/time/seasonPhase.js'
 import {
   ageOnJune30,
@@ -112,19 +112,11 @@ async function leagueHitters(leagueId, season) {
 // there is no average to fall back on that would not be a fabrication.
 async function birthDates(ids) {
   const out = new Map()
-  for (let i = 0; i < ids.length; i += PEOPLE_BATCH) {
-    const batch = ids.slice(i, i + PEOPLE_BATCH)
-    try {
-      const data = await getJson(
-        `/api/v1/people?personIds=${batch.join(',')}&fields=people,id,birthDate`,
-      )
-      for (const person of data.people ?? []) {
-        if (person?.id && person?.birthDate) out.set(person.id, person.birthDate)
-      }
-    } catch {
-      // A failed batch leaves those players without an age; they drop out
-      // below, and the next nightly run picks them up.
-    }
+  // A failed batch leaves those players without an age; they drop out below, and the next
+  // nightly run picks them up.
+  const people = await getPeople(ids, { fields: 'people,id,birthDate', size: PEOPLE_BATCH, onError: () => {} })
+  for (const person of people) {
+    if (person?.id && person?.birthDate) out.set(person.id, person.birthDate)
   }
   return out
 }

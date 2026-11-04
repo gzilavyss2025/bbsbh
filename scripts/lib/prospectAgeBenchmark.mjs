@@ -12,26 +12,14 @@
 // hard cap on personIds count, but a large single query risks a slow/failed
 // response, so this stays conservative rather than betting the whole level on
 // one request.
-import { getJson } from './statsapi.mjs'
-import { chunk, mapConcurrent } from './concurrency.mjs'
+import { getPeople } from './statsapi.mjs'
 import { qualifiedPlayerIds } from './prospectPercentile.mjs'
 import { decimalAge } from '../../src/api/prospectTrend.js'
 
-const CHUNK_SIZE = 100
-const CONCURRENCY = 4
-
 async function fetchBirthDates(ids) {
-  const chunks = chunk(ids, CHUNK_SIZE)
-  const results = await mapConcurrent(chunks, CONCURRENCY, async (idChunk) => {
-    const data = await getJson(`/api/v1/people?personIds=${idChunk.join(',')}`)
-    return data.people ?? []
-  })
-  const byId = new Map()
-  for (const people of results) {
-    if (!people) continue
-    for (const p of people) byId.set(p.id, p.birthDate)
-  }
-  return byId
+  // A failed batch leaves those players out of the average.
+  const people = await getPeople(ids, { concurrency: 4, onError: () => {} })
+  return new Map(people.map((p) => [p.id, p.birthDate]))
 }
 
 // hitSplits/pitSplits: the same raw season splits (any date range) gen-

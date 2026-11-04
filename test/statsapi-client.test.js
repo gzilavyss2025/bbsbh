@@ -7,6 +7,7 @@ import {
   StatsapiError,
   createStatsapiClient,
   getJson,
+  getPeople,
   isRetryable,
   statsapiUrl,
 } from '../scripts/lib/statsapi.mjs'
@@ -240,4 +241,24 @@ test('tries: 1 on a call means one attempt, whatever the shared policy says', as
   const { fetch, getJson } = client([503])
   await assert.rejects(() => getJson('/api/v1/teams', { tries: 1 }), /HTTP 503/)
   assert.equal(fetch.calls.length, 1)
+})
+
+test('getPeople: one call per `size` ids, with hydrate and fields on the query, rows flattened', async (t) => {
+  const fetch = scriptedFetch([{ people: [{ id: 1 }] }, { people: [{ id: 2 }] }, { people: [{ id: 3 }] }])
+  t.mock.method(globalThis, 'fetch', fetch)
+  const people = await getPeople([1, 2, 3, 4, 5], { size: 2, hydrate: 'draft', fields: 'people,id' })
+  assert.deepEqual(people.map((p) => p.id), [1, 2, 3])
+  assert.deepEqual(fetch.calls, [
+    `${STATSAPI_BASE}/api/v1/people?personIds=1,2&hydrate=draft&fields=people,id`,
+    `${STATSAPI_BASE}/api/v1/people?personIds=3,4&hydrate=draft&fields=people,id`,
+    `${STATSAPI_BASE}/api/v1/people?personIds=5&hydrate=draft&fields=people,id`,
+  ])
+})
+
+test('getPeople: a failed call throws, or is reported and skipped with onError', async (t) => {
+  t.mock.method(globalThis, 'fetch', scriptedFetch([404]))
+  await assert.rejects(getPeople([1]), StatsapiError)
+  const seen = []
+  assert.deepEqual(await getPeople([1], { onError: (e) => seen.push(e.status) }), [])
+  assert.deepEqual(seen, [404])
 })

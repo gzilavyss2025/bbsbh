@@ -40,6 +40,7 @@
 // contract a client must not impose, and a global cap would silently re-pace
 // thirty generators that each size their own pool.
 
+import { chunk, mapConcurrent } from './concurrency.mjs'
 import { withRetry } from './net/retry.mjs'
 
 export const STATSAPI_BASE = 'https://statsapi.mlb.com'
@@ -118,3 +119,25 @@ export function createStatsapiClient({
 
 // The shared client.
 export const { getJson } = createStatsapiClient()
+
+// The /people rows for `ids`, `size` ids to a call, in id order. `hydrate` and `fields` go on the
+// query as given (the caller encodes), `timeoutMs` goes to each call. A failed call throws; with `onError(err)` it is reported
+// and its ids are left out, for a generator that wants a partial answer over none.
+export async function getPeople(ids, { hydrate, fields, size = 100, concurrency = 1, timeoutMs, onError } = {}) {
+  const tail = (hydrate ? `&hydrate=${hydrate}` : '') + (fields ? `&fields=${fields}` : '')
+  const batches = await mapConcurrent(
+    chunk(ids, size),
+    concurrency,
+    async (batch) => {
+      try {
+        return (await getJson(`/api/v1/people?personIds=${batch.join(',')}${tail}`, { timeoutMs })).people ?? []
+      } catch (err) {
+        if (!onError) throw err
+        onError(err)
+        return []
+      }
+    },
+    { strict: true },
+  )
+  return batches.flat()
+}

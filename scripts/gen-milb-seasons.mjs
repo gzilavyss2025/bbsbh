@@ -25,7 +25,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShards } from './lib/io.js'
 import { qualifiedMetrics } from './lib/prospectPercentile.mjs'
 import { SEASONS, SPORT_IDS, populationKeyOf, rowsFor, uniqueIds } from './lib/milb/seasons.mjs'
-import { getJson } from './lib/statsapi.mjs'
+import { getPeople } from './lib/statsapi.mjs'
 
 const here = import.meta.dirname
 const data = join(here, '..', 'public', 'data')
@@ -57,23 +57,13 @@ await mapConcurrent(
 )
 
 // Pass 2: the players' lines, one batch per level.
-const batches = []
-for (let i = 0; i < ids.length; i += BATCH) batches.push(ids.slice(i, i + BATCH))
-const calls = SPORT_IDS.flatMap((sid) => batches.map((chunk) => [sid, chunk]))
-const hydrate = (sid) => encodeURIComponent(`stats(group=[hitting,pitching],type=[yearByYear],sportId=${sid})`)
-const results = await mapConcurrent(
-  calls,
-  CONCURRENCY,
-  async ([sid, chunk]) => {
-    const json = await getJson(`/api/v1/people?personIds=${chunk.join(',')}&hydrate=${hydrate(sid)}&fields=${FIELDS}`)
-    return (json.people ?? []).map((p) => [p.id, rowsFor(p, sid, pools)])
-  },
-  { strict: true },
-)
-
 const players = new Map() // personId -> rows
-for (const [id, rows] of results.flat()) {
-  if (rows.length) players.set(id, [...(players.get(id) ?? []), ...rows])
+for (const sid of SPORT_IDS) {
+  const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=[yearByYear],sportId=${sid})`)
+  for (const p of await getPeople(ids, { hydrate, fields: FIELDS, size: BATCH, concurrency: CONCURRENCY })) {
+    const rows = rowsFor(p, sid, pools)
+    if (rows.length) players.set(p.id, [...(players.get(p.id) ?? []), ...rows])
+  }
 }
 const buckets = new Map() // shard key -> { personId: packed rows }
 for (const [id, rows] of players) {

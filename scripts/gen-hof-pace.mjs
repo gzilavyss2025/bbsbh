@@ -17,9 +17,8 @@
 // (outs = innings x 3, so an IP of 200.1 stays exact). Only fields every era has.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { chunk } from './lib/concurrency.mjs'
 import { paceLine } from './lib/hof/pace.mjs'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
 const data = join(import.meta.dirname, '..', 'public', 'data')
@@ -40,17 +39,13 @@ for (const a of awards) {
 const ids = [...pool.keys()]
 
 const players = []
-for (const batch of chunk(ids, 50)) {
-  const { people } = await getJson(
-    `/api/v1/people?personIds=${batch.join(',')}&hydrate=stats(group=[hitting,pitching],type=[yearByYear],sportId=1)`,
-  )
-  for (const person of people) {
-    const pitcher = pool.get(person.id).primaryPosition?.abbreviation === 'P'
-    const group = pitcher ? 'pitching' : 'hitting'
-    const splits = person.stats?.find((s) => s.group?.displayName === group)?.splits ?? []
-    const line = paceLine(splits, pitcher, warFor(person.id, pitcher))
-    if (line) players.push({ id: person.id, name: person.fullName, pitcher, ...line })
-  }
+const hydrate = 'stats(group=[hitting,pitching],type=[yearByYear],sportId=1)'
+for (const person of await getPeople(ids, { hydrate, size: 50 })) {
+  const pitcher = pool.get(person.id).primaryPosition?.abbreviation === 'P'
+  const group = pitcher ? 'pitching' : 'hitting'
+  const splits = person.stats?.find((s) => s.group?.displayName === group)?.splits ?? []
+  const line = paceLine(splits, pitcher, warFor(person.id, pitcher))
+  if (line) players.push({ id: person.id, name: person.fullName, pitcher, ...line })
 }
 
 // A short run (a failed batch, a changed shape) must not replace the committed file.
