@@ -18,8 +18,7 @@
 // Players: everyone with a career in war.json, plus the Top 100 in top-prospects.json.
 // Run by hand: node scripts/gen-milb-seasons.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { fetchLevelSeasonStats } from '../src/api/statsLevels.js'
 import { milbShardKey, packRow } from '../src/api/milbSeasons.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -28,7 +27,7 @@ import { qualifiedMetrics } from './lib/prospectPercentile.mjs'
 import { SEASONS, SPORT_IDS, populationKeyOf, rowsFor, uniqueIds } from './lib/milb/seasons.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const data = join(here, '..', 'public', 'data')
 const outDir = join(data, 'milb-seasons')
 

@@ -14,8 +14,7 @@
 // use appends yesterday's MLB snapshot; --date=YYYY-MM-DD rebuilds one date,
 // and --from/--to backfills an inclusive date range.
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
@@ -23,7 +22,7 @@ import { clamp, round1 } from '../src/lib/math/number.js'
 import { writeJsonAtomic } from './lib/io.js'
 import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/seasonScoreFormula.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'season-score.json')
 const seedPath = join(here, 'season-expectations-seed.json')
 const MLB_LEAGUES = [103, 104]
@@ -302,6 +301,6 @@ async function main() {
   db.close()
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

@@ -12,8 +12,7 @@
 // file before the reader reveals it (ADR-0114).
 //
 // All logic a test must reach is in lib/world-series/series.mjs.
-import { join, resolve, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join, resolve } from 'node:path'
 import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
@@ -21,7 +20,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { buildFile, dedupeByPk, gamesOf } from './lib/world-series/series.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const args = parseArgs(process.argv.slice(2))
 for (const k of Object.keys(args)) {
   if (!['from', 'to', 'out', 'check'].includes(k)) throw new Error(`unknown flag: --${k}`)

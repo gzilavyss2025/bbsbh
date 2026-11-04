@@ -41,7 +41,6 @@
 
 import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -71,7 +70,7 @@ import {
   BASERUNNING_NOTE_EVENT_TYPES, runnerLastName,
 } from '../src/api/playbyplay.js'
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url))
+const ROOT = join(import.meta.dirname, '..')
 const BUNDLE_DIR = join(ROOT, 'public', 'data', 'callouts')
 const OUT = join(ROOT, '.scratch', 'callout-audit', 'report.json')
 

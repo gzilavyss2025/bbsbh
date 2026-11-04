@@ -6,11 +6,10 @@
 // The mean start speed (#1933) goes beside each shard in {NN}.mph.json, `{ season, mph: { pitcherId:
 // { gamePk: { code: tenths } } } }`, because the mix shards are at their size ceiling. A code with
 // no speed has no entry.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { bucketsOf, writeSeasons, writeShards } from '../io.js'
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'pitch-arsenal-starts')
+const outDir = join(import.meta.dirname, '..', '..', '..', 'public', 'data', 'pitch-arsenal-starts')
 
 // `pitchers` is aggregateGamePitchTypes's map; its types are keyed `code:stand`.
 export function foldStarts(db, { gamePk, level, season }, pitchers) {

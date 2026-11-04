@@ -21,9 +21,8 @@
 // Run it locally the same way: `npm run build && npm run check:dist-dev`.
 import { readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const DIST = path.resolve(fileURLToPath(new URL('../dist', import.meta.url)))
+const DIST = path.resolve(import.meta.dirname, '../dist')
 
 // The endpoint prefix every dev-only save posts to, plus the one route that
 // takes bytes instead of JSON. Deliberately literal strings rather than

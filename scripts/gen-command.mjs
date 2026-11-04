@@ -14,8 +14,7 @@
 // release, so most nights this writes an identical file.
 //
 // Run by hand: node scripts/gen-command.mjs [--season=2026]
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import {
   MIN_COMMAND_PITCHES,
@@ -28,7 +27,7 @@ import {
   pitcherIdsByName,
 } from './lib/opencommand.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'target-command.json')
 
 const seasonArg = process.argv.find((a) => a.startsWith('--season='))

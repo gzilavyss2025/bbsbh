@@ -45,13 +45,12 @@
 //
 // This runs nightly via .github/workflows/update-nightly-data.yml.
 // Run by hand: node scripts/gen-run-value.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { csvObjects, num, round1, withRetry } from './lib/savant.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'run-value.json')
 const season = new Date().getFullYear()
 

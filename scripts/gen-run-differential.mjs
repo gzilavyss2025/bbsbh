@@ -65,14 +65,13 @@
 // Run by hand:
 //   node scripts/gen-run-differential.mjs
 //   node scripts/gen-run-differential.mjs --from=2015   # a short sweep, for a test
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'run-differential.json')
 
 // 1901 is the first season of the two-league era — the first year the
@@ -406,6 +405,6 @@ async function main() {
   console.log(`\nWrote ${out} — ${rows.length} club seasons over +${floor}, ${from}–${to}`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

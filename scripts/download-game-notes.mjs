@@ -20,11 +20,10 @@
 
 import { readFile, readdir } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { archiveRows } from '../src/lib/gameNotes/archive.js'
 import { downloadMissing } from './lib/game-notes-download.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const ARCHIVE = join(ROOT, 'public', 'data', 'game-notes')
 
 function args(argv) {

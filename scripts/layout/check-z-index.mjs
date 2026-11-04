@@ -23,7 +23,6 @@
 
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from '../lib/walk.mjs'
 import { maskComments } from './mask-comments.mjs'
 
@@ -106,4 +105,4 @@ function main() {
   console.log(`✓ z-index guard holds — ${files.length} files checked, none above ${MAX_RAW} without a token.`)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

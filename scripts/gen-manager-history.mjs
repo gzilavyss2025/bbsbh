@@ -50,7 +50,6 @@
 // needed.
 import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
@@ -61,7 +60,7 @@ import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 // --from=YYYY --to=YYYY: sweep a range and MERGE it into the shards (a
 // hand-run way to extend history without a rebuild). --out=DIR writes the
 // shards and the needs-research queue there instead, for a measuring run.

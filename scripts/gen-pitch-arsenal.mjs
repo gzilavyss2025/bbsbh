@@ -36,8 +36,7 @@
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
 // rows already on file, for when a derived (not per-game) field like handedness
 // changes and re-fetching every ingested feed would change nothing in the DB.
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
@@ -58,7 +57,7 @@ import { GAP_CAP, collectPending, runSweep } from './lib/sweep/retry.mjs'
 
 export { centuryRankMap, exportCommandMap } // moved to lib/ to hold this file's size budget; tests import them from here
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
 // Per-pitcher buckets for the opposing-starter card, one slim per-level pool for
 // the player page's similarity ranking. Nothing reads the league in full, so
@@ -623,6 +622,6 @@ async function main() {
 // Only sweep when run as a script — keeps aggregateGamePitchTypes /
 // exportPitchArsenal importable for tests without triggering a live fetch +
 // file write.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

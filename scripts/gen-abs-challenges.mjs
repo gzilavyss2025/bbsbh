@@ -121,8 +121,7 @@
 // and so nothing inside it could be unit-tested. This file is the sweep: dates
 // in, feeds fetched,
 // rows written, JSON out.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonIfChanged, writeSeasons } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -149,7 +148,7 @@ import {
   scopeOfGameType,
 } from './lib/abs/index.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const storeDir = join(here, '..', 'public', 'data', 'abs')
 const out = 'abs-challenges.json'
 // THE DENOMINATOR LIST IS A SECOND FILE, not a key in the first. The report

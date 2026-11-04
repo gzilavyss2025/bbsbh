@@ -52,8 +52,7 @@
 // RE24 total — this script writes BOTH `states` (288) and `re24` (24) sums so
 // that fallback never needs a second pass over history.
 import { existsSync, readdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { eraDecade } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
@@ -65,7 +64,7 @@ import {
   sweepGames,
 } from './lib/run-expectancy/eras.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'run-expectancy.json')
 const eraDir = join(here, '..', '.scratch', 'run-expectancy-eras')
 const eraOutDir = join(here, '..', 'public', 'data', 'run-expectancy-eras')

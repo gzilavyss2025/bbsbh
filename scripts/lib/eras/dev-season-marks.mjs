@@ -22,13 +22,12 @@
 
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { contrastRatio } from '../../../src/lib/contrast.js'
 import { isMlbTeamId } from '../../../src/lib/teams.js'
 import { describeMarkRejection } from '../dev-custom-marks.mjs'
 
-const REPO_ROOT = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)))
+const REPO_ROOT = path.resolve(import.meta.dirname, '../../..')
 
 export const DEV_ERA_ROUTE = 'era'
 export const DEV_ERA_ART_ROUTE = 'era-art'

@@ -21,9 +21,8 @@
 // `npm run lint`. Locally: `npm run build && npm run check:sw-learn`.
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const SW = path.resolve(fileURLToPath(new URL('../dist/sw.js', import.meta.url)))
+const SW = path.resolve(import.meta.dirname, '../dist/sw.js')
 
 // Paths that must NOT be handled by the precached shell — they are server-
 // rendered documents. And paths that must still BE handled, so a denylist

@@ -23,11 +23,10 @@
 // Run it by hand. Unlike a club's mark, a league mark changes about once a
 // decade, so there is no cron behind this.
 import { mkdir, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { monoLogoSvg } from '../src/lib/logoMono.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'logos', 'league')
 const manifestPath = join(here, '..', 'src', 'lib', 'data', 'league-logo-manifest.json')
 

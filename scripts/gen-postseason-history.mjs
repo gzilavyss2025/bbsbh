@@ -55,13 +55,12 @@
 // which bye box reads "1" vs. "2".
 //
 // Run by hand: node scripts/gen-postseason-history.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'postseason-history.json')
 // The app's own UI shows 2020-present eagerly and gates 2000-2019 behind a
 // "Load more" button (PostseasonHistoryPage.jsx) — EARLIEST_YEAR is the

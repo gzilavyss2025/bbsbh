@@ -26,8 +26,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { gunzipSync, gzipSync } from 'node:zlib'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { isoDay, parseArgs } from './lib/args.mjs'
@@ -106,7 +105,7 @@ async function build() {
 }
 
 async function gate() {
-  const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'hitter-grid', String(season))
+  const dir = join(import.meta.dirname, '..', 'public', 'data', 'hitter-grid', String(season))
   const shard = { bat: {} }
   for (const f of readdirSync(dir).filter((n) => /^\d\d\.json$/.test(n))) {
     const file = JSON.parse(readFileSync(join(dir, f), 'utf8'))

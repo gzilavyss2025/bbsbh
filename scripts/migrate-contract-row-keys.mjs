@@ -53,8 +53,7 @@
 //                        other. Read every one of them first.
 //   --skip-unmappable    Migrate everything mappable and leave the rest in
 //                        place under their old keys.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readFile, writeFile } from 'node:fs/promises'
 
 import { parseArgs } from './lib/args.mjs'
@@ -70,7 +69,7 @@ import {
 } from './lib/contract-row-key.mjs'
 import { getRedis, redisConfigFromEnv } from '../api/_lib/redis.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const sourceDir = join(here, 'data', 'contracts')
 const poolDir = join(here, '..', 'public', 'data', 'contracts-history', 'season-players')
 
