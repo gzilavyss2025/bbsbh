@@ -26,14 +26,13 @@
 //
 // Runs on a cron (.github/workflows/update-nightly-data.yml); also by hand:
 //   node scripts/gen-game-notes.mjs
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { readdir } from 'node:fs/promises'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { fileURLToPath } from 'node:url'
 import { getJson as getStatsapiJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'game-notes')
 const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 

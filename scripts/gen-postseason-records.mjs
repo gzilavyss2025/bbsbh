@@ -28,8 +28,7 @@
 //                                  # re-read games already on file, for a new
 //                                  # stored fact; REFREEZE lets the frozen
 //                                  # season dumps change, on purpose
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { writeShardsWithStamp } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -45,7 +44,7 @@ import {
   buildSeasonFile,
 } from './lib/records/postseason.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'postseason-records')
 
 const GROUP = 'postseason-records'
@@ -151,6 +150,6 @@ async function main() {
   db.close()
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

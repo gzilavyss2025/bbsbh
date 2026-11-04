@@ -53,7 +53,6 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
 
 import { LANDING_PAGES } from '../src/copy/landing/pages/index.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
@@ -202,7 +201,7 @@ ${entries.join('\n')}
 // writes a file on import would make the test suite mutate the repo — a build
 // artifact appearing in `git status` after running tests is the kind of small
 // mystery that costs somebody an afternoon.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   const xml = buildSitemap()
   writeFileSync(resolve('public/sitemap.xml'), xml)
   console.log(`✓ sitemap.xml — ${xml.match(/<loc>/g)?.length ?? 0} urls`)

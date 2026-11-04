@@ -17,14 +17,13 @@
 // bytes. Any failed call aborts the run (strict), so a hole cannot ship.
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { buildLedger, managersFor, postseasonFor, standingsFor } from './lib/franchise/ledger.mjs'
 
-const root = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const outDir = join(root, 'public', 'data', 'franchise-ledger')
 const FIRST = 1901
 const flag = process.argv.indexOf('--through')

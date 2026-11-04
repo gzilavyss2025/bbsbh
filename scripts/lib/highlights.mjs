@@ -10,8 +10,7 @@
 // See .scratch/highlights-cascade/PRD.md and issues/01-data-layer.md.
 
 import { readdir } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './io.js'
 import {
   classifyHighlight,
@@ -19,7 +18,7 @@ import {
   isEligibleForPositiveFilter,
 } from '../../src/api/highlights.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 export const OUT_DIR = join(here, '..', '..', 'public', 'data', 'highlights')
 const BLOCKLIST_PATH = join(here, '..', 'highlight-blocklist.json')
 

@@ -7,8 +7,7 @@
 // The rendered card still attributes both Fever and the underlying Cot's data.
 // This runs nightly, never at request time. Run by hand:
 //   node scripts/fever/gen-player-contracts.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { shardKey100 } from '../../src/lib/shardKey.js'
 import { computePayRanks, largestSplit } from '../lib/contract-pay-rank.mjs'
 import { chunk, mapConcurrent } from '../lib/concurrency.mjs'
@@ -16,7 +15,7 @@ import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { normalizeContractsPayload } from './normalize-contracts.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', '..', 'public', 'data', 'player-contracts')
 const FEED_URL = 'https://www.feverbaseball.com/api/data/contracts'
 

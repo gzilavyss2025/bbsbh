@@ -28,9 +28,8 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const CLAUDE_MD = join(ROOT, 'CLAUDE.md')
 const src = readFileSync(CLAUDE_MD, 'utf8')
 const problems = []

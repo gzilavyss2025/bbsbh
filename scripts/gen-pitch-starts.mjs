@@ -5,8 +5,7 @@
 //   node scripts/gen-pitch-starts.mjs --season=2020 --verify   # the gate that puts the season in seasons.json
 // MLB only. The shards hold the same numbers foldStarts and mphBuckets give from the database.
 import { readdir, readFile, stat } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeSeasons, writeShards } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
@@ -14,7 +13,7 @@ import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, sampleGames, shardsOf } from './lib/pitch/starts-sweep.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'pitch-arsenal-starts')
+const outDir = join(import.meta.dirname, '..', 'public', 'data', 'pitch-arsenal-starts')
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
 
@@ -117,4 +116,4 @@ async function main() {
   await (args.verify ? verify : sweep)(season, dir, store, pks)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main()
+if (import.meta.main) await main()

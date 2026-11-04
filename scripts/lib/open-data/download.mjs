@@ -9,9 +9,8 @@
 // holds a file, so a planted file can never sit beside the one it fetched.
 import { mkdir, readdir, writeFile } from 'node:fs/promises'
 import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const REPO = fileURLToPath(new URL('../../../', import.meta.url))
+const REPO = join(import.meta.dirname, '../../../')
 
 // -> { path, bytes }. `fetchFn` and `log` are injected so the test stays offline.
 export async function downloadTo(url, dir, { fetchFn = fetch, log = console.log } = {}) {
@@ -33,7 +32,7 @@ export async function downloadTo(url, dir, { fetchFn = fetch, log = console.log 
   return { path, bytes: bytes.length }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   const [url, dir] = process.argv.slice(2)
   if (!url || !dir) throw new Error('usage: download.mjs <url> <empty-folder>')
   await downloadTo(url, dir)

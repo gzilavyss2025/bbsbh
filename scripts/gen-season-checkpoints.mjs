@@ -34,8 +34,7 @@
 // a season is two leaderboard calls plus about 60 batched calls. A full ten-season
 // backfill is about 650 requests.
 import { existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { getJson } from './lib/statsapi.mjs'
@@ -43,7 +42,7 @@ import { chunk, mapConcurrent } from './lib/concurrency.mjs'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
 import { ROLES, buildExtremes, buildTails, lastCompletedSeason } from './lib/season-checkpoints/tails.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const args = parseArgs(process.argv.slice(2))
 const rawDir = join(here, 'data', 'season-checkpoints')
 const outDir = join(here, '..', 'public', 'data', 'season-checkpoints')

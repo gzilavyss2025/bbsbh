@@ -33,13 +33,12 @@
 //
 // Run by hand: node scripts/gen-postseason-leaders.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const historyPath = join(here, '..', 'public', 'data', 'postseason-history.json')
 const out = join(here, '..', 'public', 'data', 'postseason-leaders.json')
 // Career-postseason qualifier floors for rate stats — same idea as the live

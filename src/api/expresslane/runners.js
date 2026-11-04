@@ -8,7 +8,7 @@
 // a runner first to third. This module names the boxes that have to be on the
 // screen beside the batter's.
 //
-// REVEAL-ONLY, on the same footing as rail.js beside it. Every card here
+// REVEAL-ONLY, on the same footing as linescore.js and derive.js. Every card here
 // carries its plate appearance's outcome, so this is callable only from inside
 // a SealBox's reveal render function (ADR-0001/0002).
 //
@@ -23,7 +23,7 @@
 // its `stepCap` gates what LATER plays are allowed to write back onto EARLIER
 // cards. Express Lane passes the film-gate cursor as that same cap, so the
 // runners' diamonds are true as of the cursor and never past it. This module
-// does not re-derive any of it — it maps one rail row onto that cap and reads
+// does not re-derive any of it — it maps one cursor row onto that cap and reads
 // the cards back out.
 //
 // The rule it enforces on top: NEVER build the deck from an uncapped feed.
@@ -39,12 +39,11 @@ export function battingSideOf(half) {
   return half === 'bottom' ? 'home' : 'away'
 }
 
-// One rail row -> `computeHalfInningFeed`'s `stepCap`.
+// One cursor row -> `computeHalfInningFeed`'s `stepCap`.
 //
-// The rail keys on the feed's own game-wide plate-appearance number, and so do
-// the cards, so the join is that number rather than a position — the two lists
-// do not have the same length, because the rail carries a row per EVENT and
-// the feed carries a card per PLAY, with mound-visit notes interleaved.
+// A row keys on the feed's own game-wide plate-appearance number, and so do
+// the cards, so the join is that number rather than a position — a row is per
+// EVENT and a card per PLAY, with mound-visit notes interleaved.
 //
 // `isTerminal` IS PART OF THE JOIN, AND LEAVING IT OUT IS A LEAK. Result mode
 // keeps every `action` row, and an action row sits INSIDE a plate appearance
@@ -79,13 +78,11 @@ export function railStepCap(entries, row) {
 // (ADR-0016): `revealAtBat(inning, half, count)` stores it, and PlayByPlay
 // reads it back as how much of the half to draw.
 //
-// A COUNT OF RAIL ROWS IS A DIFFERENT NUMBER, and the two are not
-// interchangeable. The rail carries a row per EVENT and the feed a card per
-// PLAY, with mound visits, substitutions and timeouts interleaved on one side
-// and not the other. Over the captured game (gamePk 823035) they disagree at 99
-// of 128 cursor positions, and at 91 of those the rail position is the LARGER
-// — so writing it would open entries in the innings viewer that Express Lane
-// never showed. Pinned by test/express-lane-runners.test.js.
+// A ROW POSITION IS A DIFFERENT NUMBER, and the two are not interchangeable.
+// Rows are per EVENT and the feed is a card per PLAY, with mound visits,
+// substitutions and timeouts interleaved on one side and not the other, so a
+// row position can run LARGER than the cap and open entries in the innings
+// viewer that Express Lane never showed.
 //
 // This is `expressDeck`'s own cap, exposed on its own, because the reveal
 // happens as the cursor lands rather than a render later.
@@ -232,7 +229,7 @@ function descriptionsByAtBat(feed) {
 // The whole deck for one cursor position: the box the scorer is writing in,
 // and the boxes of the men already on. One call, one cap, one feed read.
 //
-// `row` is the rail row the cursor sits on — the last row whose film has been
+// `row` is the row the cursor sits on — the last row whose film has been
 // watched. Everything here is therefore a play the scorer has REACHED; nothing
 // is drawn for the row ahead, which is the film gate's whole point.
 //
@@ -315,7 +312,7 @@ export function expressDeck(feed, inningNum, half, row) {
 // carries no `atBatIndex` — deliberately, since giving him the leadoff batter's
 // number would make `railStepCap` join the wrong card and draw a box the scorer
 // had not reached. Keyed on that missing number he got an `undefined` React
-// key, a tap that matched no rail row, and an `is-on` test of `undefined ===
+// key, a tap that matched no row, and an `is-on` test of `undefined ===
 // undefined` that lit him up on every cursor with no batter on the deck.
 //
 // So each chip carries an `id` of its own and says what KIND it is. The

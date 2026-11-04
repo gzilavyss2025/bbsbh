@@ -17,9 +17,8 @@
 // Usage: node scripts/frozen/freeze-season.mjs --season 2026 [--force]
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const root = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..')
+const root = join(import.meta.dirname, '..', '..')
 const dataDir = join(root, 'public', 'data')
 const indexPath = join(root, 'src', 'lib', 'data', 'frozen-seasons.json')
 

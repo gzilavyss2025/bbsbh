@@ -17,8 +17,7 @@
 // gameType=R. A rehab stint is judged against the regular-season schedule, so
 // postseason games are not read here.
 // Run by hand: node scripts/gen-rehab.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { isoToday } from '../src/lib/dates.js'
 import { txnDate, isRehabTxn, rehabListRow } from '../src/api/rehab-policy.js'
@@ -26,7 +25,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'rehab.json')
 // An open stint has a rehab leg in the last 30 days (REHAB_MAX_DAYS), so a
 // 40-day league-wide window finds every CANDIDATE. It does not decide the

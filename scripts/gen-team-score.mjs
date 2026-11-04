@@ -13,9 +13,8 @@
 // site for test/team-score.test.js. `game.venue.id`/`.name` were verified
 // present on the schedule fetch below with no added hydration, checked
 // against a live 2026-08-01 STL@TOR window.
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   pythagoreanPct,
   qualityScoreFromGames,
@@ -33,7 +32,7 @@ import { round1 } from '../src/lib/math/number.js'
 
 export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'team-score.json')
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
@@ -308,4 +307,4 @@ async function main() {
   db.close()
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
+if (import.meta.main) main()

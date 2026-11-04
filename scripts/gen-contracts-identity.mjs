@@ -32,8 +32,7 @@
 //                      resolved (unambiguously) from the other three files
 //
 // Run by hand: node scripts/gen-contracts-identity.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { resolveClubCode } from '../src/lib/contracts/clubCodes.js'
@@ -41,7 +40,7 @@ import { matchRow, normalizeName } from './lib/contract-identity-match.mjs'
 import { CROSSWALK_DIR, contractRowKeys } from './lib/contract-row-key.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const sourceDir = join(here, 'data', 'contracts')
 const poolDir = join(here, '..', 'public', 'data', 'contracts-history', 'season-players')
 // pending.json stays under public/: the admin review page fetches it.

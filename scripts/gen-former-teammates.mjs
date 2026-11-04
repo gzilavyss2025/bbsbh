@@ -67,8 +67,7 @@
 // UI never has to choose between two card types for the same matchup.
 // Run by hand: node scripts/gen-former-teammates.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShardsWithStamp } from './lib/io.js'
@@ -83,7 +82,7 @@ import {
   reduceCareer,
 } from './lib/former-teammates.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'former-teammates')
 // Days of slate to precompute (today + the next two), so late-night and next-day
 // browsing find their game. Rosters are as-of-build; ties barely shift daily.

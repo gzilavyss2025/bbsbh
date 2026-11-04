@@ -14,14 +14,13 @@
 // this year from October on, else last year). Any failed call aborts the run (strict). The files
 // carry no clock, so a re-run on the same feed writes the same bytes.
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../../src/lib/teams.js'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { CATEGORIES, STAT_TYPES, buildClubLeaders } from '../lib/franchise/leaders.mjs'
 
-const outDir = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'public', 'data', 'franchise-leaders')
+const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'franchise-leaders')
 const now = new Date()
 const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : now.getUTCFullYear() - (now.getUTCMonth() >= 9 ? 0 : 1)

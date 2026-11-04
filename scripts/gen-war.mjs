@@ -53,14 +53,13 @@
 // (src/api/war.js), never statsapi.mlb.com's whole-league leaderboard directly.
 // Run by hand: node scripts/gen-war.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { teamWarSplits } from './lib/war-splits.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'war.json')
 // The season in play, not the calendar year (#1465): on January 1 the calendar
 // names a season with no games, and this file would be written empty.

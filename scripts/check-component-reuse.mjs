@@ -36,9 +36,8 @@
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 
 // Rules outside src/styles/system/ that draw each shape. DOWNWARD ONLY.
 // Measured on origin/main at 2324e44b (band 3 less the one in system/), then
@@ -196,4 +195,4 @@ function main() {
   )
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

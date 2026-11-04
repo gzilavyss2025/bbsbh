@@ -28,7 +28,6 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import postcss from 'postcss'
 import { ROOT, toPosix, walk } from '../lib/walk.mjs'
 
@@ -130,4 +129,4 @@ function main() {
   console.log(`✓ Layout ratchet holds — ${Object.keys(counts).length} files at budget.`)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

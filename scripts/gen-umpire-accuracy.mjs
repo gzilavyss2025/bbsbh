@@ -93,8 +93,7 @@
 // row and a game with genuinely no challenges must stay distinguishable, so
 // aggregate() counts contributing games rather than summing blindly.
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { challengesForPlay } from '../src/api/challenges.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
@@ -103,7 +102,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { SUMMARY, writeAccuracyStore } from './lib/umpire-accuracy-merge.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 // TWO OUTPUTS per season, and between them they ARE the archive — split by who
 // asks. Every umpire's season aggregates in one file (~0.12 MB: the ranking
 // pool the lineup page, the box score, and the rankings table read), and one

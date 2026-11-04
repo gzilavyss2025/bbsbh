@@ -18,7 +18,6 @@
 
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import postcss from 'postcss'
 import { ROOT, toPosix, walk } from '../lib/walk.mjs'
 import { isKeyframes, markedBefore } from './check-layout-ratchet.mjs'
@@ -81,4 +80,4 @@ function main() {
   console.log('✓ Card fill: no rule sizes a card to 100% of its parent.')
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

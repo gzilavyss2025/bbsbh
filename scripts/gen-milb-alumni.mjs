@@ -37,14 +37,13 @@
 //
 // Run by hand: node scripts/gen-milb-alumni.mjs
 // Nightly: .github/workflows/update-nightly-data.yml
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
 const outDir = join(dataDir, 'milb-alumni')
 // The scan cache is NOT in public/ — it is this generator's working state, not

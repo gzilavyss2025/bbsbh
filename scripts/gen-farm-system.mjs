@@ -42,14 +42,13 @@
 // Run by hand:
 //   node scripts/gen-farm-system.mjs
 //   node scripts/gen-farm-system.mjs --season=2026
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic, readJsonOr } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
 const out = join(dataDir, 'farm-system.json')
 
@@ -174,6 +173,6 @@ async function main() {
   console.log(`wrote ${out} — ${Object.keys(orgs).length} organisations`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

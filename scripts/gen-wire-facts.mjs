@@ -24,12 +24,11 @@
 //   node scripts/gen-wire-facts.mjs --days=10    # a narrower window
 import { readdirSync, rmSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const publicDir = join(here, '..', 'public')
 const ledgerDir = join(publicDir, 'data', 'team-transactions')
 const outDir = join(publicDir, 'data', 'wire-facts')

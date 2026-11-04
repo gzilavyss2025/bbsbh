@@ -12,8 +12,7 @@
 // ponytail: no sprint-speed term. It halves the board-level error for ground
 // balls, but needs one more Savant request (ADR-0097, follow-up).
 import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { flatRates, hitterCounters } from '../../../src/api/scout/hitterGrid.js'
 import { clamp } from '../../../src/lib/math/number.js'
 import { num } from '../savant.mjs'
@@ -73,7 +72,7 @@ export function fitTable(balls) {
 export const xwobaOf = (table, ev, la) => table.rows[ci(ev)][cj(la)] / 1000
 
 export const tablePath = (season, dir = 'xwoba-table') =>
-  join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', dir, `${season}.json`)
+  join(import.meta.dirname, '..', '..', '..', 'public', 'data', dir, `${season}.json`)
 
 // The season's table (`dir`: 'xwoba-table' or 'xba-table'), or null when none is on
 // file. Read once per season and dir.

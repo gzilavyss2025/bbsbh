@@ -32,7 +32,6 @@
 
 import { readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from './lib/walk.mjs'
 
 const ROOTS = ['scripts', '.scratch']
@@ -143,4 +142,4 @@ function main() {
   )
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

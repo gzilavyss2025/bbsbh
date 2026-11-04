@@ -29,9 +29,8 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const SRC = join(ROOT, 'src')
 
 // Who may render a stamp. Every entry here is a surface where EVERY game shown

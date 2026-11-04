@@ -3,7 +3,7 @@ import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
-import { VIEWBOX, PLOT_VIEWBOX, plotPercent } from '../../lib/ballpark/ballparkGeometry.js'
+import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 import { ordinal } from '../../lib/format.js'
 
 // The Hit chart: every ball put in play, plotted where it was fielded on the
@@ -13,24 +13,9 @@ import { ordinal } from '../../lib/format.js'
 // one that decides the reader has earned these), which is the same contract
 // every other component in charts/ works under.
 //
-// Two shapes of the same card:
-//   'game' — the whole game, one club at a time: club chips, a tapped-ball
-//            readout, the two switches, a key, and a four-number stat bar.
-//   'half' — one half inning: no club to choose, dots numbered against a list
-//            of that half's batters underneath.
-
-// The crop, the box it leaves and the percentage mapping for HTML laid over
-// it are ballparkGeometry.js's (PLOT_VIEWBOX, plotPercent) — the flight card
-// the play-by-play diamond opens plots onto the same window, and a second
-// spelling of the numbers would slide one card's marks against the other's.
-
-// The half's dot numbers ride beside their dot rather than on it — to its
-// right normally, and to its LEFT once the dot is far enough over that the
-// number would land on the posted right-field distance (the '355′' the drawing
-// prints at the foul pole) or run out past the card. `RIGHT_EDGE` is where that
-// flip happens, in the same viewBox units the dots themselves live in.
-const NUMBER_OFFSET_X = 17
-const RIGHT_EDGE = VIEWBOX.w * 0.78
+// The whole game, one club at a time: club chips, a tapped-ball readout, the
+// two switches, a key, and a stat bar. The crop is ballparkGeometry.js's
+// (PLOT_VIEWBOX), shared with the flight card so the two plot onto one window.
 
 // The data layer owns the real cut line (`HARD_HIT_MPH`) and the caller passes
 // it down. It is repeated here rather than imported because that module is
@@ -41,8 +26,6 @@ const RIGHT_EDGE = VIEWBOX.w * 0.78
 // export exists to prevent.
 export const DEFAULT_HARD_HIT_MPH = 95
 
-const DASH = '—'
-
 const isHard = (ball, cut) => ball?.exitVelo != null && ball.exitVelo >= cut
 
 // A ground ball's `distance` is the few feet it travelled before a fielder got
@@ -52,7 +35,6 @@ const carried = (ball) =>
   ball != null && ball.trajectory !== 'ground_ball' && ball.distance != null
 
 const velo = (ball) => (ball?.exitVelo == null ? -1 : ball.exitVelo)
-const veloText = (ball) => (ball?.exitVelo == null ? DASH : ball.exitVelo.toFixed(1))
 
 // The half of the inning as a triangle — broadcast shorthand, and the reason it
 // is drawn rather than typed is that "T6"/"B6" reads as a letter grade at this
@@ -83,11 +65,9 @@ export function HitChart({
   clubs = [],
   note,
   tag,
-  variant = 'game',
   hardHitMph = DEFAULT_HARD_HIT_MPH,
 }) {
-  const isHalf = variant === 'half'
-  // Two charts can share a page (a half card above the game card), and an SVG
+  // Two charts can share a page, and an SVG
   // gradient id is document-global — without a per-instance id the second
   // chart's <defs> would silently repaint the first one's heat rings.
   const heatId = `hitchart-heat-${useId()}`
@@ -113,8 +93,8 @@ export function HitChart({
   const park = resolveBallparkLayout({ venueId, venueName: venue, gameDate })
   if (!balls?.length || !park) return null
 
-  // The half shows what happened; the game shows hits until you ask for outs.
-  const plotted = isHalf ? inScope : inScope.filter((b) => b.hit || showOuts)
+  // Hits until you ask for outs.
+  const plotted = inScope.filter((b) => b.hit || showOuts)
   const hardest = inScope.reduce((best, b) => (velo(b) > velo(best) ? b : best), null)
   // At rest the readout reports the hardest ball this club hit, so the strip is
   // never a blank frame waiting to be tapped.
@@ -124,15 +104,13 @@ export function HitChart({
   const hard = inScope.filter((b) => isHard(b, hardHitMph)).length
 
   const tagLines = Array.isArray(tag) ? tag : tag ? [tag] : []
-  const fieldLabel = isHalf
-    ? "Chart of this half inning's balls in play"
-    : `Chart of the balls in play at ${venue || park.name}`
+  const fieldLabel = `Chart of the balls in play at ${venue || park.name}`
 
   const chip = (on, tone) =>
     `hitchart__chip${on ? ` hitchart__chip--${tone}` : ''}`
 
   return (
-    <Card as="div" body="flush" className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
+    <Card as="div" body="flush" className="hitchart hitchart--game">
       <div className="hitchart__head">
         <div>
           <p className="hitchart__note">{note ?? venue}</p>
@@ -156,7 +134,7 @@ export function HitChart({
           letters do. A selected chip fills navy, so it asks for the precomputed
           `mono` knockout art rather than filtering the colour mark white
           (ADR-0031). */}
-      {!isHalf && clubs.length > 0 && (
+      {clubs.length > 0 && (
         <div className="hitchart__chiprow">
           {/* ALL, AND IT LEADS. The clubs beside it filter DOWN from this, so
               the row reads the way it behaves: everything, then one side or the
@@ -234,27 +212,25 @@ export function HitChart({
                 landing coordinate — their ART overlaps, which no layering
                 fixes.) One layer underneath keeps every dot's own art above
                 every target, so a bigger target costs no precision. */}
-            {!isHalf && (
-              <g className="hitchart__taps">
-                {plotted.map((ball) => (
-                  <circle
-                    key={ball.id}
-                    className="hitchart__tap"
-                    cx={ball.x}
-                    cy={ball.y}
-                    r="24"
-                    onClick={() => setPickedBall(ball.id)}
-                  />
-                ))}
-              </g>
-            )}
+            <g className="hitchart__taps">
+              {plotted.map((ball) => (
+                <circle
+                  key={ball.id}
+                  className="hitchart__tap"
+                  cx={ball.x}
+                  cy={ball.y}
+                  r="24"
+                  onClick={() => setPickedBall(ball.id)}
+                />
+              ))}
+            </g>
             {plotted.map((ball) => (
               <g
                 key={ball.id}
                 className="hitchart__ball"
-                onClick={isHalf ? undefined : () => setPickedBall(ball.id)}
+                onClick={() => setPickedBall(ball.id)}
               >
-                {!isHalf && current?.id === ball.id && (
+                {current?.id === ball.id && (
                   <circle className="hitchart__picked" cx={ball.x} cy={ball.y} r="18" />
                 )}
                 {showHard && isHard(ball, hardHitMph) && (
@@ -286,32 +262,10 @@ export function HitChart({
               </g>
             ))}
           </BallparkDiagram>
-
-          {/* An SVG <text> would scale with the drawing and end up a different
-              size on every card width, so the half's dot numbers are HTML laid
-              over the plot in percentages of the cropped viewBox instead. */}
-          {isHalf &&
-            plotted.map((ball, i) => {
-              const flip = ball.x > RIGHT_EDGE
-              const x = flip ? ball.x - NUMBER_OFFSET_X : ball.x + NUMBER_OFFSET_X
-              const at = plotPercent({ x, y: ball.y })
-              return (
-                <span
-                  key={ball.id}
-                  className={`hitchart__dotnum${flip ? ' hitchart__dotnum--flip' : ''}`}
-                  style={{
-                    left: `${at.left.toFixed(2)}%`,
-                    top: `${at.top.toFixed(2)}%`,
-                  }}
-                >
-                  {i + 1}
-                </span>
-              )
-            })}
         </div>
       </div>
 
-      {!isHalf && current && (
+      {current && (
         <div className="hitchart__readout">
           {/* TWO ROWS, NOT TWO COLUMNS. Side by side, the measurements held a
               nowrap column wide enough that a two-word name wrapped underneath
@@ -330,121 +284,83 @@ export function HitChart({
         </div>
       )}
 
-      {/* THE SWITCHES ARE THE GAME CARD'S. A half's chart held one of them, on
-          its own row, to toggle rings the list underneath already reports in
-          clay - a control that cost fifty pixels to restate what was three
-          lines below it. The rings themselves stay: `showHard` opens true and
-          the half never turns it off. */}
-      {!isHalf && (
-        <div className="hitchart__chiprow hitchart__chiprow--switches">
-          <button
-            type="button"
-            className={chip(showOuts, 'on-ink')}
-            aria-pressed={showOuts}
-            onClick={() => setShowOuts((v) => !v)}
-          >
-            <span className="hitchart__switch" aria-hidden="true" />
-            Show outs
-          </button>
-          <button
-            type="button"
-            className={chip(showHard, 'on-marker')}
-            aria-pressed={showHard}
-            onClick={() => setShowHard((v) => !v)}
-          >
-            <span className="hitchart__switch" aria-hidden="true" />
-            Hard hits <span className="hitchart__count">{hardHitMph}+</span>
-          </button>
+      <div className="hitchart__chiprow hitchart__chiprow--switches">
+        <button
+          type="button"
+          className={chip(showOuts, 'on-ink')}
+          aria-pressed={showOuts}
+          onClick={() => setShowOuts((v) => !v)}
+        >
+          <span className="hitchart__switch" aria-hidden="true" />
+          Show outs
+        </button>
+        <button
+          type="button"
+          className={chip(showHard, 'on-marker')}
+          aria-pressed={showHard}
+          onClick={() => setShowHard((v) => !v)}
+        >
+          <span className="hitchart__switch" aria-hidden="true" />
+          Hard hits <span className="hitchart__count">{hardHitMph}+</span>
+        </button>
+      </div>
+
+        <div className="hitchart__key">
+        <span className="hitchart__keyitem">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <circle className="hitchart__hit" cx="8" cy="8" r="4.4" />
+          </svg>
+          Hit
+        </span>
+        <span className="hitchart__keyitem">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <circle className="hitchart__out" cx="8" cy="8" r="4.6" />
+          </svg>
+          Out
+        </span>
+        <span className="hitchart__keyitem">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <rect
+              className="hitchart__hr"
+              x="4.6"
+              y="4.6"
+              width="8.8"
+              height="8.8"
+              transform="rotate(45 9 9)"
+            />
+          </svg>
+          Home run
+        </span>
+        <span className="hitchart__keyitem">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+            <circle
+              className="hitchart__heat hitchart__heat--key"
+              cx="10"
+              cy="10"
+              r="6.6"
+              stroke={`url(#${heatId})`}
+            />
+            <circle className="hitchart__hit" cx="10" cy="10" r="3.4" />
+          </svg>
+          Hard hit
+        </span>
+      </div>
+
+      {/* TWO NUMBERS, NOT FOUR. The other two were already on the card:
+          "In play" is the count printed on the lit chip above, and
+          "Hardest" is the figure the readout rests on when nothing is
+          tapped. A stat bar that repeats its own page reads as filler and
+          costs a phone sixty pixels of height to do it. */}
+      <div className="hitchart__facts">
+        <div className="hitchart__fact">
+          <p className="hitchart__factlabel">Hits</p>
+          <p className="hitchart__factvalue">{hits}</p>
         </div>
-      )}
-
-      {!isHalf && (
-        <>
-          <div className="hitchart__key">
-            <span className="hitchart__keyitem">
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <circle className="hitchart__hit" cx="8" cy="8" r="4.4" />
-              </svg>
-              Hit
-            </span>
-            <span className="hitchart__keyitem">
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <circle className="hitchart__out" cx="8" cy="8" r="4.6" />
-              </svg>
-              Out
-            </span>
-            <span className="hitchart__keyitem">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                <rect
-                  className="hitchart__hr"
-                  x="4.6"
-                  y="4.6"
-                  width="8.8"
-                  height="8.8"
-                  transform="rotate(45 9 9)"
-                />
-              </svg>
-              Home run
-            </span>
-            <span className="hitchart__keyitem">
-              <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-                <circle
-                  className="hitchart__heat hitchart__heat--key"
-                  cx="10"
-                  cy="10"
-                  r="6.6"
-                  stroke={`url(#${heatId})`}
-                />
-                <circle className="hitchart__hit" cx="10" cy="10" r="3.4" />
-              </svg>
-              Hard hit
-            </span>
-          </div>
-
-          {/* TWO NUMBERS, NOT FOUR. The other two were already on the card:
-              "In play" is the count printed on the lit chip above, and
-              "Hardest" is the figure the readout rests on when nothing is
-              tapped. A stat bar that repeats its own page reads as filler and
-              costs a phone sixty pixels of height to do it. */}
-          <div className="hitchart__facts">
-            <div className="hitchart__fact">
-              <p className="hitchart__factlabel">Hits</p>
-              <p className="hitchart__factvalue">{hits}</p>
-            </div>
-            <div className="hitchart__fact">
-              <p className="hitchart__factlabel">Hard</p>
-              <p className="hitchart__factvalue">{hard}</p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {isHalf && (
-        <>
-          {/* The unit is carried once, by the column head, so no figure in the
-              list below has to repeat it. */}
-          <div className="hitchart__listhead">
-            <span>Balls in play</span>
-            <span>Exit velo · mph</span>
-          </div>
-          <ol className="hitchart__list">
-            {plotted.map((ball, i) => (
-              <li key={ball.id} className="hitchart__row">
-                <span className="hitchart__rownum">{i + 1}</span>
-                <span className="hitchart__rowname">{ball.batter}</span>
-                <span className="hitchart__rowcode">{ball.code}</span>
-                <span
-                  className={`hitchart__rowvelo${
-                    isHard(ball, hardHitMph) ? ' hitchart__rowvelo--hard' : ''
-                  }`}
-                >
-                  {veloText(ball)}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
+        <div className="hitchart__fact">
+          <p className="hitchart__factlabel">Hard</p>
+          <p className="hitchart__factvalue">{hard}</p>
+        </div>
+      </div>
     </Card>
   )
 }

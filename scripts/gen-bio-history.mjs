@@ -23,15 +23,14 @@
 // so a re-run with the same input rewrites the same bytes. The report it prints is
 // the one the PR quotes.
 import { readFile } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { basename, join } from 'node:path'
 import { parseCsv } from './lib/csv.mjs'
 import { writeShards } from './lib/io.js'
 import { buildBioShards } from './lib/open-data/bio-shards.mjs'
 import { buildGazetteer } from './lib/open-data/gazetteer.mjs'
 import { buildRetroBridge } from './lib/open-data/retro-bridge.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const args = process.argv.slice(2)
 const flag = (name, fallback) => {
   const at = args.indexOf(name)

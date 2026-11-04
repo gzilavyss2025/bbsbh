@@ -37,15 +37,14 @@
 //   node scripts/gen-comeback-wins.mjs --days=<n>  # postseason backfill: the nightly
 //                                     # window is 3 days, so older October games
 //                                     # need a hand run reaching back to them.
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { parseArgs } from './lib/args.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'comeback-wins.json')
 const DEFAULT_DAYS = 3
 // The cumulative home win % (+ its `about` for nothing here, but kept minimal).
@@ -248,6 +247,6 @@ async function main() {
 }
 
 // Only sweep when run as a script — keeps the pure helpers importable for tests.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }
