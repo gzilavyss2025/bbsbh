@@ -465,6 +465,19 @@ jobs:
         if: steps.player-contracts.outcome == 'success'
         continue-on-error: true
         run: node scripts/fever/gen-salaries.mjs
+      # After "Top prospects" and "Club ledgers and league salaries": it copies
+      # the files those two write into public/data/frozen/{season}/ (#2778).
+      # NOT gated, on purpose: the night it matters is a quiet offseason one when
+      # every input gate is false. It decides for itself (ADR-0074's season-over
+      # rule) and is a quiet no-op on every other night, including "already
+      # frozen". It fails (exit 1, naming the season) only when the live files
+      # have already moved on to N+1 with N never frozen. Staged by the
+      # `git add -A -- public … src/lib/data` below; a first freeze adds files,
+      # so drop-stamp-only.mjs (modified files only) never drops it.
+      - name: Freeze finished season
+        id: freeze-season
+        continue-on-error: true
+        run: node scripts/frozen/freeze-season.mjs --nightly
       - name: Prospect level percentile
         id: prospect-trend
         if: steps.top-prospects.outcome == 'success'

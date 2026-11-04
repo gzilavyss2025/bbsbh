@@ -44,19 +44,48 @@ export function seasonInPlay(todayIso, row) {
   return todayIso.slice(5) < FALLBACK_TURN ? year - 1 : year
 }
 
+// THE SEASON THAT IS OVER — issue #2778, ADR-0074's rule for scripts.
+//
+// A season is over once statsapi's offseason for it has opened: on or after its
+// row's `offseasonStartDate` (Nov 1 in 2026; the postseason runs to Oct 31 and
+// is still the season). From Jan 1 to the next Opening Day the season in play is
+// last year's (seasonInPlay above), and that season is over by definition. The
+// answer is the season that just ended, or null for "not over".
+//
+// It fails closed: in November and December it needs this year's row with a
+// valid offseasonStartDate, and a missing or wrong-year row is null, not a guess.
+// Null only waits a night; a guess could act on a season still being played.
+export function seasonOver(todayIso, row) {
+  const season = seasonInPlay(todayIso, row)
+  const year = Number(todayIso.slice(0, 4))
+  if (season < year) return season
+  const opens = Number(row?.seasonId) === year ? row?.offseasonStartDate : null
+  if (typeof opens !== 'string' || !ISO.test(opens)) return null
+  return todayIso >= opens ? season : null
+}
+
+// statsapi's season row for `year`, or null on a failed read. Never throws.
+async function fetchSeasonRow(year) {
+  try {
+    const data = await getJson(
+      `/api/v1/seasons?sportId=1&season=${year}&fields=seasons,seasonId,regularSeasonStartDate,offseasonStartDate`,
+    )
+    return data?.seasons?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 // The season in play for `today` (a Date; now by default). One statsapi read;
 // a failed read falls back to the calendar rule above and never throws.
 export async function fetchSeasonInPlay(today = new Date()) {
   const todayIso = today.toISOString().slice(0, 10)
-  const year = todayIso.slice(0, 4)
-  let row = null
-  try {
-    const data = await getJson(
-      `/api/v1/seasons?sportId=1&season=${year}&fields=seasons,seasonId,regularSeasonStartDate`,
-    )
-    row = data?.seasons?.[0] ?? null
-  } catch {
-    row = null
-  }
-  return seasonInPlay(todayIso, row)
+  return seasonInPlay(todayIso, await fetchSeasonRow(todayIso.slice(0, 4)))
+}
+
+// The season that is over on `today`, or null. Same one read; a failed read in
+// November or December is null (fails closed), never a throw.
+export async function fetchSeasonOver(today = new Date()) {
+  const todayIso = today.toISOString().slice(0, 10)
+  return seasonOver(todayIso, await fetchSeasonRow(todayIso.slice(0, 4)))
 }
