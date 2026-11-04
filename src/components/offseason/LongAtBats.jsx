@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
+import { atBatGamePath, clubAbbr, count, fetchLongAtBats, findLongAtBat } from '../../api/notebook.js'
+import { getJson } from '../../api/statsapi.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { monthDayShort } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -19,71 +20,34 @@ import { atBatScenePitches, atBatZone } from '../../lib/pitcherCard/atBat.js'
 import { Button } from '../ui/control/Button.jsx'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 
+// The list's foot fades only while there is more below it.
+const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight >= el.scrollHeight - 2))
+
 // "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
 const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
-const lastName = (name) => name.split(' ').slice(1).join(' ') || name
 
-// THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
-// #1078, step 4 of #1038).
-//
-// The wire above this says what is happening to the rosters. This says what
-// happened in the season a reader has just put their scorebook away on, and it
-// is the note the design study picked for MLB because it is the one thing a
-// SCORER notices that a highlight reel never shows: the at-bat that would not
-// end. Twelve pitches is four lines of a scorebook cell.
-//
-// A CENSUS, NOT A LEADERBOARD. The number is how many there were in the whole
-// regular season, out of every plate appearance played — which is only sayable because
-// pitch coverage at MLB is complete and every game was read
-// (scripts/gen-long-at-bats.mjs). When it is not complete the note says so
-// instead of quietly presenting a sample as a count; `coverage.complete` is
-// exactly that check, and it is the difference between "170 of 173,710" and a
-// sentence that would be false.
-//
-// AND IT NAMES NO RESULT, which took deciding rather than assuming. A row names
-// a batter, a pitcher, a date and a pitch count. It does NOT name the at-bat's
-// result, its inning, or anything about the game around it — because a
-// twelve-pitch at-bat is a LENGTH, and a length is true of the at-bat whoever
-// won. The generator does not store the outcome, so there is nothing here to
-// leak it. Opening a row opens that game at its first lineup page, sealed under
-// the same `revealedThrough` mark the slate's own cards hand over
-// (api/notebook.js). That is the same line the picked-game card walks at the
-// minor levels (ADR-0080), and the reason #1078's own spoiler note only asks a
-// report to declare itself when it is about a RESULT.
-//
-// THE ROW IS THE /fouls PAGE'S, and that is a deliberate borrowing. "Most
-// fouls in one plate appearance" draws the batter's face pinned left and the
-// pitcher's pinned right, their names and clubs facing each other across the
-// count — because a long at-bat is two men refusing to give in, and a table row
-// cannot show that. This note is about the same event measured a different way,
-// so it reads the same way.
-//
-// WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
-// line carries the score, the inning, the outs, the bases and what the at-bat
-// finally did — a report page's ordinary right, and none of it this note's. The
-// slot holds the DATE here instead, which is the one thing about the at-bat
-// that opens its game without saying a word about it.
-//
-// FIVE UP FRONT, THEN TEN AT A TIME. The whole census is the answer — trimming
-// it to a round number is the one thing research.md §7 forbids outright — but
-// the whole census is 170 rows, and each one carries two faces now, so opening
-// all of it in one press dropped a reader into eight thousand pixels of scroll
-// with the rest of the page somewhere below it. The door pages instead. Every
-// row is still reachable; none of them arrives uninvited.
+// THE LONGEST AT-BATS OF THE SEASON (issue #1078, redesigned 2026-11-03). A
+// census, not a leaderboard: every at-bat of ten or more pitches, out of every
+// plate appearance played, and only when every game was read
+// (scripts/gen-long-at-bats.mjs, `coverage.complete`). The census line sums the
+// regular season and the postseason (Gary, 2026-11-03; a departure from
+// ADR-0104 for this card). The picked at-bat shows Gameday's scorebug as it
+// began, the zone, and how it ended: this page is an open surface (ADR-0034).
+// Opening its date opens the game sealed (api/notebook.js).
 
 // The longest at-bat's pitches on the Gameday zone. The census file keeps no
 // at-bat index, so the game's play-by-play is read and the plate appearance
 // found by its batter, pitcher and length. Nothing until it arrives.
-async function fetchAtBat(row) {
-  const res = await fetch(`https://statsapi.mlb.com/api/v1/game/${row.pk}/playByPlay`)
-  if (!res.ok) return null
-  const feed = await res.json()
-  // The census counts a little differently from the feed's isPitch flags, so
-  // match the meeting and take its longest plate appearance.
-  const pitched = (p) => (p.playEvents ?? []).filter((e) => e.isPitch).length
-  const play = (feed.allPlays ?? [])
-    .filter((p) => p.matchup?.batter?.id === row.batter.id && p.matchup?.pitcher?.id === row.pitcher.id)
-    .sort((a, b) => pitched(b) - pitched(a))[0]
+// One request per at-bat: the scorebug and the zone both ask for it.
+const atBats = new Map()
+function fetchAtBat(row) {
+  const k = `${row.pk}-${row.batter.id}-${row.pitcher.id}-${row.pitches}`
+  if (!atBats.has(k)) atBats.set(k, readAtBat(row))
+  return atBats.get(k)
+}
+async function readAtBat(row) {
+  const feed = await getJson(`/api/v1/game/${row.pk}/playByPlay`).catch(() => null)
+  const play = findLongAtBat(feed?.allPlays, row)
   if (!play) return null
   // The game as the at-bat began: the play before it carries the score, and,
   // in the same half, the outs and the runners.
@@ -103,7 +67,7 @@ async function fetchAtBat(row) {
 
 // Gameday's own scorebug, set to the game as the at-bat began.
 function Scorebug({ row }) {
-  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id])
+  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id, row.pitches])
   const b = data?.bug
   if (!b) return null
   const [first, second, third] = b.bases
@@ -131,7 +95,7 @@ function Scorebug({ row }) {
 // The zone, a card for whichever pitch dot the pointer is on, and how the
 // at-bat ended under it.
 function AtBatZone({ row }) {
-  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id])
+  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id, row.pitches])
   const [tip, setTip] = useState(null)
   // The pitch-tracking replay: null shows the zone, an object plays the at-bat
   // through PitchScene's at-bat look (a new object replays it).
@@ -229,8 +193,7 @@ export function LongAtBats({ season }) {
   // it is read. A complete zero is still a count.
   const post = data.post?.coverage.complete ? data.post : null
 
-  // The postseason's long at-bats join the list, each marked; the census
-  // line below still counts the two seasons apart (ADR-0104).
+  // The postseason's long at-bats join the list, each marked.
   // `key`: a row's own id. pk + batter + pitches is not unique at ten pitches
   // (one batter can see a pitcher twice for ten in a game), and a repeated React
   // key left a stale row standing at the head of a filtered list.
@@ -249,7 +212,6 @@ export function LongAtBats({ season }) {
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
   const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
   // Every row, in a list that scrolls in its own box (five rows tall).
-  const shown = all
   const path = atBatGamePath(top)
 
   // ONE CARD, ONE UNIT: the longest at-bat drawn one square per pitch, the
@@ -324,13 +286,10 @@ export function LongAtBats({ season }) {
               className="seasonnote__bars"
               // The foot fades only while there is more below; at the end, or a list
               // that fits, it sits flat.
-              ref={(el) => el && (el.dataset.end = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 ? 'true' : 'false')}
-              onScroll={(e) => {
-                const el = e.currentTarget
-                el.dataset.end = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 ? 'true' : 'false'
-              }}
+              ref={(el) => el && markEnd(el)}
+              onScroll={(e) => markEnd(e.currentTarget)}
             >
-                  {shown.map((row, i) => (
+                  {all.map((row, i) => (
                     <li key={row.key}>
                       <button
                         type="button"
@@ -361,13 +320,10 @@ export function LongAtBats({ season }) {
                     </li>
                   ))}
                 </ol>
-                    <p className="sr-only" role="status">
-                  Showing {shown.length} of {all.length} at-bats.
-                </p>
               </div>
           </div>
 
-          <AtBatZone key={`${top.pk}-${top.batter.id}`} row={top} />
+          <AtBatZone key={`${top.pk}-${top.batter.id}-${top.pitches}`} row={top} />
         </div>
 
 

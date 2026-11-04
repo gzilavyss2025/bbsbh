@@ -176,7 +176,7 @@ test('the age note opens on the reader’s own league, not on the first in the f
 // built doc as well as on the committed files, because the committed files
 // carry no `post` until the nightly run has swept a postseason game.
 const BANNED =
-  /^(runs|score|scores|winner|loser|isTie|inning|innings|halfInning|outs|rbi|event|eventType|result|description|linescore|decisions|awayScore|homeScore|top|gameType|series|round)$/i
+  /^(runs|score|scores|winner|loser|isTie|inning|innings|halfInning|outs|rbi|eventType|result|description|linescore|decisions|awayScore|homeScore|top|gameType|series|round)$/i
 const DOC_KEYS = ['season', 'generatedAt', 'threshold', 'coverage', 'rows', 'post']
 const COVERAGE_KEYS = ['games', 'playedGames', 'plateAppearances', 'plateAppearancesWithoutPitches', 'complete']
 const ROW_KEYS = ['pk', 'date', 'g', 'away', 'home', 'batter', 'pitcher', 'pitches', 'event']
@@ -413,4 +413,13 @@ test('a pickoff or step-off inside an at-bat is not a pitch', () => {
 test('an automatic intentional walk is no coverage gap', () => {
   const ibb = { result: { eventType: 'intent_walk', event: 'Intent Walk' }, playEvents: [{ isPitch: false, type: 'action' }] }
   assert.equal(scanGamePlays([ibb], 12).withoutPitches, 0)
+})
+
+test('two long at-bats by one batter against one pitcher open their own plays', async () => {
+  const { findLongAtBat } = await import('../src/api/notebook.js')
+  const meet = (n, idx) => ({ atBatIndex: idx, matchup: { batter: { id: 1 }, pitcher: { id: 2 } }, playEvents: Array.from({ length: n }, () => ({ isPitch: true })) })
+  const plays = [meet(10, 3), meet(12, 30)]
+  const row = (pitches) => ({ batter: { id: 1 }, pitcher: { id: 2 }, pitches })
+  assert.equal(findLongAtBat(plays, row(10)).atBatIndex, 3)
+  assert.equal(findLongAtBat(plays, row(12)).atBatIndex, 30)
 })

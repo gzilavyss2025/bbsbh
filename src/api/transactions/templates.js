@@ -466,8 +466,8 @@ export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
     }
   } else {
     const days = daysText(daysBetween(stint.from, stint.to))
-    // A stint that ate his whole season says so: "did not play in 2026".
-    const wholeSeason = !facts.seasonLine?.games && facts.season
+    // A stint that ran past the season says "did not play in 2026" (a June return has no games yet either).
+    const wholeSeason = facts.season && !facts.seasonLine?.games && !((stint.to ?? moveDate)?.slice(5, 7) < '10')
     let s = wholeSeason
       ? `${name} did not play in ${facts.season}`
       : v === 0 ? `${name} missed ${days}` : `${name} returns after missing ${days}`

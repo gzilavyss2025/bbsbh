@@ -38,7 +38,7 @@ const daysArg = process.argv.find((a) => a.startsWith('--days='))
 const WINDOW = daysArg ? Number(daysArg.split('=')[1]) : 60
 
 installSiteFetch(publicDir)
-const { factKey, factRequest, fetchPlayerFacts } = await import('../src/api/transactions/playerFacts.js')
+const { factKey, factRequest, fetchPlayerFacts, withoutContract } = await import('../src/api/transactions/playerFacts.js')
 const { subjectsOf } = await import('../src/api/transactions/templates.js')
 
 const iso = (d) => d.toISOString().slice(0, 10)
@@ -71,21 +71,32 @@ async function buildDay(date, stories) {
     }
   }
   const out = {}
+  let missed = 0
   await mapConcurrent([...requests], 12, async ([key, [id, opts]]) => {
     const facts = await fetchPlayerFacts(id, opts)
-    if (facts) out[key] = facts
+    // The contract is read live in the browser, so it never goes stale here.
+    if (facts) out[key] = withoutContract(facts)
+    else missed += 1
   })
-  return out
+  return { out, missed }
 }
 
 async function main() {
   console.log(`Wire facts: ${first} to the day before ${today}`)
   const byDay = await storiesByDay()
   let built = 0
+  let failed = 0
   for (const date of [...byDay.keys()].sort()) {
     const path = join(outDir, `${date}.json`)
     if ((await readJsonOr(path, null)) !== null) continue
-    const facts = await buildDay(date, byDay.get(date))
+    const { out: facts, missed } = await buildDay(date, byDay.get(date))
+    // A day is written once and never again, so a day with a failed read is
+    // not written at all: the next night builds it whole.
+    if (missed) {
+      failed += 1
+      console.log(`  ${date}: ${missed} reads failed; left for the next run`)
+      continue
+    }
     await writeJsonAtomic(path, facts)
     built += 1
     console.log(`  ${date}: ${Object.keys(facts).length} players`)
@@ -99,7 +110,9 @@ async function main() {
       dropped += 1
     }
   }
-  console.log(`Done: ${built} days built, ${dropped} dropped.`)
+  console.log(`Done: ${built} days built, ${failed} left for the next run, ${dropped} dropped.`)
+  // Every pending day failed: statsapi is down. Say so in the nightly summary.
+  if (failed && !built) process.exitCode = 1
 }
 
 await import('node:fs').then((fs) => fs.mkdirSync(outDir, { recursive: true }))

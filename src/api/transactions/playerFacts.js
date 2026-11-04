@@ -242,10 +242,25 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     // Every arrival, oldest first: a quick second move ("two days after
     // Milwaukee got him from Cleveland") reads the one before.
     arrivals: moves.filter((t) => ARRIVALS[t.typeCode] && t.toTeam?.id).map((t) => arrivalOf(t, person.fullName)),
-    contract: contract
-      ? { terms: contract.terms ?? null, club: contract.clubAbbrev ?? null, season: contract.season ?? null, options: contract.options?.remaining ?? null }
-      : null,
+    contract: shapeContract(contract),
   }
+}
+
+function shapeContract(contract) {
+  return contract
+    ? { terms: contract.terms ?? null, club: contract.clubAbbrev ?? null, season: contract.season ?? null, options: contract.options?.remaining ?? null }
+    : null
+}
+
+// A settled day's facts are kept without the contract (both stores), so the
+// contract is read fresh: a December extension shows on a September move.
+export function withoutContract(facts) {
+  const rest = { ...facts }
+  delete rest.contract
+  return rest
+}
+async function withContract(personId, facts) {
+  return facts && { ...facts, contract: shapeContract(await fetchPlayerContract(personId).catch(() => null)) }
 }
 
 // The season a move speaks for: the one just finished, until spring training.
@@ -309,7 +324,7 @@ export function factRequest(story, date, { playerId, template }) {
 // His lines and age as they stood the day before `asOf`. byDateRange over many
 // years answers one split per club plus the total, which carries no team
 // (person 547180 through 2026-04-30: PHI 889, WSH 927, total 1,816 games).
-async function asOfFacts(personId, person, facts, asOf) {
+export async function asOfFacts(personId, person, facts, asOf) {
   const until = shiftDays(asOf, -1)
   const group = facts.pitcher ? 'pitching' : 'hitting'
   const range = (from) =>
@@ -328,8 +343,11 @@ async function asOfFacts(personId, person, facts, asOf) {
     midSeason: asOf.startsWith(String(facts.season)) && asOf.slice(5, 7) < '10',
     seasonLine: seasonStat ? shapeLine(seasonStat, facts.pitcher) : null,
     seasonClubs: [],
-    careerLine: careerStat ? shapeLine(careerStat, facts.pitcher) : facts.careerLine,
-    rows: (facts.rows ?? []).filter((r) => r.season < facts.season),
+    // No line before the move (a first call-up, or a failed read) is no line:
+    // the current career would carry games played after it.
+    careerLine: careerStat ? shapeLine(careerStat, facts.pitcher) : null,
+    // A move after its season (a November non-tender) keeps that season's row.
+    rows: (facts.rows ?? []).filter((r) => (asOf.slice(5, 7) >= '10' ? r.season <= facts.season : r.season < facts.season)),
   }
 }
 
@@ -366,17 +384,42 @@ const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD, the re
 function readStored(key) {
   try {
     const raw = localStorage.getItem(FACTS_STORE + key)
-    return raw ? JSON.parse(raw) : null
+    return raw ? JSON.parse(raw).f ?? null : null
   } catch {
     return null
   }
 }
-function writeStored(key, facts) {
+// Each entry carries its move's day (`d`). When storage is full, the oldest half
+// of these entries goes and the write is tried once more, so this store can never
+// crowd out the reveal marks (`bbsbh:reveal:`) that share the origin's quota.
+function writeStored(key, facts, asOf) {
+  const value = JSON.stringify({ d: asOf, f: withoutContract(facts) })
   try {
-    localStorage.setItem(FACTS_STORE + key, JSON.stringify(facts))
+    localStorage.setItem(FACTS_STORE + key, value)
   } catch {
-    // Full or blocked storage: the note still shows, it is only read again next time.
+    try {
+      evictOldest()
+      localStorage.setItem(FACTS_STORE + key, value)
+    } catch {
+      // Blocked storage: the note still shows, it is only read again next time.
+    }
   }
+}
+function evictOldest() {
+  const mine = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i)
+    if (!k?.startsWith(FACTS_STORE)) continue
+    let d = ''
+    try {
+      d = JSON.parse(localStorage.getItem(k))?.d ?? ''
+    } catch {
+      // unreadable: oldest
+    }
+    mine.push([d, k])
+  }
+  mine.sort((a, b) => (a[0] < b[0] ? -1 : 1))
+  for (const [, k] of mine.slice(0, Math.max(1, Math.ceil(mine.length / 2)))) localStorage.removeItem(k)
 }
 // One move's facts, keyed the same in the browser and in the nightly file.
 export function factKey(personId, { season, teamId = null, ilMove = null, tradeMove = null, callMove = null, arrival = false, asOf = null }) {
@@ -405,7 +448,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
   const settled = asOf != null && asOf < today()
   if (!cache.has(key) && settled) {
     const stored = readStored(key)
-    if (stored) cache.set(key, Promise.resolve(stored))
+    if (stored) cache.set(key, withContract(personId, stored))
   }
   // Then the night's pre-built file for the move's day, before any live read.
   if (!cache.has(key) && settled && !unbuilt.has(key)) {
@@ -413,8 +456,8 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
       key,
       prebuiltDay(asOf).then((day) => {
         if (day?.[key]) {
-          writeStored(key, day[key])
-          return day[key]
+          writeStored(key, day[key], asOf)
+          return withContract(personId, day[key])
         }
         cache.delete(key)
         unbuilt.add(key) // read live once; never ask the file for it again
@@ -474,7 +517,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
         })
         .then(withTradeIds)
         .then((facts) => {
-          if (facts && settled) writeStored(key, facts)
+          if (facts && settled) writeStored(key, facts, asOf)
           return facts
         })
         .catch(() => {

@@ -627,8 +627,6 @@ a.seasonnote__barrow:hover .seasonnote__barname {
   .oseason__list .wire__cutline--joined { display: none; }
   .oseason__list .wire__split { display: block; }
   .oseason__list .wire__split > .wire__cutline + .wire__cutline { margin-top: var(--space-2); }
-}
-@media (min-width: 740px) {
   /* The faces float so a long split card's text wraps under them. */
   .oseason__list .wire__row:has(.wire__split) {
     display: flow-root;
@@ -637,13 +635,9 @@ a.seasonnote__barrow:hover .seasonnote__barname {
     float: left;
     margin: 0 var(--space-3) var(--space-2) 0;
   }
-}
-@media (min-width: 740px) {
   .oseason__list .wire__row:has(.wire__split) .wire__body {
     display: block;
   }
-}
-@media (min-width: 740px) {
   .oseason__list .wire__row:has(.wire__split) .wire__kicker {
     float: right;
     margin: 0 0 var(--space-2) var(--space-3);
@@ -813,7 +807,7 @@ a.seasonnote__barrow:hover .seasonnote__barname {
   min-height: 112px;
   padding: 0 0 0 var(--space-3);
   border: var(--bw-rule, 2px) solid var(--text-heading);
-  background: var(--side-club);
+  background: var(--side-club, var(--surface-stamped-ink));
   color: var(--text-on-ink-bright);
 }
 .seasonnote__sidemark {

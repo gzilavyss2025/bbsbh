@@ -124,3 +124,14 @@ export function atBatGamePath(row) {
   if (!row?.date || !row?.away?.abbr || !row?.home?.abbr) return null
   return gamePath(row.date, row.away.abbr, row.home.abbr, 'lineup1', row.g ?? 1)
 }
+
+// The census row's own plate appearance in a game's play-by-play: the same
+// batter, pitcher and pitch count (the census counts `isPitch` events too,
+// scripts/lib/long-at-bats.mjs). A batter can face one pitcher twice for ten
+// or more in a game, so the count is what tells the two apart. The longest
+// meeting is the fallback when no count matches.
+export function findLongAtBat(allPlays, row) {
+  const pitched = (p) => (p.playEvents ?? []).filter((e) => e.isPitch).length
+  const meetings = (allPlays ?? []).filter((p) => p.matchup?.batter?.id === row.batter.id && p.matchup?.pitcher?.id === row.pitcher.id)
+  return meetings.find((p) => pitched(p) === row.pitches) ?? meetings.sort((a, b) => pitched(b) - pitched(a))[0] ?? null
+}
