@@ -27,7 +27,7 @@ import { LANDING_GROUPS, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { renderIndex, renderPage } from '../src/copy/landing/render.js'
 import { resolvePage } from '../src/copy/landing/schema.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
-import { sanitizeOverrides } from '../src/copy/registry.js'
+import { sanitizeOverrides } from '../src/copy/registryFull.js'
 import { appShell } from './_lib/crawl.js'
 import { getRedis, readHash } from './_lib/redis.js'
 

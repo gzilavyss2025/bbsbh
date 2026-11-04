@@ -165,9 +165,20 @@ jobs:
           # (admin), so pushes with it bypass the required check the same
           # way the maintainer's own direct pushes already do.
           token: ${{ secrets.GH_BOT_TOKEN }}
+      # Generator working state (scripts/data/*.sql, callouts-archive/) lives in
+      # the private bbsbh-state repo (#2886). GH_BOT_TOKEN has Contents
+      # read/write on it. "Commit if changed" pushes it back BEFORE it commits
+      # here, so main never holds output from state the state repo lacks.
+      - uses: actions/checkout@v7
+        with:
+          repository: gzilavyss2025/bbsbh-state
+          path: .state
+          token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v7
         with:
           node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
+      - name: Pull generator state
+        run: node scripts/repo/state.mjs pull
 
       - name: Wait for yesterday's slate to go Final
         run: |
@@ -769,6 +780,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # State first (#2886). A failure here stops the step before the commit
+          # below, so a night whose state was not saved deploys nothing either.
+          git -C .state config user.name "github-actions[bot]"
+          git -C .state config user.email "github-actions[bot]@users.noreply.github.com"
+          node scripts/repo/state.mjs push
           # -A over the three roots every generator writes into, instead of the
           # 60-path list this used to carry. That list was hand-maintained and
           # drifted twice, both silently: gen-jerseys.mjs's jerseys.json was

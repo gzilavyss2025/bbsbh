@@ -61,9 +61,9 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel. T
 ## Admin-editable copy (`src/copy/`)
 
 The wording of the admin-editable surfaces is not hard-coded.
-`src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
-`sanitizeOverrides`; no token substitution, and its header records why no
-game data may ever be interpolated into a field);
+`src/copy/registry.js` is the SPA's runtime set (ids, defaults, caps, `sanitizeOverrides`;
+no `/learn` guides, no `mergeOverrides`, no game data in any field). `registryFull.js`
+adds both: `api/copy.js`, `api/page.js`, `AdminCopy` and `/learn?edit` use it (#2878);
 `CopyProvider.jsx` + `copyContext.js` resolve
 `defaults ← localStorage cache ← live /api/copy` and expose
 `useCopy().t(id)`, always falling back to defaults.
