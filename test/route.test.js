@@ -16,6 +16,7 @@ import {
   canonicalSection,
   gameNotesPath,
   parseRoute,
+  isSlateUrl,
   slugify,
   idFromSlug,
   entitySegment,
@@ -1337,4 +1338,9 @@ test('isYearView is a Dec 31 as-of in a past year', () => {
   assert.equal(isYearView('2018-06-01'), false)
   assert.equal(isYearView(`${new Date().getFullYear()}-12-31`), false)
   assert.equal(isYearView(null), false)
+})
+
+test('isSlateUrl is true for every slate URL and false for other screens', () => {
+  for (const url of ['/', '/aaa', '/11042026', '/milb', '/?nointro']) assert.equal(isSlateUrl(url), true, url)
+  assert.equal(isSlateUrl('/logos'), false)
 })
