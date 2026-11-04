@@ -39,6 +39,8 @@ sessions that share one machine. In the cloud, these rules change:
 - **No worktree.** Nobody else shares the container, so edit in the primary checkout.
   The `block-primary-checkout-edit` hook skips cloud sessions for this reason.
   Local sessions still need a worktree.
+- **Generator state is not in the clone** (ADR-0128). `npm test` and the build need none.
+  Before you run a generator by hand or `npm run test:state`, run `npm run state:pull`.
 - **No `gh` CLI.** Use the GitHub MCP tools instead (for example,
   `list_pull_requests` and `pull_request_read`) to list and read PRs.
 - **No housekeeping.** Skip `/start-day`, `/clean-worktrees` and `/clean-dev-servers`.

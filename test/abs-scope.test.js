@@ -124,24 +124,6 @@ test('buildExport: All sums the counts and recomputes the rate, never a mean of 
   assert.equal(both.perGame, 5 / 2)
 })
 
-// THE BACKFILL, PINNED ON THE COMMITTED DUMP. The 23 games below are every
-// postseason game the schedule listed (gameType F, D, L, W, by gamePk) that was
-// on file when the scope arrived. 2026's regular season ended on September 27
-// (MLB) and September 20 (Triple-A), so no later game may still read 'R'.
-test('the committed dump: every 2026 postseason game is P, and no October game is left in R', async () => {
-  const db = await openDb()
-  const scopeOf = new Map(db.prepare('SELECT game_pk, scope FROM abs_ingested_games').all().map((g) => [g.game_pk, g.scope]))
-  const post = [
-    849823, 849825, 849828, 849829, 849830, 849834, 849835, 849839, 849841, 849842, 849843, 849844,
-    849845, 849846, 849848, 849849, 849851, 850987, 850988, 850989, 850991, 850992, 850993,
-  ]
-  for (const pk of post) assert.equal(scopeOf.get(pk), 'P', `${pk}`)
-  const late = db
-    .prepare("SELECT game_pk FROM abs_ingested_games WHERE season = 2026 AND scope = 'R' AND date > CASE level WHEN 'MLB' THEN '2026-09-27' ELSE '2026-09-20' END")
-    .all()
-  assert.deepEqual(late, [])
-})
-
 test('the reader picks one file a scope, and Regular is the default', async (t) => {
   t.mock.method(globalThis, 'fetch', async (url) => {
     const body = url === '/data/abs/seasons.json' ? { seasons: [2026], current: 2026 } : { url }

@@ -129,3 +129,11 @@ undefined/
 /ds-bundle/
 /.ds-sync/
 /.design-sync/.cache/
+
+# generator working state (#2886): lives in the private gzilavyss2025/bbsbh-state
+# repo. `npm run state:pull` clones it into .state/ and copies it in here; the
+# nightly pushes it back. Keep this list in step with isState() in
+# scripts/repo/state.mjs.
+/.state/
+/scripts/data/*.sql
+/scripts/data/callouts-archive/
