@@ -42,9 +42,11 @@ import stampsHandler, {
 import {
   MAX_STAMPS_PER_SEASON,
   applyRemoteStamps,
-  isStamped,
   remoteStampsFromExport,
+  stampFor,
 } from '../src/lib/stamps.js'
+
+const isStamped = (map, gamePk) => stampFor(map, gamePk) != null
 import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // --------------------------------------------------------------------------

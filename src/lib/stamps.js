@@ -282,10 +282,6 @@ export function stampFor(map, gamePk) {
   return entry && entry.state === 'on' ? entry : null
 }
 
-export function isStamped(map, gamePk) {
-  return stampFor(map, gamePk) != null
-}
-
 // Every live stamp in a season, newest game first.
 export function stampsForSeason(map, season) {
   return Object.entries(map || {})

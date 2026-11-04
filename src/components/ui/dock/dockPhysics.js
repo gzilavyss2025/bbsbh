@@ -141,19 +141,6 @@ export function velocityFrom(samples, windowMs = VELOCITY_WINDOW_MS) {
   return ((last.y - first.y) / dt) * 1000
 }
 
-// How far open the sheet is, 0 at the rail and 1 at the tallest detent. The
-// scrim reads this: it stays fully clear across the rail→half stretch (a dock
-// at its working height sits BESIDE the slate, and dimming the games would
-// break the flow the dock exists to preserve) and fades in only across
-// half→full, where the sheet has effectively become the page.
-export function openness(offset, detents) {
-  if (detents.length < 2) return 0
-  const closed = detents[detents.length - 1]
-  const open = detents[0]
-  if (closed === open) return 0
-  return Math.max(0, Math.min(1, (closed - offset) / (closed - open)))
-}
-
 export function scrimAlpha(offset, detents, max = 0.34) {
   if (detents.length < 3) return 0
   const [full, half] = detents

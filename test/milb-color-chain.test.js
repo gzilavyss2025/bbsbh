@@ -24,7 +24,7 @@ import {
   milbColorPair,
   milbHasResearchedColor,
 } from '../src/lib/brandColors.js'
-import { teamTintColor, teamPrimaryColor, teamChipColors, teamStripeGradient } from '../src/lib/teams.js'
+import { teamTintColor, teamPrimaryColor, teamChipColors } from '../src/lib/teams.js'
 import { milbVariantColors, milbTreatmentTile } from '../src/lib/milbColors.js'
 
 // Durham Bulls, a Rays affiliate with a researched pair of its own — the
@@ -54,7 +54,6 @@ test('step 1 short-circuits step 2 — a researched affiliate never wears its pa
   assert.equal(teamPrimaryColor(DURHAM), '#0054A4')
   assert.notEqual(teamPrimaryColor(DURHAM), teamPrimaryColor(RAYS))
   assert.notEqual(teamTintColor(DURHAM), teamTintColor(RAYS))
-  assert.notEqual(teamStripeGradient(DURHAM), teamStripeGradient(RAYS))
   assert.notEqual(teamChipColors(DURHAM).primary, teamChipColors(RAYS).primary)
 })
 
@@ -122,7 +121,6 @@ test('milbBrandPair stops at null where milbColorPair paints the neutral pair', 
   assert.equal(teamTintColor(UNKNOWN), null)
   assert.equal(teamPrimaryColor(UNKNOWN), null)
   assert.equal(teamChipColors(UNKNOWN), null)
-  assert.equal(teamStripeGradient(UNKNOWN), null)
 })
 
 // --------------------------------------------------------------------------

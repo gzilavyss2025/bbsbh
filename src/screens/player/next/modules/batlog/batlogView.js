@@ -82,22 +82,6 @@ export function batlogView(splits, { cutoff = null, scores = null, fouls = null 
 // The filter: 'all', 'reg' (the regular season) or 'post'.
 export const scopeRows = (rows, scope) => (scope === 'all' ? rows : rows.filter((r) => r.post === (scope === 'post')))
 
-// The totals strip over the rows the filter shows. A rate with no denominator prints a dash.
-export function totalsOf(rows) {
-  const sum = (k) => rows.reduce((t, r) => t + r[k], 0)
-  const [ab, h, bb, hbp, sf] = ['ab', 'h', 'bb', 'hbp', 'sf'].map(sum)
-  const tb = h + sum('d2') + 2 * sum('d3') + 3 * sum('hr')
-  const pa = ab + bb + hbp + sf
-  return {
-    games: rows.length,
-    avg: ab ? rate3(h / ab) : DASH,
-    obp: pa ? rate3((h + bb + hbp) / pa) : DASH,
-    slg: ab ? rate3(tb / ab) : DASH,
-    hr: sum('hr'),
-    rbi: sum('rbi'),
-  }
-}
-
 // One season's games with their scores and fouls, or null (no game, or the log did not load).
 export async function loadBatlog(personId, season, asOf) {
   const log = await fetchPersonStats(personId, { type: 'gameLog', group: 'hitting', season, gameType: MLB_LOG_GAME_TYPES })

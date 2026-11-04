@@ -236,7 +236,7 @@ test('a rank mark belongs to the tile its label names, W-L included', () => {
 })
 
 // ---- the top cards (heroData.js): when each one hides ----
-import { hasExtras, headerExtras } from '../src/screens/player/next/heroData.js'
+import { headerExtras } from '../src/screens/player/next/heroData.js'
 
 const bio = { id: 1 }
 const hitRating = { ovr: 70, bars: { power: 70, contact: 65, speed: 50, fielding: 60 } }
@@ -259,10 +259,3 @@ test('a minor leaguer (an OVR with no bars) gets the stamp and a level meter, no
   assert.equal(g.minor.levelLabel, 'AA')
 })
 
-test('overview extras: a block counts for ranks, a postseason row or other levels, not for empty lists', () => {
-  assert.equal(hasExtras({ ranks: [], otherLevels: [] }), false)
-  assert.equal(hasExtras({}), false)
-  assert.equal(hasExtras({ ranks: [{ league: 'NL' }] }), true)
-  assert.equal(hasExtras({ postseason: { games: 3, tiles: [] } }), true)
-  assert.equal(hasExtras({ otherLevels: [{ sportId: 11 }] }), true)
-})

@@ -23,7 +23,6 @@ import {
   addStamp,
   adoptRemoteStamps,
   applyRemoteStamps,
-  isStamped,
   normalizePlacement,
   normalizeStamp,
   parseStamps,
@@ -42,6 +41,8 @@ import {
   toGamePk,
   unplaceStamp,
 } from '../src/lib/stamps.js'
+
+const isStamped = (map, gamePk) => stampFor(map, gamePk) != null
 
 // ---------------------------------------------------------------------------
 // Validation and parsing

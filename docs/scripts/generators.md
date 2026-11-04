@@ -1705,7 +1705,7 @@ Re-run only to fold in a new season.
   `gen-savant-percentiles.mjs` (both import them from `lib/savant.mjs`). Run by hand
   once a year after the season ends and move `FIRST_SEASON`/`LAST_SEASON` with it:
   `node scripts/gen-savant-history.mjs`. About 2.5 KB a shard on average, 5 KB at most;
-  it throws past 6 KB. A page opens one shard (`src/api/ovr/savantHistory.js`). A finished
+  it throws past 6 KB. A page would open one shard (the `savantHistory.js` reader was deleted in #2845). A finished
   season's ranks did not change between two fetches minutes apart (checked once); a
   later revision is unchecked.
 - `gen-ovr.mjs` → `public/data/ovr/{NN}.json` (player-keyed, bucketed on `personId % 100`

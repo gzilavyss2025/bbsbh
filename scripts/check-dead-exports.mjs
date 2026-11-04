@@ -78,6 +78,45 @@ const ALLOWLIST = {
   'src/api/history/franchiseLeaders.js#franchiseLeaders': 'Staged ahead of its first caller on purpose: #2596 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-leaders.test.js uses it today.',
 }
 
+// Several exports of one file that share a reason: { 'path#name': reason }.
+const staged = (file, names, why) => Object.fromEntries(names.map((n) => [`${file}#${n}`, why]))
+
+Object.assign(
+  ALLOWLIST,
+  staged('src/api/gameday/moments/moments.js', ['levelFor', 'momentsForPlay'], '(#2574) staged: Gameday\'s moments dial waits for its screen. Only test/gameday-moments.test.js uses it today.'),
+  staged('src/api/ovr/ovrData.js', ['fetchOvrHistory'], '(#1703) staged: gen-ovr.mjs has the history write PAUSED until the OVR card shows it (Gary, 2026-11-04); this is its reader. test/ovr/history.test.js.'),
+  staged('src/api/history/onThisDay.js', ['onThisDay'], 'Staged data-first reader of the on-this-day shards (ADR-0100); the page that calls it is not built. test/on-this-day.test.js. Unconfirmed: no issue number on file.'),
+  staged('src/api/savant/attackAngle.js', ['fetchAttackAngles'], '(#2349) contact-replay attack-angle fetch, kept with its test; nothing calls it since the replay card went. Unconfirmed that it is meant to return.'),
+  staged('src/api/boxlines/careerSplits.js', ['DOOR_COLUMNS_WIDE', 'DOOR_EMPHASIS'], 'Card column vocabulary (ADR-0073) that names doorCells({ wide }) and the inked cell; no screen reads it today. Pinned against doorCells in test/splits-part-a.test.js and test/boxlines-card-facets.test.js.'),
+  staged('src/api/game.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
+  staged('src/api/scout/rosterStats.js', ['resetRosterReads'], 'test seam: clears the roster-read memo between cases, test/world-series/roster-card.test.js.'),
+  staged('src/lib/headshot/retry.js', ['resetSiloMisses'], 'test seam: clears the silo-miss set between cases, test/headshot.test.js.'),
+  staged('src/api/gameday/reviews.js', ['reviewsAtStep'], 'test seam for the Gameday review/ABS bank read, test/gameday-reviews.test.js.'),
+  staged('src/lib/ballpark/ballparkGeometry.js', ['plotPercent'], 'test seam for the plot-to-percent mapping HTML overlays share with the SVG, test/overlay-alignment.test.js.'),
+  staged('src/lib/ballpark/layout/fenceShape.js', ['fenceProblems'], 'test seam: validates every live ballpark outline, test/ballpark-layouts.test.js.'),
+  staged('src/lib/ballpark/layout/resolveLayout.js', ['allBallparkLayouts'], 'test seam: walks every live ballpark layout (coverage report and tests), test/ballpark-layouts.test.js and three more.'),
+  staged('src/lib/zone/regions.js', ['drawCol'], 'test seam for the zone grid mirroring, test/scout-regions.test.js.'),
+  staged('src/lib/reportPages.js', ['REPORT_PAGES'], 'test seam: the flat list derived from PAGE_GROUPS, pinned by test/report-pages.test.js and read by check-report-pages.mjs.'),
+  staged('src/screens/gameday/next/zonemap/zoneMapFlag.js', ['dismissZoneMap'], 'test seam: the writer half of the zone-map dismiss store whose reader is live, test/gameday-stage-mount.test.js.'),
+  staged('src/lib/pitcherCard/replaySteps.js', ['replaySteps', 'countAt', 'basesAt'], 'Kept on purpose with their tests: the pure models behind the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/contactDraw.js', ['apexLabel', 'distanceLabel', 'sidePathFor'], 'Kept on purpose with their tests: the deleted at-bat replay\'s side view (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/atBat.js', ['markHomeRun'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/quality.js', ['qualityFigures'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/pitcherCard/sideWall.js', ['wallAlong'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
+  staged('src/lib/motion/curves.js', ['easeStamp', 'easeUnfold'], 'Named by docs/contact-replay.md as the curves its JS reads; pinned by test/motion-curves.test.js. Unconfirmed that the replay returns.'),
+  staged('src/lib/contracts/parseMoney.js', ['parseMoneyCell'], 'The contracts pipeline\'s money parser, documented in docs/contracts-*.md and pinned by test/parse-money.test.js; no src caller today. Unconfirmed whether a scratch script uses it.'),
+  staged('src/lib/contracts/positions.js', ['POSITIONS', 'resolveRole'], 'The contracts pipeline\'s position table and role rule, documented in docs/contracts-data-caveats.md and pinned by test/contracts-positions.test.js; no src caller today. Unconfirmed whether a scratch script uses them.'),
+  staged('src/lib/runExpectancy.js', ['lookupEraRE'], 'Reader helper for the per-decade run-expectancy tables (docs/api/static-data.md, docs/scripts/generators.md), pinned by test/run-expectancy-eras.test.js; no screen calls it yet.'),
+  staged('src/lib/passportLayout.js', ['pageIsFull'], 'Documented passport rule (ADR-0036), pinned by test/passport-layout.test.js; no caller today. Unconfirmed.'),
+  staged('src/lib/stampLogoTuning.js', ['stampLogoTuning'], 'Documented in src/lib/CLAUDE.md as the stamp placement reader; GameStamp reads stampMarkPlacement instead. Pinned by test/stamp-art.test.js. Unconfirmed.'),
+  staged('src/screens/gameday/next/stage/play.js', ['stateAt'], 'Documented in src/screens/gameday/next/CLAUDE.md as the stage\'s pure timeline; test/gameday-stage.test.js pins it. Unconfirmed that a mount is still to come.'),
+  staged('src/screens/team/next/standings/standingsData.js', ['hasRecords'], 'Documented in src/screens/team/CLAUDE.md as the Records card\'s hide rule; test/team-next-standings.test.js. Unconfirmed.'),
+  // Files #2850 is changing: revisit after it lands.
+  staged('src/lib/heritage/pass.js', ['passPage'], 'revisit after #2850 (pass.js is on its list). Test: test/heritage-pass.test.js.'),
+  staged('src/screens/gameday/next/hero/heroModel.js', ['ordinal', 'contactLine'], 'revisit after #2850 (heroModel.js is on its list). Test: test/gameday-hero.test.js.'),
+  staged('src/screens/scout/edge/edge.js', ['ledgerScale', 'textOf'], 'revisit after #2850 (edge.js is on its list). Test: test/scout-edge.test.js.'),
+)
+
 const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root), { skip: IGNORE_DIRS }))
 const codeFiles = allFiles.filter((f) => CODE_EXT.has(extname(f)))
 const src = new Map(codeFiles.map((f) => [f, readFileSync(f, 'utf8')]))

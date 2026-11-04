@@ -378,11 +378,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   never `team.battingOrder`, which mutates to the current slot occupants and
   would sprout PH rows on the staging pages late in a game. It also feeds
   `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
-  pages). `selectBullpen`/`selectBench` hand every card row an `enteredIdx` (the
-  half he entered at) and `enteredAsOf` is the one place that reads it: a row is
-  struck through only at or below BOTH the reveal mark and the half on screen,
-  so a reader paging back through a game they already unsealed sees the bench
-  that half opened with (ADR-0005's amendment).
+  pages). The bench/bullpen card selectors and `enteredAsOf` went in #2845 (nothing called
+  them); ADR-0005's amendment records the rule they held.
 - `liveEdge.js` — a THIRD classification, neither reveal-only nor an ordinary
   spoiler-free selector (the plays-based live-edge reader that drove the Scores
   Unlocked pass's navigation was removed with the pass, ADR-0116). Two UNGATED

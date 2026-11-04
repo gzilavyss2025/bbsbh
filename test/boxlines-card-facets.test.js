@@ -13,6 +13,7 @@ import test from 'node:test'
 import { CARD_FACETS, cardFacetsFor, FAMILIES, FOLD_FROM, SECTIONS } from '../src/api/boxlines/cardFacets.js'
 import {
   DOOR_COLUMNS,
+  DOOR_EMPHASIS,
   careerSplitLine,
   doorCells,
   doorLine,
@@ -362,12 +363,31 @@ test('a door prints the same five figures, in the same order, as its sheet headl
     const cells = doorCells(null, stat, group)
     assert.equal(cells.length, 5, `${group} does not fill its five columns`)
     assert.equal(DOOR_COLUMNS[group].length, 5, `${group} does not name five columns`)
+    assert.equal(DOOR_EMPHASIS[group].length, 5, `${group} does not weight five columns`)
     const line = careerSplitLine(stat, group)
     let at = -1
     for (const cell of cells) {
       const found = line.indexOf(cell, at + 1)
       assert.ok(found > at, `${group}: the headline does not quote "${cell}" after "${cells[0]}"`)
       at = found
+    }
+  }
+})
+
+test('the emphasised column is a rate, never a count', () => {
+  // A split is asked "how well", and the card inks the cell that answers.
+  // The two groups do NOT answer in the same column — a bat is read on AVG and
+  // OPS, an arm on ERA — and the column sitting where a hitter's OPS sits is a
+  // pitcher's BB, which answers nothing. Ink it there and the card quietly
+  // points at a walk total as though it were the headline figure.
+  const RATES = { hitting: ['AVG', 'OPS'], pitching: ['ERA'] }
+  for (const group of Object.keys(DOOR_EMPHASIS)) {
+    const lit = DOOR_EMPHASIS[group]
+      .map((weight, i) => (weight ? DOOR_COLUMNS[group][i] : null))
+      .filter(Boolean)
+    assert.ok(lit.length > 0, `${group} emphasises nothing`)
+    for (const column of lit) {
+      assert.ok(RATES[group].includes(column), `${group} emphasises ${column}, which is a count`)
     }
   }
 })

@@ -441,8 +441,7 @@ for each generator; the reader modules:
   regular season. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's fouls module (`FoulsCard.jsx`) (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
-  one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
-  SABR foul-accumulation hit-probability constants used in copy. The LIVE
+  one, same rule as the Milestone Watch projection). The LIVE
   per-half foul counters (`fouls`/`twoStrikeFouls`) live in `derive.js`'s
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
   `batterFoulLine` carries `byCount` and `foulCountCells` reads it (and the league's, from
@@ -620,8 +619,7 @@ for each generator; the reader modules:
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`
   (1/3/10-appearance buckets, days spanned, consecutive-day pattern),
   `availabilityFor` (rule-based fresh/limited/down with human-readable
-  reasons — ESPN-published thresholds), `workloadVsBaseline` (vs. own norm +
-  role baseline). `apps` takes every game type (`R,F,D,L,W`), so October relief
+  reasons — ESPN-published thresholds), `apps` takes every game type (`R,F,D,L,W`), so October relief
   work counts toward rest days and the board; `season`, `role` and the baseline
   floors stay regular-season only, so a postseason cameo cannot re-class a
   pitcher or move a league mean. Surfaces: the lineup page's `BullpenCard` (gated to

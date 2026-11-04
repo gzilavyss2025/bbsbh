@@ -113,7 +113,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   baseline. A **mid-half change belongs in the feed**: `computeHalfInningFeed` drops a
   *pre*-pitch change (`anyPitchInHalf`), and the live arm comes from the half report.
   **Windowed, the opening arm is an announcement, not a header** — only a half opening with a
-  fresh arm (`selectIsFreshPitcher`), only until the first at-bat is unveiled. Those two
+  fresh arm, only until the first at-bat is unveiled. Those two
   omissions make it the ONLY announcement of a between-innings change, so it may not be dropped
   there: ADR-0043's second.
 - **Extra innings never spoil** — `InningViewer` and Gameday's line score show only

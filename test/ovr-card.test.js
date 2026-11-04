@@ -5,7 +5,6 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { TIERS, tierFor } from '../src/lib/ovr/tiers.js'
 import {
   SEGMENTS,
-  countUpValue,
   filledSegments,
   meterMarks,
   ovrView,
@@ -48,20 +47,6 @@ test('filledSegments: 20 segments, the floor still shows some, the cap fills all
   assert.equal(filledSegments(20), 4)
   assert.equal(filledSegments(74), 15)
   assert.equal(filledSegments(99), 20)
-})
-
-test('countUpValue: starts at 20, ends on exactly the value, never goes back', () => {
-  assert.equal(countUpValue(0, 74), 20)
-  assert.equal(countUpValue(1, 74), 74)
-  assert.equal(countUpValue(2, 74), 74)
-  let was = 20
-  for (let i = 1; i <= 100; i += 1) {
-    const v = countUpValue(i / 100, 74)
-    assert.ok(v >= was && v <= 74)
-    was = v
-  }
-  assert.equal(countUpValue(1, 99), 99)
-  assert.equal(countUpValue(1, 20), 20)
 })
 
 test('meterMarks: OVR, POT and the level cap sit on the 20-99 scale', () => {

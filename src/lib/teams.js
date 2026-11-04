@@ -1079,20 +1079,6 @@ function resolveTeamColorPair(teamId) {
   return TEAM_COLOR_PAIRS[teamId] ?? milbBrandPair(teamId) ?? null
 }
 
-// A diagonal, 100%-opacity two-tone stripe for `teamId` — a plain CSS
-// `background` value, ready to drop on any element via inline style. Returns
-// null for a team with no known pair, so callers can fall back to a flat
-// color rather than render nothing.
-export function teamStripeGradient(teamId) {
-  const pair = resolveTeamColorPair(teamId)
-  if (!pair) return null
-  const [a, b] = pair
-  // 3px bands (6px per repeat) — fine enough to read as a woven zebra
-  // texture rather than a couple of wide diagonal blocks at the compact bar
-  // sizes this is actually used at (StatBox.jsx's favor meter).
-  return `repeating-linear-gradient(45deg, ${a} 0px, ${a} 3px, ${b} 3px, ${b} 6px)`
-}
-
 // A club's single primary brand color (the first of TEAM_COLOR_PAIRS), for
 // contexts that want one team-identity hex rather than a two-tone stripe
 // (e.g. a solid hover fill). Returns

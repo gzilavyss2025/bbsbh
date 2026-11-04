@@ -9,7 +9,6 @@ import {
   SHEET_FRACTION,
   detentOffsets,
   nearestDetent,
-  openness,
   projectMomentum,
   releaseDetent,
   rubberband,
@@ -173,14 +172,6 @@ test('velocityFrom is safe on degenerate sample histories', () => {
   assert.equal(velocityFrom([]), 0)
   assert.equal(velocityFrom([{ y: 5, t: 5 }]), 0)
   assert.equal(velocityFrom([{ y: 0, t: 7 }, { y: 40, t: 7 }]), 0, 'no time passed, no velocity')
-})
-
-test('openness runs 0 at the rail to 1 at the tallest detent', () => {
-  const detents = detentOffsets(VIEWPORT, RAIL)
-  assert.equal(openness(detents[2], detents), 0)
-  assert.equal(openness(detents[0], detents), 1)
-  assert.ok(openness(detents[1], detents) > 0 && openness(detents[1], detents) < 1)
-  assert.equal(openness(detents[2] + 500, detents), 0, 'clamped below the rail')
 })
 
 test('the scrim stays clear until the sheet passes the working height', () => {

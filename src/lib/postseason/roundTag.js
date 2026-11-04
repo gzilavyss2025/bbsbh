@@ -60,8 +60,6 @@ for (const [id, abbr, league, ...others] of CLUBS) {
   for (const a of [abbr, ...others]) ID_BY_ABBR.set(a, id)
 }
 
-export const CLUB_LEAGUES = CLUBS.map(([id, , league]) => [id, league])
-
 const yearOf = (season) => {
   const y = Number(String(season ?? '').slice(0, 4))
   return Number.isFinite(y) && y > 0 ? y : null

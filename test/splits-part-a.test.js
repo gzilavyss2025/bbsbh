@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { loadCareerSplits, loadSeasonSplits } from '../src/api/boxlines/splitsLoad.js'
-import { DOOR_COLUMNS, doorCells, mergeCareerSplits } from '../src/api/boxlines/careerSplits.js'
+import { DOOR_COLUMNS, DOOR_COLUMNS_WIDE, doorCells, mergeCareerSplits } from '../src/api/boxlines/careerSplits.js'
 import { SITUATIONAL_SIT_CODES, situationalSplitsView, splitReads, splitsView } from '../src/api/person.js'
 import { pctOf } from '../src/lib/math/number.js'
 
@@ -102,6 +102,8 @@ test('doors: a wide cell row adds OBP, SLG, K% and BB% after the five the card d
   const stat = { gamesPlayed: 80, plateAppearances: 8, avg: '.250', homeRuns: 2, ops: '.700', obp: '.300', slg: '.400', strikeOuts: 1, baseOnBalls: 1 }
   assert.deepEqual(doorCells(null, stat, 'hitting'), ['80', '8', '.250', '2', '.700'])
   assert.deepEqual(doorCells(null, stat, 'hitting', { wide: true }), ['80', '8', '.250', '2', '.700', '.300', '.400', '13%', '13%'])
+  assert.deepEqual(DOOR_COLUMNS_WIDE.hitting, [...DOOR_COLUMNS.hitting, 'OBP', 'SLG', 'K%', 'BB%'])
+  assert.deepEqual(DOOR_COLUMNS_WIDE.pitching, [...DOOR_COLUMNS.pitching, 'OBP', 'SLG', 'K%', 'BB%'])
 })
 
 test('doors: a pitcher\'s K% and BB% divide by batters faced; a games-only door stays empty', () => {
