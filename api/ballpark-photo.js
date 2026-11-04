@@ -52,9 +52,6 @@ const KINDS = {
   wordmark: { maxBytes: 400_000, field: (key) => `ballpark.${key}Wordmark` },
 }
 
-// Re-exported: the Blob helpers moved to _lib/blob.js, and identity.js and the tests import them here.
-export { isOwnBlobUrl, isOwnBlobUrlUnder, reclaimableBlobUrls, reclaimBlobs, sniffImage } from './_lib/blob.js'
-
 // Every park key the copy registry knows, derived from the registry itself
 // rather than re-deriving from BALLPARKS. The registry is what an upload is
 // ultimately FOR — a key with no `ballpark.{key}Photo` field is a key no admin

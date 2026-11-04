@@ -16,9 +16,11 @@ export function requestUrl(req) {
 // The JSON body, or null if there isn't a valid one: Vercel pre-parses a JSON body onto `req.body`,
 // otherwise the stream is read. Never throws; every caller turns null into a 400.
 export async function readJsonBody(req) {
-  if (req?.body && typeof req.body === 'object') return req.body
   try {
-    if (typeof req?.body === 'string') return JSON.parse(req.body)
+    // Inside the try: on Vercel Node `req.body` is a lazy getter that throws on malformed JSON.
+    const body = req?.body
+    if (body && typeof body === 'object') return body
+    if (typeof body === 'string') return JSON.parse(body)
     const chunks = []
     for await (const chunk of req) chunks.push(chunk)
     if (chunks.length === 0) return null

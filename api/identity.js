@@ -40,7 +40,7 @@ import {
   mergeIdentityOverrides,
   sanitizeIdentityOverrides,
 } from '../src/lib/identity/fields.js'
-import { reclaimableBlobUrls, reclaimBlobs } from './ballpark-photo.js'
+import { reclaimableBlobUrls, reclaimBlobs } from './_lib/blob.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis, readHash, writeHash } from './_lib/redis.js'

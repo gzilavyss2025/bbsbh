@@ -1,6 +1,6 @@
 // Vercel Blob helpers shared by api/ballpark-photo.js and api/identity-logo.js: sniff, own-URL
 // checks, reclaiming orphans, and the one admin upload flow (method, token, admin, body, put).
-import { del, put } from '@vercel/blob'
+// @vercel/blob is imported lazily: a deploy without a store pays nothing at cold start.
 import { authenticateAdmin } from './adminAuth.js'
 import { privateJson, readRawBody, requestUrl } from './nodeHandler.js'
 
@@ -104,6 +104,7 @@ export function reclaimableBlobUrls(prev, keep, prefix) {
 export async function reclaimBlobs(urls, token) {
   if (!urls?.length || !token) return
   try {
+    const { del } = await import('@vercel/blob')
     await del(urls, { token })
   } catch {
     // Orphans left behind. Nothing the admin did was wrong.
@@ -115,13 +116,13 @@ export async function reclaimBlobs(urls, token) {
 // or `{ maxBytes, limit, prefix, vet(bytes, sig) -> error string | null (415), pathname(sig), field }`.
 // A NEW URL EVERY TIME (addRandomSuffix): overwriting one stable pathname would leave the old
 // bytes cached at the CDN and in browsers, so "I replaced it" would look like a failed save.
-export async function uploadImage(req, res, resolve) {
+export async function uploadImage(req, res, resolve, authenticate = authenticateAdmin) {
   if (req.method !== 'POST') return privateJson(res, { error: 'method not allowed' }, 405)
 
   const token = process.env.BLOB_READ_WRITE_TOKEN
   if (!token) return privateJson(res, { error: 'image store not configured' }, 501)
 
-  const userId = await authenticateAdmin(req)
+  const userId = await authenticate(req)
   if (!userId) return privateJson(res, { error: 'forbidden' }, 403)
 
   const { searchParams } = requestUrl(req)
@@ -145,6 +146,7 @@ export async function uploadImage(req, res, resolve) {
 
   let uploaded
   try {
+    const { put } = await import('@vercel/blob')
     uploaded = await put(pathname(sig), bytes, {
       access: 'public',
       token,

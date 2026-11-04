@@ -183,16 +183,10 @@ export function withCrawlBody(html, card, roster) {
     : withBody
 }
 
-// Our own static shell (a filesystem file — served directly, never rewritten
-// back here, so no loop), fetched over the request's origin to keep the hashed
-// asset refs correct. Memoised per origin for the life of the instance, as
-// api/page.js does: index.html changes only on a deploy, and a deploy gets
-// fresh instances. Without it every deep link cost two CDN requests. A failure
-// is NOT cached, so the next request tries again.
 // The request's origin is trusted only when it is one of this deployment's own
 // hosts: the three production names, or the URLs Vercel gives this build. Any
 // other Host falls back to SITE_URL, so a forged Host header can neither steer
-// the shell fetch nor poison shellCache and og:image with a foreign origin.
+// the shell fetch nor poison the shell cache (appShell, _lib/crawl.js) and og:image with a foreign origin.
 export function trustedOrigin(url, env = process.env) {
   const hosts = new Set(['tallybb.com', 'www.tallybb.com', 'bbsbh.vercel.app', env.VERCEL_URL, env.VERCEL_BRANCH_URL])
   return hosts.has(url.host) || url.hostname === 'localhost' ? url.origin : SITE_URL

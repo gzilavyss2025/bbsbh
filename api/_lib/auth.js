@@ -79,7 +79,7 @@ export async function authenticateUser(
 // BEFORE auth (so a 501 names the missing Redis, not a 401), then the Clerk check.
 // `fn(req, res, { redis, userId })` runs only for a verified user. `pre(req, res)`
 // is an optional guard that runs after the method check and before the store (reveal's 400);
-// it answers and returns true to stop.
+// it answers and returns true to stop. It must be synchronous (a returned Promise would read as "stop").
 export function withUser(methods, fn, pre) {
   return async (req, res) => {
     if (!methods.includes(req.method)) return privateJson(res, { error: 'method not allowed' }, 405)

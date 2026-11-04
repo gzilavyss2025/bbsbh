@@ -71,11 +71,7 @@ async function readOverrides() {
 //   2. It is the same constant the rest of the render path trusts, so there is
 //      one answer to "what origin is this page" instead of two.
 //
-// Memoised for the life of the lambda instance. index.html changes only on a
-// deploy, and a deploy gets fresh instances, so a warm instance serving many
-// `?edit` hits makes one origin fetch rather than one per request. A failure is
-// NOT cached — the caller falls back to a redirect, and the next request should
-// be free to try again.
+// (appShell memoises it; see _lib/crawl.js.)
 export default async function handler(req, res) {
   // SITE_URL as the parse base, not the request's host. Nothing downstream reads
   // `url.origin` any more — only the query string — but a `new URL` built on an
