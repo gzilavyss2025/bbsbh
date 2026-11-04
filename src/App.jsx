@@ -7,8 +7,7 @@ import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
 import { Notice } from './components/ui/state/Notice.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
-import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
-import { HeadshotLogPanel } from './components/headshot-log/HeadshotLogPanel.jsx'
+import { LazyPlayerHoverCard } from './components/player/LazyPlayerHoverCard.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import { placeKey } from './lib/from/route.js'
@@ -24,6 +23,10 @@ import {
 // The on-device headshot log button (issue #1446) is switched off. The panel and
 // src/lib/headshot/log.js stay in the tree; flip this to true to show it again.
 const SHOW_HEADSHOT_LOG = false
+const HeadshotLogPanel = lazyNamed(
+  () => import('./components/headshot-log/HeadshotLogPanel.jsx'),
+  'HeadshotLogPanel',
+)
 
 // Headless cross-device sync for the Logbook's game stamps (ADR-0035). Like
 // RevealCloudSync and AccountButton, it imports @clerk/clerk-react at its top,
@@ -572,8 +575,12 @@ export default function App() {
           An external store like SyncStatusProvider below, not Context: a page
           can carry dozens of PlayerLinks, and this is the only component that
           re-renders when the hovered player changes. */}
-      <PlayerHoverCard />
-      {SHOW_HEADSHOT_LOG && <HeadshotLogPanel />}
+      <LazyPlayerHoverCard />
+      {SHOW_HEADSHOT_LOG && (
+        <Suspense fallback={null}>
+          <HeadshotLogPanel />
+        </Suspense>
+      )}
       {/* Mounted unconditionally — it touches no Clerk API of its own, and the
           sync receipt has to be able to say "this deploy has no account
           feature" rather than rendering nothing. It is an external store, so
