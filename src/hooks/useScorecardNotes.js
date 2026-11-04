@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { localStore } from '../lib/account/localStore.js'
 import {
   SHEET_NOTES_KEY,
   EMPTY_SHEET_NOTES,
@@ -16,25 +17,17 @@ import {
 // ratchet; last write wins, which for a margin note is the right answer).
 export function useScorecardNotes(gamePk) {
   const storageKey = gamePk ? `${SHEET_NOTES_KEY}${gamePk}` : null
-  const [notes, setNotes] = useState(() => {
-    if (!storageKey) return EMPTY_SHEET_NOTES
-    try {
-      return parseSheetNotes(window.localStorage.getItem(storageKey))
-    } catch {
-      return EMPTY_SHEET_NOTES
-    }
-  })
+  const store = useMemo(
+    () => storageKey && localStore(storageKey, parseSheetNotes, serializeSheetNotes),
+    [storageKey],
+  )
+  const [notes, setNotes] = useState(() => (store ? store.read() : EMPTY_SHEET_NOTES))
 
   useEffect(() => {
-    if (!storageKey) return
-    try {
-      const raw = serializeSheetNotes(notes)
-      if (raw == null) window.localStorage.removeItem(storageKey)
-      else window.localStorage.setItem(storageKey, raw)
-    } catch {
-      // Private-mode / storage-disabled — degrade to in-session memory only.
-    }
-  }, [storageKey, notes])
+    if (!store) return
+    if (serializeSheetNotes(notes) == null) store.drop()
+    else store.write(notes)
+  }, [store, notes])
 
   useEffect(() => {
     if (!storageKey) return

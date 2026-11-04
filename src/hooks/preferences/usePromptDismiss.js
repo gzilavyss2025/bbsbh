@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { localStore } from '../../lib/account/localStore.js'
 import {
   PROMPTS_KEY,
   hasSeenPrompt,
@@ -7,22 +8,7 @@ import {
   serializePrompts,
 } from '../../lib/account/prompts.js'
 
-function readPrompts() {
-  try {
-    return parsePrompts(window.localStorage.getItem(PROMPTS_KEY))
-  } catch {
-    return {}
-  }
-}
-
-function writePrompts(map) {
-  try {
-    window.localStorage.setItem(PROMPTS_KEY, serializePrompts(map))
-  } catch {
-    // Private mode — the dismissal still applies for the rest of this visit,
-    // via the React state the caller holds.
-  }
-}
+const store = localStore(PROMPTS_KEY, parsePrompts, serializePrompts)
 
 // One contextual prompt's one-shot dismissal state
 // (src/lib/account/prompts.js). Every prompt in My Tally's contextual list
@@ -32,12 +18,12 @@ function writePrompts(map) {
 // the worst case of skipping that wiring is a prompt showing once more in an
 // already-open second tab, which is harmless.
 export function usePromptDismiss(id) {
-  const [prompts, setPrompts] = useState(readPrompts)
+  const [prompts, setPrompts] = useState(store.read)
   const dismissed = hasSeenPrompt(prompts, id)
   const dismiss = useCallback(() => {
     setPrompts((prev) => {
       const next = markPromptSeen(prev, id)
-      if (next !== prev) writePrompts(next)
+      if (next !== prev) store.write(next)
       return next
     })
   }, [id])

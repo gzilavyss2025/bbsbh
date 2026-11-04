@@ -1,3 +1,4 @@
+import { rgbToHsl, toRgb } from '../contrast.js'
 import { logoCdnUrl } from '../logoCdn.js'
 import { monoLogoFingerprint, monoLogoParts, monoLogoSvg } from '../logoMono.js'
 
@@ -74,7 +75,5 @@ export function badgeFieldPins(svg) {
 function hexLightness(value) {
   const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(value)?.[1]
   if (!hex) return 1
-  const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255)
-  return (Math.max(r, g, b) + Math.min(r, g, b)) / 2
+  return rgbToHsl(toRgb(hex)).l
 }
