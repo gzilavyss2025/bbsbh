@@ -390,3 +390,31 @@ test('an activation after a stint that ate the season says he did not play', () 
   const back = { ...f, stint: { ...f.stints[0], from: '2026-03-26', to: '2026-11-02' }, stints: [f.stints[0]], seasonLine: { games: 0 }, beforeLine: null }
   assert.match(injuredStory(back, { placed: false, moveDate: '2026-11-02' }), /^Rutschman did not play in 2026/)
 })
+
+test('a cut big leaguer stuck in the minors reads his last two minor-league years, then his last full season', () => {
+  const line = (games) => ({ games, avg: '.250', hr: 10 })
+  const stuck = facts({
+    seasonLine: { games: 5, avg: '.100', hr: 0 },
+    minors: { team: null, level: ['Triple-A'], line: line(90) },
+    minorsPrev: { team: null, level: ['Triple-A'], line: line(100) },
+    years: [{ season: 2023, line: { games: 140, avg: '.260', hr: 22 } }],
+  })
+  const story = cutStory(stuck, { clause: 'Sent X outright.' })
+  assert.match(story, /in Triple-A in 2026, after he .* in Triple-A in 2025\./)
+  assert.match(story, /His last full season was 2023/)
+  const noPrev = cutStory(facts({ ...stuck, minorsPrev: null }), { clause: 'Sent X outright.' })
+  assert.match(noPrev, /in Triple-A in 2026\./)
+  assert.doesNotMatch(noPrev, /2025/)
+})
+
+test('a reliever stuck in the minors also gets his minor-league years', () => {
+  const pline = (games) => ({ games, starts: 0, era: '3.50', ip: '60.0' })
+  const reliever = facts({
+    pitcher: true,
+    seasonLine: { games: 4, starts: 0, era: '9.00', ip: '4.0' },
+    careerLine: { games: 120, starts: 2, era: '4.20', ip: '130.0' },
+    minors: { team: null, level: ['Triple-A'], line: pline(45) },
+    minorsPrev: { team: null, level: ['Triple-A'], line: pline(50) },
+  })
+  assert.match(cutStory(reliever, { clause: 'Sent X outright.' }), /in Triple-A in 2026, after he .* in Triple-A in 2025\./)
+})
