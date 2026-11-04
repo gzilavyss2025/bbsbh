@@ -6,7 +6,7 @@ import { GamedayNextPage } from './GamedayNextPage.jsx'
 import { useGamedayStage } from './stage/useGamedayStage.jsx'
 import { ScoringSheet } from './panels/GamedaySheets.jsx'
 import { rewindTo, walkCut } from './panels/panelData.js'
-import { holdGrid } from './steps/subStep.js'
+import { gridHold, holdGrid } from './steps/subStep.js'
 import { useCallback, useMemo, useState } from 'react'
 import { ordinal } from '../../../lib/format.js'
 
@@ -37,6 +37,11 @@ export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, pane
   // and the hero's rows). That tap reveals nothing: the checkpoint is the half already under the mark.
   const [cpOpen, setCpOpen] = useState(null)
   const held = Boolean(cp) && cpOpen !== bug.viewIdx
+  // The half the reader just finished: the mark reached the half on screen while they watched (not a cold
+  // load, not a re-read). Only its close-out holds the line-score grid (#2768, Gary 2026-11-04).
+  const [seenMark, setSeenMark] = useState(mark)
+  const [freshIdx, setFreshIdx] = useState(null)
+  if (mark !== seenMark) { setSeenMark(mark); if (mark === bug.viewIdx) setFreshIdx(mark) }
   const closeOut = held
     ? { label: `${bug.viewHalf === 'top' ? 'Middle' : 'End'} ${ordinal(bug.viewInning)}`, disabled: false, onClick: () => setCpOpen(bug.viewIdx) }
     : advance
@@ -55,7 +60,7 @@ export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, pane
   // reveal mark, which shows nothing the reader has not revealed. That gate is what keeps them out of a SealBox.
   const rewind = useMemo(() => (rewindAbi != null && bug.feed ? rewindTo(bug.feed, bug.viewInning, bug.viewHalf, rewindAbi) : null), [bug.feed, bug.viewInning, bug.viewHalf, rewindAbi])
   const trailExtras = { onReplay: (i) => { staged.onReplay(i); panels.onPick?.(i) }, onBack: staged.replaying != null ? staged.onBack : null, here: staged.replaying ?? (open?.sub > 0 ? null : bug.live?.last?.atBatIndex ?? null) }
-  const shown = holdGrid(rewind ? { ...panels, step: rewind.step, mark: rewind.mark, runsInProgress: rewind.runsInProgress } : panels, held || panels.closing)
+  const shown = holdGrid(rewind ? { ...panels, step: rewind.step, mark: rewind.mark, runsInProgress: rewind.runsInProgress } : panels, gridHold(held, freshIdx === bug.viewIdx, panels.closing))
   const band = bug.started && bug.live ? (
     <>
       <ScorebugMount {...bug} {...(rewind ? { runsInProgress: rewind.runsInProgress } : {})} revealedThrough={rewind ? rewind.mark : mark} meta={meta} onTeam={onTeam} />

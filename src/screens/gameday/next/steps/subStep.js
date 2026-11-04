@@ -46,6 +46,9 @@ export const forwardAdvance = (label, idx, closing, goTo) => ({ label, disabled:
 // `gridHeld` is read by the navigator only, so no other panel freezes with it. `held` is the close-out
 // (checkpoint not yet opened) or `focus.closing`, which also covers a read-back step hold on a half whose
 // checkpoint was already opened this visit.
+// When the grid holds: the close-out of a half that just finished under the reader's eyes (`fresh`), or
+// `focus.closing`. A half re-read after the fact is never held by its pending checkpoint (Gary, 2026-11-04).
+export const gridHold = (closeOut, fresh, closing) => Boolean((closeOut && fresh) || closing)
 export const holdGrid = (panels, held) => (held ? { ...panels, onSelect: () => {}, gridHeld: true } : panels)
 
 // One tap inside the open at-bat: the sub-step count after it, or null when this tap reveals the

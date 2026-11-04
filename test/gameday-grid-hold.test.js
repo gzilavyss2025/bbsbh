@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { holdGrid } from '../src/screens/gameday/next/steps/subStep.js'
+import { gridHold, holdGrid } from '../src/screens/gameday/next/steps/subStep.js'
 
 // #2768: the line-score grid waits like the advance does. Until "Middle 1st ›" opens the
 // checkpoint (or while the half's rule inks in), a tapped inning moves nothing, forward or back.
@@ -29,7 +29,15 @@ test('once the checkpoint is open, the grid moves again', () => {
 test('GamedayNextMount holds the grid on the close-out and focus.closing', async () => {
   const { readFileSync } = await import('node:fs')
   const read = (rel) => readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8')
-  assert.match(read('src/screens/gameday/next/GamedayNextMount.jsx'), /holdGrid\([\s\S]*?,\s*held \|\| panels\.closing\)/)
+  assert.match(read('src/screens/gameday/next/GamedayNextMount.jsx'), /holdGrid\([\s\S]*?,\s*gridHold\(held, freshIdx === bug\.viewIdx, panels\.closing\)\)/)
   assert.match(read('src/screens/InningViewer.jsx'), /onSelect: goTo, closing: focus\.closing/)
   assert.match(read('src/screens/gameday/next/panels/GamedayPanels.jsx'), /aria-disabled=\{gridHeld \|\| undefined\}/)
+})
+
+// A half that just finished holds the grid until its checkpoint opens; a half re-read later does not.
+test('only a freshly finished half holds the grid on its pending checkpoint', () => {
+  assert.equal(gridHold(true, true, false), true)
+  assert.equal(gridHold(true, false, false), false, 'a re-read half is free')
+  assert.equal(gridHold(false, true, false), false, 'checkpoint open: free')
+  assert.equal(gridHold(false, false, true), true, 'the ink-in or step hold still holds')
 })
