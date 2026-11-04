@@ -1,5 +1,5 @@
 import { shardKey100 } from '../../lib/shardKey.js'
-import { staticJsonBy } from '../staticJson.js'
+import { staticJson, staticJsonBy } from '../staticJson.js'
 
 // Fever Baseball's Cot's-to-MLBAM join, fetched at build time by
 // scripts/fever/gen-player-contracts.mjs. One player page reads one ~10 KB
@@ -10,11 +10,20 @@ const fetchShard = staticJsonBy(
   { fallback: null },
 )
 
+// Pay ranks for the whole league, in one file (gen-player-contracts.mjs). One
+// signing re-ranks a pool, so a rank kept inside each shard rewrote all 100.
+const fetchPayRanks = staticJson('/data/pay-ranks.json', { fallback: null })
+
+export const withPayRank = (contract, payRanks, personId) => ({
+  ...contract,
+  payRank: payRanks?.ranks?.[personId] ?? null,
+})
+
 export async function fetchPlayerContract(personId) {
   if (personId == null) return null
-  const shard = await fetchShard(shardKey100(personId))
+  const [shard, payRanks] = await Promise.all([fetchShard(shardKey100(personId)), fetchPayRanks()])
   const contract = shard?.players?.[personId]
-  return contract ? { ...contract, source: shard.meta } : null
+  return contract ? withPayRank({ ...contract, source: shard.meta }, payRanks, personId) : null
 }
 
 // The one season the contract files cover (every shard's meta carries it).

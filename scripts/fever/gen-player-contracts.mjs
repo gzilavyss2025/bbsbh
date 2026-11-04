@@ -12,12 +12,13 @@ import { fileURLToPath } from 'node:url'
 import { shardKey100 } from '../../src/lib/shardKey.js'
 import { computePayRanks, largestSplit } from '../lib/contract-pay-rank.mjs'
 import { chunk, mapConcurrent } from '../lib/concurrency.mjs'
-import { writeShards } from '../lib/io.js'
+import { writeJsonAtomic, writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { normalizeContractsPayload } from './normalize-contracts.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', '..', 'public', 'data', 'player-contracts')
+const payRanksPath = join(here, '..', '..', 'public', 'data', 'pay-ranks.json')
 const FEED_URL = 'https://www.feverbaseball.com/api/data/contracts'
 
 // The Contract card's positional pay rank needs a primary position per player,
@@ -76,10 +77,15 @@ async function main() {
   const { meta, players } = normalizeContractsPayload(await fetchContracts())
 
   const positions = await fetchPositionMeta(Object.keys(players), meta.season)
+  // Pay ranks go to ONE league file, not into each player's shard: one signing
+  // re-ranks a whole pool, and a rank inside the shards rewrote all 100 of them
+  // (~120 files a night in the 2026-11 offseason). fetchPlayerContract joins it.
   const payRanks = computePayRanks(players, positions, meta.season)
-  for (const [playerId, record] of Object.entries(players)) {
-    record.payRank = payRanks.get(String(playerId)) ?? null
-  }
+  await writeJsonAtomic(payRanksPath, {
+    generatedAt: new Date().toISOString(),
+    season: meta.season,
+    ranks: Object.fromEntries([...payRanks].sort(([a], [b]) => Number(a) - Number(b))),
+  })
 
   const buckets = new Map(
     Array.from({ length: 100 }, (_, number) => [String(number).padStart(2, '0'), {}]),
