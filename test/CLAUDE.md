@@ -40,10 +40,11 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   ABS pair by the same one, which takes the gamePk as its argument. The Gameday engine's
   `game-*.gameday.json` set is rebuilt by `.scratch/gameday-engine/build-fixture.mjs`. The suite reads them
   from disk, so it stays offline.
-- **A hook is exercised through one server render.** `callout-ledger.test.js` reads
+- **A hook is exercised through one render probe.** `callout-ledger.test.js` reads
   `useCalloutLedgerValue` by rendering a probe component with
   `react-dom/server`'s `renderToStaticMarkup`. `local-store-pins.test.js` also renders through `react-dom/server`
-  (`renderToString`). That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
+  (`renderToString`). `reveal-progress-game-switch.test.js` needs effects, so it mounts
+  through `react-dom/client`'s `createRoot` on a stub container and a stub `window`. That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
   (`revealProgressCore.js` is the pattern) when a hook's logic can live in one; use
   the probe only when the value the hook returns IS the thing under test.
 - **Prefer asserting the field(s) under test, not the whole object**, when adding new

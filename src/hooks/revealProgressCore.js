@@ -32,14 +32,17 @@ export function parseBoxRevealMark(raw) {
 
 // Parse the at-bat stepping cursor, stored as "{halfIdx}:{count}" (ADR-0016), or
 // "{halfIdx}:{count}:{sub}" with the sub-steps shown of the next at-bat (ADR-0123,
-// decision 12; Gameday only). Any field being negative/non-integer, or the count
-// absent, collapses the whole cursor to the inert { halfIdx: -1, count: 0, sub: 0 }:
-// a stale or garbled value is ignored rather than misread as live progress.
+// decision 12; Gameday only). Every field must be a plain digit string, the same rule
+// as parseRevealMark (#2891: ' 4:1e2' or '0x4:0b11' used to parse). Anything else, or
+// the count absent, collapses the whole cursor to the inert { halfIdx: -1, count: 0,
+// sub: 0 }: a stale or garbled value is ignored rather than misread as live progress.
 export function parseAtBatMark(raw) {
   const inert = { halfIdx: -1, count: 0, sub: 0 }
-  if (raw == null) return inert
-  const [h, c, s = 0] = String(raw).split(':').map(Number)
-  if (![h, c, s].every((n) => Number.isInteger(n) && n >= 0)) return inert
+  if (typeof raw !== 'string') return inert
+  const parts = raw.split(':')
+  if (parts.length < 2 || parts.length > 3) return inert
+  const [h, c, s = 0] = parts.map(parseRevealMark)
+  if (h < 0 || c < 0 || s < 0) return inert
   return { halfIdx: h, count: c, sub: s }
 }
 
@@ -129,7 +132,8 @@ export function effectiveReveal({ stamped, revealedThrough, unlocked, actualCoun
 // game goes THROUGH the ratchet like every other source. It cannot walk a mark
 // backward — a reader who has already scored past the live half keeps their
 // place — and a hand-mangled stored value cannot make it, since parseRevealMark
-// collapses anything that is not a non-negative integer to -1 and -1 loses.
+// reads only a plain digit string in the safe-integer range (anything else is -1)
+// and -1 loses.
 // Returns the mark now stored.
 export function catchUpMarkIn(storage, key, idx) {
   if (!key || !Number.isInteger(idx) || idx < 0) return -1
