@@ -131,10 +131,6 @@ export const MILESTONE_COLLECTIONS = [
   },
 ]
 
-export function isMilestoneCollectionId(id) {
-  return MILESTONE_COLLECTIONS.some((c) => c.id === id)
-}
-
 // One collection's progress over a set of stamps + their resolved facts.
 // `stamps` is whatever the retrospective is already showing (whole
 // collection, or one book) and `factsByPk` is the same `api/logbook.js`

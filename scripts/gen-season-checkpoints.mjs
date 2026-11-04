@@ -37,8 +37,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
-import { getJson } from './lib/statsapi.mjs'
-import { chunk, mapConcurrent } from './lib/concurrency.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
 import { ROLES, buildExtremes, buildTails, lastCompletedSeason } from './lib/season-checkpoints/tails.mjs'
 
@@ -67,20 +66,18 @@ async function playerIds(role, season) {
 async function fetchRole(role, season) {
   const ids = await playerIds(role, season)
   const out = {}
-  const batches = chunk(ids, BATCH)
-  await mapConcurrent(batches, 4, async (batch) => {
-    const json = await getJson(
-      `/api/v1/people?personIds=${batch.join(',')}` +
-        `&hydrate=stats(group=[${role}],type=[gameLog],season=${season},sportId=1,gameType=[R])`,
-    )
-    for (const person of json.people ?? []) {
-      const rows = (person.stats ?? []).find((s) => s.group?.displayName === role)?.splits ?? []
-      if (!rows.length) continue
-      const { final, checkpoints, team, teams } = foldSeason(role, rows)
-      const keys = Object.keys(checkpoints).map(Number).sort((a, b) => a - b)
-      out[person.id] = { n: person.fullName, f: pack(role, final), c: keys.map((k) => pack(role, checkpoints[k])), t: team, ct: keys.map((k) => teams[k]) }
-    }
-  }, { strict: true })
+  const people = await getPeople(ids, {
+    size: BATCH,
+    concurrency: 4,
+    hydrate: `stats(group=[${role}],type=[gameLog],season=${season},sportId=1,gameType=[R])`,
+  })
+  for (const person of people) {
+    const rows = (person.stats ?? []).find((s) => s.group?.displayName === role)?.splits ?? []
+    if (!rows.length) continue
+    const { final, checkpoints, team, teams } = foldSeason(role, rows)
+    const keys = Object.keys(checkpoints).map(Number).sort((a, b) => a - b)
+    out[person.id] = { n: person.fullName, f: pack(role, final), c: keys.map((k) => pack(role, checkpoints[k])), t: team, ct: keys.map((k) => teams[k]) }
+  }
   console.log(`${season} ${role}: ${ids.length} players, ${Object.keys(out).length} with a game log`)
   return out
 }

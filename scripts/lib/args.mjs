@@ -1,19 +1,20 @@
 // Shared CLI arg parsing + trailing-window date math for the gen-*.mjs
 // generators.
 //
+import { parseArgs as nodeParseArgs } from 'node:util'
+
 // parseArgs reads `--flag=value` as a string and a bare `--flag` as `true`.
 // gen-rookies-backfill and gen-run-expectancy keep a stricter local copy that
 // ignores a bare `--flag`, so a mistyped value flag still falls back to its default.
 
-export function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)=(.*)$/.exec(a)
-    if (m) args[m[1]] = m[2]
-    else if (a.startsWith('--')) args[a.slice(2)] = true
-  }
-  return args
-}
+// Only `--` arguments count: a short flag or a stray word is ignored. A bare `--` is dropped too,
+// because node's parser would stop at it and lose every flag after.
+export const parseArgs = (argv) =>
+  ({ ...nodeParseArgs({ args: argv.filter((a) => a.startsWith('--') && a !== '--'), strict: false }).values })
+
+// A value flag's string, or undefined when it is absent or given bare (`--season` with no `=`),
+// so the generator falls back to its default instead of reading `true` as 1.
+export const strOpt = (args, name) => (typeof args[name] === 'string' ? args[name] : undefined)
 
 export const isoDay = (d) => d.toISOString().slice(0, 10)
 

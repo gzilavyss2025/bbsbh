@@ -21,7 +21,7 @@ import { join } from 'node:path'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { isoToday } from '../src/lib/dates.js'
 import { txnDate, isRehabTxn, rehabListRow } from '../src/api/rehab-policy.js'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
@@ -83,9 +83,8 @@ async function fetchMlbTeamIds() {
 async function fetchPositions(ids) {
   const list = [...new Set(ids.filter(Boolean))]
   if (!list.length) return {}
-  const data = await getJson(`/api/v1/people?personIds=${list.join(',')}`)
   const out = {}
-  for (const p of data.people ?? []) out[p.id] = p.primaryPosition?.abbreviation || ''
+  for (const p of await getPeople(list)) out[p.id] = p.primaryPosition?.abbreviation || ''
   return out
 }
 async function fetchTeamLevels(ids) {

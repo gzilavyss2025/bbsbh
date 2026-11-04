@@ -18,7 +18,7 @@
 // from .scratch/metric-engines/pitch-workload.md live here.
 
 import { staticJson } from './staticJson.js'
-import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { ipToOuts } from '../lib/math/innings.js'
 import { num } from '../lib/math/number.js'
 
 export const fetchWorkload = staticJson('/data/workload.json')
@@ -44,7 +44,7 @@ export function foldGameLog(splits) {
       season.gs += gs
       season.pitches += num(st.numberOfPitches)
       season.outs += ipToOuts(st.inningsPitched)
-      // Starts only: the per-start rates (moundRateFor) must not count a swingman's relief outings.
+      // Starts only: the per-start rates must not count a swingman's relief outings.
       if (gs) {
         season.gsPitches += num(st.numberOfPitches)
         season.gsOuts += ipToOuts(st.inningsPitched)
@@ -365,25 +365,6 @@ export function turnStripFor(data, personId, asOfDate) {
     // of them, and "his last turns came every 7 days" would be describing a
     // rotation he is no longer in. The elapsed count is the whole story.
     outOfTurn: daysSince > MAX_TURN_DAYS,
-  }
-}
-
-// The per-outing rates the card's footer prints. `outsPerOuting` is the one that
-// separates a one-inning closer from a multi-inning long man — a distinction the
-// SP/RP role word cannot make, and the reason the card shows this instead of a
-// league-reliever baseline (that pool blends both, so a closer reads deeply
-// negative every day of the season on his job description alone).
-export function moundRateFor(data, personId) {
-  const p = data?.pitchers?.[String(personId)]
-  const s = p?.season
-  if (!s || !(s.g > 0)) return null
-  const outsPerOuting = Math.round((s.outs / s.g) * 10) / 10
-  return {
-    outsPerOuting,
-    multiInning: outsPerOuting > 3,
-    // gsOuts/gsPitches are starts only; a store older than them has none, so no rate.
-    ipPerStart: s.gs > 0 && s.gsOuts != null ? outsToIp(Math.round(s.gsOuts / s.gs)) : null,
-    pitchesPerStart: s.gs > 0 && s.gsPitches != null ? Math.round(s.gsPitches / s.gs) : null,
   }
 }
 

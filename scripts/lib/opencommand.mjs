@@ -35,6 +35,9 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 
+// Re-exported: the generators and target-command.test.js take it from here.
+export { median } from '../../src/lib/math/number.js'
+
 const here = import.meta.dirname
 const CACHE = join(here, '..', '..', 'node_modules', '.cache', 'opencommand')
 
@@ -341,16 +344,6 @@ export async function* streamPitches(season, index) {
 // ---------------------------------------------------------------------------
 // SMALL PURE HELPERS (unit-tested in test/opencommand.test.js)
 // ---------------------------------------------------------------------------
-
-// The median of a numeric array. Sorts a COPY: callers hold these arrays for
-// several statistics at once, and a sort in place has surprised this repo
-// before.
-export function median(values) {
-  if (!values || !values.length) return null
-  const a = [...values].sort((x, y) => x - y)
-  const mid = a.length >> 1
-  return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2
-}
 
 // Percentile rank of `value` within `population`, ALREADY FLIPPED so a smaller
 // miss scores higher — the strip's convention, where 99 is always the good end

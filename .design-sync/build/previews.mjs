@@ -164,20 +164,6 @@ w('Report', 'LeaderList', page('Report', 'Leader List',
 </section>
 <p class="pv-note">Lead: field wash and a marker rank pill. Mine: an ink tint and an ink bar. The 36px mark slot takes a logo or a headshot.</p>`))
 
-w('Report', 'ResultCard', page('Report', 'Result Card',
-`  .pv-result { max-width: 440px; }`,
-`<section class="card card--stamped card--soft result pv-result" aria-label="Sample final: Dodgers 5, Yankees 3">
-  <div class="result__strip">
-    <div class="result__club result__club--away" style="--result-tint: var(--accent-primary)"><span class="result__mark" style="display:grid;place-items:center;font-family:var(--font-display)">NYY</span><span class="result__runs">3</span></div>
-    <div class="result__mid"><b class="result__status">Final</b><span class="result__note">Game 6</span></div>
-    <div class="result__club result__club--home result__club--win"><span class="result__mark" style="display:grid;place-items:center;font-family:var(--font-display)">LAD</span><span class="result__runs">5</span></div>
-  </div>
-  <div class="result__bar"><span><b class="result__tag">WP</b>Sample Pitcher</span><span class="result__line">7.0 IP · 9 K</span></div>
-  <div class="result__bar"><span><b class="result__tag">MVP</b>Sample Player</span><span class="result__line">2-for-4 · HR · 3 RBI</span></div>
-  <div class="result__foot"><span>Sample data · Oct 28 · Sample Park</span><button type="button" class="btn btn--control">Box score</button></div>
-</section>
-<p class="pv-note">From the focus-mode scorebug. For a finished game on a history page only; a current score never goes in it.</p>`))
-
 w('Report', 'MeterAndKey', page('Report', 'Meter And Key',
 `  .pv-stack { display: grid; gap: var(--space-4); max-width: 440px; }`,
 `<div class="pv-stack">

@@ -317,38 +317,3 @@ export function computeInningDigest(feed, derivedMap) {
   }
   return rows
 }
-
-// Rolling (cumulative) pitch count for a pitching side through the given
-// inning. The pitching side maps to the half: the home pitcher works the top
-// half, the away pitcher the bottom. Sums pitches for that same half across
-// innings 1..inningNum.
-export function rollingPitches(derivedMap, inningNum, half) {
-  let total = 0
-  for (let n = 1; n <= inningNum; n++) {
-    total += derivedMap[key(n, half)]?.pitches ?? 0
-  }
-  return total
-}
-
-// Cumulative missed-call count through the half being viewed — unlike
-// rollingPitches above (one pitcher's side only), a blown ball/strike call
-// belongs to the plate umpire regardless of which team is pitching, so this
-// sums BOTH halves of every earlier inning plus the top half of the current
-// one, adding its bottom half too only when `half` itself is 'bottom'. Since
-// a half only renders this card once revealed, and reveal only ever advances
-// one half at a time, every half this sums over is already something the
-// user has revealed — same footing as challenges.js/umpireFavor.js's
-// cumulative-through-the-reached-half figures. Null (not 0) until at least
-// one summed half has tracking data, so an all-MiLB game hides the stat
-// instead of showing a false 0 — same convention as missedCalls itself.
-export function rollingMissedCalls(derivedMap, inningNum, half) {
-  let total = null
-  for (let n = 1; n <= inningNum; n++) {
-    const halves = n < inningNum || half === 'bottom' ? ['top', 'bottom'] : ['top']
-    for (const h of halves) {
-      const mc = derivedMap[key(n, h)]?.missedCalls
-      if (mc != null) total = (total ?? 0) + mc
-    }
-  }
-  return total
-}

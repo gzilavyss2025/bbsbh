@@ -1,5 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { resolve, join } from 'node:path'
+import { listSheets } from './lib/walk.mjs'
 
 // Every component rule lives under src/styles/ — the partials src/index.css
 // @imports in order. Read the DIRECTORY TREE rather than a fixed list so a new
@@ -8,16 +7,7 @@ import { resolve, join } from 'node:path'
 // that outgrows the file cap subdivides instead of splitting sideways
 // (ADR-0038), and `focus/`, `scorecard/` and `motion/` are all real rules this
 // guard would otherwise walk straight past.
-const stylesDir = resolve('src/styles')
-const listSheets = (dir, prefix) =>
-  readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return listSheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css')
-      ? [{ rel: `src/styles/${prefix}${f}`, name: `${prefix}${f}`, css: readFileSync(abs, 'utf8') }]
-      : []
-  })
-const sheets = listSheets(stylesDir, '').sort((a, b) => a.rel.localeCompare(b.rel))
+const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw, name: s.rel.slice('src/styles/'.length) }))
 const errors = []
 
 // This guard is only as good as its target. If the partials move again — or a
@@ -125,7 +115,7 @@ const SPACING_RESIDUE = {
 // that says the nudge stopped being a correction and became the house spacing.
 // It only moves down: if the count falls a full band below, tighten it, so this
 // number can never become a record of a codebase that no longer exists.
-const NUDGE_CEILING = 300
+const NUDGE_CEILING = 275
 const NUDGE_BAND = 25
 
 // A live copy of the ledger, drawn down as each listed literal is found.

@@ -18,7 +18,6 @@
 
 export {
   personSportId,
-  isPitcher,
   isTwoWay,
   pitcherRole,
   draftInfo,
@@ -43,8 +42,6 @@ export {
 
 export {
   gameLogView,
-  gameLogLimit,
-  loggedSplits,
   FIRSTS_DEFS,
   PITCHER_FIRSTS_DEFS,
   firstsFromGameLog,
@@ -55,16 +52,13 @@ export {
   MILESTONE_DEFS,
   MILESTONE_PROGRESS_FLOOR,
   nearestMilestone,
-  milestoneWatchView,
   projectMilestoneETA,
   careerPerSeasonRate,
-  MILESTONE_RARITY,
   milestoneRarityRank,
   mlbCareerThroughCutoff,
 } from './person/milestones.js'
 
 export {
-  arsenalView,
   advancedPitchingView,
   advancedHittingView,
   battedBallView,
@@ -90,24 +84,14 @@ export {
 } from './person/transactions.js'
 
 export {
-  MAJOR_AWARDS,
-  DEFAULT_AWARD_ORDER,
-  awardLeague,
   awardsView,
   isPostseasonAward,
-  rankAwards,
-  rankKeyOf,
-  parseAwardOrder,
-  formatAwardOrder,
-  parseAwardCap,
-  knownRankKeys,
 } from './person/awards.js'
 
 export {
   detectRehabAssignment,
   detectInjuredList,
   injuredListStints,
-  otherLevelSeasonBlocks,
   buildBlock,
 } from './person/activity.js'
 

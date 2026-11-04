@@ -9,7 +9,7 @@ import {
 } from '../scripts/gen-comeback-wins.mjs'
 import { scopeOfGameType } from '../scripts/lib/records/postseason.mjs'
 import {
-  comebackWinsFor, leagueComebackWinsFor, comebackRatesFor, comebackPostFor,
+  comebackRatesFor, comebackPostFor,
 } from '../src/api/comebackWins.js'
 
 const wp = (...homes) => homes.map((h) => ({ homeTeamWinProbability: h }))
@@ -77,23 +77,6 @@ const DATA = {
     },
   },
 }
-
-test('comebackWinsFor selects one team/season row, null when absent', () => {
-  assert.deepEqual(comebackWinsFor(DATA, 110, 2026), {
-    sub10: 1, sub20: 2, sub30: 3, att10: 4, att20: 8, att30: 12, wins: 40,
-  })
-  assert.equal(comebackWinsFor(DATA, 999, 2026), null)
-  assert.equal(comebackWinsFor(null, 110, 2026), null)
-})
-
-test('leagueComebackWinsFor shapes rows for statRank ({ teamId, stat })', () => {
-  const rows = leagueComebackWinsFor(DATA, 2026)
-  assert.deepEqual(rows, [
-    { teamId: 110, stat: { sub10: 1, sub20: 2, sub30: 3 } },
-    { teamId: 111, stat: { sub10: 0, sub20: 0, sub30: 1 } },
-  ])
-  assert.deepEqual(leagueComebackWinsFor(null, 2026), [])
-})
 
 // --------------------------------------------------------------------------
 // comebackRatesFor — the card's per-threshold rate + pooled MLB baseline.

@@ -30,13 +30,6 @@ test('TeamFilterStrip: no title=, the MLB pin and every club keep a name', () =>
   assert.ok(src.includes('aria-label={t.name}'))
 })
 
-test('RosterList: no title=, the All Star star and the WAR pill keep a name', () => {
-  const src = jsx('screens/team/modules/RosterList.jsx')
-  assert.ok(!/\stitle=/.test(src))
-  assert.ok(src.includes('role="img" aria-label={`${season} All Star`}'))
-  assert.ok(src.includes('aria-label={`Season WAR (MLB calc)'))
-})
-
 test('the season grid and ballpark card carry no title=; every game link keeps a name', () => {
   const grid = jsx('screens/team/next/games/SeasonGrid.jsx')
   assert.ok(!/\stitle=/.test(grid))

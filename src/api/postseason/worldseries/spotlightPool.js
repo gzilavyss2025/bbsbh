@@ -12,7 +12,7 @@
 // Each read is club-wide (playerPool=ALL), so a club costs three stat requests plus the roster,
 // not one per player. A failed read is [] (that line falls back or is left out), never a throw.
 import { getJson } from '../../statsapi.js'
-import { dayBefore } from '../fetch.js'
+import { dayBefore } from '../../../lib/dates.js'
 import { fetchSeriesRoster } from '../roster.js'
 
 const FIELDS = 'stats,splits,player,id,stat,plateAppearances,ops,inningsPitched,era'

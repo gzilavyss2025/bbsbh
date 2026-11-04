@@ -37,8 +37,9 @@
 //
 // Run by `npm run lint`. Zero deps, walks src/ and public/learn.css.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join, sep } from 'node:path'
+import { walk } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const STYLES = join(ROOT, 'src', 'styles')
@@ -105,16 +106,6 @@ const NON_STYLE_ALLOWLIST = {
 
 const READ = /var\(\s*--seal[a-z-]*/
 
-function cssFiles(dir) {
-  const out = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) out.push(...cssFiles(full))
-    else if (entry.endsWith('.css')) out.push(full)
-  }
-  return out
-}
-
 // Blank out comments, keeping newlines, so this repo's long design prose — which
 // names --seal constantly, on purpose — never reads as a declaration.
 function stripComments(css) {
@@ -157,7 +148,7 @@ const problems = []
 const reached = new Set()
 let reads = 0
 
-for (const file of cssFiles(STYLES)) {
+for (const file of walk(STYLES, { exts: ['.css'] })) {
   const name = file.slice(STYLES.length + 1).split(sep).join('/')
   const allowed = ALLOWLIST[name]
   for (const decl of declarations(readFileSync(file, 'utf8'))) {
@@ -191,18 +182,7 @@ for (const [file, selectors] of Object.entries(ALLOWLIST)) {
 
 // --- 3: everything outside src/styles/ ------------------------------------
 const NAMES = /--seal[a-z-]*/
-function sourceFiles(dir) {
-  const out = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) {
-      if (full === STYLES) continue
-      out.push(...sourceFiles(full))
-    } else if (/\.(jsx?|md)$/.test(entry)) out.push(full)
-  }
-  return out
-}
-for (const file of sourceFiles(join(ROOT, 'src'))) {
+for (const file of walk(join(ROOT, 'src'), { exts: ['.js', '.jsx', '.md'] }).filter((f) => !f.startsWith(STYLES + sep))) {
   const name = file.slice(ROOT.length + 1).split(sep).join('/')
   if (NON_STYLE_ALLOWLIST[name]) continue
   const src = readFileSync(file, 'utf8')

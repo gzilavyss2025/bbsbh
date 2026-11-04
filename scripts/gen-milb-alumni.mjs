@@ -41,7 +41,8 @@ import { join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
@@ -116,20 +117,6 @@ async function scanPlayer(personId) {
   return stints
 }
 
-// Run `work` over `items` with a fixed number of workers.
-async function pool(items, work) {
-  const queue = [...items]
-  let done = 0
-  await Promise.all(
-    Array.from({ length: CONCURRENCY }, async () => {
-      while (queue.length) {
-        await work(queue.shift())
-        if (++done % 100 === 0) console.log(`  scanned ${done}/${items.length}`)
-      }
-    }),
-  )
-}
-
 // ---- the current farm system --------------------------------------------------
 
 async function currentAffiliates() {
@@ -154,20 +141,14 @@ async function currentAffiliates() {
 // in which every player's club was ''.
 async function fetchPeople(ids) {
   const out = new Map()
-  for (let i = 0; i < ids.length; i += 100) {
-    const batch = ids.slice(i, i + 100)
-    const json = await getJson(
-      `/api/v1/people?personIds=${batch.join(',')}&hydrate=currentTeam`,
-    )
-    for (const p of json.people ?? []) {
-      out.set(String(p.id), {
-        name: p.fullName ?? '',
-        num: p.primaryNumber ?? '',
-        pos: p.primaryPosition?.abbreviation ?? '',
-        teamId: p.currentTeam?.id ?? null,
-        teamName: p.currentTeam?.name ?? '',
-      })
-    }
+  for (const p of await getPeople(ids, { hydrate: 'currentTeam' })) {
+    out.set(String(p.id), {
+      name: p.fullName ?? '',
+      num: p.primaryNumber ?? '',
+      pos: p.primaryPosition?.abbreviation ?? '',
+      teamId: p.currentTeam?.id ?? null,
+      teamName: p.currentTeam?.name ?? '',
+    })
   }
   return out
 }
@@ -181,9 +162,16 @@ console.log(`pool: ${ranked.length} active players, WAR ${ranked[0].war} → ${r
 const cache = await readJsonOr(cachePath, {})
 const stale = ranked.filter((p) => needsScan(cache[p.id], season))
 console.log(`scanning ${stale.length} of ${ranked.length} players (${ranked.length - stale.length} cached)`)
-await pool(stale, async (p) => {
-  cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
-})
+let scanned = 0
+await mapConcurrent(
+  stale,
+  CONCURRENCY,
+  async (p) => {
+    cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
+    if (++scanned % 100 === 0) console.log(`  scanned ${scanned}/${stale.length}`)
+  },
+  { strict: true },
+)
 // Drop cache rows for players who have fallen out of the pool, so the file
 // tracks the pool rather than growing forever.
 const inPool = new Set(ranked.map((p) => p.id))

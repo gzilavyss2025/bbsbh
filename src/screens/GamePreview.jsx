@@ -216,4 +216,3 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
   )
 }
 
-export default GamePreview

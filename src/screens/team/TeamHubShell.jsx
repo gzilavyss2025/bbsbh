@@ -1,4 +1,5 @@
-import { Suspense, lazy, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { fetchTeams } from '../../api/schedule.js'
 import { resolveGameNotes } from '../../api/gameNotes.js'
 import { rankText } from '../../api/person.js'
@@ -35,12 +36,8 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 // exactly one person in the world can open has no business in the chunk every
 // visitor downloads — and it carries the field catalog, 62-identity-admin.css
 // and (through the catalog) the WPA and stamp modules with it.
-const IdentityAdminBar = lazy(() =>
-  import('./modules/identity/IdentityAdminBar.jsx').then((m) => ({ default: m.IdentityAdminBar })),
-)
-const IdentityDrawer = lazy(() =>
-  import('./modules/identity/IdentityDrawer.jsx').then((m) => ({ default: m.IdentityDrawer })),
-)
+const IdentityAdminBar = lazyNamed(() => import('./modules/identity/IdentityAdminBar.jsx'), 'IdentityAdminBar')
+const IdentityDrawer = lazyNamed(() => import('./modules/identity/IdentityDrawer.jsx'), 'IdentityDrawer')
 
 const DASH = '—'
 

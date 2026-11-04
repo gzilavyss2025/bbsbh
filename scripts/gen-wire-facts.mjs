@@ -27,14 +27,15 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const publicDir = join(here, '..', 'public')
 const ledgerDir = join(publicDir, 'data', 'team-transactions')
 const outDir = join(publicDir, 'data', 'wire-facts')
 
-const daysArg = process.argv.find((a) => a.startsWith('--days='))
-const WINDOW = daysArg ? Number(daysArg.split('=')[1]) : 60
+const daysArg = strOpt(parseArgs(process.argv.slice(2)), 'days')
+const WINDOW = daysArg === undefined ? 60 : Number(daysArg)
 
 // A fetch of a site path (`/data/...`) reads public/ from disk; every other
 // URL goes to the real fetch.

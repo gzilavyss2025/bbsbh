@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { parseAwardCap, parseAwardOrder } from '../../../../../api/person/awards.js'
-import { dayBefore } from '../../../../../api/player/context.js'
+import { dayBefore } from '../../../../../lib/dates.js'
 import { awardLedgerFor } from '../../../../../api/player/history.js'
 import { fetchPlayerAwards } from '../../../../../api/person-fetch.js'
 import { useCopy } from '../../../../../copy/copyContext.js'

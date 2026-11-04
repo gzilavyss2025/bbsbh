@@ -53,12 +53,10 @@ export {
 } from './playbyplay/eventTypes.js'
 
 export {
-  sentenceCaseEventText,
   moundVisitsAllowed,
   moundVisitRemainings,
   pitchingChangePitcher,
   defensiveChangeFielder,
-  pinchRunningPlayers,
   pinchHittingBatter,
   runnerLastName,
 } from './playbyplay/notificationCards.js'

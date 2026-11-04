@@ -110,7 +110,7 @@ list says what each guard checks.
   classifications. See `src/api/CLAUDE.md` and the manifest's own header.
 - `check-statsapi-client.mjs` — fails a `.mjs`/`.js` file under `scripts/` or
   `.scratch/` that names `statsapi.mlb.com` or `STATSAPI_BASE` on a code line
-  (comments are skipped), or names `cachedGetJson` inside `scripts/`. `src/`,
+  (comments are skipped). `src/`,
   `api/`, `test/` and `e2e/` are out of scope: the browser has its own client.
   A small `ALLOWLIST` holds the files that must keep the host, each with a reason;
   a stale entry fails, like `check-dir-size.mjs`'s budgets. The matcher is pure

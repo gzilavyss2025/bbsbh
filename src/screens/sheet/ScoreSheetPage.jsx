@@ -74,4 +74,3 @@ export function ScoreSheetPage({ feed, managers, scorebookWeather }) {
   )
 }
 
-export default ScoreSheetPage

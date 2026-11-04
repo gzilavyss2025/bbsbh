@@ -1,5 +1,5 @@
 // Unit coverage for the mound card's derivations (src/api/workload.js's
-// dayStripFor / turnStripFor / moundRateFor).
+// dayStripFor / turnStripFor).
 //
 // The card these feed is the pitcher's counterpart to a hitter's last-three-
 // games read, and its whole claim is that it DESCRIBES rather than predicts: it
@@ -10,7 +10,7 @@
 // invented rather than taken from the app's own tired thresholds.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { dayStripFor, turnStripFor, moundRateFor, LOAD_BANDS } from '../src/api/workload.js'
+import { dayStripFor, turnStripFor, LOAD_BANDS } from '../src/api/workload.js'
 
 const data = {
   season: 2026,
@@ -121,35 +121,6 @@ test('turnStripFor: an opener is not handed a rotation turn', () => {
   assert.equal(turnStripFor(data, 'opener', AS_OF), null)
   // The reliever strip is what he gets instead, and it still works for him.
   assert.equal(dayStripFor(data, 'opener', AS_OF).length, 14)
-})
-
-test('moundRateFor: outs per outing separates a one-inning arm from a long man', () => {
-  const rel = moundRateFor(data, 'reliever')
-  assert.equal(rel.outsPerOuting, 3.6)   // 216 outs / 60 appearances
-  assert.equal(rel.multiInning, true)
-  const st = moundRateFor(data, 'starter')
-  assert.equal(st.ipPerStart, '6.0')     // 435 outs / 24 starts = 18.1 outs
-  assert.equal(st.pitchesPerStart, 91)   // 2179 / 24, rounded
-})
-
-test('moundRateFor: per-start rates count starts only, not the relief outings of a swingman', () => {
-  // 2 starts (90 + 80 pitches, 18 + 15 outs) and 2 relief outings (20 + 10 pitches, 3 + 3 outs).
-  const swing = { pitchers: { x: { role: 'SP', apps: [], season: { g: 4, gs: 2, pitches: 200, outs: 39, gsPitches: 170, gsOuts: 33 } } } }
-  const r = moundRateFor(swing, 'x')
-  assert.equal(r.pitchesPerStart, 85)    // 170 / 2, not 200 / 2
-  assert.equal(r.ipPerStart, '5.2')      // 33 outs / 2 = 16.5, rounds to 17 outs
-})
-
-test('moundRateFor: a store from before the starts-only sums gives no per-start rate', () => {
-  const old = { pitchers: { x: { role: 'SP', apps: [], season: { g: 4, gs: 2, pitches: 200, outs: 39 } } } }
-  const r = moundRateFor(old, 'x')
-  assert.equal(r.pitchesPerStart, null)
-  assert.equal(r.ipPerStart, null)
-})
-
-test('moundRateFor: no season games means no rates rather than a divide by zero', () => {
-  const empty = { pitchers: { x: { role: 'RP', apps: [], season: { g: 0, gs: 0, pitches: 0, outs: 0 } } } }
-  assert.equal(moundRateFor(empty, 'x'), null)
 })
 
 test('turnStripFor: a man months past his last start is not in a turn', () => {

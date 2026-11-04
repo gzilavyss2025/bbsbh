@@ -1,4 +1,5 @@
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -14,8 +15,8 @@ import { InfoPopover } from '../ui/InfoPopover.jsx'
 
 // The list's foot fades only while there is more below it.
 // The picked at-bat's scorebug and zone load in their own chunk (LongAtBatDetail.jsx).
-const Scorebug = lazy(() => import('./LongAtBatDetail.jsx').then((m) => ({ default: m.Scorebug })))
-const AtBatZone = lazy(() => import('./LongAtBatDetail.jsx').then((m) => ({ default: m.AtBatZone })))
+const Scorebug = lazyNamed(() => import('./LongAtBatDetail.jsx'), 'Scorebug')
+const AtBatZone = lazyNamed(() => import('./LongAtBatDetail.jsx'), 'AtBatZone')
 
 const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight >= el.scrollHeight - 2))
 

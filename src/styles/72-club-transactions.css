@@ -3,11 +3,7 @@
    under another (screens/team/TeamTransactionsPage.jsx). Imported by that
    page alone, not by the core sheet.
 
-   Almost nothing here is new. The CARD is .txstory, already defined in
-   29-team-transactions.css for the club deck and shared by both surfaces
-   (TxStory.jsx) — this partial only takes it out of the deck's fixed-width
-   flex line and lets it fill a reading column. The day heading is the wire's
-   own dateline row, upright.
+   The day heading is the wire's own dateline row, upright.
    ------------------------------------------------------------------------ */
 
 .txpage__days {
@@ -40,63 +36,6 @@
 .txpage__count {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
-}
-
-/* One card per row. The deck sizes .txstory to 320px (360px --wide) because a
-   swipe needs a card the thumb can land on; a page has the whole measure, so
-   the width is released and the cutline wraps at the reading column instead.
-
-   On a wide layout the photo rail stops FLOATING and becomes a real second
-   column. In the deck a float is exactly right — the cutline runs to eight or ten lines in a
-   320px card and wraps around the photos like a magazine caption. At page
-   width most cutlines are one or two lines, and text that short never reaches
-   down past the rail, so a float left the card standing at the rail's height
-   with an obvious hole under the sentence. A grid says the same thing on
-   purpose: words on the left, faces on the right, the card as tall as
-   whichever is taller.
-
-   Only the two columns are declared. A .photorail--strip (a rail past
-   RAIL_FLOAT_MAX, which un-floats itself) lands in the same cell and needs no
-   second rule. */
-.txpage__stories {
-  display: grid;
-  gap: var(--space-2h);
-}
-.txpage__stories .txstory,
-.txpage__stories .txstory--wide {
-  width: auto;
-  max-width: 100%;
-}
-
-/* The two columns are a WIDE-layout rule, at the app's own 740px breakpoint.
-   Below it there is no second column to give: a phone is 390px, a three-face
-   rail is 174px of that, and the sentence beside it wrapped every three words.
-   Narrow, the card keeps the deck's own float — which is what the deck has
-   always used at exactly this measure, and it reads correctly there. */
-@media (min-width: 740px) {
-  .txpage__stories .txstory,
-  .txpage__stories .txstory--wide {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    /* Two rows, and the second takes every spare pixel. Without that the
-       rail's height is split between them and the slack lands BETWEEN the pill
-       and the sentence it labels, which reads as two unrelated things. Under
-       the sentence it reads as the margin of a short entry, which is what it
-       is. */
-    grid-template-rows: auto 1fr;
-    column-gap: var(--space-3h);
-    align-items: start;
-  }
-  .txpage__stories .photorail {
-    float: none;
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    margin: 0;
-  }
-  .txpage__stories .txstory__type,
-  .txpage__stories .txstory__cutline {
-    grid-column: 1;
-  }
 }
 
 /* The page's empty state (EmptyState, #1132) owns its inset and copy, never

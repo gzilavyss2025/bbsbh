@@ -41,7 +41,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `offseason/` | `LevelOffseason`, `SeasonRecord`, `MovedUp`, `WinterCalendar` | The empty-slate page state (ADR-0074, ADR-0079, ADR-0080, ADR-0081). Rules: `offseason/CLAUDE.md` |
 | `ovr/` | `OvrBars`, `useOvr` | The player page's OVR bars (#1703), drawn by the header extras card. Open surface, no SealBox (ADR-0034). Logic is pure, in `lib/ovr/`; the bars are draw-only and read the ratings through `api/ovr/` |
 | `player/` | `Headshot`, `PlayerLink`, `PlayerHoverCard`, `Ledger`, `CareerTimeline` | Player-identity primitives and career-level cards |
-| `playerstats/` | `CommandReceivedCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities), drawn by the player page's TBD slots |
+| `playerstats/` | `CommandReceivedCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities), drawn by the player page's Command received slot |
 | `playbyplay/` | `PitcherNotice`, `cardCopy.js`, `pitcherCard/` | The notification-card family's surviving parts (ADR-0017); the feed that drew the rest (`PlayByPlay`) was deleted in #2747. `PitchScene` never uses React state per frame. Rules: `playbyplay/CLAUDE.md` |
 | `postseason/` | `SeriesParts`, `SeriesMark`, `SeriesFlow`, `SeriesTotals`, `SeriesRibbon`, `SeriesLeadersLedger`, `SeriesPrimer`, `edges/` | The parts both series pages draw the same way: the finished page and the live page. Draw-only; each page keeps its own spoiler footing (ADR-0087's 2026-10-01 addendum). `SeriesPrimer` is the home page series primer's two slots, fed by `usePrimer`: `SeriesRibbon` and `edges/` (Today's edges) are its main column, `BracketNow`, `SeriesTotals` and `SeriesLeadersLedger` its right column (2026-10-08 addendum) |
 | `preview/` | `SavePosterButton` | Saves the finished poster out of the canvas (`docs/preview-poster.md`) |
@@ -56,7 +56,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `OffDaySection` | Team-identity/navigation primitives |
 | `teamstats/` | `TeamLeaders`, `SeasonSeriesStrip` | Team-level statistical cards |
-| `transactions/` | `TxStory`, `MoveRow`, `WireRail`, `WireDock` | Roster-move surfaces. Rules: `transactions/CLAUDE.md` |
+| `transactions/` | `MoveRow`, `WireRail`, `WireDock` | Roster-move surfaces. Rules: `transactions/CLAUDE.md` |
 | `umpire/` | `UmpireAccuracyModal`, `UmpireLink`, `UmpireTendencies`, `UmpiresCard` | Umpire-specific surfaces |
 | `winter/` | `LeaguePicker` | The WINTER tab's league picker: four leagues share one rail tab (ADR-0078) |
 | `workload/` | `DayStrip`, `ThresholdBullets`, `PenDots`, `StaffGrid`, `ProjectedStarters` | The four marks that draw `api/workload.js` without a sentence. Their ink is global (`styles/76-workload-marks.css`), not component-imported |

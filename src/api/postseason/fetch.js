@@ -27,6 +27,7 @@
 
 import { getJson } from '../statsapi.js'
 import { deriveBracket } from './bracket.js'
+import { dayBefore } from '../../lib/dates.js'
 
 const GAME_TYPES = 'F,D,L,W'
 
@@ -68,13 +69,6 @@ const RESULT_FIELDS = [
   'id',
   'isWinner',
 ].join(',')
-
-// 'YYYY-MM-DD' minus one day, in UTC so no timezone can move it.
-export function dayBefore(iso) {
-  const d = new Date(`${iso}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
 
 export function skeletonUrl(season) {
   return `/api/v1/schedule?sportId=1&season=${season}&gameType=${GAME_TYPES}&hydrate=team&fields=${SKELETON_FIELDS}`

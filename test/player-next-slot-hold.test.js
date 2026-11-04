@@ -22,7 +22,7 @@ test('the hints are the measured floors', () => {
   assert.deepEqual(by.plate, [2480, 1840])
   assert.deepEqual(by.arsenal, [1720, 1180])
   assert.deepEqual(by.path, [240, 240])
-  for (const id of ['tbd-season', 'tbd-gamelog', 'tbd-mound', 'tbd-career', 'tbd-history', 'milestones']) {
+  for (const id of ['command-received', 'milestones']) {
     assert.deepEqual(by[id], [0, 0], `${id} holds nothing`)
   }
 })

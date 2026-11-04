@@ -40,12 +40,8 @@
 
 export {
   HIT_CATEGORY_KEYS,
-  parseRecord,
-  foldedRecordText,
-  gameResult,
   magnitudeOf,
   corroborationBonus,
-  CORROBORATION_BONUS,
   rankNotes,
 } from './callout-notes/shared.js'
 
@@ -68,18 +64,12 @@ export { buildThirdTimeThroughNote, buildTtoPitchesNote } from './callout-notes/
 
 export {
   buildLeadHeldNote,
-  buildTiedAfterHeldNotes,
   buildScorelessHeldNotes,
   buildBothScorelessHeldNotes,
   buildDayOfWeekNotes,
-  buildRunsScoredNote,
-  buildRunsAllowedNote,
-  buildComebackNote,
-  buildCloseGameNotes,
 } from './callout-notes/heldNotes.js'
 
 export {
-  INNING_DIFF_MIN_GAMES,
   buildInningRunDiffNote,
   buildStarterTeamRecordNote,
   buildFoulVolumeNote,

@@ -1,8 +1,7 @@
 // The filesystem half of the lab's Eras editor — the /__dev/era and
 // /__dev/era-art branches of vite.config.js's devDataSave() middleware
 // (ADR-0029). The lab owns src/lib/data/season-marks.json and the art in
-// public/logos/historical/ (#1591); scripts/season-marks/fetch.mjs is only a
-// one-time bootstrap now.
+// public/logos/historical/ (#1591).
 //
 // Three operations, all server-owned:
 //

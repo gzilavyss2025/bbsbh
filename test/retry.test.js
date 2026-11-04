@@ -58,3 +58,10 @@ test('withRetry with shouldRetry still retries the errors it accepts', async () 
   assert.equal(out, 'ok')
   assert.equal(calls, 3)
 })
+
+test('withRetry with a label names the call in the final error', async () => {
+  await assert.rejects(
+    withRetry(async () => { throw new Error('boom') }, { tries: 2, sleep: noSleep, label: 'Savant x' }),
+    /^Error: Savant x: boom after 2 attempts$/,
+  )
+})

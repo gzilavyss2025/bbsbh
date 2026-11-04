@@ -24,7 +24,7 @@
 //
 // Usage: node scripts/wire/gen-notable-players.mjs
 import { readFile, readdir, writeFile } from 'node:fs/promises'
-import { getJson } from '../lib/statsapi.mjs'
+import { getJson, getPeople } from '../lib/statsapi.mjs'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 
 const DATA = new URL('../../public/data/', import.meta.url)
@@ -94,21 +94,17 @@ async function main() {
   }
   const ids = [...pool]
   let answered = 0
-  for (let i = 0; i < ids.length; i += BATCH) {
-    const chunk = ids.slice(i, i + BATCH)
-    const hydrate = 'stats(group=[hitting,pitching],type=[career],sportId=1)'
-    const { people = [] } = await getJson(`/api/v1/people?personIds=${chunk.join(',')}&hydrate=${hydrate}`)
-    for (const p of people) {
-      answered += 1
-      let games = 0
-      let pitched = 0
-      for (const s of p.stats ?? []) {
-        const stat = s.splits?.[0]?.stat ?? {}
-        if (s.group?.displayName === 'hitting') games = stat.gamesPlayed ?? 0
-        if (s.group?.displayName === 'pitching') pitched = stat.gamesPitched ?? stat.gamesPlayed ?? 0
-      }
-      if (games >= CAREER_GAMES || pitched >= CAREER_PITCHED) notable.add(p.id)
+  const hydrate = 'stats(group=[hitting,pitching],type=[career],sportId=1)'
+  for (const p of await getPeople(ids, { hydrate, size: BATCH })) {
+    answered += 1
+    let games = 0
+    let pitched = 0
+    for (const s of p.stats ?? []) {
+      const stat = s.splits?.[0]?.stat ?? {}
+      if (s.group?.displayName === 'hitting') games = stat.gamesPlayed ?? 0
+      if (s.group?.displayName === 'pitching') pitched = stat.gamesPitched ?? stat.gamesPlayed ?? 0
     }
+    if (games >= CAREER_GAMES || pitched >= CAREER_PITCHED) notable.add(p.id)
   }
   if (answered < ids.length) console.warn(`gen-notable-players: ${ids.length - answered} of ${ids.length} players came back without a record`)
   if (star.size === 0 || notable.size === 0) throw new Error('gen-notable-players: an empty list; refusing to write')

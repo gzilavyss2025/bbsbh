@@ -46,7 +46,7 @@ const files = (dir) =>
 // this fails, the slice moved a seal: stop and ask, never update the literal.
 const N5_SEAL = {
   'components/game/GameCardParts.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  // 16: the scorebug's mount moved from ConsoleBand to InningsHeader (the page's masthead), so the
+  // 16: the scorebug's mount moved from ConsoleBand to the page's masthead (now GamedayNextMount), so the
   // viewer hands the same clamped mark to one more child. Same consumer, same clamp, no new import (ruled on by the maintainer).
   // 10, and no winprob.js: the Gameday swap (#2566) deleted the old screen's reads (the Arms tab's win
   // probability, the reference panel, the running line). Removals only; no read moved or was added.

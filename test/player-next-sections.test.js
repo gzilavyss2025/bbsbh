@@ -76,25 +76,25 @@ const BOTH = ['hitting', 'pitching']
 test('the slots are the 32 module folders, with each section holding its modules in order', () => {
   assert.deepEqual(
     [...new Set(SLOTS.map((s) => s.module))].sort(),
-    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'hofpace', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospect', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
+    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'command-received', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'hofpace', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospect', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'teams'],
   )
   const at = (section) => SLOTS.filter((s) => s.section === section).map((s) => s.module)
-  assert.deepEqual(at('season'), ['season', 'percentile', 'advanced', 'runvalue', 'tbd'])
-  assert.deepEqual(at('career'), ['path', 'prospects', 'prospect', 'tbd'])
-  assert.deepEqual(at('history'), ['firsts', 'innings', 'awards', 'contract', 'teams', 'moves', 'photos', 'highlights', 'tbd'])
+  assert.deepEqual(at('season'), ['season', 'percentile', 'advanced', 'runvalue', 'command-received'])
+  assert.deepEqual(at('career'), ['path', 'prospects', 'prospect'])
+  assert.deepEqual(at('history'), ['firsts', 'innings', 'awards', 'contract', 'teams', 'moves', 'photos', 'highlights'])
   assert.deepEqual(at('form-trend'), ['form', 'pform'])
-  assert.deepEqual(at('on-the-mound'), ['mound', 'command', 'target', 'tbd'])
+  assert.deepEqual(at('on-the-mound'), ['mound', 'command', 'target'])
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('the Game log section runs logs, foul balls, similar players, milestones, Hall of Fame pace, then the tbd slot', () => {
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'pfouls', 'fouls', 'similar', 'milestones', 'hofpace', 'tbd'])
+test('the Game log section runs logs, foul balls, similar players, milestones, then Hall of Fame pace', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'pfouls', 'fouls', 'similar', 'milestones', 'hofpace'])
 })
 
-test('the tbd slots for the pitcher boards: On the mound for a pitcher only, Game log for both', () => {
-  const tbd = (r) => slotInstances(r).filter((i) => i.module === 'tbd').map((i) => i.id)
-  assert.deepEqual(tbd(['hitting']), ['tbd-season', 'tbd-gamelog', 'tbd-career', 'tbd-history'])
-  assert.deepEqual(tbd(['pitching']), ['tbd-season', 'tbd-gamelog', 'tbd-mound', 'tbd-career', 'tbd-history'])
+test('Command received is a hitting-role slot, ending Season', () => {
+  const ids = (r) => slotInstances(r).filter((i) => i.module === 'command-received').map((i) => i.id)
+  assert.equal(ids(['hitting']).length, 1)
+  assert.deepEqual(ids(['pitching']), [])
 })
 
 test('the batter Form trend and the pitcher Form trend are two modules', () => {
@@ -141,7 +141,7 @@ test('a button hides only when every slot in its section is empty', () => {
   // Both empty: it goes.
   const gone = Object.fromEntries(career.map((i) => [i.key, true]))
   assert.deepEqual(keys(shownSections(sections, inst, gone)), ['overview', 'history'])
-  assert.equal(history.length, 9)
+  assert.equal(history.length, 8)
 })
 
 test('a once slot gets one instance for a two-way player, with no role suffix; a pitcher-only slot is not once', () => {
@@ -194,7 +194,7 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // Modules an issue has built: real modules, which may return null and call onEmpty when
 // they have no data. Add a module here in the PR that builds it; every other module must
 // still be a stub.
-const BUILT = new Set(['tbd', 'similar', 'prospects', 'prospect', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'hofpace', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
+const BUILT = new Set(['command-received', 'similar', 'prospects', 'prospect', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'hofpace', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
 
 // A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
 // stub loses its button) until the issue builds it: the live page never shows a "loads here"

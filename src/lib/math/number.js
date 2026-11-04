@@ -8,6 +8,14 @@ export function num(x) {
   return Number.isFinite(n) ? n : 0
 }
 
+// A finite number, else null. Blank (`null`, `undefined`, `''`) and non-numbers read as null:
+// "no value", which `num` above would flatten to 0.
+export function numOrNull(x) {
+  if (x == null || x === '') return null
+  const n = Number(x)
+  return Number.isFinite(n) ? n : null
+}
+
 // `n` held within [lo, hi]. Needs lo <= hi; NaN stays NaN.
 export function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n))
@@ -28,6 +36,15 @@ export function round1(n) {
 // Two decimal places, for a drawing's coordinates: 1.256 -> 1.26.
 export function round2(n) {
   return Math.round(n * 100) / 100
+}
+
+// The middle value of `values` (the mean of the middle pair when the count is even), or null for
+// none. Sorts a copy.
+export function median(values) {
+  if (!values?.length) return null
+  const s = [...values].sort((a, b) => a - b)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
 }
 
 // `n` of `of` as a whole percent, half up, or null with nothing to divide by. The product

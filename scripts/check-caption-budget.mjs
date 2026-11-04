@@ -26,8 +26,7 @@
 //
 // Zero deps. Run by `npm run lint`.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { resolve, join } from 'node:path'
+import { listSheets } from './lib/walk.mjs'
 
 // The number of `font-size: var(--fs-caption)` declarations under src/styles/.
 // DOWNWARD ONLY. See the header before you touch it.
@@ -71,17 +70,9 @@ import { resolve, join } from 'node:path'
 // 102 -> 101: a rule for a class no component draws went in the PurgeCSS sweep.
 // 99 -> 98: the intro chain went (#2856).
 // 99 -> 98: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
-const BUDGET = 97
+const BUDGET = 96
 
-const stylesDir = resolve('src/styles')
-const sheets = []
-;(function walk(dir, prefix) {
-  for (const f of readdirSync(dir)) {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) walk(abs, `${prefix}${f}/`)
-    else if (f.endsWith('.css')) sheets.push({ rel: `src/styles/${prefix}${f}`, css: readFileSync(abs, 'utf8') })
-  }
-})(stylesDir, '')
+const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw }))
 
 // A guard that stops guarding still prints its tick, which reads as coverage.
 // If the partials ever move, repoint this script IN THE SAME COMMIT.

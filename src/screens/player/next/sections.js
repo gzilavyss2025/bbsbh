@@ -46,7 +46,7 @@ export const SLOTS = [
   { id: 'percentile', module: 'percentile', section: 'season', label: 'Percentile rank', minH: [440, 420], roles: HP, load: () => import('./modules/percentile/index.jsx') },
   { id: 'advanced', module: 'advanced', section: 'season', label: 'Advanced', minH: [480, 260], roles: HP, load: () => import('./modules/advanced/index.jsx') },
   { id: 'runvalue', module: 'runvalue', section: 'season', label: 'Run value', minH: [340, 340], roles: HP, once: true, load: () => import('./modules/runvalue/index.jsx') },
-  { id: 'tbd-season', module: 'tbd', section: 'season', label: 'More season', minH: [0, 0], roles: HP, load: () => import('./modules/tbd/index.jsx') },
+  { id: 'command-received', module: 'command-received', section: 'season', label: 'More season', minH: [0, 0], roles: H, load: () => import('./modules/command-received/index.jsx') },
   { id: 'splits', module: 'splits', section: 'splits', label: 'Splits', minH: [1040, 580], roles: HP, load: () => import('./modules/splits/index.jsx') },
   { id: 'plate', module: 'plate', section: 'plate-approach', label: 'Plate approach', minH: [2480, 1840], roles: H, load: () => import('./modules/plate/index.jsx') },
   { id: 'contact', module: 'contact', section: 'contact', label: 'Contact', minH: [1120, 800], roles: H, load: () => import('./modules/contact/index.jsx') },
@@ -55,21 +55,18 @@ export const SLOTS = [
   { id: 'batlog', module: 'batlog', section: 'game-log', label: 'Game log', minH: [1760, 940], roles: H, load: () => import('./modules/batlog/index.jsx') },
   { id: 'pitchlog', module: 'pitchlog', section: 'game-log', label: 'Game log', minH: [1400, 700], roles: P, load: () => import('./modules/pitchlog/index.jsx') },
   { id: 'pfouls', module: 'pfouls', section: 'game-log', label: 'Foul balls', minH: [1020, 600], roles: P, twin: true, load: () => import('./modules/pfouls/index.jsx') },
-  // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it (the tbd slot after it is the "more" board).
+  // Foul balls has no button on the boards: it sits in the Game log section.
   { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', minH: [840, 460], roles: H, twin: true, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', minH: [360, 340], roles: HP, load: () => import('./modules/similar/index.jsx') },
   { id: 'milestones', module: 'milestones', section: 'game-log', label: 'Milestone watch', minH: [0, 0], roles: HP, load: () => import('./modules/milestones/index.jsx') },
   { id: 'hofpace', module: 'hofpace', section: 'game-log', label: 'Hall of Fame pace', minH: [0, 0], roles: HP, load: () => import('./modules/hofpace/index.jsx') },
-  { id: 'tbd-gamelog', module: 'tbd', section: 'game-log', label: 'More game log', minH: [0, 0], roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'arsenal', module: 'arsenal', section: 'pitches', label: 'Pitch arsenal', minH: [1720, 1180], roles: P, load: () => import('./modules/arsenal/index.jsx') },
   { id: 'mound', module: 'mound', section: 'on-the-mound', label: 'On the mound', minH: [700, 620], roles: P, load: () => import('./modules/mound/index.jsx') },
   { id: 'command', module: 'command', section: 'on-the-mound', label: 'Command', minH: [920, 540], roles: P, load: () => import('./modules/command/index.jsx') },
   { id: 'target', module: 'target', section: 'on-the-mound', label: 'Target command', minH: [1180, 520], roles: P, load: () => import('./modules/target/index.jsx') },
-  { id: 'tbd-mound', module: 'tbd', section: 'on-the-mound', label: 'More on the mound', minH: [0, 0], roles: P, load: () => import('./modules/tbd/index.jsx') },
   { id: 'path', module: 'path', section: 'career', label: 'Path to the Majors', minH: [240, 240], roles: HP, load: () => import('./modules/path/index.jsx') },
   { id: 'prospects', module: 'prospects', section: 'career', label: 'Prospect rankings', minH: [240, 220], roles: HP, load: () => import('./modules/prospects/index.jsx') },
   { id: 'prospect', module: 'prospect', section: 'career', label: 'Prospect performance', minH: [0, 0], roles: HP, once: true, load: () => import('./modules/prospect/index.jsx') },
-  { id: 'tbd-career', module: 'tbd', section: 'career', label: 'More career', minH: [0, 0], roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'firsts', module: 'firsts', section: 'history', label: 'Firsts', minH: [260, 260], roles: HP, load: () => import('./modules/firsts/index.jsx') },
   { id: 'innings', module: 'innings', section: 'history', label: 'Innings by position', minH: [360, 480], roles: HP, pair: 'a', load: () => import('./modules/innings/index.jsx') },
   { id: 'awards', module: 'awards', section: 'history', label: 'Awards', minH: [300, 480], roles: HP, once: true, pair: 'b', load: () => import('./modules/awards/index.jsx') },
@@ -78,7 +75,6 @@ export const SLOTS = [
   { id: 'moves', module: 'moves', section: 'history', label: 'Transactions', minH: [780, 420], roles: HP, once: true, load: () => import('./modules/moves/index.jsx') },
   { id: 'photos', module: 'photos', section: 'history', label: 'Photos', minH: [420, 580], roles: HP, once: true, pair: 'a', load: () => import('./modules/photos/index.jsx') },
   { id: 'highlights', module: 'highlights', section: 'history', label: 'Highlights', minH: [520, 580], roles: HP, once: true, pair: 'b', load: () => import('./modules/highlights/index.jsx') },
-  { id: 'tbd-history', module: 'tbd', section: 'history', label: 'More history', minH: [0, 0], roles: HP, load: () => import('./modules/tbd/index.jsx') },
 ]
 
 const WORD = { hitting: 'Batting', pitching: 'Pitching' }

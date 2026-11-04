@@ -224,7 +224,7 @@ Module issue: #1892. Data issue: #1908.
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Pitch list, usage %, count | `public/data/pitch-arsenal/{season}/{NN}.json`, `arsenalMixRows` (`src/api/pitchArsenal.js`) | have | Use the store, not Savant usage |
+| Pitch list, usage %, count | `public/data/pitch-arsenal/{season}/{NN}.json`, `pitchArsenalFor` (`src/api/pitchArsenal.js`) | have | Use the store, not Savant usage |
 | Avg and max mph | same store | have | — |
 | Usage vs L / vs R | `vs.L`, `vs.R`, `arsenalSidesView` | have | — |
 | Spin rpm | feed `breaks.spinRate` only | missing | Per-type sums in `aggregateGamePitchTypes` (`scripts/gen-pitch-arsenal.mjs`) |
@@ -245,7 +245,7 @@ Module issue: #1893.
 | Bullpen 14-day strip | `dayStripFor` | have | — |
 | Opponent, vs / at, opponent logo | not in `apps` | missing | Store opponent id, `isHome`, `gameType`, `gamePk` per app in `foldGameLog` |
 | Postseason tag ("NLDS") | `gameType` | reshape | Same rule as the game logs |
-| "Averages N pitches per start" | `moundRateFor().pitchesPerStart` | reshape | Bug: it divides all pitches, relief too, by starts. Keep starter-only pitches |
+| "Averages N pitches per start" | `pitchesPerStart` (since removed) | reshape | Bug: it divides all pitches, relief too, by starts. Keep starter-only pitches |
 | A past week (Ashby, May 9–15) | store keeps the last 12 apps only | reshape | Board demo only. A past date needs the live `gameLog` |
 
 The opponent-logo gap is **confirmed**: the board circles are placeholders, and the

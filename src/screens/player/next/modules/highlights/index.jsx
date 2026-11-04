@@ -4,7 +4,7 @@ import { fetchTeamHighlights, flattenPositiveClips } from '../../../../../api/ga
 import { HighlightSheet } from '../../../../../components/playbyplay/HighlightSheet.jsx'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
-import { inMajors } from '../tbd/tbdData.js'
+import { inMajors } from '../../parts/inMajors.js'
 import { clipsTag, highlightsView } from './highlightsView.js'
 
 const SHOWN = 6

@@ -8,7 +8,7 @@
 // 01-09 (the strike zone) and 11-14 (outside it). Triple-A (sportId 11) answers the same shape;
 // sportIds 12-14 and a hitter with no games before endDate answer `splits: []`.
 import { getJson } from '../statsapi.js'
-import { dayBefore } from '../game.js'
+import { dayBefore } from '../../lib/dates.js'
 
 // { zones: { '01'..'09': { avg, temp } } }, or null when there are no zones (MiLB, a debut) or
 // no level or no date to stop at. A failed fetch is null too: the map is left off rather than mislabelled.

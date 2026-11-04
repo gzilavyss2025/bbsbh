@@ -65,6 +65,7 @@
 //   node scripts/gen-gate.mjs --season=2025   # a past season
 //   node scripts/gen-gate.mjs --seasons=2024,2025,2026
 import { join } from 'node:path'
+import { median as medianOf } from '../src/lib/math/number.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
@@ -169,16 +170,9 @@ function mean(values, places = 0) {
   return Math.round(avg * f) / f
 }
 
-// Middle value of a list, or the mean of the middle pair. The MEDIAN is worth
-// shipping alongside the mean because one sold-out opening day drags a small
-// club's average up by a thousand seats, and the two numbers disagreeing IS
-// the story on several clubs — the page prints both.
-function median(values) {
-  if (!values.length) return null
-  const s = [...values].sort((a, b) => a - b)
-  const mid = s.length >> 1
-  return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2)
-}
+// Whole-number median (attendance and minutes are whole), or null for none. The shared median
+// returns the mean of the middle pair for an even count; the page prints it whole.
+const median = (values) => (values.length ? Math.round(medianOf(values)) : null)
 
 // Sample standard deviation. Bessel-corrected (n-1), because these are a
 // season IN PROGRESS standing in for the season, not a closed population.

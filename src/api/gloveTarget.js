@@ -54,20 +54,6 @@ export async function fetchGloveTargetFor(personId, season) {
 export const RIM_IN = 30
 export const REFERENCE_RINGS = [10, 20, 30]
 
-// The pitch types a pitcher has a cloud for, ALL first and then his own by how
-// often he threw them — the chip row's order, matching the Target Command strip
-// above it so the two cards list a pitcher's arsenal the same way.
-export function gloveTargetTypes(entry) {
-  if (!entry) return []
-  return Object.entries(entry)
-    .map(([code, v]) => ({ code, n: v.n, miss: v.miss }))
-    .sort((a, b) => {
-      if (a.code === 'ALL') return -1
-      if (b.code === 'ALL') return 1
-      return b.n - a.n
-    })
-}
-
 // One selected cloud, with its dots already clamped to the rim. Null when the
 // pitcher has no row for that type — the card falls back to ALL rather than
 // drawing an empty frame.

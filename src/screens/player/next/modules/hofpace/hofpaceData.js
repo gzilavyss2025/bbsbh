@@ -2,7 +2,7 @@
 // yearByYear lines. Under `?d=` this season's line is cut the day before (never stats=career).
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { aggregateSplits } from '../../../../../api/person/stats.js'
-import { dayBefore } from '../../../../../api/player/context.js'
+import { dayBefore } from '../../../../../lib/dates.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../../../../../api/war.js'
 import { hofPaceRows } from './hofpaceView.js'
 

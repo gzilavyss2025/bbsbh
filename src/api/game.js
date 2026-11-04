@@ -5,6 +5,7 @@ import { getJson } from './statsapi.js'
 import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { num } from './person/shared.js'
 import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { dayBefore } from '../lib/dates.js'
 import { roundShort } from '../lib/postseason/gameRound.js'
 
 // `options.fields` (array or comma-string) opts a caller into a pruned
@@ -350,14 +351,6 @@ async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate
     // MiLB coverage gaps / pre-debut arms — the staging row just omits it.
     return null
   }
-}
-
-// "2026-09-30" -> "2026-09-29". UTC on both sides, so no time zone or DST
-// edge can move the day.
-export function dayBefore(apiDate) {
-  const d = new Date(`${apiDate}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
 }
 
 // ---------------------------------------------------------------------------

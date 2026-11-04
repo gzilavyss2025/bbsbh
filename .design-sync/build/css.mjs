@@ -54,7 +54,7 @@ add('src/styles/system/table.css', rd('src/styles/system/table.css'))
 add('src/styles/system/pill.css', rd('src/styles/system/pill.css'))
 add('src/styles/system/segmented/segmented.css', rd('src/styles/system/segmented/segmented.css'))
 add('src/styles/system/button.css', rd('src/styles/system/button.css'))
-for (const f of ['stat', 'leader', 'result', 'meter', 'controls']) add(`src/styles/system/report/${f}.css`, rd(`src/styles/system/report/${f}.css`))
+for (const f of ['stat', 'leader', 'meter', 'controls']) add(`src/styles/system/report/${f}.css`, rd(`src/styles/system/report/${f}.css`))
 add('src/styles/motion/stamp-in.css', rd('src/styles/motion/stamp-in.css'))
 bundle += '\n/* ==== src/styles/motion/player-rise.css (the player rise) ==== */\n' + rd('src/styles/motion/player-rise.css')
 // The notification card's arrival (ADR-0113): the resting looks, then the motion between them.

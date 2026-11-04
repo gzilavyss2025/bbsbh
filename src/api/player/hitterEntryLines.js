@@ -15,7 +15,7 @@
 // key (Nathaniel Lowe 2026: CIN, CLE, combined). Pick by the missing key, never
 // by position; a one-club hitter has no keyless split and any split is his line.
 import { getJson } from '../statsapi.js'
-import { dayBefore } from '../game.js'
+import { dayBefore } from '../../lib/dates.js'
 
 const keep = (stat) => ({
   avg: stat.avg ?? '',

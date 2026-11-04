@@ -9,7 +9,6 @@ import { fileURLToPath } from 'node:url'
 import { buildFamilyTies } from '../scripts/lib/open-data/family-ties.mjs'
 import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../scripts/lib/open-data/credits.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
-import { familyOf } from '../src/api/person/family/family.js'
 
 // The family-links dataset (ADR-0100): Retrosheet's relatives.csv, joined to MLBAM
 // ids through the Chadwick register, sharded on the player's MLBAM id.
@@ -214,24 +213,3 @@ test('the generator writes the same bytes on a second run, and prints its report
   for (const name of names) assert.equal(await readFile(join(a, name), 'utf8'), await readFile(join(b, name), 'utf8'))
 })
 
-// ---- the reader ------------------------------------------------------------
-
-test('familyOf returns the entries from the player\'s shard, and [] when there are none', async () => {
-  const urls = []
-  const shard = { credit: [], players: { 111188: [{ relation: 'Father', personId: 100, name: 'Bobby Bonds' }] } }
-  const realFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
-    urls.push(String(url))
-    return String(url).endsWith(`/${shardKey100(111188)}.json`)
-      ? new Response(JSON.stringify(shard))
-      : new Response('', { status: 404 })
-  }
-  try {
-    assert.deepEqual(await familyOf(111188), shard.players[111188])
-    assert.deepEqual(urls, [`/data/family-ties/${shardKey100(111188)}.json`])
-    assert.deepEqual(await familyOf(999999), []) // another shard: 404
-    assert.deepEqual(await familyOf(null), [])
-  } finally {
-    globalThis.fetch = realFetch
-  }
-})

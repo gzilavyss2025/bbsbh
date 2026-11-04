@@ -27,8 +27,9 @@
 //
 // Run by `npm run lint` (so it gates every push). Zero deps, walks src/.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { walk } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const SRC = join(ROOT, 'src')
@@ -182,16 +183,6 @@ const FORBIDDEN_ART_FILES = [
   'components/logbook/StampInButton.jsx',
 ]
 
-function sourceFiles(dir) {
-  const out = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) out.push(...sourceFiles(full))
-    else if (entry.endsWith('.jsx') || entry.endsWith('.js')) out.push(full)
-  }
-  return out
-}
-
 const rel = (file) => file.slice(file.indexOf('src') + 4).replace(/\\/g, '/')
 
 // Blank out comments so this file's own prose — and the long spoiler-rule
@@ -203,7 +194,7 @@ function stripComments(src) {
 }
 
 const problems = []
-const files = sourceFiles(SRC)
+const files = walk(SRC, { exts: ['.js', '.jsx'] })
 
 // --- 1 + 2: the import allowlists -----------------------------------------
 for (const [target, allowed] of Object.entries(STAMP_ALLOWLIST)) {

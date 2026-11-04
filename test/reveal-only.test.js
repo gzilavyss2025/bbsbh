@@ -14,8 +14,6 @@ import {
   computeDerivedByInning,
   revealDerived,
   computeGameSuperlatives,
-  rollingPitches,
-  rollingMissedCalls,
 } from '../src/api/derive.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computePitcherLines } from '../src/api/pitchers.js'
@@ -79,15 +77,6 @@ test('computeGameSuperlatives reduces the per-half bests across the whole game',
   assert.equal(best.longestHit, 420)
 })
 
-test('rollingPitches accumulates one pitching side across innings', () => {
-  const m = computeDerivedByInning(buildFeed())
-  // Home pitches the TOP halves: 8 (top 1) + 3 (top 2) = 11 through the 2nd.
-  assert.equal(rollingPitches(m, 2, 'top'), 11)
-  assert.equal(rollingPitches(m, 1, 'top'), 8)
-  // Away pitches the BOTTOM halves: only bottom 1 is nonzero through the 1st.
-  assert.equal(rollingPitches(m, 1, 'bottom'), 7)
-})
-
 test('computeDerivedByInning tolerates an empty / malformed feed', () => {
   assert.deepEqual(computeDerivedByInning({}), {})
   assert.deepEqual(computeDerivedByInning(null), {})
@@ -95,7 +84,7 @@ test('computeDerivedByInning tolerates an empty / malformed feed', () => {
 })
 
 // --------------------------------------------------------------------------
-// derive.js — missed-calls tracking (isMissedCall / rollingMissedCalls)
+// derive.js — missed-calls tracking (isMissedCall)
 // --------------------------------------------------------------------------
 // A called pitch with a known tracked location; omit pX/pZ to simulate a
 // half with no pitch-tracking data (the MiLB-degrade case).
@@ -153,13 +142,6 @@ test('missedCalls counts only genuine ball/strike disagreements, both directions
 test('missedCalls stays null for a half with no tracking data, even with called pitches', () => {
   const top2 = revealDerived(computeDerivedByInning(missedCallsFeed()), 2, 'top')
   assert.equal(top2.missedCalls, null)
-})
-
-test('rollingMissedCalls sums both halves of an earlier inning plus the current one', () => {
-  const m = computeDerivedByInning(missedCallsFeed())
-  assert.equal(rollingMissedCalls(m, 1, 'top'), 1) // top 1 only
-  assert.equal(rollingMissedCalls(m, 1, 'bottom'), 2) // + bottom 1
-  assert.equal(rollingMissedCalls(m, 2, 'top'), 2) // top 2 has no tracking data to add
 })
 
 test('a corrupted pre-pitch count (4th ball / 3rd strike already logged) is excluded from missedCalls', () => {

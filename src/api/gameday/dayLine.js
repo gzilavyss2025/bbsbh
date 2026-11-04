@@ -12,8 +12,7 @@
 // later play's write-back (a run scored two batters on, an out on the bases)
 // never lands on a card the reader has already seen. Same two-job rule
 // scorecardGame.js follows: the cap stops the write-back, the slice drops the
-// cards past the cursor. There is no uncapped variant (the same footing as
-// expressDeck in ../expresslane/runners.js).
+// cards past the cursor. There is no uncapped variant.
 //
 // What counts, decided against the captured real game (gamePk 823035,
 // test/fixtures/game-823035.trimmed.json):

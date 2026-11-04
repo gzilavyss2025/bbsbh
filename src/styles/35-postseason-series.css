@@ -546,7 +546,7 @@
   margin-top: var(--space-2);
 }
 /* Same role as the Team page's .roster-sub__title, above its own
-   .thub-roster list. */
+   roster list. */
 .psseries__rostergrouptitle {
   margin: 0 0 8px;
   font-family: var(--font-display);
@@ -556,8 +556,7 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-/* A hairline-divided row list, the row idiom of the Team page's .thub-roster
-   (whose own box went in #1775) — no box-shadow here since this list already
+/* A hairline-divided row list, the roster row idiom, no box of its own — no box-shadow here since this list already
    sits inside .psseries__rostercard's own elevated card. */
 .psseries__rosterlist {
   list-style: none;

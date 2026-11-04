@@ -32,7 +32,8 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { isoDay, parseArgs } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
-import { csvObjects, fetchArsenalBoard, withRetry } from './lib/savant.mjs'
+import { csvObjects, fetchArsenalBoard } from './lib/savant.mjs'
+import { withRetry } from './lib/net/retry.mjs'
 import { XBA_GATE, ballsOf, fitTable, gateRows, gateVerdict, tablePath, xbaGaps } from './lib/pitch/xwoba.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
@@ -62,13 +63,13 @@ async function build() {
     const file = join(cacheDir, `${day}.csv.gz`)
     if (!existsSync(file)) {
       try {
-        const text = await withRetry(`Savant ${day}`, 4, async () => {
+        const text = await withRetry(async () => {
           const res = await fetch(dayUrl(day))
           const body = await res.text()
           // A day with Final games has balls in play; none means Savant has not posted it yet.
           if (!res.ok || !csvObjects(body)[0]?.pitch_type) throw new Error(`HTTP ${res.status}, no rows`)
           return body
-        })
+        }, { tries: 4, delayMs: 2500, label: `Savant ${day}` })
         // Savant cuts a reply at 25,000 rows with no error. A day of balls in play is near 800.
         if (csvObjects(text).length >= 25000) throw new Error(`${day}: 25,000 rows, the reply is cut`)
         await writeFile(file, gzipSync(text))

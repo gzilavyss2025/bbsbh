@@ -138,6 +138,7 @@ export function pitchCardInfo(feed, play) {
     const pd = e.pitchData ?? {}
     const co = pd.coordinates ?? {}
     const no = e.pitchNumber ?? i + 1
+    // Strict on purpose (not numOrNull): the feed's pitch fields are numbers, and a stray string or boolean must read as missing.
     const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
     const hitData = e.hitData
     return {
