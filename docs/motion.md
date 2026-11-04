@@ -187,8 +187,10 @@ as a game quietly running.
 
 `sc-seal-breathe` (opacity 1 → 0.82, no scale) is the scorecard sheet's own,
 referenced where it stands in `styles/scorecard/box.css` rather than promoted —
-that file is in `index.css`'s core list, so the keyframe is always defined, and
-a keyframe resolves by name wherever it was declared. The frontier seal runs it,
+that file is in the scorecard route chunk (`styles/scorecard/index.css`, imported by
+`ScorecardPage.jsx`), so the keyframe is defined only while the scorecard is open, and
+a keyframe resolves by name wherever it was declared. A core rule that runs a scorecard
+keyframe needs its own copy in core: `sc-stamp` lives in `motion/playbyplay.css`. The frontier seal runs it,
 byte for byte what `.sc-ab__seal` runs — scoped to `.pagenav--innings`, because
 `.btn--reveal` is the kraft skin and not the frontier. A live game's lineup page
 wears it on "Catch up to live" (the home slate wore it on "Reveal all results"

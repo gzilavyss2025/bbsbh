@@ -1,0 +1,10 @@
+/* The scorecard's partials in cascade order, imported by the screens that draw it. */
+@import './grid.css';
+@import './box.css';
+@import './page.css';
+@import './footer.css';
+@import './lens.css';
+@import './lens-bar.css';
+@import './lens-cards.css';
+@import './lens-carry.css';
+@import '../motion/scorecard-lens.css';

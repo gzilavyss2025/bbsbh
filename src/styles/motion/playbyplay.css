@@ -18,7 +18,7 @@
    action in the product.
 
    BEATS 3 AND 4 ARE THE SCORECARD SHEET'S OWN, unchanged: @keyframes sc-ink
-   and sc-stamp, declared in styles/scorecard/box.css, with their own delays.
+   and sc-stamp, declared below (the scorecard's box.css runs it too), with their own delays.
    This extends that vocabulary to the feed rather than inventing a second one.
    --ease-press on the stamp is the system's single ease-IN, which exists
    because a stamp is pushed.
@@ -62,6 +62,22 @@
 .pbp__atbat--writing .pbp__leg {
   stroke-dasharray: 43;
   animation: leg-trace 180ms var(--ease-out) calc(280ms + var(--leg-i, 0) * 60ms) backwards;
+}
+/* The scorecard's stamp-in, here because a core rule runs it and scorecard/ is a
+   route chunk. A keyframe resolves by name, so box.css still runs it. */
+@keyframes sc-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes leg-trace {
   from {

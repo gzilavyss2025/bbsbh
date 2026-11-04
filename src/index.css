@@ -183,14 +183,6 @@
 @import './styles/38-umpire-pages.css';
 @import './styles/39-manager-page.css';
 @import './styles/40-game-modals.css';
-@import './styles/scorecard/grid.css';
-@import './styles/scorecard/box.css';
-@import './styles/scorecard/page.css';
-@import './styles/scorecard/footer.css';
-@import './styles/scorecard/lens.css';
-@import './styles/scorecard/lens-bar.css';
-@import './styles/scorecard/lens-cards.css';
-@import './styles/scorecard/lens-carry.css';
 @import './styles/44-pre-game-cards.css';
 @import './styles/46-consent-modal.css';
 /* The JUMP BAR (#1883): HubTabBar variant="anchor". */
@@ -243,7 +235,6 @@
 @import './styles/motion/strike.css';
 @import './styles/motion/playbyplay.css';
 @import './styles/motion/innings.css';
-@import './styles/motion/scorecard-lens.css';
 @import './styles/motion/stamp-in.css';
 @import './styles/motion/player-rise.css';
 @import './styles/motion/menurail.css';
@@ -323,6 +314,10 @@
                               partial cannot exist. Every selector in it is
                               .dlab__*, shared with no other partial, and only
                               that one unlisted route loads it.)
+     scorecard/*  motion/scorecard-lens   screens/Scorecard.jsx (the game scorecard and
+                              /scorecard-lab), screens/animlab/motionDemos.jsx
+                              (the box-score partials stay: tests pin their place
+                              and `.plink` out-ranks them if they move)
      scout/scout              screens/scout/ScoutPage.jsx (/scout, #1410) —
                               .scout__* only, a SUBDIRECTORY for the same
                               file-budget reason as designlab/)

@@ -1,3 +1,4 @@
+import '../../styles/scorecard/index.css'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../../hooks/revealProgressCore.js'

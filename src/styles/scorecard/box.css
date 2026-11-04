@@ -6,8 +6,9 @@
    hand-edited corner, the reveal frontier's kraft seal and the turn handoff.
    Split out of grid.css at the 600-line file cap (ADR-0038); grid.css draws
    the grid AROUND these boxes and page.css is the page chrome around that.
-   Imported by index.css between the two, so the cascade order is exactly what
-   one file's top-to-bottom order was.
+   Imported through scorecard/index.css (grid, box, page in that order), so the
+   cascade order is exactly what one file's top-to-bottom order was. sc-stamp's
+   @keyframes lives in motion/playbyplay.css, which core rules also run.
    ============================================================ */
 /* ---- One at-bat box ---- */
 .sc-ab {
@@ -292,20 +293,6 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@keyframes sc-stamp {
-  0% {
-    opacity: 0;
-    transform: scale(1.6);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(0.92);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 .sc-ab__main {
