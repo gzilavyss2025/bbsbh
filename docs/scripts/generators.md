@@ -2152,6 +2152,19 @@ Re-run only to fold in a new season.
 
 ## Assets / off-app
 
+- `perf/measure.mjs` — NOT a generator and NOT on any cron or in `npm test`: a hand-run
+  throttled-phone measurement (#2906, plan #2905). Run `npm run build` first; it starts
+  `vite preview` itself and drives Chromium at 390x844, CPU 4x, ~6 Mbps / 150 ms. It loads
+  the route (default `/?nointro`; pass another as the first argument), waits 6 s, then
+  scrolls 30 x 400 px, and prints a markdown table: FCP, LCP and its element, CLS on load
+  and during the scroll (separate), long tasks, element count, requests by type and host.
+  Each metric is the median of `--runs N` (default 5) with min–max. Flags: `--storage
+  empty|warm` (first visit, or a return visit after one priming load), `--sw` (service
+  worker on: precache files and KB, then a second visit), `--sources` (the elements behind
+  each layout shift), `--date YYYY-MM-DD` (that day's slate; pick an in-season date from
+  `docs/test-games.md`), `--wait S`. Set `CHROME_PATH` (cloud: `/opt/pw-browsers/chromium`)
+  when the Playwright in `node_modules` wants a Chromium build that is not installed.
+
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
   layer over the research JSON under `.scratch/` and `public/data/`, and the first
   thing a research spike opens (#1117). Before a spike pulls anything from
