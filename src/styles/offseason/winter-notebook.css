@@ -1,0 +1,160 @@
+/* The winter home page's at-bat story rows (LongAtBats.jsx). Split out of
+   winter-home.css (2026-11-04); imported right after it, so the cascade is
+   unchanged. The one-card redesign that overrides these is
+   winter-long-at-bats.css. */
+/* ---------------------------------------------------------------------------
+   THE AT-BAT STORIES — the twelve-pitch note's rows, issue #1078.
+
+   This is the /fouls page's "Most fouls in one plate appearance" row, brought
+   over on purpose: the batter's face pinned left, the pitcher's pinned right,
+   their names and clubs facing each other across the count. A long at-bat is
+   two men refusing to give in, and a table row cannot draw that.
+
+   WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
+   line carries the score, the inning, the outs, the bases and what the at-bat
+   finally did. Every one of those is a result, and this note is on the SLATE,
+   offering games a reader has not scored (ADR-0081). The slot holds the date
+   instead — the one thing about the at-bat that opens its game without saying
+   a word about it.
+
+   The classes are the note's own rather than .storypa-row's, because
+   43-foul-tracker.css is component-imported by that page alone and pulling 877
+   lines of foul-tracker chrome onto the home slate to reuse forty of them would
+   be a bad trade. The shared version is the design lab's job (issues
+   #1112-1114). The box itself is the canonical Card already (#1113).
+   --------------------------------------------------------------------------- */
+/* THE NOTEBOOK ROW — three stamped cards: the census figure, the longest
+   at-bat drawn one square per pitch, the next longest as bars against it. */
+/* layout-exempt: notebook row, figure 1 : longest 1.4 : rest 1.4 */
+.seasonnote__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+@media (min-width: 740px) {
+  .seasonnote__row {
+    grid-template-columns: 1fr 1.4fr 1.4fr;
+  }
+}
+.seasonnote__row > .card {
+  min-width: 0;
+}
+.seasonnote__what {
+  margin: 0 0 var(--space-2);
+}
+/* layout-exempt: face, name, vs, name, face on one line */
+.seasonnote__pair {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.seasonnote__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+/* layout-exempt: name over club */
+.seasonnote__who {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.seasonnote__who--pitcher {
+  text-align: right;
+}
+.seasonnote__who .seasonnote__name {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  letter-spacing: var(--ls-caps);
+}
+.seasonnote__club {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.seasonnote__vs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* layout-exempt: a row of pitch squares that wraps */
+.seasonnote__pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  list-style: none;
+  margin: var(--space-3) 0;
+  padding: 0;
+}
+.seasonnote__pip {
+  width: 12px;
+  height: 12px;
+  background: var(--text-heading);
+}
+/* layout-exempt: count left, game door right */
+.seasonnote__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.seasonnote__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+.seasonnote__when {
+  gap: var(--space-1h);
+}
+.seasonnote__bars {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+/* layout-exempt: name and count over a full-width bar */
+.seasonnote__barrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-2);
+  padding: var(--space-1h) 0;
+  color: inherit;
+  text-decoration: none;
+}
+.seasonnote__barname {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seasonnote__barn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+.seasonnote__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--border-hairline);
+}
+.seasonnote__bar > span {
+  display: block;
+  height: 100%;
+  background: var(--text-heading);
+}
+a.seasonnote__barrow:hover .seasonnote__barname {
+  color: var(--text-heading);
+  text-decoration: underline;
+}
+.wirefacts__close {
+  display: flex;
+  margin: var(--space-2) auto 0;
+}
+

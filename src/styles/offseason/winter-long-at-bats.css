@@ -1,0 +1,463 @@
+/* The longest at-bats card (LongAtBats.jsx), redesigned 2026-11-03. Split
+   out of winter-home.css (2026-11-04); imported after winter-notebook.css,
+   whose rows it overrides, and before winter-home-phone.css. */
+/* THE NOTEBOOK AS ONE CARD — the longest at-bat left, the next longest right,
+   every length in the same pitch squares, the census one line under both. */
+.seasonnote__sheet .seasonnote__row {
+  margin-top: 0;
+  gap: var(--space-5);
+}
+@media (min-width: 740px) {
+  .seasonnote__sheet .seasonnote__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .seasonnote__sheet .seasonnote__rest {
+    border-left: var(--bw-hair) solid var(--border-hairline);
+    padding-left: var(--space-5);
+  }
+}
+/* layout-exempt: the big count and its word on one baseline */
+.seasonnote__sheet .seasonnote__big {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+.seasonnote__sheet .seasonnote__big .seasonnote__n {
+  margin: 0;
+}
+.seasonnote__sheet .seasonnote__pips {
+  margin: var(--space-2) 0 var(--space-4);
+}
+.seasonnote__sheet .seasonnote__when {
+  margin-top: var(--space-3);
+}
+.seasonnote__sheet .seasonnote__bars {
+  margin-bottom: var(--space-3);
+}
+/* layout-exempt: a row of small pitch squares under the name */
+.seasonnote__minipips {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 2px;
+}
+.seasonnote__minipips > span {
+  width: 8px;
+  height: 8px;
+  background: var(--text-heading);
+}
+.seasonnote__census {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* One paragraph per player on a wide card; the joined sentence elsewhere. */
+.wire__split { display: none; }
+@media (min-width: 740px) {
+  .oseason__list .wire__cutline--joined { display: none; }
+  .oseason__list .wire__split { display: block; }
+  .oseason__list .wire__split > .wire__cutline + .wire__cutline { margin-top: var(--space-2); }
+  /* The faces float so a long split card's text wraps under them. */
+  .oseason__list .wire__row:has(.wire__split) {
+    display: flow-root;
+  }
+  .oseason__list .wire__row:has(.wire__split) .wire__faces {
+    float: left;
+    margin: 0 var(--space-3) var(--space-2) 0;
+  }
+  .oseason__list .wire__row:has(.wire__split) .wire__body {
+    display: block;
+  }
+  .oseason__list .wire__row:has(.wire__split) .wire__kicker {
+    float: right;
+    margin: 0 0 var(--space-2) var(--space-3);
+  }
+}
+
+/* The matchup as two stacked broadcast lines: face, role over name, club. */
+.seasonnote__matchup {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* layout-exempt: face, name, club mark on one line */
+.seasonnote__side {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.seasonnote__sheet .seasonnote__side .seasonnote__shot {
+  width: var(--shot-sm-w, 40px);
+  height: var(--shot-sm-h, 48px);
+}
+.seasonnote__role {
+  color: var(--text-caption);
+}
+/* layout-exempt: club mark over its abbreviation */
+.seasonnote__team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.seasonnote__zone {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: var(--space-2) auto var(--space-3);
+}
+/* Next longest runs full width under the at-bat, two columns of rows. */
+.seasonnote__sheet .card__body > .seasonnote__rest {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+@media (min-width: 740px) {
+  .seasonnote__sheet .card__body > .seasonnote__rest {
+    border-left: 0;
+    padding-left: 0;
+  }
+  /* layout-exempt: a fixed two-column list, not auto-fit */
+  .seasonnote__sheet .card__body > .seasonnote__rest .seasonnote__bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-5);
+  }
+  .seasonnote__sheet .seasonnote__row .seasonnote__zone {
+    margin-top: 0;
+    max-width: 340px;
+  }
+}
+.seasonnote__bug {
+  margin: var(--space-3) 0 var(--space-2);
+}
+/* Gameday's band, sized for a card: one full-width strip, inning, bases and outs in a row. */
+.seasonnote__bug .inhead { display: block; margin: 0; box-shadow: none; height: 72px; overflow: hidden; } /* raw-value-exempt: the card's band height */
+.seasonnote__bug .inhead__bars { display: none; }
+.seasonnote__bug .inhead__strip { min-height: 0; height: 100%; grid-template-columns: 56px minmax(0, 1fr) auto minmax(0, 1fr) 56px; }
+.seasonnote__bug .inhead__center { flex-direction: row; justify-content: center; align-items: center; gap: var(--space-3); padding: 0 var(--space-3); }
+.seasonnote__bug .inhead .inhead__runs { font-size: var(--fs-num-xl, 2.25rem); top: -0.06em; }
+.seasonnote__bug .inhead__runs--away { padding-right: var(--space-2); }
+.seasonnote__bug .inhead__runs--home { padding-left: var(--space-2); }
+/* layout-exempt: restyles Gameday's scorebug outs stack inside the card */
+.seasonnote__bug .inhead__outs { flex-direction: column; }
+.seasonnote__bug .inhead .basestate { width: 32px; height: 32px; } /* raw-value-exempt: bases fill the band */
+.seasonnote__bug .inhead__half .teamlogo { width: 46px !important; height: 46px !important; } /* raw-value-exempt: marks fill the band */
+.seasonnote__bug .inhead__half--away .teamlogo { translate: -28% 0; }
+.seasonnote__bug .inhead__half--home .teamlogo { translate: 28% 0; }
+.seasonnote__zonewrap {
+  position: relative;
+  max-width: 340px;
+  margin: 0 auto;
+}
+.seasonnote__zonewrap .strikezone__dot { cursor: pointer; }
+/* layout-exempt: the pitch dot beside its facts */
+.seasonnote__tip {
+  position: absolute;
+  z-index: var(--z-raised);
+  transform: translate(12px, -50%);
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--text-heading);
+  box-shadow: 3px 3px 0 var(--text-heading);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.seasonnote__tip p { margin: 0; }
+.seasonnote__tiptype {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.seasonnote__tipmeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* The result as Gameday's band calls it: a navy plate, the event shouted in
+   the display face with the marker stripe under it, the play in cream. */
+.seasonnote__result {
+  max-width: 340px;
+  margin: var(--space-3) auto 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  border-left: var(--space-1h) solid var(--marker);
+}
+#root .seasonnote__result .seasonnote__what {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink-bright);
+}
+.seasonnote__resulttext {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-on-ink-cream);
+}
+/* The date rides the count's line, right, as the game's door. */
+.seasonnote__sheet .seasonnote__big .seasonnote__when {
+  margin: 0 0 0 auto;
+  align-self: center;
+  display: inline-flex;
+  gap: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+  text-decoration: none;
+}
+.seasonnote__sheet .seasonnote__big .seasonnote__when:hover { text-decoration: underline; }
+
+/* THE MATCHUP AS TWO BROADCAST TILES: each in its club's colour, the mark a
+   watermark behind, the name shouted, the face cut in at the right. */
+/* layout-exempt: the two matchup tiles, a fixed pair side by side */
+.seasonnote__sheet .seasonnote__matchup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  border-top: 0;
+  margin-top: var(--space-2);
+}
+.seasonnote__sheet .seasonnote__side {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0;
+  min-height: 112px;
+  padding: 0 0 0 var(--space-3);
+  border: var(--bw-rule, 2px) solid var(--text-heading);
+  background: var(--side-club, var(--surface-stamped-ink));
+  color: var(--text-on-ink-bright);
+}
+.seasonnote__sidemark {
+  position: absolute;
+  left: -18px;
+  top: -14px;
+  opacity: 0.18;
+  pointer-events: none;
+}
+.seasonnote__sheet .seasonnote__side .seasonnote__who {
+  position: relative;
+  align-self: center;
+  min-width: 0;
+}
+#root .seasonnote__side .seasonnote__role {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--marker);
+}
+#root .seasonnote__side .seasonnote__name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink-bright);
+}
+#root .seasonnote__side .seasonnote__club {
+  color: var(--text-on-ink-soft);
+}
+.seasonnote__sheet .seasonnote__side .seasonnote__shot {
+  position: relative;
+  flex: none;
+  width: 84px;
+  height: 104px;
+  background: transparent !important;
+}
+.seasonnote__sheet .seasonnote__side .seasonnote__shot { border: 0; box-shadow: none; }
+.seasonnote__sheet .seasonnote__side .seasonnote__shot img { object-position: bottom; }
+/* The census as a picker under the tiles: a row shows its at-bat above. */
+.seasonnote__longest .seasonnote__rest {
+  margin-top: var(--space-4);
+}
+.seasonnote__longest .seasonnote__bars {
+  margin-bottom: var(--space-3);
+}
+button.seasonnote__barrow {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  padding: var(--space-1h) var(--space-2);
+  border-left: var(--space-1) solid transparent;
+}
+button.seasonnote__barrow:hover .seasonnote__barname { text-decoration: underline; }
+button.seasonnote__barrow[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--marker) 22%, transparent);
+  border-left-color: var(--marker);
+}
+/* A census row: the count big at left, batter over pitcher with their marks,
+   the date over the result at right. */
+/* layout-exempt: count, names, date in fixed tracks per row */
+#root button.seasonnote__barrow {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+#root button.seasonnote__barrow .seasonnote__barn {
+  font-size: var(--fs-num-md);
+  text-align: center;
+}
+/* layout-exempt: batter over pitcher */
+.seasonnote__barwho { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* layout-exempt: mark beside name */
+.seasonnote__barside { display: flex; align-items: center; gap: var(--space-1h); min-width: 0; }
+#root .seasonnote__barrow .seasonnote__barname {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#root .seasonnote__barrow .seasonnote__barname--p { color: var(--text-caption); font-weight: var(--w-regular, 500); }
+/* layout-exempt: date over result, right */
+.seasonnote__barmeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.seasonnote__barevent {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+#root .seasonnote__longest .seasonnote__rest { border-left: 0; padding-left: 0; }
+.seasonnote__barpost { color: var(--text-heading); }
+
+/* SPACING PASS: two equal columns, one gap everywhere, the zone and its
+   result filling their column edge to edge so both columns share edges. */
+@media (min-width: 740px) {
+  .seasonnote__sheet .seasonnote__row {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-5);
+    align-items: start;
+  }
+}
+/* layout-exempt: the left column, one gap between every block */
+.seasonnote__sheet .seasonnote__longest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.seasonnote__sheet .seasonnote__longest > * { margin: 0; }
+.seasonnote__sheet .seasonnote__big { align-items: baseline; }
+.seasonnote__sheet .seasonnote__bug { margin: 0; }
+.seasonnote__sheet .seasonnote__matchup { margin: 0; gap: var(--space-3); }
+#root .seasonnote__longest .seasonnote__rest { margin: 0; padding: 0; }
+.seasonnote__longest .seasonnote__bars { margin: 0 0 var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
+/* layout-exempt: the zone column, same gap */
+.seasonnote__zonecol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.seasonnote__zonecol .seasonnote__zonewrap,
+.seasonnote__zonecol .seasonnote__result,
+.seasonnote__sheet .seasonnote__row .seasonnote__zone {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+.seasonnote__sheet .seasonnote__census { margin-top: var(--space-4); }
+.seasonnote__play {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-raised);
+}
+.seasonnote__scene { width: 100%; }
+#root .seasonnote__barrow .seasonnote__barname {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui, var(--fs-small));
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+}
+/* The list scrolls in its own box, five rows tall. */
+.seasonnote__longest .seasonnote__bars {
+  max-height: calc(5 * 55px); /* raw-value-exempt: five list rows */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* House scroller: no bar, a paper fade at the foot says there is more. */
+.seasonnote__longest .seasonnote__bars {
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); /* raw-value-exempt: the fade's depth */
+}
+.seasonnote__longest .seasonnote__bars::-webkit-scrollbar { display: none; }
+#root button.seasonnote__barrow { grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: var(--space-2); }
+#root button.seasonnote__barrow .seasonnote__barn { text-align: left; font-size: var(--fs-small); }
+/* The club filter: a strip of marks across the card's head, scrolling sideways. */
+/* layout-exempt: one sideways strip of club marks */
+.seasonnote__clubs {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seasonnote__clubs::-webkit-scrollbar { display: none; }
+/* layout-exempt: centres one club mark in its button */
+.seasonnote__clubpick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--space-1h);
+  border: var(--bw-hair) solid transparent;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+}
+.seasonnote__clubpick:hover { opacity: 1; }
+.seasonnote__clubpick[aria-pressed='true'] {
+  opacity: 1;
+  border-color: var(--text-heading);
+  background: color-mix(in srgb, var(--marker) 22%, transparent);
+}
+.seasonnote__clubpick--all {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.seasonnote__barpost {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.seasonnote__longest .seasonnote__bars[data-end='true'] { mask-image: none; }

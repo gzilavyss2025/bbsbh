@@ -59,7 +59,7 @@ const BOXED_HOSTS = [
   ['25-wide-layout.css', '.wirerail__door'],
   ['offseason/winter-home.css', '.oseason__door'],
   ['78-offseason.css', '.srecord__door'],
-  ['offseason/winter-home.css', '.seasonnote__when'],
+  ['offseason/winter-notebook.css', '.seasonnote__when'],
 ]
 // A control with a text label, and a glyph that opens a note: ink, no rule.
 const TEXT_CONTROLS = [
