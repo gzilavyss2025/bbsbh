@@ -548,7 +548,6 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   diamond then simply offers no handle. The path itself is pure geometry a tier
   down in `src/lib/ballpark/ballFlight.js`, whose bow depth is the ball's own
   apex height in feet (`test/ball-flight.test.js`).
-  The side-view maths (`elevationArc` in that module) has no renderer now; `test/elevation-arc.test.js` still covers it.
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches

@@ -1,7 +1,7 @@
 // The real wall in the side view (#1771, docs/contact-replay.md §7.1): how far the park's fence is, and how
 // tall, along the line of ONE batted ball. Pure and spoiler-free: it reads static park geometry
 // (resolveBallparkLayout) and the ball's landing coordinate, which the replay already holds inside the reveal.
-// The wall itself is wallOnLine, the one the Elevation Arc draws, so the two side views cannot disagree.
+// The wall itself is wallOnLine, the one the Gameday scene draws, so the two side views cannot disagree.
 import { ballBearing, wallOnLine } from '../ballpark/ballFlight.js'
 import { hitCoordToSvg } from '../ballpark/hitProjection.js'
 
