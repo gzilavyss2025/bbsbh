@@ -47,10 +47,18 @@ export function careerWarRanking(live, shards, { poolSize = Infinity } = {}) {
 // or when he was in the minors recently enough that this season could still add
 // to it. Everyone else — the established big leaguer whose last option was
 // years ago — is skipped, which is the great majority after the first run.
-export function needsScan(entry, season) {
+//
+// `latestFinal` (YYYY-MM-DD) is the date of the latest minor-league game gone
+// Final. A recent player's stints only grow when a game is played, so one
+// scanned AFTER that date is skipped: all offseason, that is everyone. Without
+// it 1,242 of 1,472 players were re-walked every night of the 2026 winter.
+// Unknown (undefined) or no scan date on the entry: re-walk.
+export function needsScan(entry, season, latestFinal) {
   if (!entry || entry.scanned !== season) return true
   const lasts = Object.values(entry.stints ?? {}).map((s) => s?.last ?? 0)
-  return lasts.length === 0 || Math.max(...lasts) >= season - 1
+  const recent = lasts.length === 0 || Math.max(...lasts) >= season - 1
+  if (!recent) return false
+  return latestFinal == null || !entry.scannedOn || entry.scannedOn <= latestFinal
 }
 
 // Invert player → clubs into club → players: each current affiliate's alumni,

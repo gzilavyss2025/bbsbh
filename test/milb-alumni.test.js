@@ -65,6 +65,28 @@ test('needsScan re-walks a player cached with no minor-league stints at all', ()
   assert.equal(needsScan({ scanned: 2026, stints: {} }, 2026), true)
 })
 
+// The third argument is the date of the latest minor-league Final. A recent
+// player's stints can only grow when a game is played, so once he was scanned
+// after the last Final (the whole offseason: last Final 2026-09-26) he is
+// skipped. Without it 1,242 of 1,472 players were re-walked every night.
+test('needsScan skips a recent player scanned after the latest minor-league Final', () => {
+  const entry = { scanned: 2026, scannedOn: '2026-11-04', stints: { 556: { g: 30, first: 2025, last: 2026 } } }
+  assert.equal(needsScan(entry, 2026, '2026-09-26'), false)
+  assert.equal(needsScan({ scanned: 2026, scannedOn: '2026-11-04', stints: {} }, 2026, '2026-09-26'), false)
+})
+
+test('needsScan re-walks a recent player when a game went Final on or after his scan', () => {
+  const entry = { scanned: 2026, scannedOn: '2026-08-05', stints: { 556: { g: 30, first: 2025, last: 2026 } } }
+  assert.equal(needsScan(entry, 2026, '2026-08-05'), true)
+  assert.equal(needsScan(entry, 2026, '2026-08-06'), true)
+})
+
+test('needsScan re-walks a recent player with no scan date, or when the latest Final is unknown', () => {
+  const recent = { 556: { g: 30, first: 2025, last: 2026 } }
+  assert.equal(needsScan({ scanned: 2026, stints: recent }, 2026, '2026-09-26'), true)
+  assert.equal(needsScan({ scanned: 2026, scannedOn: '2026-11-04', stints: recent }, 2026, undefined), true)
+})
+
 // ---- alumniByTeam -----------------------------------------------------------
 
 const AFFILIATES = new Set(['556', '5015'])

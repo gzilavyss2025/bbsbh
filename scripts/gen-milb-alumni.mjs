@@ -153,6 +153,27 @@ async function fetchPeople(ids) {
   return out
 }
 
+// ---- the latest minor-league game gone Final ---------------------------------
+// needsScan skips a recent player scanned after this date. One schedule call,
+// from the oldest scan date in the cache (so no Final between a scan and today
+// is missed) to today. No Final in that window: every scan is current, and the
+// window's start stands in. A failed read returns undefined, and needsScan then
+// re-walks every recent player, as before.
+async function latestMinorLeagueFinal(cache, today) {
+  // Only players whose stints can still grow: a settled career's old scan date
+  // would stretch the window back months and make this one call huge in season.
+  const recent = Object.values(cache).filter((e) => Object.values(e.stints ?? {}).every((t) => (t?.last ?? 0) < season - 1) === false || !Object.keys(e.stints ?? {}).length)
+  const dates = recent.map((e) => e.scannedOn).filter(Boolean).sort()
+  const start = dates[0] ?? today
+  try {
+    const sched = await getJson(`/api/v1/schedule?sportId=${SPORT_IDS.join(',')}&startDate=${start}&endDate=${today}`)
+    const finals = (sched.dates ?? []).filter((d) => (d.games ?? []).some((g) => g.status?.abstractGameCode === 'F' && !['C', 'D'].includes(g.status?.codedGameState)))
+    return finals.at(-1)?.date ?? (dates.length ? '0000-00-00' : undefined)
+  } catch {
+    return undefined
+  }
+}
+
 // ---- run ------------------------------------------------------------------------
 
 const affiliates = await currentAffiliates()
@@ -160,14 +181,17 @@ const ranked = await careerWar()
 console.log(`pool: ${ranked.length} active players, WAR ${ranked[0].war} → ${ranked[ranked.length - 1].war}`)
 
 const cache = await readJsonOr(cachePath, {})
-const stale = ranked.filter((p) => needsScan(cache[p.id], season))
+const today = new Date().toISOString().slice(0, 10)
+const latestFinal = await latestMinorLeagueFinal(cache, today)
+console.log(`latest minor-league Final: ${latestFinal ?? 'unknown (re-walking every recent player)'}`)
+const stale = ranked.filter((p) => needsScan(cache[p.id], season, latestFinal))
 console.log(`scanning ${stale.length} of ${ranked.length} players (${ranked.length - stale.length} cached)`)
 let scanned = 0
 await mapConcurrent(
   stale,
   CONCURRENCY,
   async (p) => {
-    cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
+    cache[p.id] = { stints: await scanPlayer(p.id), scanned: season, scannedOn: today }
     if (++scanned % 100 === 0) console.log(`  scanned ${scanned}/${stale.length}`)
   },
   { strict: true },
