@@ -8,8 +8,9 @@
 //
 // Run by `npm run lint` (so it gates every push). Zero deps, walks src/.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { walk } from './lib/walk.mjs';
 
 const SRC = join(import.meta.dirname, '..', 'src');
 
@@ -65,16 +66,6 @@ function ruleSelector(lines, index) {
   return parts.join(' ').split('{')[0].trim().replace(/\s+/g, ' ');
 }
 
-function cssFiles(dir) {
-  const out = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...cssFiles(full));
-    else if (entry.endsWith('.css')) out.push(full);
-  }
-  return out;
-}
-
 // Blank out /* ... */ comments (even multi-line) while preserving newlines, so
 // line numbers stay accurate and prose mentioning these values isn't flagged.
 function stripComments(src) {
@@ -83,7 +74,7 @@ function stripComments(src) {
 
 // Read every file once: comment-stripped lines for the cascade, raw lines for
 // the marker (stripComments blanks it).
-const files = cssFiles(SRC).map((file) => {
+const files = walk(SRC, { exts: ['.css'] }).map((file) => {
   const raw = readFileSync(file, 'utf8').split('\n');
   return { file, raw, lines: stripComments(raw.join('\n')).split('\n') };
 });

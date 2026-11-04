@@ -45,8 +45,9 @@
 //
 // Run by `npm run lint` (so it gates every push). Zero deps, walks src/.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
+import { walk } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const SRC = join(ROOT, 'src')
@@ -68,16 +69,6 @@ const ALL_CLASSES = new Set([
   'mixed',
   'spoiler-free',
 ])
-
-function sourceFiles(dir) {
-  const out = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) out.push(...sourceFiles(full))
-    else if (entry.endsWith('.jsx') || entry.endsWith('.js')) out.push(full)
-  }
-  return out
-}
 
 const rel = (file) => relative(SRC, file).replace(/\\/g, '/')
 
@@ -129,7 +120,7 @@ try {
 const entries = manifest.modules ?? {}
 
 // --- 1 + 2: completeness, both directions ---------------------------------
-const onDisk = sourceFiles(API)
+const onDisk = walk(API, { exts: ['.js', '.jsx'] })
   .map((f) => relative(API, f).replace(/\\/g, '/'))
   .sort()
 
@@ -188,7 +179,7 @@ for (const [file, entry] of Object.entries(entries)) {
 }
 
 // --- 4: containment --------------------------------------------------------
-const files = sourceFiles(SRC)
+const files = walk(SRC, { exts: ['.js', '.jsx'] })
 const parsed = new Map(files.map((f) => [f, stripComments(readFileSync(f, 'utf8'))]))
 
 for (const [file, entry] of Object.entries(entries)) {

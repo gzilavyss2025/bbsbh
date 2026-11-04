@@ -49,8 +49,8 @@
 //
 // Zero deps. Run by `npm run lint`.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { listSheets } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 
@@ -319,16 +319,8 @@ export function countSheet(rel, raw) {
   return { regex, chars, bare: [...new Set(bare)] }
 }
 
-export function listSheets(dir, prefix = 'src/styles/') {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return listSheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css') ? [{ rel: `${prefix}${f}`, raw: readFileSync(abs, 'utf8') }] : []
-  })
-}
-
 function main() {
-  const sheets = listSheets(join(ROOT, 'src/styles')).sort((a, b) => a.rel.localeCompare(b.rel))
+  const sheets = listSheets()
 
   // A guard that stops guarding still prints its tick, which reads as coverage.
   // Count first (check-focus-ring.mjs's guard): if the partials ever move or

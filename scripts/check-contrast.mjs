@@ -23,8 +23,9 @@
 // deps. If you intentionally retune a color, update the hex until this passes —
 // don't loosen a threshold.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { relative, resolve } from 'node:path'
+import { toPosix, walk } from './lib/walk.mjs'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' with { type: 'json' }
 import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json' }
@@ -174,14 +175,7 @@ function commentText(src, isJs) {
   return [...blocks, ...lineComments].join('\n')
 }
 
-function claimFiles(dir, ext, out = []) {
-  for (const entry of readdirSync(resolve(dir))) {
-    const full = `${dir}/${entry}`
-    if (statSync(resolve(full)).isDirectory()) claimFiles(full, ext, out)
-    else if (entry.endsWith(ext)) out.push(full)
-  }
-  return out
-}
+const claimFiles = (dir, ext) => walk(resolve(dir), { exts: [ext] }).map((f) => toPosix(relative(resolve('.'), f)))
 
 const claimFailures = []
 const CLAIM_SCAN = [
