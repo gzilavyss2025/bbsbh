@@ -151,3 +151,13 @@ No open issue duplicated any of them; gzilavyss2025/bbsbh#1817 (the 2026-10-08 a
 | B4 Design Lab scout prototype | https://github.com/gzilavyss2025/bbsbh/issues/2840 |
 | B5 migrate-contract-row-keys | https://github.com/gzilavyss2025/bbsbh/issues/2841 |
 | B6 expresslane/rail.js | https://github.com/gzilavyss2025/bbsbh/issues/2842 |
+
+## Decisions (Gary, 2026-11-04 interview)
+
+1. **Test policy:** a cleanup PR may delete a test whose only subject is the dead code it removes. The PR lists each removed test. Tests that cover live code are never loosened.
+2. **Delivery:** the orchestrator runs one PR per issue. gzilavyss2025/bbsbh#2833–#2840 and #2842 are now `ready-for-agent`.
+3. **What's Brewing (#2837):** delete the parser and `scripts/scan-game-notes-insights.mjs` together.
+4. **migrate-contract-row-keys (#2841):** the migration never ran. The script stays, and #2841 is closed as not planned. Running it is https://github.com/gzilavyss2025/bbsbh/issues/2843 (`ready-for-human`).
+5. **rail.js (#2842):** delete it. The runner tests build their own rows.
+6. **Remaining findings:** one tracking issue, https://github.com/gzilavyss2025/bbsbh/issues/2844.
+7. **Guard:** `check-dead-exports` fails on test-only exports after the cuts land: https://github.com/gzilavyss2025/bbsbh/issues/2845.
