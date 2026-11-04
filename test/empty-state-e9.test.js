@@ -50,7 +50,6 @@ const KEPT = [
   'payboard__empty',
   'umpmodal__empty',
   'oseason__empty',
-  'scout__notposted', // worn by the lab's scout harness (a held tool page)
   'hint--prose',
 ]
 for (const name of KEPT) {

@@ -4,7 +4,7 @@
 **Status:** Design pass, 2026-10-02, then a polish pass the same day (section
 E). No real page exists yet.
 **Prototype:** `/design-lab?nointro#prototypes` (band "Five — prototypes"),
-code in `src/screens/designlab/scout/`. It uses invented data only.
+code was deleted (#2840); the live page `src/screens/scout/` is the reference.
 
 This spec settles four questions: A (the 13 regions), B (the two maps and the
 pitch type), C (controls and states) and D (the head-to-head list). Section E
@@ -55,7 +55,7 @@ first-base side      third-base side      third-base side      first-base side
   R = a right-handed hitter's box: always on the third-base side.
 ```
 
-- `REGION_OF` in `src/screens/designlab/scout/model.js` is the only table. The
+- `REGION_OF` in `src/lib/zone/regions.js` is the only table. The
   stored 5x5 shards do not change. The roll-up is a read-time sum.
 - The existing pitcher shards (`public/data/pitch-command/`) work unchanged.
 - `test/scout-design.test.js` pins the partition: every cell is in one region,
