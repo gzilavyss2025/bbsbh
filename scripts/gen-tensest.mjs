@@ -25,7 +25,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow, isPlayedFinal } from './lib/tensest/tensest.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
@@ -33,7 +33,7 @@ const STATE = join(here, 'data', 'tensest-state.json')
 const CONCURRENCY = 8
 const GAME_TYPES = 'R,F,D,L,W'
 
-const arg = parseArgs(process.argv.slice(2)).season
+const arg = strOpt(parseArgs(process.argv.slice(2)), 'season')
 const season = arg ? Number(arg) : await fetchSeasonInPlay()
 
 const sched = await getJson(

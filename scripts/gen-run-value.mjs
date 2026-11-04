@@ -120,7 +120,7 @@ async function fetchPeople(ids) {
   const map = new Map()
   const people = await getPeople(ids, {
     size: 200,
-    onError: (err) => console.error(`statsapi people chunk: ${err.message} — falling back to Savant names`),
+    onError: (err, i) => console.error(`statsapi people chunk ${i + 1}: ${err.message} — falling back to Savant names`),
   })
   for (const p of people) {
     map.set(String(p.id), {

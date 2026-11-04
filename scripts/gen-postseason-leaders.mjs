@@ -333,7 +333,7 @@ async function main() {
       console.log(`${done}/${pending.length} ingested, checkpointing...`)
       await writeOut()
     }
-  })
+  }, { strict: true }) // a checkpoint write error must fail the run; ingest errors are caught above
   await writeOut()
   console.log(`wrote ${out}`)
 }

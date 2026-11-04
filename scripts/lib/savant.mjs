@@ -68,16 +68,7 @@ export async function fetchSavantCsv(label, url, { attempts = 4, columns = [], a
     if (!rows.length && !allowEmpty) throw new Error('empty response')
     return rows
   }
-  let retries = 0
-  const shouldRetry = (err) => {
-    console.error(`${label}: ${err.message} — retry ${++retries}/${attempts - 1}`)
-    return true
-  }
-  try {
-    return await withRetry(read, { tries: attempts, delayMs: 2500, shouldRetry })
-  } catch (err) {
-    throw new Error(`${label}: ${err?.message ?? 'failed'} after ${attempts} attempts`)
-  }
+  return withRetry(read, { tries: attempts, delayMs: 2500, label })
 }
 
 // Savant's `pitch-arsenal-stats` leaderboard — a direct per-pitch-type join,

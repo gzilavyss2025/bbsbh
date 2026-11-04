@@ -67,9 +67,9 @@ async function build() {
           const res = await fetch(dayUrl(day))
           const body = await res.text()
           // A day with Final games has balls in play; none means Savant has not posted it yet.
-          if (!res.ok || !csvObjects(body)[0]?.pitch_type) throw new Error(`Savant ${day}: HTTP ${res.status}, no rows`)
+          if (!res.ok || !csvObjects(body)[0]?.pitch_type) throw new Error(`HTTP ${res.status}, no rows`)
           return body
-        }, { tries: 4, delayMs: 2500 })
+        }, { tries: 4, delayMs: 2500, label: `Savant ${day}` })
         // Savant cuts a reply at 25,000 rows with no error. A day of balls in play is near 800.
         if (csvObjects(text).length >= 25000) throw new Error(`${day}: 25,000 rows, the reply is cut`)
         await writeFile(file, gzipSync(text))

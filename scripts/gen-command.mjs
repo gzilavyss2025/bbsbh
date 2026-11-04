@@ -26,12 +26,12 @@ import {
   percentileLowerIsBetter,
   pitcherIdsByName,
 } from './lib/opencommand.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'target-command.json')
 
-const seasonArg = parseArgs(process.argv.slice(2)).season
+const seasonArg = strOpt(parseArgs(process.argv.slice(2)), 'season')
 const preferred = seasonArg ? Number(seasonArg) : new Date().getFullYear()
 
 // ONE SEASON, the current one — the same scope gen-savant-percentiles.mjs keeps,

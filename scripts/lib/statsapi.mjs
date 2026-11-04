@@ -121,19 +121,19 @@ export function createStatsapiClient({
 export const getJson = createStatsapiClient().getJson
 
 // The /people rows for `ids`, `size` ids to a call, in id order. `hydrate` and `fields` go on the
-// query as given (the caller encodes), `timeoutMs` goes to each call. A failed call throws; with `onError(err)` it is reported
+// query as given (the caller encodes), `timeoutMs` goes to each call. A failed call throws; with `onError(err, i)` (i = the batch number from 0) it is reported
 // and its ids are left out, for a generator that wants a partial answer over none.
 export async function getPeople(ids, { hydrate, fields, size = 100, concurrency = 1, timeoutMs, onError } = {}) {
   const tail = (hydrate ? `&hydrate=${hydrate}` : '') + (fields ? `&fields=${fields}` : '')
   const batches = await mapConcurrent(
     chunk(ids, size),
     concurrency,
-    async (batch) => {
+    async (batch, i) => {
       try {
         return (await getJson(`/api/v1/people?personIds=${batch.join(',')}${tail}`, { timeoutMs })).people ?? []
       } catch (err) {
         if (!onError) throw err
-        onError(err)
+        onError(err, i)
         return []
       }
     },

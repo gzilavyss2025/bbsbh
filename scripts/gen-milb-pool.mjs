@@ -49,7 +49,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { levelOffseasonPhase } from '../src/lib/time/seasonPhase.js'
 import { movedUpIds, poolSeasonFor, reasonFacts, selectPool } from './lib/milb-pool.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
@@ -77,7 +77,7 @@ const CONCURRENCY = 6
 const args = process.argv.slice(2)
 const opts = parseArgs(args)
 const rebuild = args.includes('--rebuild')
-const onlyLevel = Number(opts.level) || null
+const onlyLevel = Number(strOpt(opts, 'level')) || null
 
 const today = new Date().toISOString().slice(0, 10)
 

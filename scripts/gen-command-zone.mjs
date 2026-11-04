@@ -53,12 +53,12 @@ import {
   playIndex,
   streamPitches,
 } from './lib/opencommand.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'glove-target')
 
-const seasonArg = parseArgs(process.argv.slice(2)).season
+const seasonArg = strOpt(parseArgs(process.argv.slice(2)), 'season')
 const preferred = seasonArg ? Number(seasonArg) : new Date().getFullYear()
 
 // How many dots one pitch type carries to the client. A pitcher throws 500+ of

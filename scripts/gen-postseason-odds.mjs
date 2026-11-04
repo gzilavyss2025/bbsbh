@@ -19,10 +19,9 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
-import { clamp, round1 } from '../src/lib/math/number.js'
+import { clamp, round1, round2 } from '../src/lib/math/number.js'
 import { latestAtOrBefore } from '../src/lib/math/snapshot.js'
 import { writeJsonAtomic } from './lib/io.js'
-import { round2 } from '../src/lib/math/number.js'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'postseason-odds.json')

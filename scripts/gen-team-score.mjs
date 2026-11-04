@@ -28,8 +28,7 @@ import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
-import { round1 } from '../src/lib/math/number.js'
-import { round2 } from '../src/lib/math/number.js'
+import { round1, round2 } from '../src/lib/math/number.js'
 
 export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 

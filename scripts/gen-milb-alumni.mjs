@@ -162,11 +162,13 @@ console.log(`pool: ${ranked.length} active players, WAR ${ranked[0].war} → ${r
 const cache = await readJsonOr(cachePath, {})
 const stale = ranked.filter((p) => needsScan(cache[p.id], season))
 console.log(`scanning ${stale.length} of ${ranked.length} players (${ranked.length - stale.length} cached)`)
+let scanned = 0
 await mapConcurrent(
   stale,
   CONCURRENCY,
   async (p) => {
     cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
+    if (++scanned % 100 === 0) console.log(`  scanned ${scanned}/${stale.length}`)
   },
   { strict: true },
 )

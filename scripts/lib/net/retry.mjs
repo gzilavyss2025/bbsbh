@@ -9,12 +9,15 @@
 // By default every error is retried. A caller narrows that with `shouldRetry`
 // (statsapi's client does: network errors, 429 and 5xx only, never another
 // 4xx). The pause is `delayMs * attempt`, and there is none after the last try.
+//
+// With a `label`, each retry is logged ("label: msg — retry 1/2") and the final error is
+// rethrown as "label: msg after N attempts", so a nightly log says which call died.
 
 import { setTimeout as defaultSleep } from 'node:timers/promises'
 
 export async function withRetry(
   fn,
-  { tries = 3, delayMs = 2000, sleep = defaultSleep, shouldRetry = () => true } = {},
+  { tries = 3, delayMs = 2000, sleep = defaultSleep, shouldRetry = () => true, label } = {},
 ) {
   let lastErr
   for (let attempt = 1; attempt <= tries; attempt += 1) {
@@ -23,8 +26,10 @@ export async function withRetry(
     } catch (err) {
       lastErr = err
       if (attempt >= tries || !shouldRetry(err)) break
+      if (label) console.error(`${label}: ${err.message} — retry ${attempt}/${tries - 1}`)
       await sleep(delayMs * attempt)
     }
   }
+  if (label) throw new Error(`${label}: ${lastErr?.message ?? 'failed'} after ${tries} attempts`)
   throw lastErr
 }
