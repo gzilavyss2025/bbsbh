@@ -2162,8 +2162,11 @@ Re-run only to fold in a new season.
   empty|warm` (first visit, or a return visit after one priming load), `--sw` (service
   worker on: precache files and KB, then a second visit), `--sources` (the elements behind
   each layout shift), `--date YYYY-MM-DD` (that day's slate; pick an in-season date from
-  `docs/test-games.md`), `--wait S`. Set `CHROME_PATH` (cloud: `/opt/pw-browsers/chromium`)
-  when the Playwright in `node_modules` wants a Chromium build that is not installed.
+  `docs/test-games.md`), `--wait S`. It picks a free port and fails if the preview exits.
+  Layout shift is the web-vitals figure (largest session window), split at the moment the
+  scroll starts. The warm and `--sw` visits are primed in a separate page. With `--sw`, CDP
+  throttling does not reach the service-worker target, so the install numbers (precache
+  files and KB, `precache` caches only) are unthrottled.
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
   layer over the research JSON under `.scratch/` and `public/data/`, and the first
