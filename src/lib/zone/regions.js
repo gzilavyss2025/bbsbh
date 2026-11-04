@@ -44,10 +44,6 @@ export function rollUp(cells) {
 // pitch would take, so the cell a pitch is counted in is the cell the map
 // draws, in both views (test/scout-design.test.js pins it).
 export const projX = (px, view) => (view === 'pitcher' ? catcherX(-px) : catcherX(px))
-// A stored column's drawn position, for a card that draws 5x5 cells one by
-// one (CommandMap's way): the stored column itself, mirrored only in the pitcher's view.
-export const drawCol = (col, view) => (view === 'pitcher' ? GRID - 1 - col : col)
-
 // A nominal zone for the map's frame: a season map spans many batters, so it
 // draws one shape (CommandMap does the same). Edges in the normalised units
 // normalizePitch returns; one ring cell is one third of the zone, like a cell.

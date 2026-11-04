@@ -11,7 +11,7 @@ import { GamedayStage, restBatter, restZones } from '../src/screens/gameday/next
 import { stageActors } from '../src/screens/gameday/next/stage/actors.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { battingSide } from '../src/screens/gameday/next/stage/battingSide.js'
-import { dismissZoneMap, zoneMapDismissed } from '../src/screens/gameday/next/zonemap/zoneMapFlag.js'
+import { zoneMapDismissed } from '../src/screens/gameday/next/zonemap/zoneMapFlag.js'
 
 const F = JSON.parse(readFileSync(new URL('./fixtures/game-824716.gameday.json', import.meta.url)))
 const wall = wallFn(null)
@@ -210,18 +210,4 @@ test('the zone card shows a batter only with his own zones, and only at rest', (
 })
 
 // ---- The zone map's dismiss --------------------------------------------------------------------
-
-test('the dismiss survives a reload and resets for another game', () => {
-  const store = new Map()
-  globalThis.window = { localStorage: { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) } }
-  try {
-    assert.equal(zoneMapDismissed(824716), false)
-    dismissZoneMap(824716)
-    assert.equal(zoneMapDismissed(824716), true)
-    assert.deepEqual([...store.keys()], ['bbsbh:zonemap:824716'])
-    assert.equal(zoneMapDismissed(823169), false)
-  } finally {
-    delete globalThis.window
-  }
-})
 

@@ -93,13 +93,8 @@ Object.assign(
   staged('src/api/game.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
   staged('src/api/scout/rosterStats.js', ['resetRosterReads'], 'test seam: clears the roster-read memo between cases, test/world-series/roster-card.test.js.'),
   staged('src/lib/headshot/retry.js', ['resetSiloMisses'], 'test seam: clears the silo-miss set between cases, test/headshot.test.js.'),
-  staged('src/api/gameday/reviews.js', ['reviewsAtStep'], 'test seam for the Gameday review/ABS bank read, test/gameday-reviews.test.js.'),
-  staged('src/lib/ballpark/ballparkGeometry.js', ['plotPercent'], 'test seam for the plot-to-percent mapping HTML overlays share with the SVG, test/overlay-alignment.test.js.'),
   staged('src/lib/ballpark/layout/fenceShape.js', ['fenceProblems'], 'test seam: validates every live ballpark outline, test/ballpark-layouts.test.js.'),
   staged('src/lib/ballpark/layout/resolveLayout.js', ['allBallparkLayouts'], 'test seam: walks every live ballpark layout (coverage report and tests), test/ballpark-layouts.test.js and three more.'),
-  staged('src/lib/zone/regions.js', ['drawCol'], 'test seam for the zone grid mirroring, test/scout-regions.test.js.'),
-  staged('src/lib/reportPages.js', ['REPORT_PAGES'], 'test seam: the flat list derived from PAGE_GROUPS, whose set test/report-pages.test.js pins (check-report-pages.mjs only greps for the name).'),
-  staged('src/screens/gameday/next/zonemap/zoneMapFlag.js', ['dismissZoneMap'], 'test seam: the writer half of the zone-map dismiss store whose reader is live, test/gameday-stage-mount.test.js.'),
   staged('src/lib/pitcherCard/replaySteps.js', ['replaySteps', 'countAt', 'basesAt'], 'Kept on purpose with their tests: the pure models behind the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/contactDraw.js', ['apexLabel', 'distanceLabel', 'sidePathFor'], 'Kept on purpose with their tests: the deleted at-bat replay\'s side view (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/atBat.js', ['markHomeRun'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
@@ -109,12 +104,6 @@ Object.assign(
   staged('src/lib/contracts/parseMoney.js', ['parseMoneyCell'], 'Used by the .scratch contract build scripts (.scratch/contracts/, .scratch/team-success/), which sit outside this guard\'s roots; pinned by test/parse-money.test.js.'),
   staged('src/lib/contracts/positions.js', ['POSITIONS', 'resolveRole'], 'Used by the .scratch contract build scripts (.scratch/contracts-extensions/, .scratch/prospect-value/), which sit outside this guard\'s roots; pinned by test/contracts-positions.test.js.'),
   staged('src/lib/runExpectancy.js', ['lookupEraRE'], 'Staged reader of the per-decade run-expectancy tables (docs/api/static-data.md); no screen reads per-count run expectancy yet. Pinned by test/run-expectancy-eras.test.js.'),
-  staged('src/lib/stampLogoTuning.js', ['stampLogoTuning'], 'test seam for the retroactive stamp-placement store: GameStamp reads stampMarkPlacement, and test/identity-overrides.test.js and test/stamp-art.test.js pin the store\'s own answer through this one.'),
-  staged('src/screens/gameday/next/stage/play.js', ['stateAt'], '(#2573) staged: the per-frame drawing state of the Gameday stage. stagePlay (live) builds the play it reads; the canvas that calls it each frame is not built yet (src/screens/gameday/next/CLAUDE.md). test/gameday-stage.test.js.'),
-  // Files #2850 is changing: revisit after it lands.
-  staged('src/lib/heritage/pass.js', ['passPage'], 'revisit after #2850 (pass.js is on its list). Test: test/heritage-pass.test.js.'),
-  staged('src/screens/gameday/next/hero/heroModel.js', ['ordinal', 'contactLine'], 'revisit after #2850 (heroModel.js is on its list). Test: test/gameday-hero.test.js.'),
-  staged('src/screens/scout/edge/edge.js', ['ledgerScale', 'textOf'], 'revisit after #2850 (edge.js is on its list). Test: test/scout-edge.test.js.'),
 )
 
 const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root), { skip: IGNORE_DIRS }))

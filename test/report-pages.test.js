@@ -2,13 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   PAGE_GROUPS,
-  REPORT_PAGES,
   GUIDES_GROUP,
   TOOLS_GROUP,
   MENU_GROUPS,
   FOOTER_TRAIL,
   isGuidePath,
 } from '../src/lib/reportPages.js'
+
+const REPORT_PAGES = PAGE_GROUPS.flatMap((group) => group.pages)
 
 // reportPages.js grew groups; REPORT_PAGES is derived from them now. The
 // interesting risk is not that a group renders wrong — it's that regrouping

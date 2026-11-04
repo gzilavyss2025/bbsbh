@@ -99,11 +99,3 @@ const isPlayed = (row) => row.status?.abstractGameState === 'Final' &&
   !/^(Postponed|Cancelled)/.test(row.status?.detailedState ?? '')
 
 export const passRecordText = (record) => (record ? `${record.wins}\u2013${record.losses}` : '')
-
-// Tall passes have their own display pagination, never new saved placements.
-export const PASSES_PER_PAGE = 4
-export function passPage(stamps, page) {
-  const pages = Math.max(1, Math.ceil(stamps.length / PASSES_PER_PAGE))
-  const current = Math.max(1, Math.min(pages, Math.trunc(page) || 1))
-  return { pages, current, entries: stamps.slice((current - 1) * PASSES_PER_PAGE, current * PASSES_PER_PAGE) }
-}

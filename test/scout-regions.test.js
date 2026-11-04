@@ -10,7 +10,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { EDGE, GRID, commandCell, inZone, normalizePitch, catcherX, sy } from '../src/lib/zone/zoneGeometry.js'
 import {
-  NOMINAL, REGIONS, REGION_OF, drawCol, platePoints, projX, regionLabel, regionRect, rollUp, sidesInOrder, stanceRect,
+  NOMINAL, REGIONS, REGION_OF, platePoints, projX, regionLabel, regionRect, rollUp, sidesInOrder, stanceRect,
 } from '../src/lib/zone/regions.js'
 
 const VIEWS = ['pitcher', 'hitter']
@@ -49,15 +49,6 @@ test('in both views, a pitch is drawn inside the region it is counted in', () =>
         assert.ok(dx >= x && dx <= x + width && dy >= y && dy <= y + height, `px ${px} pz ${pz} ${view}`)
       }
     }
-  }
-})
-
-test('drawCol (mirrored only in the pitcher’s view) orders cells the way the projection draws them', () => {
-  for (const view of VIEWS) {
-    const xs = [1, 2, 3].map((c) => regionRect(`r2c${c}`, view).x)
-    const order = [1, 2, 3].map((c) => drawCol(c, view))
-    assert.deepEqual(order.map((d) => xs[order.indexOf(d)]), [...xs], view)
-    for (let i = 0; i < 2; i++) assert.equal(Math.sign(order[i + 1] - order[i]), Math.sign(xs[i + 1] - xs[i]), view)
   }
 })
 

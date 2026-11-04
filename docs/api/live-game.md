@@ -653,15 +653,12 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   card. Pinned on gamePk 823035 (`test/gameday-day-line.test.js`).
 - `gameday/stepCut.js` — the cut both modules share: `visibleAtBatCards(feed, inning,
   half, step)` and `stepCutAtBatIndex` (the last on-screen card's `atBatIndex`, or -1).
-- `gameday/reviews.js` (#2607) — `reviewsAtStep(feed, { inning, half, step,
-  revealedThrough })` gives `{ reviews, bank }`. Each review: `kind` (`abs`, `manager`
+- `gameday/reviews.js` (#2607) — `reviewsInPlay(feed, play)` gives the play's reviews. Each: `kind` (`abs`, `manager`
   when a club challenged anything else, `crew` when no club is named), `side`,
   `reason` from MLB's `/api/v1/reviewReasons` (the second letter of `reviewType`),
   `overturned` (null while `inProgress`), the player, and where it happened. ABS records
-  come from `challenges.js`' `challengesForPlay` (one walk for every surface). The bank is
-  `challenges.js`' rules walked to the step, with a refill when a club enters an extra
-  inning empty; null for a game that does not run ABS. Never reads
-  `gameData.absChallenges`. Pinned on gamePk 823036, 823169 and 815625.
+  come from `challenges.js`' `challengesForPlay` (one walk for every surface). Never reads
+  `gameData.absChallenges`. The step-level list and ABS bank (`reviewsAtStep`) were deleted in #2845. Pinned on gamePk 823036 and 823169.
 - `gameday/checkpoint.js` (#2605) — `checkpointPages(feed, { inning, half,
   revealedThrough })` gives the closed half's pages in `PAGE_ORDER` (`tally`,
   `pitching`, then `atBats` and `gameSoFar` as `built: false` until #2572), or null for a

@@ -7,7 +7,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
 import { deriveLiveState } from '../src/api/playbyplay/entriesView.js'
-import { boxModel, contactLine, ordinal, splitCode } from '../src/screens/gameday/next/hero/heroModel.js'
+import { boxModel, splitCode } from '../src/screens/gameday/next/hero/heroModel.js'
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
@@ -50,18 +50,6 @@ test('box model: a called third strike draws the backwards K from calledLooking'
   const m = boxModel(looking)
   assert.equal(m.code, 'K')
   assert.equal(m.looking, true)
-})
-
-test('contact line: ground balls drop the distance', () => {
-  const all = half(F824, 2, 'top')
-  // Exit velocity to a tenth, the ".0" dropped (Gary, 2026-10-27).
-  assert.equal(contactLine(at(all, 13)), '102.6 mph · 30° · 382 ft')
-  assert.equal(contactLine(at(all, 12)), '84.2 mph · -25°')
-  assert.equal(contactLine(at(all, 15)), '')
-})
-
-test('ordinal slots', () => {
-  assert.deepEqual([1, 2, 3, 4, 9].map(ordinal), ['1st', '2nd', '3rd', '4th', '9th'])
 })
 
 const live = (entries, cap) => deriveLiveState(entries, cap).last

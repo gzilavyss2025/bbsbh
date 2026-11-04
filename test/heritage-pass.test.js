@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync, existsSync } from 'node:fs'
-import { factsRecord, heritagePassModel, passCity, passDate, passPage, passRecordText, yearRecordThrough } from '../src/lib/heritage/pass.js'
+import { factsRecord, heritagePassModel, passCity, passDate, passRecordText, yearRecordThrough } from '../src/lib/heritage/pass.js'
 import { stampGameFacts } from '../src/api/logbook.js'
 import { revealStampFacts } from '../src/api/linescore.js'
 import { withSeriesFacts } from '../src/api/game.js'
@@ -64,19 +64,6 @@ test('dates are formatted without timezone shifts and invalid dates are omitted'
   for (const value of ['', null, '2026-02-30', '2026-99-02', '2026-7-7', 'garbage']) {
     assert.equal(passDate(value), '')
   }
-})
-
-test('tall-pass pagination retains every record and clamps after collection changes', () => {
-  const stamps = Array.from({ length: 11 }, (_, gamePk) => ({ gamePk, placement: { page: 8 } }))
-  const before = JSON.stringify(stamps)
-  const pages = [1, 2, 3].map((page) => passPage(stamps, page))
-  assert.equal(pages[0].entries.length, 4)
-  assert.equal(pages[2].entries.length, 3)
-  assert.deepEqual(pages.flatMap((p) => p.entries), stamps)
-  assert.equal(passPage(stamps.slice(0, 2), 3).current, 1)
-  assert.equal(passPage([], 8).pages, 1)
-  assert.equal(passPage(stamps, -4).current, 1)
-  assert.equal(JSON.stringify(stamps), before)
 })
 
 test('facts producers preserve absent metadata instead of asserting MLB regular season', () => {

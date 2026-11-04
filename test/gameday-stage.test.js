@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
 import { HIT_COORD_ORIGIN, HIT_COORD_FT_PER_UNIT } from '../src/lib/ballpark/hitProjection.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
-import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
+import { stagePlay } from '../src/screens/gameday/next/stage/play.js'
 
 const F = JSON.parse(readFileSync(new URL('./fixtures/gameday/stage-824716.json', import.meta.url)))
 const layout = resolveBallparkLayout({ venueId: F.venue.id, venueName: F.venue.name, gameDate: F.officialDate })
@@ -14,14 +14,8 @@ const wall = wallFn(layout)
 const [hr, groundout] = F.plays.map((p) => stagePlay(p, wall))
 const coordFeet = (c) => [(c.coordX - HIT_COORD_ORIGIN.x) * HIT_COORD_FT_PER_UNIT, (HIT_COORD_ORIGIN.y - c.coordY) * HIT_COORD_FT_PER_UNIT]
 
-test('every phase stays overhead, with no close-up poses and a brief pitch', () => {
+test('the pitch and the chase are brief, and a play ends within three seconds', () => {
   for (const play of [hr, groundout, stagePlay({}, wall)]) {
-    for (let t = 0; t <= play.end; t += 0.03) {
-      const st = stateAt(play, t)
-      assert.equal(st.view, 'field')
-      assert.equal(st.batterPose, undefined)
-      assert.equal(st.pitcherPose, undefined)
-    }
     assert.ok(play.t.pitch - play.t.windup <= 0.23)
     assert.ok(play.t.chase - play.t.contact <= 0.85)
     assert.ok(play.end < 3)
@@ -29,7 +23,6 @@ test('every phase stays overhead, with no close-up poses and a brief pitch', () 
 })
 
 test('the abbreviated ball keeps its landing coordinate and the groundout throw', () => {
-  assert.deepEqual(stateAt(hr, hr.t.chase).ballPos, hr.ball.at(hr.ball.T))
   // Over the wall: the path runs on to the coordinate, in the seats.
   const home = hr.ball.at(hr.ball.T)
   const [cx, cy] = coordFeet(F.plays[0].playEvents.at(-1).hitData.coordinates)
@@ -51,7 +44,6 @@ test('a ball with no landing coordinate (tier C) has no chase', () => {
   delete p.playEvents.at(-1).hitData.coordinates
   const play = stagePlay(p, wall)
   assert.equal(play.ball, null)
-  assert.equal(stateAt(play, play.end).view, 'field')
 })
 
 // The feed lists one runner entry per movement, so a single sends a runner 1B to 2B then 2B to 3B
@@ -70,30 +62,3 @@ test('a runner who moves twice is one figure, from his first base to his last', 
   assert.deepEqual(rs.slice(1).map((r) => [r.start, r.end]), [['1B', '3B'], ['2B', '3B'], ['3B', '3B']])
 })
 
-test('runners finish before settling, including all four bases of a home run', () => {
-  const before = stateAt(hr, hr.t.contact)
-  assert.deepEqual(before.runners[0].pos, [0, 0, 0])
-  const rounding = stateAt(hr, hr.t.contact + 0.6)
-  assert.ok(rounding.runners[0].moving)
-  assert.ok(rounding.runners[0].pos[1] > 60)
-  assert.equal(rounding.runners[0].gone, false)
-  const settled = stateAt(hr, hr.t.settle)
-  assert.ok(settled.runners.every((r) => !r.moving && r.gone))
-  assert.deepEqual(settled.runners, stateAt(hr, hr.end + 1).runners)
-  assert.deepEqual(stateAt(groundout, groundout.t.settle).fielders, stateAt(groundout, groundout.end + 1).fielders)
-})
-
-test('a walk and an untracked hit still advance runners and stop on their destination', () => {
-  for (const tracked of [false, true]) {
-    const p = structuredClone(F.plays[0])
-    p.runners = [{ details: { runner: { id: 1 }, playIndex: p.playEvents.at(-1).index }, movement: { start: null, end: '1B', isOut: false } }]
-    if (!tracked) delete p.playEvents.at(-1).hitData.coordinates
-    const play = stagePlay(p, wall), end = stateAt(play, play.end).runners[0]
-    assert.ok(stateAt(play, play.t.contact + 0.1).runners[0].moving)
-    assert.deepEqual(end.pos, [90 / Math.SQRT2, 90 / Math.SQRT2, 0])
-    assert.equal(end.moving, false)
-    assert.equal(end.gone, false)
-  }
-  const walk = stagePlay({ runners: [{ details: { runner: { id: 1 } }, movement: { start: null, end: '1B' } }] }, wall)
-  assert.deepEqual(stateAt(walk, walk.end).runners[0].pos, [90 / Math.SQRT2, 90 / Math.SQRT2, 0])
-})

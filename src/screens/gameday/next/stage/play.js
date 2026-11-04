@@ -9,7 +9,7 @@
 // stage abbreviates their timing. The camera and runner routes do not follow the ball.
 import { realFlight } from '../../../../lib/pitch/pitchFlight.js'
 import { flightPath } from '../../../../lib/gameday/flightPath.js'
-import { BASES, POS, lerp, polar, smooth, v3 } from './scene.js'
+import { BASES, lerp, polar, smooth, v3 } from './scene.js'
 import { clamp } from '../../../../lib/math/number.js'
 
 const BEAT = { ready: 0.08, pitch: 0.22, settle: 0.16, result: 0.5 }
@@ -144,38 +144,3 @@ function runnerDistance(r, ball) {
   return r.end ? Math.max(0, baseIndex(r.end) * 90 - a) : 0
 }
 
-const onPath = (d) => {
-  const c = clamp(d, 0, 360), i = Math.min(3, Math.floor(c / 90))
-  return v3.lerp(BASES[ORDER[i]], BASES[ORDER[i + 1]], (c - i * 90) / 90)
-}
-
-// Everything the drawing needs at t seconds after the tap. The field is always overhead.
-export function stateAt(play, t) {
-  const { t: T, last, ball } = play
-  const phase = t < T.windup ? 'ready' : t < T.pitch ? 'pitch' : t < T.chase ? 'chase' : t < T.advance ? 'advance' : t < T.settle ? 'settle' : 'result'
-  const pitchU = clamp((t - T.windup) / BEAT.pitch, 0, 1)
-  const ballU = clamp((t - T.contact) / (T.chase - T.contact || 1), 0, 1)
-  const ballT = ball ? ballU * ball.T : 0
-  const runners = play.runners.map((r) => {
-    const a = baseIndex(r.start) * 90, distance = runnerDistance(r, ball)
-    const travelled = Math.min(distance, Math.max(0, t - T.contact) * RUN_SPEED)
-    const moving = travelled < distance && t >= T.contact
-    return { id: r.id, pos: onPath(a + travelled), batter: r.start == null, moving,
-      gone: (r.out && !ball && r.start == null) || (r.out && t >= T.advance) || a + travelled >= 360 }
-  })
-  const fielders = { ...POS }
-  if (ball && play.fielder && POS[play.fielder] && t >= T.contact) {
-    const to = [...ball.field.slice(0, 2), 0]
-    fielders[play.fielder] = v3.lerp(POS[play.fielder], to, smooth(ballU))
-  }
-  if (ball?.throw && POS[ball.throw.to] && t >= T.contact) {
-    const bag = ball.throw.target
-    fielders[ball.throw.to] = v3.lerp(POS[ball.throw.to], [bag[0] - Math.sign(bag[0]) * 1.5, bag[1], 0], smooth(ballU))
-  }
-  return {
-    t, phase, play, pitchU, ballT, runners, fielders, view: 'field',
-    pitchPos: last && t >= T.windup && t < T.pitch
-      ? (last.at ? last.at(pitchU) : v3.lerp([0, 60.5, 0], BASES.home, pitchU)) : null,
-    ballPos: ball && t >= T.contact ? ball.at(ballT) : null,
-  }
-}

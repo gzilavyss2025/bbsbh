@@ -204,11 +204,6 @@ export function groupLabelFor(path) {
   return PAGE_GROUPS.find((g) => g.pages.some((p) => p.path === path))?.label ?? BROADCAST_STRAND
 }
 
-// The flat list, derived. test/report-pages.test.js pins the SET (nothing
-// lost, nothing added, no duplicate path), not the order, because the order
-// is the one thing a regrouping is allowed to move.
-export const REPORT_PAGES = PAGE_GROUPS.flatMap((group) => group.pages)
-
 // The guides live at /learn and are NOT React routes — they are server-
 // rendered documents (ADR-0053), which is why they carry a full URL path here
 // and never belonged in REPORT_PAGES. Until now nothing inside the app linked

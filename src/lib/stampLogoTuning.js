@@ -24,7 +24,7 @@
 import bundled from './data/stamp-logo-tuning.json' with { type: 'json' }
 import { liveStore, treatmentRecord } from './tuningStore.js'
 import { registerIdentityStore } from './identity/overlay.js'
-import { markPlacement, resolveMarkPlacement } from './stampArt.js'
+import { markPlacement } from './stampArt.js'
 
 // Registered so a club's mark placement can be retuned at runtime from that
 // club's own team page (src/lib/identity/overlay.js).
@@ -42,12 +42,6 @@ const STORE = registerIdentityStore('stamp-logo-tuning', bundled)
 // — the app wants the resolved placement below.
 export function stampLogoTuningRecord(teamId, side) {
   return treatmentRecord(STORE, String(teamId), side)
-}
-
-// The four numbers, defaulted and clamped — always an answer, so a caller never
-// branches on coverage. An untuned club gets the identity placement.
-export function stampLogoTuning(teamId, side) {
-  return resolveMarkPlacement(stampLogoTuningRecord(teamId, side))
 }
 
 // What GameStamp draws one mark with: the slot, plus the transform (or null) the
