@@ -49,7 +49,7 @@ function Sealable({ ctx, reach = false, quiet = false, children }) {
 }
 
 function Navigator({ ctx }) {
-  const { feed, regulation, unlocked, mark, runsInProgress, curIdx, onSelect, disabled, meta } = ctx
+  const { feed, regulation, unlocked, mark, runsInProgress, curIdx, onSelect, gridHeld, meta } = ctx
   const cols = Array.from({ length: Math.max(regulation, unlocked) }, (_, i) => i + 1)
   const cell = (n, half, side) => {
     const idx = halfIndex(n, half)
@@ -88,7 +88,7 @@ function Navigator({ ctx }) {
               type="button"
               className="gdp__run"
               aria-current={idx === curIdx || undefined}
-              aria-disabled={disabled || undefined}
+              aria-disabled={gridHeld || undefined}
               disabled={n > unlocked || skipped}
               aria-label={`${half === 'top' ? 'Top' : 'Bottom'} ${n}${skipped ? ', not played' : l ? `, ${l.runs} runs` : ', sealed'}`}
               onClick={() => onSelect(idx)}

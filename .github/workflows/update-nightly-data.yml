@@ -191,6 +191,28 @@ jobs:
           RUN_ALL: ${{ inputs.run_all }}
         run: node scripts/nightly/inputs.mjs
 
+      # Freezes the season that just ended (#2778). BEFORE every producer on
+      # purpose: it copies salaries.json, top-prospects.json and
+      # team-contracts/ as committed at HEAD, the last good versions, not
+      # tonight's rewrite. So a producer that fails tonight cannot hand it a
+      # partial or stale file, and one that rolls over to N+1 tonight cannot
+      # make the first attempt too late. HEAD's top-prospects stamp only
+      # advances when the list really changes (drop-stamp-only.mjs), so a
+      # January restamp of the same list does not read as N+1. Nothing above
+      # this step writes those three.
+      # NOT gated: the night it matters is a quiet offseason one when every
+      # input gate is false. It decides for itself (ADR-0074's season-over
+      # rule) and is a quiet no-op on every other night, including "already
+      # frozen". It fails (exit 1, naming the season) when the live files have
+      # moved on to N+1 with N never frozen, or when it cannot read statsapi's
+      # season row in November or December. Staged by the
+      # `git add -A -- public … src/lib/data` below; a first freeze adds files,
+      # so drop-stamp-only.mjs (modified files only) never drops it.
+      - name: Freeze finished season
+        id: freeze-season
+        continue-on-error: true
+        run: node scripts/frozen/freeze-season.mjs --nightly
+
       # ---- Structural data: slow-moving upstream, rebuilt nightly --------
       # Three separate Monday crons until 2026-08-28, then a Monday-GATED block
       # here until 2026-08-29. They run every night now, unconditionally, and
