@@ -15,13 +15,8 @@
 
 /* ---------- the rail (wide, from BRACKET_RAIL_QUERY up) ---------- */
 
-/* 358 is the rail's width: FullBracket's TREE_W for the plain tree. In the
-   rail's stamped cards (below) the tree is RAIL_TREE_W, 358 less each card's
-   edge and padding. The shell widens to match: the games column keeps the 928px it has
-   beside the wire rail, and 928 + 24 + 358 = 1310. */
-.screen--slate.screen--bracketrail {
-  max-width: 1310px;
-}
+/* The shell's widening for this rail (`.screen--bracketrail`) is in 25-wide-layout.css, with the
+   wire rail's, so it is in the entry CSS and the shell does not widen after this file loads. */
 
 .bracketrail {
   flex: 0 0 auto;
