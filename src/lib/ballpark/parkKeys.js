@@ -32,27 +32,10 @@
 import PINNED from '../data/park-keys.json' with { type: 'json' }
 import { venueKey } from './ballparkArt.js'
 import { ballparkFor } from './ballparkData.js'
+import { parkKey } from '../data/parkNames.js'
 
-// venueKey(any name a pinned venue has worn) -> that venue's pinned key.
-const KEY_BY_NAME = new Map()
-for (const { key, names } of Object.values(PINNED)) {
-  for (const name of names) KEY_BY_NAME.set(venueKey(name), key)
-}
-
-// The key a park's stores are filed under. The venue id wins when the caller
-// has one: it finds a renamed park even before the generator has recorded the
-// new name. Then any name the venue has worn. Then, for a venue on no list (a
-// neutral site, a park newer than the last generator run), the same
-// canonical-name key the stores have always used.
-export function parkKey(venueName, venueId = null) {
-  const pinned = venueId != null ? PINNED[venueId]?.key : null
-  if (pinned) return pinned
-  const raw = venueKey(venueName)
-  if (!raw) return ''
-  // ballparkFor finds an MLB park by its id too (#1859), so a renamed park
-  // that is not pinned yet still lands on its canonical-name key.
-  return KEY_BY_NAME.get(raw) ?? venueKey(ballparkFor(venueName, venueId)?.name || venueName)
-}
+// parkKey lives in ./parkNames.js (no geometry import); re-exported for callers.
+export { parkKey }
 
 // Every name the venue has worn, newest first, with the caller's own name in
 // front. Empty for a venue on no list.
