@@ -86,8 +86,8 @@ export function clearRevealMarks() {
 // goes through the same `mergeMark` every other source does — a tap, another
 // tab's storage event, a signed-in device's cloud sync — so it cannot walk the
 // mark backward, and a hostile or stale stored value cannot make it do so
-// either (`parseRevealMark` collapses anything that is not a non-negative
-// integer to -1, and -1 loses the merge). What it skips is only React: there is
+// either (`parseRevealMark` reads only a plain digit string in the safe-integer
+// range; anything else is -1, and -1 loses the merge). What it skips is only React: there is
 // no mounted `useRevealProgress` to call `mergeRevealedThrough` on, because the
 // reader is still on the lineup page and the innings viewer mounts a moment
 // later and reads this key fresh.
@@ -174,6 +174,14 @@ function readAtBatMark(storageKey) {
   }
 }
 
+const markKey = (gamePk) => (gamePk ? `${REVEAL_KEY}${gamePk}` : null)
+// One game's stored mark and cursor, read fresh: the hook's seed and its re-seed.
+const seedFor = (gamePk) => ({
+  gamePk,
+  through: readRevealMark(markKey(gamePk)),
+  cursor: readAtBatMark(gamePk ? `${ATBAT_KEY}${gamePk}` : null),
+})
+
 // Everything that advances with the reveal high-water mark: the mark itself
 // (persisted per gamePk so leaving the innings view and returning — even in a
 // new session — keeps your place, per InningViewer's spoiler-safety
@@ -185,24 +193,39 @@ function readAtBatMark(storageKey) {
 // `regulation`/`actualCount` come from the caller (selectRegulationInnings /
 // selectInningCount) since they're plain feed reads, not reveal state.
 export function useRevealProgress(feed, regulation, actualCount) {
-  const storageKey = feed?.gamePk ? `${REVEAL_KEY}${feed.gamePk}` : null
-  const [revealedThrough, setRevealedThrough] = useState(() =>
-    readRevealMark(storageKey),
+  const gamePk = feed?.gamePk || null
+  const storageKey = markKey(gamePk)
+
+  // The mark, the at-bat cursor and the game they belong to are ONE state object, so a
+  // value can never be paired with the wrong game (#2891). A new gamePk on a mounted
+  // hook is a different game: ask storage again, during render, as useBoxScoreReveal
+  // below does (an effect would paint one frame of A's reveal on B first). Every
+  // update goes through `update`, which drops itself when the state has moved on to
+  // another game, so a late game-A source (its storage listener before effects flush,
+  // a slow cloud GET, a tap queued mid-switch) can neither show nor persist on B.
+  const [state, setState] = useState(() => seedFor(gamePk))
+  let current = state
+  if (state.gamePk !== gamePk) {
+    current = seedFor(gamePk)
+    setState(current)
+  }
+  const { through, cursor } = current
+  const update = useCallback(
+    (fn) => setState((prev) => (prev.gamePk === gamePk ? fn(prev) : prev)),
+    [gamePk],
   )
 
-  const atBatStorageKey = feed?.gamePk ? `${ATBAT_KEY}${feed.gamePk}` : null
-  const [atBatMark, setAtBatMark] = useState(() => readAtBatMark(atBatStorageKey))
   // How many entries have been stepped through for a given half-index — 0 for
   // any half other than the one the mark belongs to (a different half, or no
   // stepping done yet).
   const atBatCountFor = useCallback(
-    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.count : 0),
-    [atBatMark],
+    (n, half) => (cursor.halfIdx === halfIndex(n, half) ? cursor.count : 0),
+    [cursor],
   )
   // Gameday's sub-steps shown of the half's next at-bat (ADR-0123): 0 for any other half.
   const subFor = useCallback(
-    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.sub : 0),
-    [atBatMark],
+    (n, half) => (cursor.halfIdx === halfIndex(n, half) ? cursor.sub : 0),
+    [cursor],
   )
 
   // The one ratchet: revealedThrough only ever moves forward, from any
@@ -210,9 +233,10 @@ export function useRevealProgress(feed, regulation, actualCount) {
   // cloud sync — see useRevealCloudSync.js). Exposed as mergeRevealedThrough
   // so every caller pushing in an externally-sourced value goes through the
   // same one-directional guarantee instead of re-implementing it.
-  const mergeRevealedThrough = useCallback((idx) => {
-    setRevealedThrough((prev) => mergeMark(prev, idx))
-  }, [])
+  const mergeRevealedThrough = useCallback(
+    (idx) => update((prev) => ({ ...prev, through: mergeMark(prev.through, idx) })),
+    [update],
+  )
 
   // The one door back through the ratchet, and it is the key being REMOVED —
   // never a value. No stale or hostile value can re-seal a half through it,
@@ -226,48 +250,66 @@ export function useRevealProgress(feed, regulation, actualCount) {
   // The at-bat cursor resets with it. It is the same reader's position in the
   // same game, and a cursor left pointing into a half that just re-sealed would
   // be written straight back to storage by the persist effect below.
-  const resealAll = useCallback(() => {
-    setRevealedThrough(-1)
-    setAtBatMark(parseAtBatMark(null))
-  }, [])
-
-  const revealTo = useCallback(
-    (n, half) => {
-      mergeRevealedThrough(halfIndex(n, half))
-      // Whatever was mid-step just got fully committed — clear it so a later
-      // half doesn't inherit a stale count.
-      setAtBatMark(parseAtBatMark(null))
-    },
-    [mergeRevealedThrough],
+  const resealAll = useCallback(
+    () => update((prev) => ({ ...prev, through: -1, cursor: parseAtBatMark(null) })),
+    [update],
   )
 
-  const revealAtBat = useCallback((n, half, count) => {
-    const halfIdx = halfIndex(n, half)
-    setRevealedThrough((prev) => markAfterStep(prev, halfIdx))
-    setAtBatMark({ halfIdx, count, sub: 0 })
-  }, [])
+  // Whatever was mid-step gets fully committed — the cursor clears so a later half
+  // doesn't inherit a stale count.
+  const revealTo = useCallback(
+    (n, half) =>
+      update((prev) => ({
+        ...prev,
+        through: mergeMark(prev.through, halfIndex(n, half)),
+        cursor: parseAtBatMark(null),
+      })),
+    [update],
+  )
+
+  const revealAtBat = useCallback(
+    (n, half, count) => {
+      const halfIdx = halfIndex(n, half)
+      update((prev) => ({
+        ...prev,
+        through: markAfterStep(prev.through, halfIdx),
+        cursor: { halfIdx, count, sub: 0 },
+      }))
+    },
+    [update],
+  )
 
   // One sub-step inside the next at-bat (ADR-0123, decision 10): the count stays, so nothing
   // commits this half; the result's tap goes through revealAtBat. Like it, it opens the halves before this one.
-  const revealSub = useCallback((n, half, sub) => {
-    const halfIdx = halfIndex(n, half)
-    setRevealedThrough((prev) => markAfterStep(prev, halfIdx))
-    setAtBatMark((m) => ({ halfIdx, count: m.halfIdx === halfIdx ? m.count : 0, sub }))
-  }, [])
+  const revealSub = useCallback(
+    (n, half, sub) => {
+      const halfIdx = halfIndex(n, half)
+      update((prev) => ({
+        ...prev,
+        through: markAfterStep(prev.through, halfIdx),
+        cursor: { halfIdx, count: prev.cursor.halfIdx === halfIdx ? prev.cursor.count : 0, sub },
+      }))
+    },
+    [update],
+  )
 
+  // Persist under the key the state itself carries, never the render's key: the value
+  // and the game it belongs to travel together.
   useEffect(() => {
-    if (!storageKey || revealedThrough < 0) return
+    if (!state.gamePk || state.through < 0) return
     try {
-      window.localStorage.setItem(storageKey, String(revealedThrough))
+      window.localStorage.setItem(markKey(state.gamePk), String(state.through))
     } catch {
       // Private-mode / storage-disabled — degrade to in-session memory only.
     }
-  }, [storageKey, revealedThrough])
+  }, [state.gamePk, state.through])
 
   // The 'storage' event only fires in OTHER tabs/windows on the same origin,
   // never the tab that made the write — so this picks up a reveal made in a
   // second tab on the same game without needing a reload. Same ratchet as
-  // revealTo: only ever moves forward.
+  // revealTo: only ever moves forward. After a game switch, the old game's
+  // listener stays attached until effects flush; its updates are keyed to the
+  // old game and `update` drops them.
   useEffect(() => {
     if (!storageKey) return
     function onStorage(e) {
@@ -284,23 +326,24 @@ export function useRevealProgress(feed, regulation, actualCount) {
   }, [storageKey, mergeRevealedThrough, resealAll])
 
   useEffect(() => {
-    if (!atBatStorageKey) return
+    if (!state.gamePk) return
+    const cursorKey = `${ATBAT_KEY}${state.gamePk}`
     try {
-      if (atBatMark.halfIdx < 0) {
-        window.localStorage.removeItem(atBatStorageKey)
+      if (state.cursor.halfIdx < 0) {
+        window.localStorage.removeItem(cursorKey)
       } else {
-        window.localStorage.setItem(atBatStorageKey, formatAtBatMark(atBatMark))
+        window.localStorage.setItem(cursorKey, formatAtBatMark(state.cursor))
       }
     } catch {
       // Private-mode / storage-disabled — degrade to in-session memory only.
     }
-  }, [atBatStorageKey, atBatMark])
+  }, [state.gamePk, state.cursor])
 
   // How many innings are currently visible: regulation, plus one more for each
   // extra inning whose predecessor has already been fully revealed.
   const unlocked = useMemo(
-    () => unlockedInnings(regulation, actualCount, revealedThrough),
-    [regulation, actualCount, revealedThrough],
+    () => unlockedInnings(regulation, actualCount, through),
+    [regulation, actualCount, through],
   )
 
   // Derived stats (pitches/whiffs/1st-pitch strikes) are parsed lazily and
@@ -324,7 +367,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
   }, [feed])
 
   return {
-    revealedThrough,
+    revealedThrough: through,
     revealTo,
     mergeRevealedThrough,
     unlocked,
@@ -437,16 +480,19 @@ export function useBoxScoreReveal(gamePk) {
     setMark({ key: storageKey, opened })
   }
 
+  // Both latch moves are keyed to this render's game: after a switch, the old game's
+  // storage listener stays attached until effects flush, and its call must not land
+  // on the new game's state (#2891).
   const markBoxOpened = useCallback(() => {
-    setMark((prev) => (prev.opened ? prev : { ...prev, opened: true }))
-  }, [])
+    setMark((prev) => (prev.key !== storageKey || prev.opened ? prev : { ...prev, opened: true }))
+  }, [storageKey])
 
   // The one path back. Private to the storage listener below — no screen calls
   // this, and none should: re-sealing is a consequence of the bit being taken
   // off the device, never something the UI decides.
   const resealBox = useCallback(() => {
-    setMark((prev) => (prev.opened ? { ...prev, opened: false } : prev))
-  }, [])
+    setMark((prev) => (prev.key === storageKey && prev.opened ? { ...prev, opened: false } : prev))
+  }, [storageKey])
 
   useEffect(() => {
     if (!storageKey || !opened) return

@@ -34,6 +34,18 @@ test('parseRevealMark collapses null / garbage / negative / fractional to -1', (
   assert.equal(parseRevealMark('Infinity'), -1)
 })
 
+// #2891: Number(raw) read '' and ' ' as 0 (top of the 1st opened) and '1e3' as 1000
+// (every half, extras too). Only a plain digit string is a mark.
+test('parseRevealMark reads only a plain digit string; every other shape fails closed', () => {
+  for (const v of ['', ' ', '1e3', '0x1f', '0b11', '0o7', '-1', '1.5', 'NaN', ' 3', '3 ', '+3', '9'.repeat(20)]) {
+    assert.equal(parseRevealMark(v), -1, JSON.stringify(v))
+  }
+  assert.equal(parseRevealMark(5), -1) // storage holds strings; a number is not a stored mark
+  assert.equal(parseRevealMark('0'), 0)
+  assert.equal(parseRevealMark('5'), 5)
+  assert.equal(parseRevealMark('17'), 17)
+})
+
 // --------------------------------------------------------------------------
 // parseAtBatMark — the "{halfIdx}:{count}" stepping cursor (ADR-0016)
 // --------------------------------------------------------------------------
@@ -49,6 +61,16 @@ test('parseAtBatMark falls back to the inert cursor on anything malformed', () =
   assert.deepEqual(parseAtBatMark('3'), inert) // missing count
   assert.deepEqual(parseAtBatMark('-1:0'), inert)
   assert.deepEqual(parseAtBatMark('3:-1'), inert)
+})
+
+// #2891: the cursor shows plays without a tap, so it takes the same plain-digit rule as
+// the mark. Number() used to read ' 4:1e2' as { 4, 100 } and '0x4:0b11' as { 4, 3 }.
+test('parseAtBatMark fails closed on every non-digit field shape', () => {
+  const inert = { halfIdx: -1, count: 0, sub: 0 }
+  for (const v of [' 4:1e2', '0x4:0b11', '4:', ':2', '4: 2', '4:2:', '4:2:1e1', '4:2:1:0', '', 7]) {
+    assert.deepEqual(parseAtBatMark(v), inert, JSON.stringify(v))
+  }
+  assert.deepEqual(parseAtBatMark('4:2:3'), { halfIdx: 4, count: 2, sub: 3 })
 })
 
 // --------------------------------------------------------------------------

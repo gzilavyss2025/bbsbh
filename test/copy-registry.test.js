@@ -7,13 +7,8 @@
 // or an oversized value into the page.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  FIELDS,
-  FIELD_IDS,
-  defaultCopy,
-  resolveCopy,
-  sanitizeOverrides,
-} from '../src/copy/registry.js'
+import { FIELDS, defaultCopy, sanitizeOverrides } from '../src/copy/registryFull.js'
+import { FIELD_IDS, resolveCopy } from '../src/copy/registry.js'
 import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
 import { parseWinterCalendar } from '../src/lib/time/seasonPhase.js'
 import { CREDITS, creditLine, fieldIds, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
@@ -280,7 +275,7 @@ test('creditLine names the licence for every photo that requires it', () => {
 
 test('field ids are unique and dotted group.slot', () => {
   const seen = new Set()
-  for (const id of FIELD_IDS) {
+  for (const { id } of FIELDS) {
     assert.ok(!seen.has(id), `${id} is unique`)
     seen.add(id)
     // The slot half allows digits — venueKey() emits [a-z0-9], and a real MiLB
