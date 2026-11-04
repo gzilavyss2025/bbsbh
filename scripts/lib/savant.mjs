@@ -13,7 +13,7 @@
 // in the job log, and let the previous night's committed file stand.
 
 import { setTimeout as sleep } from 'node:timers/promises'
-import { round1 } from '../../src/lib/math/number.js'
+import { median as plainMedian, round1 } from '../../src/lib/math/number.js'
 import { csvObjects, parseCsv } from '../../src/lib/csv/parse.js'
 
 // The CSV reader lives in src/lib/csv/ so the app can import it too (the Matchup
@@ -160,14 +160,13 @@ export { round1 }
 // weighting denominator for each one (PA for xwOBA, batted-ball events for
 // EV, swings for bat speed, ...), which the median sidesteps entirely.
 export function median(values) {
-  if (!values.length) return null
-  const sorted = [...values].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
+  const m = plainMedian(values)
+  if (m == null) return null
   // round1 on BOTH branches — an odd-length list's middle value comes straight
   // off a raw Savant column (e.g. 72.13707063) and needs the same one-decimal
   // storage precision the even-length average already gets, or the file would
   // carry two different precisions depending on a population's parity alone.
-  return round1(sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2)
+  return round1(m)
 }
 
 // The per-metric median of `rawMap`'s values, over the INTERSECTION of

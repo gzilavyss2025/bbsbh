@@ -51,7 +51,7 @@ import { openDb, dumpGroup } from './lib/db.js'
 import { classifyUniformAsset } from '../src/api/uniforms.js'
 import { teamClubName } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, isoDay } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = import.meta.dirname
@@ -60,7 +60,6 @@ const jerseysJsonPath = join(here, '..', 'public', 'data', 'jerseys.json')
 const DEFAULT_DAYS = 3
 const BATCH_SIZE = 100 // gamePks per uniforms/game call
 
-const isoDay = (d) => d.toISOString().slice(0, 10)
 const args = parseArgs(process.argv.slice(2))
 const days = Number(args.days) || DEFAULT_DAYS
 

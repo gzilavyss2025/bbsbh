@@ -42,6 +42,7 @@ import {
   combineByPlayer,
   sortByAge,
 } from './lib/youngest-regulars.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
@@ -68,8 +69,9 @@ const LIST_SIZE = 20
 const PEOPLE_BATCH = 100
 
 const args = process.argv.slice(2)
-const onlyLevel = Number(args.find((a) => a.startsWith('--level='))?.split('=')[1]) || null
-const onlySeason = Number(args.find((a) => a.startsWith('--season='))?.split('=')[1]) || null
+const opts = parseArgs(args)
+const onlyLevel = Number(opts.level) || null
+const onlySeason = Number(opts.season) || null
 
 const today = new Date().toISOString().slice(0, 10)
 

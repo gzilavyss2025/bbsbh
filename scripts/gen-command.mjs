@@ -26,12 +26,13 @@ import {
   percentileLowerIsBetter,
   pitcherIdsByName,
 } from './lib/opencommand.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'target-command.json')
 
-const seasonArg = process.argv.find((a) => a.startsWith('--season='))
-const preferred = seasonArg ? Number(seasonArg.slice('--season='.length)) : new Date().getFullYear()
+const seasonArg = parseArgs(process.argv.slice(2)).season
+const preferred = seasonArg ? Number(seasonArg) : new Date().getFullYear()
 
 // ONE SEASON, the current one — the same scope gen-savant-percentiles.mjs keeps,
 // and for the same reason: the Analytics tab reads a player's CURRENT season, so

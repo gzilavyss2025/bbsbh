@@ -38,6 +38,15 @@ export function round2(n) {
   return Math.round(n * 100) / 100
 }
 
+// The middle value of `values` (the mean of the middle pair when the count is even), or null for
+// none. Sorts a copy.
+export function median(values) {
+  if (!values?.length) return null
+  const s = [...values].sort((a, b) => a - b)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+
 // `n` of `of` as a whole percent, half up, or null with nothing to divide by. The product
 // comes first: (29 / 200) * 100 is 14.499999999999998 and would round down.
 export function pctOf(n, of) {

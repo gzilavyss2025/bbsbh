@@ -13,6 +13,8 @@
 // alternatives (projected arbitration figures, options counted at face) that
 // were weighed and turned down.
 
+import { median } from '../../src/lib/math/number.js'
+
 // Out-year codes, exactly as Cot's writes them.
 const ARBITRATION = /^A\d+$/i
 const OPTION = /^(OPT|cond opt|club opt|player opt|mutual opt|vest opt)$/i
@@ -161,13 +163,6 @@ function sortRows(rows) {
   return [...rows].sort((a, b) => (b.salary ?? 0) - (a.salary ?? 0) || a.name.localeCompare(b.name))
 }
 
-function median(values) {
-  if (values.length === 0) return 0
-  const sorted = [...values].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-}
-
 // One club's ledger. `placeFor` answers with a 40-man place ({ pos, age }) or
 // null; a null is not a hole in the data, it is a player the club is still
 // paying who has no place on the roster, and he belongs on the page for exactly
@@ -282,7 +277,7 @@ export function leagueRollup({ meta, teams, byClub, placeFor, season, years }) {
     owed: owed.slice(0, 8),
     totals: {
       payroll: payrolls.reduce((sum, value) => sum + value, 0),
-      median: median(payrolls),
+      median: median(payrolls) ?? 0,
       covered,
     },
   }

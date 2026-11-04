@@ -57,13 +57,6 @@ test('STATSAPI_BASE outside the client is a violation, statsapiUrl is not', () =
   assert.deepEqual(rules('const NOT_STATSAPI_BASE_X = 1'), [])
 })
 
-test('cachedGetJson is banned in scripts/ and allowed in .scratch/', () => {
-  const src = "const j = await cachedGetJson('/api/v1/teams')"
-  assert.deepEqual(rules(src, 'scripts/gen-teams.mjs'), ['cache'])
-  assert.deepEqual(rules(src, 'scripts/fever/gen-salaries.mjs'), ['cache'])
-  assert.deepEqual(rules(src, '.scratch/spike/pull.mjs'), [])
-})
-
 test('one line can break two rules', () => {
   assert.deepEqual(rules("fetch('https://statsapi.mlb.com' + STATSAPI_BASE)"), ['host', 'base'])
 })

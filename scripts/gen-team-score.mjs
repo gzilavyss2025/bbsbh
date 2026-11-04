@@ -27,14 +27,14 @@ import {
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, isoDay } from './lib/args.mjs'
 import { round1 } from '../src/lib/math/number.js'
+import { round2 } from '../src/lib/math/number.js'
 
 export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'team-score.json')
-const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
   const d = new Date(`${date}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() + n)
@@ -42,7 +42,6 @@ const addDays = (date, n) => {
 }
 const previousUtcDay = () => addDays(isoDay(new Date()), -1)
 
-const round2 = (n) => Math.round(n * 100) / 100
 const round3 = (n) => Math.round(n * 1000) / 1000
 
 function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}, extraFields = {}) {

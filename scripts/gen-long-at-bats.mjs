@@ -52,6 +52,7 @@ import {
   playedGamesOf,
   scanGamePlays,
 } from './lib/long-at-bats.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'long-at-bats')
@@ -72,8 +73,9 @@ const PLAY_FIELDS =
   'allPlays,about,halfInning,atBatIndex,matchup,batter,pitcher,id,fullName,pitchIndex,playEvents,isPitch,result,type,event,eventType'
 
 const args = process.argv.slice(2)
+const opts = parseArgs(args)
 const rescan = args.includes('--rescan')
-const onlySeason = Number(args.find((a) => a.startsWith('--season='))?.split('=')[1]) || null
+const onlySeason = Number(opts.season) || null
 
 const today = new Date().toISOString().slice(0, 10)
 

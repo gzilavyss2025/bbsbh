@@ -87,9 +87,7 @@ table, and picking a bar suggests white or near-black for the ink. With a triad,
 club bar wears it and its tile tints with `bar`; with none, the era keeps the neutral chrome.
 Today's club colours never carry back to an old game.
 
-`scripts/season-marks/fetch.mjs` is a one-time bootstrap now. It refuses to run without
-`--rebuild-from-seed`, because it rebuilds the table from `seed.json` and would erase the
-lab's edits.
+The lab is the only writer: the one-time bootstrap script that first built the table is gone.
 
 ## `TeamLogo`'s own fallback chain
 

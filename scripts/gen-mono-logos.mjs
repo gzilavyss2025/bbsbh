@@ -59,6 +59,7 @@ import {
   sourceVariantFor,
 } from './lib/mono-logo-art.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
@@ -71,9 +72,10 @@ const sheetPath = join(sheetDir, 'contact-sheet.html')
 const CONCURRENCY = 8
 
 const args = process.argv.slice(2)
+const opts = parseArgs(args)
 const onlyIds = (() => {
-  const raw = args.find((a) => a.startsWith('--ids='))?.slice('--ids='.length)
-  if (!raw) return null
+  const raw = opts.ids
+  if (typeof raw !== 'string' || !raw) return null
   return new Set(raw.split(',').map((s) => Number(s.trim())).filter(Boolean))
 })()
 const wantSheet = args.includes('--sheet')
