@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T07:56:13.258Z",
+  "generatedAt": "2026-11-04T07:55:43.522Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -493,7 +493,7 @@
       "position": "SS",
       "levelRaw": "ALL (3)",
       "statLine": ".289, 19 HR, 85 RBI",
-      "age": 21,
+      "age": 22,
       "number": "96"
     },
     {
@@ -1158,42 +1158,6 @@
     }
   ],
   "orgProspects": [
-    {
-      "orgRank": 11,
-      "playerId": 814005,
-      "name": "Jake Bloss",
-      "teamId": 11,
-      "team": "",
-      "position": "RHP",
-      "levelRaw": "ALL (4)",
-      "statLine": "39.1 IP, 6.18 ERA, 37 SO",
-      "age": 25,
-      "topRank": null
-    },
-    {
-      "orgRank": 23,
-      "playerId": 695705,
-      "name": "Luke Holman",
-      "teamId": 11,
-      "team": "",
-      "position": "RHP",
-      "levelRaw": "ROK",
-      "statLine": "6.2 IP, 2.70 ERA, 9 SO",
-      "age": 23,
-      "topRank": null
-    },
-    {
-      "orgRank": 26,
-      "playerId": 806992,
-      "name": "Enrique Jimenez",
-      "teamId": 11,
-      "team": "",
-      "position": "C",
-      "levelRaw": "ALL (3)",
-      "statLine": ".241, 6 HR, 17 RBI",
-      "age": 20,
-      "topRank": null
-    },
     {
       "orgRank": 1,
       "playerId": 805796,
@@ -1917,7 +1881,7 @@
     {
       "orgRank": 8,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -2360,18 +2324,6 @@
     },
     {
       "orgRank": 18,
-      "playerId": 700842,
-      "name": "Eduardo Rivera",
-      "teamId": 111,
-      "team": "bos",
-      "position": "LHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "65.2 IP, 3.15 ERA, 81 SO",
-      "age": 23,
-      "topRank": null
-    },
-    {
-      "orgRank": 19,
       "playerId": 832562,
       "name": "Dylan Brown",
       "teamId": 111,
@@ -2383,7 +2335,7 @@
       "topRank": null
     },
     {
-      "orgRank": 20,
+      "orgRank": 19,
       "playerId": 702540,
       "name": "Mikey Romero",
       "teamId": 111,
@@ -2395,7 +2347,7 @@
       "topRank": null
     },
     {
-      "orgRank": 21,
+      "orgRank": 20,
       "playerId": 699151,
       "name": "Jedixson Paez",
       "teamId": 111,
@@ -2407,7 +2359,7 @@
       "topRank": null
     },
     {
-      "orgRank": 22,
+      "orgRank": 21,
       "playerId": 836605,
       "name": "Dawvris Brito",
       "teamId": 111,
@@ -2419,7 +2371,7 @@
       "topRank": null
     },
     {
-      "orgRank": 23,
+      "orgRank": 22,
       "playerId": 813400,
       "name": "Jack Winnay",
       "teamId": 111,
@@ -2431,7 +2383,7 @@
       "topRank": null
     },
     {
-      "orgRank": 24,
+      "orgRank": 23,
       "playerId": 808269,
       "name": "Gerardo Rodriguez",
       "teamId": 111,
@@ -2443,7 +2395,7 @@
       "topRank": null
     },
     {
-      "orgRank": 25,
+      "orgRank": 24,
       "playerId": 701326,
       "name": "Luke Heyman",
       "teamId": 111,
@@ -2455,7 +2407,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 25,
       "playerId": 702517,
       "name": "Mason White",
       "teamId": 111,
@@ -2467,7 +2419,7 @@
       "topRank": null
     },
     {
-      "orgRank": 27,
+      "orgRank": 26,
       "playerId": 683093,
       "name": "Hayden Mullins",
       "teamId": 111,
@@ -2479,7 +2431,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 694194,
       "name": "Miguel Bleis",
       "teamId": 111,
@@ -2491,7 +2443,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 28,
       "playerId": 703190,
       "name": "Johanfran Garcia",
       "teamId": 111,
@@ -2503,7 +2455,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 836613,
       "name": "Garielvin Silverio",
       "teamId": 111,
@@ -2512,6 +2464,18 @@
       "levelRaw": "ROK",
       "statLine": ".260, 5 HR, 33 RBI",
       "age": 18,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 694057,
+      "name": "Yordanny Monegro",
+      "teamId": 111,
+      "team": "bos",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "6.2 IP, 4.05 ERA, 8 SO",
+      "age": 24,
       "topRank": null
     },
     {
@@ -2859,7 +2823,7 @@
       "position": "SS",
       "levelRaw": "A+",
       "statLine": ".292, 8 HR, 16 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -3076,6 +3040,18 @@
       "levelRaw": "ALL (2)",
       "statLine": ".300, 29 HR, 93 RBI",
       "age": 25,
+      "topRank": null
+    },
+    {
+      "orgRank": 23,
+      "playerId": 695705,
+      "name": "Luke Holman",
+      "teamId": 113,
+      "team": "cin",
+      "position": "RHP",
+      "levelRaw": "ROK",
+      "statLine": "6.2 IP, 2.70 ERA, 9 SO",
+      "age": 23,
       "topRank": null
     },
     {
@@ -6135,7 +6111,7 @@
       "position": "C",
       "levelRaw": "ALL (2)",
       "statLine": ".287, 20 HR, 92 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -6747,7 +6723,7 @@
       "position": "SS",
       "levelRaw": "ALL (3)",
       "statLine": ".289, 19 HR, 85 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": 41
     },
     {
@@ -8443,6 +8419,18 @@
       "topRank": null
     },
     {
+      "orgRank": 11,
+      "playerId": 814005,
+      "name": "Jake Bloss",
+      "teamId": 141,
+      "team": "tor",
+      "position": "RHP",
+      "levelRaw": "ALL (4)",
+      "statLine": "39.1 IP, 6.18 ERA, 37 SO",
+      "age": 25,
+      "topRank": null
+    },
+    {
       "orgRank": 12,
       "playerId": 702302,
       "name": "RJ Schreck",
@@ -8923,6 +8911,18 @@
       "topRank": null
     },
     {
+      "orgRank": 26,
+      "playerId": 806992,
+      "name": "Enrique Jimenez",
+      "teamId": 142,
+      "team": "min",
+      "position": "C",
+      "levelRaw": "ALL (3)",
+      "statLine": ".241, 6 HR, 17 RBI",
+      "age": 21,
+      "topRank": null
+    },
+    {
       "orgRank": 27,
       "playerId": 821613,
       "name": "Luis Fragoza",
@@ -8943,7 +8943,7 @@
       "position": "OF",
       "levelRaw": "ALL (2)",
       "statLine": ".267, 5 HR, 38 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": null
     },
     {
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Muñoz",
+      "name": "Rolddy Munoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
@@ -10563,7 +10563,7 @@
       "position": "SS",
       "levelRaw": "AAA",
       "statLine": ".233, 9 HR, 41 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
