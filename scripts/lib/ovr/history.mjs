@@ -33,7 +33,11 @@ export function mergeHistory({ prior = [], seed = [], real, today }) {
   // Seeds only start a series. Once a real row exists they are not added again: thinning
   // the old real rows would move `firstReal` forward and let a seed back in after them.
   for (const row of prior.some((r) => !r[3]) ? prior : [...seed, ...prior]) byDate.set(row[0], row)
-  if (real && (!byDate.has(today) || byDate.get(today)[3])) byDate.set(today, [today, real[0], real[1]])
+  // A rating equal to the last real row adds no row: once a season is over every night
+  // repeats the final rating, and readers measure change between the rows that exist.
+  const lastReal = [...byDate.values()].filter((r) => !r[3] && r[0] < today).sort((a, b) => (a[0] < b[0] ? -1 : 1)).at(-1)
+  const repeats = lastReal && lastReal[1] === real?.[0] && JSON.stringify(lastReal[2]) === JSON.stringify(real?.[1])
+  if (real && !repeats && (!byDate.has(today) || byDate.get(today)[3])) byDate.set(today, [today, real[0], real[1]])
   const firstReal = [...byDate.values()].filter((r) => !r[3]).map((r) => r[0]).sort()[0]
   const rows = [...byDate.values()].filter((r) => !r[3] || !firstReal || r[0] < firstReal)
   return retain(rows, today)

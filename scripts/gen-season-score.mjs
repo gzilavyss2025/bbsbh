@@ -16,7 +16,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { openDb, dumpGroup } from './lib/db.js'
+import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { clamp, round1 } from '../src/lib/math/number.js'
@@ -282,12 +282,19 @@ async function main() {
   const dates = datesFromArgs(args)
   const [seed, db] = await Promise.all([loadSeed(), openDb()])
   const insert = upsertSnapshot(db)
+  const previous = previousTeamSnapshot(db)
   for (const date of dates) {
     const { season, snapshots } = await buildDate(date, seed)
+    let repeats = 0
     for (const [teamId, snapshot] of Object.entries(snapshots)) {
+      // A season that is over repeats its last line every night: skip it (repeatsPrevious).
+      if (repeatsPrevious(previous(season, Number(teamId), 'surprise', date), snapshot)) {
+        repeats++
+        continue
+      }
       insert.run(season, Number(teamId), date, JSON.stringify(snapshot))
     }
-    console.log(`${date}: ${Object.keys(snapshots).length} MLB season-score snapshots`)
+    console.log(`${date}: ${Object.keys(snapshots).length} MLB season-score snapshots, ${repeats} unchanged and skipped`)
   }
   await dumpGroup(db, 'team-snapshots')
   await writeJsonAtomic(out, exportJson(db))

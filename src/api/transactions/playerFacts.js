@@ -379,7 +379,7 @@ async function minorsAsOf(personId, group, season, asOf) {
 // A move from a day already over reads facts that can no longer change, so its
 // answer is kept in this browser (localStorage, FACTS_STORE) and a return visit
 // reads it with no request at all. Today's moves always read live.
-const FACTS_STORE = 'bbsbh:wirefacts:v1:'
+const FACTS_STORE = 'bbsbh:wirefacts:v2:'
 const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD, the reader's own day
 function readStored(key) {
   try {
@@ -409,14 +409,15 @@ function evictOldest() {
   const mine = []
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i)
-    if (!k?.startsWith(FACTS_STORE)) continue
+    if (!k?.startsWith('bbsbh:wirefacts:')) continue
     let d = ''
     try {
       d = JSON.parse(localStorage.getItem(k))?.d ?? ''
     } catch {
       // unreadable: oldest
     }
-    mine.push([d, k])
+    // An older key version is dead weight: the first to go.
+    mine.push([k.startsWith(FACTS_STORE) ? d : '', k])
   }
   mine.sort((a, b) => (a[0] < b[0] ? -1 : 1))
   for (const [, k] of mine.slice(0, Math.max(1, Math.ceil(mine.length / 2)))) localStorage.removeItem(k)
@@ -508,10 +509,12 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
           if (!facts || full) return facts
           const group = facts.pitcher ? 'pitching' : 'hitting'
-          const minors = asOf
-            ? await minorsAsOf(personId, group, season, asOf)
-            : (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
+          const milb = (yr) => getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${yr}&leagueListId=milb_all`).catch(() => null).then((r) => r?.stats?.flatMap((x) => x.splits ?? []))
+          // The season before, too: a big leaguer stuck in Triple-A is judged
+          // on his last two years there. Read alongside this season's.
+          const [minors, prev] = await Promise.all([asOf ? minorsAsOf(personId, group, season, asOf) : milb(season), milb(Number(season) - 1)])
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors })
+          withMinors.minorsPrev = shapeMinors(prev, facts.pitcher)
           const extra = ['midSeason', 'seasonLine', 'seasonClubs', 'careerLine', 'age', 'rows', 'stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })

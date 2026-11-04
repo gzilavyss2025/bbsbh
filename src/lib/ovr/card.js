@@ -54,9 +54,13 @@ export function seasonsLine(seasons) {
 
 // The change as the card shows it (7 days, or longer when the history is sparse). null when there is none, so no arrow and no zero.
 // A seeded end is a prospect-trend percentile, not a rating, so it is no change either.
-function changeView(history) {
+// `today` (YYYY-MM-DD), when given, hides a change whose newest snapshot is more than
+// 7 days old: identical ratings add no row, so all offseason the newest row is the
+// season's last change, and it must not read as this week's.
+function changeView(history, today) {
   const c = changeSince(history)
   if (!c || c.to.seeded) return null
+  if (today && (Date.parse(today) - Date.parse(c.to.date)) / 864e5 > 7) return null
   const { delta, from, to } = c
   // changeSince reaches back to the newest snapshot AT LEAST 7 days older, so say how far it did reach.
   const days = Math.round((Date.parse(to.date) - Date.parse(from.date)) / 864e5)
@@ -70,8 +74,9 @@ function sparkView(history) {
   return values.length > 1 ? values : null
 }
 
-// rating: fetchOvr's answer; group: 'hitting' | 'pitching'; history: fetchOvrHistory's rows.
-export function ovrView({ rating, group, history = [] }) {
+// rating: fetchOvr's answer; group: 'hitting' | 'pitching'; history: fetchOvrHistory's rows;
+// today: the reader's date, so a stale change is not shown (changeView).
+export function ovrView({ rating, group, history = [], today }) {
   const { ovr, bars, level, seasons } = rating
   return {
     ovr,
@@ -80,7 +85,7 @@ export function ovrView({ rating, group, history = [] }) {
       .filter(([key]) => bars?.[key] != null)
       .map(([key, label]) => ({ key, label, value: bars[key], tier: tierFor(bars[key]), filled: filledSegments(bars[key]) })),
     minor: level == null ? null : { pot: rating.pot ?? null, levelLabel: SPORT_LABEL[level] ?? '', marks: meterMarks({ ovr, pot: rating.pot, level }) },
-    change: changeView(history),
+    change: changeView(history, today),
     spark: sparkView(history),
     seasons: seasonsLine(seasons),
   }

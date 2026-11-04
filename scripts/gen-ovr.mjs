@@ -51,30 +51,39 @@ const { written } = await writeShards(join(dataDir, 'ovr'), [...shards])
 // bat / pit split. A row per player per date, kept by mergeHistory. The date is the day the
 // nightly inputs were made, so a rerun on the same files writes the same bytes. Prospects get
 // weekly rows seeded from prospect-trend.json (flagged, they are percentiles, not ratings).
-const readJson = (path) => (existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null)
-const today = readJson(join(dataDir, 'savant-percentiles.json')).generatedAt.slice(0, 10)
-const seeds = { bat: {}, pit: {} }
-for (const p of unpackProspectTrend(readJson(join(dataDir, 'prospect-trend.json')) ?? { players: [] }).players) {
-  seeds[p.group === 'pitching' ? 'pit' : 'bat'][p.playerId] = seedRows(p.history)
-}
-const history = new Map() // shard key -> { bat: { id: rows }, pit }
-const histShard = (key) => history.get(key) ?? history.set(key, { bat: {}, pit: {} }).get(key)
-for (let n = 0; n < 100; n++) {
-  const key = String(n).padStart(2, '0')
-  const old = readJson(join(dataDir, 'ovr-history', `${key}.json`)) ?? { bat: {}, pit: {} }
-  for (const group of ['bat', 'pit']) {
-    const ids = new Set([...Object.keys(old[group]), ...Object.keys(shards.get(key)?.[group] ?? {})])
-    for (const id of Object.keys(seeds[group])) if (shardKey100(id) === key) ids.add(id)
-    for (const id of ids) {
-      const now = shards.get(key)?.[group][id]
-      const rows = mergeHistory({ prior: old[group][id], seed: seeds[group][id], real: now && [now.ovr, now.bars], today })
-      if (rows.length) histShard(key)[group][id] = rows
+// PAUSED until #1703 shows it (Gary, 2026-11-04): nothing in src/ reads ovr-history yet
+// (fetchOvrHistory has no caller), so it is not written. The files on disk stay as they
+// are; #1703 decides whether to keep them or start fresh. Flip this to resume.
+const WRITE_HISTORY = false
+let histWritten = 0
+let histBiggest = 0
+let today = '(paused)'
+if (WRITE_HISTORY) {
+  const readJson = (path) => (existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null)
+  today = readJson(join(dataDir, 'savant-percentiles.json')).generatedAt.slice(0, 10)
+  const seeds = { bat: {}, pit: {} }
+  for (const p of unpackProspectTrend(readJson(join(dataDir, 'prospect-trend.json')) ?? { players: [] }).players) {
+    seeds[p.group === 'pitching' ? 'pit' : 'bat'][p.playerId] = seedRows(p.history)
+  }
+  const history = new Map() // shard key -> { bat: { id: rows }, pit }
+  const histShard = (key) => history.get(key) ?? history.set(key, { bat: {}, pit: {} }).get(key)
+  for (let n = 0; n < 100; n++) {
+    const key = String(n).padStart(2, '0')
+    const old = readJson(join(dataDir, 'ovr-history', `${key}.json`)) ?? { bat: {}, pit: {} }
+    for (const group of ['bat', 'pit']) {
+      const ids = new Set([...Object.keys(old[group]), ...Object.keys(shards.get(key)?.[group] ?? {})])
+      for (const id of Object.keys(seeds[group])) if (shardKey100(id) === key) ids.add(id)
+      for (const id of ids) {
+        const now = shards.get(key)?.[group][id]
+        const rows = mergeHistory({ prior: old[group][id], seed: seeds[group][id], real: now && [now.ovr, now.bars], today })
+        if (rows.length) histShard(key)[group][id] = rows
+      }
     }
   }
+  histBiggest = Math.max(...[...history.values()].map((s) => JSON.stringify(s).length))
+  if (histBiggest > MAX_HISTORY_SHARD_BYTES) throw new Error(`a history shard is ${histBiggest} bytes, over ${MAX_HISTORY_SHARD_BYTES}: stop and ask`)
+  ;({ written: histWritten } = await writeShards(join(dataDir, 'ovr-history'), [...history]))
 }
-const histBiggest = Math.max(...[...history.values()].map((s) => JSON.stringify(s).length))
-if (histBiggest > MAX_HISTORY_SHARD_BYTES) throw new Error(`a history shard is ${histBiggest} bytes, over ${MAX_HISTORY_SHARD_BYTES}: stop and ask`)
-const { written: histWritten } = await writeShards(join(dataDir, 'ovr-history'), [...history])
 
 // The report: what the review notes on the rating module (issue #1720) asked this step to look at.
 const stat = (xs) => {

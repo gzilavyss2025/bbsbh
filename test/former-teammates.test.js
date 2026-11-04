@@ -12,31 +12,16 @@ import {
   capRows,
   careerRequests,
   historicalParentOrgAt,
-  isShippedGame,
   orgIdForShared,
   orgTiesApply,
   reduceCareer,
   resolveStintOrg,
 } from '../scripts/lib/former-teammates.mjs'
 
-const game = (leagueId) => ({ teams: { home: { team: { id: 1, league: { id: leagueId } } } } })
-
-test('the matchup sweep includes winter ball', () => {
-  assert.ok(MATCHUP_SPORT_IDS.includes(17))
-  for (const id of [1, 11, 12, 13, 14]) assert.ok(MATCHUP_SPORT_IDS.includes(id))
-  assert.ok(!MATCHUP_SPORT_IDS.includes(16), 'rookie ball stays out')
-})
-
-test('a winter game ships only from the four winter leagues', () => {
-  for (const leagueId of [119, 132, 135, 131]) assert.equal(isShippedGame(17, game(leagueId)), true)
-  // Liga Roberto Clemente and the Australian league come back from sportId 17
-  // but do not ship (src/lib/winter/leagues.js).
-  assert.equal(isShippedGame(17, game(133)), false)
-  assert.equal(isShippedGame(17, game(595)), false)
-  assert.equal(isShippedGame(17, { teams: { home: { team: { id: 1 } } } }), false)
-  // No league filter at the other levels.
-  assert.equal(isShippedGame(1, game(104)), true)
-  assert.equal(isShippedGame(12, { teams: {} }), true)
+test('the matchup sweep is MLB and the four full-season MiLB levels only', () => {
+  // Winter ball was dropped (2026-11): nobody reads a winter-league card, and
+  // sweeping it kept the job rewriting shards all offseason.
+  assert.deepEqual(MATCHUP_SPORT_IDS, [1, 11, 12, 13, 14])
 })
 
 test('a career is never requested from winter ball', () => {

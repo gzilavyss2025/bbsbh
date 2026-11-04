@@ -20,6 +20,14 @@
 }
 /* The door is the card's footer: an ink bar across its foot, like the
    datelines, rather than a loose button under it. */
+.oseason__ledger .oseason__clubs {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+}
+.oseason__none {
+  padding: var(--space-3);
+  color: var(--text-caption);
+}
 .oseason__ledger .oseason__door {
   display: flex;
   width: 100%;

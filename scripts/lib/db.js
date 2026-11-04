@@ -220,3 +220,25 @@ export async function dumpGroup(db, groupName, dir = dataDir) {
 export async function dumpAll(db) {
   for (const groupName of Object.keys(GROUPS)) await dumpGroup(db, groupName)
 }
+
+// Does `payload` repeat the row before it (`prevJson`, a payload_json string),
+// with only its `asOf` moved? The nightly score generators skip such a row, so
+// a club whose season is over stops gaining a copy of its final line each night.
+// Their readers take the latest snapshot at or before a date
+// (src/lib/math/snapshot.js), so a skipped date reads the one before it.
+export function repeatsPrevious(prevJson, payload) {
+  if (prevJson == null) return false
+  const { asOf: _prevAsOf, ...prev } = JSON.parse(prevJson)
+  const { asOf: _asOf, ...next } = payload
+  return JSON.stringify(prev) === JSON.stringify(next)
+}
+
+// The payload_json of a team's latest team_snapshots row before `date`, or undefined.
+export const previousTeamSnapshot = (db) => {
+  const stmt = db.prepare(
+    `SELECT payload_json FROM team_snapshots
+     WHERE season = ? AND team_id = ? AND metric = ? AND date < ?
+     ORDER BY date DESC LIMIT 1`,
+  )
+  return (season, teamId, metric, date) => stmt.get(season, teamId, metric, date)?.payload_json
+}

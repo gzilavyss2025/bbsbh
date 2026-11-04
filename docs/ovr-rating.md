@@ -402,11 +402,18 @@ changed nothing. Record only, no action.
 
 Built in step 8 (#1722). This is the data half. The card does not show it yet (#1703).
 
+**Paused since 2026-11-04** (`WRITE_HISTORY` in `gen-ovr.mjs`): nothing reads the file
+yet, so the nightly run no longer writes it. #1703 turns it back on, keeping or
+restarting the rows already on disk.
+
 - **The file.** `gen-ovr.mjs` also writes `public/data/ovr-history/{NN}.json`, on
   `personId % 100`, in the same `bat` / `pit` split as `ovr/`. A player holds a list of
   rows `[date, ovr, bars | null, 1?]`, oldest first. The date is the day the nightly
   inputs were made (`generatedAt` of `savant-percentiles.json`). A rated date already on
   disk is never rewritten, so a rerun on the same files writes the same bytes.
+  A rating equal to the player's last real row adds no row (2026-11), so a season
+  that is over stops gaining a copy of its final rating each night. The card hides a
+  change whose newest row is more than 7 days old (`ovrView`'s `today`).
 - **What is kept** (`scripts/lib/ovr/history.mjs`): every day of the last 60 days
   (`RECENT_DAYS`), then one row per week for the rest of the current season. Older
   seasons are dropped.

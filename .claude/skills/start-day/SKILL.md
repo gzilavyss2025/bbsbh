@@ -164,7 +164,9 @@ step 4.
 
    `data-freshness-check.yml` (added 2026-08-29) is the automated version of
    this step: a second schedule at 15:00 UTC that fails, and emails the
-   maintainer, if nothing has touched `public/data` in 26 hours. It exists
+   maintainer, if `scripts/data/nightly-heartbeat.json` has not been committed in
+   26 hours. Every run rewrites that file; since 2026-11 a quiet night commits
+   nothing else, because stamp-only data changes are dropped before the commit. It exists
    because a run that never happens cannot fail, so the nightly job could never
    catch its own absence. Check it here too — if IT is also missing a run, both
    schedules were dropped and the answer is the same manual dispatch.
