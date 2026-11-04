@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { fetchMilbPool, pickGame, poolGamePath, reasonLine, seedFrom } from '../../api/milbPool.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { readRevealMarkFor } from '../../hooks/useRevealProgress.js'
+import { readRevealMarkFor } from '../../lib/account/revealMark.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
