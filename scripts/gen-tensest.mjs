@@ -19,15 +19,14 @@
 // Regular season and postseason are both kept; a row carries its game type.
 // Season: the season in play (lib/time/season-in-play.mjs), or --season=YYYY.
 // Run by hand: node scripts/gen-tensest.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow, isPlayedFinal } from './lib/tensest/tensest.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
 const STATE = join(here, 'data', 'tensest-state.json')
 const CONCURRENCY = 8

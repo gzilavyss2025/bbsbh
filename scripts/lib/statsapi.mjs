@@ -50,8 +50,7 @@
 
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { withRetry } from './net/retry.mjs'
 
 export const STATSAPI_BASE = 'https://statsapi.mlb.com'
@@ -63,7 +62,7 @@ export const statsapiUrl = (path) => STATSAPI_BASE + path
 export const RETRY_TRIES = 3
 export const RETRY_DELAY_MS = 2000
 
-export const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'node_modules', '.cache', 'statsapi')
+export const CACHE_DIR = join(import.meta.dirname, '..', '..', 'node_modules', '.cache', 'statsapi')
 export const CACHE_MAX_AGE_MS = 60 * 60 * 1000
 
 const DNS_CODES = new Set(['ENOTFOUND', 'EAI_AGAIN'])

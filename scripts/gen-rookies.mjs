@@ -39,13 +39,12 @@
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { writeRookieShards } from './lib/rookie-shards.mjs'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { findCrossingSeason, crossingDateFromGameLog } from './lib/rookie-crossing.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'rookies.json')
 
 // Run an async mapper across items with a small concurrency cap (be polite to

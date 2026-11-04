@@ -30,13 +30,12 @@ import { createHash } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
 import { mkdir, rename, stat } from 'node:fs/promises'
 import { createInterface } from 'node:readline'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const CACHE = join(here, '..', '..', 'node_modules', '.cache', 'opencommand')
 
 // The seasons OpenCommand covers. Broadcast-video CV only runs where there is

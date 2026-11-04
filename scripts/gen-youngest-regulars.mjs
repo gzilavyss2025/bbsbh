@@ -32,8 +32,7 @@
 //
 // Run by hand: node scripts/gen-youngest-regulars.mjs [--level=13] [--season=2026]
 // Nightly: .github/workflows/update-nightly-data.yml
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { levelOffseasonPhase } from '../src/lib/time/seasonPhase.js'
@@ -44,7 +43,7 @@ import {
   sortByAge,
 } from './lib/youngest-regulars.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
 const outDir = join(dataDir, 'youngest-regulars')
 

@@ -21,13 +21,12 @@
 //     five fields the matcher and the (later) admin review picker need
 //
 // Run by hand: node scripts/gen-contracts-season-players.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const rawDir = join(here, '..', '.scratch', 'contracts', 'season-players-raw')
 const shippedDir = join(here, '..', 'public', 'data', 'contracts-history', 'season-players')
 

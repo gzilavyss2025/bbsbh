@@ -21,14 +21,14 @@
 // Every key is sorted and nothing carries a clock, so a rerun on the same inputs writes the
 // same bytes (the freshness guard exempts public/data/from/map/).
 import { readdir, readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import { geoBounds, geoCentroid, geoContains, geoPath } from 'd3-geo'
 import * as topo from 'topojson-client'
 import * as simp from 'topojson-simplify'
 import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
 import { parseMetroZones, roundBox, STATE_FIPS, STATE_NAMES, stateZones } from './lib/from/zones.mjs'
+import { join } from 'node:path'
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url))
+const ROOT = join(import.meta.dirname, '..')
 const MAP_DIR = `${ROOT}public/data/from/map`
 const DATA_DIR = `${ROOT}scripts/data/from`
 const BIRTHPLACES = `${ROOT}public/data/birthplaces`

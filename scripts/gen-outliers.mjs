@@ -16,14 +16,13 @@
 // A season with no game logs yet (January to opening day) writes nothing, so last season's
 // file stays and the reader's year has no file: the page then shows its offseason state.
 import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { chunk, mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { walkPlayer } from './lib/outliers/walk.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const season = Number(process.argv[2] ?? new Date().getUTCFullYear())
 const tails = JSON.parse(readFileSync(join(root, 'public/data/season-checkpoints/tails.json'), 'utf8'))
 

@@ -10,8 +10,7 @@
 // (src/api/player/leagueAverages.js). The file has no timestamp, so a re-run writes the
 // same bytes. `--out <path>` writes somewhere else. One call a season, about 125.
 import { stat } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
@@ -23,7 +22,7 @@ const lastSeason = (await fetchSeasonInPlay()) - 1
 const years = Array.from({ length: lastSeason - FIRST + 1 }, (_, i) => FIRST + i)
 
 const outArg = process.argv.indexOf('--out')
-const out = outArg > 0 ? process.argv[outArg + 1] : join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'league-averages.json')
+const out = outArg > 0 ? process.argv[outArg + 1] : join(import.meta.dirname, '..', 'public', 'data', 'league-averages.json')
 
 const splitsOf = (data, name) => data.stats?.find((s) => s.group?.displayName === name)?.splits
 // strict: a failed call stops the run instead of writing a hole that reads as "not recorded".

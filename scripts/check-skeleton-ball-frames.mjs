@@ -14,9 +14,8 @@
 
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const jsPath = join(ROOT, 'src/components/game/BoxScoreSkeleton.jsx')
 // The rules live in one of the src/styles/*.css partials (today
 // 22-box-score-tables.css). Read them ALL and concatenate rather than naming

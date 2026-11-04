@@ -24,13 +24,12 @@
 // before the feed carries it) is kept, the same as any other.
 //
 // Run by hand: node scripts/gen-milb-ballparks.mjs (after gen-teams.mjs)
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { writeJsonAtomic } from './lib/io.js'
 import { pinParkKeys } from '../src/lib/ballpark/parkKeys.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
 const keysPath = join(here, '..', 'src', 'lib', 'data', 'park-keys.json')
 const out = join(here, '..', 'src', 'lib', 'data', 'milb-ballparks.json')
@@ -72,6 +71,6 @@ async function main() {
   console.log(`wrote ${out} (${Object.keys(parks).length} parks)`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

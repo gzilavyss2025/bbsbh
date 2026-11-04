@@ -38,14 +38,13 @@
 // Run by hand:
 //   node scripts/gen-doubleheaders.mjs
 //   node scripts/gen-doubleheaders.mjs --from=2019   # a shorter sweep, for a test
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'doubleheaders.json')
 
 // 2004 is the floor the report page opens on, and it is also about as far back
@@ -234,6 +233,6 @@ async function main() {
   console.log(`\nWrote ${out} — ${total} doubleheaders, ${from}–${to}`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

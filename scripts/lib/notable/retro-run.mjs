@@ -9,14 +9,13 @@
 // a needed column is gone.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { parseCsv } from '../csv.mjs'
 import { getJson } from '../statsapi.mjs'
 import { gameFromRow, SCHEDULE_FIELDS } from './games.mjs'
 import { CHECK_KINDS, RetroInputError, checkRetrosheet, retroEntries } from './retro-check.mjs'
 import { formatReport, reportJson } from './retro-report.mjs'
 
-const REPO = fileURLToPath(new URL('../../../', import.meta.url))
+const REPO = join(import.meta.dirname, '../../../')
 
 const insideRepo = (path) => {
   const rel = relative(REPO, resolve(path))

@@ -10,9 +10,8 @@
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 
 const FILES = [
   join(ROOT, 'src/components/chrome/SiteMenu.jsx'),

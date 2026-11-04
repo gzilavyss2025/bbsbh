@@ -16,10 +16,9 @@ const chromium = (() => {
   }
 })()
 import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const iconsDir = join(here, '..', 'public', 'icons')
 // icon.svg has hard-coded width="512" height="512" attributes, which are the
 // SVG's *intrinsic* size and win over a CSS-sized container — so without

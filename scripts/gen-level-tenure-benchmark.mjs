@@ -38,14 +38,13 @@
 // hand periodically to roll the window forward.
 //
 // Run by hand: node scripts/gen-level-tenure-benchmark.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { ipToOuts } from '../src/lib/math/innings.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const rookiesPath = join(here, '..', 'public', 'data', 'rookies.json')
 const out = join(here, '..', 'public', 'data', 'level-tenure-benchmark.json')
 

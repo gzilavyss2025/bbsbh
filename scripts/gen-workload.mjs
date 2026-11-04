@@ -25,8 +25,7 @@
 // baselines also serve pitching-health.md's P3 own-baseline engine.
 //
 // Run by hand: node scripts/gen-workload.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { clubPenCounts, foldGameLog } from '../src/api/workload.js'
@@ -34,7 +33,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { num } from '../src/lib/math/number.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'workload.json')
 // The slate's sidecar — thirty rows of counts, written beside the full store.
 const summaryOut = join(here, '..', 'public', 'data', 'workload-summary.json')

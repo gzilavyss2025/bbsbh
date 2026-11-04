@@ -11,9 +11,8 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const SRC = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'src');
+const SRC = join(import.meta.dirname, '..', 'src');
 
 const BANNED = /\.(toUpperCase|toLowerCase)\(\)/g;
 

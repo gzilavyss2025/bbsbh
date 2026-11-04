@@ -24,7 +24,6 @@
 // names that need a line), county-zone.json and point-county.json (gen-where-from-map.mjs), and
 // public/data/birthplaces/ (gen-bio-history.mjs). Nothing here needs a geo library or a download.
 import { readFile, readdir, rename, writeFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -34,8 +33,9 @@ import { packSchools, parseHd, unpackSchools } from './lib/from/ipeds.mjs'
 import { buildFrom } from './lib/from/places.mjs'
 import { fetchPeople, fetchSeasonIds, FIRST_SEASON, isPending, recheckSlice, slimPerson, sortedIds } from './lib/from/players.mjs'
 import { albersUsa } from './lib/from/project.mjs'
+import { join } from 'node:path'
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url))
+const ROOT = join(import.meta.dirname, '..')
 const DATA = `${ROOT}scripts/data/from`
 const OUT = `${ROOT}public/data/from`
 const BIRTHPLACES = `${ROOT}public/data/birthplaces`

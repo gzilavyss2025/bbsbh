@@ -25,10 +25,9 @@
 // adding install latency and avoids native-binary platform risk.
 import { DatabaseSync } from 'node:sqlite'
 import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const schemaPath = join(here, 'schema.sql')
 const dataDir = join(here, '..', 'data')
 

@@ -22,13 +22,12 @@
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { LOGO_TREATMENT_DIRS } from '../../src/lib/logoArt.js'
 import { MASTHEAD_MARK_ASSIGN_KEYS } from '../../src/lib/teams.js'
 import { markSlug } from '../../src/lib/logoRecolor.js'
 
-const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
+const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 
 export const DEV_CUSTOM_MARK_ROUTE = 'custom-mark'
 export const DEV_CUSTOM_MARK_ASSIGN_ROUTE = 'custom-mark-assign'

@@ -13,13 +13,12 @@
 // `personId % 100`, all three seasons and both player types in one shard, so a player
 // page opens ONE ~2.5 KB file (src/api/ovr/savantHistory.js).
 // Run by hand: node scripts/gen-savant-history.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeShards } from './lib/io.js'
 import { fetchPercentiles } from './lib/savant.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'savant-history')
+const outDir = join(import.meta.dirname, '..', 'public', 'data', 'savant-history')
 
 const FIRST_SEASON = 2023
 const LAST_SEASON = 2025

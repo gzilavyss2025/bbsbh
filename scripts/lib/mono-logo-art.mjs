@@ -13,14 +13,13 @@
 // regenerate with the PREVIOUS pins and look like an off-by-one bug.
 import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { logoCdnUrl } from '../../src/lib/logoCdn.js'
 import { monoLogoFingerprint, monoLogoSvg } from '../../src/lib/logoMono.js'
 import { applyIdentityOverrides } from '../../src/lib/identity/apply.js'
 import { SITE_URL } from '../../src/copy/landing/site.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const repoRoot = join(here, '..', '..')
 
 export const MONO_LOGO_DIR = join(repoRoot, 'public', 'data', 'logos', 'mono')

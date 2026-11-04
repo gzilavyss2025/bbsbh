@@ -19,9 +19,8 @@
 
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = path.join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = path.join(import.meta.dirname, '..')
 const FIXTURES_DIR = process.env.FIXTURE_FRESHNESS_DIR || path.join(ROOT, 'e2e/fixtures')
 const MANIFEST_PATH = path.join(FIXTURES_DIR, 'manifest.json')
 const MAX_AGE_DAYS = 180
