@@ -34,6 +34,17 @@ test('parseRevealMark collapses null / garbage / negative / fractional to -1', (
   assert.equal(parseRevealMark('Infinity'), -1)
 })
 
+// #2891: Number(raw) read '' and ' ' as 0 (top of the 1st opened) and '1e3' as 1000
+// (every half, extras too). Only a plain digit string is a mark.
+test('parseRevealMark reads only a plain digit string; every other shape fails closed', () => {
+  for (const v of ['', ' ', '1e3', '0x1f', '0b11', '0o7', '-1', '1.5', 'NaN', ' 3', '3 ', '+3', '9'.repeat(20)]) {
+    assert.equal(parseRevealMark(v), -1, JSON.stringify(v))
+  }
+  assert.equal(parseRevealMark('0'), 0)
+  assert.equal(parseRevealMark('5'), 5)
+  assert.equal(parseRevealMark('17'), 17)
+})
+
 // --------------------------------------------------------------------------
 // parseAtBatMark — the "{halfIdx}:{count}" stepping cursor (ADR-0016)
 // --------------------------------------------------------------------------

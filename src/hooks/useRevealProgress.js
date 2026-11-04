@@ -192,17 +192,32 @@ export function useRevealProgress(feed, regulation, actualCount) {
 
   const atBatStorageKey = feed?.gamePk ? `${ATBAT_KEY}${feed.gamePk}` : null
   const [atBatMark, setAtBatMark] = useState(() => readAtBatMark(atBatStorageKey))
+
+  // A new gamePk on a mounted hook is a different game: ask storage again, during
+  // render, as useBoxScoreReveal below does. Without this the hook kept game A's mark
+  // and cursor, rendered them on game B, and the persist effects wrote them under B's
+  // keys (#2891). An effect would paint one frame of A's reveal on B first.
+  const [seededFor, setSeededFor] = useState(storageKey)
+  let through = revealedThrough
+  let cursor = atBatMark
+  if (seededFor !== storageKey) {
+    through = readRevealMark(storageKey)
+    cursor = readAtBatMark(atBatStorageKey)
+    setSeededFor(storageKey)
+    setRevealedThrough(through)
+    setAtBatMark(cursor)
+  }
   // How many entries have been stepped through for a given half-index — 0 for
   // any half other than the one the mark belongs to (a different half, or no
   // stepping done yet).
   const atBatCountFor = useCallback(
-    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.count : 0),
-    [atBatMark],
+    (n, half) => (cursor.halfIdx === halfIndex(n, half) ? cursor.count : 0),
+    [cursor],
   )
   // Gameday's sub-steps shown of the half's next at-bat (ADR-0123): 0 for any other half.
   const subFor = useCallback(
-    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.sub : 0),
-    [atBatMark],
+    (n, half) => (cursor.halfIdx === halfIndex(n, half) ? cursor.sub : 0),
+    [cursor],
   )
 
   // The one ratchet: revealedThrough only ever moves forward, from any
@@ -256,13 +271,13 @@ export function useRevealProgress(feed, regulation, actualCount) {
   }, [])
 
   useEffect(() => {
-    if (!storageKey || revealedThrough < 0) return
+    if (!storageKey || through < 0) return
     try {
-      window.localStorage.setItem(storageKey, String(revealedThrough))
+      window.localStorage.setItem(storageKey, String(through))
     } catch {
       // Private-mode / storage-disabled — degrade to in-session memory only.
     }
-  }, [storageKey, revealedThrough])
+  }, [storageKey, through])
 
   // The 'storage' event only fires in OTHER tabs/windows on the same origin,
   // never the tab that made the write — so this picks up a reveal made in a
@@ -286,21 +301,21 @@ export function useRevealProgress(feed, regulation, actualCount) {
   useEffect(() => {
     if (!atBatStorageKey) return
     try {
-      if (atBatMark.halfIdx < 0) {
+      if (cursor.halfIdx < 0) {
         window.localStorage.removeItem(atBatStorageKey)
       } else {
-        window.localStorage.setItem(atBatStorageKey, formatAtBatMark(atBatMark))
+        window.localStorage.setItem(atBatStorageKey, formatAtBatMark(cursor))
       }
     } catch {
       // Private-mode / storage-disabled — degrade to in-session memory only.
     }
-  }, [atBatStorageKey, atBatMark])
+  }, [atBatStorageKey, cursor])
 
   // How many innings are currently visible: regulation, plus one more for each
   // extra inning whose predecessor has already been fully revealed.
   const unlocked = useMemo(
-    () => unlockedInnings(regulation, actualCount, revealedThrough),
-    [regulation, actualCount, revealedThrough],
+    () => unlockedInnings(regulation, actualCount, through),
+    [regulation, actualCount, through],
   )
 
   // Derived stats (pitches/whiffs/1st-pitch strikes) are parsed lazily and
@@ -324,7 +339,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
   }, [feed])
 
   return {
-    revealedThrough,
+    revealedThrough: through,
     revealTo,
     mergeRevealedThrough,
     unlocked,

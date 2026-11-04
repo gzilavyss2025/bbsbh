@@ -7,15 +7,17 @@
 // here.
 import { halfIndex } from '../api/select.js'
 
-// Parse a raw localStorage value into a reveal half-index. Anything that isn't
-// a non-negative integer — null (unset), a NaN, a negative, a fractional —
-// collapses to -1 ("nothing revealed"), so a hand-mangled or cross-version
-// storage entry can never over-reveal. Takes the already-read raw string (or
-// null); the hook owns the try/catch around the actual storage read.
+// Parse a raw localStorage value into a reveal half-index. Only a plain digit
+// string is a mark; anything else — null (unset), '', whitespace, a negative, a
+// fractional, '1e3', '0x1f' — collapses to -1 ("nothing revealed"), so a
+// hand-mangled or cross-version storage entry can never over-reveal. The digit
+// check comes before Number() because Number('') is 0 and Number('1e3') is 1000
+// (#2891). Takes the already-read raw string (or null); the hook owns the
+// try/catch around the actual storage read.
 export function parseRevealMark(raw) {
-  if (raw == null) return -1
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw)) return -1
   const n = Number(raw)
-  return Number.isInteger(n) && n >= 0 ? n : -1
+  return Number.isSafeInteger(n) ? n : -1
 }
 
 // Parse the box score's own mark (ADR-0049) — the one bit that says "this
