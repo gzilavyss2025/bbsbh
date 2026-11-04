@@ -17,7 +17,7 @@
 // An outline is stored only when it passes auditOutline against the same
 // season's Savant row. A failing one usually shows an older wall (Comerica's
 // SVG still has the pre-2023 center field), and drawing it would be the exact
-// bug this registry exists to stop. The audit numbers are stored either way, so
+// bug this registry exists to stop. The audit numbers go to fields-audit.json either way (build-only, not shipped), so
 // the coverage report (docs/ballpark-layouts.md) can show why.
 //
 // MINOR-LEAGUE PARKS (#1859, slice 3) get a second, weaker pass. No Savant row
@@ -46,6 +46,7 @@ import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 import { join } from 'node:path'
 
 const OUT = join(import.meta.dirname, '../../src/lib/ballpark/layout/fields.js')
+const AUDIT_OUT = join(import.meta.dirname, '../../src/lib/ballpark/layout/fields-audit.json')
 const SAVANT = (y) => `https://baseballsavant.mlb.com/leaderboard/statcast-park-factors?type=dimensions&year=${y}`
 const GAMEDAY = (id) => `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.2.0/images/fields/${id}.svg`
 
@@ -70,10 +71,13 @@ function savantRows(html) {
   return rows
 }
 
+// Whole units: one is 2.4 ft, finer than any card draws (#2903). The audit runs on these.
+const round0 = (pts) => pts.map(([x, y]) => [Math.round(x), Math.round(y)])
 const r1 = (n) => (n == null ? null : Math.round(n * 10) / 10)
 
 const rows = savantRows(await text(SAVANT(year)))
 const venues = {}
+const audits = { venues: {}, milb: {} } // build-only: fields-audit.json, read by the tests
 const fitted = []
 for (const r of rows) {
   const measured = {
@@ -88,6 +92,7 @@ for (const r of rows) {
   let layers = {}
   try {
     const out = fenceFromSvg(await text(GAMEDAY(r.venue_id)), { poles: measured.dist })
+    if (out) out.points = round0(out.points)
     if (!out) note = 'Gameday SVG has no Outfield/foul-line layers'
     else {
       if (out.fittedScale) fitted.push(out.fittedScale)
@@ -104,13 +109,13 @@ for (const r of rows) {
   } catch (err) {
     note = `Gameday SVG not fetched: ${err.message}`
   }
+  if (audit) audits.venues[r.venue_id] = { ...audit.errors, pass: audit.pass }
   venues[r.venue_id] = {
     club: r.name_display_club ?? null,
     configChanged: Boolean(r.is_diff_configuration),
     measured,
     fence,
     ...layers,
-    audit: audit && { ...audit.errors, pass: audit.pass },
     ...(note ? { note } : {}),
   }
   const tag = fence ? 'audited' : audit ? 'FAILED audit' : note
@@ -177,6 +182,7 @@ for (const [id, sportId] of milbVenues) {
     const svg = await text(GAMEDAY(id))
     const named = fenceFromSvg(svg)
     const out = named ?? legacyFenceFromSvg(svg)
+    if (out) out.points = round0(out.points)
     style = out ? (named ? 'named' : 'legacy') : null
     if (out) {
       audit = auditPosted(out.points, posted)
@@ -198,6 +204,7 @@ for (const [id, sportId] of milbVenues) {
   if (!fence && !five && !three) continue
   const names = [...new Set([v?.name, ...(milbNames.get(id) ?? [])].filter(Boolean))]
   if (names.length > 1) console.log(`  renamed: ${names.join(' -> ')}`)
+  if (audit) audits.milb[id] = { ...audit.errors, pass: audit.pass }
   milb[id] = {
     name: v?.name ?? null,
     ...(names.length > 1 ? { names } : {}),
@@ -205,7 +212,6 @@ for (const [id, sportId] of milbVenues) {
     posted,
     fence,
     ...(fence ? { style } : {}),
-    audit: audit && { ...audit.errors, pass: audit.pass },
   }
   console.log(String(id).padEnd(5), String(v?.name ?? '').slice(0, 28).padEnd(28), fence ? `estimated (${style})` : 'posted distances only', audit ? JSON.stringify(audit.errors) : '')
 }
@@ -227,4 +233,5 @@ const out = {
   },
 }
 writeFileSync(OUT, 'export default ' + JSON.stringify(out, null, 0).replace(/("\d+":\{)/g, '\n$1') + '\n')
-console.log(`wrote ${OUT}`)
+writeFileSync(AUDIT_OUT, JSON.stringify({ generatedAt: out.generatedAt, ...audits }) + '\n')
+console.log(`wrote ${OUT} and ${AUDIT_OUT}`)
