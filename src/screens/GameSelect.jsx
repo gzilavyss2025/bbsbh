@@ -18,12 +18,8 @@ import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
-import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
-import { SeriesPrimer } from '../components/postseason/SeriesPrimer.jsx'
-import { WorldSeriesHome } from '../components/worldseries/WorldSeriesHome.jsx'
 import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
-import { BracketDock } from '../components/bracket/BracketDock.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { SlateMasthead } from '../components/slatehead/SlateMasthead.jsx'
 import { fetchLevelCounts } from '../api/slate/levelCounts.js'
@@ -31,13 +27,13 @@ import { ladderStops } from '../lib/slate/ladder.js'
 import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
+import { LazyPanel } from '../components/ui/state/LazyPanel.jsx'
 import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
-import { OffseasonSlot } from '../components/offseason/OffseasonSlot.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
@@ -64,6 +60,16 @@ const ContinueScoring = isClerkEnabled
 const MergeReceiptStrip = isClerkEnabled
   ? lazyNamed(() => import('../components/account/MergeReceiptStrip.jsx'), 'MergeReceiptStrip')
   : null
+
+// Seasonal panels: each downloads only when the slate draws it (same components, same
+// props — only when they download changes). LazyPanel reserves the panel's height meanwhile.
+// WorldSeriesHome's chunk starts as soon as the postseason window is known, in parallel with
+// the bracket fetch that decides whether it renders, so a Series day waits for no extra hop.
+const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldSeriesHome.jsx'), 'WorldSeriesHome')
+const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
+const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
+const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
+const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
 // Neither the league nor the date persists anywhere. Both live in the URL
 // ('/aaa/08152026'; a missing league means MLB and a missing date means today,
@@ -120,6 +126,7 @@ export function GameSelect({
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
   const wsModeInfo = worldSeriesMode(postseasonBracket.bracket)
+  if (inPostseasonWindow) import('../components/worldseries/WorldSeriesHome.jsx') // preload, see WorldSeriesHome above
   const wsMode = Boolean(wsModeInfo) // the World Series hero replaces the fold and primer (#1906)
   const seriesGamePk = wsModeInfo?.dayType === 'game' ? wsModeInfo.series.cutoffGame?.gamePk ?? null : null
   // The bracket stands in for the off-day banner and the empty-slate line
@@ -609,15 +616,17 @@ export function GameSelect({
             }
           />
 
-          {inPostseasonWindow && (
-            <WorldSeriesHome
-              bracket={postseasonBracket.bracket}
-              cutoff={postseasonBracket.cutoff}
-              slateDate={dateStr}
-              wide={wide}
-              seriesGame={seriesGame}
-              renderCard={renderCard}
-            />
+          {inPostseasonWindow && wsMode && (
+            <LazyPanel reserve="ws">
+              <WorldSeriesHome
+                bracket={postseasonBracket.bracket}
+                cutoff={postseasonBracket.cutoff}
+                slateDate={dateStr}
+                wide={wide}
+                seriesGame={seriesGame}
+                renderCard={renderCard}
+              />
+            </LazyPanel>
           )}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
@@ -625,11 +634,13 @@ export function GameSelect({
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
           {inPostseasonWindow && !bracketInRail && !bracketInDock && !(wsMode && wide) && (
-            <PostseasonBracket
-              bracket={postseasonBracket.bracket}
-              cutoff={postseasonBracket.cutoff}
-              slateDate={dateStr}
-            />
+            <LazyPanel reserve="bracket">
+              <PostseasonBracket
+                bracket={postseasonBracket.bracket}
+                cutoff={postseasonBracket.cutoff}
+                slateDate={dateStr}
+              />
+            </LazyPanel>
           )}
 
           {/* THE OFFSEASON PAGE (issues #1038, #1077). It moves nothing: the
@@ -638,7 +649,9 @@ export function GameSelect({
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
           {winter && (
-            <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+            <LazyPanel reserve="offseason">
+              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+            </LazyPanel>
           )}
 
           {showBreakBanner && (
@@ -672,7 +685,11 @@ export function GameSelect({
                 winter: every club is idle then, and the logo rail above already
                 links all of them (2026-11-02). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
-            {october && !wsMode && <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />}
+            {october && !wsMode && (
+              <LazyPanel reserve="primer">
+                <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />
+              </LazyPanel>
+            )}
             {offDayTeams.length > 0 && !winter && !october && (
               <OffDaySection
                 teams={offDayTeams}
@@ -704,7 +721,11 @@ export function GameSelect({
 
         {/* October's copy of that column: the bracket, or the primer's. A World Series day draws its own
             bracket beside the hero (WorldSeriesHome), so the page runs the full width under it. */}
-        {bracketInRail && !wsMode && <SeriesPrimer part="rail" primer={primer} />}
+        {bracketInRail && !wsMode && (
+          <LazyPanel reserve="primer-rail">
+            <SeriesPrimer part="rail" primer={primer} />
+          </LazyPanel>
+        )}
 
       </div>
 
@@ -728,11 +749,13 @@ export function GameSelect({
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
       {bracketInDock && (
-        <BracketDock
-          bracket={postseasonBracket.bracket}
-          cutoff={postseasonBracket.cutoff}
-          slateDate={dateStr}
-        />
+        <LazyPanel reserve="dock">
+          <BracketDock
+            bracket={postseasonBracket.bracket}
+            cutoff={postseasonBracket.cutoff}
+            slateDate={dateStr}
+          />
+        </LazyPanel>
       )}
       {wireOn && !wide && !winter && (
         <WireDock
