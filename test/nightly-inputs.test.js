@@ -52,3 +52,8 @@ test('a closed gate lists its steps datasets as skipped, and freshness exempts t
 test('run_all opens both gates whatever the schedule says (a hand run that must run everything)', () => {
   assert.deepEqual(decideGates({ upcoming: sched(), recent: sched(), runAll: true }), { upcoming: true, finals: true })
 })
+
+test('the finals gate reads MLB and AAA: umpires, umpire accuracy and ABS cover AAA games', async () => {
+  const { FINALS_SPORT_IDS } = await import('../scripts/nightly/inputs.mjs')
+  assert.deepEqual(FINALS_SPORT_IDS, [1, 11])
+})

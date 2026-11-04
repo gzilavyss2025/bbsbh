@@ -412,8 +412,9 @@ restarting the rows already on disk.
   inputs were made (`generatedAt` of `savant-percentiles.json`). A rated date already on
   disk is never rewritten, so a rerun on the same files writes the same bytes.
   A rating equal to the player's last real row adds no row (2026-11), so a season
-  that is over stops gaining a copy of its final rating each night. The card hides a
-  change whose newest row is more than 7 days old (`ovrView`'s `today`).
+  that is over stops gaining a copy of its final rating each night. So when #1703
+  shows the change, it must hide one whose newest row is more than 7 days before
+  today: all offseason the newest row is the season's last change.
 - **What is kept** (`scripts/lib/ovr/history.mjs`): every day of the last 60 days
   (`RECENT_DAYS`), then one row per week for the rest of the current season. Older
   seasons are dropped.

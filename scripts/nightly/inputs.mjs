@@ -5,7 +5,7 @@
 //
 //   upcoming  an MLB game (spring training included) is scheduled in the next
 //             UPCOMING_DAYS days: game-prep steps (notes, call-outs, matchups).
-//   finals    an MLB game went Final since the last run (the heartbeat's ranAt,
+//   finals    an MLB or AAA game went Final since the last run (the heartbeat's ranAt,
 //             minus a day for a late game): game-result steps.
 //
 // Gated on the SCHEDULE, never the calendar (the workflow header's lesson: "a
@@ -21,6 +21,9 @@ import { pathToFileURL } from 'node:url'
 import { getJson } from '../lib/statsapi.mjs'
 
 export const UPCOMING_DAYS = 14 // gen-vs-team-splits.mjs reads the next 14 days
+// MLB and AAA: umpires, umpire-accuracy and abs-challenges read AAA games too, so
+// an AAA-only day (the MLB All-Star break) still opens the finals gate.
+export const FINALS_SPORT_IDS = [1, 11]
 
 // step id -> which gate it waits on, and the public/data datasets it writes (by
 // check-data-freshness.mjs's names: a file, or a directory with a trailing /).
@@ -93,7 +96,7 @@ async function main() {
   }
   const [upcoming, recent] = await Promise.all([
     readOrNull(`/api/v1/schedule?sportId=1&startDate=${iso(now)}&endDate=${iso(now + UPCOMING_DAYS * 864e5)}`),
-    readOrNull(`/api/v1/schedule?sportId=1&startDate=${since}&endDate=${iso(now)}`),
+    readOrNull(`/api/v1/schedule?sportId=${FINALS_SPORT_IDS.join(',')}&startDate=${since}&endDate=${iso(now)}`),
   ])
   const open = decideGates({ upcoming, recent, runAll: process.env.RUN_ALL === 'true' })
   const skipped = skippedDatasets(open)
