@@ -99,4 +99,3 @@ own issue and the owner's approval.
 | `cards/Probables.jsx`, `postseason/SeriesStarters.jsx` | Keep | Different pitchers per side with outing bars. The measures are not shared rows. |
 | `cards/Bullpen.jsx`, `cards/HomeRoad.jsx`, `cards/HotBats.jsx` | Keep | Per-club lists of different people or games. |
 | `postseason/SeriesLeadersLedger.jsx` | Keep | A leader per category who differs by club. It has its own ledger. |
-| `screens/designlab/scout/HeadToHead.jsx` | Keep | An event list, not a measure table. |

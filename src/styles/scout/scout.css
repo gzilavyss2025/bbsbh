@@ -1,12 +1,10 @@
 /* ============================================================
-   MATCHUP SCOUT — screens/scout/ScoutPage.jsx (/scout, #1410) and its
-   Design Lab prototype, screens/designlab/scout/ScoutLab.jsx (#1408).
+   MATCHUP SCOUT — screens/scout/ScoutPage.jsx (/scout, #1410).
 
    A PER-ROUTE PARTIAL in a subdirectory, because src/styles is at its file
-   budget (ADR-0038): imported by the two screens above, never by
+   budget (ADR-0038): imported by the screen above, never by
    src/index.css. Every selector is .scout__*; nothing else may hook these
-   classes. Spec: docs/scout-design.md. The .scout__lab and .scout__labbtn
-   rules are the prototype's own and draw nothing on the page.
+   classes. Spec: docs/scout-design.md.
 
    Two scales, one per map. The pitcher's map is the command map's clay ramp
    (26d-command-map.css): a share, sequential, one hue. The hitter's map
@@ -52,11 +50,6 @@
     flex-wrap: wrap;
     gap: var(--space-4);
   }
-}
-
-.scout__lab {
-  padding: var(--space-2);
-  border: var(--bw-hair) dashed var(--border-rule);
 }
 
 /* --- controls --- */
@@ -229,8 +222,7 @@
   color: var(--text-body);
 }
 
-.scout__empty,
-.scout__labbtn {
+.scout__empty {
   grid-column: 1 / -1;
   justify-self: start;
 }

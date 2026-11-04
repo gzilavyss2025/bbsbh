@@ -4,8 +4,7 @@ import { regionLabel, sidesInOrder } from '../../../lib/zone/regions.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // THE PARTS AROUND THE SCOUT'S MAP: the side labels under it, the
-// answer line above them, the readout for a tapped region, and the key. The
-// same parts as the Design Lab prototype (screens/designlab/scout/).
+// answer line above them, the readout for a tapped region, and the key.
 
 const pct = (x) => `${Math.round(x * 100)}`
 

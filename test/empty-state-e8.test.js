@@ -25,8 +25,7 @@ test('E8: the Scout page renders its prompt and its one chart slot on EmptyState
   assert.match(code, /<Notice tone="error" className="scout__notice">Couldn’t load this pair/, 'the error line is an error Notice since N2 (#1132)')
 })
 
-test('E8: the lab keeps scout__notposted, so its rule stays', () => {
-  assert.match(src('screens/designlab/scout/ScoutLab.jsx'), /scout__notposted/)
+test('E8: the scout stylesheet keeps its scout__notposted rule', () => {
   assert.match(src('styles/scout/scout.css'), /\.scout__notposted\s*\{/)
 })
 
