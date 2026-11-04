@@ -332,10 +332,6 @@ svg.scout__swatch {
   color: var(--text-caption);
 }
 
-.scout__notposted {
-  text-align: center;
-}
-
 /* --- the readout: a tapped region's exact figures, in a box under the map (V09) --- */
 
 /* layout-exempt: the name over the two players' lines */

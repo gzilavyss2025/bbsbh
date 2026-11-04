@@ -25,10 +25,6 @@ test('E8: the Scout page renders its prompt and its one chart slot on EmptyState
   assert.match(code, /<Notice tone="error" className="scout__notice">Couldn’t load this pair/, 'the error line is an error Notice since N2 (#1132)')
 })
 
-test('E8: the scout stylesheet keeps its scout__notposted rule', () => {
-  assert.match(src('styles/scout/scout.css'), /\.scout__notposted\s*\{/)
-})
-
 // The head-to-head list became the Meetings tab (#1490,
 // screens/scout/meetings/MeetingsPanel.jsx). Its empties and the caller's
 // tests for them moved with it, from a ternary to an if / else chain.
