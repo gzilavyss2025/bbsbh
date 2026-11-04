@@ -85,7 +85,8 @@ are rules rather than reference:
   not `new Date().getFullYear()` (#1465). From January 1 to Opening Day the calendar
   names a season with no games, and an unguarded generator writes an empty file over
   the finished one. Keep the calendar year only where it is the right meaning (a game
-  date's season), and skip the write when a season returns no data.
+  date's season), and skip the write when a season returns no data. "Is season N over?"
+  is `seasonOver` in the same file (ADR-0074); `frozen/freeze-season.mjs --nightly` uses it.
 
 A generator file is a top-level script: importing one RUNS it. A helper inside
 one can therefore never be unit-tested, so a helper worth testing goes in
