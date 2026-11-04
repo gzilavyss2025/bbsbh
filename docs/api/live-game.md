@@ -479,12 +479,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
   the number Express Lane writes into the app's at-bat reveal mark: a count of
   `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
-  the old PlayByPlay read back. A count of rail ROWS is a different number — over gamePk
-  823035 the two disagree at 99 of 128 cursor positions — and writing that one
-  opens entries in the innings viewer the surface never showed.
+  the old PlayByPlay read back. A count of event ROWS is a different number: rows
+  are per event and entries per play, so a row position can run larger than the
+  cap and open entries in the innings viewer the surface never showed.
   Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
   `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
-  rail row onto that cap. The cap is not optional and there is no variant of
+  cursor row onto that cap. The cap is not optional and there is no variant of
   `expressDeck` without the cursor — built off the finished half, a man who
   reached first in the third carries a fully shaded diamond the moment his own
   at-bat is revealed, telling the scorer the run came home before he scored the

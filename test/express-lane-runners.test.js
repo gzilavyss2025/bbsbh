@@ -36,11 +36,12 @@ function playedHalves() {
   return out
 }
 
-// A rail-shaped row for the plate appearance at `index` of one half.
-function rowAt(inning, half, index) {
+// A cursor row for the plate appearance at `index` of one half: terminal (its
+// play is over) or, with `isTerminal` false, a row INSIDE it (a timeout).
+function rowAt(inning, half, index, isTerminal = true) {
   const cards = computeHalfInningFeed(FEED, inning, half, battingSideOf(half))
   const card = cards[index]
-  return card ? { atBatIndex: card.atBatIndex, halfIndex: 0, isTerminal: true } : null
+  return card ? { atBatIndex: card.atBatIndex, halfIndex: 0, isTerminal } : null
 }
 
 test('the batting side follows the half, the way the rest of the app reads it', () => {
@@ -51,7 +52,7 @@ test('the batting side follows the half, the way the rest of the app reads it', 
 
 // --- the join ---------------------------------------------------------------
 
-test('a rail row joins its card on the feed plate-appearance number, not a position', () => {
+test('a cursor row joins its card on the feed plate-appearance number, not a position', () => {
   const cards = computeHalfInningFeed(FEED, 5, 'top', 'away')
   assert.equal(railStepCap(cards, { atBatIndex: cards[0].atBatIndex, isTerminal: true }), 1)
   assert.equal(railStepCap(cards, { atBatIndex: cards[3].atBatIndex, isTerminal: true }), 4)
@@ -282,8 +283,10 @@ test('a row INSIDE a plate appearance does not reveal that plate appearance', ()
   // walked around it.
   // A batter timeout: a non-terminal row carrying the plate appearance's own atBatIndex.
   const cards = computeHalfInningFeed(FEED, 1, 'top', 'away')
-  const lara = cards.findIndex((c) => c.batter.last === 'Lara')
-  const timeout = { ...rowAt(1, 'top', lara), kind: 'action', isTerminal: false }
+  const lara = cards.findIndex((c) => c.batter?.last === 'Lara')
+  assert.ok(lara >= 0)
+  const timeout = rowAt(1, 'top', lara, false)
+  assert.equal(timeout.isTerminal, false, 'the row this test is about')
 
   const deck = expressDeck(FEED, 1, 'top', timeout)
   assert.equal(deck.batter, null, 'the plate appearance in progress has no finished box')
@@ -304,8 +307,10 @@ test('a non-terminal row shows the base state as it was BEFORE its plate appeara
   // A batter timeout inside Vaughn's at-bat; Turang has doubled by
   // then, so the deck must show Turang on second and nothing of Vaughn's.
   const cards = computeHalfInningFeed(FEED, 1, 'top', 'away')
-  const vaughn = cards.findIndex((c) => c.batter.last === 'Vaughn')
-  const timeout = { ...rowAt(1, 'top', vaughn), kind: 'action', isTerminal: false }
+  const vaughn = cards.findIndex((c) => c.batter?.last === 'Vaughn')
+  assert.ok(vaughn >= 0)
+  const timeout = rowAt(1, 'top', vaughn, false)
+  assert.equal(timeout.isTerminal, false)
   const deck = expressDeck(FEED, 1, 'top', timeout)
   assert.deepEqual(
     deck.runners.map((r) => [r.card.batter.last, r.base]),
@@ -353,20 +358,26 @@ test('an empty half yields an empty deck rather than throwing', () => {
 //
 // Express Lane drives the app's OWN reveal mark, so the number it writes has
 // to be the number the innings viewer and the scorecard write: a count of
-// `computeHalfInningFeed` entries (ADR-0016). A count of RAIL rows is a
-// different unit — the rail carries a row per EVENT and the feed a card per
-// PLAY — and the two disagree over most of a real game.
+// `computeHalfInningFeed` entries (ADR-0016). A count of event rows is a
+// different unit — rows are per EVENT and the feed is a card per PLAY.
 
 test('the reveal cap is the deck’s own cap, at every cursor in the game', () => {
   for (const [inning, half] of playedHalves()) {
     const n = computeHalfInningFeed(FEED, inning, half, battingSideOf(half)).length
     for (let i = 0; i < n; i += 1) {
-      const row = rowAt(inning, half, i)
-      assert.equal(
-        railRevealCap(FEED, inning, half, row),
-        expressDeck(FEED, inning, half, row).cap,
-        `${half} ${inning}, card ${i}`,
-      )
+      // Both the terminal row and a row INSIDE the plate appearance (the one
+      // that must stop short of its own card).
+      for (const isTerminal of [true, false]) {
+        const row = rowAt(inning, half, i, isTerminal)
+        if (row.atBatIndex == null) continue
+        const cap = railRevealCap(FEED, inning, half, row)
+        assert.notEqual(cap, null, `${half} ${inning}, card ${i}, terminal ${isTerminal}`)
+        assert.equal(
+          cap,
+          expressDeck(FEED, inning, half, row).cap,
+          `${half} ${inning}, card ${i}, terminal ${isTerminal}`,
+        )
+      }
     }
   }
 })
@@ -382,7 +393,7 @@ test('a row with no plate appearance of its own has no cap to write', () => {
 // `computeHalfInningFeed`'s `placed` card carries no `atBatIndex` — he took no
 // plate appearance, so there is no number for him to carry. A chip strip that
 // keyed on that number gave him `undefined`: an undefined React key shared with
-// every other placement, a tap that matched no rail row, and an `is-on`
+// every other placement, a tap that matched no row, and an `is-on`
 // comparison of `undefined === undefined` that lit him up on every cursor
 // position where the deck had no batter.
 
