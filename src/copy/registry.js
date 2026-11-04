@@ -25,7 +25,6 @@
 // Voice: the app is a paper scorebook. Copy is plain-spoken, a little dry, a
 // little fond of the bit.
 
-import { landingFields } from './landing/fields.js'
 import { awardFields } from './awardFields.js'
 import { offseasonFields } from './offseasonFields.js'
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
@@ -274,96 +273,110 @@ export const FIELDS = [
   ...awardFields(),
   ...parkFields(),
   ...milbParkFields(),
-  ...landingFields(),
 ]
 
-// Fast id -> field lookup, and the set of valid ids the API validates against.
-const FIELD_BY_ID = new Map(FIELDS.map((f) => [f.id, f]))
-export const FIELD_IDS = FIELDS.map((f) => f.id)
+// The SPA ships this RUNTIME set only. The /learn guide prose (landingFields)
+// is rendered server-side by api/page.js and edited in AdminCopy, so both read
+// the full set from registryFull.js and the first-load JS stays small (#2878).
+const reg = makeRegistry(FIELDS)
+export const FIELD_IDS = reg.FIELD_IDS
+export const defaultCopy = reg.defaultCopy
+export const sanitizeOverrides = reg.sanitizeOverrides
+export const mergeOverrides = reg.mergeOverrides
+export const resolveCopy = reg.resolveCopy
 
-// The shipped defaults as a flat { id: text } map — what the app renders with
-// no copy store at all.
-export function defaultCopy() {
-  const out = {}
-  for (const f of FIELDS) out[f.id] = f.default
-  return out
-}
+// One implementation of the helpers, bound to whichever field list a consumer
+// is allowed to know about; registryFull.js binds the full list.
+export function makeRegistry(fields) {
+  // Fast id -> field lookup, and the set of valid ids the API validates against.
+  const FIELD_BY_ID = new Map(fields.map((f) => [f.id, f]))
+  const FIELD_IDS = fields.map((f) => f.id)
 
-// Validate + normalize an override map coming from ANY untrusted source (the
-// admin POST body, or a cached blob from localStorage). Returns a NEW object
-// containing only known ids whose value is a string within the field's length
-// budget; everything else is silently dropped. This is the choke point that
-// lets us treat stored copy as safe: an unknown key can't appear, and no value
-// can exceed its cap. Never throws — bad input degrades to "fewer overrides",
-// which the runtime fills back in from defaults.
-export function sanitizeOverrides(raw) {
-  const out = {}
-  if (!raw || typeof raw !== 'object') return out
-  for (const [id, value] of Object.entries(raw)) {
-    const field = FIELD_BY_ID.get(id)
-    if (!field) continue
-    if (typeof value !== 'string') continue
-    const cleaned = stripControlChars(value, field.multiline).replace(/[ \t]+$/g, '')
-    if (cleaned.length === 0) continue // empty = "use the default", not stored
-    if (cleaned.length > field.maxLength) continue
-    // A field that declares a `pattern` is not prose — its value ends up in an
-    // `<img src>` or a CSS `object-position`, where "any bounded string" is no
-    // longer a safe contract. Dropping a non-matching value here covers the
-    // admin panel AND api/copy.js, so a hand-crafted POST cannot store a
-    // `javascript:` URL or arbitrary text that would land in a style.
-    if (field.pattern && !field.pattern.test(cleaned)) continue
-    out[id] = cleaned
+  // The shipped defaults as a flat { id: text } map — what the app renders with
+  // no copy store at all.
+  function defaultCopy() {
+    const out = {}
+    for (const f of fields) out[f.id] = f.default
+    return out
   }
-  return out
-}
 
-// Layer `patch` over `current` — the partial-save merge, shared by the client
-// that composes a patch and the server that applies one.
-//
-// A patch value of '' means CLEAR THIS FIELD, so it is dropped rather than
-// stored, matching sanitizeOverrides, which already treats an empty string as
-// "no override, use the default". A key absent from the patch is left exactly
-// as it was; that is the whole point of a patch.
-//
-// IT LIVES HERE, beside sanitizeOverrides, because BOTH ends of the write need
-// the identical function and there must not be two of them. api/copy.js applies
-// a patch against the authoritative Redis map; the client composes one. A
-// second implementation that drifted would decide, silently, that a save means
-// two different things depending on which end ran it.
-export function mergeOverrides(current, patch) {
-  const merged = { ...sanitizeOverrides(current) }
-  for (const [id, value] of Object.entries(patch || {})) {
-    if (typeof value === 'string' && value.trim()) merged[id] = value.trim()
-    else delete merged[id]
+  // Validate + normalize an override map coming from ANY untrusted source (the
+  // admin POST body, or a cached blob from localStorage). Returns a NEW object
+  // containing only known ids whose value is a string within the field's length
+  // budget; everything else is silently dropped. This is the choke point that
+  // lets us treat stored copy as safe: an unknown key can't appear, and no value
+  // can exceed its cap. Never throws — bad input degrades to "fewer overrides",
+  // which the runtime fills back in from defaults.
+  function sanitizeOverrides(raw) {
+    const out = {}
+    if (!raw || typeof raw !== 'object') return out
+    for (const [id, value] of Object.entries(raw)) {
+      const field = FIELD_BY_ID.get(id)
+      if (!field) continue
+      if (typeof value !== 'string') continue
+      const cleaned = stripControlChars(value, field.multiline).replace(/[ \t]+$/g, '')
+      if (cleaned.length === 0) continue // empty = "use the default", not stored
+      if (cleaned.length > field.maxLength) continue
+      // A field that declares a `pattern` is not prose — its value ends up in an
+      // `<img src>` or a CSS `object-position`, where "any bounded string" is no
+      // longer a safe contract. Dropping a non-matching value here covers the
+      // admin panel AND api/copy.js, so a hand-crafted POST cannot store a
+      // `javascript:` URL or arbitrary text that would land in a style.
+      if (field.pattern && !field.pattern.test(cleaned)) continue
+      out[id] = cleaned
+    }
+    return out
   }
-  return sanitizeOverrides(merged)
-}
 
-// Remove control and bidirectional-override characters before a value is
-// stored or rendered. This matters most for short single-line fields, where a
-// stray or maliciously-pasted U+202E (right-to-left override) or similar could
-// reorder or disguise the text unnoticed. React already escapes markup, so this
-// is purely about invisible/reordering characters, not XSS. Newlines are
-// allowed only in multiline fields (a single-line field never legitimately
-// contains one); tabs and every C0/C1 control and bidi-format char are always
-// dropped.
-function stripControlChars(value, allowNewlines) {
-  // Bidi + invisible format chars: Arabic letter mark (U+061C), zero-width
-  // space/joiners + LRM/RLM (U+200B–200F), the embedding/override set
-  // (U+202A–202E), word joiner (U+2060), the isolate set (U+2066–2069), and the
-  // BOM/zero-width no-break space (U+FEFF). C0 controls (optionally keeping
-  // U+000A newline for multiline fields), DEL, and C1 controls.
-  const bidi = '\\u061C\\u200B-\\u200F\\u202A-\\u202E\\u2060\\u2066-\\u2069\\uFEFF'
-  const c0 = allowNewlines ? '\\u0000-\\u0009\\u000B-\\u001F' : '\\u0000-\\u001F'
-  // Built via the RegExp constructor (the newline rule varies by field), so
-  // no-control-regex — which only inspects regex *literals* — can't fire here
-  // and needs no disable directive. Keep it a constructor call if you edit this.
-  const controls = new RegExp(`[${c0}\\u007F-\\u009F${bidi}]`, 'g')
-  return value.replace(controls, '')
-}
+  // Layer `patch` over `current` — the partial-save merge, shared by the client
+  // that composes a patch and the server that applies one.
+  //
+  // A patch value of '' means CLEAR THIS FIELD, so it is dropped rather than
+  // stored, matching sanitizeOverrides, which already treats an empty string as
+  // "no override, use the default". A key absent from the patch is left exactly
+  // as it was; that is the whole point of a patch.
+  //
+  // IT LIVES HERE, beside sanitizeOverrides, because BOTH ends of the write need
+  // the identical function and there must not be two of them. api/copy.js applies
+  // a patch against the authoritative Redis map; the client composes one. A
+  // second implementation that drifted would decide, silently, that a save means
+  // two different things depending on which end ran it.
+  function mergeOverrides(current, patch) {
+    const merged = { ...sanitizeOverrides(current) }
+    for (const [id, value] of Object.entries(patch || {})) {
+      if (typeof value === 'string' && value.trim()) merged[id] = value.trim()
+      else delete merged[id]
+    }
+    return sanitizeOverrides(merged)
+  }
 
-// The runtime copy map: defaults with any valid overrides layered on top.
-// `overrides` is sanitized here too, so callers can pass a raw cached blob.
-export function resolveCopy(overrides) {
-  return { ...defaultCopy(), ...sanitizeOverrides(overrides) }
+  // Remove control and bidirectional-override characters before a value is
+  // stored or rendered. This matters most for short single-line fields, where a
+  // stray or maliciously-pasted U+202E (right-to-left override) or similar could
+  // reorder or disguise the text unnoticed. React already escapes markup, so this
+  // is purely about invisible/reordering characters, not XSS. Newlines are
+  // allowed only in multiline fields (a single-line field never legitimately
+  // contains one); tabs and every C0/C1 control and bidi-format char are always
+  // dropped.
+  function stripControlChars(value, allowNewlines) {
+    // Bidi + invisible format chars: Arabic letter mark (U+061C), zero-width
+    // space/joiners + LRM/RLM (U+200B–200F), the embedding/override set
+    // (U+202A–202E), word joiner (U+2060), the isolate set (U+2066–2069), and the
+    // BOM/zero-width no-break space (U+FEFF). C0 controls (optionally keeping
+    // U+000A newline for multiline fields), DEL, and C1 controls.
+    const bidi = '\\u061C\\u200B-\\u200F\\u202A-\\u202E\\u2060\\u2066-\\u2069\\uFEFF'
+    const c0 = allowNewlines ? '\\u0000-\\u0009\\u000B-\\u001F' : '\\u0000-\\u001F'
+    // Built via the RegExp constructor (the newline rule varies by field), so
+    // no-control-regex — which only inspects regex *literals* — can't fire here
+    // and needs no disable directive. Keep it a constructor call if you edit this.
+    const controls = new RegExp(`[${c0}\\u007F-\\u009F${bidi}]`, 'g')
+    return value.replace(controls, '')
+  }
+
+  // The runtime copy map: defaults with any valid overrides layered on top.
+  // `overrides` is sanitized here too, so callers can pass a raw cached blob.
+  function resolveCopy(overrides) {
+    return { ...defaultCopy(), ...sanitizeOverrides(overrides) }
+  }
+  return { FIELD_IDS, defaultCopy, sanitizeOverrides, mergeOverrides, resolveCopy }
 }

@@ -22,7 +22,7 @@
 // returns an empty override map (the app renders shipped defaults) and POST
 // returns 501. The app has never required a backend and still does not.
 
-import { mergeOverrides, sanitizeOverrides } from '../src/copy/registry.js'
+import { mergeOverrides, sanitizeOverrides } from '../src/copy/registryFull.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis, readHash, writeHash } from './_lib/redis.js'
