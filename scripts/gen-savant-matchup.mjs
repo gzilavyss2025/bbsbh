@@ -30,12 +30,11 @@
 // time: the live app only ever reads this small same-origin static file
 // (src/api/matchup/savant.js). See docs/data-enrichment.md §3/§5.
 // Run by hand: node scripts/gen-savant-matchup.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { fetchCustomBoard, fetchArsenalBoard, batterArsenalMap, pitcherArsenalMap, regress, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'savant-matchup.json')
 const season = new Date().getFullYear()
 

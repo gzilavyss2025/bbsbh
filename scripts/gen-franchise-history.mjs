@@ -11,14 +11,13 @@
 // no new season writes the same bytes. Any failed call aborts the run (strict),
 // so a hole cannot ship.
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { collapseSeasons, venueMates } from './lib/franchise-history.mjs'
 
-const outDir = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'public', 'data', 'franchise-history')
+const outDir = join(import.meta.dirname, '..', 'public', 'data', 'franchise-history')
 const FIRST = 1901
 const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : new Date().getUTCFullYear() - 1

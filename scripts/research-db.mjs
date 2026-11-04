@@ -81,9 +81,8 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const REPO_ROOT = join(__dirname, '..');
 const DB_PATH = join(REPO_ROOT, '.scratch', 'research.duckdb');
 
@@ -452,7 +451,7 @@ async function main() {
 }
 
 // Run only when invoked as a script, so a test can import the lists above.
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   main().catch((err) => {
     console.error(err);
     process.exitCode = 1;

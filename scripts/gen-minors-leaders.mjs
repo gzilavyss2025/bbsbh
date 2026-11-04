@@ -25,8 +25,7 @@
 // the app can't reproduce that floor from a trimmed pool, so it must be baked in.
 // Run by hand: node scripts/gen-minors-leaders.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
 import { computeLeaders, ALL_CATEGORIES } from '../src/api/teamLeaders.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -34,7 +33,7 @@ import { levelSpan, seasonWindows } from './lib/level-path.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'minors-leaders.json')
 const teamsFile = join(here, '..', 'public', 'data', 'teams.json')
 const season = new Date().getFullYear()

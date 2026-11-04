@@ -39,7 +39,6 @@
 // All logic a test must reach is in scripts/lib/notable/; this file RUNS on import.
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { parseArgs } from './lib/args.mjs'
 import { readJsonOr } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -51,7 +50,7 @@ import {
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))

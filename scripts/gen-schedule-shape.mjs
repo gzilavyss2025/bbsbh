@@ -37,15 +37,14 @@
 //   node scripts/gen-schedule-shape.mjs                # 2015 → current season
 //   node scripts/gen-schedule-shape.mjs --since=2023   # a shorter range
 //   node scripts/gen-schedule-shape.mjs --season=2026  # one season only
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { homeVenueByTeam, ledgerFor, encodeRow, encodeDetailRow, detailFacts } from './lib/schedule-shape.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const OUT_DIR = join(ROOT, 'public', 'data', 'schedule-shape')
 
 // 2015 is the floor for a practical reason and a data one. Practical: a

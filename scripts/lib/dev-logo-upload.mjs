@@ -15,7 +15,6 @@
 
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import {
   LOGO_ART_DIRS,
@@ -31,7 +30,7 @@ import {
   wpaArtTreatmentKey,
 } from '../../src/lib/logoArt.js'
 
-const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
+const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 
 // The route key this handles, mounted under the same /__dev prefix as the JSON
 // stores. Kept here rather than in DEV_DATA_STORES because the two take

@@ -83,14 +83,13 @@
 // Run: node scripts/gen-nine-keys.mjs [--refresh]
 // Writes: public/data/nine-keys.json, scripts/data/nine-keys-seasons.json
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { shapeWildCard } from '../src/api/standings.js'
 import { isFailedKey } from '../src/lib/postseason/keysVerdict.js'
 import { getJson } from './lib/statsapi.mjs'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = import.meta.dirname
 const REPO_ROOT = join(__dirname, '..')
 const API = '/api/v1'
 const CACHE_PATH = join(REPO_ROOT, 'scripts', 'data', 'nine-keys-seasons.json')
@@ -571,7 +570,7 @@ async function main() {
   )
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   main().catch((err) => {
     console.error(err)
     process.exit(1)

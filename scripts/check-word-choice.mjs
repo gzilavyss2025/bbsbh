@@ -29,7 +29,6 @@
 
 import { readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { ROOT, walk as walkFiles } from './lib/walk.mjs';
 
 const RULES = [{ banned: /playoffs?/gi, use: 'postseason' }];
@@ -73,7 +72,7 @@ const violations = [];
 
 for (const file of files) {
   // This script states the banned words to ban them, so it cannot scan itself.
-  if (file === fileURLToPath(import.meta.url)) continue;
+  if (file === import.meta.filename) continue;
   const lines = readFileSync(file, 'utf8').split(/\r?\n/);
   lines.forEach((line, i) => {
     if (EXEMPT.test(line)) return;

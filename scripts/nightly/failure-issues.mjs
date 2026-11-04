@@ -10,7 +10,6 @@
 // GH_TOKEN; it drives the `gh` CLI the runner ships with. The step log is
 // linked, not quoted: a job cannot read its own logs until it has finished.
 import { execFileSync } from 'node:child_process'
-import { pathToFileURL } from 'node:url'
 
 export const titleFor = (id) => `Nightly data: step "${id}" failed`
 
@@ -48,4 +47,4 @@ function main() {
   console.log(`failure issues: ${plan.open.length} opened, ${plan.comment.length} commented, ${plan.close.length} closed`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
+if (import.meta.main) main()

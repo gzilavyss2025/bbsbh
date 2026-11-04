@@ -17,9 +17,8 @@
 
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const ADR_DIR = join(ROOT, 'docs/adr')
 
 let files

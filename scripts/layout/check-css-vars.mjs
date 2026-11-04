@@ -24,7 +24,6 @@
 
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from '../lib/walk.mjs'
 import { maskComments } from './mask-comments.mjs'
 
@@ -90,4 +89,4 @@ function main() {
   console.log(`✓ css-vars guard holds — ${cssFiles.length} stylesheets and ${captures.length} captures read only defined properties.`)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

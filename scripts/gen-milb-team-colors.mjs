@@ -12,10 +12,9 @@
 // gen-milb-history.mjs — this is run BY HAND after a realignment, not on a
 // cron: node scripts/gen-milb-team-colors.mjs
 import { readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const affiliatesPath = join(here, '..', 'public', 'data', 'affiliates.json')
 const targetPath = join(here, '..', 'src', 'lib', 'brandColors.js')
 

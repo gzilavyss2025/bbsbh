@@ -46,8 +46,7 @@
 // Run by hand:
 //   node scripts/gen-jerseys.mjs            # trailing 3 days
 //   node scripts/gen-jerseys.mjs --days=200 # season-to-date backfill
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { openDb, dumpGroup } from './lib/db.js'
 import { classifyUniformAsset } from '../src/api/uniforms.js'
 import { teamClubName } from '../src/lib/teams.js'
@@ -55,7 +54,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const jerseysJsonPath = join(here, '..', 'public', 'data', 'jerseys.json')
 
 const DEFAULT_DAYS = 3
@@ -206,6 +205,6 @@ async function main() {
 }
 
 // Only sweep when run as a script — keeps the pure helper importable for tests.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

@@ -39,8 +39,7 @@
 //   node scripts/gen-long-at-bats.mjs --season=2026    # a specific season
 //   node scripts/gen-long-at-bats.mjs --rescan         # re-ingest every game
 // Nightly: .github/workflows/update-nightly-data.yml
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
@@ -54,7 +53,7 @@ import {
   scanGamePlays,
 } from './lib/long-at-bats.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'long-at-bats')
 const scanPath = join(here, 'data', 'long-at-bats-scan.json')
 

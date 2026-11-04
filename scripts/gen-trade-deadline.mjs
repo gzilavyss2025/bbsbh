@@ -20,8 +20,7 @@
 //
 // Run by hand: node scripts/gen-trade-deadline.mjs [year] [--force]
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
 import {
@@ -43,7 +42,7 @@ import { prospectBadge } from '../src/api/prospects.js'
 // that cap on the shared client, whose own default is none.
 const getJson = (path) => statsapiJson(path, { timeoutMs: 15_000 })
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'trade-deadline')
 
 const isoToday = () => new Date().toISOString().slice(0, 10)
@@ -327,7 +326,7 @@ async function rebuildIndex() {
 }
 
 // Only sweep when run as a script — keeps the pure helpers importable for tests.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   const arg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
   const force = process.argv.includes('--force')
 

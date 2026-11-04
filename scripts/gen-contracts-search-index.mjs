@@ -25,13 +25,12 @@
 // Run by hand: node scripts/gen-contracts-search-index.mjs
 // Run scripts/gen-contracts-identity.mjs FIRST -- this file is a projection of
 // its output and derives nothing of its own.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { stat } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { CROSSWALK_DIR } from './lib/contract-row-key.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outPath = join(here, '..', 'public', 'data', 'contracts-history', 'search-index.json')
 
 const SOURCES = ['extensions', 'arbitration', 'free_agency', 'salaries']

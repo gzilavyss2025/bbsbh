@@ -16,14 +16,13 @@
 // re-run with no new season writes the same bytes. Any failed call aborts the run
 // (strict), so a hole cannot ship. The world champion's row carries `ws: true`.
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { groupByTeam, pennantsOfSeason } from './lib/club/league-pennants.mjs'
 
-const out = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'public', 'data', 'league-pennants.json')
+const out = join(import.meta.dirname, '..', 'public', 'data', 'league-pennants.json')
 const FIRST = 1903
 const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : new Date().getUTCFullYear()

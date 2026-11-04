@@ -135,8 +135,7 @@
 // YYYY-MM-DD as argv[2] to (re)generate a specific date by hand:
 //   node scripts/gen-callouts.mjs 2026-07-10
 import { mkdir, readFile, readdir, rename, rm } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic, writeShards } from './lib/io.js'
@@ -180,7 +179,7 @@ import { fetchPlays } from './lib/world-series/plays.mjs'
 // that cap on the shared client, whose own default is none.
 const getJson = (path) => statsapiJson(path, { timeoutMs: 15_000 })
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'callouts')
 
 // The levels swept: MLB + the four full-season MiLB levels (mirrors

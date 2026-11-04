@@ -43,15 +43,14 @@
 //
 // Run by hand: node scripts/gen-milb-pool.mjs [--rebuild] [--level=13]
 // Nightly: .github/workflows/update-nightly-data.yml
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { levelOffseasonPhase } from '../src/lib/time/seasonPhase.js'
 import { movedUpIds, poolSeasonFor, reasonFacts, selectPool } from './lib/milb-pool.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
 const outDir = join(dataDir, 'milb-pool')
 // The roster cache is this generator's working state, not something a browser

@@ -15,8 +15,7 @@
 // NULL: unknown, not 0. Then called strikes, balls in play and the start speed
 // (#1911): a row swept before them holds NULL there, and stays NULL.
 // A foul tip is a whiff here, as on Savant (#1911). The shared WHIFF_CODES leave it out.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { GRID, commandCell, normalizePitch } from '../../../src/lib/zone/zoneGeometry.js'
 import { FOUL_CODES, WHIFF_CODES } from '../../../src/api/playbyplay/pitchInfo.js'
 import { CALLED_STRIKE_COMMAND_CODES, INPLAY_COMMAND_CODES, parseCells } from '../command-grid.mjs'
@@ -25,7 +24,7 @@ import { bucketsOf, writeSeasons, writeShards } from '../io.js'
 import { xwobaOf } from './xwoba.mjs'
 import { FIELDS, PLATE_FIELDS } from '../../../src/api/scout/hitterGrid.js'
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'hitter-grid')
+const outDir = join(import.meta.dirname, '..', '..', '..', 'public', 'data', 'hitter-grid')
 
 // A counter's name in the file (the reader's list), and its column, index for index.
 // The plate counters live in pitch_hitter_plate (see schema.sql), the rest in pitch_hitter_cells.

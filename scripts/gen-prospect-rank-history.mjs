@@ -24,15 +24,14 @@
 // never reached the majors, so Retrosheet and Chadwick gave them no MLBAM id,
 // and an entry with no id cannot join a player page.
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { buildProspectRankHistory } from './lib/prospect-rank-history.mjs'
 
 // The sources that ship. Remove an entry to drop that source everywhere.
 const INCLUDE_SOURCES = ['baseball-america', 'mlb-pipeline']
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const pullDir = join(root, '.scratch', 'top-prospects-history')
 
 const outArg = process.argv.indexOf('--out')

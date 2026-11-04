@@ -41,8 +41,7 @@
 //
 // Runs nightly; see scripts/lib/opencommand.mjs for the dataset, its licence
 // and its caching. Run by hand: node scripts/gen-command-zone.mjs [--season=2026]
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeShardsWithStamp } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { round1 } from '../src/lib/math/number.js'
@@ -55,7 +54,7 @@ import {
   streamPitches,
 } from './lib/opencommand.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'glove-target')
 
 const seasonArg = process.argv.find((a) => a.startsWith('--season='))

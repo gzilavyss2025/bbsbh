@@ -14,10 +14,9 @@
 // Usage: node scripts/season-marks/fetch.mjs --rebuild-from-seed [--dry] [--offline]
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
-import { join, dirname, extname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join, extname } from 'node:path'
 
-const HERE = dirname(fileURLToPath(import.meta.url))
+const HERE = import.meta.dirname
 const ROOT = join(HERE, '..', '..')
 const OUT_JSON = join(ROOT, 'src/lib/data/season-marks.json')
 const OUT_DIR = join(ROOT, 'public/logos/historical')

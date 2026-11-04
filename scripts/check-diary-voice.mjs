@@ -47,10 +47,10 @@
 // reworded in the commit that added this version (wording, never a
 // conclusion, so the diaries' append-only rule is untouched).
 import { readdirSync, existsSync } from 'node:fs'
-import { dirname, join, sep } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join, sep } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = import.meta.dirname
 const REPO_ROOT = join(__dirname, '..')
 
 const DIARY_DIRS = [

@@ -79,8 +79,7 @@
 // run (see SCHEMA_VERSION), so the nightly cron performs that migration.
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window.
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { readdir } from 'node:fs/promises'
 import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeJsonAtomic, writeSeasons, writeShards } from './lib/io.js'
@@ -93,7 +92,7 @@ import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { GAP_CAP, collectPending, runSweep } from './lib/sweep/retry.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const storeDir = join(here, '..', 'public', 'data', 'spray')
 const seasonDir = (season) => join(storeDir, String(season))
 const ledgerPath = join(here, 'data', 'spray-ingested.json')
@@ -531,6 +530,6 @@ async function main() {
 
 // Only sweep when run as a script — keeps aggregateGameSpray/foldGame
 // importable for tests without triggering a live fetch and a file write.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

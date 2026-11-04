@@ -26,14 +26,13 @@
 //   node scripts/gen-rookies-backfill.mjs --since=2015 --until=2020
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { writeRookieShards } from './lib/rookie-shards.mjs'
 import { findCrossingSeason, crossingDateFromGameLog } from './lib/rookie-crossing.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'rookies.json')
 
 // Strict on purpose: a bare `--flag` is ignored, so a mistyped value flag falls

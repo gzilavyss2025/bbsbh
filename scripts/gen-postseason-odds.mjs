@@ -16,15 +16,14 @@
 // bracket simulation (best-of-3/5/7) on top of this, a separate layer. This
 // generator only answers "does this team make the 6-team field."
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { clamp, round1 } from '../src/lib/math/number.js'
 import { latestAtOrBefore } from '../src/lib/math/snapshot.js'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'postseason-odds.json')
 const teamScorePath = join(here, '..', 'public', 'data', 'team-score.json')
 const MLB_LEAGUES = [103, 104]
@@ -272,6 +271,6 @@ async function main() {
   console.log(`wrote ${out}`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

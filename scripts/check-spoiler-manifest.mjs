@@ -47,9 +47,8 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const SRC = join(ROOT, 'src')
 const API = join(SRC, 'api')
 const MANIFEST = join(API, 'spoiler-manifest.json')

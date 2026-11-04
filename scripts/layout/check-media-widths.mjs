@@ -18,7 +18,6 @@
 
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from '../lib/walk.mjs'
 import { maskComments } from './mask-comments.mjs'
 
@@ -85,4 +84,4 @@ function main() {
   console.log(`✓ media-width guard holds — ${files.length} stylesheets checked, every @media width is on the list.`)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

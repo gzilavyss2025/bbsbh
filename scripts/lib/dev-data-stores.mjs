@@ -11,7 +11,6 @@
 // concatenating anything from the request.
 
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { isHex } from '../../src/lib/stampInk.js'
 
 // Every store is a few hundred bytes per club at most. This is a generous
@@ -19,7 +18,7 @@ import { isHex } from '../../src/lib/stampInk.js'
 // committed store (milb-treatment-tuning.json) is ~40 KB.
 export const DEV_DATA_MAX_BODY_BYTES = 256 * 1024
 
-const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
+const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
 

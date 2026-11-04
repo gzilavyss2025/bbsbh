@@ -14,13 +14,12 @@
 // docs/data-enrichment.md §3/§5 and .scratch/savant-percentiles/plan.md for
 // the full research trail and reasoning.
 // Run by hand: node scripts/gen-savant-percentiles.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { METRICS, fetchPercentiles, parseCsv, medianRates } from './lib/savant.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'savant-percentiles.json')
 // The season in play, not the calendar year (#1465): on January 1 the calendar
 // names a season with no games, and this file would be written empty.

@@ -16,10 +16,10 @@ function loadChromium() {
   }
 }
 const chromium = loadChromium()
-import { fileURLToPath, pathToFileURL } from 'node:url'
-import { dirname, join } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const src = join(here, 'og-image.html')
 const out = join(here, '..', 'public', 'og-image.png')
 

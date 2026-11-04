@@ -28,9 +28,8 @@
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const ROOT = path.join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = path.join(import.meta.dirname, '..')
 const DATA_DIR = path.join(ROOT, 'public/data')
 
 // HOURS, not days, and that distinction is the whole guard. This check runs at
@@ -274,4 +273,4 @@ function main() {
 
 // Importable for its tests, runnable as a script — the same guard
 // scripts/gen-attendance.mjs and friends use.
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()
