@@ -27,6 +27,7 @@
 // bare URL for the standalone Top 100 page + player-page badge, the
 // query-string URL for each team page's own prospect table.
 import { getJson } from './lib/statsapi.mjs'
+import { withStatsapiNames } from './lib/milb/prospect-names.mjs'
 
 const TOP100_URL = 'https://www.mlb.com/prospects/stats/top-prospects'
 const ORG_URL = 'https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1'
@@ -161,19 +162,26 @@ async function fetchList(url) {
   return extractRawEntries(html)
 }
 
-// Jersey numbers aren't part of the scraped Pipeline data at all — pulled
-// separately from the documented statsapi.mlb.com (the same public API the
-// rest of the app uses), one batched request for every Top 100 playerId.
-// Many MiLB prospects simply have no assigned number yet — degrades to no
-// entry for that id, same as every other MiLB gap in this app.
-async function fetchJerseyNumbers(playerIds) {
-  if (!playerIds.length) return new Map()
-  try {
-    const data = await getJson(`/api/v1/people?personIds=${playerIds.join(',')}`)
-    return new Map((data.people ?? []).map((p) => [p.id, p.primaryNumber ?? null]))
-  } catch {
-    return new Map()
+// Jersey numbers and names from the documented statsapi.mlb.com (the same
+// public API the rest of the app uses), batched, for every prospect id.
+// Numbers: the scraped Pipeline data has none, and many MiLB prospects have no
+// number yet. Names: the Pipeline page flips a name's accents from one scrape to
+// the next (withStatsapiNames). A failed batch degrades to the scraped data.
+async function fetchPeople(playerIds) {
+  const numbers = new Map()
+  const names = new Map()
+  for (let i = 0; i < playerIds.length; i += 150) {
+    try {
+      const data = await getJson(`/api/v1/people?personIds=${playerIds.slice(i, i + 150).join(',')}`)
+      for (const p of data.people ?? []) {
+        numbers.set(p.id, p.primaryNumber ?? null)
+        if (p.fullName) names.set(p.id, p.fullName)
+      }
+    } catch {
+      // keep what earlier batches returned
+    }
   }
+  return { numbers, names }
 }
 
 async function main() {
@@ -185,17 +193,17 @@ async function main() {
   assertOrgShape(orgRaw)
 
   const top100Deduped = dedupeByPlayer(top100Raw)
-  const jerseyNumbers = await fetchJerseyNumbers(top100Deduped.map((e) => e.playerId))
-  const players = top100Deduped
-    .map((e) => slim(e, 'rank', jerseyNumbers))
+  const orgDeduped = dedupeByPlayer(orgRaw)
+  const ids = [...new Set([...top100Deduped, ...orgDeduped].map((e) => e.playerId))]
+  const { numbers: jerseyNumbers, names } = await fetchPeople(ids)
+  const players = withStatsapiNames(top100Deduped.map((e) => slim(e, 'rank', jerseyNumbers)), names)
     .sort((a, b) => a.rank - b.rank)
   const top100Ids = new Map(players.map((p) => [p.playerId, p.rank]))
 
   // Dedupe is scoped globally by playerId here too — a person shouldn't
   // appear twice even across different orgs (a real trade mid-scrape would
   // be a genuine edge case; picking one row is fine either way).
-  const orgProspects = dedupeByPlayer(orgRaw)
-    .map((e) => ({ ...slim(e, 'orgRank'), topRank: top100Ids.get(e.playerId) ?? null }))
+  const orgProspects = withStatsapiNames(orgDeduped.map((e) => ({ ...slim(e, 'orgRank'), topRank: top100Ids.get(e.playerId) ?? null })), names)
     .sort((a, b) => (a.teamId - b.teamId) || (a.orgRank - b.orgRank))
 
   const snapshot = {

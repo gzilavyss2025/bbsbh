@@ -25,7 +25,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
-import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow } from './lib/tensest/tensest.mjs'
+import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow, isPlayedFinal } from './lib/tensest/tensest.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
@@ -39,9 +39,7 @@ const season = arg ? Number(arg.slice('--season='.length)) : await fetchSeasonIn
 const sched = await getJson(
   `/api/v1/schedule?sportId=1&gameType=${GAME_TYPES}&startDate=${season}-02-01&endDate=${season}-12-31`,
 )
-const finals = sched.dates
-  .flatMap((d) => d.games)
-  .filter((g) => g.status?.abstractGameCode === 'F' && g.status?.codedGameState !== 'D')
+const finals = sched.dates.flatMap((d) => d.games).filter(isPlayedFinal)
 
 const prev = await readJsonOr(OUT, null)
 const state = await readJsonOr(STATE, null)

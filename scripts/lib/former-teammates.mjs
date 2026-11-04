@@ -2,8 +2,7 @@
 // generator RUNS on import, so the unit suite cannot reach its body; these are
 // the decisions in it that a run's console output would not show to be wrong:
 //
-//   - which scheduled games get a shard at all (winter ball in, the sportId 17
-//     leagues that do not ship out),
+//   - which levels are swept for matchups (MLB + full-season MiLB, no winter ball),
 //   - which career stints can make two players "teammates" (a winter club
 //     never can — it is a few weeks of play, not a season),
 //   - whether the org-ties fallback applies (never to a winter club, whose
@@ -12,7 +11,7 @@
 //
 // test/former-teammates.test.js pins all four. Pure: no fetching.
 import { meetsStintCap } from '../../src/api/rehab-policy.js'
-import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID, isWinterSport } from '../../src/lib/winter/leagues.js'
+import { isWinterSport } from '../../src/lib/winter/leagues.js'
 import { num } from '../../src/lib/math/number.js'
 
 // MiLB levels, high to low (AAA/AA/A+/A). Rookie/complex ball (16) is left out:
@@ -26,22 +25,14 @@ export const MILB_SPORT_IDS = [11, 12, 13, 14]
 // not "teammates" the way two players on a 140-game Double-A roster were.
 export const CAREER_SPORT_IDS = [1, ...MILB_SPORT_IDS]
 
-// The sport ids swept for matchups: every career level plus winter ball, so a
-// winter game gets a card built from its players' MLB and MiLB careers.
-export const MATCHUP_SPORT_IDS = [...CAREER_SPORT_IDS, WINTER_SPORT_ID]
+// The sport ids swept for matchups: the career levels, no winter ball. Winter
+// games were swept from #1171 until 2026-11 and dropped: nobody reads a
+// winter-league card, and sweeping them kept the nightly job rewriting shards
+// all offseason. With no MLB/MiLB games in the window the sweep finds nothing,
+// so the folder empties to its index.json stamp until spring.
+export const MATCHUP_SPORT_IDS = CAREER_SPORT_IDS
 
 export const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
-
-// Does a game from `schedule?sportId={sportId}&hydrate=team` get a shard?
-// Every MLB/MiLB game does. A sportId 17 schedule also returns Liga Roberto
-// Clemente (133) and the Australian league (595), which the app does not ship
-// (src/lib/winter/leagues.js has the reasons), so a winter game counts only
-// when its home club's league is one of the four that ship.
-export function isShippedGame(sportId, game) {
-  if (!isWinterSport(sportId)) return true
-  const leagueId = game?.teams?.home?.team?.league?.id
-  return WINTER_LEAGUE_IDS.includes(Number(leagueId))
-}
 
 // The year-by-year requests one player's career needs: hitting and pitching at
 // each career level. One request per level, because the API silently returns

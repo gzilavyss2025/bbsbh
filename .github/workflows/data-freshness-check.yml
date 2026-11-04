@@ -42,13 +42,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           since="$(date -u -d '26 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
-          echo "Looking for a commit touching public/data since $since"
-          n="$(gh api "repos/${GITHUB_REPOSITORY}/commits?path=public/data&since=${since}&per_page=1" --jq 'length')"
+          # The heartbeat, not public/data: a quiet night commits no data file
+          # (update-nightly-data.yml drops stamp-only changes), but every run
+          # rewrites scripts/data/nightly-heartbeat.json.
+          echo "Looking for a nightly heartbeat commit since $since"
+          n="$(gh api "repos/${GITHUB_REPOSITORY}/commits?path=scripts/data/nightly-heartbeat.json&since=${since}&per_page=1" --jq 'length')"
           if [ "$n" -gt 0 ]; then
             echo "OK — nightly data has landed since $since."
             exit 0
           fi
-          echo "::error::No commit has touched public/data since $since. The nightly"
+          echo "::error::No nightly heartbeat commit since $since. The nightly"
           echo "::error::data cron has not landed. Check whether a run exists at all —"
           echo "::error::gh run list --workflow=update-nightly-data.yml — because GitHub"
           echo "::error::silently drops scheduled runs and never backfills them. Recover"

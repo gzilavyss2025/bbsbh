@@ -27,6 +27,13 @@
 
 const MAX_DEPTH = 5
 
+// One exception to "a finished game never changes": gameData.players carries each
+// player's CURRENT bio, not the one from game day. A player who is released or
+// goes unsigned loses his jersey number, so his primaryNumber path disappears from
+// the old game's feed. That is roster state, not API shape. It failed the
+// 2026-11-04 nightly for Jake Bauers (641343) and JoJo Romero (668941).
+const ROSTER_STATE = /^gameData\.players\.ID\d+\.primaryNumber$/
+
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -111,7 +118,7 @@ for (const { label, file } of TARGETS) {
     continue
   }
 
-  const missing = [...expectedPaths].filter((p) => resolvePath(fresh, p) === undefined).sort()
+  const missing = [...expectedPaths].filter((p) => !ROSTER_STATE.test(p) && resolvePath(fresh, p) === undefined).sort()
 
   if (missing.length) {
     console.error(

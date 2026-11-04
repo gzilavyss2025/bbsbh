@@ -52,3 +52,16 @@ test('seedRows turns a prospect-trend history into flagged rows, skipping weeks 
   ]
   assert.deepEqual(seedRows(h), [['2026-04-05', 55, null, 1], ['2026-10-02', 60, null, 1]])
 })
+
+test('a rating equal to the last real row adds no row', () => {
+  const prior = [['2026-10-01', 70, { contact: 60 }]]
+  assert.deepEqual(mergeHistory({ prior, today: '2026-10-08', real: real(70) }), prior)
+  // a changed bar is a change
+  const moved = mergeHistory({ prior, today: '2026-10-08', real: [70, { contact: 61 }] })
+  assert.deepEqual(dates(moved), ['2026-10-01', '2026-10-08'])
+})
+
+test('a seeded row does not count as the last rating', () => {
+  const rows = mergeHistory({ prior: [['2026-10-01', 70, null, 1]], today: '2026-10-08', real: [70, null] })
+  assert.deepEqual(rows, [['2026-10-01', 70, null, 1], ['2026-10-08', 70, null]])
+})

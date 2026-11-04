@@ -26,7 +26,7 @@ import {
   CURRENT_FORM_GAMES,
 } from '../src/api/teamScoreFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
-import { openDb, dumpGroup } from './lib/db.js'
+import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { round1 } from '../src/lib/math/number.js'
@@ -280,15 +280,27 @@ async function main() {
   const dates = datesFromArgs(args)
   const db = await openDb()
   const insert = upsertSnapshot(db)
+  const previous = previousTeamSnapshot(db)
   for (const asOf of dates) {
     const games = await fetchCompletedGames(asOf)
     const season = Number(asOf.slice(0, 4))
     const snapshots = buildTeamScoreSnapshots({ games, asOf })
+    let repeats = 0
     for (const [teamId, snapshot] of Object.entries(snapshots)) {
-      insert.run(season, Number(teamId), asOf, 'quality', JSON.stringify(snapshot.season))
-      insert.run(season, Number(teamId), asOf, 'current_form', JSON.stringify(snapshot.currentForm))
+      // Both rows or neither: exportJson builds one entry per date from the pair,
+      // so a date with only one would read as a snapshot missing half its fields.
+      const id = Number(teamId)
+      if (
+        repeatsPrevious(previous(season, id, 'quality', asOf), snapshot.season) &&
+        repeatsPrevious(previous(season, id, 'current_form', asOf), snapshot.currentForm)
+      ) {
+        repeats++
+        continue
+      }
+      insert.run(season, id, asOf, 'quality', JSON.stringify(snapshot.season))
+      insert.run(season, id, asOf, 'current_form', JSON.stringify(snapshot.currentForm))
     }
-    console.log(`${asOf}: ${Object.keys(snapshots).length} MLB team-score snapshots`)
+    console.log(`${asOf}: ${Object.keys(snapshots).length} MLB team-score snapshots, ${repeats} unchanged and skipped`)
   }
   await dumpGroup(db, 'team-snapshots')
   await writeJsonAtomic(out, exportJson(db))

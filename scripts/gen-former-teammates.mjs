@@ -1,5 +1,5 @@
 // Regenerates public/data/former-teammates/{teamA}-{teamB}.json (ids ascending)
-// — for every upcoming matchup (MLB, MiLB or winter ball), the pairs of players on the two
+// — for every upcoming matchup (MLB or MiLB), the pairs of players on the two
 // OPPOSING clubs who were once teammates (majors or minors), already shaped for
 // the lineup page's FORMER TEAMMATES card (src/api/formerTeammates.js reads one
 // file). ONE FILE PER MATCHUP, because a game view wants exactly one: the
@@ -17,15 +17,15 @@
 // read. Mirrors scripts/gen-rehab.mjs's build-time-fetch pattern (see
 // docs/data-enrichment.md §5).
 //
-// Covers every scheduled matchup — MLB, MiLB (AAA/AA/A+/A) and the four
-// winter leagues that ship (sportId 17, issue #1171) — for the rosters of clubs
-// actually scheduled to play each other in a short window, not the whole
-// league. Extending past MLB-only widens the player pool a lot (every MiLB game
-// each night, not just the majors' slate), so this is the costliest part of the
-// run; the per-player career fetch is still deduped across every matchup a club
-// appears in. Winter ball replaces the dark MiLB work from October to January:
-// a winter game's card is built from its players' MLB and MiLB careers, and a
-// winter club never counts as a shared (team, season) itself. The pure rules
+// Covers every scheduled matchup — MLB and MiLB (AAA/AA/A+/A) — for the rosters
+// of clubs actually scheduled to play each other in a short window, not the
+// whole league. Extending past MLB-only widens the player pool a lot (every MiLB
+// game each night, not just the majors' slate), so this is the costliest part of
+// the run; the per-player career fetch is still deduped across every matchup a
+// club appears in. Winter ball was swept from #1171 until 2026-11, then dropped:
+// nobody reads a winter-league card, so from the end of the MiLB postseason to
+// spring training the sweep finds nothing and the folder empties to its stamp.
+// The pure rules
 // (which games ship, which stints count, the row cap) live in
 // scripts/lib/former-teammates.mjs, where test/former-teammates.test.js pins
 // them.
@@ -78,7 +78,6 @@ import {
   careerRequests,
   NO_MLB_ORG,
   resolveStintOrg,
-  isShippedGame,
   orgIdForShared,
   orgTiesApply,
   reduceCareer,
@@ -97,9 +96,8 @@ const isoDay = (offset = 0) => {
 }
 
 // --- schedule: the matchups to precompute --------------------------------------
-// Every scheduled game across the window, MLB, MiLB and winter ball alike (see
-// MATCHUP_SPORT_IDS; a winter game only from a league that ships, see
-// isShippedGame), as unique (away, home) team-id pairs, each with the sportId
+// Every scheduled MLB and MiLB game across the window (MATCHUP_SPORT_IDS; winter
+// ball was dropped 2026-11), as unique (away, home) team-id pairs, each with the sportId
 // it was found under, plus the union of clubs involved. Regular season isn't forced — spring and postseason games get
 // the card too.
 async function fetchMatchups() {
@@ -117,7 +115,6 @@ async function fetchMatchups() {
       }
       for (const date of data.dates ?? []) {
         for (const g of date.games ?? []) {
-          if (!isShippedGame(sportId, g)) continue
           const a = g.teams?.away?.team
           const h = g.teams?.home?.team
           if (!a?.id || !h?.id) continue

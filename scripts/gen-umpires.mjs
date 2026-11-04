@@ -51,7 +51,7 @@ import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
 import { packUmpireGames } from '../src/lib/umpire/rows.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonAtomic, writeSeasons } from './lib/io.js'
+import { writeJsonIfChanged, writeSeasons } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -153,14 +153,18 @@ if (umpires.size === 0) {
   process.exit(0)
 }
 
-const generatedAt = new Date().toISOString()
 const kept = new Set()
+let changed = 0
 for (const [id, u] of umpires) {
   u.games.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   // Each shard carries the season + stamp of the run that wrote it, so a reader
-  // needs one fetch, not a shard plus an index.
+  // needs one fetch, not a shard plus an index. A shard is rewritten only when
+  // its games changed, so the stamp means "games as of", and a night with no
+  // new game (the whole offseason, an umpire's off days) leaves it alone
+  // instead of committing ~150 stamp-only files. umpires/ carries no
+  // index.json, so check-data-freshness.mjs never read these stamps.
   const { games, ...rest } = u
-  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...rest, ...packUmpireGames(games) })
+  if (await writeJsonIfChanged(join(outDir, `${id}.json`), { season, ...rest, ...packUmpireGames(games) })) changed++
   kept.add(`${id}.json`)
 }
 
@@ -176,7 +180,7 @@ for (const name of await readdir(outDir).catch(() => [])) {
 const index = await writeSeasons(storeDir, season)
 
 console.log(
-  `wrote ${umpires.size} shards to ${outDir} (${gamesSeen} games, MLB + AAA)` +
+  `${changed} of ${umpires.size} shards changed in ${outDir} (${gamesSeen} games, MLB + AAA)` +
     (swept ? `, swept ${swept} stale` : '') +
     `; serving ${index.current} of [${index.seasons.join(', ')}]`,
 )
