@@ -455,7 +455,7 @@
 }
 /* #root ties the ID component of #root *'s specificity — a plain selector
    loses to the ALL-CAPS INVARIANT and is a silent no-op. Same technique and
-   the same split as #root .txstory__cutline (29-team-transactions.css). */
+   the same split the club ledger's cutline uses. */
 #root .wire__cutline {
   text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
 }
@@ -464,7 +464,7 @@
 }
 /* display: contents so a long player name wraps mid-sentence like the prose
    around it instead of holding an unbreakable inline-block open — the same
-   fix .txstory__cutline .plink carries. */
+   fix every cutline's .plink carries. */
 .wire__cutline .plink { display: contents; }
 .wire__cutline .wire__namelink {
   font-weight: var(--w-bold);

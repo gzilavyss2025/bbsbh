@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { lazyNamed } from './lib/react/lazyNamed.js'
 import { GameSelect } from './screens/GameSelect.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
@@ -23,10 +24,6 @@ import {
 // The on-device headshot log button (issue #1446) is switched off. The panel and
 // src/lib/headshot/log.js stay in the tree; flip this to true to show it again.
 const SHOW_HEADSHOT_LOG = false
-
-function lazyNamed(loader, name) {
-  return lazy(() => loader().then((module) => ({ default: module[name] })))
-}
 
 // Headless cross-device sync for the Logbook's game stamps (ADR-0035). Like
 // RevealCloudSync and AccountButton, it imports @clerk/clerk-react at its top,

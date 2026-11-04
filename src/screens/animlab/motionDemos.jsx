@@ -3,8 +3,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'
 import { LensTear } from '../../components/scoring/lens/motion/LensTear.jsx'
 import { glideTo } from '../../components/scoring/lens/useLens.js'
-import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
-import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { LeaderList, LeaderRow } from '../../components/ui/frame/LeaderList.jsx'
 import { StatTile } from '../../components/ui/frame/StatTile.jsx'
@@ -142,26 +140,6 @@ const DEMO_LADDER = [
   { side: 'ball', label: '4' },
   { side: 'strike', label: 'X' },
 ]
-
-// One at-bat cell wearing `.pbp__atbat--writing` — the class PlayByPlay puts on
-// the first six cards of a half the reader has just unsealed. Real PitchLadder,
-// real PlayDiamond, real code and out-circle marks. `out` swaps a double for a
-// 6-3, which is what brings beat 4 (the stamp) into it.
-export function WriteOnDemo({ out = false }) {
-  return (
-    <div className="pbp__atbat pbp__atbat--writing">
-      <div className="pbp__side">
-        <PitchLadder ladder={DEMO_LADDER} />
-        <div className="pbp__play">
-          {!out && <span className="pbp__code pbp__code--hit">2B</span>}
-          <PlayDiamond reached={out ? 0 : 2} />
-          {out && <span className="pbp__code pbp__code--center pbp__code--out">6-3</span>}
-          {out && <span className="pbp__outcircle">1</span>}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // The Box Lines sheet's side entrance (ADR-0069): a cropped stand-in for the
 // sheet — its head, its headline, two ruled rows — carrying the wide

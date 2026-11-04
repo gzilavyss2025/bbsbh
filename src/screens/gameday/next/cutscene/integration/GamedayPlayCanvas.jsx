@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback, useState } from 'react'
+import { lazyNamed } from '../../../../../lib/react/lazyNamed.js'
 import { teamChipColors } from '../../../../../lib/teams.js'
 import { BALLPARK_SCENES } from '../ballpark/scenes.js'
 import { CelebrationBoundary } from './CelebrationBoundary.jsx'
@@ -6,7 +7,7 @@ import { IconButton } from '../../../../../components/ui/control/IconButton.jsx'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import '../../../../../styles/gameday-next/celebration.css'
 
-const Ballpark = lazy(() => import('../ballpark/BallparkCelebration.jsx').then((m) => ({ default: m.BallparkCelebration })))
+const Ballpark = lazyNamed(() => import('../ballpark/BallparkCelebration.jsx'), 'BallparkCelebration')
 
 // Only receives an already-revealed event from GamedayStage's lazy SealBox
 // subtree. The corner field is gone (Gary, 2026-10-28): nothing draws behind the cutscene, and a

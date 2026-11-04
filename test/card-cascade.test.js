@@ -548,7 +548,6 @@ test('the team hub keeps its space between cards, from the hub and not from Card
 const C1 = [
   { css: 'leaders/board.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat', card: 'LeaderList' },
   { css: '28-team-hub.css', sel: '.jerseydeck__card', jsx: 'components/logo/JerseyCombos.jsx', ns: 'jerseydeck__card', keep: ['background'] },
-  { css: '29-team-transactions.css', sel: '.txstory', jsx: 'components/transactions/TxStory.jsx', ns: 'txstory' },
   { css: '31-wild-card.css', sel: '.tstats', jsx: 'screens/team/modules/TeamStatsCard.jsx', ns: 'tstats' },
   { css: '31-wild-card.css', sel: '.thub-affiliate', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx', ns: 'thub-affiliate' },
   { css: '31-wild-card.css', sel: '.horizontile', jsx: 'screens/team/modules/minors/DepthChartCard.jsx', ns: 'horizontile' },

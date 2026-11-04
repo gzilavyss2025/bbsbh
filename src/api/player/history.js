@@ -61,7 +61,7 @@ export async function loadPositionScope(id, scope, { showFielding, showPitching,
 }
 
 // The Awards ledger, with the MLB column's affiliate rows resolved. Shared with the new
-// player page's tbd module (screens/player/next/modules/tbd).
+// player page's awards module (screens/player/next/modules/awards).
 export async function awardLedgerFor(awards, endDate) {
   const awardLedger = awardsView(awards, endDate)
   // The MLB column's affiliate rows: awardsView leaves orgId null for anything
@@ -81,7 +81,7 @@ export async function awardLedgerFor(awards, endDate) {
 }
 
 // The curated transaction rows. `txns` is the player's raw feed; the rest is the enrichment the
-// ledger names (levels, trade cohorts, draft, rookie limit). Shared with the tbd module.
+// ledger names (levels, trade cohorts, draft, rookie limit). Shared with the player page's moves module.
 export async function transactionRowsFor(bio, txns, rookieInfo, endDate) {
   // Everything the raw player-scoped feed can't give on its own: each affiliate
   // club's level (for CALLED UP / SENT DOWN + the level tags, and for naming an

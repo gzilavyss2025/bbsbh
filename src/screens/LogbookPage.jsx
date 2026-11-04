@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
+import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useBooks } from '../hooks/useBooks.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
@@ -16,11 +17,7 @@ import { LogbookCollection } from './LogbookCollection.jsx'
 import { NewBookPage } from './logbook/NewBookPage.jsx'
 
 const LogbookAccountGate = isClerkEnabled
-  ? lazy(() =>
-      import('../components/account/LogbookAccountGate.jsx').then((module) => ({
-        default: module.LogbookAccountGate,
-      })),
-    )
+  ? lazyNamed(() => import('../components/account/LogbookAccountGate.jsx'), 'LogbookAccountGate')
   : null
 
 // The Logbook — your passport book of game stamps (ADR-0035, ADR-0036). This

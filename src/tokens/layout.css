@@ -56,9 +56,6 @@
      an ink edge. */
   --mark-lg: 36px;
   --mark-xl: 40px;
-  /* The result card's centre cell and its strip height (styles/system/report/result.css). */
-  --result-mid: 84px;
-  --result-strip: 96px;
   /* The on/off switch (styles/system/report/controls.css): the standard 51 by 31 track. */
   --switch-w: 51px;
   --switch-h: 31px;

@@ -73,8 +73,7 @@
 .allstarrosters__leaguehead--nl {
   background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
 }
-/* One roster section's row list — the Team Page's hairline-divided .thub-row
-   idiom, under its own class names. */
+/* One roster section's row list — hairline-divided rows, a rule between each. */
 .allstarrosters__rows {
   list-style: none;
   margin: 0;

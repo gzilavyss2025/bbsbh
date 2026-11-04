@@ -50,13 +50,6 @@ const noBoxAnywhere = (cls) => {
   }
 }
 
-test('the roster list draws no card of its own, only a rule above and below', () => {
-  noBoxAnywhere('thub-roster')
-  const body = ruleBody(css('31-wild-card.css'), '.thub-roster')
-  assert.doesNotMatch(body, CHROME)
-  assert.match(body, /border-block:\s*var\(--bw-hair\) solid var\(--border-rule\)/)
-})
-
 test('a Minors stat tile is a figure under a pencil rule, not a grey well', () => {
   noBoxAnywhere('hzntile__tile')
   const body = ruleBody(css('31-wild-card.css'), '.hzntile__tile')

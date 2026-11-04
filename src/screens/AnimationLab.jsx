@@ -20,7 +20,6 @@ import {
   RiffleDemo,
   StampInDemo,
   StrikeDemo,
-  WriteOnDemo,
 } from './animlab/motionDemos.jsx'
 import { PlayerMotionLab } from './animlab/PlayerMotionLab.jsx'
 import { CutsceneMotionLab } from './animlab/CutsceneMotionLab.jsx'
@@ -339,44 +338,6 @@ export function AnimationLab() {
           {[0, 40, 90, 150, 220].map((ms) => (
             <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
               <StrikeDemo />
-            </Frame>
-          ))}
-        </div>
-      </Entry>
-
-      <Entry
-        title="Play-by-play — the card writes itself"
-        note={
-          <>
-            The flagship. On a half the reader unseals, its cards write themselves in the order a
-            scorer&rsquo;s hand makes the marks (styles/motion/playbyplay.css): pitch cells drop the
-            lanes (0ms, 35ms apart), the basepaths trace (280ms, 60ms apart), the result code inks
-            (480ms), and an out&rsquo;s circle presses like a stamp (560ms). A reach lands about
-            660ms, an out about 860ms. Capped at a half&rsquo;s first six cards &mdash; twenty at
-            once is a screensaver, and the basepath trace repaints rather than riding the
-            compositor.
-          </>
-        }
-        live={
-          <>
-            <WriteOnDemo />
-            <WriteOnDemo out />
-          </>
-        }
-      >
-        <span className="animlab__stagelabel">A reach: cells, then basepaths, then the code</span>
-        <div className="animlab__frozen">
-          {[0, 140, 300, 420, 560, 660].map((ms) => (
-            <Frame key={`reach-${ms}`} label={`${ms}ms`} delayMs={ms}>
-              <WriteOnDemo />
-            </Frame>
-          ))}
-        </div>
-        <span className="animlab__stagelabel">An out: the same, then the stamp</span>
-        <div className="animlab__frozen">
-          {[0, 140, 480, 560, 700, 860].map((ms) => (
-            <Frame key={`out-${ms}`} label={`${ms}ms`} delayMs={ms}>
-              <WriteOnDemo out />
             </Frame>
           ))}
         </div>

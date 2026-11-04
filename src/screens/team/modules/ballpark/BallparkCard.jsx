@@ -1,4 +1,5 @@
-import { Suspense, lazy, useCallback, useState } from 'react'
+import { Suspense, useCallback, useState } from 'react'
+import { lazyNamed } from '../../../../lib/react/lazyNamed.js'
 import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { parkKey } from '../../../../lib/ballpark/parkKeys.js'
@@ -76,12 +77,8 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // visitor downloads. It carries 61-ballpark-admin.css with it (the 58+ partials
 // are component-imported rather than listed in index.css), which means the
 // editor's stylesheet is code-split too.
-const BallparkAdminBar = lazy(() =>
-  import('./BallparkAdminBar.jsx').then((m) => ({ default: m.BallparkAdminBar })),
-)
-const BallparkEditFields = lazy(() =>
-  import('./BallparkEditFields.jsx').then((m) => ({ default: m.BallparkEditFields })),
-)
+const BallparkAdminBar = lazyNamed(() => import('./BallparkAdminBar.jsx'), 'BallparkAdminBar')
+const BallparkEditFields = lazyNamed(() => import('./BallparkEditFields.jsx'), 'BallparkEditFields')
 
 // The photo itself, cropped to widescreen with the admin's chosen focal point.
 //

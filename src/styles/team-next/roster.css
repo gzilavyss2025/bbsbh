@@ -1,4 +1,4 @@
-/* The Roster band (#1107, row 6c). The cards are the stamped Card; the rows are RosterList's. */
+/* The Roster band (#1107, row 6c). The cards are the stamped Card; the rows are plain roster rows. */
 .tnext__roster-door {
   align-self: flex-end;
 }

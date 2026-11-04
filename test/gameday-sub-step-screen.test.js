@@ -16,7 +16,7 @@ import { cutAt } from '../src/screens/gameday/next/panels/panelData.js'
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
-import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, nextSub, readPitchMode, replayTap, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
+import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, nextSub, readPitchMode, replayTap, stageKey, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
 import { GamedayStage, holdsFinished } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { zonePitches } from '../src/screens/gameday/next/zonemap/zonePitches.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
@@ -77,7 +77,14 @@ test('823764 ab51: the caught stealing that ends the half is the tap that reveal
   assert.equal(subTap(steps, 3, false), null) // past the three changes, the next stop ends the half
 })
 
-test('a 1-pitch and a 9-pitch at-bat: the same sealed hero and the same words on every tap', () => {
+test('the advance reads "Next" in At-bat and Pitch mode alike (Gary, 2026-10-28: the switch beside it names the mode)', () => {
+  const src = readFileSync(new URL('../src/screens/InningViewer.jsx', import.meta.url), 'utf8')
+  // Both advances (the stepping one and the sealed-half one) say "Next", with no per-mode wording.
+  assert.equal(src.match(/label: 'Next'/g)?.length, 2)
+  assert.doesNotMatch(src, /Next pitch|Next play/)
+})
+
+test('a 1-pitch and a 9-pitch at-bat: the same sealed hero', () => {
   const one = countFor(F823, 1, 'top', 1)
   const nine = countFor(F823, 1, 'bottom', 5)
   assert.equal(openAtBat(F823, 1, 'top', one).steps.length, 1)
@@ -85,16 +92,6 @@ test('a 1-pitch and a 9-pitch at-bat: the same sealed hero and the same words on
   // Sealed (sub 0) the box is the same markup, whatever the at-bat holds (the due-up strip is the lineup's).
   const top = (s) => s.match(/<div class="gdhero__top">.*?<\/div><\/div>/)[0]
   assert.equal(top(hero(F823, 1, 'top', { count: one, sub: 0 })), top(hero(F823, 1, 'bottom', { count: nine, sub: 0 })))
-  for (const pitch of [false, true]) {
-    const words = new Set()
-    for (const [half, c] of [['top', one], ['bottom', nine]]) {
-      for (let sub = 0; sub != null; sub = nextSub(F823, 1, half, c, sub, pitch)) words.add(stepWords(pitch))
-    }
-    assert.equal(words.size, 1)
-  }
-  // Gary, 2026-10-28: one word in both modes; the switch beside it names the mode.
-  assert.equal(stepWords(false), 'Next')
-  assert.equal(stepWords(true), 'Next')
   // Open, the box is the same one box (one height per tier, hero.css): only its pips differ.
   const box = (s) => s.match(/<div class="gdhero__box"[^>]*>/)?.[0]
   assert.equal(box(hero(F823, 1, 'bottom', { count: nine, sub: 8 })), box(hero(F823, 1, 'bottom', { count: nine, sub: 1 })))
