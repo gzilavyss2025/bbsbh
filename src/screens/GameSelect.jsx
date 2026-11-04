@@ -17,13 +17,8 @@ import { cardLines } from '../api/postseason/text.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
-import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
-import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
-import { SeriesPrimer } from '../components/postseason/SeriesPrimer.jsx'
-import { WorldSeriesHome } from '../components/worldseries/WorldSeriesHome.jsx'
 import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
-import { BracketDock } from '../components/bracket/BracketDock.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { SlateMasthead } from '../components/slatehead/SlateMasthead.jsx'
 import { fetchLevelCounts } from '../api/slate/levelCounts.js'
@@ -35,12 +30,8 @@ import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
-import { WireDock } from '../components/transactions/WireDock.jsx'
-import { WireRail } from '../components/transactions/WireRail.jsx'
-import { OffseasonSlot } from '../components/offseason/OffseasonSlot.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
-import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
@@ -64,6 +55,19 @@ const ContinueScoring = isClerkEnabled
 const MergeReceiptStrip = isClerkEnabled
   ? lazyNamed(() => import('../components/account/MergeReceiptStrip.jsx'), 'MergeReceiptStrip')
   : null
+
+// Seasonal panels: each downloads only when the slate draws it. Same components,
+// same props; the fallback reserves the panel's height so the slate does not jump.
+const DerbyCard = lazyNamed(() => import('../components/allstar/DerbyCard.jsx'), 'DerbyCard')
+const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
+const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
+const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldSeriesHome.jsx'), 'WorldSeriesHome')
+const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
+const WireDock = lazyNamed(() => import('../components/transactions/WireDock.jsx'), 'WireDock')
+const WireRail = lazyNamed(() => import('../components/transactions/WireRail.jsx'), 'WireRail')
+const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
+const LeaguePicker = lazyNamed(() => import('../components/winter/LeaguePicker.jsx'), 'LeaguePicker')
+const Reserve = ({ h }) => <div aria-hidden="true" style={{ minHeight: h }} />
 
 // Neither the league nor the date persists anywhere. Both live in the URL
 // ('/aaa/08152026'; a missing league means MLB and a missing date means today,
@@ -547,12 +551,14 @@ export function GameSelect({
           made here — above the club strip, which the pick then scopes. Every
           chip is a real address, never local state (ADR-0056). */}
       {onWinter && (
-        <LeaguePicker
+        <Suspense fallback={<Reserve h={44} />}>
+          <LeaguePicker
           leagues={winterBall.leagues}
           leagueId={activeLeagueId}
           dateStr={dateStr}
           isToday={isToday}
         />
+        </Suspense>
       )}
 
       {/* This level's whole club set as round chips (TeamFilterStrip, the
@@ -610,7 +616,8 @@ export function GameSelect({
           />
 
           {inPostseasonWindow && (
-            <WorldSeriesHome
+            <Suspense fallback={<Reserve h={1060} />}>
+              <WorldSeriesHome
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}
               slateDate={dateStr}
@@ -618,6 +625,7 @@ export function GameSelect({
               seriesGame={seriesGame}
               renderCard={renderCard}
             />
+            </Suspense>
           )}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
@@ -625,11 +633,13 @@ export function GameSelect({
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
           {inPostseasonWindow && !bracketInRail && !bracketInDock && !(wsMode && wide) && (
-            <PostseasonBracket
+            <Suspense fallback={<Reserve h={300} />}>
+              <PostseasonBracket
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}
               slateDate={dateStr}
             />
+            </Suspense>
           )}
 
           {/* THE OFFSEASON PAGE (issues #1038, #1077). It moves nothing: the
@@ -638,7 +648,9 @@ export function GameSelect({
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
           {winter && (
-            <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+            <Suspense fallback={<Reserve h={1170} />}>
+              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+            </Suspense>
           )}
 
           {showBreakBanner && (
@@ -662,7 +674,9 @@ export function GameSelect({
             <ul className="gamelist">
               {sorted.length === 0 && isDerbyDay && (
                 <li>
-                  <DerbyCard />
+                  <Suspense fallback={<Reserve h={100} />}>
+                    <DerbyCard />
+                  </Suspense>
                 </li>
               )}
               {listGames.map(renderCard)}
@@ -672,7 +686,9 @@ export function GameSelect({
                 winter: every club is idle then, and the logo rail above already
                 links all of them (2026-11-02). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
-            {october && !wsMode && <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />}
+            {october && !wsMode && <Suspense fallback={<Reserve h={160} />}>
+   <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />
+ </Suspense>}
             {offDayTeams.length > 0 && !winter && !october && (
               <OffDaySection
                 teams={offDayTeams}
@@ -693,18 +709,22 @@ export function GameSelect({
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
         {wireOn && wide && !winter && (
-          <WireRail
+          <Suspense fallback={null}>
+            <WireRail
             endDate={dateStr}
             sportId={sportId}
             onPresence={setRailPresent}
             fitTo={gamesColRef}
             singleDay={!isToday}
           />
+          </Suspense>
         )}
 
         {/* October's copy of that column: the bracket, or the primer's. A World Series day draws its own
             bracket beside the hero (WorldSeriesHome), so the page runs the full width under it. */}
-        {bracketInRail && !wsMode && <SeriesPrimer part="rail" primer={primer} />}
+        {bracketInRail && !wsMode && <Suspense fallback={<Reserve h={160} />}>
+   <SeriesPrimer part="rail" primer={primer} />
+ </Suspense>}
 
       </div>
 
@@ -728,19 +748,23 @@ export function GameSelect({
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
       {bracketInDock && (
-        <BracketDock
+        <Suspense fallback={null}>
+          <BracketDock
           bracket={postseasonBracket.bracket}
           cutoff={postseasonBracket.cutoff}
           slateDate={dateStr}
         />
+        </Suspense>
       )}
       {wireOn && !wide && !winter && (
-        <WireDock
+        <Suspense fallback={null}>
+          <WireDock
           endDate={dateStr}
           sportId={sportId}
           onPresence={setDockPresent}
           singleDay={!isToday}
         />
+        </Suspense>
       )}
     </div>
   )
