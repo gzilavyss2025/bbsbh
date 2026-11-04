@@ -31,6 +31,8 @@ import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
+import { WireDock } from '../components/transactions/WireDock.jsx'
+import { WireRail } from '../components/transactions/WireRail.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
@@ -67,8 +69,6 @@ const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrim
 const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
 const DerbyCard = lazyNamed(() => import('../components/allstar/DerbyCard.jsx'), 'DerbyCard')
 const LeaguePicker = lazyNamed(() => import('../components/winter/LeaguePicker.jsx'), 'LeaguePicker')
-const WireRail = lazyNamed(() => import('../components/transactions/WireRail.jsx'), 'WireRail')
-const WireDock = lazyNamed(() => import('../components/transactions/WireDock.jsx'), 'WireDock')
 const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
 // Neither the league nor the date persists anywhere. Both live in the URL
@@ -714,15 +714,13 @@ export function GameSelect({
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
         {wireOn && wide && !winter && (
-          <LazyPanel reserve="wire">
-            <WireRail
-              endDate={dateStr}
-              sportId={sportId}
-              onPresence={setRailPresent}
-              fitTo={gamesColRef}
-              singleDay={!isToday}
-            />
-          </LazyPanel>
+          <WireRail
+            endDate={dateStr}
+            sportId={sportId}
+            onPresence={setRailPresent}
+            fitTo={gamesColRef}
+            singleDay={!isToday}
+          />
         )}
 
         {/* October's copy of that column: the bracket, or the primer's. A World Series day draws its own
@@ -764,14 +762,12 @@ export function GameSelect({
         </LazyPanel>
       )}
       {wireOn && !wide && !winter && (
-        <LazyPanel reserve="wire">
-          <WireDock
-            endDate={dateStr}
-            sportId={sportId}
-            onPresence={setDockPresent}
-            singleDay={!isToday}
-          />
-        </LazyPanel>
+        <WireDock
+          endDate={dateStr}
+          sportId={sportId}
+          onPresence={setDockPresent}
+          singleDay={!isToday}
+        />
       )}
     </div>
   )

@@ -29,7 +29,7 @@ export function SiteSearchButton({ className = '' }) {
           stacking context, and the ALL-CAPS invariant is a `#root *` rule — a portal to
           <body> would land the sheet outside it (see the Clerk note in index.css). */}
       {open && (
-        <LazyPanel reserve="wire">
+        <LazyPanel reserve="search">
           <SiteSearchModal onClose={() => setOpen(false)} />
         </LazyPanel>
       )}
