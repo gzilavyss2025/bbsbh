@@ -33,3 +33,7 @@ three phrases `scripts/check-claude-md-facts.mjs` checks, so change both togethe
 - **The fifteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
   `src/lib/stamps.js`). That is safe because of WHERE stamp art may render
   (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
+
+`_lib/` holds the shared handler helpers: `withUser` (the per-user preamble), `readHash`/`writeHash`
+(the hash-store flow), `uploadImage` (the admin Blob upload), `overLimit`. Why each exists, and the
+production failure behind it: ADR-0127.

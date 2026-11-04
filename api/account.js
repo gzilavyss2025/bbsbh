@@ -44,9 +44,8 @@
 // 501s, which is correct — there is nothing stored to erase.
 
 import { isSeasonNumber } from '../src/lib/stamps.js'
-import { authenticateUser } from './_lib/auth.js'
+import { withUser } from './_lib/auth.js'
 import { privateJson } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as every other authenticated function
 // here: @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox
@@ -157,18 +156,6 @@ export async function erase(res, redis, userId) {
   })
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'DELETE') {
-    return privateJson(res, { error: 'method not allowed' }, 405)
-  }
-
-  // Store before auth, same ordering and same diagnostic reason as every other
-  // authenticated function here.
-  const redis = getRedis()
-  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
-
-  const auth = await authenticateUser(req)
-  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
-
-  return erase(res, redis, auth.userId)
-}
+// Store before auth, same ordering and same diagnostic reason as every other
+// authenticated function here (see withUser).
+export default withUser(['DELETE'], (req, res, { redis, userId }) => erase(res, redis, userId))

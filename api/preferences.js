@@ -40,9 +40,8 @@ import {
   isValidValue,
   normalizeEntry,
 } from '../src/lib/account/preferences.js'
-import { authenticateUser } from './_lib/auth.js'
+import { withUser } from './_lib/auth.js'
 import { privateJson, readJsonBody } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -142,19 +141,4 @@ export async function handleRequest(req, res, redis, userId) {
   return privateJson(res, { prefs: await readAll(redis, key) })
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
-    return privateJson(res, { error: 'method not allowed' }, 405)
-  }
-
-  // Store BEFORE auth, so `curl` against this endpoint distinguishes "no Redis
-  // credentials reaching the function" (501) from "the store is live and the
-  // problem is elsewhere" (401) — the diagnosis docs/development.md rests on.
-  const redis = getRedis()
-  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
-
-  const auth = await authenticateUser(req)
-  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
-
-  return handleRequest(req, res, redis, auth.userId)
-}
+export default withUser(['GET', 'POST'], (req, res, { redis, userId }) => handleRequest(req, res, redis, userId))

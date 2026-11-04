@@ -33,7 +33,7 @@
 
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
-import { getRedis, hashFromReply } from './_lib/redis.js'
+import { getRedis, readHash, writeHash } from './_lib/redis.js'
 
 export const config = { runtime: 'nodejs' }
 
@@ -50,20 +50,6 @@ const OVERRIDES_KEY = 'contracts:identity:overrides'
 const ROW_KEY_RE = /^(extensions|arbitration|free_agency|salaries)#([0-9a-f]{16}|\d{1,7})$/
 const NOTE_MAX_LENGTH = 500
 const ORIGINAL_CONFIDENCE_VALUES = new Set(['fuzzy', 'ambiguous', 'unresolved'])
-
-function reply(res, body, status = 200, extraHeaders = {}) {
-  return jsonResponse(res, body, status, extraHeaders)
-}
-
-// `automaticDeserialization: false`, same reason api/copy.js and
-// api/identity.js both spell out: with it on, a stored JSON string gets
-// silently re-parsed by the client library, which then trips the "is this a
-// string" half of sanitization. Off, every hash field round-trips as the
-// exact string this endpoint wrote, and JSON.parse/stringify happens here,
-// once, deliberately.
-function overridesRedis() {
-  return getRedis({ automaticDeserialization: false })
-}
 
 // One override is either "the real id is X" or "reviewed, confirmed no
 // confident id exists" — never both unset, which would be an override that
@@ -154,21 +140,21 @@ export function publicOverrides(overrides) {
 export default async function handler(req, res) {
   const method = req.method
   if (method !== 'GET' && method !== 'PATCH') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return jsonResponse(res, { error: 'method not allowed' }, 405)
   }
 
-  const redis = overridesRedis()
+  const redis = getRedis({ automaticDeserialization: false })
 
   if (method === 'GET') {
     let stored = {}
     if (redis) {
       try {
-        stored = hashFromReply(await redis.hgetall(OVERRIDES_KEY))
+        stored = await readHash(redis, OVERRIDES_KEY)
       } catch {
         stored = {}
       }
     }
-    return reply(
+    return jsonResponse(
       res,
       { overrides: publicOverrides(sanitizeOverrides(stored)) },
       200,
@@ -176,39 +162,34 @@ export default async function handler(req, res) {
     )
   }
 
-  if (!redis) return reply(res, { error: 'contract-identity override store not configured' }, 501)
+  if (!redis) return jsonResponse(res, { error: 'contract-identity override store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return reply(res, { error: 'forbidden' }, 403)
+  if (!userId) return jsonResponse(res, { error: 'forbidden' }, 403)
 
   const body = await readJsonBody(req)
-  if (body == null || !acceptableBody(body)) return reply(res, { error: 'invalid body' }, 400)
+  if (body == null || !acceptableBody(body)) return jsonResponse(res, { error: 'invalid body' }, 400)
 
   // Read fresh from Redis inside this request, same reason as api/identity.js
   // at length: a GET is CDN-cached, so merging against anything the browser
   // holds can silently resurrect or delete a row another reviewer just fixed.
   let prev
   try {
-    prev = sanitizeOverrides(hashFromReply(await redis.hgetall(OVERRIDES_KEY)))
+    prev = sanitizeOverrides(await readHash(redis, OVERRIDES_KEY))
   } catch {
-    return reply(res, { error: 'write failed' }, 502)
+    return jsonResponse(res, { error: 'write failed' }, 502)
   }
 
   const merged = mergeOverrides(prev, body.patch, { userId, now: new Date().toISOString() })
-  if (!merged) return reply(res, { error: 'invalid patch' }, 422)
+  if (!merged) return jsonResponse(res, { error: 'invalid patch' }, 422)
 
   const staleKeys = Object.keys(prev).filter((key) => !(key in merged))
   try {
-    if (Object.keys(merged).length || staleKeys.length) {
-      const tx = redis.multi()
-      const toStore = Object.fromEntries(Object.entries(merged).map(([k, v]) => [k, JSON.stringify(v)]))
-      if (Object.keys(toStore).length) tx.hset(OVERRIDES_KEY, toStore)
-      if (staleKeys.length) tx.hdel(OVERRIDES_KEY, ...staleKeys)
-      await tx.exec()
-    }
+    const toStore = Object.fromEntries(Object.entries(merged).map(([k, v]) => [k, JSON.stringify(v)]))
+    await writeHash(redis, OVERRIDES_KEY, toStore, staleKeys)
   } catch {
-    return reply(res, { error: 'write failed' }, 502)
+    return jsonResponse(res, { error: 'write failed' }, 502)
   }
 
-  return reply(res, { overrides: merged }, 200, { 'cache-control': 'no-store' })
+  return jsonResponse(res, { overrides: merged }, 200, { 'cache-control': 'no-store' })
 }

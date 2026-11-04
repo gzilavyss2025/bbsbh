@@ -93,20 +93,8 @@ export function todayEt(now = new Date()) {
 // behavior itself (the fix for a reproduced bug — see resolveGame below) is
 // unit-testable with plain fake-delay promises, without mocking fetch/
 // statsapi. See test/cards.test.js.
-export function firstNonNull(promises) {
-  if (promises.length === 0) return Promise.resolve(null)
-  return new Promise((resolve) => {
-    let remaining = promises.length
-    const settle = (value) => {
-      remaining -= 1
-      if (value != null) resolve(value)
-      else if (remaining === 0) resolve(null)
-    }
-    for (const p of promises) {
-      Promise.resolve(p).then(settle, () => settle(null))
-    }
-  })
-}
+export const firstNonNull = (promises) =>
+  Promise.any(promises.map(async (p) => (await p) ?? Promise.reject(new Error('empty')))).catch(() => null)
 
 // Scan a date's slate across every level and match the away+home slug back to a
 // game — the edge-side twin of src/api/schedule.js's resolveGame. `hydrate=team`
