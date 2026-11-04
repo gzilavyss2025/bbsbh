@@ -9,7 +9,8 @@
 // stage abbreviates their timing. The camera and runner routes do not follow the ball.
 import { realFlight } from '../../../../lib/pitch/pitchFlight.js'
 import { flightPath } from '../../../../lib/gameday/flightPath.js'
-import { BASES, POS, clamp, lerp, polar, smooth, v3 } from './scene.js'
+import { BASES, POS, lerp, polar, smooth, v3 } from './scene.js'
+import { clamp } from '../../../../lib/math/number.js'
 
 const BEAT = { ready: 0.08, pitch: 0.22, settle: 0.16, result: 0.5 }
 const RUN_SPEED = 200 // feet per second of the abbreviated basepath sequence

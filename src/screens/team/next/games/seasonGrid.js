@@ -1,5 +1,6 @@
 import { gamePath } from '../../../../lib/route.js'
 import { isMlbTeamId } from '../../../../lib/teams.js'
+import { monthAbbr } from '../../../../lib/dates.js'
 
 // The season grid's model (the Games band): the club's whole schedule laid out as weeks of seven
 // days. Pure and fed one list, so node can test it. `schedule` is `fetchTeamSchedule`'s rows,
@@ -9,7 +10,6 @@ import { isMlbTeamId } from '../../../../lib/teams.js'
 // links to the lineup page, as the old season strip did.
 
 const MS = 86400000
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const GRID_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const toMs = (apiDate) => {
@@ -161,7 +161,7 @@ export function buildSeasonGrid(schedule, allStarGame, refDate) {
       const date = toIso(ms)
       const games = dayCells.get(date) ?? []
       if (games.some((g) => g.post)) post = true
-      if (!label && (new Date(ms).getUTCDate() === 1 || w === 0)) label = MONTHS[new Date(ms).getUTCMonth()]
+      if (!label && (new Date(ms).getUTCDate() === 1 || w === 0)) label = monthAbbr(new Date(ms).getUTCMonth())
       days.push({ date, games })
     }
     weeks.push({ key: toIso(start + w * 7 * MS), label, post, postLead: false, days })

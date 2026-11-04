@@ -4,8 +4,8 @@ import { outsToIp } from '../../../../../lib/math/innings.js'
 import { ordinal, ordinalSuffix } from '../../../../../lib/format.js'
 import { SPORT_LABEL } from '../../../../../lib/teams.js'
 import { inMinors } from '../innings/inningsView.js'
+import { monthAbbr } from '../../../../../lib/dates.js'
 
-const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const GROUP_WORD = { OPS: 'hitters', ERA: 'pitchers' }
 
 // PA for a hitter, outs for a pitcher (the file's own unit), said the way the page says it.
@@ -17,7 +17,7 @@ function moveText(movement) {
   const m = movementState(movement)
   if (!m) return null
   const [, mo, d] = (m.sinceDate ?? '').split('-').map(Number)
-  const since = mo ? ` since ${MONTH[mo - 1]} ${d}` : ''
+  const since = mo ? ` since ${monthAbbr(mo - 1)} ${d}` : ''
   return m.direction === 'steady' ? `Steady${since}` : `${m.direction === 'up' ? 'Up' : 'Down'} ${m.amount} percentile points${since}`
 }
 

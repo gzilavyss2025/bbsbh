@@ -1,8 +1,8 @@
+import { monthAbbr } from '../../../../../lib/dates.js'
 // Play through the Contact balls (#2073): the order, the steps, and the season timeline.
 // Pure. The flight itself is contactFlight.js; this decides which ball flies next.
 
 export const DWELL_MS = 1150 // the rest after a ball lands, before the next one flies
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DAY_MS = 86400000
 const dayOf = (s) => {
   const [y, m, d] = s.split('-').map(Number)
@@ -39,7 +39,7 @@ export function seasonAxis(dates) {
       }
       const d = Date.UTC(y, m, 1) / DAY_MS
       if (d > d1) break
-      months.push({ t: MONTHS[m], l: ((d - d0) / span) * 100 })
+      months.push({ t: monthAbbr(m), l: ((d - d0) / span) * 100 })
       m += 1
     }
   }

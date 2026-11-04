@@ -1,4 +1,5 @@
 import { band, fmtValue } from '../../../lib/scout/metrics.js'
+import { sum } from '../../../lib/math/number.js'
 
 // THE EDGE TAB'S VERDICT AND LEDGER (#1490): "do the pitches he throws match
 // up well or badly with what the hitter does well against?" Pure, so
@@ -58,7 +59,6 @@ export function ledgerScale(rows) {
   return { lo, hi, at: (v) => ((v - lo) / (hi - lo)) * 100 }
 }
 
-const sum = (a) => a.reduce((x, y) => x + y, 0)
 const pctOf = (rows) => sum(rows.map((r) => Number(r.pct)))
 const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a sentence
 // "a", "a and b", "a, b and c".

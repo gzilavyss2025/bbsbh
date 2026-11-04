@@ -6,7 +6,6 @@ import { DOW_LABELS } from '../data/shared.js'
 // Sunday-first; the day-of-week record itself is pure, in data/shared.js (loadNumbers.js
 // imports it, and a loader must not import a .jsx card).
 export { DOW_LABELS }
-export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // Same UTC-parse convention as dayOfWeekRecord's own apiDate → weekday
 // mapping (and isoToday() itself), so "today" lines up with whichever row

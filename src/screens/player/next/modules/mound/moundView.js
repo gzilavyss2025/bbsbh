@@ -1,11 +1,10 @@
 // The On the mound card's pure view (#1893). workload.json's apps in, the two tabs' drawings out:
 // the days-since track and the calendar of recent outings. No React, no fetch.
 import { dayIndex, turnStripFor } from '../../../../../api/workload.js'
-import { monthDay } from '../../../../../lib/dates.js'
+import { monthAbbr, monthDay } from '../../../../../lib/dates.js'
 import { clubLeague, roundName } from '../../../../../lib/postseason/roundTag.js'
 
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // workload.json keeps postseason apps too (their rest days are real); the season totals stay regular season.
 const ROUND = { F: 'WC', D: 'DS', L: 'CS', W: 'WS', P: 'PS' }
 const ROLE_WORD = { SP: 'Starter', RP: 'Reliever', CL: 'Closer' }
@@ -75,7 +74,7 @@ export function calendarFor(apps, today, maxP, { from, usual, hatch } = {}) {
     return { left: x(pts[i]), w: pct(n, span), n, now, odd: !!usual && !now && (n < usual.min || n > usual.max) }
   })
   const months = []
-  for (let n = t0; n < end; n++) if (isoOf(n).slice(8) === '01' && x(n) < 80) months.push({ left: x(n), lab: MONTH[+isoOf(n).slice(5, 7) - 1] })
+  for (let n = t0; n < end; n++) if (isoOf(n).slice(8) === '01' && x(n) < 80) months.push({ left: x(n), lab: monthAbbr(+isoOf(n).slice(5, 7) - 1) })
   return { bars, dates, gaps, months, live }
 }
 

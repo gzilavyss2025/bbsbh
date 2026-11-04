@@ -1,6 +1,7 @@
 import { hitterCounters } from '../../api/scout/hitterGrid.js'
 import { METRICS, band, expected, fmtCell, hitterRegions, typeValue } from '../../lib/scout/metrics.js'
 import { REGIONS, rollUp } from '../../lib/zone/regions.js'
+import { sum } from '../../lib/math/number.js'
 
 // THE SCOUT'S HITTER BOARD (#1411, phase 2): the hitter's map and the numbers
 // that join it to the pitcher's. Pure, and shared by the page and its Design
@@ -16,7 +17,6 @@ import { REGIONS, rollUp } from '../../lib/zone/regions.js'
 // Every sum stays one season: the page reads one season store at a time.
 const KEYS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaSum']
 const SCOPE = { reg: 'R', post: 'P', all: null }
-const sum = (a) => a.reduce((x, y) => x + y, 0)
 const add = (a, b) => a.map((x, i) => x + b[i])
 
 // Many COUNTERS into one. `wobaSum` survives only if every part has it.
