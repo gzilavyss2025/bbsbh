@@ -52,16 +52,19 @@ export function seasonInPlay(todayIso, row) {
 // last year's (seasonInPlay above), and that season is over by definition. The
 // answer is the season that just ended, or null for "not over".
 //
-// It fails closed: in November and December it needs this year's row with a
-// valid offseasonStartDate, and a missing or wrong-year row is null, not a guess.
-// Null only waits a night; a guess could act on a season still being played.
+// Without a usable row (missing, wrong year, no valid offseasonStartDate) it
+// never guesses. Before November the season is still on (the postseason runs to
+// Oct 31), so that is null. In November and December the answer turns on the row,
+// so it THROWS, naming the season it cannot decide on: the freeze step then fails
+// that night instead of waiting in silence (Gary, #2887).
 export function seasonOver(todayIso, row) {
   const season = seasonInPlay(todayIso, row)
   const year = Number(todayIso.slice(0, 4))
   if (season < year) return season
   const opens = Number(row?.seasonId) === year ? row?.offseasonStartDate : null
-  if (typeof opens !== 'string' || !ISO.test(opens)) return null
-  return todayIso >= opens ? season : null
+  if (typeof opens === 'string' && ISO.test(opens)) return todayIso >= opens ? season : null
+  if (todayIso.slice(5) < '11-01') return null
+  throw new Error(`cannot tell whether ${year} is over: statsapi's ${year} season row has no usable offseasonStartDate`)
 }
 
 // statsapi's season row for `year`, or null on a failed read. Never throws.
@@ -84,7 +87,7 @@ export async function fetchSeasonInPlay(today = new Date()) {
 }
 
 // The season that is over on `today`, or null. Same one read; a failed read in
-// November or December is null (fails closed), never a throw.
+// November or December throws (seasonOver above).
 export async function fetchSeasonOver(today = new Date()) {
   const todayIso = today.toISOString().slice(0, 10)
   return seasonOver(todayIso, await fetchSeasonRow(todayIso.slice(0, 4)))

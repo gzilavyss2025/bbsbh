@@ -1495,7 +1495,8 @@ don't run these by hand.
   every night after `fetch-top-prospects.mjs` and `fever/gen-salaries.mjs`, **not gated** (its
   night is a quiet offseason one). It freezes season N the first night N is over by ADR-0074's
   rule (`seasonOver`, `lib/time/season-in-play.mjs`: on or after the row's `offseasonStartDate`)
-  and N is not in `frozen-seasons.json`. Not over yet, or already frozen: exit 0, no write. A live
+  and N is not in `frozen-seasons.json`. Not over yet, or already frozen: exit 0, no write. In
+  November or December with no readable season row it exits 1 naming the season (from Jan 1 it needs no row). A live
   file already on N+1 with N unfrozen: exits 1 and names N, so the run shows red; recover N by
   hand from git history with `--season N` (also `--force`, which rewrites a frozen season).
   The decision is the pure `freezeDecision`, tested in `test/freeze-season.test.js`. 2026 was

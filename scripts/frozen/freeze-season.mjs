@@ -14,6 +14,8 @@
 // every night: no input gate, because the night it matters is a quiet offseason
 // one. It decides for itself (freezeDecision below):
 //   - season not over yet (seasonOver, ADR-0074): exit 0, nothing written.
+//   - November or December and statsapi's season row can't be read: exit 1,
+//     naming the season it cannot decide on (from Jan 1 no row is needed).
 //   - the season that is over is already in frozen-seasons.json: exit 0.
 //   - over, not frozen, every live file still that season: freeze it, exit 0.
 //   - over, not frozen, a live file already on a later season: exit 1 and name
@@ -104,7 +106,12 @@ async function main() {
 
   if (args.includes('--nightly')) {
     const { fetchSeasonOver } = await import('../lib/time/season-in-play.mjs')
-    const over = await fetchSeasonOver()
+    let over
+    try {
+      over = await fetchSeasonOver()
+    } catch (e) {
+      fail(e.message)
+    }
     const live = readLive()
     const d = freezeDecision({ over, frozen: readFrozen(), live })
     if (d.exitCode !== 0) fail(d.message)

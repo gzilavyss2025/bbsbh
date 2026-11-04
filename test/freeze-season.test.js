@@ -31,10 +31,16 @@ test('seasonOver: from Opening Day the new season is in play, not over', () => {
   assert.equal(seasonOver('2027-03-25', row2027), null)
 })
 
-test('seasonOver: in November with no row (or a wrong-year row) it fails closed', () => {
-  assert.equal(seasonOver('2026-11-15', null), null)
-  assert.equal(seasonOver('2026-11-15', row2027), null)
-  assert.equal(seasonOver('2026-11-15', { seasonId: '2026' }), null)
+test('seasonOver: in November or December with no usable row it cannot decide, and throws naming the season', () => {
+  // Gary, #2887: the step exits 1 that night rather than wait silently.
+  assert.throws(() => seasonOver('2026-11-15', null), /2026/)
+  assert.throws(() => seasonOver('2026-12-31', row2027), /2026/)
+  assert.throws(() => seasonOver('2026-11-15', { seasonId: '2026' }), /2026/)
+})
+
+test('seasonOver: before November with no row it is still not over (no throw)', () => {
+  assert.equal(seasonOver('2026-07-04', null), null)
+  assert.equal(seasonOver('2026-10-31', null), null)
 })
 
 const live = (season, prospectsYear = season) => ({
