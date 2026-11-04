@@ -412,7 +412,8 @@ don't run these by hand.
   box score read drops only that series' block. To check a past slate by hand, run
   the generator for that date and then for the day after (`2025-11-01`, then
   `2025-11-02`). Then delete the new `callouts/` folders and any folder a run moved
-  into `scripts/data/callouts-archive/`, and never commit either one.
+  into the call-out archive (`callouts-archive/` in the bbsbh-state repo, ADR-0128),
+  and never commit or push either one.
 - `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
   `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
   + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,

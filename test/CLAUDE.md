@@ -4,6 +4,10 @@
 `npm test` (see root `CLAUDE.md`). `test/fixtures/` holds shared captured-feed JSON;
 most files keep their fixtures inline (see "Fixtures" below for why).
 
+**Real generator state is not here.** A test that reads the real dumps under
+`scripts/data/` goes in `test-state/` (`npm run test:state`, after `npm run state:pull`),
+so `npm test` runs on a fresh clone (ADR-0128).
+
 ## Finding a test
 
 There is no index table. Test files are named after the module they cover: run

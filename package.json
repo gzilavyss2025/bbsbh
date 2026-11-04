@@ -22,6 +22,8 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "test": "node --test --test-reporter=dot \"test/**/*.test.js\"",
     "test:verbose": "node --test \"test/**/*.test.js\"",
+    "test:state": "node --test \"test-state/**/*.test.js\"",
+    "state:pull": "node scripts/repo/state.mjs pull",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"scripts/**\" \"test/**/*.test.js\"",
     "e2e": "playwright test",
     "e2e:all": "playwright test",

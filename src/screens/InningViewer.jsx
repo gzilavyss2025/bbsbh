@@ -517,7 +517,7 @@ export function InningViewer({
         meta={meta}
         panels={{
           feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
-          onSelect: goTo,
+          onSelect: goTo, closing: focus.closing,
           inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : engineCountFor(effInning, effHalf),
           pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
           openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub), open: currentSealed ? { count: curAtBatCount, sub: curSub } : null, onPick, readAt: curIdx <= renderRevealedThrough ? focus.items[focus.cursor]?.atBatIndex ?? null : null, // open: per pitch; onPick/readAt: the read-back
