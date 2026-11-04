@@ -23,10 +23,11 @@ import {
 // The on-device headshot log button (issue #1446) is switched off. The panel and
 // src/lib/headshot/log.js stay in the tree; flip this to true to show it again.
 const SHOW_HEADSHOT_LOG = false
-const HeadshotLogPanel = lazyNamed(
-  () => import('./components/headshot-log/HeadshotLogPanel.jsx'),
-  'HeadshotLogPanel',
-)
+// Lazy, and only built while the flag is on: a constant-false ternary leaves no
+// import() behind, so no chunk is emitted or precached for a panel nobody sees.
+const HeadshotLogPanel = SHOW_HEADSHOT_LOG
+  ? lazyNamed(() => import('./components/headshot-log/HeadshotLogPanel.jsx'), 'HeadshotLogPanel')
+  : null
 
 // Headless cross-device sync for the Logbook's game stamps (ADR-0035). Like
 // RevealCloudSync and AccountButton, it imports @clerk/clerk-react at its top,
@@ -571,12 +572,12 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
-      {/* The one global player hover card (desktop only — see PlayerLink.jsx).
-          An external store like SyncStatusProvider below, not Context: a page
-          can carry dozens of PlayerLinks, and this is the only component that
-          re-renders when the hovered player changes. */}
+      {/* The one global player hover card (desktop only — see PlayerLink.jsx),
+          loaded on the first hover. An external store like SyncStatusProvider
+          below, not Context: a page can carry dozens of PlayerLinks, and only
+          the card and this gate subscribe to it. */}
       <LazyPlayerHoverCard />
-      {SHOW_HEADSHOT_LOG && (
+      {HeadshotLogPanel && (
         <Suspense fallback={null}>
           <HeadshotLogPanel />
         </Suspense>

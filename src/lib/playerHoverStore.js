@@ -8,8 +8,9 @@
 // changes on every hover would re-render every single one of them on every
 // mouse pass. Here, writing (scheduleHoverShow/scheduleHoverHide) is a
 // plain function call with a permanently stable identity — no subscription,
-// no re-render — and only the one component that reads it (via
-// useSyncExternalStore) ever re-renders.
+// no re-render — and only the components that read it (via
+// useSyncExternalStore) ever re-render: the card, and the gate that loads it
+// (LazyPlayerHoverCard, which re-renders only when a card opens or closes).
 //
 // The show/hide calls are debounced through one shared timer rather than
 // firing immediately, so a fast mouse pass over a dense list of names (a
@@ -53,6 +54,10 @@ export function getHoverSnapshot() {
 // by PlayerHoverCard's HoverDetail). Plain data, so the store stays free of
 // React and of any one card's shape. Null is the ordinary season line.
 export function scheduleHoverShow(id, name, rect, { immediate = false, detail = null } = {}) {
+  // The card is its own chunk (App.jsx loads it on the first open). Ask for it
+  // now, so the download overlaps the hover-intent delay below. Idempotent; a
+  // failure is the gate's to handle, so swallow it here.
+  import('../components/player/PlayerHoverCard.jsx').catch(() => {})
   clearTimeout(timer)
   if (immediate) {
     commit({ id, name, rect, detail })
