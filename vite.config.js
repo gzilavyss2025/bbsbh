@@ -540,6 +540,11 @@ export default defineConfig({
           // renders it. Precaching it put 85 KB on every install to serve a
           // request that can never come from a page this worker controls.
           '**/og-image.png',
+          // Historical club marks (~4.4 MB, 52 files; a team page shows one
+          // era at a time) and the postseason series marks (~370 KB). Both
+          // load per page and stay offline through the CacheFirst rule below.
+          'logos/**',
+          'postseason-marks/**',
         ],
         navigateFallback: '/index.html',
         // …EXCEPT the guides. `navigateFallback` alone registers a
@@ -659,6 +664,20 @@ export default defineConfig({
               cacheName: 'bbsbh-team-marks',
               expiration: {
                 maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            // Same-origin era and series art left out of the precache above
+            // (/logos/, /postseason-marks/): cached the first time it is shown.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/(logos|postseason-marks)\//.test(url.pathname),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-static-art',
+              expiration: {
+                maxEntries: 120,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
               },
             },
