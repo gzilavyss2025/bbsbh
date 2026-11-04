@@ -1,6 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
 import { lazyNamed } from './lib/react/lazyNamed.js'
-import { GameSelect } from './screens/GameSelect.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
@@ -68,6 +67,12 @@ const PreferencesCloudSync = isClerkEnabled
 const OwnerGuards = isClerkEnabled
   ? lazyNamed(() => import('./components/sync/OwnerGuards.jsx'), 'OwnerGuards')
   : null
+
+// The slate is lazy like every other screen, so /team and /player do not pay
+// for it (#2881). When the first route IS the slate, start its chunk now, at
+// module evaluation, so '/' does not wait for React to mount and then fetch.
+const GameSelect = lazyNamed(() => import('./screens/GameSelect.jsx'), 'GameSelect')
+if (!parseRoute(window.location.pathname + window.location.search).name) import('./screens/GameSelect.jsx')
 
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
