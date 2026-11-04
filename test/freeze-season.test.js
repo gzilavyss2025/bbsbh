@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seasonOver } from '../scripts/lib/time/season-in-play.mjs'
+import { needsSeasonRow, seasonOver, seasonOverAt } from '../scripts/lib/time/season-in-play.mjs'
 import { freezeDecision } from '../scripts/frozen/freeze-season.mjs'
 
 // #2778: the nightly freezes season N the first night it is over (ADR-0074),
@@ -43,8 +43,28 @@ test('seasonOver: before November with no row it is still not over (no throw)', 
   assert.equal(seasonOver('2026-10-31', null), null)
 })
 
+test('seasonOverAt: the day turns by the Pacific date, so a late Oct 31 game is not yet Nov 1', () => {
+  // 2026-11-01T03:00Z is 8 pm on Oct 31 in Los Angeles: still the season.
+  assert.equal(seasonOverAt(new Date('2026-11-01T03:00:00Z'), row2026), null)
+  // 2026-11-01T12:00Z is 5 am on Nov 1 in Los Angeles: over.
+  assert.equal(seasonOverAt(new Date('2026-11-01T12:00:00Z'), row2026), 2026)
+})
+
+test('needsSeasonRow: only March (Opening Day), November and December need the statsapi row', () => {
+  for (const d of ['2026-03-01', '2026-03-31', '2026-11-01', '2026-12-31']) assert.equal(needsSeasonRow(d), true, d)
+  for (const d of ['2027-01-01', '2027-02-28', '2026-04-01', '2026-07-04', '2026-10-31']) assert.equal(needsSeasonRow(d), false, d)
+})
+
+test('seasonOver without the row agrees with the row on every skipped month', () => {
+  // The months needsSeasonRow skips: the answer must not depend on the row there.
+  for (const [d, row] of [['2027-01-15', row2027], ['2027-02-20', row2027], ['2026-04-15', row2026], ['2026-10-31', row2026]]) {
+    assert.equal(seasonOver(d, null), seasonOver(d, row), d)
+  }
+})
+
 const live = (season, prospectsYear = season) => ({
   salaries: season,
+  clubFiles: ['158.json', '112.json'],
   clubs: [season, season],
   prospectsYear,
 })

@@ -1492,9 +1492,12 @@ don't run these by hand.
   (`salaries.json`, `top-prospects.json`, `team-contracts/{id}.json`) and the bundled list
   `src/lib/data/frozen-seasons.json` (#2776, #2778). It copies the stores that only know today,
   so a past-season team page (`?y=`) keeps Money and the Farm prospects and depth chart. Runs
-  every night after `fetch-top-prospects.mjs` and `fever/gen-salaries.mjs`, **not gated** (its
-  night is a quiet offseason one). It freezes season N the first night N is over by ADR-0074's
-  rule (`seasonOver`, `lib/time/season-in-play.mjs`: on or after the row's `offseasonStartDate`)
+  every night, **not gated** (its night is a quiet offseason one), and **before** the producers
+  (`fetch-top-prospects.mjs`, `fever/gen-player-contracts.mjs`, `fever/gen-salaries.mjs`), so it
+  copies the files as committed at HEAD, the last good versions, never a partial or rolled-over
+  rewrite from tonight. It freezes season N the first night N is over by ADR-0074's
+  rule (`seasonOver`, `lib/time/season-in-play.mjs`: on or after the row's `offseasonStartDate`,
+  by the Pacific date)
   and N is not in `frozen-seasons.json`. Not over yet, or already frozen: exit 0, no write. In
   November or December with no readable season row it exits 1 naming the season (from Jan 1 it needs no row). A live
   file already on N+1 with N unfrozen: exits 1 and names N, so the run shows red; recover N by

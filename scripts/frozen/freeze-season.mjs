@@ -10,9 +10,14 @@
 // src/lib/data/frozen-seasons.json, which the page reads synchronously to decide
 // whether the Money band exists (hiddenTeamSections).
 //
-// The nightly cron runs it with --nightly (#2778), after both producers, on
-// every night: no input gate, because the night it matters is a quiet offseason
-// one. It decides for itself (freezeDecision below):
+// The nightly cron runs it with --nightly (#2778) every night, with no input
+// gate (the night it matters is a quiet offseason one), and BEFORE the
+// producers: it copies the files as committed at HEAD, the last good versions.
+// A producer that fails tonight cannot hand it a partial or stale file, and one
+// that rolls over to N+1 tonight cannot make the first attempt too late. HEAD's
+// top-prospects stamp only moves when the list changes (drop-stamp-only.mjs), so
+// a January restamp of the same list does not read as N+1. It decides for
+// itself (freezeDecision below):
 //   - season not over yet (seasonOver, ADR-0074): exit 0, nothing written.
 //   - November or December and statsapi's season row can't be read: exit 1,
 //     naming the season it cannot decide on (from Jan 1 no row is needed).
@@ -55,7 +60,7 @@ function liveMismatches(live, season) {
   const out = []
   if (live.salaries !== season) out.push({ file: 'salaries.json', is: live.salaries })
   live.clubs.forEach((s, i) => {
-    if (s !== season) out.push({ file: `team-contracts/${live.clubFiles?.[i] ?? i}`, is: s })
+    if (s !== season) out.push({ file: `team-contracts/${live.clubFiles[i]}`, is: s })
   })
   if (live.prospectsYear !== season) out.push({ file: 'top-prospects.json (stamp year)', is: live.prospectsYear })
   return out
