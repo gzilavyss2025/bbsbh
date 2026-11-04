@@ -16,6 +16,12 @@
 //     against these same ids and length caps, so a hand-crafted POST can only
 //     ever set a KNOWN key to a bounded string — never inject a new key.
 //
+// TWO SETS, ON PURPOSE (#2878). THIS file is the SPA's RUNTIME set: no /learn
+// guide prose, and no mergeOverrides. The server (api/copy.js, api/page.js),
+// AdminCopy and /learn?edit import registryFull.js, which adds the guides.
+// Never import the merge from here: it would drop every learn.* override on a
+// partial save.
+//
 // Why a registry and not scattered string literals: the whole point of the
 // admin panel (see the ADR) is that the site owner can tune the wording of the
 // editable surfaces (GROUPS below) as the site matures, without a code change,
@@ -282,7 +288,6 @@ const reg = makeRegistry(FIELDS)
 export const FIELD_IDS = reg.FIELD_IDS
 export const defaultCopy = reg.defaultCopy
 export const sanitizeOverrides = reg.sanitizeOverrides
-export const mergeOverrides = reg.mergeOverrides
 export const resolveCopy = reg.resolveCopy
 
 // One implementation of the helpers, bound to whichever field list a consumer
