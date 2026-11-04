@@ -17,7 +17,7 @@ test('hostile stored values parse exactly as parseRevealMark does', () => {
   for (const v of ['-3', '1.5', 'NaN', '{"a":1}', '', '7; DROP', undefined]) {
     assert.equal(withStorage(v, () => readRevealMarkFor(1)), parseRevealMark(v ?? null), String(v))
   }
-  for (const v of ['-3', '1.5', 'NaN', '{"a":1}', '7; DROP', undefined]) {
+  for (const v of ['-3', '1.5', 'NaN', '{"a":1}', '', ' ', '1e3', '7; DROP', undefined]) {
     assert.equal(withStorage(v, () => readRevealMarkFor(1)), -1, String(v))
   }
   assert.equal(readRevealMarkFor(0), -1)
