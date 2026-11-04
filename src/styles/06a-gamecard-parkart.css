@@ -128,10 +128,9 @@
 
 /* Everything else on the card is a plain flex item — unpositioned, so it would
    paint UNDER the absolutely-positioned backdrop no matter how late it comes in
-   the markup. These three are the card's only such children; the pin badge and
+   the markup. These two are the card's only such children; the pin badge and
    the live/delay pills are already positioned with z-indexes of their own and
    need no help. */
-.gamecard__datebanner,
 .gamecard__open,
 .gamecard__box {
   position: relative;

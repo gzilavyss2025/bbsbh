@@ -19,28 +19,15 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // the club he's pitching for — passed through to PitcherPhoto for its
 // logo fallback.
 //
-// `entering`, when given, is the persistent header's own extra: how many
-// pitches he'd already thrown BEFORE this half — `{ pitches, halfLabel }`,
-// e.g. `{ pitches: 78, halfLabel: 'the start of the 6th' }`. Optional and
-// only ever passed by HalfInning.jsx's persistent card — a pre-pitch/mid-
-// inning change notice (StatBox.jsx / PlayByPlay.jsx's own uses of this same
-// component) has no natural "entering the half" moment to hang it on.
-//
 // `flag`, when given, is the full Now Pitching card's note under the name —
 // "Pitched yesterday" or "Starter in relief" (pitcherCard/PitcherCard.jsx).
-export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = TABS.pitching, entering = null, flag = null, logo = true, stacked = false }) {
+export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = TABS.pitching, flag = null, logo = true, stacked = false }) {
   if (!pitcher) return null
   return (
     <div className={`change ${className}`}>
       <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo} stacked={stacked}>
         {flag && <span className="change__flag">{flag}</span>}
       </ActorHead>
-      {entering && (
-        <span className="change__entering">
-          <span className="change__enteringcount">{entering.pitches} pitches</span>
-          <span className="change__enteringwhen">at {entering.halfLabel}</span>
-        </span>
-      )}
     </div>
   )
 }

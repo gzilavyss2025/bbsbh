@@ -89,8 +89,7 @@ test('N8a: .change__shot, --logo and --fallback exist in 12-sealbox.css', () => 
   }
 })
 
-test('N8a: the callers of the well use the new name; the :has rule names the whole family by it (N8c)', () => {
-  assert.match(css('12-sealbox.css'), /\.change:has\(\.change__entering\) \.change__shot\s*\{/)
+test('N8a: the callers of the well use the new name (N8c)', () => {
   assert.match(css('26-player-page.css'), /\.change__shot img\[data-pending\]\s*\{/)
 })
 

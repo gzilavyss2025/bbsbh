@@ -105,7 +105,7 @@ test('N8c: .change, .change--framed, .change--event and .change--mv exist in 12-
 })
 
 test('N8c: every part of the family keeps its rule under the new root', () => {
-  const parts = ['body', 'badges', 'entering', 'enteringcount', 'enteringwhen', 'flag', 'forline', 'hand', 'jersey', 'now', 'pitcher', 'prtag']
+  const parts = ['body', 'badges', 'flag', 'forline', 'hand', 'jersey', 'now', 'pitcher', 'prtag']
   for (const part of parts) assert.ok(has(allCss, `.change__${part}`), `.change__${part} has a rule`)
 })
 

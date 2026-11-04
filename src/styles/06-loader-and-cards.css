@@ -241,25 +241,9 @@
   border-radius: 0;
 }
 
-/* Full-width date banner (All-Star Rosters page — see GameCard.jsx's
-   `dateLabel` prop). Negative margin cancels the card's own padding so the
-   strip reaches edge to edge, radius matched to the card's own top corners. */
-.gamecard__datebanner {
-  margin: -14px -16px 0;
-  padding: var(--space-1) var(--space-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-  background: var(--surface-inset);
-  border-bottom: var(--bw-heavy) solid var(--border-stamped);
-}
-
 /* The postseason series line (#1224, slice 4) — "Game 2 · NL Wild Card" plus
    the heading-in record, text only, no pips (the bracket alone draws those).
-   Same bleed-to-the-edges technique as .gamecard__datebanner above, but
+   Bleeds to the card's edges, but
    inked as an ink band — the idiom the series page's result hero
    already uses (35-postseason-series.css's .psseries__banner) — since this
    line, like that headline, is a fact about the SERIES, not the matchup.
@@ -276,7 +260,7 @@
   overflow: hidden;
   gap: var(--space-2);
   margin: -14px -16px 0;
-  /* Wider on both sides than .gamecard__datebanner's plain --space-4: the
+  /* Wider on both sides than a plain --space-4: the
      pinned-team star (.gamecard__pinbadge, top:8/left:8) and the live/delay
      corner pill (.gamecard__live/.gamecard__delay, top:10/right:10) both sit
      ON TOP of this band (they're position: absolute against the card, not
