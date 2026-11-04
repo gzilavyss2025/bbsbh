@@ -20,7 +20,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | Bucket | Holds | The test for "does it belong here?" |
 | --- | --- | --- |
 | `ui/` | `Loader`, `SectionMasthead`, `ModalPortal`, and the `control/`, `frame/`, `table/`, `state/`, `layout/`, `dock/` primitives (`ui/CLAUDE.md`) | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
-| `account/` | `AccountButton`, `AccountPitch`, `FavoriteTeamModal`, `LogbookAccountGate`, `ClubPicker` | Clerk sign-in/account-menu surfaces and the signed-out Game Log pitch. **`ClubPicker.jsx` is the one club strip.** It takes `teams` as a prop and fetches nothing; `/profile` renders it (the first-visit intro that also did was removed 2026-10-30). Do not grow a second one |
+| `account/` | `AccountButton`, `LogbookAccountGate`, `ClubPicker` | Clerk sign-in/account-menu surfaces and the signed-out Game Log pitch. **`ClubPicker.jsx` is the one club strip.** It takes `teams` as a prop and fetches nothing; `/profile` renders it (the first-visit intro that also did was removed 2026-10-30). Do not grow a second one |
 | `admin/` | `AwardOrderEditor`, `contracts/` | Editors only an admin sees |
 | `allstar/` | `AllStarGameResult`, `DerbyCard` | All-Star Game / Derby result cards (ADR-0019's plain-score exception) |
 | `around-the-game/` | `BroadcastBar`, `BroadcastMasthead`, `StatSlab`, `RunValueParts` | The parts the Around the game report pages share. Draw-only; the data is spoiler-free (`src/api/around-the-game/CLAUDE.md`) |
@@ -68,7 +68,7 @@ UI, ADR-0036/0041).
 ## Two constraints that outrank tidiness
 
 **The Clerk-gated components must stay dynamically imported.** `AccountButton`,
-`AccountPitch`, `LogbookAccountGate`, `ContinueScoring`, and every `*CloudSync` component are
+`LogbookAccountGate`, `ContinueScoring`, and every `*CloudSync` component are
 reached through `import()` so `@clerk/clerk-react` (~110 KB raw, about 31 KB gz) stays out of the
 entry chunk. Moving them is fine; converting one of those specifiers to a static
 import is not, and it would still build cleanly. CI checks the built output:

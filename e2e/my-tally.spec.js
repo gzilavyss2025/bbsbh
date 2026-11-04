@@ -136,21 +136,12 @@ test('erasing this device clears every bbsbh: key and starts over', async ({ pag
   await sheet.getByRole('button', { name: 'Erase this device' }).click()
   await page.waitForURL('**/')
 
-  // Everything is swept EXCEPT `bbsbh:intro`, which is deliberately re-seeded
-  // on the way out. Without it the reload looks like a brand-new visitor and
-  // reopens the welcome modal — and since every exit route from that modal
-  // commits a club pick (defaulting to the pinned club) while `bbsbh:prefsOwner`
-  // has just been swept too, a still-signed-in user's real club was published
-  // over with the default on every device. Asserting the exact remaining key,
-  // rather than a count, is what keeps that from silently growing.
+  // Everything is swept: no bbsbh: key survives the erase.
   expect(
     await page.evaluate(() =>
-      Object.keys(window.localStorage).filter((k) => k.startsWith('bbsbh:')).sort(),
+      Object.keys(window.localStorage).filter((k) => k.startsWith('bbsbh:')),
     ),
-  ).toEqual(['bbsbh:intro'])
-
-  // And the point of keeping it: no welcome modal on the way back in.
-  await expect(page.getByRole('dialog', { name: 'Make Tally yours.' })).toHaveCount(0)
+  ).toEqual([])
 })
 
 test('the slate footer’s Settings button is the way in', async ({ page }) => {

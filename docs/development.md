@@ -117,15 +117,11 @@ They add to "Cloud sessions" above and do not replace any rule in it.
 - **A follow-up during a run is normal.** The maintainer can type while you work. Read
   it after the current tool calls and fold it in without restarting.
 
-## Testing the app: always append `?nointro`
+## Testing the app: `?nointro` is harmless
 
-On a fresh or cleared `localStorage`, the first-visit welcome modal
-(`FavoriteTeamModal` in `intro` mode) pops on the slate (`/`, `/{MMDDYYYY}`),
-covers the screen, and steals focus. When you load the app to test or verify —
-the home slate **or any other route** — append `?nointro` to the URL. It's a
-one-load query flag (`GameSelect.jsx` `welcomeSuppressed`), never persisted, so
-it doesn't leak into shared links, and it's harmless on non-slate routes since
-routing parses the pathname only — so use it everywhere by habit.
+The first-visit welcome modal is gone, so `?nointro` no longer does anything. It is
+harmless on any route (routing parses the pathname only), and the e2e fixture still
+adds it.
 
 - **Playwright** (`npm run e2e`, `npx playwright test`): import `test`/`expect`
   from `e2e/fixtures.js`, never `@playwright/test` directly. The fixture rewrites

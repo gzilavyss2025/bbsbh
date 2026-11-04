@@ -81,7 +81,7 @@ const BUDGETS = {
   'src/api/transactions/playerFacts.js': 680, // 662: dated facts and the settled-day caches (#2829)
   'src/styles/78-offseason.css': 800, // 706: the winter home page's rows moved to offseason/winter-home.css
   'src/styles/06-loader-and-cards.css': 800, // 900
-  'src/styles/08-site-shell.css': 800, // 900
+  'src/styles/08-site-shell.css': 700, // 800
   'src/styles/12-sealbox.css': 900, // 895
   'src/styles/14-strike-zone.css': 900, // 898
   'src/styles/15-team-color-lab.css': 680, // 674

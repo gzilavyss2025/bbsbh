@@ -262,9 +262,6 @@
   "src/styles/55-my-tally-account.css": {
     "wrap": 1
   },
-  "src/styles/56-my-tally-intro.css": {
-    "column": 1
-  },
   "src/styles/57-ballpark-card.css": {
     "column": 2
   },
