@@ -1,4 +1,3 @@
-import '../../styles/scorecard/index.css'
 import '../../styles/boxlines/boxlines.css'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'

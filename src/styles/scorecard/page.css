@@ -6,7 +6,7 @@
    (defense diamond, pitcher table, scoreboard + FINAL block + decisions),
    the notation editor's bottom sheet, the Top/Bottom control bar, and the
    Lab's own load row. The footer trio under the grid is footer.css. Split out of grid.css at the 600-line file cap
-   (ADR-0038); imported by index.css last of the three, so the cascade order is
+   (ADR-0038); imported by scorecard/index.css last of the three, so the cascade order is
    exactly what one file's top-to-bottom order was.
    ============================================================ */
 .sc-labctl {

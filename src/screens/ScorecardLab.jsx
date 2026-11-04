@@ -1,3 +1,4 @@
+import '../styles/scorecard/index.css'
 import { useMemo, useState } from 'react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

@@ -6,7 +6,7 @@
    and every mark that lands on it is box.css; the page chrome around the sheet
    (header band, footer trio, zoom control, editor) is page.css. The three were
    one file, split at the 600-line cap and moved into this directory at the
-   src/styles file cap (ADR-0038); index.css imports them in this order, which
+   src/styles file cap (ADR-0038); scorecard/index.css imports them in this order, which
    is exactly the order that one file read top to bottom.
    ============================================================ */
 .scorecard {

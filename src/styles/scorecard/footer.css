@@ -3,7 +3,7 @@
    The fielding club's defense diamond, its pitcher table, and the scoreboard
    block (both clubs' innings, the FINAL R/H/E/LOB line, the WP/LP/SV
    decisions). Split out of page.css at the 600-line file cap (ADR-0038);
-   imported by index.css straight after it, so the cascade order is exactly
+   imported by scorecard/index.css straight after it, so the cascade order is exactly
    what one file's top-to-bottom order was.
    ============================================================ */
 /* ---- Footer: defense diamond, pitcher table, scoreboard ---- */
