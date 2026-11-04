@@ -32,7 +32,7 @@
 import PINNED from '../data/park-keys.json' with { type: 'json' }
 import { venueKey } from './ballparkArt.js'
 import { ballparkFor } from './ballparkData.js'
-import { parkKey } from '../data/parkNames.js'
+import { canonicalParkName, parkKey } from '../data/parkNames.js'
 
 // parkKey lives in ./parkNames.js (no geometry import); re-exported for callers.
 export { parkKey }
@@ -79,7 +79,7 @@ export function pinParkKeys(pinned, rows, log = () => {}) {
       }
       continue
     }
-    let key = venueKey(ballparkFor(venueName)?.name || venueName)
+    let key = venueKey(canonicalParkName(venueName) || venueName)
     if (taken.has(key)) key = `${key}${venueId}`
     taken.add(key)
     out[venueId] = { key, names: [venueName] }

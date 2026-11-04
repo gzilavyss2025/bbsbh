@@ -33,7 +33,7 @@
 
 import { awardFields } from './awardFields.js'
 import { offseasonFields } from './offseasonFields.js'
-import { PARK_NAMES, parkKey } from '../lib/data/parkNames.js'
+import { PARKS, PARK_KEYS, parkKey } from '../lib/data/parkNames.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
 
 // Groups order the admin panel and let it render section headers. Keep ids
@@ -71,9 +71,9 @@ export const GROUPS = [
 // The ballpark notes: one free-text paragraph per park, shown on the team hub's
 // Overview between the built/roof/capacity facts and the outfield dimensions.
 //
-// DERIVED, not hand-listed, and that is the point. PARK_NAMES (parkNames.js, held equal to BALLPARKS by a test) is the one place
-// the set of parks is written down; a hand-kept second list here would drift the
-// first time a park is renamed, and a drifted id is not a cosmetic bug — ids are
+// DERIVED, not hand-listed, and that is the point. PARKS (lib/data/parkNames.js)
+// is the one place the set of parks is written down; a hand-kept second list
+// here would drift the first time a park is renamed, and a drifted id is not a cosmetic bug — ids are
 // Redis field names, so a park whose id moved would silently lose the paragraph
 // somebody wrote for it. Deriving from `park.name` also means the three ALIAS
 // keys (Minute Maid/Daikin, Guaranteed Rate/Rate, the Dodger Stadium pair)
@@ -111,7 +111,7 @@ const PHOTO_URL = /^https:\/\/[^\s"'<>]+$/
 const FOCAL_POINT = /^(100|\d{1,2}) (100|\d{1,2})$/
 
 function parkFields() {
-  return [...new Set(Object.values(PARK_NAMES))]
+  return PARKS.map((park) => park.name)
     .sort((a, b) => a.localeCompare(b))
     .flatMap((name) => {
       const key = parkKey(name)
@@ -209,8 +209,8 @@ function parkFields() {
 // fields for it, the MLB one with its diagram, not a colliding second set of
 // five with no diagram.
 const MLB_PARK_KEYS = new Set([
-  ...Object.keys(PARK_NAMES),
-  ...Object.values(PARK_NAMES).map((name) => parkKey(name)),
+  ...PARK_KEYS,
+  ...PARKS.map((park) => parkKey(park.name)),
 ])
 
 function milbParkFields() {
