@@ -34,7 +34,7 @@ import { listSheets } from './lib/walk.mjs'
 // that outgrows the file cap subdivides instead of splitting sideways
 // (ADR-0038), and `focus/`, `scorecard/` and `motion/` are all real rules this
 // guard would otherwise walk straight past.
-const sheets = listSheets()
+const sheets = listSheets(process.cwd())
 
 // Same hazard as check-typography.mjs: if the stylesheets move again, or a
 // refactor empties them, every assertion below becomes a no-op while still

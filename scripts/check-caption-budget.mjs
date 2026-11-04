@@ -72,7 +72,7 @@ import { listSheets } from './lib/walk.mjs'
 // 99 -> 98: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
 const BUDGET = 97
 
-const sheets = listSheets().map((s) => ({ ...s, css: s.raw }))
+const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw }))
 
 // A guard that stops guarding still prints its tick, which reads as coverage.
 // If the partials ever move, repoint this script IN THE SAME COMMIT.

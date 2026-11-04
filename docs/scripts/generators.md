@@ -41,6 +41,9 @@ sleep of its own.
 - **A DNS failure names the sandbox.** When `ENOTFOUND` or `EAI_AGAIN` outlasts
   the retries, the error says the Claude Code Bash sandbox blocks statsapi and
   to rerun with the sandbox off.
+- **Many people at once: `getPeople(ids, { hydrate, fields, size, concurrency, onError })`.**
+  It chunks the ids, calls `/api/v1/people`, and returns the rows flat. A failed call
+  throws; give `onError` to skip it instead. Never hand-chunk `personIds=`.
 - **No concurrency limit in the client.** `scripts/lib/concurrency.mjs` stays
   beside it. Its pool turns a failed item into `null`, which a client must not
   do for every caller, and each generator sizes its own pool.

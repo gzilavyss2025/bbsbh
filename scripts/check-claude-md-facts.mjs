@@ -28,7 +28,6 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, sep } from 'node:path'
-import { DEFAULT_SKIP, toPosix, walkDirs } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const CLAUDE_MD = join(ROOT, 'CLAUDE.md')
@@ -70,17 +69,22 @@ claims('the team page band count', /(\w+)-band page/i, (bands.match(/\bkey: '/g)
 
 // ------------------------------------------------- the nested CLAUDE.md list
 
-// `.claude` holds other agents' worktrees, each with a copy of every CLAUDE.md.
-const nestedDirs = () =>
-  walkDirs(ROOT, { skip: new Set([...DEFAULT_SKIP, '.claude']) })
-    .slice(1)
-    .filter((d) => existsSync(join(d, 'CLAUDE.md')))
-    .map((d) => `${toPosix(d.slice(ROOT.length + 1))}/`)
+function nestedDirs(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    // `.claude` holds other agents' worktrees, each with a copy of every CLAUDE.md.
+    if (name === 'node_modules' || name === '.git' || name === 'dist' || name === '.claude') continue
+    const full = join(dir, name)
+    if (!statSync(full).isDirectory()) continue
+    if (existsSync(join(full, 'CLAUDE.md'))) out.push(`${full.slice(ROOT.length + 1).split(sep).join('/')}/`)
+    nestedDirs(full, out)
+  }
+  return out
+}
 const bullet = /- \*\*Nested `CLAUDE\.md`\*\*[^]*?(?=\n- \*\*|\n\n)/.exec(src)
 if (!bullet) problems.push('Could not find the "Nested `CLAUDE.md`" bullet in CLAUDE.md.')
 else {
   const listed = new Set([...bullet[0].matchAll(/`([\w./-]+\/)`/g)].map((m) => m[1]))
-  const onDisk = new Set(nestedDirs())
+  const onDisk = new Set(nestedDirs(ROOT))
   for (const d of onDisk) if (!listed.has(d)) problems.push(`${d}CLAUDE.md exists but that directory is not listed in CLAUDE.md's nested-files bullet.`)
   for (const d of listed) if (!onDisk.has(d)) problems.push(`CLAUDE.md's nested-files bullet lists ${d}, which has no CLAUDE.md.`)
 }

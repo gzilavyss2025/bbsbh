@@ -7,7 +7,7 @@ import { listSheets } from './lib/walk.mjs'
 // that outgrows the file cap subdivides instead of splitting sideways
 // (ADR-0038), and `focus/`, `scorecard/` and `motion/` are all real rules this
 // guard would otherwise walk straight past.
-const sheets = listSheets().map((s) => ({ ...s, css: s.raw, name: s.rel.slice('src/styles/'.length) }))
+const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw, name: s.rel.slice('src/styles/'.length) }))
 const errors = []
 
 // This guard is only as good as its target. If the partials move again — or a

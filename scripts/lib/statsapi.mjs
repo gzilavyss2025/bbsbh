@@ -118,7 +118,7 @@ export function createStatsapiClient({
 }
 
 // The shared client.
-export const { getJson } = createStatsapiClient()
+export const getJson = createStatsapiClient().getJson
 
 // The /people rows for `ids`, `size` ids to a call, in id order. `hydrate` and `fields` go on the
 // query as given (the caller encodes), `timeoutMs` goes to each call. A failed call throws; with `onError(err)` it is reported

@@ -49,9 +49,11 @@ export function walkDirs(dir, { skip = DEFAULT_SKIP } = {}, out = []) {
   return out
 }
 
-// Every stylesheet under src/styles as { rel, raw }, `rel` repo-relative with `/`, sorted by `rel`.
-export function listSheets() {
-  return walk(join(ROOT, 'src/styles'), { exts: ['.css'] })
-    .map((abs) => ({ rel: toPosix(relative(ROOT, abs)), raw: readFileSync(abs, 'utf8') }))
+// Every stylesheet under `root`/src/styles as { rel, raw }, `rel` relative to `root` with `/`,
+// sorted by `rel`. A guard passes the tree it checks: its own repo, or the working directory
+// when a test runs it in a scratch tree.
+export function listSheets(root) {
+  return walk(join(root, 'src/styles'), { exts: ['.css'] })
+    .map((abs) => ({ rel: toPosix(relative(root, abs)), raw: readFileSync(abs, 'utf8') }))
     .sort((a, b) => a.rel.localeCompare(b.rel))
 }

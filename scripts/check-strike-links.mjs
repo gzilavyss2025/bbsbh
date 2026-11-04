@@ -34,7 +34,7 @@ import { listSheets } from './lib/walk.mjs'
 // so a new partial is covered the moment it exists — subdirectories included,
 // since `scorecard/footer.css` carries one of the four strike sites and
 // `motion/strike.css` now carries the bar that draws them.
-const sheets = listSheets()
+const sheets = listSheets(process.cwd())
 
 // Same vacuous-pass hazard as its siblings: if the stylesheets move, this check
 // must be repointed rather than left printing ✓ over nothing. There must also

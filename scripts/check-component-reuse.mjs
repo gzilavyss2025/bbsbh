@@ -116,7 +116,7 @@ export function scanSheet(rel, raw) {
 }
 
 function main() {
-  const sheets = listSheets()
+  const sheets = listSheets(ROOT)
 
   // A guard that stops guarding still prints its tick. Count first: if the
   // partials move or empty out, fail here and repoint this script in the same

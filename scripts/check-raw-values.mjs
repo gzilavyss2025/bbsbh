@@ -320,7 +320,7 @@ export function countSheet(rel, raw) {
 }
 
 function main() {
-  const sheets = listSheets()
+  const sheets = listSheets(ROOT)
 
   // A guard that stops guarding still prints its tick, which reads as coverage.
   // Count first (check-focus-ring.mjs's guard): if the partials ever move or
