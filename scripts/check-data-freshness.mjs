@@ -58,7 +58,7 @@ export const EXCEPT = {
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
-  'frozen/': 'hand-run once a year after the World Series (frozen/freeze-season.mjs, #2776); a frozen season never changes',
+  'frozen/': 'written once per season by the nightly freeze step the first night the season is over (frozen/freeze-season.mjs --nightly, #2778); a frozen season never changes',
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'xba-table/': 'built with the xwoba-table by the same run (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
