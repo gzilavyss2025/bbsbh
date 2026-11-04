@@ -19,7 +19,7 @@ import {
 } from '../scripts/gen-pitch-arsenal.mjs'
 import { MIN_PHYS_N, clearArsenalSeason, rewalkFailures } from '../scripts/lib/pitch/arsenal-physics.mjs'
 import { mphBuckets, startsBuckets } from '../scripts/lib/pitch/arsenal-starts.mjs'
-import { PHYS_FIELDS, fetchPitchMixFor, fetchPitchMphFor, physOf, pitchArsenalFor, pitchFamily, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { PHYS_FIELDS, fetchPitchMixFor, fetchPitchMphFor, physOf, pitchArsenalFor, pitchFamily, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -151,14 +151,6 @@ test('pitchFamily groups known codes and falls back to other', () => {
   assert.equal(pitchFamily('SL'), 'breaking')
   assert.equal(pitchFamily('CH'), 'offspeed')
   assert.equal(pitchFamily('KN'), 'other')
-})
-
-// --- heatView: the Pitches card's 100 mph band -------------------------------
-// `century` and `maxVelo` per pitch type are already in the shard the mix is
-// read from (gen-pitch-arsenal.mjs's sweep writes both), so the band is a sum
-// over the types he threw rather than a second fetch.
-const heatRow = (code, century, maxVelo, pitches = 100) => ({
-  code, description: code, pitches, avgVelo: 95, century, maxVelo,
 })
 
 // --- times through the order -------------------------------------------------

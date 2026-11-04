@@ -317,10 +317,6 @@ export function pageIsFullFor(stamps, page, exceptGamePk = null) {
   return otherPlacementsOn(stamps, page, exceptGamePk).length >= PAGE_CAPACITY
 }
 
-export function pageIsFull(stamps, page) {
-  return pageIsFullFor(stamps, page, null)
-}
-
 // The first page with room, or null when every page up to `pageCount` is full.
 // `exceptGamePk` is passed through for the same reason as above — a stamp
 // looking for somewhere to go must not be told its own page is out of room.

@@ -37,7 +37,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   (`standings/records/`) is a rank-strip index of the record groups. Each group folds open in
   place. The half and the month are the two scope levers, and an option with no games in the
   other pick is disabled. It costs no request: the shard holds each club's rank per scope, read
-  through the cutoff-gated `rankOf`. `hasRecords` hides the card, its head and its count when no
+  through the cutoff-gated `rankOf`. The Records card hides itself, its head and its count when no
   game counted at the cutoff.
 - **Ranks** (`next/ranks/`): batting and pitching ranks, leaders, run value and the ABS challenge
   card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`; none unless the file holds the page's season) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws

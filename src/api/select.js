@@ -235,7 +235,7 @@ export function selectOpposingDefense(feed, battingSide) {
 
 // Every personId on either team's box score roster — starters, bench, and
 // bullpen alike, whether or not they've appeared yet. Membership only, same
-// footing as selectBullpen/selectBench above: it says who's on the roster,
+// footing as the roster membership it lists: it says who's on the roster,
 // never anything about what's happened, so it's spoiler-free to read at
 // render top-level. Built for InningViewer's headshot prefetch (warm the CDN
 // cache for every face that could show up in the at-bat feed before the

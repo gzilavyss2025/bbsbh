@@ -53,11 +53,7 @@ export {
 } from './playbyplay/eventTypes.js'
 
 export {
-  moundVisitsAllowed,
-  moundVisitRemainings,
   pitchingChangePitcher,
-  defensiveChangeFielder,
-  pinchHittingBatter,
   runnerLastName,
 } from './playbyplay/notificationCards.js'
 
@@ -84,7 +80,6 @@ export {
   nextStepBoundary,
   stepCommitReady,
   focusWindows,
-  windowLeadIn,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,

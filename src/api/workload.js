@@ -14,8 +14,8 @@
 // changes once a day.
 //
 // The W1 rolling buckets (workloadFor), the W5 ESPN-threshold availability board
-// (availabilityFor), and the W4 own-norm/role percentages (workloadVsBaseline)
-// from .scratch/metric-engines/pitch-workload.md live here.
+// (availabilityFor) from .scratch/metric-engines/pitch-workload.md live here. The W4
+// own-norm/role percentages (workloadVsBaseline) were deleted in #2845: nothing called them.
 
 import { staticJson } from './staticJson.js'
 import { ipToOuts } from '../lib/math/innings.js'

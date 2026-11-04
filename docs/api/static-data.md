@@ -569,7 +569,7 @@ for each generator; the reader modules:
   rating built from quality-of-contact percentiles and fielding runs, on open surfaces
   (ADR-0034). No SealBox. No UI reads it yet (#1703). The pure steps before it are
   `ovr/rating.js`, `ovr/career.js`, `ovr/minor.js` (a minor leaguer's rating and the
-  minor-league half of the blend) and `ovr/pot.js`; the prior-season input is `ovr/savantHistory.js`.
+  minor-league half of the blend) and `ovr/pot.js`; the prior-season input is `public/data/savant-history/` (its reader, `ovr/savantHistory.js`, was deleted in #2845).
 - `ovr/ovrData.js` `fetchOvrHistory(personId, 'hitting' | 'pitching')` and `ovr/history.js`
   — a player's rating history, from `public/data/ovr-history/{NN}.json` (`gen-ovr.mjs`,
   same `personId % 100` shard key as `ovr/`). `fetchOvrHistory` gives
@@ -617,9 +617,9 @@ for each generator; the reader modules:
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`
-  (1/3/10-appearance buckets, days spanned, consecutive-day pattern),
+  (1/3/10-appearance buckets, days spanned, consecutive-day pattern) and
   `availabilityFor` (rule-based fresh/limited/down with human-readable
-  reasons — ESPN-published thresholds), `apps` takes every game type (`R,F,D,L,W`), so October relief
+  reasons — ESPN-published thresholds). `apps` takes every game type (`R,F,D,L,W`), so October relief
   work counts toward rest days and the board; `season`, `role` and the baseline
   floors stay regular-season only, so a postseason cameo cannot re-class a
   pitcher or move a league mean. Surfaces: the lineup page's `BullpenCard` (gated to

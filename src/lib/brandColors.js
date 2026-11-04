@@ -216,7 +216,7 @@ export const NEUTRAL_FALLBACK_PAIR = ['#6B6558', '#938C7C']
 // Steps 1-2 only: `teamId`'s real brand pair — its own if research resolved
 // one, else its parent MLB org's — or null when neither exists. The null rung
 // is what callers whose contract is "no known colour, render something else
-// entirely" read (teams.js's teamTintColor, teamStripeGradient, teamChipColors);
+// entirely" read (teams.js's teamTintColor, teamChipColors);
 // callers that must paint SOMETHING read milbColorPair below instead. One
 // ordering, two endings — not two chains.
 export function milbBrandPair(teamId) {

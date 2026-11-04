@@ -17,10 +17,10 @@ export function postseasonThrough(schedule, through) {
 }
 
 // The same window's full backing list, oldest -> newest — the Last 10 Games
-// strip opens scrolled to recentDecidedGames' last-10 view, then grows its
+// strip opens scrolled to the last ten of it, then grows its
 // rendered window toward the front of THIS list as the user scrolls left,
-// all the way back to Opening Day. Same `won != null` filter/invariant as
-// recentDecidedGames (no separate cutoff to drift out of sync with it).
+// all the way back to Opening Day. Every consumer here holds the same
+// `won != null` invariant (no separate cutoff to drift out of sync with it).
 export function allDecidedGames(schedule) {
   return schedule.filter((g) => g.won != null)
 }

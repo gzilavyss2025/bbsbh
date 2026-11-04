@@ -241,7 +241,7 @@ all three are silent — the reader meets the new arm as a different face in the
 hero, after the pitch they were about to write down.
 
 The card comes back in **one state**: the half opens with an arm that just took
-the mound (`selectIsFreshPitcher` — the app's existing answer to that question,
+the mound (`selectIsFreshPitcher`, removed in #2845 — the app's existing answer to that question,
 already choosing between "Now pitching" and "Pitching" for the card's own
 label), and nothing of the half has been unveiled yet (`!startedRevealing`).
 That second gate is the one `PrePitchChanges` two blocks down already carries,

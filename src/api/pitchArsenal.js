@@ -129,7 +129,7 @@ export const ELITE_VELO_MPH = 102
 // How many CENTURY_MPH+ pitches a season has to hold before either surface
 // says anything about it: the Margin Notes `centuryClub` callout
 // (pitcher-callouts.js, which owned this number privately until the player
-// page's heat band wanted the same floor) and heatView below. A one-off 100
+// page's heat band wanted the same floor) (heatView, deleted in #2845, read it too). A one-off 100
 // mph touch is unremarkable for a real flamethrower, and a band reading "1
 // pitch at 100+" is noise rather than a fact worth a gold bar.
 export const CENTURY_CLUB_MIN = 5

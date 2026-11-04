@@ -12,6 +12,9 @@
 // way with no product caller. A test still counts for "is this file imported at
 // all", so a whole file only tests import is checked, but never for a name.
 // A generator script's import is a real use.
+// A barrel's `export { x } from './y.js'` is a use of y's x only when the barrel's own x is
+// used outside test/. The barrel's own names are not checked, only the leaf's. An ALLOWLIST
+// entry that a non-test file now uses fails too: drop it.
 // A name called elsewhere in ITS OWN file — an internal helper that also
 // happens to carry an `export` keyword nobody else reaches for — ALSO counts
 // as used: that code is reachable, so flagging it would just be noise about
@@ -67,7 +70,6 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
-  'src/api/history/playedForBoth.js#playedForBoth': 'Staged ahead of its first caller on purpose: #2579 slice 2 is the reader; the card (slice 3) waits for an approved wireframe. Only test/played-for-both-reader.test.js uses it today.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/api/history/retiredNumbers.js#retiredNumbersFor': 'Staged ahead of its first caller on purpose: #2598 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/retired-numbers.test.js uses it today.',
   'src/api/history/franchiseSummary.js#franchiseSummary': 'Staged ahead of its first caller on purpose: #2600 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-summary.test.js uses it today.',
@@ -85,8 +87,8 @@ Object.assign(
   ALLOWLIST,
   staged('src/api/gameday/moments/moments.js', ['levelFor', 'momentsForPlay'], '(#2574) staged: Gameday\'s moments dial waits for its screen. Only test/gameday-moments.test.js uses it today.'),
   staged('src/api/ovr/ovrData.js', ['fetchOvrHistory'], '(#1703) staged: gen-ovr.mjs has the history write PAUSED until the OVR card shows it (Gary, 2026-11-04); this is its reader. test/ovr/history.test.js.'),
-  staged('src/api/history/onThisDay.js', ['onThisDay'], 'Staged data-first reader of the on-this-day shards (ADR-0100); the page that calls it is not built. test/on-this-day.test.js. Unconfirmed: no issue number on file.'),
-  staged('src/api/savant/attackAngle.js', ['fetchAttackAngles'], '(#2349) contact-replay attack-angle fetch, kept with its test; nothing calls it since the replay card went. Unconfirmed that it is meant to return.'),
+  staged('src/api/history/onThisDay.js', ['onThisDay'], 'ADR-0100 ships the on-this-day shards and their reader first; the page that calls it is not built. Pinned by test/on-this-day.test.js.'),
+  staged('src/api/savant/attackAngle.js', ['fetchAttackAngles'], 'Phase C data fetch of the contact replay (docs/contact-replay.md, row C), kept with the replay models listed below; the replay card is deleted, so nothing calls it. test/savant-attack-angle.test.js.'),
   staged('src/api/boxlines/careerSplits.js', ['DOOR_COLUMNS_WIDE', 'DOOR_EMPHASIS'], 'Card column vocabulary (ADR-0073) that names doorCells({ wide }) and the inked cell; no screen reads it today. Pinned against doorCells in test/splits-part-a.test.js and test/boxlines-card-facets.test.js.'),
   staged('src/api/game.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
   staged('src/api/scout/rosterStats.js', ['resetRosterReads'], 'test seam: clears the roster-read memo between cases, test/world-series/roster-card.test.js.'),
@@ -96,21 +98,19 @@ Object.assign(
   staged('src/lib/ballpark/layout/fenceShape.js', ['fenceProblems'], 'test seam: validates every live ballpark outline, test/ballpark-layouts.test.js.'),
   staged('src/lib/ballpark/layout/resolveLayout.js', ['allBallparkLayouts'], 'test seam: walks every live ballpark layout (coverage report and tests), test/ballpark-layouts.test.js and three more.'),
   staged('src/lib/zone/regions.js', ['drawCol'], 'test seam for the zone grid mirroring, test/scout-regions.test.js.'),
-  staged('src/lib/reportPages.js', ['REPORT_PAGES'], 'test seam: the flat list derived from PAGE_GROUPS, pinned by test/report-pages.test.js and read by check-report-pages.mjs.'),
+  staged('src/lib/reportPages.js', ['REPORT_PAGES'], 'test seam: the flat list derived from PAGE_GROUPS, whose set test/report-pages.test.js pins (check-report-pages.mjs only greps for the name).'),
   staged('src/screens/gameday/next/zonemap/zoneMapFlag.js', ['dismissZoneMap'], 'test seam: the writer half of the zone-map dismiss store whose reader is live, test/gameday-stage-mount.test.js.'),
   staged('src/lib/pitcherCard/replaySteps.js', ['replaySteps', 'countAt', 'basesAt'], 'Kept on purpose with their tests: the pure models behind the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/contactDraw.js', ['apexLabel', 'distanceLabel', 'sidePathFor'], 'Kept on purpose with their tests: the deleted at-bat replay\'s side view (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/atBat.js', ['markHomeRun'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/quality.js', ['qualityFigures'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
   staged('src/lib/pitcherCard/sideWall.js', ['wallAlong'], 'Kept on purpose with its test: the deleted at-bat replay (src/components/playbyplay/CLAUDE.md, docs/contact-replay.md).'),
-  staged('src/lib/motion/curves.js', ['easeStamp', 'easeUnfold'], 'Named by docs/contact-replay.md as the curves its JS reads; pinned by test/motion-curves.test.js. Unconfirmed that the replay returns.'),
-  staged('src/lib/contracts/parseMoney.js', ['parseMoneyCell'], 'The contracts pipeline\'s money parser, documented in docs/contracts-*.md and pinned by test/parse-money.test.js; no src caller today. Unconfirmed whether a scratch script uses it.'),
-  staged('src/lib/contracts/positions.js', ['POSITIONS', 'resolveRole'], 'The contracts pipeline\'s position table and role rule, documented in docs/contracts-data-caveats.md and pinned by test/contracts-positions.test.js; no src caller today. Unconfirmed whether a scratch script uses them.'),
-  staged('src/lib/runExpectancy.js', ['lookupEraRE'], 'Reader helper for the per-decade run-expectancy tables (docs/api/static-data.md, docs/scripts/generators.md), pinned by test/run-expectancy-eras.test.js; no screen calls it yet.'),
-  staged('src/lib/passportLayout.js', ['pageIsFull'], 'Documented passport rule (ADR-0036), pinned by test/passport-layout.test.js; no caller today. Unconfirmed.'),
-  staged('src/lib/stampLogoTuning.js', ['stampLogoTuning'], 'Documented in src/lib/CLAUDE.md as the stamp placement reader; GameStamp reads stampMarkPlacement instead. Pinned by test/stamp-art.test.js. Unconfirmed.'),
-  staged('src/screens/gameday/next/stage/play.js', ['stateAt'], 'Documented in src/screens/gameday/next/CLAUDE.md as the stage\'s pure timeline; test/gameday-stage.test.js pins it. Unconfirmed that a mount is still to come.'),
-  staged('src/screens/team/next/standings/standingsData.js', ['hasRecords'], 'Documented in src/screens/team/CLAUDE.md as the Records card\'s hide rule; test/team-next-standings.test.js. Unconfirmed.'),
+  staged('src/lib/motion/curves.js', ['easeStamp', 'easeUnfold'], 'Curves docs/contact-replay.md names for the kept replay models; pinned by test/motion-curves.test.js.'),
+  staged('src/lib/contracts/parseMoney.js', ['parseMoneyCell'], 'Used by the .scratch contract build scripts (.scratch/contracts/, .scratch/team-success/), which sit outside this guard\'s roots; pinned by test/parse-money.test.js.'),
+  staged('src/lib/contracts/positions.js', ['POSITIONS', 'resolveRole'], 'Used by the .scratch contract build scripts (.scratch/contracts-extensions/, .scratch/prospect-value/), which sit outside this guard\'s roots; pinned by test/contracts-positions.test.js.'),
+  staged('src/lib/runExpectancy.js', ['lookupEraRE'], 'Staged reader of the per-decade run-expectancy tables (docs/api/static-data.md); no screen reads per-count run expectancy yet. Pinned by test/run-expectancy-eras.test.js.'),
+  staged('src/lib/stampLogoTuning.js', ['stampLogoTuning'], 'test seam for the retroactive stamp-placement store: GameStamp reads stampMarkPlacement, and test/identity-overrides.test.js and test/stamp-art.test.js pin the store\'s own answer through this one.'),
+  staged('src/screens/gameday/next/stage/play.js', ['stateAt'], '(#2573) staged: the per-frame drawing state of the Gameday stage. stagePlay (live) builds the play it reads; the canvas that calls it each frame is not built yet (src/screens/gameday/next/CLAUDE.md). test/gameday-stage.test.js.'),
   // Files #2850 is changing: revisit after it lands.
   staged('src/lib/heritage/pass.js', ['passPage'], 'revisit after #2850 (pass.js is on its list). Test: test/heritage-pass.test.js.'),
   staged('src/screens/gameday/next/hero/heroModel.js', ['ordinal', 'contactLine'], 'revisit after #2850 (heroModel.js is on its list). Test: test/gameday-hero.test.js.'),
@@ -152,16 +152,8 @@ function extractImports(text) {
     imports.push({ spec, names, hasDefault, hasNamespace })
   }
 
-  // Re-exports: export { a, b as c } from 'x'; export * from 'x'.
-  const reExportNamedRe = /export\s+\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]/g
-  while ((m = reExportNamedRe.exec(text))) {
-    const names = m[1]
-      .split(',')
-      .map((p) => p.trim())
-      .filter(Boolean)
-      .map((p) => (p.match(/^(\S+)\s+as\s+(\S+)$/) || [null, p])[1])
-    imports.push({ spec: m[2], names, hasDefault: false, hasNamespace: false })
-  }
+  // `export * from 'x'`. A NAMED re-export (`export { a } from 'x'`) is not an import: see
+  // extractReExports, which the graph below resolves only once the barrel's own name is used.
   const reExportStarRe = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g
   while ((m = reExportStarRe.exec(text))) {
     imports.push({ spec: m[1], names: [], hasDefault: true, hasNamespace: true })
@@ -173,6 +165,27 @@ function extractImports(text) {
   while ((m = dynRe.exec(text))) imports.push({ spec: m[1], names: [], hasDefault: true, hasNamespace: false })
 
   return imports
+}
+
+// Named re-exports: `export { a, b as c } from 'x'` (across lines too). -> [{ spec, pairs:
+// [{ orig, exported, offset }] }], `offset` being where the exported name sits in `text`.
+function extractReExports(text) {
+  const out = []
+  for (const m of text.matchAll(/export\s+\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]/g)) {
+    const pairs = []
+    let from = m.index
+    for (const part of m[1].split(',')) {
+      const p = part.trim()
+      if (!p) continue
+      const asMatch = p.match(/^(\S+)\s+as\s+(\S+)$/)
+      const [orig, exported] = asMatch ? [asMatch[1], asMatch[2]] : [p, p]
+      const offset = text.indexOf(p, from)
+      from = offset + p.length
+      pairs.push({ orig, exported, offset })
+    }
+    out.push({ spec: m[2], pairs })
+  }
+  return out
 }
 
 // Two dynamic-import shapes carry a NAMED export past a bare import(), neither
@@ -299,10 +312,17 @@ const usedNamed = new Map(codeFiles.map((f) => [f, new Set()]))
 const usedDefault = new Map(codeFiles.map((f) => [f, false]))
 const namespaceImported = new Map(codeFiles.map((f) => [f, false]))
 const importedAtAll = new Map(codeFiles.map((f) => [f, false]))
+const reExports = [] // { barrel, target, pairs } from a non-test file
 
 for (const fromFile of codeFiles) {
   const text = src.get(fromFile)
   const fromTest = fromFile.startsWith(testDir)
+  for (const r of extractReExports(text)) {
+    const target = resolveSpecifier(r.spec, fromFile)
+    if (!target) continue
+    importedAtAll.set(target, true)
+    if (!fromTest) reExports.push({ barrel: fromFile, target, pairs: r.pairs })
+  }
   for (const imp of extractImports(text)) {
     const target = resolveSpecifier(imp.spec, fromFile)
     if (!target) continue
@@ -318,6 +338,24 @@ for (const fromFile of codeFiles) {
     importedAtAll.set(target, true)
     if (fromTest) continue
     for (const n of imp.names) (n === 'default' ? usedDefault.set(target, true) : usedNamed.get(target).add(n))
+  }
+}
+
+// A barrel's `export { x } from './y.js'` is a use of y's x only when the barrel's own `x` is used
+// outside test/ (an import of it, or a re-export of it by another barrel). Repeat to a fixed point.
+for (let changed = true; changed; ) {
+  changed = false
+  for (const { barrel, target, pairs } of reExports) {
+    for (const { orig, exported } of pairs) {
+      const barrelUsed = exported === 'default' ? usedDefault.get(barrel) : usedNamed.get(barrel).has(exported)
+      if (!barrelUsed && !namespaceImported.get(barrel)) continue
+      if (orig === 'default') {
+        if (!usedDefault.get(target)) changed = !!usedDefault.set(target, true)
+      } else if (!usedNamed.get(target).has(orig)) {
+        usedNamed.get(target).add(orig)
+        changed = true
+      }
+    }
   }
 }
 
@@ -344,6 +382,7 @@ for (const f of checkedFiles) {
     const key = `${rel}#${name}`
     if (ALLOWLIST[key]) {
       staleAllowlist.delete(key)
+      if (usedByOthers.has(name)) problems.push(`ALLOWLIST has "${key}" but a non-test file now uses it — drop the entry.`)
       continue
     }
     if (usedByOthers.has(name)) continue
@@ -352,8 +391,10 @@ for (const f of checkedFiles) {
   }
   if (exp.hasDefault && !usedDefault.get(f)) {
     const key = `${rel}#default`
-    if (ALLOWLIST[key]) staleAllowlist.delete(key)
-    else problems.push(`${rel}: the default export is not imported anywhere.`)
+    if (ALLOWLIST[key]) {
+      staleAllowlist.delete(key)
+      if (usedDefault.get(f)) problems.push(`ALLOWLIST has "${key}" but a non-test file now imports it — drop the entry.`)
+    } else problems.push(`${rel}: the default export is not imported anywhere.`)
   }
 }
 

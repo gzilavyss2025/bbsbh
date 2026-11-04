@@ -874,7 +874,7 @@ test("a book's /stats is the retrospective, not season NaN falling through to th
 // parseRoute — /profile (My Tally)
 // --------------------------------------------------------------------------
 
-test('/profile is My Tally, ', () => {
+test('/profile is My Tally, and its path builder round-trips', () => {
   assert.deepEqual(parseRoute('/profile'), { name: 'profile' })
   assert.equal(profilePath(), '/profile')
   assert.deepEqual(parseRoute(profilePath()), { name: 'profile' })

@@ -187,37 +187,3 @@ export function advancedHittingView(bundle, { post = false } = {}) {
   // Same sparse-bundle floor as advancedPitchingView.
   return facts.length >= 4 ? { facts } : null
 }
-
-// ---------------------------------------------------------------------------
-// Batted-ball profile — the ground/line/fly/pop mix from seasonAdvanced's
-// per-bucket outs+hits counts (fetchHittingAdvanced), each bucket's share of
-// balls in play and the AVG on that bucket. The four buckets sum exactly to
-// ballsInPlay (verified live: 145+83+83+30 = 341), so `share` always adds to 1.
-// ---------------------------------------------------------------------------
-
-// A sample floor so a September call-up's dozen balls in play doesn't render
-// a confident-looking batted-ball profile — same idea as the pitch arsenal's
-// MIN_ARSENAL_PITCHES qualifier floor (pitchArsenal.js).
-const MIN_BATTED_BALL_SAMPLE = 50
-
-const BATTED_BALL_BUCKETS = [
-  ['ground', 'Ground balls', 'groundOuts', 'groundHits'],
-  ['line', 'Line drives', 'lineOuts', 'lineHits'],
-  ['fly', 'Fly balls', 'flyOuts', 'flyHits'],
-  ['pop', 'Pop-ups', 'popOuts', 'popHits'],
-]
-
-export function battedBallView(seasonAdvanced) {
-  const bip = num(seasonAdvanced?.ballsInPlay)
-  if (!seasonAdvanced || bip < MIN_BATTED_BALL_SAMPLE) return null
-  const rows = BATTED_BALL_BUCKETS.map(([key, name, outsKey, hitsKey]) => {
-    const total = num(seasonAdvanced[outsKey]) + num(seasonAdvanced[hitsKey])
-    return {
-      key,
-      name,
-      share: total / bip,
-      avg: total > 0 ? num(seasonAdvanced[hitsKey]) / total : null,
-    }
-  })
-  return { rows, ballsInPlay: bip }
-}

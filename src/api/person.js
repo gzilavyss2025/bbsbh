@@ -61,7 +61,6 @@ export {
 export {
   advancedPitchingView,
   advancedHittingView,
-  battedBallView,
 } from './person/advanced.js'
 
 export {

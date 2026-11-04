@@ -255,7 +255,7 @@ revealed substitutions only. Part of #2566. A reveal clamp, so treat it as spoil
 READ FIRST
 - CLAUDE.md, src/api/CLAUDE.md, src/api/gameday/CLAUDE.md, src/api/gameday/stepCut.js.
 - src/screens/lineup/next/cards/FieldCard.jsx (today's field card: one alignment for the game),
-  src/api/select.js (selectOpposingDefense, selectPrePitchChanges, enteredAsOf).
+  src/api/select.js (selectOpposingDefense, selectPrePitchChanges; enteredAsOf was removed in #2845).
 - .scratch/gameday-design/README.md, "Round 2: what Gary locked", item 8, and "Decided after
   round 2". If round 2 is not on main, fetch claude/gameday-design-round2.
 

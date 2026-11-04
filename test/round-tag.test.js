@@ -10,6 +10,14 @@ import { entriesFrom, gameRowsFor } from '../src/api/postseason/records.js'
 import { lastAppearanceHeading } from '../src/lib/pitcherCard/card.js'
 import { gamesOf } from '../src/screens/scout/meetings/meetings.js'
 
+test('every club in the table has the league public/data/teams.json gives it now', () => {
+  const teams = JSON.parse(fs.readFileSync(new URL('../public/data/teams.json', import.meta.url), 'utf8')).bySportId['1']
+  const now = new Map(teams.map((t) => [t.id, t.leagueId === 103 ? 'AL' : 'NL']))
+  assert.equal(now.size, 30)
+  // Through clubLeague: a club missing from the table reads '' and fails here.
+  for (const [id, league] of now) assert.equal(clubLeague(id), league, `club ${id}`)
+})
+
 test('a round below the World Series names its league; the World Series stays WS', () => {
   assert.equal(roundTag('F', 121, 2026), 'NLWC')
   assert.equal(roundTag('D', 147, 2026), 'ALDS')
