@@ -57,16 +57,14 @@ await mapConcurrent(
 )
 
 // Pass 2: the players' lines, one batch per level.
-const levels = await Promise.all(
-  SPORT_IDS.map(async (sid) => {
-    const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=[yearByYear],sportId=${sid})`)
-    const people = await getPeople(ids, { hydrate, fields: FIELDS, size: BATCH })
-    return people.map((p) => [p.id, rowsFor(p, sid, pools)])
-  }),
-)
 const players = new Map() // personId -> rows
-for (const [id, rows] of levels.flat()) {
-  if (rows.length) players.set(id, [...(players.get(id) ?? []), ...rows])
+// One level at a time, CONCURRENCY calls at once: the throttle holds across levels.
+for (const sid of SPORT_IDS) {
+  const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=[yearByYear],sportId=${sid})`)
+  for (const p of await getPeople(ids, { hydrate, fields: FIELDS, size: BATCH, concurrency: CONCURRENCY })) {
+    const rows = rowsFor(p, sid, pools)
+    if (rows.length) players.set(p.id, [...(players.get(p.id) ?? []), ...rows])
+  }
 }
 const buckets = new Map() // shard key -> { personId: packed rows }
 for (const [id, rows] of players) {
