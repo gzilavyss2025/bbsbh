@@ -14,7 +14,7 @@ import { contractBoard } from './contractView.js'
 export default function ContractModule({ bio, role, asOf, onEmpty, onCount }) {
   const skip = asOf || (role === 'pitching' && bio.twoWay)
   const { data, loading } = useAsync(
-    () => (skip ? null : Promise.all([fetchPlayerContract(bio.id), fetchPlayerContractHistory(bio.id)])),
+    () => (skip ? null : Promise.all([fetchPlayerContract(bio.id, { payRank: true }), fetchPlayerContractHistory(bio.id)])),
     [bio.id, skip],
   )
   const board = useMemo(() => data && contractBoard(data[0], data[1]), [data])

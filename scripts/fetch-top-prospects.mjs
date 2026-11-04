@@ -171,18 +171,20 @@ async function fetchList(url) {
 async function fetchPeople(playerIds) {
   const numbers = new Map()
   const names = new Map()
+  const failed = new Set()
   for (let i = 0; i < playerIds.length; i += 150) {
+    const batch = playerIds.slice(i, i + 150)
     try {
-      const data = await getJson(`/api/v1/people?personIds=${playerIds.slice(i, i + 150).join(',')}`)
+      const data = await getJson(`/api/v1/people?personIds=${batch.join(',')}`)
       for (const p of data.people ?? []) {
         numbers.set(p.id, p.primaryNumber ?? null)
         if (p.fullName) names.set(p.id, p.fullName)
       }
     } catch {
-      // keep what earlier batches returned
+      for (const id of batch) failed.add(id)
     }
   }
-  return { numbers, names }
+  return { numbers, names, failed }
 }
 
 async function main() {
@@ -196,14 +198,14 @@ async function main() {
   const top100Deduped = dedupeByPlayer(top100Raw)
   const orgDeduped = dedupeByPlayer(orgRaw)
   const ids = [...new Set([...top100Deduped, ...orgDeduped].map((e) => e.playerId))]
-  const { numbers: jerseyNumbers, names: fresh } = await fetchPeople(ids)
+  const { numbers: jerseyNumbers, names: fresh, failed } = await fetchPeople(ids)
   let onDisk = null
   try {
     onDisk = JSON.parse(await (await import('node:fs/promises')).readFile(OUT_PATH, 'utf8'))
   } catch {
     // first run: no file yet
   }
-  const names = namesWithFallback(fresh, onDisk)
+  const names = namesWithFallback(fresh, onDisk, failed)
   const players = withStatsapiNames(top100Deduped.map((e) => slim(e, 'rank', jerseyNumbers)), names)
     .sort((a, b) => a.rank - b.rank)
   const top100Ids = new Map(players.map((p) => [p.playerId, p.rank]))

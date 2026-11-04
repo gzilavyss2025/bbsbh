@@ -55,10 +55,16 @@ export function careerWarRanking(live, shards, { poolSize = Infinity } = {}) {
 // Unknown (undefined) or no scan date on the entry: re-walk.
 export function needsScan(entry, season, latestFinal) {
   if (!entry || entry.scanned !== season) return true
-  const lasts = Object.values(entry.stints ?? {}).map((s) => s?.last ?? 0)
-  const recent = lasts.length === 0 || Math.max(...lasts) >= season - 1
-  if (!recent) return false
+  if (!isRecent(entry, season)) return false
   return latestFinal == null || !entry.scannedOn || entry.scannedOn <= latestFinal
+}
+
+// Can this player's stints still grow? He was in the minors this season or last,
+// or the cache holds no stints for him yet. gen-milb-alumni.mjs also reads it to
+// size the schedule window for `latestFinal`, so the two can never disagree.
+export function isRecent(entry, season) {
+  const lasts = Object.values(entry?.stints ?? {}).map((s) => s?.last ?? 0)
+  return lasts.length === 0 || Math.max(...lasts) >= season - 1
 }
 
 // Invert player → clubs into club → players: each current affiliate's alumni,

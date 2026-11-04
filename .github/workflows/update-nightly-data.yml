@@ -273,12 +273,12 @@ jobs:
         run: node scripts/gen-tensest.mjs
       - name: Umpires
         id: umpires
-        if: steps.inputs.outputs.finals != 'false'
+        if: steps.inputs.outputs.finalsAaa != 'false'
         continue-on-error: true
         run: node scripts/gen-umpires.mjs
       - name: Umpire accuracy
         id: umpire-accuracy
-        if: steps.inputs.outputs.finals != 'false'
+        if: steps.inputs.outputs.finalsAaa != 'false'
         continue-on-error: true
         run: node scripts/gen-umpire-accuracy.mjs
       - name: Minor-league leaders
@@ -525,7 +525,7 @@ jobs:
       # the same class of miss as the postseason-odds one above.
       - name: ABS challenges
         id: abs-challenges
-        if: steps.inputs.outputs.finals != 'false'
+        if: steps.inputs.outputs.finalsAaa != 'false'
         continue-on-error: true
         run: |
           node scripts/gen-abs-challenges.mjs --recheck --days=14
@@ -820,6 +820,7 @@ jobs:
       # One needs-triage issue per failed step, closed the night it passes
       # again; steps that run on continue-on-error otherwise fail in silence.
       - name: Failure issues
+        id: failure-issues
         if: always()
         continue-on-error: true
         env:

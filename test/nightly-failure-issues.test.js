@@ -36,3 +36,15 @@ test('failedSteps lists every step that failed, whatever its id, and nothing tha
   // hand-kept 60-line `if:` this replaced missed new generators twice (workflow header).
   assert.deepEqual(failedSteps(steps({ war: 'success', 'brand-new-gen': 'failure', spray: 'skipped', freshness: 'failure' })), ['brand-new-gen', 'freshness'])
 })
+
+test('the gate note goes only on a step the input gates own, not one its producer skipped', () => {
+  const open = [{ number: 8, title: titleFor('spray') }, { number: 9, title: titleFor('salaries') }]
+  // salaries is skipped because player-contracts failed: its `if:` names a producer, not a gate.
+  assert.deepEqual(planIssues(steps({ spray: 'skipped', salaries: 'skipped' }), open, new Set(['spray'])).note, [{ id: 'spray', number: 8 }])
+})
+
+test('a failed input-gate step does not fail the job: the gates fail open by design', async () => {
+  const { failedSteps } = await import('../scripts/nightly/failure-issues.mjs')
+  assert.deepEqual(failedSteps(steps({ inputs: 'failure', war: 'success' })), [])
+  assert.deepEqual(failedSteps(steps({ inputs: 'failure', war: 'failure' })), ['war'])
+})

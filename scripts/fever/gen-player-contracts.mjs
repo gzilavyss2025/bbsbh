@@ -80,11 +80,6 @@ async function main() {
   // re-ranks a whole pool, and a rank inside the shards rewrote all 100 of them
   // (~120 files a night in the 2026-11 offseason). fetchPlayerContract joins it.
   const payRanks = computePayRanks(players, positions, meta.season)
-  await writeJsonAtomic(payRanksPath, {
-    generatedAt: new Date().toISOString(),
-    season: meta.season,
-    ranks: Object.fromEntries([...payRanks].sort(([a], [b]) => Number(a) - Number(b))),
-  })
 
   const buckets = new Map(
     Array.from({ length: 100 }, (_, number) => [String(number).padStart(2, '0'), {}]),
@@ -95,6 +90,13 @@ async function main() {
 
   const entries = [...buckets].map(([key, bucketPlayers]) => [key, { meta, players: bucketPlayers }])
   const { written, swept } = await writeShards(outDir, entries)
+  // After the shards, so a failed shard write never leaves new ranks beside old
+  // contracts: the ranks file only moves once the records it ranks are on disk.
+  await writeJsonAtomic(payRanksPath, {
+    generatedAt: new Date().toISOString(),
+    season: meta.season,
+    ranks: Object.fromEntries([...payRanks].sort(([a], [b]) => Number(a) - Number(b))),
+  })
   console.log(
     `wrote ${written} player-contract shards (${Object.keys(players).length} players, ` +
       `${payRanks.size} pay-ranked, season ${meta.season}, swept ${swept})`,

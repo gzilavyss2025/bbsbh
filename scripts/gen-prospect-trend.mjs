@@ -163,6 +163,7 @@ async function main() {
      WHERE player_id = ? AND board = ? AND source = ? AND date < ?
      ORDER BY date DESC LIMIT 1`,
   )
+  const dropToday = db.prepare(`DELETE FROM player_snapshots WHERE date = ? AND player_id = ? AND board = ? AND source = ?`)
   const today = new Date().toISOString().slice(0, 10)
   let qualifiedCount = 0
   let repeats = 0
@@ -173,8 +174,12 @@ async function main() {
     if (row.payload.percentile != null) qualifiedCount++
     const payloadJson = JSON.stringify(row.payload)
     rows.push({ player_id: p.id, board: row.group, payload_json: payloadJson })
-    if (repeatsPrevious(previous.get(p.id, row.group, SOURCE, today)?.payload_json, row.payload)) repeats++
-    else insert.run(today, p.id, row.group, SOURCE, payloadJson)
+    // A repeat also drops a row an earlier run stored TODAY, or a same-day rerun
+    // whose payload went back to yesterday's would leave that stale row behind.
+    if (repeatsPrevious(previous.get(p.id, row.group, SOURCE, today)?.payload_json, row.payload)) {
+      dropToday.run(today, p.id, row.group, SOURCE)
+      repeats++
+    } else insert.run(today, p.id, row.group, SOURCE, payloadJson)
   }
   rows.sort((a, b) => a.player_id - b.player_id)
   await dumpGroup(db, 'player-snapshots')

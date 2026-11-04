@@ -19,11 +19,15 @@ export const withPayRank = (contract, payRanks, personId) => ({
   payRank: payRanks?.ranks?.[personId] ?? null,
 })
 
-export async function fetchPlayerContract(personId) {
+// `payRank: true` joins the pay rank (the Contract card is its only reader), so
+// the free-agents list, wire notes and the overview never download the ranks file.
+export async function fetchPlayerContract(personId, { payRank = false } = {}) {
   if (personId == null) return null
-  const [shard, payRanks] = await Promise.all([fetchShard(shardKey100(personId)), fetchPayRanks()])
+  const [shard, payRanks] = await Promise.all([fetchShard(shardKey100(personId)), payRank ? fetchPayRanks() : null])
   const contract = shard?.players?.[personId]
-  return contract ? withPayRank({ ...contract, source: shard.meta }, payRanks, personId) : null
+  if (!contract) return null
+  const record = { ...contract, source: shard.meta }
+  return payRank ? withPayRank(record, payRanks, personId) : record
 }
 
 // The one season the contract files cover (every shard's meta carries it).

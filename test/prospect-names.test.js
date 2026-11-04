@@ -22,11 +22,13 @@ test('a player the Stats API did not return keeps the scraped name', () => {
   assert.deepEqual(withStatsapiNames(rows, new Map()).map((r) => r.name), ['Joshua Baez', 'Elmer Rodriguez'])
 })
 
-test('a player the Stats API missed this run keeps the name already on disk, not the scraped one', async () => {
+test('a player in a failed Stats API batch keeps the name already on disk, not the scraped one', async () => {
   const { namesWithFallback } = await import('../scripts/lib/milb/prospect-names.mjs')
-  const onDisk = { players: [{ playerId: 1, name: 'Joshua Báez' }], orgProspects: [{ playerId: 2, name: 'Rolddy Muñoz' }] }
-  const names = namesWithFallback(new Map([[2, 'Rolddy Muñoz Jr.']]), onDisk)
-  assert.equal(names.get(1), 'Joshua Báez')
+  const onDisk = { players: [{ playerId: 1, name: 'Joshua Báez' }], orgProspects: [{ playerId: 2, name: 'Rolddy Muñoz' }, { playerId: 3, name: 'Old Spelling' }] }
+  const names = namesWithFallback(new Map([[2, 'Rolddy Muñoz Jr.']]), onDisk, new Set([1]))
+  assert.equal(names.get(1), 'Joshua Báez', 'failed batch: the disk name')
   assert.equal(names.get(2), 'Rolddy Muñoz Jr.', 'a fresh Stats API name still wins')
+  // Id 3 was in a batch that answered but has no person: the scrape, not a stale disk name.
+  assert.equal(names.has(3), false)
   assert.deepEqual(withStatsapiNames([{ playerId: 1, name: 'Joshua Baez' }], names).map((r) => r.name), ['Joshua Báez'])
 })

@@ -40,7 +40,7 @@
 import { join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
-import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
+import { alumniByTeam, careerWarRanking, isRecent, needsScan } from './lib/milb-alumni.mjs'
 import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
@@ -162,7 +162,7 @@ async function fetchPeople(ids) {
 async function latestMinorLeagueFinal(cache, today) {
   // Only players whose stints can still grow: a settled career's old scan date
   // would stretch the window back months and make this one call huge in season.
-  const recent = Object.values(cache).filter((e) => Object.values(e.stints ?? {}).every((t) => (t?.last ?? 0) < season - 1) === false || !Object.keys(e.stints ?? {}).length)
+  const recent = Object.values(cache).filter((e) => isRecent(e, season))
   const dates = recent.map((e) => e.scannedOn).filter(Boolean).sort()
   const start = dates[0] ?? today
   try {

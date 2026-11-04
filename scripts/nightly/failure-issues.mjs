@@ -12,19 +12,23 @@
 // linked, not quoted: a job cannot read its own logs until it has finished.
 // With --check (the last step) it only fails the job when any step failed.
 import { execFileSync } from 'node:child_process'
+import { GATES } from './inputs.mjs'
 
 export const titleFor = (id) => `Nightly data: step "${id}" failed`
 export const NOTE_MARK = 'skipped by the input gates'
 
 // steps: the workflow's `steps` context ({ id: { outcome } }); open: the open
 // issues as [{ number, title, noted? }], noted when a comment carries NOTE_MARK.
-export function planIssues(steps, open) {
+// gated: the step ids the input gates own (inputs.mjs GATES). A skipped step
+// outside it was skipped by its producer's failure, not a gate, so it gets no
+// gate note. Omitted: every skipped step counts (the unit tests' default).
+export function planIssues(steps, open, gated = null) {
   const byTitle = new Map(open.map((i) => [i.title, i]))
   const plan = { open: [], comment: [], close: [], note: [] }
   for (const [id, { outcome }] of Object.entries(steps)) {
     const issue = byTitle.get(titleFor(id))
     const number = issue?.number
-    if (outcome === 'skipped' && issue && !issue.noted) plan.note.push({ id, number })
+    if (outcome === 'skipped' && issue && !issue.noted && (!gated || gated.has(id))) plan.note.push({ id, number })
     if (outcome === 'failure') {
       if (number) plan.comment.push({ id, number })
       else plan.open.push(id)
@@ -37,7 +41,11 @@ export function planIssues(steps, open) {
 
 // The steps that failed, by id. The job's last step fails the job from this
 // (--check), so a new generator needs no entry in a hand-kept list to count.
-export const failedSteps = (steps) => Object.entries(steps).filter(([, s]) => s.outcome === 'failure').map(([id]) => id)
+// The input-gate step fails OPEN (every gated step still runs), so its failure
+// gets an issue but does not turn the night red on its own.
+const FAIL_OPEN = new Set(['inputs'])
+export const failedSteps = (steps) =>
+  Object.entries(steps).filter(([id, s]) => s.outcome === 'failure' && !FAIL_OPEN.has(id)).map(([id]) => id)
 
 function check() {
   const failed = failedSteps(JSON.parse(process.env.STEPS_JSON ?? '{}'))
@@ -55,7 +63,7 @@ function main() {
   const day = new Date().toISOString().slice(0, 10)
   const open = JSON.parse(gh('issue', 'list', '--state', 'open', '--search', 'in:title "Nightly data: step"', '--json', 'number,title,comments', '--limit', '100'))
     .map((i) => ({ number: i.number, title: i.title, noted: (i.comments ?? []).some((c) => c.body?.includes(NOTE_MARK)) }))
-  const plan = planIssues(steps, open)
+  const plan = planIssues(steps, open, new Set(Object.keys(GATES)))
   for (const id of plan.open) {
     gh('issue', 'create', '--title', titleFor(id), '--label', 'needs-triage', '--body',
       `The nightly data step \`${id}\` failed on ${day}.\n\nStep log: ${run}\n\n` +

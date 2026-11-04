@@ -15,7 +15,7 @@
 // and --from/--to backfills an inclusive date range.
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
+import { openDb, dumpGroup, dropTeamSnapshot, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
 import { clamp, round1 } from '../src/lib/math/number.js'
@@ -281,12 +281,14 @@ async function main() {
   const [seed, db] = await Promise.all([loadSeed(), openDb()])
   const insert = upsertSnapshot(db)
   const previous = previousTeamSnapshot(db)
+  const drop = dropTeamSnapshot(db)
   for (const date of dates) {
     const { season, snapshots } = await buildDate(date, seed)
     let repeats = 0
     for (const [teamId, snapshot] of Object.entries(snapshots)) {
       // A season that is over repeats its last line every night: skip it (repeatsPrevious).
       if (repeatsPrevious(previous(season, Number(teamId), 'surprise', date), snapshot)) {
+        drop(season, Number(teamId), 'surprise', date)
         repeats++
         continue
       }
