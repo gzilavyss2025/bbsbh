@@ -80,7 +80,7 @@ export const EXCEPT = {
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
   'ovr/': 'nightly (gen-ovr.mjs, #1720), but the shards carry no clock, so a rerun on the same files writes the same bytes and there is no stamp to age',
-  'ovr-history/': 'nightly with gen-ovr.mjs (#1722); the shards carry no clock (a row is dated by the inputs it was built from), so there is no stamp to age',
+  'ovr-history/': 'paused until #1703 shows it (gen-ovr.mjs WRITE_HISTORY); the shards carry no clock (a row is dated by the inputs it was built from), so there is no stamp to age',
   'world-series/': 'hand-run after each World Series (gen-world-series.mjs, gen-world-series-events.mjs); a finished Series never changes and the files carry no clock',
   'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
   'season-checkpoints/': 'hand-run once a year after the regular season (gen-season-checkpoints.mjs, #1855); the tails pool finished seasons only',
