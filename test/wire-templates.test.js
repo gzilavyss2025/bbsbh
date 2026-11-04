@@ -377,3 +377,16 @@ test('a draft round reads the same wherever a note says it', async () => {
   assert.equal(pickPhrase('CB-A'), 'competitive-balance pick')
   assert.equal(pickPhrase(null), 'draft pick')
 })
+
+test('a mid-season activation with no games yet says what he missed, not that he did not play', () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  // Dated to the day before the move, his season line is empty for a stint from Opening Day.
+  const back = { ...f, stint: { ...f.stints[0], from: '2026-03-26', to: '2026-06-10' }, stints: [f.stints[0]], seasonLine: { games: 0 }, beforeLine: null }
+  assert.doesNotMatch(injuredStory(back, { placed: false, moveDate: '2026-06-10' }), /did not play/)
+})
+
+test('an activation after a stint that ate the season says he did not play', () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  const back = { ...f, stint: { ...f.stints[0], from: '2026-03-26', to: '2026-11-02' }, stints: [f.stints[0]], seasonLine: { games: 0 }, beforeLine: null }
+  assert.match(injuredStory(back, { placed: false, moveDate: '2026-11-02' }), /^Rutschman did not play in 2026/)
+})

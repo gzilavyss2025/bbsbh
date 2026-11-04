@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { factSeason, fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
+import { factRequest, fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { Button } from '../ui/control/Button.jsx'
-import { CALLS, callUpSentence, factLines, subjectsOf } from '../../api/transactions/templates.js'
+import { callUpSentence, factLines, subjectsOf } from '../../api/transactions/templates.js'
 import { FactSheet } from './FactSheet.jsx'
 
 // One move's player background on the offseason ledger. One player: his note
@@ -23,19 +23,10 @@ function useMoveFacts(story, date, subjects, enabled = true) {
   useEffect(() => {
     if (!key || !enabled) return undefined
     let live = true
-    // The club that made the move is the one he joined, even when the move
-    // itself sends him to a farm club.
-    const opts = { season: factSeason(date), teamId: story.teamId }
     Promise.all(
       key.split(',').map((pair) => {
-        const [id, template] = pair.split(':')
-        return fetchPlayerFacts(Number(id), {
-          ...opts,
-          ilMove: template.startsWith('il-') ? date : null,
-          tradeMove: template === 'trade' ? date : null,
-          callMove: CALLS.has(template) ? { kind: template, date } : null,
-          arrival: template === 'arrival',
-        })
+        const [playerId, template] = pair.split(':')
+        return fetchPlayerFacts(...factRequest(story, date, { playerId, template }))
       }),
     ).then(
       (all) => live && setFacts(all),
@@ -108,6 +99,11 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
   // the move exists (Garrett Stallings, optioned July 12 beside an activation).
   const extraMan = !line ? people.find((p) => p !== lead && p.facts.extraMan && p.note) : null
   const note = !line ? [lead?.note, callUpNote, extraMan?.note].filter(Boolean).join(' ') : ''
+  // Each player's own note, by id, for the wide card that gives every player
+  // his own paragraph (MoveRow's split cutline).
+  const notes = new Map(
+    !line && named ? people.filter((p) => p.note).map((p) => [subjects[all.indexOf(p.facts)].playerId, p.note]) : [],
+  )
   return (
     <>
       {children(
@@ -115,6 +111,8 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
           {note && `${note} `}
           {toggle}
         </>,
+        notes,
+        toggle,
       )}
       {open && (
         <div className="wirefacts" id={sheetId}>

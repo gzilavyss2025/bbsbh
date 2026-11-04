@@ -1326,6 +1326,12 @@ don't run these by hand.
   `index.json` holds the metadata: once `final`, a run skips the season unless forced.
   The NEXT season's file owns the winter (#1477): a season runs from the day after the previous
   `seasonEndDate`, and the default season turns to next year the day after this year's end.
+- `gen-wire-facts.mjs` → `wire-facts/{date}.json` — every move's player facts for one
+  PAST day, keyed by `playerFacts.js` `factKey`, so the wire and the club ledgers open their
+  notes with no statsapi reads. Runs after `gen-team-transactions.mjs` (it reads those
+  ledgers) and runs the browser's own `playerFacts.js` under Node (its
+  `installSiteFetch` serves `/data/...` reads from `public/`). A day's facts are gated to its date, so its file is written once;
+  the window is the last 60 days, and older moves read live, then from the reader's browser.
 
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
   per MLB club holding its per-play video highlights, game by game, newest first.

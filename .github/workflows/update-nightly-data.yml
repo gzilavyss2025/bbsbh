@@ -362,6 +362,13 @@ jobs:
         id: team-transactions
         continue-on-error: true
         run: node scripts/gen-team-transactions.mjs
+      # MUST stay after "Team transactions": it reads those ledgers for the
+      # moves whose player facts it pre-builds (one file per past day).
+      # Staged by the `git add -A -- public …` below.
+      - name: Wire facts
+        id: wire-facts
+        continue-on-error: true
+        run: node scripts/gen-wire-facts.mjs
       # MUST stay after "Team Scores": gen-postseason-odds.mjs reads
       # public/data/team-score.json for each club's strength, so running it
       # first would simulate the rest of the season off yesterday's teams.
@@ -768,6 +775,7 @@ jobs:
           steps.season-score.outcome == 'failure' ||
           steps.team-score.outcome == 'failure' ||
           steps.team-transactions.outcome == 'failure' ||
+          steps.wire-facts.outcome == 'failure' ||
           steps.postseason-odds.outcome == 'failure' ||
           steps.manager-history.outcome == 'failure' ||
           steps.player-contracts.outcome == 'failure' ||

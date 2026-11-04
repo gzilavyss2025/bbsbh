@@ -58,11 +58,14 @@ export function isPlateAppearance(play) {
   return PLATE_APPEARANCE_EVENT_TYPES.has(play?.result?.eventType)
 }
 
-// How many pitches were thrown in this play. `pitchIndex` is the feed's own
-// list of which playEvents were pitches, so its length is the count without
-// fetching the events themselves — which is what lets one trimmed request
-// answer for a whole game (28 KB against 555 KB for the full play-by-play).
+// How many pitches were thrown in this play: the playEvents the feed flags
+// `isPitch`. NOT `pitchIndex`'s length — that list also holds pickoff throws
+// and pitcher step-offs (gamePk 823152, Jake Burger v Logan Gilbert: 13 pitches,
+// 15 entries), which put at-bats on the census that never reached twelve. The
+// trimmed request asks for `playEvents,isPitch` alone, about 34 KB a game.
+// `pitchIndex` stays only as the fallback for a scan written before this.
 export function pitchesIn(play) {
+  if (Array.isArray(play?.playEvents)) return play.playEvents.filter((e) => e?.isPitch).length
   return Array.isArray(play?.pitchIndex) ? play.pitchIndex.length : 0
 }
 
@@ -87,7 +90,10 @@ export function scanGamePlays(plays, threshold) {
     if (!isPlateAppearance(play)) continue
     out.plateAppearances += 1
     const pitches = pitchesIn(play)
-    if (pitches === 0) {
+    // A play the feed sent with no events at all is a coverage gap. One whose
+    // events hold no pitch is not: an automatic intentional walk is thrown no pitch.
+    const sent = Array.isArray(play.playEvents) ? play.playEvents.length > 0 : pitches > 0
+    if (!sent) {
       out.withoutPitches += 1
       continue
     }
@@ -97,6 +103,9 @@ export function scanGamePlays(plays, threshold) {
       top: play?.about?.halfInning === 'top',
       batter: play?.matchup?.batter ?? null,
       pitcher: play?.matchup?.pitcher ?? null,
+      // How it ended ("Walk", "Strikeout"): the note now shows it (Gary, 2026-11-03),
+      // since the offseason page is an open surface (ADR-0034).
+      event: play?.result?.event ?? null,
     })
   }
   return out
@@ -169,6 +178,7 @@ function rowFor(game, entry) {
       teamId: (entry.top ? home : away).id,
     },
     pitches: entry.pitches,
+    ...(entry.event ? { event: entry.event } : {}),
   }
 }
 
