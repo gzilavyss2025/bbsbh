@@ -1,7 +1,7 @@
 // The pure half of gen-tensest.mjs: wording a play, and keeping the tensest rows.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { addRows, assertFloorHolds, describePlay, emptyStore, gameRowsOrThrow, mergeTop, playRows, rankTop } from '../scripts/lib/tensest/tensest.mjs'
+import { addRows, assertFloorHolds, describePlay, emptyStore, gameRowsOrThrow, isPlayedFinal, mergeTop, playRows, rankTop } from '../scripts/lib/tensest/tensest.mjs'
 import { isPostseason, rankLabel } from '../src/api/tensest/tensest.js'
 
 const play = (event, description, extra = {}) => ({
@@ -87,4 +87,14 @@ test('rankLabel marks a shared rank with T and isPostseason is every type but R'
   assert.deepEqual(rows.map((x) => rankLabel(x, rows)), ['1', 'T2', 'T2'])
   assert.equal(isPostseason({ gt: 'R' }), false)
   assert.equal(isPostseason({ gt: 'W' }), true)
+})
+
+test('isPlayedFinal: a cancelled or postponed game is not read, a played Final is', () => {
+  // Cancelled reports abstractGameCode F but has no winProbability (404): one such
+  // game (823490, rained out 2026-09-27) failed every nightly run from 2026-11-04.
+  const status = (codedGameState, abstractGameCode = 'F') => ({ status: { abstractGameCode, codedGameState } })
+  assert.equal(isPlayedFinal(status('F')), true)
+  assert.equal(isPlayedFinal(status('C')), false)
+  assert.equal(isPlayedFinal(status('D')), false)
+  assert.equal(isPlayedFinal(status('I', 'L')), false)
 })

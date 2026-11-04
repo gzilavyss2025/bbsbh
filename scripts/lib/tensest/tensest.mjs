@@ -176,6 +176,11 @@ export function mergeTop(existing, incoming, size) {
 
 // The empty store, and one batch of rows folded into it. Each play lands in three
 // lists: the whole league, the club that was batting, and the club that was pitching.
+// A game with plays to read: Final, and neither postponed ('D') nor cancelled ('C').
+// A cancelled game also reports abstractGameCode 'F' but has no winProbability.
+export const isPlayedFinal = (g) =>
+  g.status?.abstractGameCode === 'F' && g.status?.codedGameState !== 'D' && g.status?.codedGameState !== 'C'
+
 export const emptyStore = () => ({ league: [], teams: {} })
 
 export function addRows(store, rows) {
