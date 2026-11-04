@@ -174,23 +174,6 @@ export function defensiveChangeFielder(feed, playerId, positionAbbr) {
   }
 }
 
-// The incoming pinch runner + the runner he replaced, for a mid-inning
-// pinch-running note (see PinchRunNotice) — pushed at the moment the swap
-// happens, distinct from the retroactive strike-through this same swap also
-// leaves on the replaced batter's own card (see the prSubs bookkeeping below).
-export function pinchRunningPlayers(feed, pinchId, replacedId) {
-  const nameOf = (id) => {
-    if (id == null) return null
-    const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
-    const { last, first, useName } = personNameParts(person)
-    const name = last
-      ? `${last}${first ? `, ${useName || first}` : ''}`
-      : person.fullName ?? ''
-    return { id, name, jersey: person.primaryNumber ?? '' }
-  }
-  return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
-}
-
 // The incoming pinch hitter's card fields for a mid-inning "now batting" note
 // (see BatterNotice) — same "Last, First" + jersey shape as
 // pitchingChangePitcher/defensiveChangeFielder, no hand/position since

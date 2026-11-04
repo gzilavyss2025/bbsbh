@@ -8,11 +8,6 @@ export const fetchTeamScores = staticJson('/data/team-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },
 })
 
-export function teamScoreFor(data, teamId, season, cutoff) {
-  const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
-  return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
-}
-
 // Every team's Season Grade at one shared as-of cutoff. Quality and
 // Surprise live in separate generated files, so rows only enter the comparison
 // pool when both same-date-safe readers can provide a value.

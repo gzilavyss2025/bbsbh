@@ -2,7 +2,7 @@
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { aggregateSplits } from '../../../../../api/person/stats.js'
 import { mlbCareerThroughCutoff, milestoneWatchView } from '../../../../../api/person/milestones.js'
-import { dayBefore } from '../../../../../api/player/context.js'
+import { dayBefore } from '../../../../../lib/dates.js'
 import { isoToday } from '../../../../../lib/dates.js'
 
 // Prior MLB seasons plus this season to the cutoff, the same sum the live hub makes. Never stats=career:

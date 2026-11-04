@@ -4,13 +4,7 @@
 // never renders a later season result. Missing data is a missing badge.
 
 import { staticJson } from './staticJson.js'
-import { latestAtOrBefore } from '../lib/math/snapshot.js'
 
 export const fetchSeasonScores = staticJson('/data/season-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },
 })
-
-export function seasonScoreFor(data, teamId, season, cutoff) {
-  const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
-  return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
-}

@@ -23,24 +23,6 @@ import { staticJson } from './staticJson.js'
 
 export const fetchComebackWins = staticJson('/data/comeback-wins.json')
 
-// One team's buckets for a season, or null if the file has no row for it.
-export function comebackWinsFor(data, teamId, season) {
-  return data?.seasons?.[season]?.byTeamId?.[teamId] ?? null
-}
-
-// Every team's buckets for a season, shaped as `{ teamId, stat: { sub10, sub20,
-// sub30 } }` — the exact row shape TeamPage's statRank/rankTeam expects, so the
-// card can rank each threshold against the rest of the league (out of however
-// many teams have a row yet). Empty when the file is missing.
-export function leagueComebackWinsFor(data, season) {
-  const byTeamId = data?.seasons?.[season]?.byTeamId
-  if (!byTeamId) return []
-  return Object.entries(byTeamId).map(([teamId, b]) => ({
-    teamId: Number(teamId),
-    stat: { sub10: b.sub10, sub20: b.sub20, sub30: b.sub30 },
-  }))
-}
-
 // The three nested depth thresholds, shallowest first: (win key, attempt key,
 // the win-probability floor the club sank to).
 const THRESHOLDS = [

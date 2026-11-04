@@ -69,28 +69,6 @@ export function railStepCap(entries, row) {
   return row.isTerminal ? at + 1 : at
 }
 
-// THE NUMBER EXPRESS LANE WRITES INTO THE APP'S OWN AT-BAT MARK.
-//
-// Express Lane is not a second scoring frontier beside the innings viewer's —
-// it is the same one, walked a different way — so advancing here has to move
-// the same mark, in the same unit, that a tap in the innings viewer or on the
-// scorecard moves. That unit is a COUNT OF `computeHalfInningFeed` ENTRIES
-// (ADR-0016): `revealAtBat(inning, half, count)` stores it, and PlayByPlay
-// reads it back as how much of the half to draw.
-//
-// A ROW POSITION IS A DIFFERENT NUMBER, and the two are not interchangeable.
-// Rows are per EVENT and the feed is a card per PLAY, with mound visits,
-// substitutions and timeouts interleaved on one side and not the other, so a
-// row position can run LARGER than the cap and open entries in the innings
-// viewer that Express Lane never showed.
-//
-// This is `expressDeck`'s own cap, exposed on its own, because the reveal
-// happens as the cursor lands rather than a render later.
-export function railRevealCap(feed, inningNum, half, row) {
-  if (!feed || !row) return null
-  return railStepCap(computeHalfInningFeed(feed, inningNum, half, battingSideOf(half)), row)
-}
-
 // The runners standing on base, as of whatever cap built these entries.
 //
 // A card is a live runner when its trip reached a base, has not come home, and
@@ -295,41 +273,4 @@ export function expressDeck(feed, inningNum, half, row) {
     entries,
     cap,
   }
-}
-
-// The plate appearances the scorer has already reached, newest last — the foot
-// strip of chips, and the only way back to a play he did not read the first
-// time.
-//
-// REACHED ones only. Chips for plate appearances still ahead would say how
-// many batters are left to bat in the half, and the staging frontier would
-// draw them before the scorer got there. Position within the current half is
-// all any indicator on this surface may show (ADR-0008).
-//
-// THE AUTOMATIC RUNNER HAS NO PLATE-APPEARANCE NUMBER, and a chip strip that
-// assumed one broke three ways at once in extra innings. He is placed on second
-// to start the half without batting, so `computeHalfInningFeed`'s `placed` card
-// carries no `atBatIndex` — deliberately, since giving him the leadoff batter's
-// number would make `railStepCap` join the wrong card and draw a box the scorer
-// had not reached. Keyed on that missing number he got an `undefined` React
-// key, a tap that matched no row, and an `is-on` test of `undefined ===
-// undefined` that lit him up on every cursor with no batter on the deck.
-//
-// So each chip carries an `id` of its own and says what KIND it is. The
-// placement is a marker rather than a way back: there is no play of his to
-// return to, and the surface renders him as one.
-export function reachedPlateAppearances(entries) {
-  return (entries ?? [])
-    .filter((card) => card?.kind === 'atbat' || card?.kind === 'placed')
-    .map((card) => ({
-      id: card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`,
-      kind: card.kind,
-      // Null, never undefined: the difference is what an equality test against
-      // another card's index turns on.
-      atBatIndex: card.atBatIndex ?? null,
-      last: card.batter?.last ?? card.runner?.last ?? '',
-      code: card.code ?? '',
-      codeKind: card.codeKind ?? '',
-      scored: Boolean(card.scored),
-    }))
 }

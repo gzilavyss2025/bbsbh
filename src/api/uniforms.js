@@ -7,6 +7,7 @@
 
 import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
+import { POSTSEASON_TYPES } from './game.js'
 
 // Assets sort jersey → pants → cap so the composed line always reads top-down.
 const UNIFORM_PIECE_ORDER = { J: 0, P: 1, C: 2 }
@@ -487,8 +488,6 @@ const TREATMENT_RANK = {
   'alternate-4': 4,
   'city-connect': 5,
 }
-
-const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
 // Builds the Team Page's "logo + jersey + record" strip: one
 // entry per JERSEY in the club's uniform catalog, each carrying its logo

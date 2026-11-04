@@ -46,6 +46,7 @@
 // games), so day/night is read off the schedule record too.
 import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
+import { dayBefore } from '../../lib/dates.js'
 import { ipToOuts } from '../../lib/math/innings.js'
 import { baseballToday } from '../../lib/time/standingsDates.js'
 import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
@@ -93,15 +94,6 @@ function pitchingCounts(st) {
     baseOnBalls: n(st.baseOnBalls),
     strikeOuts: n(st.strikeOuts),
   }
-}
-
-// "2024-09-29" -> "2024-09-28". Manual y/m/d, midday UTC, so a DST edge or a
-// local-timezone offset can never move the answer by a day.
-export function dayBefore(iso) {
-  const [y, m, d] = String(iso).split('-').map(Number)
-  const t = new Date(Date.UTC(y, m - 1, d, 12))
-  t.setUTCDate(t.getUTCDate() - 1)
-  return t.toISOString().slice(0, 10)
 }
 
 // Which seasons' game logs to fetch, and through which day. Seasons after the

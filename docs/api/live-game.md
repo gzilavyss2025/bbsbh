@@ -466,8 +466,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   box — he writes it on the RUNNER's box, the plate appearance in which that man
   reached, which on the #22 sheet is a row further up. `expressDeck(feed,
   inning, half, row)` returns the finished box, the men on (ordered third,
-  second, first), the men this play took OFF the bases, the capped card list and
-  the chips; `runnersOnBase` is the predicate — reached a base, has not scored,
+  second, first), the men this play took OFF the bases, the capped card list;
+  `runnersOnBase` is the predicate — reached a base, has not scored,
   `outAt == null`, and dropping that last one leaves a man on first who was
   forced at second two pitches ago. `runnersDeparted(prev, entries)` is the
   second question beside it (ADR-0072): a man on base at `cap - 1` and gone at
@@ -476,12 +476,6 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   written on HIS box, and taking it away in the same frame takes the diamond
   with it. Its list is `departed` and its field is `from`, the base he left,
   never `base`: he is not standing anywhere.
-  `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
-  the number Express Lane writes into the app's at-bat reveal mark: a count of
-  `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
-  the old PlayByPlay read back. A count of event ROWS is a different number: rows
-  are per event and entries per play, so a row position can run larger than the
-  cap and open entries in the innings viewer the surface never showed.
   Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
   `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
   cursor row onto that cap. The cap is not optional and there is no variant of

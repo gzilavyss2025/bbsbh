@@ -8,6 +8,7 @@
 import { personNameParts } from '../select.js'
 import { challengesForPlay } from '../challenges.js'
 import { WHIFF_CODES, pitchCallCode } from './eventTypes.js'
+import { numOrNull } from '../../lib/math/number.js'
 
 // Both live in eventTypes.js (spoiler-free); re-exported so the barrel is unchanged.
 export { WHIFF_CODES, pitchCallCode }
@@ -138,7 +139,6 @@ export function pitchCardInfo(feed, play) {
     const pd = e.pitchData ?? {}
     const co = pd.coordinates ?? {}
     const no = e.pitchNumber ?? i + 1
-    const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
     const hitData = e.hitData
     return {
       no,
@@ -155,19 +155,19 @@ export function pitchCardInfo(feed, play) {
       // is the release distance from the plate's back point: 60.5 ft minus the
       // feed's `extension` (about 6.2 ft, so about 54.3 ft). An inference, and
       // null when the park sent no extension.
-      vx0: num(co.vX0),
-      vy0: num(co.vY0),
-      vz0: num(co.vZ0),
-      ax: num(co.aX),
-      ay: num(co.aY),
-      az: num(co.aZ),
-      breakH: num(pd.breaks?.breakHorizontal), // inches; the replay's whiff figure
-      releaseY: num(pd.extension) == null ? null : 60.5 - pd.extension,
+      vx0: numOrNull(co.vX0),
+      vy0: numOrNull(co.vY0),
+      vz0: numOrNull(co.vZ0),
+      ax: numOrNull(co.aX),
+      ay: numOrNull(co.aY),
+      az: numOrNull(co.aZ),
+      breakH: numOrNull(pd.breaks?.breakHorizontal), // inches; the replay's whiff figure
+      releaseY: numOrNull(pd.extension) == null ? null : 60.5 - pd.extension,
       // The count AFTER this pitch, off the pitch's own event (never its index:
       // an automatic call moves the count with no pitch). Null when the feed
       // sent none (the at-bat replay then draws no count strip).
-      balls: num(e.count?.balls),
-      strikes: num(e.count?.strikes),
+      balls: numOrNull(e.count?.balls),
+      strikes: numOrNull(e.count?.strikes),
       typeCode: e.details?.type?.code ?? '',
       mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
       type: e.details?.type?.description ?? '',
@@ -181,12 +181,12 @@ export function pitchCardInfo(feed, play) {
       // pitch with no `hitData`. The contact replay reads it (docs/contact-replay.md).
       hit: hitData
         ? {
-            exitVelo: num(hitData.launchSpeed),
-            launchAngle: num(hitData.launchAngle),
-            distance: num(hitData.totalDistance),
+            exitVelo: numOrNull(hitData.launchSpeed),
+            launchAngle: numOrNull(hitData.launchAngle),
+            distance: numOrNull(hitData.totalDistance),
             trajectory: hitData.trajectory ?? null,
-            coordX: num(hitData.coordinates?.coordX),
-            coordY: num(hitData.coordinates?.coordY),
+            coordX: numOrNull(hitData.coordinates?.coordX),
+            coordY: numOrNull(hitData.coordinates?.coordY),
           }
         : null,
       // The feed's id for this pitch; Savant's `play_id` is the same string

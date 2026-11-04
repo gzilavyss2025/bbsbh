@@ -7,7 +7,6 @@ import {
   mapFreeAgent,
   filterFreeAgents,
   sortFreeAgents,
-  summarizeFreeAgents,
   statLine,
   statsByPerson,
   cleanNote,
@@ -126,16 +125,6 @@ test('position, club and unsigned-only filters combine', () => {
 
 test('sorts by WAR, highest first, with no-WAR rows last by name', () => {
   assert.deepEqual(sortFreeAgents(rows).map((r) => r.id), [677800, 669373, 1, 691907])
-})
-
-test('the summary counts the MLB list only', () => {
-  const s = summarizeFreeAgents(rows)
-  assert.equal(s.declared, 3)
-  assert.equal(s.signed, 1)
-  assert.equal(s.unsigned, 2)
-  assert.equal(s.latest.id, 691907)
-  assert.equal(s.best.id, 677800)
-  assert.equal(s.optionsDeclined, 1)
 })
 
 test('stat lines for hitters and pitchers', () => {

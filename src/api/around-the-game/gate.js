@@ -60,7 +60,7 @@ export function postseasonGate(data, season) {
 // last, for a field whose good end is low). Ties SHARE the best rank, the same
 // convention attendance.js and comebackWins.js already use, and a row with no
 // value ranks null rather than last — it has not earned a place either way.
-function ranked(rows, field, { lowIsBest = false } = {}) {
+export function ranked(rows, field, { lowIsBest = false } = {}) {
   const usable = rows.filter((r) => r[field] != null)
   return rows.map((r) => {
     if (r[field] == null) return { ...r, rank: null, tied: false }

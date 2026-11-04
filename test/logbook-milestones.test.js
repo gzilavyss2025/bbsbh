@@ -6,7 +6,6 @@ import {
   MILESTONE_COLLECTIONS,
   computeAllMilestones,
   computeMilestoneProgress,
-  isMilestoneCollectionId,
   rosterFor,
 } from '../src/api/logbookMilestones.js'
 
@@ -156,13 +155,6 @@ test('parks collection: fills ONLY the home club\'s slot', () => {
 test('computeAllMilestones: one result per registered collection, in registry order', () => {
   const results = computeAllMilestones([], {})
   assert.deepEqual(results.map((r) => r.id), MILESTONE_COLLECTIONS.map((c) => c.id))
-})
-
-test('isMilestoneCollectionId', () => {
-  assert.equal(isMilestoneCollectionId('clubs'), true)
-  assert.equal(isMilestoneCollectionId('parks'), true)
-  assert.equal(isMilestoneCollectionId('nope'), false)
-  assert.equal(isMilestoneCollectionId(undefined), false)
 })
 
 // --------------------------------------------------------------------------

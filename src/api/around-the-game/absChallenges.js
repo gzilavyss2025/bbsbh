@@ -18,6 +18,7 @@
 // gen-gate.mjs.
 
 import { seasonStaticJson } from '../staticJson.js'
+import { ranked } from './gate.js'
 
 // A season store (ADR-0086): abs/{season}/. Takes `{ seasonYear }`: a year,
 // 'all' (abs/all/), or nothing for the season abs/seasons.json names.
@@ -54,20 +55,6 @@ export function levelsIn(data) {
 
 export function summaryFor(data, level) {
   return data?.levels?.[level] ?? null
-}
-
-// Rank a board on one field, ties sharing the best rank — 1 + the number of
-// rows strictly ahead. Mirrors gate.js's own `ranked` exactly, kept as a local
-// copy for the same reason that file keeps its venueKey local: it is eight
-// lines, and exporting it would widen a module's surface for one caller.
-function ranked(rows, field, { lowIsBest = false } = {}) {
-  const usable = rows.filter((r) => r[field] != null)
-  return rows.map((r) => {
-    if (r[field] == null) return { ...r, rank: null, tied: false }
-    const ahead = usable.filter((o) => (lowIsBest ? o[field] < r[field] : o[field] > r[field])).length
-    const tied = usable.filter((o) => o[field] === r[field]).length > 1
-    return { ...r, rank: ahead + 1, tied }
-  })
 }
 
 function sortOn(rows, field, lowIsBest) {

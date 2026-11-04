@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '../scripts/gen-team-score.mjs'
-import { leagueSeasonGradesFor, teamScoreFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
+import { leagueSeasonGradesFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
 import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import {
@@ -283,12 +283,6 @@ test('snapshots retain season quality and a last-10 form window', () => {
   assert.equal(snapshots[1].currentForm.games, 10)
   assert.equal(snapshots[1].season.wins, 5)
   assert.equal(snapshots[1].currentForm.wins, 4)
-})
-
-test('reader never looks ahead of the Team Page cutoff', () => {
-  const data = { seasons: { 2026: { byTeamId: { 158: { '2026-07-10': { season: { score: 6.2 } }, '2026-07-12': { season: { score: 7.4 } } } } } } }
-  assert.equal(teamScoreFor(data, 158, 2026, '2026-07-11').season.score, 6.2)
-  assert.equal(teamScoreFor(data, 158, 2026, '2026-07-09'), null)
 })
 
 test('a walk-off win in the current-form window raises the score and is counted as a clutch win', () => {

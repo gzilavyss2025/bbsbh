@@ -49,13 +49,7 @@ import {
   signedFallback,
 } from '../person.js'
 import { gamePath } from '../../lib/route.js'
-import { isoToday } from '../../lib/dates.js'
-
-export function dayBefore(iso) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
+import { dayBefore, isoToday } from '../../lib/dates.js'
 
 // The "Current season" tiles' stat line, plus the LEVEL that line belongs to
 // (`sportId`) — the two must travel together: the register keys its date-cut

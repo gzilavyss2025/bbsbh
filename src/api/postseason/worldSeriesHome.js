@@ -18,7 +18,8 @@ import { fetchPersonStats } from '../person-fetch.js'
 import { getJson } from '../statsapi.js'
 import { fetchGamePhotos } from '../gamePhotos.js'
 import { fetchGameBoxscore, foldRunsByGame } from '../postseasonSeries.js'
-import { dayBefore, keptGames } from './fetch.js'
+import { keptGames } from './fetch.js'
+import { dayBefore } from '../../lib/dates.js'
 
 // The last day a read may include.
 const counts = (date, slateDate) => date < slateDate

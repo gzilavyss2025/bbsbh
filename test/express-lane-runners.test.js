@@ -9,9 +9,7 @@ import { readFileSync } from 'node:fs'
 import {
   battingSideOf,
   expressDeck,
-  railRevealCap,
   railStepCap,
-  reachedPlateAppearances,
   runnersDeparted,
   runnersOnBase,
 } from '../src/api/expresslane/runners.js'
@@ -319,17 +317,6 @@ test('a non-terminal row shows the base state as it was BEFORE its plate appeara
   assert.equal(deck.batter, null)
 })
 
-test('the chips name only the plate appearances already reached', () => {
-  const deck = expressDeck(FEED, 5, 'top', rowAt(5, 'top', 2))
-  const chips = reachedPlateAppearances(deck.entries)
-  assert.deepEqual(
-    chips.map((c) => c.last),
-    ['Sánchez', 'Frelick', 'Pratt'],
-    'nothing ahead of the cursor, so the strip never says how many are left to bat',
-  )
-  assert.equal(chips.at(-1).code, 'BB')
-})
-
 test('every card arrives with the three marks AtBatBox draws but does not compute', () => {
   // One plate appearance has to draw the SAME box here and on the #22 sheet,
   // or a scorer copying from the screen onto paper meets two marks for one
@@ -351,94 +338,6 @@ test('an empty half yields an empty deck rather than throwing', () => {
   assert.deepEqual(deck, { batter: null, runners: [], departed: [], entries: [], cap: null })
   assert.deepEqual(runnersOnBase(null), [])
   assert.deepEqual(runnersDeparted(null, null), [])
-  assert.deepEqual(reachedPlateAppearances(undefined), [])
-})
-
-// --- the at-bat reveal mark ------------------------------------------------
-//
-// Express Lane drives the app's OWN reveal mark, so the number it writes has
-// to be the number the innings viewer and the scorecard write: a count of
-// `computeHalfInningFeed` entries (ADR-0016). A count of event rows is a
-// different unit — rows are per EVENT and the feed is a card per PLAY.
-
-test('the reveal cap is the deck’s own cap, at every cursor in the game', () => {
-  for (const [inning, half] of playedHalves()) {
-    const n = computeHalfInningFeed(FEED, inning, half, battingSideOf(half)).length
-    for (let i = 0; i < n; i += 1) {
-      // Both the terminal row and a row INSIDE the plate appearance (the one
-      // that must stop short of its own card).
-      for (const isTerminal of [true, false]) {
-        const row = rowAt(inning, half, i, isTerminal)
-        if (row.atBatIndex == null) continue
-        const cap = railRevealCap(FEED, inning, half, row)
-        assert.notEqual(cap, null, `${half} ${inning}, card ${i}, terminal ${isTerminal}`)
-        assert.equal(
-          cap,
-          expressDeck(FEED, inning, half, row).cap,
-          `${half} ${inning}, card ${i}, terminal ${isTerminal}`,
-        )
-      }
-    }
-  }
-})
-
-test('a row with no plate appearance of its own has no cap to write', () => {
-  assert.equal(railRevealCap(FEED, 1, 'top', { atBatIndex: null, isTerminal: true }), null)
-  assert.equal(railRevealCap(FEED, 1, 'top', null), null)
-  assert.equal(railRevealCap(null, 1, 'top', { atBatIndex: 0, isTerminal: true }), null)
-})
-
-// --- the automatic runner’s chip -------------------------------------------
-//
-// `computeHalfInningFeed`'s `placed` card carries no `atBatIndex` — he took no
-// plate appearance, so there is no number for him to carry. A chip strip that
-// keyed on that number gave him `undefined`: an undefined React key shared with
-// every other placement, a tap that matched no row, and an `is-on`
-// comparison of `undefined === undefined` that lit him up on every cursor
-// position where the deck had no batter.
-
-const placedCard = {
-  kind: 'placed',
-  runnerId: 592885,
-  runner: { last: 'Yelich', first: 'Christian' },
-  base: 2,
-  code: 'AR',
-  reached: 2,
-  scored: false,
-}
-
-test('the automatic runner gets a chip with an identity of its own', () => {
-  const chips = reachedPlateAppearances([
-    placedCard,
-    { kind: 'atbat', atBatIndex: 7, batter: { last: 'Adames' }, code: '6-3' },
-  ])
-  assert.equal(chips.length, 2)
-  assert.ok(
-    chips.every((chip) => chip.id != null && chip.id !== ''),
-    'every chip can be keyed',
-  )
-  assert.notEqual(chips[0].id, chips[1].id, 'and no two chips share that key')
-})
-
-test('the automatic runner’s chip is not a way back to a play, and says so', () => {
-  const [chip] = reachedPlateAppearances([placedCard])
-  assert.equal(chip.kind, 'placed')
-  assert.equal(chip.atBatIndex, null, 'null rather than undefined — there is no number')
-  assert.equal(chip.last, 'Yelich')
-  assert.equal(chip.code, 'AR')
-})
-
-test('two placements in one game never collide on a key', () => {
-  const chips = reachedPlateAppearances([placedCard, { ...placedCard, runnerId: 668930 }])
-  assert.notEqual(chips[0].id, chips[1].id)
-})
-
-test('an ordinary plate appearance keeps its own number', () => {
-  const [chip] = reachedPlateAppearances([
-    { kind: 'atbat', atBatIndex: 12, batter: { last: 'Turang' }, code: 'K' },
-  ])
-  assert.equal(chip.atBatIndex, 12)
-  assert.equal(chip.kind, 'atbat')
 })
 
 // --- naming the half, rather than numbering it -----------------------------

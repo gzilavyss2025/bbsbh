@@ -6,7 +6,6 @@ import {
   marcelBaseline,
   seasonScoreFromResidual,
 } from '../scripts/gen-season-score.mjs'
-import { seasonScoreFor } from '../src/api/seasonScore.js'
 import {
   HOME_WIN_PROBABILITY,
   HOME_FIELD_FACTOR_MIN,
@@ -216,20 +215,3 @@ test('earnedPaceWins falls back to the runs-based Pythagorean split when a team 
   assert.ok(snapshots[1].earnedPaceWins > 81) // outscoring opponents 2:1 should project a pace above .500
 })
 
-test('the reader never looks ahead of the Team Page cutoff', () => {
-  const data = {
-    seasons: {
-      2026: {
-        byTeamId: {
-          158: {
-            '2026-07-10': { score: 6.2 },
-            '2026-07-12': { score: 7.4 },
-          },
-        },
-      },
-    },
-  }
-  assert.equal(seasonScoreFor(data, 158, 2026, '2026-07-11').score, 6.2)
-  assert.equal(seasonScoreFor(data, 158, 2026, '2026-07-12').score, 7.4)
-  assert.equal(seasonScoreFor(data, 158, 2026, '2026-07-09'), null)
-})

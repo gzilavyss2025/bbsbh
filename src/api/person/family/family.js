@@ -16,12 +16,6 @@ import { staticJsonBy } from '../../staticJson.js'
 // `fetchFamilyShard` when it draws them. `familyOf` is for the entries alone.
 export const fetchFamilyShard = staticJsonBy((key) => `/data/family-ties/${key}.json`, { fallback: null })
 
-export async function familyOf(personId) {
-  if (personId == null) return []
-  const shard = await fetchFamilyShard(shardKey100(personId))
-  return shard?.players?.[String(personId)] ?? []
-}
-
 // The band's order: parents, then brothers, then sons, then everyone else. A
 // stable sort keeps the file's own order (relation, then name) inside a group.
 const GROUP = new Map([

@@ -10,11 +10,11 @@
 //   • the row shape the sheet renders (newest first, his club's runs first,
 //     the box-score path from the schedule join).
 import assert from 'node:assert/strict'
+import { dayBefore } from '../src/lib/dates.js'
 import test from 'node:test'
 import {
   askableGameTypes,
   boxLineRows,
-  dayBefore,
   logRequestPlan,
   matchingSplits,
   POSTSEASON,

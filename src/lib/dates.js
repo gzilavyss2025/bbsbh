@@ -240,3 +240,11 @@ export function firstPitchText(gameDate, startTimeTBD = false) {
   if (startTimeTBD || !gameDate) return 'TBD'
   return timeOfDay(Date.parse(gameDate)) || 'TBD'
 }
+
+// "2026-09-30" -> "2026-09-29". Midday UTC on both sides, so no time zone or DST
+// edge can move the day.
+export function dayBefore(iso) {
+  const d = new Date(`${iso}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
