@@ -683,6 +683,17 @@ jobs:
           node scripts/compress-logos.mjs
           node scripts/gen-logo-art.mjs
 
+      # BEFORE the commit, on the working tree: every generator that ran has just
+      # restamped its files, so this still catches one that silently wrote
+      # nothing. The commit step then drops the stamp-only files, so the stamps
+      # on main no longer advance on a quiet night; checking after the commit
+      # would fail every one of them.
+      - name: Data freshness
+        id: freshness
+        if: always()
+        continue-on-error: true
+        run: node scripts/check-data-freshness.mjs
+
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -699,7 +710,14 @@ jobs:
           # gen-manager-history.mjs --current-only rewrites the shared-season
           # research queue every night. Left out, the run pushed its data and
           # then failed the leftover check below (2026-10-07).
+          # The heartbeat is the one file every run changes. It lives outside
+          # public/, so it starts no Vercel deploy (vercel-ignore-build.sh), and
+          # data-freshness-check.yml watches it to know this job ran.
+          printf '{"ranAt":"%s","runId":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${{ github.run_id }}" > scripts/data/nightly-heartbeat.json
           git add -A -- public scripts/data src/lib/data scripts/manager-transitions-needs-research.json
+          # A file whose only change is a run stamp is put back (stamp-only.mjs):
+          # a quiet night then commits only the heartbeat and deploys nothing.
+          node scripts/nightly/drop-stamp-only.mjs
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else
@@ -711,7 +729,10 @@ jobs:
             for i in 1 2 3 4 5; do
               if git push; then pushed=1; break; fi
               git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
-              git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"
+              # -X theirs: on a conflict keep THIS run's side (in a rebase,
+              # "theirs" is the commit being replayed). Two runs that collide
+              # both rewrite the heartbeat, which would otherwise stop the push.
+              git rebase -X theirs "origin/$(git rev-parse --abbrev-ref HEAD)"
               sleep $((RANDOM % 10 + 1))
             done
             if [ -z "$pushed" ]; then
@@ -736,10 +757,6 @@ jobs:
       # 0 and produced NOTHING leaves a stale file and reports success. Every
       # incident in this file's header is that shape. always(), because a night
       # where something already failed is exactly when the staleness matters.
-      - name: Data freshness
-        if: always()
-        run: node scripts/check-data-freshness.mjs
-
       - name: Fail if any generator errored
         if: |
           steps.teams.outcome == 'failure' ||
@@ -802,7 +819,8 @@ jobs:
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
           steps.nine-keys.outcome == 'failure' ||
-          steps.feed-shape-drift.outcome == 'failure'
+          steps.feed-shape-drift.outcome == 'failure' ||
+          steps.freshness.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1

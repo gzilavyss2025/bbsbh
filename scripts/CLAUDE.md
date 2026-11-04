@@ -49,6 +49,9 @@ are rules rather than reference:
   added beside `team-records/`'s. Never raise the budget as a reflex fix for a
   guard failure — that unstamped count is a ratchet the guard checks against
   itself, and widening it on request is exactly the drift it exists to catch.
+- **A run stamp under a new key name goes in `STAMP_KEYS`** (`scripts/nightly/stamp-only.mjs`).
+  The nightly commit drops a file whose only change is a stamp; an unknown stamp key
+  reads as real data and commits, and deploys, every night.
 - **A generator that needs app logic imports it**, never a second copy: `docs/scripts/generators.md`, "Sharing app logic".
 - **An append-only generator that merges fresh rows into a carried-forward
   store, keyed on an upstream-asserted identity** (an official, a player, any

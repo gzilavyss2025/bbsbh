@@ -21,7 +21,9 @@
 // hand-maintained `git add` list drifted twice in silence — so a new nightly
 // dataset is covered the moment it lands, with no edit here to forget.
 //
-// Run by .github/workflows/update-nightly-data.yml, after the commit step.
+// Run by .github/workflows/update-nightly-data.yml BEFORE the commit step, on the
+// working tree: the commit step drops stamp-only files (nightly/drop-stamp-only.mjs), so
+// the stamps on main stop advancing on a quiet night.
 // Run by hand: node scripts/check-data-freshness.mjs
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
