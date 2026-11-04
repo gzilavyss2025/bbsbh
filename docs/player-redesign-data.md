@@ -141,7 +141,7 @@ Module issue: #1888.
 | --- | --- | --- | --- |
 | Ball x, y, exit velocity, result, pitcher hand | `public/data/spray/` via `decodeSprayBalls` (`src/api/spray.js`) | have | — |
 | Hits, XBH, HR, hard-hit, BIP totals | spray `o`, `splitTotals` | have | — |
-| Pull / center / oppo | `directionMix` (`src/api/spray.js`) | have | — |
+| Pull / center / oppo | `directionOf` (`src/api/spray.js`) | have | — |
 | Hard-hit 95 mph | `HARD_HIT_MPH` (`src/lib/ballpark/hitProjection.js`) | have | — |
 | Park outline | spray `g` + `src/lib/ballpark/` | have | The board draws a generic field |
 | Postseason balls | spray `post` | have | Not on the board |
@@ -159,7 +159,7 @@ Module issue: #1889.
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
 | Per-game AB, H, 2B, 3B, HR, BB, HBP, SF, SH, K, PA, RBI | `gameLog` via `fetchHitterForm` (`src/api/hitterForm.js`) | have | — |
-| Rolling OPS (10 / 15 / 20 games), best and worst stretch | `hitterFormWindows` gives last 7 / 15 / 30 only | reshape | Add a pure `rollingSeries(log, w)` in `hitterForm.js` |
+| Rolling OPS (10 / 15 / 20 games), best and worst stretch | (was `hitterFormWindows`, last 7 / 15 / 30 only; since removed) | reshape | Add a pure `rollingSeries(log, w)` in `hitterForm.js` |
 | Season OPS reference rule | season stat | have | — |
 | Opponent label | `gameLog` `opponent`, `isHome` | reshape | Abbreviation from the teams table |
 | HR marks, K / BB stretch bars | `gameLog` | have | — |

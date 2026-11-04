@@ -1,25 +1,17 @@
-// EXPRESS LANE, TIER 2 — the clip index.
+// EXPRESS LANE, TIER 2 — the clip URL resolver.
 //
-// One map per game: `playId -> { mp4Url, posterUrl, durationSec }`. The rail
-// (rail.js) is the complete event list; this is the sparse overlay of film
-// that sits on top of it.
+// Resolves one `playId` to its playable mp4 URL (`resolveClipUrl`) and parses
+// Savant's page for it (`parseSportyVideoHtml`).
 //
 // SPOILER-FREE, and that is a positive statement rather than a missing gate.
 // Nothing here reads a score, a count, an out or a play. There is no prose:
-// no clip title, no blurb, no result. Every value is a URL, a duration or a
+// no clip title, no blurb, no result. Every value is a URL or a
 // null, and a URL is built from a `playId` the app already holds. So this
 // module is safe at render top-level, on any surface — unlike rail.js beside
 // it, which is reveal-only.
 //
-// TWO CAUTIONS FOR ITS CALLERS, both of which this module cannot enforce:
-//
-//   1. A POSTER CARRIES THE BROADCAST SCOREBUG, BURNED INTO THE PIXELS —
-//      score, inning, count and outs, read off real frames rather than
-//      assumed. The URL is safe; the picture is not. Render a poster only
-//      inside a play the reader has ALREADY revealed. Never use the NEXT
-//      clip's poster as a loading placeholder: pitch N+1's frame shows the
-//      result of the at-bat still being scored. Use a neutral placeholder.
-//   2. NEVER PRINT A GAME-WIDE CLIP TOTAL. "Pitch 47 of 333" states how long
+// A CAUTION FOR ITS CALLERS, which this module cannot enforce:
+// NEVER PRINT A GAME-WIDE CLIP TOTAL. "Pitch 47 of 333" states how long
 //      the game ran, which states whether it went to extra innings — straight
 //      against ADR-0008. Show position within the current half only, and keep
 //      the same rule on any staging or progress indicator.
@@ -41,20 +33,18 @@
 // that serves the BYTES, which this module never fetches — blocks automated
 // access. It began returning empty bodies and then a hard 403 after roughly 25
 // requests in a few minutes. So nothing here ever bursts: `resolveClipUrl`
-// makes ONE request for ONE playId on demand, and `buildClipIndex` walks its
-// list one at a time and stops early when the answers stop arriving. Do not
+// makes ONE request for ONE playId on demand. Do not
 // add a parallel prefetcher, in this file or above it.
 //
 // DEGRADES, NEVER THROWS. Clips publish 8 to 26 minutes after the pitch, so a
 // just-played at-bat has a `playId` and no clip. A lookup that fails, 404s or
-// has not published yet resolves to `mp4Url: null`, which a caller renders as
+// has not published yet resolves to null, which a caller renders as
 // "not posted yet" — the same convention every MiLB surface in this app uses.
 // There are no clips at all before 2016, none for MiLB (sportIds 11-14,
 // verified zero), and none for All-Star or exhibition games (`gameType: "A"`).
-// Each of those is the same empty index, reached by the same path.
+// Each of those is the same null, reached by the same path.
 
 const SAVANT_LOOKUP = 'https://baseballsavant.mlb.com/sporty-videos?playId='
-const POSTER_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 const DEFAULT_TIMEOUT_MS = 10_000
 
 // The mp4 the Savant page points at. Matched by host and extension rather than
@@ -128,194 +118,3 @@ export async function resolveClipUrl(
   if (!url) clipUrlCache.delete(playId)
   return url
 }
-
-// A clip's poster frame. NEEDS NO NETWORK CALL — it derives from the playId
-// alone, on the same Cloudinary-style transform path the rest of this app
-// already reads mlbstatic images through.
-//
-// `feed` is the booth: every clip exists in BOTH 'home' and 'away' at no extra
-// cost. `width` picks the rendition.
-//
-// Read the scorebug caution at the top of this file before you render one.
-export function clipPosterUrl(playId, { feed = 'home', width = 640 } = {}) {
-  if (!playId) return null
-  const booth = feed === 'away' ? 'away' : 'home'
-  return `${POSTER_BASE}/w_${width},q_auto:good/fastball/${playId}_${booth}.jpg`
-}
-
-// One index entry, in the shape the whole feature reads:
-//   mp4Url      the playable clip, or null for "not posted yet"
-//   posterUrl   derived, always present, gated by WHERE it may render
-//   durationSec optional; null until something supplies it (see below)
-function entryFor(playId, mp4Url, durationSec, feed) {
-  return {
-    playId,
-    mp4Url: mp4Url ?? null,
-    posterUrl: clipPosterUrl(playId, { feed }),
-    durationSec: typeof durationSec === 'number' ? durationSec : null,
-  }
-}
-
-// Read an optional duration for one playId out of a Map or a plain object.
-function durationFor(durations, playId) {
-  if (!durations) return null
-  if (typeof durations.get === 'function') return durations.get(playId) ?? null
-  return durations[playId] ?? null
-}
-
-// Build the index for a list of playIds — ONE AT A TIME, in the order given.
-//
-// Sequential on purpose. The lookups themselves are cheap, but a burst is the
-// shape that gets a client blocked, and the block is silent and mid-game. A
-// queue that reads as a person watching clips keeps working.
-//
-// `maxConsecutiveMisses` is the circuit breaker. Once that many lookups in a
-// row come back empty, this stops asking and marks the rest not posted. Two
-// different states share that shape and both want the same answer: a host that
-// has started refusing, and the publication frontier of a game that finished
-// minutes ago, where the tail of the list simply does not exist yet. Asking
-// eighty more times helps neither.
-//
-// Every requested playId gets an entry, resolved or not, so a caller can index
-// straight off a rail row and get "not posted yet" rather than `undefined`.
-export async function buildClipIndex(
-  playIds,
-  {
-    fetchImpl = null,
-    signal = null,
-    feed = 'home',
-    durations = null,
-    maxConsecutiveMisses = 5,
-  } = {},
-) {
-  const index = new Map()
-  let misses = 0
-  let stopped = false
-  for (const playId of playIds ?? []) {
-    if (!playId) continue
-    if (stopped || signal?.aborted) {
-      index.set(playId, entryFor(playId, null, durationFor(durations, playId), feed))
-      continue
-    }
-    const url = await resolveClipUrl(playId, { fetchImpl, signal })
-    index.set(playId, entryFor(playId, url, durationFor(durations, playId), feed))
-    misses = url ? 0 : misses + 1
-    if (misses >= maxConsecutiveMisses) stopped = true
-  }
-  return index
-}
-
-// ---------------------------------------------------------------------------
-// The IndexedDB cache, keyed by gamePk.
-//
-// Worth persisting because the Savant token is deterministic: the same playId
-// gives the same URL on every call, so the index never goes stale and staging
-// survives an app restart. Only `mp4Url` and `durationSec` are stored — a
-// poster derives for free, and storing one would freeze the booth and the
-// rendition into the record.
-//
-// Every path degrades to "no cache" rather than throwing. IndexedDB is absent
-// in a Node test run, refused in some private-browsing modes, and WebKit
-// evicts by ORIGIN under storage pressure, so an empty read is normal and not
-// an error. The bytes behind this index are disposable for the same reason.
-// ---------------------------------------------------------------------------
-
-const DB_NAME = 'bbsbh-express-lane'
-const DB_VERSION = 1
-const STORE = 'clip-index'
-
-function openDb(idb) {
-  return new Promise((resolve) => {
-    if (!idb?.open) {
-      resolve(null)
-      return
-    }
-    let request
-    try {
-      request = idb.open(DB_NAME, DB_VERSION)
-    } catch {
-      resolve(null)
-      return
-    }
-    request.onupgradeneeded = () => {
-      const db = request.result
-      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'gamePk' })
-    }
-    request.onsuccess = () => resolve(request.result ?? null)
-    request.onerror = () => resolve(null)
-    request.onblocked = () => resolve(null)
-  })
-}
-
-// The cached index for one game, as the same entry shape `buildClipIndex`
-// returns. An empty Map means "nothing cached", which is the answer for a
-// first visit, a cleared store, and a browser with no IndexedDB at all.
-export async function loadClipIndex(gamePk, { idb = globalThis.indexedDB, feed = 'home' } = {}) {
-  const db = await openDb(idb)
-  if (!db) return new Map()
-  try {
-    const record = await new Promise((resolve) => {
-      const tx = db.transaction(STORE, 'readonly')
-      const request = tx.objectStore(STORE).get(Number(gamePk))
-      request.onsuccess = () => resolve(request.result ?? null)
-      request.onerror = () => resolve(null)
-    })
-    const index = new Map()
-    for (const [playId, row] of Object.entries(record?.clips ?? {})) {
-      index.set(playId, entryFor(playId, row?.mp4Url, row?.durationSec, feed))
-    }
-    return index
-  } catch {
-    return new Map()
-  } finally {
-    db.close?.()
-  }
-}
-
-// Persist one game's index. Returns true when the write landed, false when it
-// could not — a caller carries on either way, because the index rebuilds from
-// the same deterministic lookups.
-export async function saveClipIndex(gamePk, index, { idb = globalThis.indexedDB } = {}) {
-  const db = await openDb(idb)
-  if (!db) return false
-  try {
-    const clips = {}
-    for (const [playId, entry] of index ?? []) {
-      if (!entry?.mp4Url) continue
-      clips[playId] = { mp4Url: entry.mp4Url, durationSec: entry.durationSec ?? null }
-    }
-    return await new Promise((resolve) => {
-      const tx = db.transaction(STORE, 'readwrite')
-      tx.objectStore(STORE).put({ gamePk: Number(gamePk), clips, savedAt: Date.now() })
-      tx.oncomplete = () => resolve(true)
-      tx.onerror = () => resolve(false)
-      tx.onabort = () => resolve(false)
-    })
-  } catch {
-    return false
-  } finally {
-    db.close?.()
-  }
-}
-
-// ---------------------------------------------------------------------------
-// DURATIONS AND TITLES — deliberately not fetched here yet.
-//
-// `fastball-gateway.mlb.com/graphql` serves them through
-// `mediaPlayback(ids: [...], idType: PLAY_ID)`. It is ungated, it reflects the
-// caller's origin for CORS, and it batches to a MAXIMUM OF 100 IDS — 200 fails
-// with "Error reading data" — so a whole game costs four calls.
-//
-// What is NOT verified is the selection set: which fields to ask that resolver
-// for. This repo's rule is to check a field path against a real response and
-// never to guess one, so the call waits for one live probe rather than
-// shipping an invented query. `durationSec` is already in the entry shape and
-// `buildClipIndex` already takes a `durations` map, so closing this changes no
-// caller.
-//
-// It stays optional in any case. The index must not depend on it, and a clip's
-// duration must never be printed BEFORE the clip plays: terminal clips run
-// 4.34 to 12.11 MB precisely because a longer one holds more play developing,
-// so the runtime of the next clip tells a scorer what kind of play is coming
-// (ADR-0046, and the film gate's own waiting-indicator rule).
-// ---------------------------------------------------------------------------

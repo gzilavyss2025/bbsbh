@@ -29,18 +29,12 @@ import { combineSprayEntries } from '../src/lib/seasons/combine.js'
 import {
   MIN_SPRAY_BIP,
   MIN_SPLIT_BIP,
-  MIX_MINORITY_MAX,
   decodeSprayBalls,
-  directionCaption,
-  directionMix,
   directionOf,
   fetchSprayFor,
-  hrNote,
   isBarrel,
-  splitBalls,
   splitTotals,
   sprayAngle,
-  sprayScopeOf,
   sprayView,
   withContact,
 } from '../src/api/spray.js'
@@ -113,30 +107,6 @@ test('a ball hooked past the foul line is still pull, not a fourth bucket', () =
   assert.equal(directionOf(62, 'L'), 'pull')
 })
 
-test('directionCaption names the pull side for the side the split was hit from', () => {
-  assert.equal(directionCaption('R'), 'Bats right — pull side is left field.')
-  assert.equal(directionCaption('L'), 'Bats left — pull side is right field.')
-  assert.equal(directionCaption(null), null)
-})
-
-test('directionMix counts the three thirds for a one-sided sample', () => {
-  const balls = decodeSprayBalls(
-    entryOf({
-      p: [row(-30), row(-40), row(0), row(10), row(35)],
-    }),
-  )
-  assert.deepEqual(directionMix(balls), { side: 'R', pull: 2, center: 2, oppo: 1, n: 5 })
-})
-
-test('directionMix refuses a switch-hitter sample — two mirrored halves do not sum', () => {
-  const balls = decodeSprayBalls(
-    entryOf({
-      p: [row(-30, { s: 0 }), row(30, { s: 1 }), row(0, { s: 1 })],
-    }),
-  )
-  assert.equal(directionMix(balls), null)
-})
-
 // A REAL CASE, not a hypothetical. Ozzie Albies turned around for exactly ONE
 // of his 240 balls in play against right-handers this season. Under a strict
 // "every ball from the same side" rule that lone at-bat silenced the whole
@@ -144,46 +114,6 @@ test('directionMix refuses a switch-hitter sample — two mirrored halves do not
 // is a MAJORITY one instead: a side that holds almost nothing does not make a
 // split two-sided, and its balls are simply left out of the count so the three
 // thirds still describe one stance and still sum to the sample.
-test('one turned-around at-bat does not silence a one-sided split', () => {
-  const balls = decodeSprayBalls(
-    entryOf({ p: [...Array(30).fill(0).map(() => row(-30, { s: 1 })), row(30, { s: 0 })] }),
-  )
-  const mix = directionMix(balls)
-  assert.equal(mix.side, 'L')
-  assert.equal(mix.n, 30, 'the odd ball out is excluded, not folded into the other stance')
-  assert.equal(mix.oppo, 30)
-})
-
-test('directionMix still refuses once the minority side is a real share of the sample', () => {
-  const balls = decodeSprayBalls(
-    entryOf({
-      p: [
-        ...Array(20).fill(0).map(() => row(-30, { s: 1 })),
-        ...Array(20).fill(0).map(() => row(30, { s: 0 })),
-      ],
-    }),
-  )
-  assert.equal(directionMix(balls), null)
-})
-
-test('the minority share is a tenth of the sample, and the line is exclusive', () => {
-  const oneSided = (minor) =>
-    decodeSprayBalls(
-      entryOf({
-        p: [
-          ...Array(100 - minor).fill(0).map(() => row(-30, { s: 0 })),
-          ...Array(minor).fill(0).map(() => row(-30, { s: 1 })),
-        ],
-      }),
-    )
-  assert.equal(directionMix(oneSided(Math.round(100 * MIX_MINORITY_MAX) - 1)).n, 91)
-  assert.equal(directionMix(oneSided(Math.round(100 * MIX_MINORITY_MAX) + 1)), null)
-})
-
-test('directionMix is null with nothing to count', () => {
-  assert.equal(directionMix([]), null)
-})
-
 // ---------------------------------------------------------------- decode ----
 
 test('decodeSprayBalls names every stored column', () => {
@@ -222,13 +152,6 @@ test('decodeSprayBalls is an empty list for an entry with no plotted balls', () 
 
 // ----------------------------------------------------------------- split ----
 
-test('splitBalls filters on the hand of the pitcher, and All keeps everything', () => {
-  const balls = decodeSprayBalls(entryOf({ p: [row(0, { h: 0 }), row(0, { h: 1 }), row(0, { h: 0 })] }))
-  assert.equal(splitBalls(balls, 'all').length, 3)
-  assert.equal(splitBalls(balls, 'R').length, 2)
-  assert.equal(splitBalls(balls, 'L').length, 1)
-})
-
 test('splitTotals reads the stored per-hand totals', () => {
   const entry = entryOf({ o: { R: [300, 90, 30, 12, 140], L: [100, 25, 8, 4, 41] } })
   assert.deepEqual(splitTotals(entry, 'R'), { bip: 300, hits: 90, xbh: 30, hr: 12, hard: 140 })
@@ -246,20 +169,6 @@ test('splitTotals answers zeroes for a hand the batter never faced', () => {
 })
 
 // -------------------------------------------------------- home-run footnote --
-
-test('hrNote is silent when every home run carries a landing point', () => {
-  assert.equal(hrNote(12, 12), null)
-  assert.equal(hrNote(0, 0), null)
-})
-
-test('hrNote says how many of the season home runs could be plotted', () => {
-  assert.equal(hrNote(11, 12), '11 of 12 HR had tracked landing points')
-  assert.equal(hrNote(0, 1), '0 of 1 HR had tracked landing points')
-})
-
-test('hrNote never reports more plotted than the totals hold', () => {
-  assert.equal(hrNote(13, 12), null)
-})
 
 // ------------------------------------------------------------------ view ----
 
@@ -330,7 +239,7 @@ test('sprayView names both levels when the season crossed them, majors first', (
 test('sprayView decodes the balls once, for the chart to filter', () => {
   const view = sprayView(shardOf(661388, bigEntry()), 661388)
   assert.equal(view.balls.length, 4)
-  assert.equal(splitBalls(view.balls, 'L').length, 1)
+  assert.equal(view.balls.filter((b) => b.hand === 'L').length, 1)
 })
 
 // ------------------------------------------------------------ the postseason ----
@@ -529,19 +438,6 @@ test('the sweep writes the columns decodeSprayBalls reads', () => {
   assert.equal(ball.side, 'L')
   assert.equal(ball.level, 'aaa')
   assert.equal(ball.pitcherId, 500001)
-})
-
-test('a picked scope the card cannot serve falls back to Regular, so the footer never says postseason over regular balls', () => {
-  // SprayMap keeps the picked scope in state across a season change. The new
-  // season may have no October balls (no `scoped`): the view is then the regular
-  // card, and the scope it reports must be Regular too.
-  const regular = { splits: [], levels: ['mlb'] }
-  assert.equal(sprayScopeOf(regular, 'P'), 'R')
-  assert.equal(sprayScopeOf(regular, 'A'), 'R')
-  const withPost = { ...regular, scoped: { P: { splits: [] }, A: { splits: [] } } }
-  assert.equal(sprayScopeOf(withPost, 'P'), 'P')
-  assert.equal(sprayScopeOf(withPost, 'A'), 'A')
-  assert.equal(sprayScopeOf(withPost, 'R'), 'R')
 })
 
 // ------------------------------------------------- contact store (#1912) ----
