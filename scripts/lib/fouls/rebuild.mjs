@@ -1,6 +1,7 @@
 // `gen-fouls.mjs --rebuild-counts[=<season>]`: forget one season's batter and pitcher totals,
 // by-count cells and per-game rows (#1881, #1914) and re-read every game of that season on
 // file, so the totals and the cells come from the same feeds and the same rules.
+import { mapConcurrent } from '../concurrency.mjs'
 import { foldBatterTotals, foldPitcherTotals } from './byCount.mjs'
 
 // One season's rows in every table the re-read refills: the by-count cells (batters', pitchers') and per-game rows, and
@@ -62,18 +63,13 @@ export async function rebuildCounts(db, stmts, { season, aggregate, getFeed, che
   let done = 0
   for (let from = 0; from < total; from += CHUNK) {
     const chunk = queue.slice(from, from + CHUNK)
-    const aggs = new Array(chunk.length)
-    const pending = chunk.map((_, i) => i)
-    async function worker() {
-      for (let i = pending.shift(); i !== undefined; i = pending.shift()) {
-        try {
-          aggs[i] = aggregate(await getFeed(chunk[i].game_pk))
-        } catch (err) {
-          aggs[i] = err
-        }
+    const aggs = await mapConcurrent(chunk, 8, async (g) => {
+      try {
+        return aggregate(await getFeed(g.game_pk))
+      } catch (err) {
+        return err
       }
-    }
-    await Promise.all(Array.from({ length: 8 }, worker))
+    })
     chunk.forEach((g, i) => {
       try {
         if (aggs[i] instanceof Error) throw aggs[i]

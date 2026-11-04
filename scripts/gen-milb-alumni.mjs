@@ -42,6 +42,7 @@ import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
 import { getJson, getPeople } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = import.meta.dirname
 const dataDir = join(here, '..', 'public', 'data')
@@ -116,20 +117,6 @@ async function scanPlayer(personId) {
   return stints
 }
 
-// Run `work` over `items` with a fixed number of workers.
-async function pool(items, work) {
-  const queue = [...items]
-  let done = 0
-  await Promise.all(
-    Array.from({ length: CONCURRENCY }, async () => {
-      while (queue.length) {
-        await work(queue.shift())
-        if (++done % 100 === 0) console.log(`  scanned ${done}/${items.length}`)
-      }
-    }),
-  )
-}
-
 // ---- the current farm system --------------------------------------------------
 
 async function currentAffiliates() {
@@ -175,9 +162,14 @@ console.log(`pool: ${ranked.length} active players, WAR ${ranked[0].war} → ${r
 const cache = await readJsonOr(cachePath, {})
 const stale = ranked.filter((p) => needsScan(cache[p.id], season))
 console.log(`scanning ${stale.length} of ${ranked.length} players (${ranked.length - stale.length} cached)`)
-await pool(stale, async (p) => {
-  cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
-})
+await mapConcurrent(
+  stale,
+  CONCURRENCY,
+  async (p) => {
+    cache[p.id] = { stints: await scanPlayer(p.id), scanned: season }
+  },
+  { strict: true },
+)
 // Drop cache rows for players who have fallen out of the pool, so the file
 // tracks the pool rather than growing forever.
 const inPool = new Set(ranked.map((p) => p.id))

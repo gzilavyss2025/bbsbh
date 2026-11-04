@@ -36,6 +36,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = import.meta.dirname
@@ -321,24 +322,18 @@ async function main() {
   }
 
   let done = 0
-  const queue = [...pending]
-  async function worker() {
-    while (queue.length) {
-      const g = queue.shift()
-      if (!g) return
-      try {
-        await ingestGame(db, insertBat, insertPitch, markGame, g.gamePk, g.season)
-      } catch (err) {
-        console.error(`gamePk ${g.gamePk}: ${err.message}`)
-      }
-      done += 1
-      if (done % CHECKPOINT_EVERY === 0) {
-        console.log(`${done}/${pending.length} ingested, checkpointing...`)
-        await writeOut()
-      }
+  await mapConcurrent(pending, CONCURRENCY, async (g) => {
+    try {
+      await ingestGame(db, insertBat, insertPitch, markGame, g.gamePk, g.season)
+    } catch (err) {
+      console.error(`gamePk ${g.gamePk}: ${err.message}`)
     }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+    done += 1
+    if (done % CHECKPOINT_EVERY === 0) {
+      console.log(`${done}/${pending.length} ingested, checkpointing...`)
+      await writeOut()
+    }
+  })
   await writeOut()
   console.log(`wrote ${out}`)
 }
