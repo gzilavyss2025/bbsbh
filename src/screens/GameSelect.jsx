@@ -247,7 +247,7 @@ export function GameSelect({
   // line wanted here — a date or level switch is a cold load again.
   const coldLoad = loading && !data
 
-  // The favorite team is always an MLB club (FavoriteTeamModal only offers
+  // The favorite team is always an MLB club (the club picker only offers
   // those), so on a MiLB level its own game never appears — pin its current
   // affiliate at THIS level instead. Season keys off the slate's own date
   // (not "now") so paging near a year boundary still asks for the season the

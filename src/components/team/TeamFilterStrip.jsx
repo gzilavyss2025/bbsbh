@@ -37,7 +37,7 @@ export function TeamFilterStrip({
   const stripRef = useRef(null)
   const activeRef = useRef(null)
 
-  // Same centering effect as SplitsVsTeam/FavoriteTeamModal: keep the picked
+  // Same centering effect as SplitsVsTeam/ClubPicker: keep the picked
   // club's logo centered horizontally without a page-level scroll jump, on
   // mount and on every pick. The pinned MLB button lives outside this
   // scrolling strip, so picking it (activeRef unset) leaves the scroll

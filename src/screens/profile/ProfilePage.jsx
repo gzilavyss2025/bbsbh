@@ -51,7 +51,7 @@ import { LedgerSection } from './sections/LedgerSection.jsx'
 // This component is Clerk-free at its top level. Everything that touches
 // @clerk/clerk-react lives in ProfileAccount.jsx, dynamically imported and only
 // when the deploy configures an account — the established pattern
-// (AccountPitch, LogbookAccountGate, the four cloud-sync components). The page
+// (LogbookAccountGate, the four cloud-sync components). The page
 // is NOT gated on being signed in: settings are settings, and every one of them
 // works with no account at all.
 const ProfileAccount = isClerkEnabled

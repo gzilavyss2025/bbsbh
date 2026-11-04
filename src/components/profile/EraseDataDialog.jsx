@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { markIntroSeenIn } from '../../lib/account/intro.js'
 import { clearTallyDataIn } from '../../lib/account/localData.js'
 import { clearAllPhotos } from '../../lib/scorecard-photos/store.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
@@ -96,17 +95,6 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
     clearTallyDataIn(browserStorage())
     // The scorecard photos live in IndexedDB, not under a bbsbh: key (#2511).
     await clearAllPhotos()
-    // Erasing sweeps `bbsbh:intro` along with everything else, which made the
-    // reload look like a brand-new visitor and reopened the welcome modal.
-    // That is a bad moment on its own — you asked to be forgotten and got
-    // onboarded — but it was also a live data bug: ANY exit from that modal
-    // commits its pick, defaulting to the pinned club, and with `bbsbh:prefsOwner`
-    // swept too the strategy falls back to `backfill`, so a still-signed-in
-    // user's real club was overwritten with the default on every device.
-    //
-    // Re-seeding the flag is the whole fix: someone who just used the erase
-    // sheet has plainly seen the intro.
-    markIntroSeenIn(browserStorage())
     window.location.assign('/')
   }
 

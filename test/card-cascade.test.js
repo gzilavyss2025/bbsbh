@@ -2115,7 +2115,6 @@ const H3_RENAMED = [
   ['bcast__eyebrow', 'bcast__note'],
   ['guidelink__eyebrow', 'guidelink__note'],
   ['hitchart__eyebrow', 'hitchart__note'],
-  ['introsheet__eyebrow', 'introsheet__note'],
   ['szmodal__eyebrow', 'szmodal__note'],
   ['trrank__eyebrow', 'trrank__note'],
   ['umpmodal__eyebrow', 'umpmodal__note'],

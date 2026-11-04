@@ -50,8 +50,6 @@
        notification cards), `.bs__potgDesc`, `.scoresum__desc`, `.ww-film__text`,
        `.psseries__potgDesc`
      - the pre-half callout cards' fun-fact line — `.prehalf__text`
-     - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
-       `.favteamsheet__pitch`
      - the broadcast report pages' method notes — `.method p` (the "how this
        was counted" prose closing each of the four pages under
        `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted)
