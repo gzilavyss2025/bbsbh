@@ -444,10 +444,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   testing the half object instead printed real-looking zeros for an inning that
   never happened.
 - **Express Lane's screens were deleted** when Gameday replaced it (#2566), with its staging
-  (`lib/expresslane/`, which was deleted). Three modules stay: `clipIndex.js` (the play-by-play's
-  Watch), `runners.js` (Gameday and the scorecard reuse it, ADR-0072) and `rail.js`, the ordered
-  event list of one half that `runners.js`'s deck is tested through. `rail.js` is reveal-only and
-  has no screen importer now; a new caller reads it inside a `SealBox` reveal function.
+  (`lib/expresslane/`, which was deleted). Two modules stay: `clipIndex.js` (the play-by-play's
+  Watch) and `runners.js` (Gameday and the scorecard reuse it, ADR-0072). `rail.js` was deleted (#2842).
 - **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
   `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
   that turns a playId into a playable clip — via

@@ -8,7 +8,7 @@
 // a runner first to third. This module names the boxes that have to be on the
 // screen beside the batter's.
 //
-// REVEAL-ONLY, on the same footing as rail.js beside it. Every card here
+// REVEAL-ONLY, on the same footing as linescore.js and derive.js. Every card here
 // carries its plate appearance's outcome, so this is callable only from inside
 // a SealBox's reveal render function (ADR-0001/0002).
 //

@@ -16,7 +16,6 @@ import {
   runnersOnBase,
 } from '../src/api/expresslane/runners.js'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
-import { buildRail, resultModeRows } from '../src/api/expresslane/rail.js'
 import { halfIndex } from '../src/api/select.js'
 import { halfAt } from '../src/api/scorecard/alignment.js'
 
@@ -281,10 +280,10 @@ test('a row INSIDE a plate appearance does not reveal that plate appearance', ()
   // feed one card too far and drew Lara's finished box: the scorer read "6-3"
   // before watching the pitch that made it. The film gate was intact; the deck
   // walked around it.
-  const rail = resultModeRows(buildRail(FEED, 1, 'top'))
-  const timeout = rail[1]
-  assert.equal(timeout.kind, 'action')
-  assert.equal(timeout.isTerminal, false, 'the row this test is about')
+  // A batter timeout: a non-terminal row carrying the plate appearance's own atBatIndex.
+  const cards = computeHalfInningFeed(FEED, 1, 'top', 'away')
+  const lara = cards.findIndex((c) => c.batter.last === 'Lara')
+  const timeout = { ...rowAt(1, 'top', lara), kind: 'action', isTerminal: false }
 
   const deck = expressDeck(FEED, 1, 'top', timeout)
   assert.equal(deck.batter, null, 'the plate appearance in progress has no finished box')
@@ -296,17 +295,17 @@ test('a row INSIDE a plate appearance does not reveal that plate appearance', ()
   )
 
   // His own terminal row, one tap later, is where the outcome arrives.
-  const after = expressDeck(FEED, 1, 'top', rail[2])
+  const after = expressDeck(FEED, 1, 'top', rowAt(1, 'top', lara))
   assert.equal(after.batter.batter.last, 'Lara')
   assert.equal(after.batter.code, '6-3')
 })
 
 test('a non-terminal row shows the base state as it was BEFORE its plate appearance', () => {
-  const rail = resultModeRows(buildRail(FEED, 1, 'top'))
-  // Row 4 is a batter timeout inside Vaughn's at-bat; Turang has doubled by
+  // A batter timeout inside Vaughn's at-bat; Turang has doubled by
   // then, so the deck must show Turang on second and nothing of Vaughn's.
-  const timeout = rail[4]
-  assert.equal(timeout.isTerminal, false)
+  const cards = computeHalfInningFeed(FEED, 1, 'top', 'away')
+  const vaughn = cards.findIndex((c) => c.batter.last === 'Vaughn')
+  const timeout = { ...rowAt(1, 'top', vaughn), kind: 'action', isTerminal: false }
   const deck = expressDeck(FEED, 1, 'top', timeout)
   assert.deepEqual(
     deck.runners.map((r) => [r.card.batter.last, r.base]),
@@ -342,26 +341,6 @@ test('every card arrives with the three marks AtBatBox draws but does not comput
   assert.equal(walk.centerCode, 'BB')
 })
 
-test('a half that was never played has an empty rail, which is how a game ENDS', () => {
-  // THE SIGNAL THE SURFACE KEYS ON, and the bug it was found by. Express Lane
-  // opens on `revealedThrough + 1` — the first half not yet scored — so a game
-  // scored to its last out opens on a half that never happened. It rendered
-  // the ordinary deck over nothing: a dead button under a film pane promising
-  // film that was never coming, on a screen headed "Top 10th".
-  //
-  // Reading this half is the sanctioned lookahead (ADR-0003/0010) and it leaks
-  // nothing — an empty rail says only "you have reached the end of what has
-  // been played", which the scorer who reached it already knows. It is
-  // deliberately NOT a check against the game's inning count: that number
-  // states whether the game went to extras (ADR-0008).
-  //
-  // gamePk 823035 went nine innings, so the top of the 10th is that half.
-  assert.deepEqual(resultModeRows(buildRail(FEED, 10, 'top')), [])
-  assert.deepEqual(buildRail(FEED, 10, 'top'), [])
-  // And the half before it is not empty, so the signal really distinguishes.
-  assert.ok(resultModeRows(buildRail(FEED, 9, 'bottom')).length > 0)
-})
-
 test('an empty half yields an empty deck rather than throwing', () => {
   const deck = expressDeck(FEED, 11, 'top', { atBatIndex: 1 })
   assert.deepEqual(deck, { batter: null, runners: [], departed: [], entries: [], cap: null })
@@ -380,33 +359,16 @@ test('an empty half yields an empty deck rather than throwing', () => {
 
 test('the reveal cap is the deck’s own cap, at every cursor in the game', () => {
   for (const [inning, half] of playedHalves()) {
-    for (const row of resultModeRows(buildRail(FEED, inning, half))) {
+    const n = computeHalfInningFeed(FEED, inning, half, battingSideOf(half)).length
+    for (let i = 0; i < n; i += 1) {
+      const row = rowAt(inning, half, i)
       assert.equal(
         railRevealCap(FEED, inning, half, row),
         expressDeck(FEED, inning, half, row).cap,
-        `${half} ${inning}, row ${row.key}`,
+        `${half} ${inning}, card ${i}`,
       )
     }
   }
-})
-
-test('a rail row’s position is NOT that count, and writing it would over-reveal', () => {
-  let over = 0
-  let agree = 0
-  for (const [inning, half] of playedHalves()) {
-    const rows = resultModeRows(buildRail(FEED, inning, half))
-    rows.forEach((row, i) => {
-      const cap = railRevealCap(FEED, inning, half, row)
-      const ordinal = i + 1
-      if (ordinal === cap) agree += 1
-      else if (ordinal > cap) over += 1
-    })
-  }
-  // The two units are not interchangeable, and the majority of the difference
-  // runs the DANGEROUS way: a rail position larger than the feed cap opens
-  // entries in the innings viewer that Express Lane never showed.
-  assert.ok(over > 0, 'the rail position overstates the feed cap on real plays')
-  assert.ok(over > agree, 'they disagree more often than they agree')
 })
 
 test('a row with no plate appearance of its own has no cap to write', () => {
