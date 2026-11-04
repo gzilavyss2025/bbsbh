@@ -44,19 +44,74 @@ export function seasonInPlay(todayIso, row) {
   return todayIso.slice(5) < FALLBACK_TURN ? year - 1 : year
 }
 
+// THE SEASON THAT IS OVER — issue #2778, ADR-0074's rule for scripts.
+//
+// A season is over once statsapi's offseason for it has opened: on or after its
+// row's `offseasonStartDate` (Nov 1 in 2026; the postseason runs to Oct 31 and
+// is still the season). From Jan 1 to the next Opening Day the season in play is
+// last year's (seasonInPlay above), and that season is over by definition. The
+// answer is the season that just ended, or null for "not over".
+//
+// Without a usable row (missing, wrong year, no valid offseasonStartDate) it
+// never guesses. Before November the season is still on (the postseason runs to
+// Oct 31), so that is null. In November and December the answer turns on the row,
+// so it THROWS, naming the season it cannot decide on: the freeze step then fails
+// that night instead of waiting in silence (Gary, #2887).
+export function seasonOver(todayIso, row) {
+  const season = seasonInPlay(todayIso, row)
+  const year = Number(todayIso.slice(0, 4))
+  if (season < year) return season
+  const opens = Number(row?.seasonId) === year ? row?.offseasonStartDate : null
+  if (typeof opens === 'string' && ISO.test(opens)) return todayIso >= opens ? season : null
+  if (todayIso.slice(5) < '11-01') return null
+  throw new Error(`cannot tell whether ${year} is over: statsapi's ${year} season row has no usable offseasonStartDate`)
+}
+
+// statsapi's season row for `year`, or null on a failed read. Never throws.
+async function fetchSeasonRow(year) {
+  try {
+    const data = await getJson(
+      `/api/v1/seasons?sportId=1&season=${year}&fields=seasons,seasonId,regularSeasonStartDate,offseasonStartDate`,
+    )
+    return data?.seasons?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 // The season in play for `today` (a Date; now by default). One statsapi read;
 // a failed read falls back to the calendar rule above and never throws.
 export async function fetchSeasonInPlay(today = new Date()) {
   const todayIso = today.toISOString().slice(0, 10)
-  const year = todayIso.slice(0, 4)
-  let row = null
-  try {
-    const data = await getJson(
-      `/api/v1/seasons?sportId=1&season=${year}&fields=seasons,seasonId,regularSeasonStartDate`,
-    )
-    row = data?.seasons?.[0] ?? null
-  } catch {
-    row = null
-  }
-  return seasonInPlay(todayIso, row)
+  return seasonInPlay(todayIso, await fetchSeasonRow(todayIso.slice(0, 4)))
+}
+
+// Today's date in the US, YYYY-MM-DD. The offseason turns on a US calendar
+// day: a late World Series game on Oct 31 Pacific is already Nov 1 in UTC, and
+// the season is not over until Nov 1 arrives in Los Angeles.
+export function pacificIso(now) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(now)
+}
+
+// seasonOver for a moment rather than a day: the Pacific date of `now`.
+export function seasonOverAt(now, row) {
+  return seasonOver(pacificIso(now), row)
+}
+
+// Whether seasonOver's answer on `todayIso` can depend on the season row.
+// November and December turn on offseasonStartDate; March on Opening Day
+// (regularSeasonStartDate). January and February are always last season (no
+// Opening Day falls that early), and April to October is always "not over"
+// (the postseason runs to Oct 31), so those months skip the read.
+export function needsSeasonRow(todayIso) {
+  return ['03', '11', '12'].includes(todayIso.slice(5, 7))
+}
+
+// The season that is over at `now` (a Date; now by default), or null. Reads
+// statsapi's row only when the answer can depend on it (needsSeasonRow); a
+// failed read in November or December throws (seasonOver above).
+export async function fetchSeasonOver(now = new Date()) {
+  const todayIso = pacificIso(now)
+  const row = needsSeasonRow(todayIso) ? await fetchSeasonRow(todayIso.slice(0, 4)) : null
+  return seasonOver(todayIso, row)
 }
