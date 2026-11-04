@@ -25,7 +25,7 @@
 import { mergeOverrides, sanitizeOverrides } from '../src/copy/registry.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
-import { getRedis, hashFromReply } from './_lib/redis.js'
+import { getRedis, readHash, writeHash } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -41,28 +41,6 @@ const COPY_KEY = 'copy:overrides'
 const COPY_HISTORY_KEY = 'copy:history'
 const COPY_HISTORY_MAX = 20
 
-function reply(res, body, status = 200, extraHeaders = {}) {
-  return jsonResponse(res, body, status, extraHeaders)
-}
-
-function copyRedis() {
-  // `automaticDeserialization: false` is DELIBERATE and specific to the copy
-  // store (api/reveal.js keeps the default because it stores an integer). Our
-  // values are arbitrary admin-authored strings: with the default on,
-  // @upstash/redis JSON-parses a value like "42", "true", or "null" on read
-  // and hands back a number/boolean/null, which sanitizeOverrides then drops as
-  // "not a string" — a silent data-loss bug where a perfectly good humor line
-  // vanishes after saving. Off, every value round-trips as the exact string we
-  // stored. The history list (JSON we stringify ourselves) is parsed by hand
-  // below for the same reason. It is why this one endpoint passes an option to
-  // the shared factory instead of calling it bare.
-  //
-  // It also costs this endpoint the hash PAIRING, which is why every read below
-  // goes through hashFromReply (_lib/redis.js). Read that function before
-  // changing this line — the two are a matched pair, and removing either one
-  // alone reintroduces a bug the other exists to prevent.
-  return getRedis({ automaticDeserialization: false })
-}
 
 // The admin gate (Clerk token + COPY_ADMIN_USER_IDS allowlist) lives in
 // _lib/adminAuth.js now that api/ballpark-photo.js shares it. Same behaviour,
@@ -97,10 +75,11 @@ export function writePlan(prev, body) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return jsonResponse(res, { error: 'method not allowed' }, 405)
   }
 
-  const redis = copyRedis()
+  // automaticDeserialization:false keeps admin strings exact; readHash re-pairs HGETALL (ADR-0127).
+  const redis = getRedis({ automaticDeserialization: false })
   const { searchParams } = requestUrl(req)
   const wantHistory = searchParams.get('history') === '1'
 
@@ -108,9 +87,9 @@ export default async function handler(req, res) {
     // The history list is admin-only (it records who changed what, when); the
     // current copy map is public.
     if (wantHistory) {
-      if (!redis) return reply(res, { error: 'copy store not configured' }, 501)
+      if (!redis) return jsonResponse(res, { error: 'copy store not configured' }, 501)
       const userId = await authenticateAdmin(req)
-      if (!userId) return reply(res, { error: 'forbidden' }, 403)
+      if (!userId) return jsonResponse(res, { error: 'forbidden' }, 403)
       let entries
       try {
         const raw = (await redis.lrange(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)) || []
@@ -127,19 +106,19 @@ export default async function handler(req, res) {
       } catch {
         entries = []
       }
-      return reply(res, { history: entries }, 200, { 'cache-control': 'private, no-store' })
+      return jsonResponse(res, { history: entries }, 200, { 'cache-control': 'private, no-store' })
     }
 
     // Public read. No Redis -> empty overrides, app uses defaults.
     let stored = {}
     if (redis) {
       try {
-        stored = hashFromReply(await redis.hgetall(COPY_KEY))
+        stored = await readHash(redis, COPY_KEY)
       } catch {
         stored = {}
       }
     }
-    return reply(res, 
+    return jsonResponse(res,
       { copy: sanitizeOverrides(stored) },
       200,
       // Copy is global and non-secret: let the CDN and browser hold it briefly
@@ -150,14 +129,14 @@ export default async function handler(req, res) {
   }
 
   // POST — admin write.
-  if (!redis) return reply(res, { error: 'copy store not configured' }, 501)
+  if (!redis) return jsonResponse(res, { error: 'copy store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return reply(res, { error: 'forbidden' }, 403)
+  if (!userId) return jsonResponse(res, { error: 'forbidden' }, 403)
 
   const body = await readJsonBody(req)
   if (body == null) {
-    return reply(res, { error: 'invalid body' }, 400)
+    return jsonResponse(res, { error: 'invalid body' }, 400)
   }
 
   // TWO BODIES, AND THE DIFFERENCE IS WHO READS THE CURRENT STATE.
@@ -182,7 +161,7 @@ export default async function handler(req, res) {
   // a cache, and it happens inside the same request that writes. See ADR-0025's
   // amendment — a client cannot be given a coherent read of shared state
   // through a cache it does not control, so it must stop needing one.
-  if (!acceptableBody(body)) return reply(res, { error: 'invalid body' }, 400)
+  if (!acceptableBody(body)) return jsonResponse(res, { error: 'invalid body' }, 400)
 
   // Declared out here because the response echoes the stored map back, and the
   // catch below must stay scoped to the WRITE — a failure there is a 502, not a
@@ -195,7 +174,7 @@ export default async function handler(req, res) {
     // `staleKeys` was ALWAYS empty, so clearing a field never actually deleted
     // it, and every history snapshot recorded an empty `prev`, so undo had
     // nothing to restore.
-    const prev = sanitizeOverrides(hashFromReply(await redis.hgetall(COPY_KEY)))
+    const prev = sanitizeOverrides(await readHash(redis, COPY_KEY))
     const plan = writePlan(prev, body)
     const staleKeys = plan.staleKeys
     clean = plan.clean
@@ -205,15 +184,13 @@ export default async function handler(req, res) {
     // previous copy intact rather than wiping every override (a failed `del` +
     // `hset` pair would have reset the whole site to defaults). A GET can never
     // observe an empty hash mid-save either.
-    const tx = redis.multi()
-    tx.lpush(COPY_HISTORY_KEY, JSON.stringify({ at: Date.now(), by: userId, copy: prev }))
-    tx.ltrim(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)
-    if (Object.keys(clean).length) tx.hset(COPY_KEY, clean)
-    if (staleKeys.length) tx.hdel(COPY_KEY, ...staleKeys)
-    await tx.exec()
+    await writeHash(redis, COPY_KEY, clean, staleKeys, (tx) => {
+      tx.lpush(COPY_HISTORY_KEY, JSON.stringify({ at: Date.now(), by: userId, copy: prev }))
+      tx.ltrim(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)
+    })
   } catch {
-    return reply(res, { error: 'write failed' }, 502)
+    return jsonResponse(res, { error: 'write failed' }, 502)
   }
 
-  return reply(res, { copy: clean }, 200, { 'cache-control': 'no-store' })
+  return jsonResponse(res, { copy: clean }, 200, { 'cache-control': 'no-store' })
 }

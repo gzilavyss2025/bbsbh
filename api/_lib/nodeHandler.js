@@ -1,76 +1,27 @@
-// Request/response adapter for the `runtime: 'nodejs'` serverless functions
-// (first written for three of them: api/reveal.js, api/copy.js, and a
-// day-consent endpoint removed in ADR-0116).
-//
-// WHY THIS EXISTS — read before "simplifying" any of it. All three functions
-// were written against the Web-standard fetch shape: `new URL(req.url)`,
-// `req.headers.get(...)`, `await req.json()`, `return new Response(...)`. That is
-// the EDGE runtime's contract. Under `runtime: 'nodejs'` Vercel hands the
-// handler Node's `(req, res)` instead, where `req.url` is a bare path. Every one
-// of those functions therefore threw `TypeError: Invalid URL` on its very first
-// line of real work, in production, on every request:
-//
-//     TypeError: Invalid URL
-//         at handler (file:///var/task/api/reveal.js:101:28)
-//         { code: 'ERR_INVALID_URL', input: '/api/reveal?gamePk=1' }
-//
-// It went unnoticed because nothing that matters *breaks* when they fail: the
-// client treats every one of these as optional (CopyProvider falls back to
-// shipped defaults, both sync components swallow errors and stay local-only), so
-// a 500 looks exactly like "this deploy's optional functions were never
-// configured" — which is a supported state. The lesson worth keeping: a
-// graceful degrade can hide a hard failure indefinitely. These endpoints need
-// real request-level checks against a deploy, not just module-level smoke
-// tests — importing the module in Node and calling it with a `Request`
-// exercises a shape production never passes, which is exactly how this shipped.
-//
-// The helpers below read whichever shape they are handed rather than assuming
-// one, so the functions keep working if Vercel's runtime contract shifts again.
+// Request/response adapter for the `runtime: 'nodejs'` functions, where Vercel hands the handler
+// Node's `(req, res)` and `req.url` is a bare path (not the Web fetch shape; ADR-0127). Every
+// non-edge function runs on Node, so only the Node shape is read here.
 
-// Header lookup that works with both a Web `Headers` (edge) and Node's plain
-// object (`IncomingMessage.headers`, always lower-cased keys). Returns '' rather
-// than null/undefined so callers can do plain string work.
+// A header, or '' (Node lower-cases its keys).
 export function getHeader(req, name) {
-  const headers = req?.headers
-  if (!headers) return ''
-  if (typeof headers.get === 'function') return headers.get(name) || ''
-  return headers[String(name).toLowerCase()] || ''
+  return req?.headers?.[String(name).toLowerCase()] || ''
 }
 
-// A parsed URL from either shape. Node gives a path ('/api/copy?x=1'), the edge
-// gives an absolute URL; `new URL` ignores the base when the input is already
-// absolute, so one call covers both. The base is only ever used to make a
-// relative path parseable — the host is never trusted for anything.
+// A parsed URL from the bare path Node gives (or an absolute one). The base only makes a relative
+// path parseable; the host is never trusted for anything.
 export function requestUrl(req) {
   return new URL(req?.url || '/', 'https://local.invalid')
 }
 
-// The JSON body, or null if there isn't a valid one. Three sources, in the order
-// they're likely to exist: Vercel's Node runtime pre-parses a JSON body onto
-// `req.body`; the edge shape exposes `req.json()`; otherwise read the stream.
-// Never throws — a malformed body is null, which every caller turns into a 400.
+// The JSON body, or null if there isn't a valid one: Vercel pre-parses a JSON body onto `req.body`,
+// otherwise the stream is read. Never throws; every caller turns null into a 400.
 export async function readJsonBody(req) {
   if (req?.body && typeof req.body === 'object') return req.body
-  if (typeof req?.body === 'string') {
-    try {
-      return JSON.parse(req.body)
-    } catch {
-      return null
-    }
-  }
-  if (typeof req?.json === 'function') {
-    try {
-      return await req.json()
-    } catch {
-      return null
-    }
-  }
   try {
+    if (typeof req?.body === 'string') return JSON.parse(req.body)
     const chunks = []
     for await (const chunk of req) chunks.push(chunk)
     if (chunks.length === 0) return null
-    // Chunks are Buffers under Node and Uint8Arrays under an edge-ish stream;
-    // decoding each to a string avoids depending on Buffer being a global.
     const decoder = new TextDecoder()
     return JSON.parse(chunks.map((c) => (typeof c === 'string' ? c : decoder.decode(c, { stream: true }))).join(''))
   } catch {
@@ -78,33 +29,14 @@ export async function readJsonBody(req) {
   }
 }
 
-// The raw request body as a Uint8Array, or null. Used by the ONE endpoint that
-// takes bytes rather than JSON (api/ballpark-photo.js).
-//
-// `maxBytes` is enforced WHILE READING, not after. That ordering is the point:
-// checking a `content-length` header first would trust a number the caller
-// supplies, and checking the total after buffering would mean a 500 MB body had
-// already been held in a serverless function's memory before we objected. So we
-// count as chunks arrive and abandon the read the moment the running total goes
-// over — the caller gets null and answers 413, and nothing larger than the cap
-// is ever resident.
-//
-// Same three-shape tolerance as readJsonBody: Vercel's Node runtime hands a
-// Buffer on `req.body` for a content-type its parser does not own (which is
-// every image type), the edge shape exposes `arrayBuffer()`, and otherwise we
-// read the stream. Never throws — every failure is null.
+// The raw request body as a Uint8Array, or null (the endpoints that take image bytes).
+// `maxBytes` is enforced WHILE READING so an oversized body is never resident (ADR-0127).
+// Vercel hands a Buffer on `req.body` for a content-type its parser does not own; otherwise the
+// stream is read. Never throws; every failure is null.
 export async function readRawBody(req, maxBytes) {
   const tooBig = (n) => Number.isFinite(maxBytes) && n > maxBytes
   const body = req?.body
   if (body instanceof Uint8Array) return tooBig(body.byteLength) ? null : body
-  if (typeof req?.arrayBuffer === 'function') {
-    try {
-      const buf = new Uint8Array(await req.arrayBuffer())
-      return tooBig(buf.byteLength) ? null : buf
-    } catch {
-      return null
-    }
-  }
   try {
     const chunks = []
     let total = 0
@@ -127,28 +59,15 @@ export async function readRawBody(req, maxBytes) {
   }
 }
 
-// Send a JSON response through whichever channel exists. With Node's `res` we
-// write to it and return undefined; with no `res` (edge) we return a `Response`
-// for the platform to send. Handlers just `return jsonResponse(res, …)` and stay
-// agnostic — which is what keeps this fix from having to be made twice if the
-// runtime contract changes again.
+// Write a JSON response to Node's `res`; handlers `return jsonResponse(res, …)`.
 export function jsonResponse(res, body, status = 200, headers = {}) {
-  const payload = JSON.stringify(body)
-  const allHeaders = { 'content-type': 'application/json', ...headers }
-  if (res && typeof res.setHeader === 'function') {
-    res.statusCode = status
-    for (const [k, v] of Object.entries(allHeaders)) res.setHeader(k, v)
-    res.end(payload)
-    return undefined
-  }
-  return new Response(payload, { status, headers: allHeaders })
+  res.statusCode = status
+  for (const [k, v] of Object.entries({ 'content-type': 'application/json', ...headers })) res.setHeader(k, v)
+  res.end(JSON.stringify(body))
 }
 
-// jsonResponse for per-user, auth-gated answers: never let a shared cache (or
-// the browser) hold one user's data and hand it to another request. Used by
-// account, ballpark-photo, books, identity-logo, preferences, reveal and
-// stamps. Never relax the header — stamps.js answers carry a
-// score.
+// jsonResponse for per-user, auth-gated answers: never let a shared cache (or the browser) hold one
+// user's data and hand it to another. Never relax the header; stamps.js answers carry a score.
 export function privateJson(res, body, status = 200) {
   return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
 }

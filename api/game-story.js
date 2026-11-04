@@ -50,36 +50,11 @@ function isEvergreen(url) {
 // mlb.com/{slug}/feeds/news/rss.xml, 2026-07-17). MiLB ids have no entry: those
 // clubs carry no team-branded news feed.
 const MLB_SLUG = {
-  108: 'angels',
-  109: 'dbacks',
-  110: 'orioles',
-  111: 'redsox',
-  112: 'cubs',
-  113: 'reds',
-  114: 'guardians',
-  115: 'rockies',
-  116: 'tigers',
-  117: 'astros',
-  118: 'royals',
-  119: 'dodgers',
-  120: 'nationals',
-  121: 'mets',
-  133: 'athletics',
-  134: 'pirates',
-  135: 'padres',
-  136: 'mariners',
-  137: 'giants',
-  138: 'cardinals',
-  139: 'rays',
-  140: 'rangers',
-  141: 'bluejays',
-  142: 'twins',
-  143: 'phillies',
-  144: 'braves',
-  145: 'whitesox',
-  146: 'marlins',
-  147: 'yankees',
-  158: 'brewers',
+  108: 'angels', 109: 'dbacks', 110: 'orioles', 111: 'redsox', 112: 'cubs', 113: 'reds',
+  114: 'guardians', 115: 'rockies', 116: 'tigers', 117: 'astros', 118: 'royals', 119: 'dodgers',
+  120: 'nationals', 121: 'mets', 133: 'athletics', 134: 'pirates', 135: 'padres', 136: 'mariners',
+  137: 'giants', 138: 'cardinals', 139: 'rays', 140: 'rangers', 141: 'bluejays', 142: 'twins',
+  143: 'phillies', 144: 'braves', 145: 'whitesox', 146: 'marlins', 147: 'yankees', 158: 'brewers',
 }
 
 // &amp; decodes LAST — decoding it first would turn a source string that
@@ -197,10 +172,8 @@ export default async function handler(req) {
     stories = []
   }
 
-  return new Response(JSON.stringify({ stories }), {
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=3600',
-    },
-  })
+  return Response.json(
+    { stories },
+    { headers: { 'cache-control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=3600' } },
+  )
 }

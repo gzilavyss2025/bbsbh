@@ -48,9 +48,8 @@ import {
   sanitizeCoverColor,
   sanitizeCoverMark,
 } from '../src/lib/books.js'
-import { authenticateUser } from './_lib/auth.js'
+import { withUser } from './_lib/auth.js'
 import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -218,24 +217,8 @@ export async function deleteBook(res, redis, userId, id) {
   return privateJson(res, { ok: true })
 }
 
-export default async function handler(req, res) {
-  if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
-    return privateJson(res, { error: 'method not allowed' }, 405)
-  }
-
-  const redis = getRedis()
-  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
-
-  const auth = await authenticateUser(req)
-  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
-  const userId = auth.userId
-
+export default withUser(['GET', 'POST', 'DELETE'], (req, res, { redis, userId }) => {
   if (req.method === 'GET') return listBooks(res, redis, userId)
-
-  if (req.method === 'DELETE') {
-    const { searchParams } = requestUrl(req)
-    return deleteBook(res, redis, userId, searchParams.get('id'))
-  }
-
+  if (req.method === 'DELETE') return deleteBook(res, redis, userId, requestUrl(req).searchParams.get('id'))
   return postBook(req, res, redis, userId)
-}
+})

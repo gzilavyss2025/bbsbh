@@ -1,57 +1,23 @@
-// Clerk token verification for the authenticated endpoints (api/reveal.js,
-// api/stamps.js, and the admin half of api/copy.js, among others).
-//
-// WHY THIS EXISTS — the same failure as api/_lib/redis.js, one layer down. Each
-// of those functions had its own `authenticate()` that collapsed every possible
-// problem into `return null`, and every caller turned that into a bare
-// `401 unauthorized`. So these four outcomes were indistinguishable from the
-// outside:
-//
-//   1. CLERK_SECRET_KEY is not set on this deploy — nothing can ever verify.
-//   2. The request carried no token at all (an anonymous curl, a signed-out app).
-//   3. The token is real but this deploy can't verify it — most often a secret
-//      key from a DIFFERENT Clerk instance than the publishable key the front
-//      end was built with.
-//   4. The token is genuinely expired or forged.
-//
-// (1) and (3) are misconfigurations that need a human; (2) and (4) are the
-// system working. Flattening all four into one status meant a deploy could
-// reject every real request forever while looking exactly like a correctly
-// working one being polled by strangers — which is precisely what happened, and
-// what took a Vercel log query rather than a glance to find.
-//
-// So a missing secret key is now a 501, matching the store's own "not
-// configured" answer, and a token that fails verification is distinguishable
-// from no token at all. `curl` against any authenticated endpoint now names the
-// problem:
-//
-//   501 sync not configured  — no Redis credentials reaching the function
-//   501 auth not configured  — no CLERK_SECRET_KEY reaching the function
-//   401 no token             — auth is configured; this request was anonymous
-//   401 invalid token        — a token arrived and could not be verified
-//
-// None of these leak anything: which env vars a deploy has is not a secret, and
-// no response says anything about a user.
+// Clerk token verification for the authenticated endpoints. The incidents behind it are in ADR-0127:
+// four distinct failures once collapsed to one 401; `verifyToken` RESOLVES TO THE JWT PAYLOAD (not
+// `{ data, errors }`) and THROWS on failure; the log names Clerk's reason, never the token.
 
 import { verifyToken } from '@clerk/backend'
-import { getHeader } from './nodeHandler.js'
+import { getHeader, privateJson } from './nodeHandler.js'
+import { getRedis } from './redis.js'
 
 export const AUTH_NOT_CONFIGURED = 'auth not configured'
 export const NO_TOKEN = 'no token'
 export const INVALID_TOKEN = 'invalid token'
 
-// The bearer token, or '' — never null/undefined, so callers can do string work.
+// The bearer token, or ''.
 export function bearerToken(req) {
   const auth = getHeader(req, 'authorization')
   return auth.startsWith('Bearer ') ? auth.slice(7).trim() : ''
 }
 
-// Everything that can be decided WITHOUT calling Clerk: is this deploy able to
-// verify at all, and did the caller even present a token? Pure and
-// env-injectable, so both answers are pinned by the unit suite instead of
-// resting on a deploy CI cannot run.
-//
-// Returns `{ ok: true, token, secretKey }` or `{ ok: false, status, error }`.
+// What can be decided without calling Clerk: can this deploy verify at all, did the caller present
+// a token? Pure and env-injectable. `{ ok: true, token, secretKey }` or `{ ok: false, status, error }`.
 export function authPreflight(req, env = process.env) {
   const secretKey = typeof env?.CLERK_SECRET_KEY === 'string' ? env.CLERK_SECRET_KEY.trim() : ''
   if (!secretKey) return { ok: false, status: 501, error: AUTH_NOT_CONFIGURED }
@@ -60,81 +26,22 @@ export function authPreflight(req, env = process.env) {
   return { ok: true, token, secretKey }
 }
 
-// ---------------------------------------------------------------------------
-// WHY THE SERVER LOGS WHAT THE RESPONSE WON'T SAY
-// ---------------------------------------------------------------------------
-// `401 invalid token` is the right answer to hand a CLIENT: a caller has no
-// business learning whether it failed on a signature, an expiry, or this
-// deploy's inability to reach Clerk at all. But it was also all the SERVER
-// knew, and that is a different problem — the same one this file was written
-// to solve, one level further down.
-//
-// Production hit exactly that wall: every genuine token rejected as `invalid
-// token`, while the publishable key, the token's issuer, and the secret key
-// had each been independently verified to belong to the same Clerk instance.
-// Nothing was left to check from outside, because Clerk's own reason —
-// `token-invalid-signature` vs `token-expired` vs `jwk-remote-failed-to-load`,
-// which are three unrelated faults with three unrelated fixes — was being
-// caught and thrown away right here.
-//
-// So the reason now goes to the log, where only the operator can read it, and
-// the response is untouched. Two rules keep that safe:
-//
-//   - The token NEVER gets logged. It is a live credential; a log line is not
-//     the place for one, and the reason is what's diagnostic anyway.
-//   - The secret key is logged as its PREFIX only (`sk_live_` / `sk_test_`),
-//     which is 8 characters, secret-free, and answers the two questions that
-//     actually recur: is this the live instance or the test one, and is it
-//     even a secret key rather than a publishable key pasted into the wrong
-//     variable. That specific mix-up is easy to make — the two sit side by
-//     side in Clerk's dashboard — and impossible to see once Vercel marks the
-//     variable Sensitive and stops echoing it back.
+// The secret key's 8-character prefix only (`sk_live_` / `sk_test_`), never the key; a publishable
+// key pasted into the wrong variable is named (ADR-0127).
 function keyShape(secretKey) {
   const prefix = String(secretKey).slice(0, 8)
-  // A publishable key here is a real, seen-in-the-wild misconfiguration, so it
-  // gets named rather than reported as just another opaque prefix.
   if (prefix.startsWith('pk_')) return `${prefix} (PUBLISHABLE KEY — belongs in VITE_CLERK_PUBLISHABLE_KEY)`
   if (!prefix.startsWith('sk_')) return `${prefix} (not a Clerk secret key)`
   return prefix
 }
 
-// ---------------------------------------------------------------------------
-// THE RETURN SHAPE — read before touching the call below
-// ---------------------------------------------------------------------------
-// `verifyToken` RESOLVES TO THE JWT PAYLOAD ITSELF, and THROWS when a token
-// does not verify. Its signature in @clerk/backend 3.x is:
-//
-//   verifyToken(token, options) => Promise<JwtPayload>
-//
-// It does NOT resolve to `{ data, errors }`. This file used to destructure
-// exactly that, and the consequence was total and silent: a payload has no
-// `data` property, so `data` came back `undefined` for a PERFECTLY VALID
-// token, `!data?.sub` was therefore always true, and every authenticated
-// request in production was answered `401 invalid token` — reveal sync, the
-// since-removed spoiled-day map, and the Logbook alike, since the day Clerk was
-// added.
-//
-// It hid so well because it fails in the direction that looks like a
-// misconfiguration. A bad token throws and is caught, and a GOOD token was
-// rejected too, so the endpoint's outward behaviour was indistinguishable from
-// a wrong secret key — which is what it was mistaken for, through several
-// rounds of re-issuing keys that were correct all along. What finally named it
-// was logging the reason: "no sub claim on a token that verified" only makes
-// sense if verification SUCCEEDED and we discarded the result.
-//
-// So: read the payload directly, and let the catch handle failure. If a future
-// bump changes this again, the symptom will be a 100% auth failure rate with
-// valid credentials — check this contract first.
 function failureReason(caught) {
   if (!caught) return 'verified, but the payload carried no `sub` claim'
   return `${caught?.name ?? 'Error'}: ${caught?.message ?? String(caught)}`
 }
 
-// Optional authorizedParties hardening: set CLERK_AUTHORIZED_PARTIES to the
-// app's own origin(s) (comma-separated) so a token minted for a different azp
-// can't be replayed here. Applied to EVERY authenticated endpoint, user and
-// admin alike, unless a caller passes its own. Left unset, verifyToken skips the check — the
-// allowlist still bounds writes to enumerated user ids.
+// CLERK_AUTHORIZED_PARTIES (comma-separated origins) is an optional hardening for every
+// authenticated endpoint; unset, verifyToken skips the check (ADR-0127).
 export function authorizedParties(env = process.env) {
   const parties = (env.CLERK_AUTHORIZED_PARTIES || '')
     .split(',')
@@ -143,10 +50,8 @@ export function authorizedParties(env = process.env) {
   return parties.length ? parties : undefined
 }
 
-// The full check. `verifyOptions` is passed through to Clerk; `authorizedParties`
-// defaults to CLERK_AUTHORIZED_PARTIES. `log` and `verify` are injectable so
-// the unit suite can pin both the logging and the return-shape contract above
-// without a live Clerk instance, which CI has no way to reach.
+// The full check. `verifyOptions` goes to Clerk; `log` and `verify` are injectable so the unit
+// suite can pin the logging and the return-shape contract without a live Clerk instance.
 export async function authenticateUser(
   req,
   { env = process.env, log = console.error, verify = verifyToken, ...rest } = {},
@@ -162,12 +67,27 @@ export async function authenticateUser(
   }
   try {
     const payload = await verify(pre.token, { secretKey: pre.secretKey, ...verifyOptions })
-    // `sub` is the Clerk user id. Absent means this is not a session token we
-    // can attribute to a user, which is a rejection — but a different one from
-    // "did not verify", and the log says which.
+    // `sub` is the Clerk user id; absent is a rejection, and the log says why.
     if (!payload?.sub) return reject(null)
     return { ok: true, userId: payload.sub }
   } catch (caught) {
     return reject(caught)
+  }
+}
+
+// The per-user preamble every authenticated function repeats: method guard, store
+// BEFORE auth (so a 501 names the missing Redis, not a 401), then the Clerk check.
+// `fn(req, res, { redis, userId })` runs only for a verified user. `pre(req, res)`
+// is an optional guard that runs after the method check and before the store (reveal's 400);
+// it answers and returns true to stop.
+export function withUser(methods, fn, pre) {
+  return async (req, res) => {
+    if (!methods.includes(req.method)) return privateJson(res, { error: 'method not allowed' }, 405)
+    if (pre?.(req, res)) return
+    const redis = getRedis()
+    if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
+    const auth = await authenticateUser(req)
+    if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
+    return fn(req, res, { redis, userId: auth.userId })
   }
 }

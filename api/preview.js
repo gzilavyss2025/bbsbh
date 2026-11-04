@@ -27,7 +27,7 @@
 
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { buildCard, buildRoster } from './_lib/cards.js'
-import { CRAWL_STYLE, renderCrawlBody } from './_lib/crawl.js'
+import { appShell, CRAWL_STYLE, esc, renderCrawlBody } from './_lib/crawl.js'
 
 export const config = { runtime: 'edge' }
 
@@ -42,14 +42,6 @@ const MARKER = /<!-- OG:BEGIN[\s\S]*?OG:END -->/
 // still serves the card it serves today.
 const ROOT_DIV = '<div id="root"></div>'
 const HEAD_END = '</head>'
-
-function esc(s) {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
 
 // The public URL the user actually shared, rebuilt from the rewrite params —
 // clean of the ?route=… internals (and of any as-of ?d/?s hints).
@@ -197,18 +189,6 @@ export function withCrawlBody(html, card, roster) {
 // api/page.js does: index.html changes only on a deploy, and a deploy gets
 // fresh instances. Without it every deep link cost two CDN requests. A failure
 // is NOT cached, so the next request tries again.
-const shellCache = new Map()
-
-async function appShell(origin) {
-  const cached = shellCache.get(origin)
-  if (cached) return cached
-  const res = await fetch(`${origin}/index.html`, { headers: { Accept: 'text/html' } })
-  if (!res.ok) throw new Error(`index ${res.status}`)
-  const html = await res.text()
-  shellCache.set(origin, html)
-  return html
-}
-
 // The request's origin is trusted only when it is one of this deployment's own
 // hosts: the three production names, or the URLs Vercel gives this build. Any
 // other Host falls back to SITE_URL, so a forged Host header can neither steer

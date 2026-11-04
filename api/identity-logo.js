@@ -33,9 +33,7 @@
 
 import { describeLogoRejection, LOGO_MAX_BYTES } from '../src/lib/logoArt.js'
 import { IDENTITY_DIMENSIONS, identityFieldId } from '../src/lib/identity/fields.js'
-import { isOwnBlobUrlUnder, sniffImage } from './ballpark-photo.js'
-import { authenticateAdmin } from './_lib/adminAuth.js'
-import { privateJson, readRawBody, requestUrl } from './_lib/nodeHandler.js'
+import { uploadImage } from './_lib/blob.js'
 
 // Node runtime, not edge — @clerk/backend's verifyToken pulls in internals
 // Vercel's edge sandbox rejects. Same reason as api/copy.js.
@@ -46,74 +44,19 @@ export const config = { runtime: 'nodejs' }
 // about the vocabulary. A slot outside it is a field id no save could land.
 const SLOTS = new Set(IDENTITY_DIMENSIONS.logo.keys)
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return privateJson(res, { error: 'method not allowed' }, 405)
-
-  const token = process.env.BLOB_READ_WRITE_TOKEN
-  if (!token) return privateJson(res, { error: 'image store not configured' }, 501)
-
-  const userId = await authenticateAdmin(req)
-  if (!userId) return privateJson(res, { error: 'forbidden' }, 403)
-
-  const { searchParams } = requestUrl(req)
-  const teamId = searchParams.get('teamId') || ''
-  const slot = searchParams.get('slot') || ''
-  if (!/^[1-9]\d*$/.test(teamId)) return privateJson(res, { error: 'unknown team' }, 400)
-  if (!SLOTS.has(slot)) return privateJson(res, { error: 'unknown slot' }, 400)
-
-  const bytes = await readRawBody(req, LOGO_MAX_BYTES)
-  // null for BOTH "nothing arrived" and "went over the cap"; content-length is
-  // re-read purely to phrase the error (enforcement already happened in the
-  // streaming count). Same split as ballpark-photo.
-  if (!bytes) {
-    const declared = Number(req.headers?.['content-length'] ?? 0)
-    return declared > LOGO_MAX_BYTES
-      ? privateJson(res, { error: `image too large — the limit is ${LOGO_MAX_BYTES / 1024} KB` }, 413)
-      : privateJson(res, { error: 'no image received' }, 400)
-  }
-
-  // The curated-art standard, judged by the same function the dev lab and its
-  // endpoint already share (512x512 PNG under the cap) — so a file this refuses
-  // is one /identity-lab would have refused, with the same sentence.
-  const rejection = describeLogoRejection(bytes)
-  if (rejection) return privateJson(res, { error: rejection }, 415)
-
-  const sig = sniffImage(bytes)
-  if (!sig || sig.ext !== 'png') return privateJson(res, { error: 'not a PNG' }, 415)
-
-  // Lazy import, so the module still loads (and answers 501) where the
-  // dependency exists but the store is not configured.
-  const { put, del } = await import('@vercel/blob')
-
-  let uploaded
-  try {
-    uploaded = await put(`identity-logos/${teamId}-${slot}.png`, bytes, {
-      access: 'public',
-      token,
-      contentType: sig.contentType,
-      // A new URL every time, for ballpark-photo's cache reason: overwriting a
-      // stable pathname would leave the old bytes cached at the CDN, so "I
-      // replaced the mark" would keep showing the previous one. A unique URL
-      // makes the swap atomic and lets the object be cached hard.
-      addRandomSuffix: true,
-      cacheControlMaxAge: 31_536_000,
-    })
-  } catch {
-    return privateJson(res, { error: 'upload failed' }, 502)
-  }
-
-  // Best-effort cleanup of a blob this one replaces — after a successful put,
-  // never before, and only for a URL in our own store. The drawer only ever
-  // passes its own ABANDONED draft upload here (re-uploading before saving),
-  // never a URL a saved override still points at.
-  const replaces = searchParams.get('replaces')
-  if (replaces && isOwnBlobUrlUnder(replaces, 'identity-logos/') && replaces !== uploaded.url) {
-    try {
-      await del(replaces, { token })
-    } catch {
-      // Orphan left behind; not worth failing an upload the admin watched land.
+export default (req, res) =>
+  uploadImage(req, res, (q) => {
+    const teamId = q.get('teamId') || ''
+    const slot = q.get('slot') || ''
+    if (!/^[1-9]\d*$/.test(teamId)) return { error: 'unknown team' }
+    if (!SLOTS.has(slot)) return { error: 'unknown slot' }
+    return {
+      maxBytes: LOGO_MAX_BYTES,
+      limit: `${LOGO_MAX_BYTES / 1024} KB`,
+      prefix: 'identity-logos/',
+      // The curated-art standard, judged by the function the dev lab shares (512x512 PNG).
+      vet: (bytes, sig) => describeLogoRejection(bytes) || (sig?.ext === 'png' ? null : 'not a PNG'),
+      pathname: () => `identity-logos/${teamId}-${slot}.png`,
+      field: identityFieldId('logo', teamId, slot),
     }
-  }
-
-  return privateJson(res, { url: uploaded.url, field: identityFieldId('logo', teamId, slot) })
-}
+  })
