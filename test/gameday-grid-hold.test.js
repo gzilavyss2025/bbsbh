@@ -11,7 +11,7 @@ test('a grid tap during the close-out moves nothing, and marks the cells aria-di
   held.onSelect(1)
   held.onSelect(0)
   assert.deepEqual(moves, [], 'neither a forward nor a back tap moves')
-  assert.equal(held.disabled, true)
+  assert.equal(held.gridHeld, true)
   assert.equal(held.curIdx, 0, 'the rest of the panel context is kept')
 })
 
@@ -21,5 +21,15 @@ test('once the checkpoint is open, the grid moves again', () => {
   const free = holdGrid(panels, false)
   free.onSelect(3)
   assert.deepEqual(moves, [3])
-  assert.ok(!free.disabled)
+  assert.ok(!free.gridHeld)
+})
+
+// The wiring (#2768): the Mount holds the grid on the close-out or focus.closing, and InningViewer hands
+// it focus.closing. Dropping either brings the skipped checkpoint back with the helper test still green.
+test('GamedayNextMount holds the grid on the close-out and focus.closing', async () => {
+  const { readFileSync } = await import('node:fs')
+  const read = (rel) => readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8')
+  assert.match(read('src/screens/gameday/next/GamedayNextMount.jsx'), /holdGrid\([\s\S]*?,\s*held \|\| panels\.closing\)/)
+  assert.match(read('src/screens/InningViewer.jsx'), /onSelect: goTo, closing: focus\.closing/)
+  assert.match(read('src/screens/gameday/next/panels/GamedayPanels.jsx'), /aria-disabled=\{gridHeld \|\| undefined\}/)
 })

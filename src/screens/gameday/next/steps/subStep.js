@@ -43,7 +43,10 @@ export const forwardAdvance = (label, idx, closing, goTo) => ({ label, disabled:
 // The line-score grid waits like the advance (#2768, Gary 2026-11-04): while the half's rule inks in, and
 // until "Middle 1st ›" opens the checkpoint, a tapped inning moves nothing, forward or back. The cells
 // stay tappable (aria-disabled, not disabled), as the advance does (ADR-0046).
-export const holdGrid = (panels, held) => (held ? { ...panels, onSelect: () => {}, disabled: true } : panels)
+// `gridHeld` is read by the navigator only, so no other panel freezes with it. `held` is the close-out
+// (checkpoint not yet opened) or `focus.closing`, which also covers a read-back step hold on a half whose
+// checkpoint was already opened this visit.
+export const holdGrid = (panels, held) => (held ? { ...panels, onSelect: () => {}, gridHeld: true } : panels)
 
 // One tap inside the open at-bat: the sub-step count after it, or null when this tap reveals the
 // at-bat itself (its result, or the event that ends the half: decision 7). Pitch mode shows the next
