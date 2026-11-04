@@ -146,7 +146,9 @@
    motion/ is: src/styles is a flat directory at its own ratchet. */
 @import './styles/charts/winprob.css';
 @import './styles/21-box-score.css';
+@import './styles/21a-box-score-stars.css';
 @import './styles/box-score/scoring-summary.css';
+@import './styles/21b-box-score-tally.css';
 @import './styles/22-box-score-tables.css';
 /* The DOOR — the one "there is more behind this" control the app draws
    (#1130), and the first of the shared rules the design-system collapse pulls
@@ -314,9 +316,8 @@
                               that one unlisted route loads it.)
      scorecard/*  motion/scorecard-lens   screens/Scorecard.jsx (the game scorecard and
                               /scorecard-lab), screens/animlab/motionDemos.jsx
-     21a-box-score-stars, 21b-box-score-tally
-                              screens/BoxScore.jsx (21, 22 and 23 stay: the
-                              postseason, salaries and slate pages share them)
+                              (the box-score partials stay: tests pin their place
+                              and `.plink` out-ranks them if they move)
      scout/scout              screens/scout/ScoutPage.jsx (/scout, #1410) —
                               .scout__* only, a SUBDIRECTORY for the same
                               file-budget reason as designlab/)
