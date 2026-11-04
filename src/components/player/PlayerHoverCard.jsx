@@ -10,7 +10,8 @@ import { Pill } from '../ui/control/Pill.jsx'
 
 const CARD_ID = 'player-hover-card'
 
-// The one global hover card — mounted ONCE in App.jsx, singleton by design
+// The one global hover card — mounted ONCE, by LazyPlayerHoverCard (App.jsx
+// mounts that, and the card's chunk loads on the first hover), singleton by design
 // (there is only ever one thing being hovered at a time). PlayerLink writes
 // to the shared store on hover/focus; this reads it via useSyncExternalStore,
 // so it's the only component that re-renders on a hover change. Portalled to

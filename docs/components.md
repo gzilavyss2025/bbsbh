@@ -28,7 +28,7 @@ The half page `HalfInning`, `InningPage`, `DelayCard` and the page turn (`page-t
 
 ## `player/`
 
-`PlayerHoverCard` is the one PlayerLink triggers (desktop only, `lib/playerHoverStore.js`), mounted once in `App.jsx` and portalled to `<body>`
+`PlayerHoverCard` is the one PlayerLink triggers (desktop only, `lib/playerHoverStore.js`), loaded on the first hover by `LazyPlayerHoverCard` (mounted in `App.jsx`) and portalled to `<body>`
 
 ## `scoring/`
 

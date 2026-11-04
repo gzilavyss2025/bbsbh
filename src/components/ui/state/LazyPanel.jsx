@@ -6,7 +6,7 @@ import { reportCrash } from '../../../lib/crash/report.js'
 // not jump; if the chunk fails to load (a 404 after a deploy, a phone gone
 // offline) the panel is simply absent — it never takes the slate down
 // (MoveRow.jsx's WireFactsBoundary is the same rule).
-class PanelBoundary extends Component {
+export class PanelBoundary extends Component {
   state = { failed: false }
 
   static getDerivedStateFromError() {
