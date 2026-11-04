@@ -4,7 +4,7 @@ Reference moved out of `src/components/CLAUDE.md`. That file keeps each bucket's
 
 ## `charts/`
 
-`BallFlight` is `HitChart`'s per-play sibling: the base diamond in the at-bat feed is its handle (hover on a pointer, tap on a phone), and it adds the PATH from the plate that a chart of thirty dots cannot draw. Same marks, same 95-mph ring, one stylesheet (`69-hit-chart.css`). `SprayMap` is the season-long third: the same projection and the same ink, but its data (`src/api/spray.js`) is spoiler-FREE, so it needs no gate — and it draws a GENERIC field, because a season is sixty parks and picking one would invent a distance (`73-spray-map.css`)
+`BallFlight` is `HitChart`'s per-play sibling: the base diamond in the at-bat feed is its handle (tap it), and it adds the PATH from the plate that a chart of thirty dots cannot draw. Same marks, same 95-mph ring, one stylesheet (`69-hit-chart.css`). `SprayMap` is the season-long third: the same projection and the same ink, but its data (`src/api/spray.js`) is spoiler-FREE, so it needs no gate — and it draws a GENERIC field, because a season is sixty parks and picking one would invent a distance (`73-spray-map.css`)
 
 ## `bracket/`
 

@@ -4,18 +4,13 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
-import { ballFlightPath, hasElevationArc } from '../../lib/ballpark/ballFlight.js'
-import { Segmented } from '../ui/control/Segmented.jsx'
-import { ElevationPlot } from './ElevationArc.jsx'
-import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
-import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
+import { ballFlightPath } from '../../lib/ballpark/ballFlight.js'
 import { DEFAULT_HARD_HIT_MPH } from './HitChart.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
-import { CountUp, FlightClock } from './CountUp.jsx'
+import { FlightClock } from './CountUp.jsx'
 
-// WHERE THIS ONE BALL WENT. The play-by-play's base diamond is the handle: point
-// at it on a desktop and the flight opens beside the card; tap it on a phone and
-// it opens as a sheet you dismiss by tapping anywhere on it. Only a ball that was
+// WHERE THIS ONE BALL WENT. The play-by-play's base diamond is the handle: tap it
+// and the flight opens as a sheet you dismiss by tapping anywhere on it. Only a ball that was
 // actually PUT IN PLAY offers it — a strikeout and a walk have no flight, and a
 // park that tracked no landing coordinate has nothing to draw, so the handle
 // simply isn't there (the MiLB degrade, one more time).
@@ -32,26 +27,6 @@ import { CountUp, FlightClock } from './CountUp.jsx'
 // fetches nothing and imports no reveal-only module. `ball` arrives on an at-bat
 // card that only exists inside its own half's SealBox reveal.
 
-// Hover intent, not a hair trigger. A pointer travelling down the feed's right
-// rail crosses every diamond on the way to the one it wants; at zero delay each
-// of them opened a card. Same argument, same shape, as the player hover card's
-// (lib/playerHoverStore.js) — the show delay is the longer of the two.
-const SHOW_DELAY_MS = 220
-const HIDE_DELAY_MS = 120
-
-// What the popover is expected to occupy, for the flip/clamp math. The card is
-// a fixed width by CSS; the height is the drawing's own aspect at that width
-// plus the head and the numbers under it.
-const CARD_WIDTH = 300
-const CARD_HEIGHT = 356
-
-const DASH = '—'
-
-// A ground ball's `distance` is the few feet it travelled before a fielder got
-// to it — reported as "12 FT" beside an exit velocity it reads as a broken
-// number, so the strip drops it. Same rule the hit chart's readout uses.
-const carried = (ball) => ball.trajectory !== 'ground_ball' && ball.distance != null
-
 const isHard = (ball) => ball.exitVelo != null && ball.exitVelo >= DEFAULT_HARD_HIT_MPH
 
 // What the play WAS, in words. The feed's own phrase when it sent one; a plain
@@ -64,7 +39,7 @@ function outcomeWord(ball) {
 }
 
 // The drawing, the path, and the mark where the ball came down. One component so
-// the popover and the sheet can never drift into two different pictures.
+// the sheet has one picture.
 // How long the opened card's ball takes to land (Gary, 2026-10-29): a grounder skims, a liner is
 // quick, a fly ball hangs, a popup hangs longest; anything else by its carry. Real hang times sped
 // up to well under a second, so the card settles fast.
@@ -142,137 +117,26 @@ function FlightPlot({ ball, park }) {
   )
 }
 
-// The measurements, under the drawing. Every one of them is null-guarded: a park
-// can track where a ball landed and report no exit velocity or launch angle for
-// it, which is a dash rather than a missing tile — the strip keeps its shape.
-function FlightFacts({ ball }) {
-  return (
-    <div className="bflight__facts">
-      <div className="bflight__fact">
-        <p className="bflight__factlabel">Exit velo</p>
-        <p className="bflight__factvalue">
-          {ball.exitVelo == null ? DASH : <CountUp value={ball.exitVelo.toFixed(1)} />}
-          <span className="bflight__unit"> mph</span>
-        </p>
-      </div>
-      <div className="bflight__fact">
-        <p className="bflight__factlabel">Launch</p>
-        <p className="bflight__factvalue">
-          {ball.launchAngle == null ? DASH : <CountUp value={`${ball.launchAngle}°`} />}
-        </p>
-      </div>
-      <div className="bflight__fact">
-        <p className="bflight__factlabel">Distance</p>
-        <p className="bflight__factvalue">
-          {carried(ball) ? (
-            <>
-              <CountUp value={String(ball.distance)} />
-              <span className="bflight__unit"> ft</span>
-            </>
-          ) : (
-            DASH
-          )}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// THE HEAD READS DOWNWARD: who, then what he did. The result used to sit
-// opposite the name as the bare denotation alone — "RODRÍGUEZ … 1B" — which
-// puts the one word the card exists to explain in a shorthand you have to
-// already know, at the far end of the line from the name it belongs to. The
-// scorer's mark stays, as a chip beside the plain word rather than instead of
-// it.
-//
-// `onClose` is a REAL flex item in this row, never an absolutely positioned
-// corner: floated over the head it sat on the rule underneath and crowded
-// whatever the result line ended with. The popover passes none, and the row
-// simply closes up.
-//
-// THE TWO VIEWS (#1875): the plan view above, or the side view (ElevationArc.jsx).
-// The toggle is on the SHEET only. The popover takes no pointer (see its CSS), so
-// a control there could never be pressed. A ball with no launch angle or no
-// distance has no side view, and the toggle is not drawn at all. The toggle sits
-// above the drawing, so it stays under the thumb when the drawing changes height.
-const VIEWS = [
-  { value: 'spray', label: 'Field Spray' },
-  { value: 'arc', label: 'Elevation Arc' },
-]
-
-function FlightBody({ ball, park, name, code, closeRef, onClose, facts = true, arc = true, head = true }) {
-  const [view, setView] = useState('spray')
-  const toggle = Boolean(onClose) && arc && hasElevationArc(ball)
-  const side = toggle && view === 'arc'
+// Just the ✕ (floated over the drawing's corner by CSS) and the plot.
+function FlightBody({ ball, park, closeRef, onClose }) {
   return (
     <>
-      {(head || onClose) && <div className={head ? 'bflight__head' : 'bflight__head bflight__head--bare'}>
-        {head && <span className="bflight__ttl">
-          <span className="bflight__who">{name}</span>
-          <span className="bflight__result">
-            <span className="bflight__outcome">{outcomeWord(ball)}</span>
-            {code && <span className="bflight__code">{code}</span>}
-          </span>
-        </span>}
-        {onClose && (
+      {onClose && (
+        <div className="bflight__head bflight__head--bare">
           <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
           </IconButton>
-        )}
-      </div>}
-      {toggle && (
-        // The sheet is a dismiss target end to end; a press on the toggle is not
-        // "I am done reading", so it stops here.
-        <div className="bflight__views" onClick={(e) => e.stopPropagation()}>
-          <Segmented label="View of the flight" value={view} onChange={setView} options={VIEWS} fill />
         </div>
       )}
-      {side ? <ElevationPlot ball={ball} park={park} /> : <FlightPlot ball={ball} park={park} />}
-      {facts && <FlightFacts ball={ball} />}
+      <FlightPlot ball={ball} park={park} />
     </>
   )
 }
 
-// `facts={false}`: leave out the exit velo / launch / distance strip, for a host that already shows them
-// beside the diamond (Gameday's hero). `arc={false}`: the field spray only, no Elevation Arc view.
-// `head={false}`: no name or result over the drawing, only the sheet's ✕ (the host names the play).
-// `hover={false}`: no popover on a pointer's hover; the flight opens only on a click or tap.
 // `extra`: more for the opened card only, under the drawing (Gameday's Savant figures).
-export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true, hover = true, extra = null }) {
-  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY) && hover
-  const btnRef = useRef(null)
+export function BallFlight({ ball, batter, extra = null }) {
   const closeRef = useRef(null)
-  const timer = useRef(null)
-  // The trigger's own box at hover time. The card positions off it once and
-  // closes when the page moves, rather than tracking it live.
-  const [anchor, setAnchor] = useState(null)
   const [open, setOpen] = useState(false)
-
-  useEffect(() => () => clearTimeout(timer.current), [])
-
-  useEffect(() => {
-    if (!anchor) return
-    // A captured rect describes where the trigger WAS. Once the feed scrolls the
-    // card is anchored to nothing real, so it closes instead of following. The
-    // wheel/touchmove pair catches the case `scroll` misses: a wheel tick with
-    // nothing left to scroll fires no scroll event at all, and the card would
-    // sit through the intent to travel.
-    const close = () => {
-      clearTimeout(timer.current)
-      setAnchor(null)
-    }
-    const onKey = (e) => e.key === 'Escape' && close()
-    window.addEventListener('keydown', onKey)
-    window.addEventListener('scroll', close, { capture: true, passive: true })
-    window.addEventListener('wheel', close, { passive: true })
-    window.addEventListener('touchmove', close, { passive: true })
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      window.removeEventListener('scroll', close, { capture: true })
-      window.removeEventListener('wheel', close)
-      window.removeEventListener('touchmove', close)
-    }
-  }, [anchor])
 
   useEffect(() => {
     if (!open) return
@@ -280,8 +144,7 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
     window.addEventListener('keydown', onKey)
     // The sheet takes focus and hands it back, the same contract every other
     // dialog here keeps (StrikeZoneModal). The close button is the target: it
-    // is the first thing in the card a keyboard can act on (the view toggle,
-    // when the ball has a side view, comes after it).
+    // is the first thing in the card a keyboard can act on.
     const trigger = document.activeElement
     closeRef.current?.focus()
     return () => {
@@ -296,25 +159,7 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
   if (!ball || !park) return null
 
   const name = batter?.last || batter?.fullName || ''
-  const show = (immediate) => {
-    if (!hoverCapable || !btnRef.current) return
-    const rect = btnRef.current.getBoundingClientRect()
-    clearTimeout(timer.current)
-    if (immediate) setAnchor(rect)
-    else timer.current = setTimeout(() => setAnchor(rect), SHOW_DELAY_MS)
-  }
-  const hide = () => {
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => setAnchor(null), HIDE_DELAY_MS)
-  }
   const label = `Ball flight for ${name || 'this at-bat'}, ${outcomeWord(ball)}`
-  const pos = anchor
-    ? hoverCardPosition(anchor, { width: window.innerWidth, height: window.innerHeight }, {
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-      })
-    : null
-
   return (
     <>
       {/* THE DIAMOND IS THE HANDLE. The button lies over the whole tally cell
@@ -324,39 +169,14 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
           under them would lose every tap that landed on the code. Nothing in
           the cell is interactive otherwise, so the cell can be the target. */}
       <button
-        ref={btnRef}
         type="button"
         className="pbp__flightbtn"
         aria-label={label}
-        onMouseEnter={() => show(false)}
-        onMouseLeave={hide}
-        onFocus={() => show(true)}
-        onBlur={hide}
-        onClick={() => {
-          clearTimeout(timer.current)
-          setAnchor(null)
-          setOpen(true)
-        }}
+        onClick={() => setOpen(true)}
       />
-      {pos && !open && (
-        <ModalPortal>
-          <Card
-            as="div"
-            body="flush"
-            className="bflight bflight--hover"
-            role="dialog"
-            aria-label={label}
-            style={{ left: pos.left, top: pos.top }}
-          >
-            <FlightBody ball={ball} park={park} name={name} code={code} facts={facts} arc={arc} head={head} />
-          </Card>
-        </ModalPortal>
-      )}
       {open && (
         <ModalPortal>
-          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. The
-              one control on the card is the view toggle, which stops its own
-              taps (FlightBody); any other tap can only mean "I am done reading
+          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. Any tap can only mean "I am done reading
               it", and hunting for a corner ✕ on a phone is the worse of the
               two. The ✕ stays for the pointer that expects one and for a
               keyboard, which needs a real focus target. */}
@@ -367,11 +187,6 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
               <FlightBody
                 ball={ball}
                 park={park}
-                name={name}
-                code={code}
-                facts={facts}
-                arc={arc}
-                head={head}
                 closeRef={closeRef}
                 onClose={() => setOpen(false)}
               />

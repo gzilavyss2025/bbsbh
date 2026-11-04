@@ -636,104 +636,19 @@
   font-family: var(--font-body);
   padding: var(--space-3) var(--space-3) var(--space-1);
 }
-/* Square corners, card and code chip, as every Gameday surface is (Card's sheet rounds by default). */
-.bflight:is(.bflight--modal, .bflight--hover), .bflight .bflight__code { border-radius: var(--radius-square); }
-
-.bflight--hover {
-  position: fixed;
-  z-index: var(--z-modal);
-  /* THE CARD TAKES NO POINTER. It is read-only — a drawing and three numbers —
-     so a reader travelling down the feed's diamonds passes straight through it
-     onto the next one, which re-anchors the card, instead of having to steer
-     around it. Anything clickable added in here turns this back on and owes the
-     trigger-to-card gap a safe polygon, not a plain grace period. The SHEET is
-     the opposite: its surface is a dismiss target, all but its view toggle. */
-  pointer-events: none;
-}
-
+/* Square corners on the card, as every Gameday surface is (Card's sheet rounds by default). */
 .bflight--modal {
-  /* Wider than the popover: a sheet is the whole screen's attention, and the
+  border-radius: var(--radius-square);
+  /* A sheet is the whole screen's attention, and the
      drawing is the point of it. */
   width: 340px;
   animation: fade var(--dur-med) var(--ease-out);
 }
 
-/* THE HEAD IS A ROW OF REAL ITEMS — title block, then the close button. Nothing
-   in it is floated over anything else: the close button used to be absolutely
-   positioned in the corner, which put a 28px circle down on the rule under the
-   head and hard against whatever the result line ended with. As a flex item it
-   sits IN the row, the rule runs clear underneath all of it, and the popover —
-   which has no close button — simply closes the row up. */
-.bflight__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: var(--space-2);
-}
-/* Only the ✕ (BallFlight head={false}): it floats in the card's top right corner, over the drawing's
+/* The ✕: it floats in the card's top right corner, over the drawing's
    empty corner, so the field starts at the card's top instead of under a row of white. */
 .bflight:has(> .bflight__head--bare) { position: relative; }
-.bflight__head--bare { position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); border-bottom: 0; padding-bottom: 0; }
-
-.bflight__ttl {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.bflight__who {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-title);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* What he did, under his name: the plain word first, the scorer's mark beside
-   it. A denotation alone ("1B") is a shorthand the reader has to already know,
-   and this card exists to be understood at a glance. */
-.bflight__result {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-  min-width: 0;
-}
-
-.bflight__outcome {
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-solid);
-  color: var(--text-caption);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* The scorer's own denotation, in his own hand — the mono face every other
-   scorebook mark in the app is set in, on the paper chip the scorecard sheet
-   gives it. */
-.bflight__code {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-cell);
-  letter-spacing: var(--ls-title);
-  line-height: var(--lh-solid);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  padding: 2px var(--space-1);
-}
+.bflight__head--bare { display: flex; position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); border-bottom: 0; padding-bottom: 0; }
 
 .bflight .bflight__field {
   display: block;
@@ -829,53 +744,6 @@
 
 .bflight__heat-to {
   stop-color: var(--award-line);
-}
-
-/* ---- The side view (#1875, ElevationArc.jsx): light axis marks, the wall in heading ink ---- */
-
-.bflight__views,
-.bflight__arc {
-  margin: var(--space-2) 0 0;
-}
-
-.bflight__arcsvg {
-  display: block;
-  width: 100%;
-}
-
-.bflight__arcground {
-  stroke: var(--graphite);
-  stroke-width: 1.2;
-}
-
-.bflight__arcgrid {
-  stroke: var(--border-hairline);
-  stroke-dasharray: 3 4;
-}
-
-.bflight__arctick,
-.bflight__arcpeaklabel {
-  fill: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-}
-
-.bflight__arcpeaklabel {
-  fill: var(--text-heading);
-  font-weight: var(--w-bold);
-}
-
-.bflight__arcwall {
-  stroke: var(--text-heading);
-  stroke-width: 3;
-}
-
-.bflight .bflight__arcpath {
-  stroke-width: 2.5;
-}
-
-.bflight__arcpeak {
-  fill: var(--award-ink);
 }
 
 /* ---- The numbers ---- */
