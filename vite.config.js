@@ -513,8 +513,8 @@ export default defineConfig({
         // through the CacheFirst `/assets/` rule below.
         manifestTransforms: [shellOnly],
         // What is left to exclude, now that `data/**.json` is opted OUT by
-        // default above: the ART. Two directories of images that a page
-        // reaches for a couple of files at a time, plus the link-preview card,
+        // default above: the ART. Images that a page reaches for a few
+        // files at a time, plus the link-preview card,
         // each with its own reason below.
         globIgnores: [
           // Gameday's big-play celebration art (~6.5 MB), also the Animation
@@ -541,10 +541,11 @@ export default defineConfig({
           // request that can never come from a page this worker controls.
           '**/og-image.png',
           // Historical club marks (~4.4 MB, 52 files; a team page shows one
-          // era at a time) and the postseason series marks (~370 KB). Both
-          // load per page and stay offline through the CacheFirst rule below.
-          'logos/**',
-          'postseason-marks/**',
+          // era at a time). Loaded per page and kept offline by the runtime
+          // rule below. /logos/home-run-derby-2026.svg stays precached (the
+          // slate's DerbyCard draws it), and so does postseason-marks/: it
+          // holds only the current season, which the slate series line uses.
+          'logos/historical/**',
         ],
         navigateFallback: '/index.html',
         // …EXCEPT the guides. `navigateFallback` alone registers a
@@ -669,10 +670,13 @@ export default defineConfig({
             },
           },
           {
-            // Same-origin era and series art left out of the precache above
-            // (/logos/, /postseason-marks/): cached the first time it is shown.
-            urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/(logos|postseason-marks)\//.test(url.pathname),
-            handler: 'CacheFirst',
+            // Historical club marks, left out of the precache above. No ?v= hash
+            // and identity-lab saves overwrite the same file names, so
+            // StaleWhileRevalidate: shown from disk, refreshed behind it. Only
+            // images are stored: vercel.json rewrites unknown paths to
+            // index.html with a 200, and a missing mark must not be cached as HTML.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/logos/historical/'),
+            handler: 'StaleWhileRevalidate',
             method: 'GET',
             options: {
               cacheName: 'bbsbh-static-art',
@@ -680,6 +684,15 @@ export default defineConfig({
                 maxEntries: 120,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
               },
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }) =>
+                    response && response.status === 200 &&
+                    (response.headers.get('content-type') || '').startsWith('image/')
+                      ? response
+                      : null,
+                },
+              ],
             },
           },
           {
