@@ -45,6 +45,17 @@ export function addDays(date, n) {
   return copy
 }
 
+// "YYYY-MM-DD" as a local-midnight Date (manual y/m/d, so a weekday can't drift across a DST
+// edge), or null for a missing/garbled value. The one parse the formatters below share.
+function localDate(apiDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return null
+  const [y, m, d] = apiDate.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+// An apiDate formatter for these Intl options; '' for a missing/garbled date.
+const fmt = (opts) => (apiDate) => localDate(apiDate)?.toLocaleDateString(undefined, opts) ?? ''
+
 // Whether an apiDate ("YYYY-MM-DD") falls within the last `days` days of
 // today, inclusive of today itself — used to flag a "new" callout on a
 // recently-happened event (e.g. foul tracker's single-game highs). Manual
@@ -53,9 +64,8 @@ export function addDays(date, n) {
 // Date objects with time-of-day still attached can. Returns false for a
 // missing/garbled date or one in the future.
 export function isWithinDays(apiDate, days, today = new Date()) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return false
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const then = new Date(y, m - 1, d)
+  const then = localDate(apiDate)
+  if (!then) return false
   const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   const diffDays = Math.round((todayMidnight - then) / 86400000)
   return diffDays >= 0 && diffDays <= days
@@ -70,15 +80,16 @@ export function monthDay(apiDate) {
   return m ? `${Number(m[1])}/${Number(m[2])}` : ''
 }
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' })
+// "Jan".."Dec" from a 0-based month index: the one spelling every caption shares.
+export const monthAbbr = (i) => MONTH.format(Date.UTC(2000, i, 1))
 
 // "Jul 5" — month name and day, no weekday and no year, read straight off the
 // YYYY-MM-DD (a trailing time or zone is ignored). The one spelling for a
-// caption or a row date; monthDay above is the compact "7/5" and monthDayShort
-// below is the locale-formatted one. Returns '' for a missing/garbled date.
+// caption or a row date; monthDay above is the compact "7/5". Returns '' for a missing/garbled date.
 export function monthDayName(apiDate) {
   const m = /^\d{4}-(\d{2})-(\d{2})/.exec(apiDate ?? '')
-  return m ? `${MONTH_NAMES[Number(m[1]) - 1]} ${Number(m[2])}` : ''
+  return m ? `${monthAbbr(Number(m[1]) - 1)} ${Number(m[2])}` : ''
 }
 
 // "4/14/26" — compact month/day/2-digit-year, for a context where the season
@@ -95,71 +106,28 @@ export function monthDayYear(apiDate) {
 // the rest of this file so the weekday can't drift across a DST edge; returns
 // false for a missing/garbled date.
 export function isFriday(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return false
-  const [y, m, d] = apiDate.split('-').map(Number)
-  return new Date(y, m - 1, d).getDay() === 5
+  return localDate(apiDate)?.getDay() === 5
 }
 
 // "MON" — 3-letter uppercase weekday abbreviation, for a compact date badge
-// (foul tracker's single-game-highs link). Same no-Date-round-trip approach
-// as monthDay/monthDayYear; returns '' for a missing/garbled date.
+// (foul tracker's single-game-highs link). Returns '' for a missing/garbled date.
 export function weekdayAbbr(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3).toUpperCase() // caps-js-exempt
-}
-
-// "Dec 10" — month and day, no weekday and no year, for a strip whose whole
-// row is one winter (the offseason page's calendar). monthDay's "12/10" reads
-// as a fraction in a line of short labels; the year is carried by the page.
-export function monthDayShort(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return fmt({ weekday: 'short' })(apiDate).slice(0, 3).toUpperCase() // caps-js-exempt
 }
 
 // "Fri, Jul 5" style label for the slate header.
-export function humanDate(apiDate) {
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+export const humanDate = fmt({ weekday: 'short', month: 'short', day: 'numeric' })
 
 // "Fri, Jul 5, 2026" — humanDate plus the year, for the game page's own
 // masthead (GameView.jsx): unlike the slate list humanDate serves elsewhere,
 // this header can be reached long after the fact (a shared deep link, a
 // history/postseason page), where the year isn't implied by "today."
-export function humanDateWithYear(apiDate) {
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
+export const humanDateWithYear = fmt({ weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 
 // "Fri, June 12, 2026" — the full date line the scorebook header wants, so it
-// can be copied straight onto the sheet. Same parse as humanDate; returns ''
-// for a missing/garbled date (thin MiLB feeds) so callers show the usual "—".
-export function scorebookDate(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
+// can be copied straight onto the sheet. Returns '' for a missing/garbled date
+// (thin MiLB feeds) so callers show the usual "—".
+export const scorebookDate = fmt({ weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })
 
 // Whether an apiDate ("YYYY-MM-DD") names a real calendar date — a Date
 // round-trip catches an out-of-range month/day (e.g. "2026-13-45" or

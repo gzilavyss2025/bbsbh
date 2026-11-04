@@ -1,5 +1,5 @@
 import '../../styles/postseason/primer-main.css'
-import { monthDayShort } from '../../lib/dates.js'
+import { monthDayName } from '../../lib/dates.js'
 import { pillSolidStyle } from '../../lib/design/pillClass.js'
 import { seriesStatus } from '../../lib/postseason/primer/seriesStatus.js'
 import { wpSpark } from '../../lib/postseason/primer/wpSpark.js'
@@ -59,7 +59,7 @@ function Game({ node, game, clubs }) {
       <div className="seriesribbon__top">
         <span className="seriesribbon__no">G{node.n}</span>
         {node.kind === 'today' && <span>Today</span>}
-        {node.date && <span>{monthDayShort(node.date)}</span>}
+        {node.date && <span>{monthDayName(node.date)}</span>}
       </div>
       {node.kind === 'ifNecessary' && <p className="seriesribbon__note">If necessary</p>}
       {node.kind === 'today' && <GameTime gameDate={game?.gameDate} tzId={game?.tzId} tbd={!game?.gameDate} />}

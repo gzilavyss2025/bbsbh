@@ -8,7 +8,7 @@ import { clubShort } from '../../../api/around-the-game/clubs.js'
 import { fetchGamesByPk } from '../../../api/schedule.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../../hooks/preferences/useFavoriteTeam.js'
-import { monthDayShort } from '../../../lib/dates.js'
+import { monthDayName } from '../../../lib/dates.js'
 import { ordinal } from '../../../lib/format.js'
 import { useRouteLink } from '../../../lib/nav.js'
 import { gamePath } from '../../../lib/route.js'
@@ -170,7 +170,7 @@ export function RanOut({ summary, clubs }) {
               n.fails.length > 1 &&
               n.fails.every((f) => f.playerId != null && f.playerId === n.fails[0].playerId)
             const link = games?.[n.gamePk]
-            const date = monthDayShort(n.date)
+            const date = monthDayName(n.date)
             return (
               <tr
                 key={`${n.gamePk}-${n.teamId}`}

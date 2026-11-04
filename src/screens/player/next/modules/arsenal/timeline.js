@@ -1,4 +1,5 @@
 import { easeOutQuart } from '../../../../../lib/motion/curves.js'
+import { clamp } from '../../../../../lib/math/number.js'
 
 // The Arsenal card's timeline (#2073, board ArsenalReveal.dc.html): every beat of the side view, the mix bar
 // and the menu, as a pure function of t, the ms since the card started to play. Pure; no clock, no DOM.
@@ -8,9 +9,8 @@ import { easeOutQuart } from '../../../../../lib/motion/curves.js'
 export const LEAD = 760 // ms before the release (the board's T0)
 export const TAIL = 760 // ms held after the last landing
 
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x))
 // The board's `eo`: an ease-out quart that holds at 0 before its start and at 1 after its end.
-export const eo = (x) => easeOutQuart(clamp(x))
+export const eo = (x) => easeOutQuart(clamp(x, 0, 1))
 
 // The timeline's length in ms. `pitches` are { code, ft, rpm }; ft (s) is null for a pitch with no path.
 export function totalMs(pitches, S = 3) {
@@ -20,7 +20,7 @@ export function totalMs(pitches, S = 3) {
 
 // A figure counting up to v as e goes 0 -> 1, with v's own decimals, or d.
 export function countText(v, e, d = (String(v).split('.')[1] ?? '').length) {
-  return (v * clamp(e)).toFixed(d)
+  return (v * clamp(e, 0, 1)).toFixed(d)
 }
 
 // Every beat at t. `solo` is the picked code (only when that pitch has a path): the others are ghosts,
@@ -38,7 +38,7 @@ export function beatsAt(t, pitches, { S = 3, solo = null } = {}) {
       const ghost = solo != null && solo !== p.code
       const flies = p.ft != null
       const land = flies ? LEAD + p.ft * 1000 * S : Infinity
-      const u = ghost ? 1 : flies ? clamp(rel / (p.ft * 1000 * S)) : 0
+      const u = ghost ? 1 : flies ? clamp(rel / (p.ft * 1000 * S), 0, 1) : 0
       const landed = !ghost && t >= land
       const since = t - land
       const born = eo((t - (LEAD - 260)) / 260)

@@ -1,5 +1,6 @@
 import { hitterCounters } from '../../../../../api/scout/hitterGrid.js'
 import { GRID, inZone } from '../../../../../lib/zone/zoneGeometry.js'
+import { sum } from '../../../../../lib/math/number.js'
 
 // The batter Plate approach's pure view (#1887): what the hitter did with each pitch, from the
 // hitter-grid counters (ADR-0096, #1911). Season sums over Final games; an open surface.
@@ -10,7 +11,6 @@ export const OUTCOMES = ['In play', 'Ball', 'Foul', 'Called', 'Whiff']
 export const MIN_CELL = 10 // a cell under this many pitches prints nothing
 const MIN_TYPE = 10 // a pitch type under this many is left out of the mix
 
-const sum = (a) => a.reduce((x, y) => x + y, 0)
 const rate = (n, d) => (d > 0 ? n / d : null)
 const ALL = Array.from({ length: GRID * GRID }, (_, i) => i)
 const ZONE = ALL.filter((i) => inZone({ col: i % GRID, row: Math.floor(i / GRID) }))

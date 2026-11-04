@@ -1,4 +1,5 @@
 import { divisionRecordFor } from '../../data/shared.js'
+import { monthAbbr } from '../../../../lib/dates.js'
 
 // The top of the one-scroll team page (#1107, row 5), as pure shapes: the record spot, the form
 // line, the two stretches, Last 10, the days calendar and the win-percentage grid. Everything
@@ -9,8 +10,7 @@ import { divisionRecordFor } from '../../data/shared.js'
 
 export const STRETCH = 15
 const MLB_CLUBS = 30
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const monthOf = (iso) => MONTHS[Number(iso.slice(5, 7)) - 1]
+const monthOf = (iso) => monthAbbr(Number(iso.slice(5, 7)) - 1)
 
 const decided = (schedule) => schedule.filter((g) => g.won != null)
 const regular = (schedule) => decided(schedule).filter((g) => g.gameType === 'R')

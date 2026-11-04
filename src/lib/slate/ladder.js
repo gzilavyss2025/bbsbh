@@ -8,6 +8,7 @@
 // The old level rail put WINTER second, right after MLB; the D1 design moves
 // it to the end (Gary's handoff, 2026-10-18).
 import { isWinterSport } from '../winter/leagues.js'
+import { monthAbbr } from '../dates.js'
 
 const FULL_NAME = {
   MLB: 'Major League',
@@ -68,11 +69,10 @@ export function ladderStops({ levels, counts, sportId, winterGames = null }) {
 // plus the one-line form the compact bar prints. Built from the date's own
 // parts, never from a clock, so it names the day the URL names.
 const DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export function dateLines(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
   const dow = DOW[new Date(y, m - 1, d).getDay()]
-  const md = `${MON[m - 1]} ${d}`
+  const md = `${monthAbbr(m - 1)} ${d}`
   return { dow, md, short: `${dow.slice(0, 3)} ${md}` }
 }

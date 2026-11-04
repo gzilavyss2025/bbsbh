@@ -4,7 +4,7 @@ import { useScrollRail } from '../../../../hooks/scroll/useScrollRail.js'
 import { fetchTeamHighlights, flattenPositiveClips } from '../../../../api/gamehighlights.js'
 import { HighlightSheet } from '../../../../components/playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../../../../components/highlights/HighlightClipCard.jsx'
-import { MONTH_LABELS } from '../TeamStatsCard.jsx'
+import { monthAbbr } from '../../../../lib/dates.js'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 
@@ -16,7 +16,7 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 // just the bare date.
 function gameCaption(clip, game) {
   const d = new Date(`${clip.date}T00:00:00Z`)
-  const dateLabel = `${MONTH_LABELS[d.getUTCMonth()]} ${d.getUTCDate()}`
+  const dateLabel = `${monthAbbr(d.getUTCMonth())} ${d.getUTCDate()}`
   if (!game?.opponent) return dateLabel
   const oppLabel = `${game.isHome ? '' : '@ '}${game.opponent.abbreviation}`
   return `${dateLabel} ${oppLabel}`

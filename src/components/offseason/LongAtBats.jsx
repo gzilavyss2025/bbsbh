@@ -3,7 +3,7 @@ import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
-import { monthDayShort } from '../../lib/dates.js'
+import { monthDayName } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
@@ -94,7 +94,7 @@ export function LongAtBats({ season }) {
               <span className="t-label t-label--bold">pitches</span>
               {path && (
                 <a className="seasonnote__when" {...linkProps(path)}>
-                  {monthDayShort(top.date)}, {top.date.slice(0, 4)}
+                  {monthDayName(top.date)}, {top.date.slice(0, 4)}
                   <span className="sr-only"> — open this game</span>
                   <span aria-hidden="true">›</span>
                 </a>
@@ -141,7 +141,7 @@ export function LongAtBats({ season }) {
                         type="button"
                         className="seasonnote__barrow"
                         aria-pressed={i === pick}
-                        aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)}`}
+                        aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayName(row.date)}`}
                         onClick={() => setPick(i)}
                       >
                         <span className="seasonnote__barn">{row.pitches}</span>
@@ -158,7 +158,7 @@ export function LongAtBats({ season }) {
                     <span className="seasonnote__barmeta">
                       <span>
                         {row.post && <span className="seasonnote__barpost">Postseason</span>}{row.post && ' · '}
-                        {monthDayShort(row.date)}
+                        {monthDayName(row.date)}
                       </span>
                       {row.event && <span className="seasonnote__barevent">{row.event}</span>}
                     </span>

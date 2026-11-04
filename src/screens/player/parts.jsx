@@ -3,15 +3,14 @@
 // verbatim when the page became four tab routes — nothing here is new, and
 // nothing here belongs to one tab (a piece only one tab draws stays in that
 // tab's own screen).
+import { monthDayName } from '../../lib/dates.js'
 
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const DASH = '—'
 
 // "Jul 5, 2019" — a dated career event (the debut fact, every "first").
 export function debutLabel(iso) {
-  const [y, m, d] = (iso || '').split('-')
-  return y ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
+  const md = monthDayName(iso)
+  return md ? `${md}, ${iso.slice(0, 4)}` : ''
 }
 
 // "2018 · Rd 1 #21", or the signing year for an undrafted player.

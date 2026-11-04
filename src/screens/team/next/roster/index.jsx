@@ -16,7 +16,7 @@ import { StaffGrid } from '../../../../components/workload/StaffGrid.jsx'
 import { splitDisplayName } from '../../../../api/person.js'
 import { loadRoster } from '../../data/loadRoster.js'
 import { lineupDefenseFrom, seasonOf } from '../../data/shared.js'
-import { monthDayShort } from '../../../../lib/dates.js'
+import { monthDayName } from '../../../../lib/dates.js'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { rosterCount, transactionsDoor } from './rosterData.js'
@@ -57,7 +57,7 @@ function PenWeek({ teamId }) {
     <Stack gap="base" className="rosterbox-week">
       <Sub title="Bullpen, last seven days"><StaffGrid rows={grid} /></Sub>
       <StatStrip>
-        <StatCell lead label={fig.day ? `Pitched ${monthDayShort(fig.day)}` : 'Pitched'} value={fig.pitched} note={`of ${fig.arms} arms`} />
+        <StatCell lead label={fig.day ? `Pitched ${monthDayName(fig.day)}` : 'Pitched'} value={fig.pitched} note={`of ${fig.arms} arms`} />
         <StatCell label="Seven days" value={fig.total} note="pitches" />
         <StatCell label="Most work" value={fig.busiest ? fig.busiest.last7dayPitches : '—'} note={fig.busiest ? splitDisplayName(fig.busiest.name).last : ''} />
       </StatStrip>

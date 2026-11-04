@@ -8,14 +8,14 @@
 // `meetingWins` ({ away, home }) is the optional head-to-head count for that row.
 // The meeting row is dropped when the clubs did not meet. A missing last Series
 // or title reads "—".
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DAY_MS = 86_400_000
 // Two meetings further apart than this are two series.
 const SERIES_GAP_DAYS = 4
 
 const parts = (iso) => {
   const [y, m, d] = iso.split('-').map(Number)
-  return { m: MONTHS[m - 1], d, t: Date.UTC(y, m - 1, d) }
+  const t = Date.UTC(y, m - 1, d)
+  return { m: new Date(t).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' }), d, t }
 }
 const fmt = (a, b) => {
   if (a.t === b.t) return `${a.m} ${a.d}`

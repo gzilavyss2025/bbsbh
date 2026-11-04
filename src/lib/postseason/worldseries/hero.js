@@ -11,6 +11,7 @@
 //   decidedHero   a decided Series' hero: the winner, each game's winner, the Series MVP's slab.
 import { gamePath } from '../../route.js'
 import { ledgerModel } from './ledger.js'
+import { shiftDays } from '../../time/standingsDates.js'
 
 // 'Fri' and 23 from '2026-10-23'. Noon UTC keeps the date on its own day in every zone.
 const at = (date) => new Date(`${date}T12:00:00Z`)
@@ -22,12 +23,7 @@ const monthOf = (date) => at(date).toLocaleDateString('en-US', { month: 'long', 
 export function monthsOf(days) {
   return [...new Set(days.filter((d) => d.date).map((d) => monthOf(d.date)))].join(' / ')
 }
-const dayAfter = (date) => {
-  if (!date) return null
-  const d = at(date)
-  d.setUTCDate(d.getUTCDate() + 1)
-  return d.toISOString().slice(0, 10)
-}
+const dayAfter = (date) => (date ? shiftDays(date, 1) : null)
 
 // The World Series format, 2-3-2: an off day after Game 2 and after Game 5, none between the rest.
 const OFF_AFTER = new Set([2, 5])
@@ -49,7 +45,7 @@ export function withFormatDates(games, upcoming, slateDate = '') {
       if (g.date || !g.ifNecessary) return g
       const prev = dateOf.get(g.gameNumber - 1)
       if (!prev) return g
-      const date = OFF_AFTER.has(g.gameNumber - 1) ? dayAfter(dayAfter(prev)) : dayAfter(prev)
+      const date = shiftDays(prev, OFF_AFTER.has(g.gameNumber - 1) ? 2 : 1)
       if (date <= slateDate) return g
       dateOf.set(g.gameNumber, date)
       return { ...g, date, projected: true }

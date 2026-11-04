@@ -83,11 +83,6 @@ export const TYPE_TONE = {
   shuffle: 'move',
 }
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
 // Spelled-out dateline. Mixed-case here on purpose: the CSS applies the
 // app's ALL-CAPS invariant, never a per-component .toUpperCase() (ADR-0017 /
 // check-name-casing.mjs).
@@ -99,7 +94,8 @@ const MONTHS = [
 export function datelineParts(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
-  return { weekday: WEEKDAYS[date.getUTCDay()], month: MONTHS[m - 1], day: d }
+  const long = (opts) => date.toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' })
+  return { weekday: long({ weekday: 'long' }), month: long({ month: 'long' }), day: d }
 }
 export function dateline(iso) {
   const { weekday, month, day } = datelineParts(iso)

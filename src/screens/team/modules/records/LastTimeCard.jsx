@@ -1,3 +1,4 @@
+import { monthDayName } from '../../../../lib/dates.js'
 import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/scheduleShape.js'
 import { ALL_MLB_TEAM_IDS, teamClubName, teamLocationName } from '../../../../lib/teams.js'
 import '../../../../styles/65-team-records.css'
@@ -37,14 +38,13 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 // "Jul 3" — parsed off the ISO string rather than through Date, which would
 // shift the day by one in any timezone behind UTC. Same reason and same shape
 // as teamRecords.js's shortDate, which this deliberately mirrors.
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function when(iso) {
-  const [y, m, d] = iso.split('-')
+  const y = iso.slice(0, 4)
   const now = String(new Date().getFullYear())
   // The year is dropped inside the current season and kept outside it. "Jul 3"
   // reads as this year to anyone holding a scorecard; "May 18, 2019" has to say
   // so, because the whole force of the line is how long ago it was.
-  return y === now ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}`
+  return y === now ? monthDayName(iso) : `${monthDayName(iso)}, ${y}`
 }
 
 // The cities that host two clubs, plus any club whose "location" is really just

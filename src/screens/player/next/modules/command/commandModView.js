@@ -5,6 +5,7 @@ import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank,
 import { pitchLabel } from '../../../../../api/pitchArsenal.js'
 import { ordinal } from '../../../../../lib/format.js'
 import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
+import { sum } from '../../../../../lib/math/number.js'
 
 const HAND_WORD = { L: 'vs left-handed batters', R: 'vs right-handed batters' }
 // Each tile's rate, label, and base: the count its rate is out of.
@@ -21,7 +22,6 @@ const STEPS = 5
 export const HEART = 12 // the stored index of middle-middle; the readout opens on it
 
 const fmt = (n) => n.toLocaleString('en-US')
-const sum = (a) => (a ?? []).reduce((x, y) => x + y, 0)
 const pct = (n, of) => (of > 0 ? Math.round((n / of) * 100) : 0)
 // A percentile rank reads 1st to 99th: the mid-rank of the end of a big pool rounds to 0 or 100.
 const rankWord = (p) => ordinal(Math.min(99, Math.max(1, p)))
