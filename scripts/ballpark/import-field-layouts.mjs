@@ -126,14 +126,14 @@ console.log(`median per-park pole scale ${fitted[fitted.length >> 1]?.toFixed(3)
 // resolves by venue id, so a rename never loses the wall. But a caller with
 // only a name (and the facts table's aliases) needs the new name, so this
 // logs every MLB park name that does not resolve, and every MLB venue with no
-// layout record (a new park). Add the alias in ballparkData.js, or the record
+// layout record (a new park). Add the alias in src/lib/data/parkNames.js, or the record
 // in layout/configurations.js, before Opening Day.
 const namesBySeason = {}
 for (const season of [year, year + 1]) {
   const data = await getJson(`/api/v1/teams?sportIds=1,11,12,13,14&season=${season}&hydrate=venue`)
   namesBySeason[season] = data?.teams ?? []
   for (const t of namesBySeason[season].filter((x) => x.sport?.id === 1 && x.venue)) {
-    if (!ballparkFor(t.venue.name)) console.warn(`RENAME? ${season} ${t.abbreviation} venue ${t.venue.id} "${t.venue.name}" has no alias in ballparkData.js`)
+    if (!ballparkFor(t.venue.name)) console.warn(`RENAME? ${season} ${t.abbreviation} venue ${t.venue.id} "${t.venue.name}" has no alias in parkNames.js`)
     if (!CONFIGURATIONS.some((c) => c.venueId === t.venue.id)) console.warn(`NEW PARK? ${season} ${t.abbreviation} venue ${t.venue.id} "${t.venue.name}" has no layout record`)
   }
 }

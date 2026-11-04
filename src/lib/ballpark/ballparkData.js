@@ -53,6 +53,7 @@
 
 import { CONFIGURATIONS } from './layout/configurations.js'
 import { measuredFor } from './layout/fences.js'
+import { PARKS } from '../data/parkNames.js'
 
 // Normalize a venue name to a stable lookup key (mirrors ballparks.js).
 // "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
@@ -67,27 +68,27 @@ function normalizeVenue(name) {
 // dist: outfield distances in feet (lf line, lf-center gap, straightaway center,
 //   rf-center gap, rf line). wall: wall heights in feet (lf, cf, rf).
 export const BALLPARKS = {
-  americanfamilyfield: { name: 'American Family Field', dist: { lf: 344, lc: 371, cf: 400, rc: 374, rf: 345 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2001, roof: 'Retractable', capacity: 41700 },
-  angelstadium: { name: 'Angel Stadium', dist: { lf: 330, lc: 389, cf: 396, rc: 365, rf: 330 }, wall: { lf: 5, cf: 8, rf: 8 }, built: 1966, roof: 'Open', capacity: 45517 },
-  buschstadium: { name: 'Busch Stadium', dist: { lf: 336, lc: 375, cf: 400, rc: 375, rf: 335 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2006, roof: 'Open', capacity: 44494 },
-  chasefield: { name: 'Chase Field', dist: { lf: 328, lc: 412, cf: 407, rc: 414, rf: 335 }, wall: { lf: 8, cf: 25, rf: 8 }, built: 1998, roof: 'Retractable', capacity: 48359 },
-  citifield: { name: 'Citi Field', dist: { lf: 335, lc: 370, cf: 408, rc: 380, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 42136 },
-  citizensbankpark: { name: 'Citizens Bank Park', dist: { lf: 329, lc: 381, cf: 401, rc: 398, rf: 330 }, wall: { lf: 6, cf: 6, rf: 13 }, built: 2004, roof: 'Open', capacity: 42901 },
-  comericapark: { name: 'Comerica Park', dist: { lf: 342, lc: 370, cf: 412, rc: 365, rf: 330 }, wall: { lf: 7, cf: 7, rf: 9 }, built: 2000, roof: 'Open', capacity: 41083 },
-  coorsfield: { name: 'Coors Field', dist: { lf: 347, lc: 420, cf: 415, rc: 424, rf: 350 }, wall: { lf: 8, cf: 8, rf: 17 }, built: 1995, roof: 'Open', capacity: 50144 },
-  daikinpark: { name: 'Daikin Park', dist: { lf: 315, lc: 362, cf: 409, rc: 373, rf: 326 }, wall: { lf: 21, cf: 9, rf: 7 }, built: 2000, roof: 'Retractable', capacity: 41000 },
-  fenwaypark: { name: 'Fenway Park', dist: { lf: 310, lc: 390, cf: 420, rc: 380, rf: 302 }, wall: { lf: 37, cf: 17, rf: 5 }, built: 1912, roof: 'Open', capacity: 37755 },
-  globelifefield: { name: 'Globe Life Field', dist: { lf: 329, lc: 372, cf: 407, rc: 374, rf: 326 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2020, roof: 'Retractable', capacity: 40000 },
-  greatamericanballpark: { name: 'Great American Ball Park', dist: { lf: 328, lc: 379, cf: 404, rc: 370, rf: 325 }, wall: { lf: 12, cf: 8, rf: 8 }, built: 2003, roof: 'Open', capacity: 43891 },
-  kauffmanstadium: { name: 'Kauffman Stadium', dist: { lf: 347, lc: 379, cf: 410, rc: 379, rf: 344 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1973, roof: 'Open', capacity: 38427 },
-  loandepotpark: { name: 'loanDepot park', dist: { lf: 344, lc: 386, cf: 407, rc: 392, rf: 335 }, wall: { lf: 12, cf: 9, rf: 12 }, built: 2012, roof: 'Retractable', capacity: 37446 },
-  nationalspark: { name: 'Nationals Park', dist: { lf: 336, lc: 377, cf: 402, rc: 370, rf: 335 }, wall: { lf: 8, cf: 8, rf: 14 }, built: 2008, roof: 'Open', capacity: 41376 },
-  oraclepark: { name: 'Oracle Park', dist: { lf: 339, lc: 399, cf: 391, rc: 415, rf: 309 }, wall: { lf: 8, cf: 8, rf: 25 }, built: 2000, roof: 'Open', capacity: 41915 },
-  orioleparkatcamdenyards: { name: 'Oriole Park at Camden Yards', dist: { lf: 333, lc: 376, cf: 410, rc: 373, rf: 318 }, wall: { lf: 8, cf: 7, rf: 21 }, built: 1992, roof: 'Open', capacity: 44970 },
-  petcopark: { name: 'Petco Park', dist: { lf: 336, lc: 386, cf: 396, rc: 391, rf: 322 }, wall: { lf: 4, cf: 7, rf: 10 }, built: 2004, roof: 'Open', capacity: 40222 },
-  pncpark: { name: 'PNC Park', dist: { lf: 325, lc: 410, cf: 399, rc: 375, rf: 320 }, wall: { lf: 6, cf: 10, rf: 21 }, built: 2001, roof: 'Open', capacity: 38753 },
-  progressivefield: { name: 'Progressive Field', dist: { lf: 325, lc: 410, cf: 405, rc: 375, rf: 325 }, wall: { lf: 19, cf: 9, rf: 9 }, built: 1994, roof: 'Open', capacity: 34788 },
-  ratefield: { name: 'Rate Field', dist: { lf: 330, lc: 377, cf: 400, rc: 372, rf: 335 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1991, roof: 'Open', capacity: 40241 },
+  americanfamilyfield: { dist: { lf: 344, lc: 371, cf: 400, rc: 374, rf: 345 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2001, roof: 'Retractable', capacity: 41700 },
+  angelstadium: { dist: { lf: 330, lc: 389, cf: 396, rc: 365, rf: 330 }, wall: { lf: 5, cf: 8, rf: 8 }, built: 1966, roof: 'Open', capacity: 45517 },
+  buschstadium: { dist: { lf: 336, lc: 375, cf: 400, rc: 375, rf: 335 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2006, roof: 'Open', capacity: 44494 },
+  chasefield: { dist: { lf: 328, lc: 412, cf: 407, rc: 414, rf: 335 }, wall: { lf: 8, cf: 25, rf: 8 }, built: 1998, roof: 'Retractable', capacity: 48359 },
+  citifield: { dist: { lf: 335, lc: 370, cf: 408, rc: 380, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 42136 },
+  citizensbankpark: { dist: { lf: 329, lc: 381, cf: 401, rc: 398, rf: 330 }, wall: { lf: 6, cf: 6, rf: 13 }, built: 2004, roof: 'Open', capacity: 42901 },
+  comericapark: { dist: { lf: 342, lc: 370, cf: 412, rc: 365, rf: 330 }, wall: { lf: 7, cf: 7, rf: 9 }, built: 2000, roof: 'Open', capacity: 41083 },
+  coorsfield: { dist: { lf: 347, lc: 420, cf: 415, rc: 424, rf: 350 }, wall: { lf: 8, cf: 8, rf: 17 }, built: 1995, roof: 'Open', capacity: 50144 },
+  daikinpark: { dist: { lf: 315, lc: 362, cf: 409, rc: 373, rf: 326 }, wall: { lf: 21, cf: 9, rf: 7 }, built: 2000, roof: 'Retractable', capacity: 41000 },
+  fenwaypark: { dist: { lf: 310, lc: 390, cf: 420, rc: 380, rf: 302 }, wall: { lf: 37, cf: 17, rf: 5 }, built: 1912, roof: 'Open', capacity: 37755 },
+  globelifefield: { dist: { lf: 329, lc: 372, cf: 407, rc: 374, rf: 326 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2020, roof: 'Retractable', capacity: 40000 },
+  greatamericanballpark: { dist: { lf: 328, lc: 379, cf: 404, rc: 370, rf: 325 }, wall: { lf: 12, cf: 8, rf: 8 }, built: 2003, roof: 'Open', capacity: 43891 },
+  kauffmanstadium: { dist: { lf: 347, lc: 379, cf: 410, rc: 379, rf: 344 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1973, roof: 'Open', capacity: 38427 },
+  loandepotpark: { dist: { lf: 344, lc: 386, cf: 407, rc: 392, rf: 335 }, wall: { lf: 12, cf: 9, rf: 12 }, built: 2012, roof: 'Retractable', capacity: 37446 },
+  nationalspark: { dist: { lf: 336, lc: 377, cf: 402, rc: 370, rf: 335 }, wall: { lf: 8, cf: 8, rf: 14 }, built: 2008, roof: 'Open', capacity: 41376 },
+  oraclepark: { dist: { lf: 339, lc: 399, cf: 391, rc: 415, rf: 309 }, wall: { lf: 8, cf: 8, rf: 25 }, built: 2000, roof: 'Open', capacity: 41915 },
+  orioleparkatcamdenyards: { dist: { lf: 333, lc: 376, cf: 410, rc: 373, rf: 318 }, wall: { lf: 8, cf: 7, rf: 21 }, built: 1992, roof: 'Open', capacity: 44970 },
+  petcopark: { dist: { lf: 336, lc: 386, cf: 396, rc: 391, rf: 322 }, wall: { lf: 4, cf: 7, rf: 10 }, built: 2004, roof: 'Open', capacity: 40222 },
+  pncpark: { dist: { lf: 325, lc: 410, cf: 399, rc: 375, rf: 320 }, wall: { lf: 6, cf: 10, rf: 21 }, built: 2001, roof: 'Open', capacity: 38753 },
+  progressivefield: { dist: { lf: 325, lc: 410, cf: 405, rc: 375, rf: 325 }, wall: { lf: 19, cf: 9, rf: 9 }, built: 1994, roof: 'Open', capacity: 34788 },
+  ratefield: { dist: { lf: 330, lc: 377, cf: 400, rc: 372, rf: 335 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1991, roof: 'Open', capacity: 40241 },
   // CAPACITY DELIBERATELY NOT statsapi's. The venue endpoint still returns
   // 49,282 for Rogers Centre — the pre-renovation, multipurpose-era listing.
   // The $300M rebuild demolished and rebuilt the lower bowl, and the park has
@@ -97,19 +98,19 @@ export const BALLPARKS = {
   // published for the current configuration. Every other park in this table
   // matches statsapi; this one row does not, on purpose, so a refresh of the
   // distances must not quietly restore it.
-  rogerscentre: { name: 'Rogers Centre', dist: { lf: 328, lc: 368, cf: 404, rc: 359, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 41500 },
-  targetfield: { name: 'Target Field', dist: { lf: 339, lc: 377, cf: 404, rc: 367, rf: 328 }, wall: { lf: 8, cf: 8, rf: 23 }, built: 2010, roof: 'Open', capacity: 38544 },
-  tmobilepark: { name: 'T-Mobile Park', dist: { lf: 331, lc: 390, cf: 405, rc: 387, rf: 327 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1999, roof: 'Retractable', capacity: 47929 },
-  tropicanafield: { name: 'Tropicana Field', dist: { lf: 315, lc: 410, cf: 404, rc: 404, rf: 322 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1990, roof: 'Dome', capacity: 25025 },
-  truistpark: { name: 'Truist Park', dist: { lf: 335, lc: 385, cf: 400, rc: 375, rf: 325 }, wall: { lf: 6, cf: 9, rf: 16 }, built: 2017, roof: 'Open', capacity: 41149 },
-  uniqlofieldatdodgerstadium: { name: 'Dodger Stadium', dist: { lf: 330, lc: 385, cf: 395, rc: 385, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1962, roof: 'Open', capacity: 56000 },
-  wrigleyfield: { name: 'Wrigley Field', dist: { lf: 355, lc: 368, cf: 400, rc: 368, rf: 353 }, wall: { lf: 11, cf: 11, rf: 11 }, built: 1914, roof: 'Open', capacity: 41363 },
-  yankeestadium: { name: 'Yankee Stadium', dist: { lf: 318, lc: 399, cf: 408, rc: 385, rf: 314 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 47309 },
+  rogerscentre: { dist: { lf: 328, lc: 368, cf: 404, rc: 359, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 41500 },
+  targetfield: { dist: { lf: 339, lc: 377, cf: 404, rc: 367, rf: 328 }, wall: { lf: 8, cf: 8, rf: 23 }, built: 2010, roof: 'Open', capacity: 38544 },
+  tmobilepark: { dist: { lf: 331, lc: 390, cf: 405, rc: 387, rf: 327 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1999, roof: 'Retractable', capacity: 47929 },
+  tropicanafield: { dist: { lf: 315, lc: 410, cf: 404, rc: 404, rf: 322 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1990, roof: 'Dome', capacity: 25025 },
+  truistpark: { dist: { lf: 335, lc: 385, cf: 400, rc: 375, rf: 325 }, wall: { lf: 6, cf: 9, rf: 16 }, built: 2017, roof: 'Open', capacity: 41149 },
+  uniqlofieldatdodgerstadium: { dist: { lf: 330, lc: 385, cf: 395, rc: 385, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1962, roof: 'Open', capacity: 56000 },
+  wrigleyfield: { dist: { lf: 355, lc: 368, cf: 400, rc: 368, rf: 353 }, wall: { lf: 11, cf: 11, rf: 11 }, built: 1914, roof: 'Open', capacity: 41363 },
+  yankeestadium: { dist: { lf: 318, lc: 399, cf: 408, rc: 385, rf: 314 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 47309 },
   // The Athletics' interim home (a Triple-A park). The lines and center are
   // posted; the gaps (lc/rc) are the venue endpoint's 380, and the wall heights
   // are estimated, so its gap and wall ranks are approximate. No traced outline
   // exists, so the diagram uses the straight five-point fallback.
-  sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 380, cf: 403, rc: 380, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
+  sutterhealthpark: { dist: { lf: 330, lc: 380, cf: 403, rc: 380, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
 }
 
 // Savant's measured wall heights replace the literals above for every park it
@@ -123,13 +124,14 @@ for (const c of CONFIGURATIONS) {
   if (h) rec.wall = { lf: Math.round(h.lf), cf: Math.round(h.cf), rf: Math.round(h.rf) }
 }
 
-// Aliases for parks whose feed name can appear under a former/sponsor variant, so
-// the modal still resolves (same idea as ballparks.js keying a park per name). The
-// live feed uses the current statsapi name, but sponsorships churn — map the
-// likely alternates to the same record.
-BALLPARKS.dodgerstadium = BALLPARKS.uniqlofieldatdodgerstadium
-BALLPARKS.minutemaidpark = BALLPARKS.daikinpark
-BALLPARKS.guaranteedratefield = BALLPARKS.ratefield
+// Each record's name, and the alias keys for parks whose feed name can appear
+// under a former/sponsor variant, come from ../data/parkNames.js, the one list
+// of parks (#2898): the copy registry reads names from there without this
+// geometry. Aliases share the record object, so they inherit the wall heights.
+for (const { key, name, aliases = [] } of PARKS) {
+  BALLPARKS[key].name = name
+  for (const alias of aliases) BALLPARKS[alias] = BALLPARKS[key]
+}
 
 // Dimension descriptors, in the order they read on the field (LF line → RF line,
 // then the three wall heights). `group` splits the two ranked families so the
