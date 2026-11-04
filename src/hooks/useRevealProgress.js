@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { halfIndex } from '../api/select.js'
 import { selectCatchUpTarget } from '../api/liveEdge.js'
 import { computeDerivedByInning } from '../api/derive.js'
+import { REVEAL_KEY, readRevealMark, readRevealMarkFor } from '../lib/account/revealMark.js'
 import {
   parseRevealMark,
   parseAtBatMark,
@@ -21,24 +22,13 @@ import {
 } from '../lib/account/boxReveal.js'
 import {
   ATBAT_MARK_PREFIX,
-  REVEAL_MARK_PREFIX,
   clearRevealMarksIn,
   readRevealOwnerIn,
   writeRevealOwnerIn,
 } from '../lib/account/revealOwner.js'
 
-// localStorage key prefix + reader for the per-game reveal high-water mark.
-// The parse/merge/unlock rules are the React-free core in revealProgressCore.js
-// (unit-tested there); this hook owns only the storage I/O and React wiring.
-const REVEAL_KEY = REVEAL_MARK_PREFIX
-function readRevealMark(storageKey) {
-  if (!storageKey) return -1
-  try {
-    return parseRevealMark(window.localStorage.getItem(storageKey))
-  } catch {
-    return -1
-  }
-}
+// The per-game mark's key and reader live in revealMark.js (#2879); the parse/merge/unlock
+// rules are the React-free core in revealProgressCore.js. This hook owns the rest of the I/O.
 
 // The account this device's reveal marks belong to, and the two operations the
 // shared-device guard needs on them (OwnerGuards.jsx). The rules — WHY the
@@ -86,19 +76,8 @@ export function clearRevealMarks() {
   return cleared.length
 }
 
-// This device's persisted mark for one game, read WITHOUT mounting the hook —
-// for a surface that has to answer "is there anything here to catch up on?"
-// before the innings viewer exists. Its one caller is GameView's lineup page
-// (ADR-0055), which compares it against the live half to decide whether the
-// "Catch up to live" button is worth drawing at all. Returns -1 for an unknown
-// game, an unset key, or a mangled value — the same fail-closed parse every
-// other reader of this key uses, and the same answer as "nothing revealed yet",
-// which makes the offer appear rather than disappear. That is the harmless
-// direction: the worst a spurious offer costs is a tap that lands the reader
-// where they already were.
-export function readRevealMarkFor(gamePk) {
-  return gamePk ? readRevealMark(`${REVEAL_KEY}${gamePk}`) : -1
-}
+// (`readRevealMarkFor`, this device's mark for one game read without mounting the hook, is in
+// revealMark.js; `catchUpPlan` below is its caller, ADR-0055.)
 
 // CATCH UP TO LIVE (ADR-0055): ratchet one game's mark to `idx` from outside
 // the hook, then let the innings viewer mount and read it.
