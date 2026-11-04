@@ -284,6 +284,12 @@ export function teamSegment(id, name) {
   return entitySegment(id, teamFullName(Number(id)) || name)
 }
 
+// True when the URL is the home slate ('/', '/aaa', '/11042026', unknown paths).
+// App.jsx uses it to start the slate's chunk at boot.
+export function isSlateUrl(url) {
+  return parseRoute(url).name === 'home'
+}
+
 export function parseRoute(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)

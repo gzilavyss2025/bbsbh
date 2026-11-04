@@ -1,6 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
 import { lazyNamed } from './lib/react/lazyNamed.js'
-import { GameSelect } from './screens/GameSelect.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
@@ -15,6 +14,7 @@ import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import { placeKey } from './lib/from/route.js'
 import {
   parseRoute,
+  isSlateUrl,
   gamePath,
   matchupSlug,
   urlDateToApi,
@@ -68,6 +68,15 @@ const PreferencesCloudSync = isClerkEnabled
 const OwnerGuards = isClerkEnabled
   ? lazyNamed(() => import('./components/sync/OwnerGuards.jsx'), 'OwnerGuards')
   : null
+
+// The slate is lazy like every other screen, so /team and /player do not pay
+// for it (#2881). When the first route IS the slate, start its chunk at module
+// evaluation so '/' does not wait for React to mount and then fetch. Both calls
+// use the one specifier, so the browser's module map shares the fetch; the
+// literal lazyNamed form is what check-dead-exports reads. The bare preload
+// swallows its own rejection; lazy() owns error handling.
+const GameSelect = lazyNamed(() => import('./screens/GameSelect.jsx'), 'GameSelect')
+if (isSlateUrl(currentUrl())) import('./screens/GameSelect.jsx').catch(() => {})
 
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
@@ -593,6 +602,7 @@ export default function App() {
         )}
         <Suspense
           fallback={
+            route.name === 'home' ? null : (
             <div className="app">
               <div className="screen">
                 {/* `loader--route` names THIS boundary and nothing else. The
@@ -606,6 +616,7 @@ export default function App() {
                 <Loader className="loader--route" />
               </div>
             </div>
+            )
           }
         >
           <div className="app">{content}</div>

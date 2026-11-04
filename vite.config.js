@@ -95,6 +95,20 @@ function shellOnly(entries) {
   const html = readFileSync(new URL('./dist/index.html', import.meta.url), 'utf8')
   const shell = new Set([...html.matchAll(/(?:src|href)="\/(assets\/[^"]+)"/g)].map((m) => m[1]))
   if (shell.size === 0) throw new Error('shellOnly: dist/index.html names no /assets/ files')
+  // The slate (GameSelect) is the one route chunk precached, with its static
+  // imports and CSS from Vite's build manifest: it is lazy so other routes skip
+  // it, but an installed app that updates online and launches offline at the
+  // park must still open on it (#2881).
+  const bundle = JSON.parse(readFileSync(new URL('./dist/.vite/manifest.json', import.meta.url), 'utf8'))
+  const slateKey = 'src/screens/GameSelect.jsx'
+  if (!bundle[slateKey]) throw new Error(`shellOnly: ${slateKey} missing from the build manifest`)
+  const walk = (key) => {
+    if (shell.has(bundle[key].file)) return
+    shell.add(bundle[key].file)
+    for (const css of bundle[key].css ?? []) shell.add(css)
+    for (const dep of bundle[key].imports ?? []) walk(dep)
+  }
+  walk(slateKey)
   const manifest = entries.filter(
     (e) => !e.url.startsWith('assets/') || e.url.endsWith('.woff2') || shell.has(e.url),
   )
@@ -420,6 +434,8 @@ function devDataSave() {
 // auto-increment would let one server quietly take a port another is already
 // bound to instead of failing loudly.
 export default defineConfig({
+  // shellOnly reads dist/.vite/manifest.json to find the slate chunk's imports.
+  build: { manifest: true },
   server: {
     port: 5173,
     strictPort: true,
