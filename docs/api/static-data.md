@@ -266,26 +266,6 @@ for each generator; the reader modules:
   download per club. The page's pure half is
   `src/lib/gameNotes/archive.js`; `scripts/download-game-notes.mjs` saves the same
   archive's PDFs to a gitignored folder.
-- `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a
-  `CONFIG` map keyed by teamId; all 30 MLB clubs), it parses the narrative blurbs
-  out of the PDF for an in-app modal (`WhatsBrewingModal.jsx`). No game surface
-  opens that modal any more — the parse proved too brittle across the clubs'
-  shifting templates, so every Game Notes button links straight to the PDF; the
-  one caller left is the unlisted `/game-notes-debug` QA page. Parses
-  client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
-  main bundle — see `vite.config.js`) rather than in the cron, because tonight's
-  note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
-  template needs its own calibration, so `CONFIG` carries a `layout` per club —
-  `column` (Brewers' narrow-column sheet) or `flow-bold`/`flow` (league-standard
-  full-width, most other clubs) — plus font/geometry tunables (single zone or a
-  `columns:` array for multi-column pages). `hasWhatsBrewing`/
-  `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
-  teamId→title map) rather than here, so a caller's gate check can import them
-  statically without pulling this whole parser out of its lazy chunk; add a
-  club = add a `CONFIG` entry here + a title there (not a new parser). See
-  `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
-  and `docs/whats-brewing.md` for parsing details + the Node harness
-  (`extractForTeam`).
 - `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
   `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is
   eight full-level stat pulls (~4,700 players), so `gen-minors-leaders.mjs` (daily

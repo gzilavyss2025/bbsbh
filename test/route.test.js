@@ -231,7 +231,6 @@ test('single-segment named routes resolve to their route name', () => {
     '/scorecard-lab': 'scorecard-lab',
     '/identity-lab': 'identity-lab',
     '/uniform-names': 'uniform-names',
-    '/game-notes-debug': 'game-notes-debug',
     '/first-scorebook': 'first-scorebook',
     '/photos': 'photos',
     '/classics': 'classics',

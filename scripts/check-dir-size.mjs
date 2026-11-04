@@ -71,7 +71,7 @@ const BUDGETS = {
   // written to match; every module the player page's Analytics tab loads is here
   // together. catcherOfRecord.js sits BESIDE defense.js, whose chain it asks a
   // narrower question of and whose spoiler gate it inherits whole.
-  'src/api': 115, // +clubDefenseRunning.js (#2316): the contract names this path
+  'src/api': 113, // +clubDefenseRunning.js (#2316): the contract names this path
   // awards.js, split out of transactions.js. Same "nothing here fetches"
   // convention and person-shaping job as its siblings; a subdirectory for one
   // module would hide it from check-spoiler-manifest's flat classification.
@@ -80,13 +80,13 @@ const BUDGETS = {
   // package.json and the docs name them by path (docs/scripts/generators.md).
   // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
   // open-data and pitch-start generators), so the script itself stays a thin runner.
-  scripts: 143, // +gen-wire-facts.mjs (the nightly workflow and the docs name it by path), +gen-tensest.mjs (the nightly workflow and the docs name it by path), +gen-played-for-both.mjs (#2579; the issue and the docs name it by path), +gen-franchise-ledger.mjs (#2595; the issue and the docs name it by path), +gen-outliers.mjs (#2453; the issue and the nightly workflow name it by path), +gen-hof-pace.mjs (#1857; package.json and the docs name it by path), +gen-league-pennants.mjs (team and player pennants), +gen-season-checkpoints.mjs (#1855), +gen-umpire-history.mjs (#1565), +gen-club-defense-running.mjs (#2316), +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths; +gen-where-from-map.mjs and gen-where-from.mjs (#1526)
+  scripts: 142, // +gen-wire-facts.mjs (the nightly workflow and the docs name it by path), +gen-tensest.mjs (the nightly workflow and the docs name it by path), +gen-played-for-both.mjs (#2579; the issue and the docs name it by path), +gen-franchise-ledger.mjs (#2595; the issue and the docs name it by path), +gen-outliers.mjs (#2453; the issue and the nightly workflow name it by path), +gen-hof-pace.mjs (#1857; package.json and the docs name it by path), +gen-league-pennants.mjs (team and player pennants), +gen-season-checkpoints.mjs (#1855), +gen-umpire-history.mjs (#1565), +gen-club-defense-running.mjs (#2316), +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths; +gen-where-from-map.mjs and gen-where-from.mjs (#1526)
   'src/lib': 52,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share
   // code between generators, so inlining them would copy it into each one.
   'scripts/lib': 42,
-  'src/screens': 40,
+  'src/screens': 39,
   'src/hooks': 25,
   'src/screens/identity-lab': 15,
   // One file per diary finding. A research diary is append-only
