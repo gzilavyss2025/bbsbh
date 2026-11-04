@@ -316,7 +316,7 @@
      report/charts            components/around-the-game/BroadcastBar.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
-     research/diary           screens/research/Diaries.jsx
+     research/diary           screens/research/ResearchDiaryPage.jsx
      designlab/lab            screens/designlab/index.jsx (the /design-lab
                               catalog — a SUBDIRECTORY because src/styles is at
                               its own 115-file directory budget, so a 116th flat

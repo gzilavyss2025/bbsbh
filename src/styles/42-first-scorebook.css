@@ -658,7 +658,7 @@
   font-size: var(--fs-compact);
   color: var(--text-muted);
 }
-/* Same divided-row idiom as .allstarrosters__rows/.thub-roster's hairline
+/* Same divided-row idiom as .allstarrosters__rows's hairline
    separators and tight padding — but WITHOUT their own outer border/
    background, since this list already lives inside the team card's own
    bordered box (a nested second border/box read as a "card within a card").

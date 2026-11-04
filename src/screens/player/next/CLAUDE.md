@@ -53,6 +53,6 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
   `both/` is full: new files go in `season/`, `history/`, `gamelog/`, `pitcher/` or `top/`.
 - **Shared parts:** a part two modules use sits in `parts/`, not in one module's folder:
   `LogTable.jsx`, the game log table (pitchlog #1851, batlog #1890); `CountExplorer.jsx`
-  (count grid, panel, `Stat`, `Rail`) and `foulsFormat.js` (number formats), the Foul balls cards (#1891, #2016).
+  (count grid, panel, `Stat`, `Rail`) and `foulsFormat.js` (number formats), the Foul balls cards (#1891, #2016); `inMajors.js`, the major-league test `advanced`, `photos` and `highlights` share.
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the
   page wraps everything in `LinkScope`) and ADR-0057 addresses (use the path builders).

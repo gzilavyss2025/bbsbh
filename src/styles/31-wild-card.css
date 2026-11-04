@@ -321,7 +321,7 @@
 
 /* The rookie pill (components/badges/RookiePill.jsx) is a plain outline pill in
    --field. Phone widths swap the full "ROOKIE" word for just "R" — with WAR,
-   name, and a chevron already sharing the row (see .thub-row), the full word
+   name, and a chevron already sharing the row, the full word
    was a big part of what made roster rows feel scrunched. */
 .rookie__short {
   display: none;

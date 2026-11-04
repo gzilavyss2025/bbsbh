@@ -56,7 +56,7 @@ const SECTIONS = [
   { key: 'substitutes', label: 'Substitutes' },
 ]
 
-// One recipient row, styled like the Team Page's roster rows (.thub-row) —
+// One recipient row, a hairline-divided roster row —
 // a bordered list card instead of loose inline spans, so a season with a
 // full 30+ name roster reads as compact rows rather than wrapped whitespace.
 // `effectiveTeamId` is the team currently highlighted — either the picked
@@ -92,8 +92,7 @@ function RecipientRow({ r, effectiveTeamId, filtering }) {
   )
 }
 
-// A bordered card list — one per roster section — mirroring the Team Page's
-// .thub-roster convention. Returns null for an empty bucket so a caller can
+// A bordered card list — one per roster section — with hairline-divided rows. Returns null for an empty bucket so a caller can
 // render it unconditionally.
 function RosterCard({ recipients, effectiveTeamId, filtering }) {
   if (!recipients.length) return null

@@ -46,7 +46,7 @@ export const SLOTS = [
   { id: 'percentile', module: 'percentile', section: 'season', label: 'Percentile rank', minH: [440, 420], roles: HP, load: () => import('./modules/percentile/index.jsx') },
   { id: 'advanced', module: 'advanced', section: 'season', label: 'Advanced', minH: [480, 260], roles: HP, load: () => import('./modules/advanced/index.jsx') },
   { id: 'runvalue', module: 'runvalue', section: 'season', label: 'Run value', minH: [340, 340], roles: HP, once: true, load: () => import('./modules/runvalue/index.jsx') },
-  { id: 'command-received', module: 'command-received', section: 'season', label: 'Command received', minH: [0, 0], roles: H, load: () => import('./modules/command-received/index.jsx') },
+  { id: 'command-received', module: 'command-received', section: 'season', label: 'More season', minH: [0, 0], roles: H, load: () => import('./modules/command-received/index.jsx') },
   { id: 'splits', module: 'splits', section: 'splits', label: 'Splits', minH: [1040, 580], roles: HP, load: () => import('./modules/splits/index.jsx') },
   { id: 'plate', module: 'plate', section: 'plate-approach', label: 'Plate approach', minH: [2480, 1840], roles: H, load: () => import('./modules/plate/index.jsx') },
   { id: 'contact', module: 'contact', section: 'contact', label: 'Contact', minH: [1120, 800], roles: H, load: () => import('./modules/contact/index.jsx') },
@@ -55,7 +55,7 @@ export const SLOTS = [
   { id: 'batlog', module: 'batlog', section: 'game-log', label: 'Game log', minH: [1760, 940], roles: H, load: () => import('./modules/batlog/index.jsx') },
   { id: 'pitchlog', module: 'pitchlog', section: 'game-log', label: 'Game log', minH: [1400, 700], roles: P, load: () => import('./modules/pitchlog/index.jsx') },
   { id: 'pfouls', module: 'pfouls', section: 'game-log', label: 'Foul balls', minH: [1020, 600], roles: P, twin: true, load: () => import('./modules/pfouls/index.jsx') },
-  // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it (milestones ends it).
+  // Foul balls has no button on the boards: it sits in the Game log section.
   { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', minH: [840, 460], roles: H, twin: true, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', minH: [360, 340], roles: HP, load: () => import('./modules/similar/index.jsx') },
   { id: 'milestones', module: 'milestones', section: 'game-log', label: 'Milestone watch', minH: [0, 0], roles: HP, load: () => import('./modules/milestones/index.jsx') },

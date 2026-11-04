@@ -97,7 +97,7 @@ test('the whole study is off under reduced motion', async ({ page }) => {
   // The old innings bar's live-edge dot left the lab with that bar (#2566); the LIVE pill keeps the beat.
   await expect(page.locator('.animlab__live .gamecard__live').first()).toBeVisible()
   expect(await animName(page.locator('.animlab__live .gamecard__live').first(), '::before')).toBe('none')
-  for (const sel of ['.btn--reveal', '.pbp__cell', '.pbp__leg', '.pbp__outcircle']) {
+  for (const sel of ['.btn--reveal']) {
     expect(await animName(page.locator(`.animlab__live ${sel}`).first()), sel).toBe('none')
   }
   expect(

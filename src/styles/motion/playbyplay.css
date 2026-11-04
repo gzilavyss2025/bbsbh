@@ -42,14 +42,6 @@
    and a reveal-in-this-session coincide. HalfInning's comment carries the
    full argument; do not "fix" this by dropping the windowed exclusion. */
 
-/* --- Beat 1: the pitches ------------------------------------------------- */
-/* `--cell-i` is the pitch's place in the WHOLE sequence, not in its own lane
-   (PitchLadder sets it), so the two lanes fill in the order the pitches were
-   actually thrown rather than both racing down from the top. */
-.pbp__atbat--writing .pbp__cell {
-  animation: sc-ink 140ms var(--ease-out) calc(var(--cell-i, 0) * 35ms) backwards;
-}
-
 /* --- Beat 2: the basepaths ----------------------------------------------- */
 /* The only new technique in the set. Every leg of the diamond is the same
    length — sqrt(30^2 + 30^2) = 42.43 units in PlayDiamond's 0 0 100 100
@@ -108,7 +100,6 @@
 /* Skip the whole sequence and render settled ink. Not slowed — the reader
    asked for less movement, and the marks are the content. */
 @media (prefers-reduced-motion: reduce) {
-  .pbp__atbat--writing .pbp__cell,
   .pbp__atbat--writing .pbp__leg,
   .pbp__atbat--writing .pbp__code,
   .pbp__atbat--writing .pbp__outcircle {

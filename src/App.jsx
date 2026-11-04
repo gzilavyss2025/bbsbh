@@ -72,11 +72,11 @@ const OwnerGuards = isClerkEnabled
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const ResearchDiaryPage = lazyNamed(
-  () => import('./screens/research/Diaries.jsx'),
+  () => import('./screens/research/ResearchDiaryPage.jsx'),
   'ResearchDiaryPage',
 )
 const ContenderDiaryPage = lazyNamed(
-  () => import('./screens/research/Diaries.jsx'),
+  () => import('./screens/contenders/ContenderDiaryPage.jsx'),
   'ContenderDiaryPage',
 )
 const ContractIdentityReviewPage = lazyNamed(

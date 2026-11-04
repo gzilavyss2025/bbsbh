@@ -7,8 +7,8 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 
 // The admin research diaries' one page: the prospect-research diary
-// (Diaries.jsx, /admin/research) and the Contender Diary
-// (Diaries.jsx, /admin/contenders). Each passes its own
+// (ResearchDiaryPage.jsx, /admin/research) and the Contender Diary
+// (contenders/ContenderDiaryPage.jsx, /admin/contenders). Each passes its own
 // content module (`diary`: HOW_TO_READ, RESEARCH_DIARY, TRAPS, VERDICTS) and its
 // words; the verdict vocabularies differ through that module, not through here.
 // The Contender Diary began as a line-for-line copy, kept apart until it was

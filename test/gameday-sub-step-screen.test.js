@@ -77,6 +77,13 @@ test('823764 ab51: the caught stealing that ends the half is the tap that reveal
   assert.equal(subTap(steps, 3, false), null) // past the three changes, the next stop ends the half
 })
 
+test('the advance reads "Next" in At-bat and Pitch mode alike (Gary, 2026-10-28: the switch beside it names the mode)', () => {
+  const src = readFileSync(new URL('../src/screens/InningViewer.jsx', import.meta.url), 'utf8')
+  // Both advances (the stepping one and the sealed-half one) say "Next", with no per-mode wording.
+  assert.equal(src.match(/label: 'Next'/g)?.length, 2)
+  assert.doesNotMatch(src, /Next pitch|Next play/)
+})
+
 test('a 1-pitch and a 9-pitch at-bat: the same sealed hero', () => {
   const one = countFor(F823, 1, 'top', 1)
   const nine = countFor(F823, 1, 'bottom', 5)

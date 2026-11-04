@@ -5,10 +5,9 @@ import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { scheduleHoverShow, scheduleHoverHide } from '../../lib/playerHoverStore.js'
 
 // A trigger's own box, or — when that box has collapsed to nothing — the box
-// of what it actually renders. `.wire__cutline .plink` and
-// `.txstory__cutline .plink` both go `display: contents` so a player's name
-// wraps mid-sentence with the prose around it (04-site-bar.css,
-// 29-team-transactions.css), predating this card; a `display: contents`
+// of what it actually renders. `.wire__cutline .plink`
+// goes `display: contents` so a player's name wraps mid-sentence with the prose around it
+// (04-site-bar.css), predating this card; a `display: contents`
 // element generates no box of its own, so its own getBoundingClientRect() is
 // always all-zero even while it's on screen and hovered. Its rendered
 // content still has a box, reached here through a Range over its children.

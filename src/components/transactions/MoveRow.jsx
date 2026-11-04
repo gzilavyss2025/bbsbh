@@ -1,4 +1,5 @@
-import { Component, Fragment, Suspense, lazy, useMemo } from 'react'
+import { Component, Fragment, Suspense, useMemo } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { reportCrash } from '../../lib/crash/report.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -11,7 +12,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ReplyQuotes, moveAnchor, useReplies } from './ReplyQuote.jsx'
 // The player notes and their sheet load on their own, off the first load: a
 // ledger row draws its plain sentence until they arrive.
-const WireFacts = lazy(() => import('./WireFacts.jsx').then((m) => ({ default: m.WireFacts })))
+const WireFacts = lazyNamed(() => import('./WireFacts.jsx'), 'WireFacts')
 
 // A notes chunk that fails to load (a 404 after a deploy, a phone gone offline)
 // leaves the row its plain sentence, never takes the ledger down
@@ -92,7 +93,7 @@ const MONTHS = [
 // check-name-casing.mjs).
 //
 // `datelineParts` is the same walk stopped one step early, for the day
-// markers that write the date abbreviated and stacked (TxStory.jsx's DayTab).
+// markers that write the date abbreviated and stacked.
 // One weekday table and one month table for every surface, so a deck tab and
 // a wire row can never name the same day differently.
 export function datelineParts(iso) {

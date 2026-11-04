@@ -21,7 +21,7 @@
 // below.)
 //
 // DYNAMIC IMPORTS. Every lazy-loaded screen in this app goes through
-// `lazyNamed(() => import('./Screen.jsx'), 'ScreenName')` (src/App.jsx) or the
+// `lazyNamed(() => import('./Screen.jsx'), 'ScreenName')` (src/lib/react/lazyNamed.js) or the
 // equivalent inline `import('./x.jsx').then((m) => ({ default: m.X }))` /
 // `.then((m) => m.X(...))` shape (a handful of Clerk-gated components). Both are pattern-matched below so
 // a lazily-routed export doesn't read as dead just because no STATIC `import`
@@ -135,7 +135,7 @@ function extractImports(text) {
 
 // Two dynamic-import shapes carry a NAMED export past a bare import(), neither
 // visible to extractImports above:
-//   lazyNamed(() => import('./Screen.jsx'), 'ScreenName')   — src/App.jsx
+//   lazyNamed(() => import('./Screen.jsx'), 'ScreenName')   — src/lib/react/lazyNamed.js
 //   import('./x.jsx').then((m) => ({ default: m.X }))       — a few Clerk/
 //   import('./x.jsx').then((m) => m.X(...))                    dynamic gates
 // Returns [{ spec, names: [...] }].

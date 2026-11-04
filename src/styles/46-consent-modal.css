@@ -191,10 +191,6 @@
   animation-play-state: paused;
   animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));
 }
-.animlab__frame .pbp__atbat--writing .pbp__cell {
-  animation-play-state: paused;
-  animation-delay: calc(var(--cell-i, 0) * 35ms + var(--animlab-delay, 0s));
-}
 .animlab__frame .pbp__atbat--writing .pbp__leg {
   animation-play-state: paused;
   animation-delay: calc(280ms + var(--leg-i, 0) * 60ms + var(--animlab-delay, 0s));
