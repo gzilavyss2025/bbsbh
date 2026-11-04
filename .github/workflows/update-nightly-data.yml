@@ -165,9 +165,20 @@ jobs:
           # (admin), so pushes with it bypass the required check the same
           # way the maintainer's own direct pushes already do.
           token: ${{ secrets.GH_BOT_TOKEN }}
+      # Generator working state (scripts/data/*.sql, callouts-archive/) lives in
+      # the private bbsbh-state repo (#2886). GH_BOT_TOKEN has Contents
+      # read/write on it. "Commit if changed" pushes it back BEFORE it commits
+      # here, so main never holds output from state the state repo lacks.
+      - uses: actions/checkout@v7
+        with:
+          repository: gzilavyss2025/bbsbh-state
+          path: .state
+          token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v7
         with:
           node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
+      - name: Pull generator state
+        run: node scripts/repo/state.mjs pull
 
       - name: Wait for yesterday's slate to go Final
         run: |
@@ -190,6 +201,28 @@ jobs:
         env:
           RUN_ALL: ${{ inputs.run_all }}
         run: node scripts/nightly/inputs.mjs
+
+      # Freezes the season that just ended (#2778). BEFORE every producer on
+      # purpose: it copies salaries.json, top-prospects.json and
+      # team-contracts/ as committed at HEAD, the last good versions, not
+      # tonight's rewrite. So a producer that fails tonight cannot hand it a
+      # partial or stale file, and one that rolls over to N+1 tonight cannot
+      # make the first attempt too late. HEAD's top-prospects stamp only
+      # advances when the list really changes (drop-stamp-only.mjs), so a
+      # January restamp of the same list does not read as N+1. Nothing above
+      # this step writes those three.
+      # NOT gated: the night it matters is a quiet offseason one when every
+      # input gate is false. It decides for itself (ADR-0074's season-over
+      # rule) and is a quiet no-op on every other night, including "already
+      # frozen". It fails (exit 1, naming the season) when the live files have
+      # moved on to N+1 with N never frozen, or when it cannot read statsapi's
+      # season row in November or December. Staged by the
+      # `git add -A -- public … src/lib/data` below; a first freeze adds files,
+      # so drop-stamp-only.mjs (modified files only) never drops it.
+      - name: Freeze finished season
+        id: freeze-season
+        continue-on-error: true
+        run: node scripts/frozen/freeze-season.mjs --nightly
 
       # ---- Structural data: slow-moving upstream, rebuilt nightly --------
       # Three separate Monday crons until 2026-08-28, then a Monday-GATED block
@@ -747,6 +780,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # State first (#2886). A failure here stops the step before the commit
+          # below, so a night whose state was not saved deploys nothing either.
+          git -C .state config user.name "github-actions[bot]"
+          git -C .state config user.email "github-actions[bot]@users.noreply.github.com"
+          node scripts/repo/state.mjs push
           # -A over the three roots every generator writes into, instead of the
           # 60-path list this used to carry. That list was hand-maintained and
           # drifted twice, both silently: gen-jerseys.mjs's jerseys.json was

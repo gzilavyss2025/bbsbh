@@ -16,6 +16,7 @@ import { lineupEntering } from '../../../../api/battingorder.js'
 import { GamedayPanel } from './GamedayPanels.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
+import { holdGrid } from '../steps/subStep.js'
 
 // The bar's Box and Win % sheets (Gary, 2026-10-29), each over the page and back to the same spot on close.
 // Both read the game AS OF THE READER'S STEP, never the whole feed: everything that names a result reads
@@ -81,7 +82,7 @@ export function BoxSheet({ ctx, onClose, onFull }) {
   return (
     <Sheet title="Box score" onClose={onClose}>
       {/* The line score as the strip draws it, R / H / E as of the step. */}
-      <GamedayPanel block="navigator" ctx={{ ...ctx, onSelect: () => {}, disabled: true }} />
+      <GamedayPanel block="navigator" ctx={holdGrid(ctx, true)} />
       {reach ? (
         <SealBox key={`${ctx.inning}-${ctx.half}`} forceRevealed coverless>
           {() => (

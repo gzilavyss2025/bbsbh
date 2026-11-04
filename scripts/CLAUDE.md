@@ -25,6 +25,8 @@ tables is the reason this layer exists, so wire it in rather than adding
 another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5) rather than `better-sqlite3` — the workflows run generators with no
 `npm install` step, and a built-in avoids adding install latency.
 A `bySeason` group keeps every season, one frozen dump per old season (ADR-0086).
+**The dumps and `data/callouts-archive/` are not in this repo** (ADR-0128): they live in
+the private `bbsbh-state` repo. Run `npm run state:pull` before a generator that reads them.
 
 ## Generator rules
 
@@ -85,7 +87,8 @@ are rules rather than reference:
   not `new Date().getFullYear()` (#1465). From January 1 to Opening Day the calendar
   names a season with no games, and an unguarded generator writes an empty file over
   the finished one. Keep the calendar year only where it is the right meaning (a game
-  date's season), and skip the write when a season returns no data.
+  date's season), and skip the write when a season returns no data. "Is season N over?"
+  is `seasonOver` in the same file (ADR-0074); `frozen/freeze-season.mjs --nightly` uses it.
 
 A generator file is a top-level script: importing one RUNS it. A helper inside
 one can therefore never be unit-tested, so a helper worth testing goes in

@@ -889,14 +889,6 @@ test('isPlayedGame takes a game that stays at Game Over or Completed Early', () 
   assert.equal(isPlayedGame({}), false)
 })
 
-test('the committed ledger carries no tie that was never played', () => {
-  const sql = readFileSync('scripts/data/team-records.sql', 'utf8')
-  const phantoms = sql
-    .split('\n')
-    .filter((line) => line.startsWith('INSERT INTO team_record_games') && line.includes(", 'T', ") && line.includes('"innings":[]'))
-  assert.deepEqual(phantoms.slice(0, 3), [], `${phantoms.length} rows are a 0-0 tie with no innings: a cancelled or postponed game`)
-})
-
 test('uniqueByGamePk keeps each gamePk once, first listing wins', () => {
   const a = { game: { gamePk: 1 }, date: '2026-05-01' }
   const dup = { game: { gamePk: 1 }, date: '2026-05-02' }
