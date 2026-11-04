@@ -1,0 +1,20 @@
+src/components/account/AccountPitch.jsx     
+src/components/account/FavoriteTeamModal.jsx
+src/components/account/IntroPassportMark.jsx
+src/components/transactions/TxStory.jsx     
+splitSegments                       function  src/components/around-the-game/RunValueParts.jsx:122:17        
+flightMs                            function  src/components/charts/BallFlight.jsx:71:17                     
+POINTER_FOCUS_MS                              src/components/charts/winprob/explore.js:63:14                 
+PLOT_R                                        src/components/charts/winprob/plot.js:15:14                    
+PinstripePattern                    function  src/components/charts/winprob/WinProbBands.jsx:13:17           
+PinstripePattern                              src/components/charts/WinProbChart.jsx:83:10                   
+BOOK_WIDE_QUERY                               src/components/passport/PassportBook.jsx:83:14                 
+ActorHead                           function  src/components/playbyplay/PitcherNotice.jsx:58:17              
+usePlayerLink                       function  src/components/player/PlayerLink.jsx:32:17                     
+exactMoney                          function  src/components/salaries/Money.jsx:25:17                        
+PitchList                           function  src/components/scoring/StrikeZone.jsx:265:17                   
+BANNER_TONE                                   src/components/transactions/MoveRow.jsx:63:14                  
+TYPE_TONE                                     src/components/transactions/MoveRow.jsx:77:14                  
+datelineParts                       function  src/components/transactions/MoveRow.jsx:98:17                  
+Cutline                             function  src/components/transactions/MoveRow.jsx:150:17                 
+VELOCITY_WINDOW_MS                            src/components/ui/dock/dockPhysics.js:129:14                   
