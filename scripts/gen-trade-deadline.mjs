@@ -21,7 +21,7 @@
 // Run by hand: node scripts/gen-trade-deadline.mjs [year] [--force]
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { getJson as statsapiJson } from './lib/statsapi.mjs'
+import { getJson as statsapiJson, getPeople } from './lib/statsapi.mjs'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
 import {
   SEASONS,
@@ -103,15 +103,10 @@ async function fetchPositionsAndDebuts(personIds) {
   const positions = {}
   const debutedIds = new Set()
   const bio = {}
-  for (let i = 0; i < list.length; i += 100) {
-    const batch = list.slice(i, i + 100)
-    if (!batch.length) continue
-    const data = await getJson(`/api/v1/people?personIds=${batch.join(',')}&hydrate=draft`)
-    for (const p of data.people ?? []) {
-      positions[p.id] = p.primaryPosition?.abbreviation || ''
-      if (p.mlbDebutDate) debutedIds.add(p.id)
-      bio[p.id] = { draft: draftInfo(p), birthCountry: p.birthCountry || '' }
-    }
+  for (const p of await getPeople(list, { hydrate: 'draft', timeoutMs: 15_000 })) {
+    positions[p.id] = p.primaryPosition?.abbreviation || ''
+    if (p.mlbDebutDate) debutedIds.add(p.id)
+    bio[p.id] = { draft: draftInfo(p), birthCountry: p.birthCountry || '' }
   }
   return { positions, debutedIds, bio }
 }

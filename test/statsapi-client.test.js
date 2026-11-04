@@ -1,17 +1,13 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readdir, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 import test from 'node:test'
 import {
-  CACHE_DIR,
   RETRY_DELAY_MS,
   RETRY_TRIES,
   STATSAPI_BASE,
   StatsapiError,
-  cachedGetJson,
   createStatsapiClient,
   getJson,
+  getPeople,
   isRetryable,
   statsapiUrl,
 } from '../scripts/lib/statsapi.mjs'
@@ -194,7 +190,7 @@ test('another network error keeps its own message', async () => {
   })
 })
 
-// (b) The opt-in research cache.
+// (b) No cache.
 test('a client made with no cacheDir is cache-off: two calls, two fetches', async () => {
   const { fetch, getJson } = client([{ n: 1 }])
   await getJson('/api/v1/x')
@@ -208,58 +204,6 @@ test('the shared getJson never caches: two calls, two fetches, nothing written',
   assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
   assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
   assert.equal(fetch.calls.length, 2)
-})
-
-test('the cache directory is git-ignored, and only cachedGetJson uses it', () => {
-  assert.match(CACHE_DIR, /node_modules[\\/]\.cache[\\/]statsapi$/)
-  assert.equal(typeof cachedGetJson, 'function')
-  assert.notEqual(cachedGetJson, getJson)
-})
-
-test('with a cache directory given, a second call reads the file instead of the API', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'statsapi-cache-'))
-  try {
-    const { fetch, getJson } = client([{ n: 1 }, { n: 2 }], { cacheDir: dir })
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    assert.equal(fetch.calls.length, 1)
-    assert.deepEqual(await getJson('/api/v1/y'), { n: 2 })
-    assert.equal(fetch.calls.length, 2)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
-})
-
-test('a cached answer older than the max age is fetched again', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'statsapi-cache-'))
-  try {
-    let clock = 1_000_000
-    const { fetch, getJson } = client([{ n: 1 }, { n: 2 }], {
-      cacheDir: dir,
-      cacheMaxAgeMs: 60_000,
-      now: () => clock,
-    })
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    clock += 59_000
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    clock += 2_000
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 2 })
-    assert.equal(fetch.calls.length, 2)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
-})
-
-test('a failed call is never cached', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'statsapi-cache-'))
-  try {
-    const { fetch, getJson } = client([404, { n: 1 }], { cacheDir: dir })
-    await assert.rejects(getJson('/api/v1/x'), StatsapiError)
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    assert.equal(fetch.calls.length, 2)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
 })
 
 // Review of #1287: a TypeError with no network cause (a bad URL) is final.
@@ -297,4 +241,24 @@ test('tries: 1 on a call means one attempt, whatever the shared policy says', as
   const { fetch, getJson } = client([503])
   await assert.rejects(() => getJson('/api/v1/teams', { tries: 1 }), /HTTP 503/)
   assert.equal(fetch.calls.length, 1)
+})
+
+test('getPeople: one call per `size` ids, with hydrate and fields on the query, rows flattened', async (t) => {
+  const fetch = scriptedFetch([{ people: [{ id: 1 }] }, { people: [{ id: 2 }] }, { people: [{ id: 3 }] }])
+  t.mock.method(globalThis, 'fetch', fetch)
+  const people = await getPeople([1, 2, 3, 4, 5], { size: 2, hydrate: 'draft', fields: 'people,id' })
+  assert.deepEqual(people.map((p) => p.id), [1, 2, 3])
+  assert.deepEqual(fetch.calls, [
+    `${STATSAPI_BASE}/api/v1/people?personIds=1,2&hydrate=draft&fields=people,id`,
+    `${STATSAPI_BASE}/api/v1/people?personIds=3,4&hydrate=draft&fields=people,id`,
+    `${STATSAPI_BASE}/api/v1/people?personIds=5&hydrate=draft&fields=people,id`,
+  ])
+})
+
+test('getPeople: a failed call throws, or is reported and skipped with onError', async (t) => {
+  t.mock.method(globalThis, 'fetch', scriptedFetch([404]))
+  await assert.rejects(getPeople([1]), StatsapiError)
+  const seen = []
+  assert.deepEqual(await getPeople([1], { onError: (e) => seen.push(e.status) }), [])
+  assert.deepEqual(seen, [404])
 })

@@ -28,23 +28,13 @@
 //
 // Run by `npm run lint`. Zero deps, scans src/styles/*.css.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { resolve, join } from 'node:path'
+import { listSheets } from './lib/walk.mjs'
 
 // Read the DIRECTORY TREE rather than a fixed list, like check-focus-ring.mjs,
 // so a new partial is covered the moment it exists — subdirectories included,
 // since `scorecard/footer.css` carries one of the four strike sites and
 // `motion/strike.css` now carries the bar that draws them.
-const stylesDir = resolve('src/styles')
-const listSheets = (dir, prefix) =>
-  readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return listSheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css')
-      ? [{ rel: `src/styles/${prefix}${f}`, raw: readFileSync(abs, 'utf8') }]
-      : []
-  })
-const sheets = listSheets(stylesDir, '').sort((a, b) => a.rel.localeCompare(b.rel))
+const sheets = listSheets(process.cwd())
 
 // Same vacuous-pass hazard as its siblings: if the stylesheets move, this check
 // must be repointed rather than left printing ✓ over nothing. There must also

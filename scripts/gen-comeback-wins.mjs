@@ -42,7 +42,7 @@ import { writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { parseArgs } from './lib/args.mjs'
+import { parseArgs, isoDay } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'comeback-wins.json')
@@ -51,7 +51,6 @@ const DEFAULT_DAYS = 3
 // Only homeTeamWinProbability is read; pruning keeps each game's payload small.
 const WP_FIELDS = 'homeTeamWinProbability'
 
-const isoDay = (d) => d.toISOString().slice(0, 10)
 const args = parseArgs(process.argv.slice(2))
 const days = Number(args.days) || DEFAULT_DAYS
 

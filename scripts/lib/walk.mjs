@@ -4,8 +4,8 @@
 // symlinks followed (statSync), a skipped name is skipped at any depth.
 // Paths in and out are absolute. A guard that wants repo-relative paths
 // calls path.relative(ROOT, file) itself.
-import { readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { join, relative } from 'node:path'
 
 // The repo root, two levels above scripts/lib/.
 export const ROOT = join(import.meta.dirname, '..', '..')
@@ -47,4 +47,13 @@ export function walkDirs(dir, { skip = DEFAULT_SKIP } = {}, out = []) {
     if (statSync(full).isDirectory()) walkDirs(full, { skip }, out)
   }
   return out
+}
+
+// Every stylesheet under `root`/src/styles as { rel, raw }, `rel` relative to `root` with `/`,
+// sorted by `rel`. A guard passes the tree it checks: its own repo, or the working directory
+// when a test runs it in a scratch tree.
+export function listSheets(root) {
+  return walk(join(root, 'src/styles'), { exts: ['.css'] })
+    .map((abs) => ({ rel: toPosix(relative(root, abs)), raw: readFileSync(abs, 'utf8') }))
+    .sort((a, b) => a.rel.localeCompare(b.rel))
 }

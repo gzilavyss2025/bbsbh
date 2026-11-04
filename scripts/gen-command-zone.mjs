@@ -53,12 +53,13 @@ import {
   playIndex,
   streamPitches,
 } from './lib/opencommand.mjs'
+import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'glove-target')
 
-const seasonArg = process.argv.find((a) => a.startsWith('--season='))
-const preferred = seasonArg ? Number(seasonArg.slice('--season='.length)) : new Date().getFullYear()
+const seasonArg = strOpt(parseArgs(process.argv.slice(2)), 'season')
+const preferred = seasonArg ? Number(seasonArg) : new Date().getFullYear()
 
 // How many dots one pitch type carries to the client. A pitcher throws 500+ of
 // one pitch in a season; a phone-width card can show a few dozen before the

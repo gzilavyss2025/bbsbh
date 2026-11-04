@@ -40,7 +40,7 @@
 // Run by hand: node scripts/gen-level-tenure-benchmark.mjs
 import { join } from 'node:path'
 import { ipToOuts } from '../src/lib/math/innings.js'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 
@@ -86,11 +86,7 @@ function groupFor(posAbbr) {
 
 async function fetchGroups(ids) {
   const byId = new Map()
-  for (let i = 0; i < ids.length; i += 100) {
-    const chunk = ids.slice(i, i + 100)
-    const data = await getJson(`/api/v1/people?personIds=${chunk.join(',')}`)
-    for (const p of data.people ?? []) byId.set(p.id, groupFor(p.primaryPosition?.abbreviation))
-  }
+  for (const p of await getPeople(ids)) byId.set(p.id, groupFor(p.primaryPosition?.abbreviation))
   return byId
 }
 

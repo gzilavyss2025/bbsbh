@@ -9,8 +9,9 @@
 //
 // Run by `npm run lint` (so it gates every push). Zero deps, walks src/**/*.jsx.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { walk } from './lib/walk.mjs';
 
 const SRC = join(import.meta.dirname, '..', 'src');
 
@@ -22,16 +23,6 @@ const BANNED = /\.(toUpperCase|toLowerCase)\(\)/g;
 // letter of a word for a sentence). See ADR-0017.
 const EXEMPT = /caps-js-exempt\b/i;
 
-function jsxFiles(dir) {
-  const out = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...jsxFiles(full));
-    else if (entry.endsWith('.jsx')) out.push(full);
-  }
-  return out;
-}
-
 // Blank out // line comments and /* ... */ block comments while preserving
 // newlines, so line numbers stay accurate and prose mentioning these calls
 // isn't flagged.
@@ -42,7 +33,7 @@ function stripComments(src) {
 }
 
 const violations = [];
-for (const file of jsxFiles(SRC)) {
+for (const file of walk(SRC, { exts: ['.jsx'] })) {
   const raw = readFileSync(file, 'utf8').split('\n');
   const lines = stripComments(raw.join('\n')).split('\n');
   lines.forEach((line, i) => {

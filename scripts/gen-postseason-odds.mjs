@@ -18,8 +18,8 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
-import { parseArgs } from './lib/args.mjs'
-import { clamp, round1 } from '../src/lib/math/number.js'
+import { parseArgs, isoDay } from './lib/args.mjs'
+import { clamp, round1, round2 } from '../src/lib/math/number.js'
 import { latestAtOrBefore } from '../src/lib/math/snapshot.js'
 import { writeJsonAtomic } from './lib/io.js'
 
@@ -34,8 +34,6 @@ const DEFAULT_SIMS = 5000
 // granularity is finer than 0.1%, and near the 0%/100% extremes that extra
 // digit is what lets the UI show "99.95%" instead of overstating certainty
 // with a flat "100.0%" (see PostseasonOddsCard's formatPct).
-const round2 = (n) => Math.round(n * 100) / 100
-const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
   const d = new Date(`${date}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() + n)

@@ -34,8 +34,8 @@
 //
 // Zero deps. Run by `npm run lint`. Unit cases: test/component-reuse.test.js.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { listSheets } from './lib/walk.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 
@@ -115,16 +115,8 @@ export function scanSheet(rel, raw) {
   return { hits, bare }
 }
 
-export function listSheets(dir, prefix = 'src/styles/') {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return listSheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css') ? [{ rel: `${prefix}${f}`, raw: readFileSync(abs, 'utf8') }] : []
-  })
-}
-
 function main() {
-  const sheets = listSheets(join(ROOT, 'src/styles')).sort((a, b) => a.rel.localeCompare(b.rel))
+  const sheets = listSheets(ROOT)
 
   // A guard that stops guarding still prints its tick. Count first: if the
   // partials move or empty out, fail here and repoint this script in the same

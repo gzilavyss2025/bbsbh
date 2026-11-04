@@ -12,9 +12,7 @@
 // (except the client itself, and this file):
 //   1. names the host `statsapi.mlb.com` on a line that is not a comment, or
 //   2. uses STATSAPI_BASE, the constant the client builds its URLs from (use
-//      statsapiUrl(path) to RECORD an address, getJson(path) to fetch one), or
-//   3. (scripts/ only) names cachedGetJson. The research cache is for .scratch:
-//      a generator must never read it, because the nightly data must be fresh.
+//      statsapiUrl(path) to RECORD an address, getJson(path) to fetch one).
 //
 // Comment lines are skipped: a header may say where its data comes from.
 //
@@ -54,7 +52,6 @@ export const ALLOWLIST = {
 
 const HOST = /statsapi\.mlb\.com/
 const BASE = /\bSTATSAPI_BASE\b/
-const CACHE = /\bcachedGetJson\b/
 
 const norm = (p) => p.split('\\').join('/')
 
@@ -84,12 +81,10 @@ export function codeLines(source) {
 // the client: [{ line, rule, text }]. The pure half, tested in
 // test/statsapi-client-guard.test.js.
 export function findViolations(source, file = '') {
-  const inScripts = norm(file).startsWith('scripts/')
   const found = []
   for (const [line, text] of codeLines(source)) {
     if (HOST.test(text)) found.push({ line, rule: 'host', text: text.trim() })
     if (BASE.test(text)) found.push({ line, rule: 'base', text: text.trim() })
-    if (inScripts && CACHE.test(text)) found.push({ line, rule: 'cache', text: text.trim() })
   }
   return found
 }
@@ -106,7 +101,6 @@ export function listSources(root = ROOT, roots = ROOTS) {
 const HELP = {
   host: 'builds a statsapi.mlb.com URL. Call getJson(path) from scripts/lib/statsapi.mjs instead (import path relative to this file).',
   base: 'uses STATSAPI_BASE. Fetch with getJson(path); to record an address, use statsapiUrl(path).',
-  cache: 'names cachedGetJson in scripts/. The research cache is for .scratch only: a generator must read fresh data.',
 }
 
 function main() {

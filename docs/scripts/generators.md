@@ -41,11 +41,9 @@ sleep of its own.
 - **A DNS failure names the sandbox.** When `ENOTFOUND` or `EAI_AGAIN` outlasts
   the retries, the error says the Claude Code Bash sandbox blocks statsapi and
   to rerun with the sandbox off.
-- **A research cache, for `.scratch` only.** `cachedGetJson(path)` keeps each
-  answer for an hour in `node_modules/.cache/statsapi/`, which git ignores, so a
-  re-run of a spike does not pull again. `getJson` never reads it, and the guard
-  fails a file in `scripts/` that names `cachedGetJson`: the nightly data must be
-  fresh.
+- **Many people at once: `getPeople(ids, { hydrate, fields, size, concurrency, onError })`.**
+  It chunks the ids, calls `/api/v1/people`, and returns the rows flat. A failed call
+  throws; give `onError` to skip it instead. Never hand-chunk `personIds=`.
 - **No concurrency limit in the client.** `scripts/lib/concurrency.mjs` stays
   beside it. Its pool turns a failed item into `null`, which a client must not
   do for every caller, and each generator sizes its own pool.
@@ -1813,17 +1811,11 @@ Re-run only to fold in a new season.
   affiliate data is clean) and merges a small hand-verified seed
   (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the SEED, never the
   output.** See the generator header for the 2005-floor rationale.
-- `season-marks/fetch.mjs` → `src/lib/data/season-marks.json` + `public/logos/historical/` —
-  the mark a club wore in a past season (#1591). **The lab owns that table now** (the
-  Eras tab, `docs/identity-lab.md`): this script is a one-time bootstrap, and it refuses
-  to run without `--rebuild-from-seed`, because it would erase every era the lab added.
-  **Hand-run, NOT on a cron**: the art is immutable. Reads `scripts/season-marks/seed.json`, asks Wikimedia Commons for each file's licence, and downloads only a file marked public
-  domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
-  draws the era's serif abbreviation (`abbr`, from the Stats API for those seasons) and the
-  maintainer sees what needs a decision (#1626). An era Commons does not document carries
-  a `cite`. This script sets no colours; an era carries its own
-  triad only when set in the lab, and otherwise wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
-  `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
+- `src/lib/data/season-marks.json` + `public/logos/historical/` — the mark a club wore in a
+  past season (#1591). **Hand-edited in the lab** (the Eras tab, `docs/identity-lab.md`); no
+  script builds it now. The art is immutable and no cron touches it. An era with no art
+  draws its serif abbreviation (`abbr`) and wears neutral chrome unless it carries its own
+  triad (#1626). Reader: `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the
@@ -2259,11 +2251,9 @@ Re-run only to fold in a new season.
   (`npm run gen:ballpark-thumbs`) after adding or replacing a bundled photo,
   same cadence as the photos themselves.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
-- `gen-og-image.mjs` — NOT currently used. `public/og-image.png` (1200×630
-  link-preview card) is a hand-provided phone-mockup asset instead. This script +
-  `scripts/og-image.html` render an alternate generated-art version, kept in case we
-  go back to it. The `og:*`/`twitter:*` tags in `index.html` point at the current
-  `.jpg` (absolute URLs).
+- `public/og-image.png` (1200×630 link-preview card) is a hand-provided phone-mockup
+  asset; no script generates it. The `og:*`/`twitter:*` tags in `index.html` point at
+  it (absolute URLs).
 - `gen-sitemap.mjs` → `public/sitemap.xml` — runs as part of `npm run build`. Lists
   the `/learn` guides plus the stable, public, non-scoring app routes, and
   deliberately lists NO game, date, player or team URL: a sitemap is a standing

@@ -68,7 +68,7 @@
 // Run by hand: node scripts/gen-former-teammates.mjs
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShardsWithStamp } from './lib/io.js'
 import {
@@ -477,17 +477,9 @@ const LEVEL_RANK = (label) => LEVEL_ORDER[label] ?? 0
 // comma-list of ids).
 async function fetchNames(personIds) {
   const names = new Map()
-  const CHUNK = 100
-  for (let i = 0; i < personIds.length; i += CHUNK) {
-    const chunk = personIds.slice(i, i + CHUNK)
-    try {
-      const data = await getJson(`/api/v1/people?personIds=${chunk.join(',')}`)
-      for (const p of data.people ?? []) {
-        if (p.id) names.set(p.id, p.fullName ?? '')
-      }
-    } catch {
-      /* leave those names blank; the card degrades to an empty string */
-    }
+  // A failed batch leaves those names blank; the card degrades to an empty string.
+  for (const p of await getPeople(personIds, { onError: () => {} })) {
+    if (p.id) names.set(p.id, p.fullName ?? '')
   }
   return names
 }

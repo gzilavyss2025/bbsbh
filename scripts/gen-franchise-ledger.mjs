@@ -19,7 +19,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { writeShards } from './lib/io.js'
-import { getJson } from './lib/statsapi.mjs'
+import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { buildLedger, managersFor, postseasonFor, standingsFor } from './lib/franchise/ledger.mjs'
 
@@ -68,9 +68,7 @@ for (const id of ALL_MLB_TEAM_IDS) {
   }
 }
 const ids = [...need].sort((a, b) => a - b)
-const batches = Array.from({ length: Math.ceil(ids.length / 100) }, (_, i) => ids.slice(i * 100, i * 100 + 100))
-const named = await mapConcurrent(batches, 4, (batch) => getJson(`/api/v1/people?personIds=${batch.join(',')}`), { strict: true })
-const names = new Map(named.flatMap((r) => r.people ?? []).map((p) => [p.id, p.fullName]))
+const names = new Map((await getPeople(ids, { concurrency: 4 })).map((p) => [p.id, p.fullName]))
 const missing = ids.filter((id) => !names.has(id))
 if (missing.length) throw new Error(`no name for manager ids ${missing.join(', ')}`)
 
