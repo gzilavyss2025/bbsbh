@@ -72,6 +72,9 @@ export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough,
         }
         if (cancelled) return
         const data = await res.json()
+        // Checked again after the body arrives: a slow game-A answer must not land
+        // after the hook has moved on to game B (#2891).
+        if (cancelled) return
         if (Number.isInteger(data.revealedThrough) && data.revealedThrough >= 0) {
           mergeRevealedThrough(data.revealedThrough)
         }

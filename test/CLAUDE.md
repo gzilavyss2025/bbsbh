@@ -4,6 +4,10 @@
 `npm test` (see root `CLAUDE.md`). `test/fixtures/` holds shared captured-feed JSON;
 most files keep their fixtures inline (see "Fixtures" below for why).
 
+**Real generator state is not here.** A test that reads the real dumps under
+`scripts/data/` goes in `test-state/` (`npm run test:state`, after `npm run state:pull`),
+so `npm test` runs on a fresh clone (ADR-0128).
+
 ## Finding a test
 
 There is no index table. Test files are named after the module they cover: run
@@ -40,10 +44,11 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   ABS pair by the same one, which takes the gamePk as its argument. The Gameday engine's
   `game-*.gameday.json` set is rebuilt by `.scratch/gameday-engine/build-fixture.mjs`. The suite reads them
   from disk, so it stays offline.
-- **A hook is exercised through one server render.** `callout-ledger.test.js` reads
+- **A hook is exercised through one render probe.** `callout-ledger.test.js` reads
   `useCalloutLedgerValue` by rendering a probe component with
   `react-dom/server`'s `renderToStaticMarkup`. `local-store-pins.test.js` also renders through `react-dom/server`
-  (`renderToString`). That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
+  (`renderToString`). `reveal-progress-game-switch.test.js` needs effects, so it mounts
+  through `react-dom/client`'s `createRoot` on a stub container and a stub `window`. That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
   (`revealProgressCore.js` is the pattern) when a hook's logic can live in one; use
   the probe only when the value the hook returns IS the thing under test.
 - **Prefer asserting the field(s) under test, not the whole object**, when adding new

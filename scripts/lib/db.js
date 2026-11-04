@@ -1,11 +1,12 @@
 // Shared SQLite helpers for the gen-*.mjs generators (docs/adr/0021).
 //
-// The committed source of truth is TEXT dumps (scripts/data/*.sql, plain
+// The source of truth is TEXT dumps (scripts/data/*.sql, plain
 // INSERT statements) rather than a binary .db file, so PR diffs stay
 // reviewable and the git packfile doesn't accumulate binary blobs on every
 // nightly commit. Each generator run reconstitutes a throwaway in-memory
 // database from schema.sql + every group's dump, writes to it, then
-// re-dumps only the group(s) it owns.
+// re-dumps only the group(s) it owns. The dumps live in the private bbsbh-state
+// repo, not this one (ADR-0128): `npm run state:pull` copies them in.
 //
 // Dumps are split ONE FILE PER GROUP, not one shared file, so two generators
 // on independently scheduled cron workflows can never silently clobber each

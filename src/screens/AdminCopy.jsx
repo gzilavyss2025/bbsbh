@@ -4,7 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
-import { FIELDS, GROUPS, defaultCopy, sanitizeOverrides } from '../copy/registry.js'
+import { FIELDS, GROUPS, defaultCopy, sanitizeOverrides } from '../copy/registryFull.js'
 import { AwardOrderEditor } from '../components/admin/AwardOrderEditor.jsx'
 
 // The admin copy editor (route: /admin, unlinked). Lets the site owner tune the

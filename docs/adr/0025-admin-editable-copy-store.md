@@ -246,3 +246,12 @@ it (`test/api-copy-write-plan.test.js`).
 `saveCopyPatch` no longer reads at all and is smaller for it. The panel keeps
 full-map semantics, since it genuinely holds every field, but its own load now
 bypasses the edge with a unique URL rather than trusting `cache: 'no-store'`.
+
+## Amendment (2026-11-04) — two registries (#2878)
+
+`src/copy/registry.js` is the runtime set the SPA ships: offseason, awards and
+ballparks, with no `/learn` guide prose and no `mergeOverrides`.
+`src/copy/registryFull.js` adds the guides (`landingFields()`) and the merge. The
+server (`api/copy.js`, `api/page.js`), `AdminCopy` and `/learn?edit` validate and
+merge against the full set only, so a partial save keeps every `learn.*` override.
+The saving is about 37 KB gzip of first-load JS.
