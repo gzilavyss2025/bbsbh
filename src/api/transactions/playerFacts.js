@@ -409,19 +409,15 @@ function evictOldest() {
   const mine = []
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i)
-    // An older key version is dead weight: the first to go.
-    if (k?.startsWith('bbsbh:wirefacts:') && !k.startsWith(FACTS_STORE)) {
-      mine.push(['', k])
-      continue
-    }
-    if (!k?.startsWith(FACTS_STORE)) continue
+    if (!k?.startsWith('bbsbh:wirefacts:')) continue
     let d = ''
     try {
       d = JSON.parse(localStorage.getItem(k))?.d ?? ''
     } catch {
       // unreadable: oldest
     }
-    mine.push([d, k])
+    // An older key version is dead weight: the first to go.
+    mine.push([k.startsWith(FACTS_STORE) ? d : '', k])
   }
   mine.sort((a, b) => (a[0] < b[0] ? -1 : 1))
   for (const [, k] of mine.slice(0, Math.max(1, Math.ceil(mine.length / 2)))) localStorage.removeItem(k)
