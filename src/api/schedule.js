@@ -455,8 +455,7 @@ export async function fetchGamesByPk(gamePks) {
 // than inheriting one date's sportId like the ordinary slate does. One
 // batched request (same endpoint/hydrate as fetchGamesByPk above), reusing
 // normalizeGame so a Top Games card can never drift from an ordinary slate
-// card's shape. `officialDate` rides alongside for the card's date banner
-// (GameCard's `dateLabel` prop) — normalizeGame's own `gameDate` is a full
+// card's shape. `officialDate` rides alongside — normalizeGame's own `gameDate` is a full
 // ISO timestamp, not a calendar day. Degrades to {} on failure.
 export async function fetchGameCardsByPk(gamePks) {
   const list = [...new Set((gamePks ?? []).filter(Boolean))]

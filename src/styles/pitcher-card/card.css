@@ -371,9 +371,6 @@
 .pscene__ghost.is-dim {
   opacity: 0.3;
 }
-.szmodal__body .pbp__replay {
-  align-self: stretch;
-}
 
 /* Phone: the card's "Replay" control, last on the zone icon's line. Narrow
    sides, so zone, Watch and Replay share the ~142px column at 390; narrower,
@@ -420,14 +417,4 @@
    off from the count strip above. */
 .pbp__replaypicks {
   margin: var(--space-2);
-}
-
-/* Wide, the whole half laid out: a pick's scene plays in its own card, on a
-   row of its own under the pitch list and zone plot (AtBatReplay.jsx). */
-.pbp__zonecell:has(> .pbp__replay) {
-  flex-wrap: wrap;
-}
-.pbp__zonecell > .pbp__replay {
-  flex-basis: 100%;
-  max-width: var(--refrail-w); /* the rail's size, not the card's */
 }

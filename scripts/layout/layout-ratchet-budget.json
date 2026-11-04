@@ -54,9 +54,9 @@
     "grid": 3
   },
   "src/styles/12-sealbox.css": {
-    "column": 7,
+    "column": 6,
     "wrap": 1,
-    "grid": 4
+    "grid": 3
   },
   "src/styles/13-play-by-play.css": {
     "column": 2
@@ -382,7 +382,6 @@
   },
   "src/styles/pitcher-card/card.css": {
     "column": 4,
-    "wrap": 1,
     "grid": 5
   },
   "src/styles/postseason/home.css": {
