@@ -7,8 +7,11 @@
 // context before deleting anything this flags.
 //
 // WHAT IT WALKS. Every export in src/**/*.{js,jsx} is checked against an
-// import graph built from the WHOLE repo (src/, api/, scripts/, test/, e2e/) —
-// an export used only by a test, or only by a generator script, is still used.
+// import graph built from src/, api/, scripts/ and e2e/. An export only a test
+// (test/) imports is NOT used (#2845): ~1,000 lines of src/api code piled up that
+// way with no product caller. A test still counts for "is this file imported at
+// all", so a whole file only tests import is checked, but never for a name.
+// A generator script's import is a real use.
 // A name called elsewhere in ITS OWN file — an internal helper that also
 // happens to carry an `export` keyword nobody else reaches for — ALSO counts
 // as used: that code is reachable, so flagging it would just be noise about
@@ -47,14 +50,14 @@
 // Run by `npm run lint` (so it gates every push).
 
 import { readFileSync } from 'node:fs'
-import { dirname, extname, join, relative, resolve } from 'node:path'
+import { dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { ROOT, walk } from './lib/walk.mjs'
 
 
 const CODE_EXT = new Set(['.js', '.jsx', '.mjs'])
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git', '.vercel'])
-// Every root whose files can import from src/ and therefore count toward
-// "does anything use this" — not just src/ itself.
+// Every root whose files can import from src/. test/ is walked only to mark a file
+// as imported (see the import loop); its imports never count as a use.
 const CORPUS_ROOTS = ['src', 'api', 'scripts', 'test', 'e2e']
 // Only exports declared in these are checked — api/ and scripts/ have their
 // own conventions (Vercel handlers, one-off generators) this guard doesn't
@@ -252,6 +255,7 @@ function usedElsewhereInFile(lines, skipLine, name) {
   return lines.some((line, i) => i !== skipLine && re.test(line.replace(/\/\/.*$/, '')))
 }
 
+const testDir = join(ROOT, 'test') + sep
 const usedNamed = new Map(codeFiles.map((f) => [f, new Set()]))
 const usedDefault = new Map(codeFiles.map((f) => [f, false]))
 const namespaceImported = new Map(codeFiles.map((f) => [f, false]))
@@ -259,10 +263,12 @@ const importedAtAll = new Map(codeFiles.map((f) => [f, false]))
 
 for (const fromFile of codeFiles) {
   const text = src.get(fromFile)
+  const fromTest = fromFile.startsWith(testDir)
   for (const imp of extractImports(text)) {
     const target = resolveSpecifier(imp.spec, fromFile)
     if (!target) continue
     importedAtAll.set(target, true)
+    if (fromTest) continue
     if (imp.hasNamespace) namespaceImported.set(target, true)
     if (imp.hasDefault) usedDefault.set(target, true)
     for (const n of imp.names) (n === 'default' ? usedDefault.set(target, true) : usedNamed.get(target).add(n))
@@ -271,6 +277,7 @@ for (const fromFile of codeFiles) {
     const target = resolveSpecifier(imp.spec, fromFile)
     if (!target) continue
     importedAtAll.set(target, true)
+    if (fromTest) continue
     for (const n of imp.names) (n === 'default' ? usedDefault.set(target, true) : usedNamed.get(target).add(n))
   }
 }
