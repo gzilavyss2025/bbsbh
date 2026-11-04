@@ -8,9 +8,9 @@ import {
   parseAtBatMark,
   formatAtBatMark,
   parseBoxRevealMark,
+  restoreReveal,
   catchUpMarkIn,
   markAfterStep,
-  markOnPageShow,
   mergeMark,
   offerCatchUp,
   unlockedInnings,
@@ -322,15 +322,18 @@ export function useRevealProgress(feed, regulation, actualCount) {
       // Same parse + forward-only merge as every other reveal source.
       else mergeRevealedThrough(parseRevealMark(e.newValue))
     }
-    // A back/forward-cache restore fires no `storage` events for what changed while the
-    // page was cached, so it asks storage again — forward-only (#2913).
+    // A back/forward-cache restore may get no `storage` events for what changed while the
+    // page was cached, so it asks storage again (#2913; the rules are restoreReveal's).
     function onPageShow(e) {
+      if (!e.persisted) return
+      let raw
       try {
-        const raw = window.localStorage.getItem(storageKey)
-        update((prev) => ({ ...prev, through: markOnPageShow(prev.through, e, raw) }))
+        raw = window.localStorage.getItem(storageKey)
       } catch {
-        // Storage unavailable — the page keeps the mark it had.
+        return // Storage unavailable — the page keeps the state it had.
       }
+      const storedCursor = readAtBatMark(`${ATBAT_KEY}${gamePk}`)
+      update((prev) => restoreReveal(prev, raw, storedCursor))
     }
     window.addEventListener('storage', onStorage)
     window.addEventListener('pageshow', onPageShow)
@@ -338,7 +341,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('pageshow', onPageShow)
     }
-  }, [storageKey, update, mergeRevealedThrough, resealAll])
+  }, [storageKey, gamePk, update, mergeRevealedThrough, resealAll])
 
   useEffect(() => {
     if (!state.gamePk) return
@@ -533,8 +536,21 @@ export function useBoxScoreReveal(gamePk) {
       // and must not additionally close one that is already open.
       else if (e.newValue == null) resealBox()
     }
+    // A back/forward-cache restore replays the same rule on what storage holds now (#2913).
+    function onPageShow(e) {
+      if (!e.persisted) return
+      try {
+        onStorage({ key: storageKey, newValue: window.localStorage.getItem(storageKey) })
+      } catch {
+        // Storage unavailable — the page keeps the state it had.
+      }
+    }
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    window.addEventListener('pageshow', onPageShow)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('pageshow', onPageShow)
+    }
   }, [storageKey, markBoxOpened, resealBox])
 
   return { boxOpened: opened, markBoxOpened }

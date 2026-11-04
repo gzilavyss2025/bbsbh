@@ -63,11 +63,27 @@ export function markAfterStep(revealedThrough, halfIdx) {
 }
 
 // A page restored from the back/forward cache (`pageshow`, `persisted`) missed every
-// `storage` event fired while it sat there, so it re-reads the stored mark (#2913).
-// Same forward-only merge as everything else: a re-read may raise the mark, never lower
-// it, and a removed or mangled value (-1) changes nothing (ADR-0002).
-export function markOnPageShow(prev, { persisted }, raw) {
-  return persisted ? mergeMark(prev, parseRevealMark(raw)) : prev
+// `storage` event fired while it sat there (#2913), so the hook re-reads both keys and
+// this applies what those events would have. `raw` is the stored mark, `storedCursor`
+// the parsed at-bat cursor; `prev` is the hook's { through, cursor }.
+//  - A REMOVED key re-seals, the same door the storage listener has: only "erase my
+//    Tally data" and the shared-device guard take it away (clearRevealMarks).
+//  - A value only raises the mark (ADR-0002); a stale or mangled one changes nothing.
+//  - The cursor never walks behind the other tab: it takes the stored one when that is
+//    further on, or when its own half has since been committed (so it is stale).
+// Returns `prev` itself when nothing changed, so a restore costs no re-render.
+const cursorAhead = (a, b) =>
+  a.halfIdx !== b.halfIdx ? a.halfIdx > b.halfIdx : a.count !== b.count ? a.count > b.count : a.sub > b.sub
+
+export function restoreReveal(prev, raw, storedCursor) {
+  if (raw == null) {
+    if (prev.through < 0 && prev.cursor.halfIdx < 0) return prev
+    return { ...prev, through: -1, cursor: parseAtBatMark(null) }
+  }
+  const through = mergeMark(prev.through, parseRevealMark(raw))
+  const stale = prev.cursor.halfIdx >= 0 && prev.cursor.halfIdx <= through
+  const cursor = stale || cursorAhead(storedCursor, prev.cursor) ? storedCursor : prev.cursor
+  return through === prev.through && cursor === prev.cursor ? prev : { ...prev, through, cursor }
 }
 
 // How many innings are currently visible: regulation, plus one more for each

@@ -14,7 +14,7 @@ import {
   unlockedInnings,
   effectiveReveal,
   markAfterStep,
-  markOnPageShow,
+  restoreReveal,
 } from '../src/hooks/revealProgressCore.js'
 import { halfIndex } from '../src/api/select.js'
 
@@ -275,20 +275,45 @@ test('markAfterStep ratchets the mark to the half before the one being stepped, 
 })
 
 // --------------------------------------------------------------------------
-// markOnPageShow — a page restored from the back/forward cache missed every
-// `storage` event fired while it sat there (#2913), so it re-reads the stored
-// mark. The re-read is the same forward-only merge: it may raise, never lower.
+// restoreReveal — a page restored from the back/forward cache missed every
+// `storage` event fired while it sat there (#2913), so it re-reads storage and
+// applies what those events would have: a value only raises the mark, a REMOVED
+// key re-seals (the same door the storage listener has), and the at-bat cursor
+// never walks behind the other tab's progress.
 // --------------------------------------------------------------------------
-test('markOnPageShow picks up a reveal made in another tab while the page was cached', () => {
-  assert.equal(markOnPageShow(3, { persisted: true }, '7'), 7)
+const inert = { halfIdx: -1, count: 0, sub: 0 }
+const at = (halfIdx, count, sub = 0) => ({ halfIdx, count, sub })
+
+test('restoreReveal picks up a reveal made in another tab while the page was cached', () => {
+  assert.equal(restoreReveal({ through: 3, cursor: inert }, '7', inert).through, 7)
 })
 
-test('markOnPageShow never lowers the mark (ADR-0002)', () => {
-  assert.equal(markOnPageShow(7, { persisted: true }, '3'), 7)
-  assert.equal(markOnPageShow(7, { persisted: true }, null), 7)
-  assert.equal(markOnPageShow(7, { persisted: true }, 'garbage'), 7)
+test('restoreReveal never lowers the mark for a value, stale or mangled (ADR-0002)', () => {
+  const prev = { through: 7, cursor: inert }
+  assert.equal(restoreReveal(prev, '3', inert), prev)
+  assert.equal(restoreReveal(prev, 'garbage', inert), prev)
 })
 
-test('markOnPageShow ignores an ordinary load (not a bfcache restore)', () => {
-  assert.equal(markOnPageShow(3, { persisted: false }, '7'), 3)
+test('restoreReveal re-seals when the key was removed while the page was cached', () => {
+  const next = restoreReveal({ through: 7, cursor: at(8, 2) }, null, inert)
+  assert.equal(next.through, -1)
+  assert.deepEqual(next.cursor, inert)
+})
+
+test('restoreReveal takes a cursor the other tab moved ahead, and keeps its own when ahead', () => {
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 1) }, '7', at(8, 3)).cursor, at(8, 3))
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 1) }, '7', at(8, 1, 2)).cursor, at(8, 1, 2))
+  const prev = { through: 7, cursor: at(8, 3) }
+  assert.equal(restoreReveal(prev, '7', at(8, 1)), prev)
+})
+
+test('restoreReveal drops a cursor whose half the other tab committed', () => {
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 2) }, '8', inert).cursor, inert)
+})
+
+test('restoreReveal returns prev when nothing changed', () => {
+  const prev = { through: 7, cursor: at(8, 2) }
+  assert.equal(restoreReveal(prev, '7', at(8, 2)), prev)
+  const sealed = { through: -1, cursor: inert }
+  assert.equal(restoreReveal(sealed, null, inert), sealed)
 })
