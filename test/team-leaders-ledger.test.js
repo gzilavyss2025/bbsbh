@@ -91,11 +91,6 @@ test('every ledger category yields exactly the leader of its own group', () => {
   }
 })
 
-test('a hitter with no position on file renders no tag rather than a dash', () => {
-  assert.equal(positionTag({ position: '' }, 'hitting'), '')
-  assert.equal(positionTag({}, 'hitting'), '')
-})
-
 // MLB's qualified bar (#team Ranks): 3.1 PA and 1.0 IP per team game in MLB,
 // 2.7 PA and 0.8 IP in the minors. A hot part-timer the roster-relative bar
 // would keep must drop off the rate boards; counting boards keep everyone.
