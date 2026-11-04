@@ -8,7 +8,7 @@
 // it to drift. An unknown size or skin is a caller's typo, and it throws: a
 // silent fallback would ship an outline button where someone asked for danger.
 
-export const SIZES = ['tap', 'control']
+const SIZES = ['tap', 'control']
 export const SKINS = ['outline', 'ink', 'ghost', 'danger', 'seal']
 
 export function buttonClassName({ size = 'tap', skin = 'outline', block = false, hint, className = '' } = {}) {

@@ -9,7 +9,6 @@
 import { getJson } from '../statsapi.js'
 import { seedFrom, pickGame } from '../milbPool.js'
 
-export { seedFrom }
 
 export const CLASSICS_FIELDS =
   'dates,date,games,gamePk,gameType,officialDate,gameNumber,seriesGameNumber,teams,away,home,team,id,name,abbreviation,venue,status,detailedState'
@@ -21,7 +20,7 @@ const GAME_TYPES = new Set(['R', 'F', 'D', 'L', 'W'])
 
 export const scheduleUrl = (teamId, season) =>
   `/api/v1/schedule?sportId=1&teamId=${teamId}&season=${season}&fields=${CLASSICS_FIELDS}`
-export const teamsUrl = (season) => `/api/v1/teams?sportId=1&season=${season}&fields=${TEAM_FIELDS}`
+const teamsUrl = (season) => `/api/v1/teams?sportId=1&season=${season}&fields=${TEAM_FIELDS}`
 
 // Schedule rows -> pickGame entries. `abbr` maps teamId -> abbreviation for that
 // season's AL/NL clubs; a club outside it is not a major-league game.

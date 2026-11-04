@@ -5,7 +5,7 @@
 // there. Like cardClass.js and pillClass.js, an unknown value is a caller's typo
 // and it throws; a silent fallback would ship the wrong look.
 
-export const STAT_LOOKS = ['default', 'band']
+const STAT_LOOKS = ['default', 'band']
 
 // A stat tile's class list. `lead` is the band's lead tile (the negative-accent
 // head and the marker stroke), so it makes no sense on the default look.
@@ -19,7 +19,7 @@ export function statTileClassName({ look = 'default', lead = false, className = 
   return parts.join(' ')
 }
 
-export const LEADER_STATES = ['lead', 'mine']
+const LEADER_STATES = ['lead', 'mine']
 
 export function leaderRowClassName({ state, className = '' } = {}) {
   if (state != null && !LEADER_STATES.includes(state)) {
@@ -40,7 +40,7 @@ export function leaderListClassName({ zebra = false } = {}) {
 // percents (52, 28, 20) both work. The figure shown is the caller's text
 // (`figure`), defaulting to the share. A part with no weight would draw nothing
 // and a zero total has no bar, so both throw.
-export const METER_TONES = ['good', 'caution', 'bad', 'neutral']
+const METER_TONES = ['good', 'caution', 'bad', 'neutral']
 
 export function meterModel(parts) {
   if (!Array.isArray(parts) || parts.length === 0) throw new Error('Meter: parts is a list of at least one part')

@@ -24,7 +24,7 @@
 //   house  the house navy and pencil rule whatever club the page wears: a head
 //          that names no club (the umpire card) inside a themed page
 //          (ADR-0030).
-export const LOOKS = ['label', 'rule', 'band']
+const LOOKS = ['label', 'rule', 'band']
 
 export function sectionHeadClassName({ look = 'label', club = false, bleed = false, house = false, className = '' } = {}) {
   if (!LOOKS.includes(look)) throw new Error(`SectionHead: unknown look "${look}" (${LOOKS.join(', ')})`)
@@ -39,7 +39,7 @@ export function sectionHeadClassName({ look = 'label', club = false, bleed = fal
 }
 
 // A heading element, or a span inside a card that already has a heading.
-export const TITLE_TAGS = ['h2', 'h3', 'h4', 'span']
+const TITLE_TAGS = ['h2', 'h3', 'h4', 'span']
 
 export function sectionHeadTitleTag(as = 'h3') {
   if (!TITLE_TAGS.includes(as)) throw new Error(`SectionHead: as="${as}" (${TITLE_TAGS.join(', ')})`)

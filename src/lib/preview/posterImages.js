@@ -28,7 +28,7 @@
 // both slow and visibly flickery.
 const cache = new Map()
 
-export function loadPosterImage(src) {
+function loadPosterImage(src) {
   if (!src) return Promise.resolve(null)
   if (cache.has(src)) return cache.get(src)
   const promise = new Promise((resolve) => {

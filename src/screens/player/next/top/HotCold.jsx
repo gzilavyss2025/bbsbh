@@ -14,7 +14,7 @@ import '../../../../styles/player-next/top/hot-cold.css'
 
 // The steps a long name takes to fit: 18px, 16px, 14px, then 14px on two lines (a 320px
 // phone leaves the name column about 80px).
-export const FIT_STEPS = ['', 'field', 'ui', 'wrap']
+const FIT_STEPS = ['', 'field', 'ui', 'wrap']
 
 // A name that shrinks to fit its leader row (Gary, 2026-10-20): while the row's name box
 // overflows, the next step is tried; the last wraps the name onto a second line, so only a

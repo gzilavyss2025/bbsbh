@@ -43,7 +43,7 @@ import { STATCAST, ODDS_SWING } from './thresholds.js'
 export const CUTOFFS = { quiet: 60, normal: 35, lots: 0 }
 
 // Rare and milestone families are fixed; the others add a magnitude bonus.
-export const MOMENT_BASE = {
+const MOMENT_BASE = {
   walkOff: 90,
   cycle: 88,
   triplePlay: 85,

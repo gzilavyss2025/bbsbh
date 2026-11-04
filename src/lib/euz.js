@@ -28,7 +28,7 @@
 // establish "his zone" at all (a Silverman bandwidth degenerates with too
 // few points) — same null-degrade convention as every other thin-sample
 // guard in this codebase (MIN_RANK_GAMES, RE24_FALLBACK_MIN_N, …).
-export const MIN_CONSISTENCY_SAMPLE = 40
+const MIN_CONSISTENCY_SAMPLE = 40
 
 // A tiny nonzero floor for a degenerate axis (every pitch at the exact same
 // coordinate, essentially impossible with real data but guards divide-by-zero).
@@ -48,7 +48,7 @@ function silverman(values) {
 // its called pitches on each axis independently (a tighter-zone game gets a
 // narrower kernel than a wild one) — shared across both classes, which is
 // what makes the derivation above cancel cleanly.
-export function gameBandwidth(pitches) {
+function gameBandwidth(pitches) {
   return {
     bwX: silverman(pitches.map((p) => p.pX)),
     bwZ: silverman(pitches.map((p) => p.pZ)),

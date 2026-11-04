@@ -10,7 +10,7 @@ import { monthDayName } from '../../../../../lib/dates.js'
 export const VIEWS = [['hr', 'Home runs'], ['hit', 'Hits'], ['all', 'All balls']]
 export const COLORS = [['result', 'Result'], ['type', 'Ball type']]
 const RESULT_NAMES = { out: 'Out', single: 'Single', double: 'Double', triple: 'Triple', hr: 'Home run' }
-export const TYPES = [['ground', 'Ground ball'], ['line', 'Line drive'], ['fly', 'Fly ball'], ['pop', 'Pop-up']]
+const TYPES = [['ground', 'Ground ball'], ['line', 'Line drive'], ['fly', 'Fly ball'], ['pop', 'Pop-up']]
 
 const DASH = '—'
 const avg = (xs) => (xs.length ? xs.reduce((t, x) => t + x, 0) / xs.length : null)

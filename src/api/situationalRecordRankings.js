@@ -178,7 +178,7 @@ export function bestOrder(metric) {
 // Does the ordering make a claim about quality? A count with a good end does; a
 // neutral count and a "how often" sort do not, and the page prints no
 // best/worst framing for those.
-export function ordersByQuality(metric, sortBy) {
+function ordersByQuality(metric, sortBy) {
   if (!metric) return false
   if (metric.kind === 'count') return metric.better !== 'neutral'
   return sortBy !== 'played'

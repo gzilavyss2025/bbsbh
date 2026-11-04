@@ -126,7 +126,7 @@ export function settleMs(distance) {
 // `{ y, t }` samples. Only the tail matters: a drag that paused before release
 // has ENDED at rest however fast it moved a second earlier, and averaging over
 // the whole gesture is exactly how a sheet acquires a phantom throw.
-export const VELOCITY_WINDOW_MS = 90
+const VELOCITY_WINDOW_MS = 90
 
 export function velocityFrom(samples, windowMs = VELOCITY_WINDOW_MS) {
   if (!samples || samples.length < 2) return 0

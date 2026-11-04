@@ -17,7 +17,7 @@ const other = (h) => (h === 'R' ? 'L' : 'R')
 const scoutOnce = fetchOnce(loadScout)
 
 // The verdict and the "Things to watch" sentences (edge.js watchList), as the Scout page builds them.
-export function scoutRead(data) {
+function scoutRead(data) {
   if (!data) return null
   const stance = stanceFor(data.hitter.bats, data.pitcher.throws)
   if (!stance) return null

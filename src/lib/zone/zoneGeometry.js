@@ -30,9 +30,9 @@
 // the domain is a touch wider so pitches just off the plate still land inside.
 export const W = 190
 export const H = 238
-export const PAD = 6
-export const DOM_X = [-1.55, 1.55]
-export const DOM_Z = [0.4, 4.6]
+const PAD = 6
+const DOM_X = [-1.55, 1.55]
+const DOM_Z = [0.4, 4.6]
 export const EDGE = 0.708 // half plate width, ft
 
 // Horizontal: the feed's pX as it comes — see THE VIEW above. catcherX(-EDGE)
@@ -79,7 +79,7 @@ export function normalizePitch(px, pz, szTop, szBottom) {
 // bounces to the backstop is still "way low", and a separate bucket for it
 // would carry a handful of pitches and no meaning.
 export const GRID = 5
-export const ZONE_CELLS = 3
+const ZONE_CELLS = 3
 
 function band(value, lo, hi) {
   // Which of the middle three bands `value` falls in, or the outer ring.

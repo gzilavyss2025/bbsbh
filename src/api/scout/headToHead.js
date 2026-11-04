@@ -125,7 +125,7 @@ export function parseSavantRows(text) {
 }
 
 // One tracked pitch, in the shape the pitch modal reads (header, `pitchList`).
-export function pitchOf(r) {
+function pitchOf(r) {
   return {
     n: numOrNull(r.pitch_number),
     code: r.pitch_type || null,

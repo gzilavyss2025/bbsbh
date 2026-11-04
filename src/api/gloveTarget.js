@@ -27,7 +27,7 @@ import { staticJsonBy } from './staticJson.js'
 // The data is OpenCommand's, under CC BY-NC-SA 4.0; the card renders the credit
 // line, and the dataset itself is only ever read by the nightly precompute
 // (scripts/gen-command-zone.mjs), never by the app.
-export const fetchGloveTargetShard = staticJsonBy((key) => `/data/glove-target/${key}.json`, {
+const fetchGloveTargetShard = staticJsonBy((key) => `/data/glove-target/${key}.json`, {
   fallback: null,
 })
 

@@ -162,7 +162,7 @@ export const LEVEL_STANDING_BANDS = ['All', ...Object.values(TIER_LABELS)]
 // of the client bundle) gates whether a percentile exists at all; THIS scales
 // how much confidence the sample supports once a percentile exists. The UI
 // states this in text; marker fill does not carry a second meaning.
-export const QUALIFICATION_FLOOR = { hitting: 40, pitching: 30 }
+const QUALIFICATION_FLOOR = { hitting: 40, pitching: 30 }
 export function confidenceState(sampleSize, group) {
   const floor = QUALIFICATION_FLOOR[group]
   if (!floor || !Number.isFinite(sampleSize) || sampleSize < floor) return null
@@ -181,7 +181,7 @@ export function confidenceLabel(confidence) {
 // A percentile can move by a point or two after one game. Both prospect
 // surfaces call moves below five points steady, so the board and card cannot
 // make different claims from the same snapshot.
-export const MOVEMENT_FLOOR = 5
+const MOVEMENT_FLOOR = 5
 export function movementState(movement) {
   if (!Number.isFinite(movement?.delta)) return null
   if (Math.abs(movement.delta) < MOVEMENT_FLOOR) {

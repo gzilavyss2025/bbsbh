@@ -31,7 +31,7 @@ export const SYNC_CHANNELS = Object.freeze(['reveal', 'stamps', 'books', 'prefs'
 //              SUPPORTED state (docs/development.md), deliberately not an error,
 //              so the UI never shows red for a correctly-configured absence.
 // error        a real, recoverable failure: offline, a rejected token, a 5xx.
-export const SYNC_PHASES = Object.freeze([
+const SYNC_PHASES = Object.freeze([
   'off',
   'local',
   'pulling',
@@ -47,11 +47,11 @@ export const SYNC_PHASES = Object.freeze([
 // states because they are the truthful headline when nothing is syncing at all.
 const SEVERITY = Object.freeze(['error', 'unavailable', 'local', 'off', 'pulling', 'synced'])
 
-export function isSyncChannel(value) {
+function isSyncChannel(value) {
   return typeof value === 'string' && SYNC_CHANNELS.includes(value)
 }
 
-export function isSyncPhase(value) {
+function isSyncPhase(value) {
   return typeof value === 'string' && SYNC_PHASES.includes(value)
 }
 

@@ -7,14 +7,14 @@
 // The hitter AB floor is chosen (Gary, 2026-10-20, from the threshold report: the average uses AB,
 // and 16% of hitter flags rested on fewer than 8 AB). The other numbers are PLACEHOLDER THRESHOLDS.
 // Gary tunes them in the PR.
-export const HITTER_MIN_PA = 8 // a hitter edge needs this many PA …
-export const HITTER_MIN_AB = 8 // … and this many AB (the average and the 2-HR branch both use them) …
-export const HITTER_MIN_AVG = 0.35 // … and this average, or
-export const HITTER_MIN_HR = 2 // … this many home runs
-export const PITCHER_MIN_AB = 10 // a pitcher edge needs this many AB …
-export const PITCHER_MAX_AVG = 0.15 // … and an average this low or lower
-export const MAX_HITTER_EDGES = 2
-export const MAX_PITCHER_EDGES = 1
+const HITTER_MIN_PA = 8 // a hitter edge needs this many PA …
+const HITTER_MIN_AB = 8 // … and this many AB (the average and the 2-HR branch both use them) …
+const HITTER_MIN_AVG = 0.35 // … and this average, or
+const HITTER_MIN_HR = 2 // … this many home runs
+const PITCHER_MIN_AB = 10 // a pitcher edge needs this many AB …
+const PITCHER_MAX_AVG = 0.15 // … and an average this low or lower
+const MAX_HITTER_EDGES = 2
+const MAX_PITCHER_EDGES = 1
 
 const avg = (r) => (r.ab > 0 ? r.h / r.ab : null)
 

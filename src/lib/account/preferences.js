@@ -101,7 +101,7 @@ const MAX_TEAM_ID = 99999
 // The closed field registry. `validate` is the ONLY authority on what a value
 // may be; `fallback` is what a reader gets when the field is absent, and is
 // never itself stored (absence means "no opinion", not "set to the default").
-export const FIELDS = Object.freeze({
+const FIELDS = Object.freeze({
   club: {
     validate: (v) => Number.isInteger(v) && v > 0 && v <= MAX_TEAM_ID,
     // The Brewers — the app's own pinned club (PINNED_TEAM_ID in teams.js).
@@ -198,7 +198,7 @@ export function serializePreferences(doc) {
 
 // Do these two documents say the same thing? Field-wise, since an entry is two
 // scalars — no deep walk needed and none wanted.
-export function samePreferences(a, b) {
+function samePreferences(a, b) {
   const left = a && typeof a === 'object' && !Array.isArray(a) ? a : {}
   const right = b && typeof b === 'object' && !Array.isArray(b) ? b : {}
   const leftFields = FIELD_NAMES.filter((f) => left[f] != null)

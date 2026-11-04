@@ -24,7 +24,7 @@ export function rate3(x) {
 // them). A ratio of counts with a denominator under 100,000 is on a half or
 // at least 0.000005 of a thousandth away from one, so the 1e-7 nudge cancels
 // the float error and moves nothing else.
-export const round3 = (v) => (Math.sign(v) * Math.round(Math.abs(v) * 1000 + 1e-7)) / 1000
+const round3 = (v) => (Math.sign(v) * Math.round(Math.abs(v) * 1000 + 1e-7)) / 1000
 
 // MLB'S OWN OPS: round OBP and SLG to three places, THEN add. Not their sum at
 // full precision, which differs from the published string for about one hitter

@@ -60,7 +60,7 @@ export function followLatest(state, count) {
 // from that pointer (a click's own focus(), or the browser's focus on a tap).
 // Any other focus (Tab, Shift+Tab) is keyboard focus and keeps its ring. A
 // pointer down that never led to focus goes stale after the window.
-export const POINTER_FOCUS_MS = 500
+const POINTER_FOCUS_MS = 500
 export function focusInput(pointerDownAt, now) {
   return pointerDownAt != null && now - pointerDownAt <= POINTER_FOCUS_MS ? 'pointer' : 'key'
 }

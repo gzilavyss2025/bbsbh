@@ -60,7 +60,7 @@ export function nextGamePath(game, slateDate, abbr, section) {
 }
 
 // The next game: the first future game that is not "if needed".
-export function nextGameNumber(columns) {
+function nextGameNumber(columns) {
   return columns.find((c) => c.kind === 'game' && c.state === 'future' && !c.ifNecessary)?.gameNumber ?? null
 }
 
@@ -123,7 +123,7 @@ export function decidedHero(series, mvp = null) {
 // rule below. [DECISION: Gary, 2026-10-20: "Before the series starts, show me Yandy Diaz and
 // Jake Bauers. Then after each game we can go with best ops 25+ PA."] Keyed by season, then club.
 export const PRE_SERIES_PICKS = { 2026: { 139: 650490, 158: 641343 } }
-export const MIN_PA = 25
+const MIN_PA = 25
 
 const opsOf = (row) => Number.parseFloat(row.ops)
 const hitFigs = (r) => `${Number.isFinite(opsOf(r)) ? r.ops : '—'} OPS · ${r.pa} PA`
@@ -140,7 +140,7 @@ const shape = (s) => {
 }
 
 // How many hitters the slab cycles through from the hot-bat splits alone, until the roster has loaded.
-export const SPOTLIGHT_SIZE = 4
+const SPOTLIGHT_SIZE = 4
 
 const byOps = (a, b) => opsOf(b) - opsOf(a) || b.pa - a.pa
 
@@ -163,7 +163,7 @@ export const spotlightAt = (lists, step) => lists.map((l) => (l.length ? l[step 
 
 // The whole roster, for the tap to walk. A club names 26 for the Series (POSTSEASON_ROSTER_SIZE in
 // api/postseason/roster.js); before it does, the current roster can run longer, so the list is cut at 26.
-export const SPOTLIGHT_ROSTER_SIZE = 26
+const SPOTLIGHT_ROSTER_SIZE = 26
 
 // "62.1" innings is 187 outs: thirds, so two lines sort by what they threw.
 const outsOf = (ip) => {

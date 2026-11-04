@@ -126,7 +126,7 @@ export function mergeCareerSplits(a, b, group) {
 // figure comes from a fielding career, which carries no rate stat, and the
 // count IS the question those doors ask ("how often did he come off the
 // bench?"), so there is nothing missing from this line.
-export function gamesLine(stat) {
+function gamesLine(stat) {
   if (!stat) return null
   return `${stat.gamesPlayed} G`
 }
@@ -234,7 +234,7 @@ export async function fetchCareerTotal(personId, group, gameType) {
 // and no rule that reconciles them. It is not a bug to be closed by loosening
 // the gate or by counting the rows instead — the rows stop at the page's
 // cutoff and the door states a whole career.
-export async function fetchFieldingStarts(personId) {
+async function fetchFieldingStarts(personId) {
   if (!personId) return null
   try {
     const data = await getJson(

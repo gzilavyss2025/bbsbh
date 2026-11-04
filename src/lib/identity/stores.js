@@ -33,7 +33,7 @@ import MONO_INK from '../data/mono-ink.json' with { type: 'json' }
 // Keyed by the DEV_DATA_STORES key, which is what a field id resolves to
 // (fields.js's `store`). Same key on both sides means the endpoint picks the
 // validator and the bundled defaults with one lookup and no second table.
-export const BUNDLED_IDENTITY_STORES = {
+const BUNDLED_IDENTITY_STORES = {
   'mlb-treatment-tuning': MLB_TREATMENT_TUNING,
   'milb-treatment-tuning': MILB_TREATMENT_TUNING,
   'mlb-team-colors': MLB_TEAM_COLORS,

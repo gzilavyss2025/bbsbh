@@ -16,7 +16,7 @@ export const COUNTS_GROUP = 'Season counts'
 
 // Every door carries the half, the month, the level (s) AND the page's date (d), so the ranking page
 // opens on the same stretch of the same day.
-export const doorPath = (metric, { half, month, sportId, asOf }) =>
+const doorPath = (metric, { half, month, sportId, asOf }) =>
   situationalRecordsPath({ metric, half, month, s: sportId, d: asOf })
 
 export function recordsModel(data, { cutoff = null, asOf = null, half = 'all', month = null } = {}) {

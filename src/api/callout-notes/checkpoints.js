@@ -248,7 +248,7 @@ export function buildBothScorelessNote(bundle, side, inning) {
 // box-score roll-up without a reveal gate. gen-callouts.mjs keeps every day the
 // club played (dayOfWeek, keyed 0=Sun…6=Sat); the gate is here — a real sample
 // and a genuinely one-sided split, or an ordinary weekday reads as noise.
-export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 export const DOW_MIN_GAMES = 6
 export const DOW_LOPSIDED = 0.66
 export const dowWhen = (dow) => `on ${WEEKDAYS[dow]}s`

@@ -59,7 +59,7 @@ export function isMultiLevelScope(key) {
 // Resolve a scope to the clubs it covers: [{ id, abbreviation, sportId }].
 // Reads only the static snapshot; degrades to [] if it's unavailable (callers
 // then show an empty state rather than crashing).
-export async function resolveScopeTeams(scope, orgId) {
+async function resolveScopeTeams(scope, orgId) {
   const { bySportId } = await fetchStaticTeams()
   const pick = (sid) => bySportId?.[String(sid)] ?? []
   const shape = (t, sid) => ({ id: t.id, abbreviation: t.abbreviation, sportId: sid })

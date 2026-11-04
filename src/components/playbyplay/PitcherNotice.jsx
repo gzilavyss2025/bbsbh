@@ -42,7 +42,7 @@ function NameStack({ name }) {
   return first ? <><small className="change__first">{first}</small><b className="change__last">{last}</b></> : name
 }
 
-export function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = null, teamName, logo = true, stacked = false, children }) {
+function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = null, teamName, logo = true, stacked = false, children }) {
   return (
     <>
       <PitcherPhoto personId={id} name={name} teamId={teamId} stamped />

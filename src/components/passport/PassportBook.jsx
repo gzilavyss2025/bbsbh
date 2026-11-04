@@ -80,7 +80,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 // pages is narrower than a phone's single page, which reads as a pamphlet.
 // 900 is where two pages still look like a book. Exported so the CSS media
 // query has a named twin — the two must move together.
-export const BOOK_WIDE_QUERY = '(min-width: 900px)'
+const BOOK_WIDE_QUERY = '(min-width: 900px)'
 
 // One opening: what sits in the left and right slots. A slot holds a page
 // number, the string 'cover', or null for "nothing there" (the desk beside a

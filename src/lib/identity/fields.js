@@ -44,7 +44,7 @@ const PREFIX = 'identity'
 export const MLB_TREATMENTS = ['main', 'alternate', 'alternate-2', 'alternate-3', 'alternate-4', 'city-connect']
 
 // MiLB's whole vocabulary: two variations, no exceptions.
-export const MILB_SIDES = ['home', 'away']
+const MILB_SIDES = ['home', 'away']
 
 // The two bars an MLB club owns. Every treatment but City Connect wears the
 // club's shared Main bar (teams.js's treatmentHeaderColorOverride), so those are
@@ -116,7 +116,7 @@ const boolean = () => ({ kind: 'boolean' })
 // mark converts worse than an alternate on the same CDN). The one non-scalar
 // dimension in this catalog: `parts` is a shape-index map, not a single value,
 // so it gets its own kind rather than a color/number/pick.
-export const MONO_SOURCE_KEYS = ['base', ...LOGO_VARIANTS.map((v) => v.key)]
+const MONO_SOURCE_KEYS = ['base', ...LOGO_VARIANTS.map((v) => v.key)]
 
 // `monoLogoFingerprint`'s own output shape — see logoMono.js.
 const MONO_FINGERPRINT = /^[0-9]{1,7}:[0-9a-f]{1,8}$/

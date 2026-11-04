@@ -256,7 +256,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
 // same 16%-mix row-tint idiom StatBox/foul-tracker/umpire-pages already use
 // for "this one's the one to look at"). It's always the final row: the at-bat
 // ends on its last pitch by definition.
-export function PitchList({ pitchDetails }) {
+function PitchList({ pitchDetails }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
   const lastNo = pitches[pitches.length - 1].no

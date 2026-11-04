@@ -103,7 +103,7 @@ export function tradedFor(description, name) {
   return side.replace(/\b(?:[LR]HP|C|1B|2B|3B|SS|LF|CF|RF|OF|IF|DH|P|UT)\s+(?=\p{Lu})/gu, '').trim() || null
 }
 
-export function prospectOf(snapshot, playerId) {
+function prospectOf(snapshot, playerId) {
   const top = (snapshot?.players ?? []).find((p) => p.playerId === playerId)
   if (top) return { rank: top.rank, teamId: null }
   const org = (snapshot?.orgProspects ?? []).find((p) => p.playerId === playerId)
@@ -264,7 +264,7 @@ async function withContract(personId, facts) {
 }
 
 // The season a move speaks for: the one just finished, until spring training.
-export function factSeason(isoDate) {
+function factSeason(isoDate) {
   const [y, m] = isoDate.split('-').map(Number)
   return m < 3 ? y - 1 : y
 }

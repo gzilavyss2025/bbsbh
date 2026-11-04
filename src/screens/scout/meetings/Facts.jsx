@@ -3,7 +3,7 @@
 // `MeetingFacts` is the section's 3 x 2 grid and `ContactLine` a plate appearance's one line of
 // contact numbers: both are a <dl> of caps labels over plain values.
 export const fixed = (v, d) => (v == null ? '—' : v.toFixed(d))
-export const xw = (v) => (v == null ? '—' : v.toFixed(3).replace(/^0/, ''))
+const xw = (v) => (v == null ? '—' : v.toFixed(3).replace(/^0/, ''))
 
 export function Fact({ value, unit, label }) {
   return (

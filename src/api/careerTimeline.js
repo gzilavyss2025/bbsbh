@@ -62,7 +62,7 @@ export function fetchTeamLogoTint(teamId) {
 // header — and are absent (not merely null) whenever no parent org resolves,
 // so the component's `e.affiliateTeamId &&` guard stays a plain existence
 // check. Returns the same `entries` for chaining.
-export async function enrichTimelineEntries(entries) {
+async function enrichTimelineEntries(entries) {
   const tintByTeam = new Map()
   const teamTint = async (teamId) => {
     if (!tintByTeam.has(teamId)) tintByTeam.set(teamId, fetchTeamLogoTint(teamId))

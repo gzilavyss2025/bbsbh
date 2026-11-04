@@ -148,7 +148,7 @@ export const BATTER_METRICS = [
   },
 ]
 
-export const PITCHER_METRICS = [
+const PITCHER_METRICS = [
   {
     key: 'xera',
     label: 'xERA',

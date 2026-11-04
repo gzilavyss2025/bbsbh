@@ -128,7 +128,7 @@ export async function currentSeasonOf(store) {
 }
 
 // Every season on file in a store, oldest first.
-export async function seasonsOf(store) {
+async function seasonsOf(store) {
   return (await seasonIndexOf(store)).seasons
 }
 

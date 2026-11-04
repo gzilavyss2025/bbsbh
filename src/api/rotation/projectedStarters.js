@@ -40,11 +40,11 @@ import { dayIndex } from '../workload.js'
 
 // Days between a pitcher's last start and the game, minus the day he started.
 // Four is the usual five-day cycle's floor.
-export const MIN_REST_DAYS = 4
+const MIN_REST_DAYS = 4
 // How far back a start still counts as "lately".
 export const START_WINDOW_DAYS = 35
 // Starts inside that window that make a pitcher a regular rather than a spot starter.
-export const REGULAR_STARTS = 2
+const REGULAR_STARTS = 2
 
 const byOldestStart = (a, b) => b.restDays - a.restDays
 

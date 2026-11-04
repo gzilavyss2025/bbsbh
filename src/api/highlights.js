@@ -80,7 +80,7 @@ export function eligibleHighlightForPlay(items, playId) {
 // tag: the live values are -offense, -pitching, -starting-pitching,
 // -relief-pitching and -team, so it's matched by prefix rather than by a guessed
 // suffix. Most clips carry none of these; absence is normal, not a data gap.
-export const SIGNIFICANCE_TAGS = [
+const SIGNIFICANCE_TAGS = [
   'wow',
   'top-play',
   'featured',

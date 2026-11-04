@@ -627,7 +627,7 @@ export const TREATMENT_SCALE = byTreatment((f) => f.scale)
 // color, white fill implied (the common case — the shared black default
 // every other pinstriped tile uses); `{ color, bg }` swaps in a colored fill
 // under the stripes instead of white (White Sox City Connect's red).
-export const TREATMENT_PINSTRIPE_COLOR = byTreatment((f) =>
+const TREATMENT_PINSTRIPE_COLOR = byTreatment((f) =>
   f.pinstripeColor === undefined
     ? undefined
     : f.pinstripeBg

@@ -272,7 +272,7 @@ export async function fetchLevelSeasonDates(sportId, season) {
 // for the Derby itself (verified live — it's not a schedulable game or
 // event), so this only supports a static "Derby's tonight" pointer, never a
 // live score. MLB-only; degrades to null on failure or a lean/missing season row.
-export async function fetchAllStarInfo(season) {
+async function fetchAllStarInfo(season) {
   return allStarInfoFrom(await fetchSeasonMeta(season))
 }
 

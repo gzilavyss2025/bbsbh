@@ -32,7 +32,7 @@ export function simFlight(ev, la, lift, h0 = 3, cd = 0.35) {
 // the nearer end when the range cannot reach it, with the flight it gives (the same
 // h0 and cd, so a caller cannot fly it again with different ones). Shared by the
 // replay (below) and the side view (ballFlight.js), which passes its own drag and range.
-export function fitLift(ev, la, dist, { h0 = 3, cd = 0.35, lo = 0, hi = 0.45, iters = 18 } = {}) {
+function fitLift(ev, la, dist, { h0 = 3, cd = 0.35, lo = 0, hi = 0.45, iters = 18 } = {}) {
   const low = simFlight(ev, la, lo, h0, cd)
   if (dist <= low.dist) return { lift: lo, flight: low }
   const high = simFlight(ev, la, hi, h0, cd)

@@ -62,7 +62,7 @@ class WireFactsBoundary extends Component {
 // everyone. A third face would push the row past the sentence beside it.
 const FACES_PER_ROW = 2
 
-export const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
+const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
 // The per-story tone map every roster-move surface reads — so an
 // add-flavoured story is green and a health/departure one is clay on the wire,
 // in the dock, on the club deck and on the club's own ledger page.
@@ -76,7 +76,7 @@ export const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner
 // it is noise with a heading's weight. What is left flags the rows worth a
 // second look (a trade, an injured list, a shuffle) and stays silent on the
 // routine ones.
-export const TYPE_TONE = {
+const TYPE_TONE = {
   trade: 'add',
   signing: 'add',
   'injured-list': 'out',
@@ -92,7 +92,7 @@ export const TYPE_TONE = {
 // markers that write the date abbreviated and stacked.
 // One weekday table and one month table for every surface, so a deck tab and
 // a wire row can never name the same day differently.
-export function datelineParts(iso) {
+function datelineParts(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
   if (Number.isNaN(date.getTime())) return { weekday: '', month: '', day: d }
@@ -146,7 +146,7 @@ export function takeStories(items, n) {
 // an anchor nested inside a button is neither valid HTML nor reliably tappable.
 // `tail` is prose that runs on after the sentence in the same paragraph: a
 // single player's background note on the offseason ledger (WireFacts.jsx).
-export function Cutline({ segments, className = 'wire__cutline', linked = true, tail = null }) {
+function Cutline({ segments, className = 'wire__cutline', linked = true, tail = null }) {
   return (
     <p className={className}>
       {(segments ?? []).map((seg, i) => {

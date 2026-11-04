@@ -106,7 +106,7 @@ export const CREDITS = {
 // The bundled photo for a park, or null when we have no art for it. Returns the
 // URL and the credit together because the caller may never render one without
 // the other (CC BY / CC BY-SA attribution).
-export function ballparkPhoto(parkName) {
+function ballparkPhoto(parkName) {
   const key = venueKey(parkName)
   const credit = CREDITS[key]
   if (!credit) return null
@@ -120,7 +120,7 @@ export function ballparkPhoto(parkName) {
 // reads, so every bundled park has one the moment that script has run; an
 // admin's own photo (ADR-0044) never does, since that upload has no build
 // step to make one in — resolvePhoto falls back to the full URL for those.
-export function ballparkPhotoThumb(parkName) {
+function ballparkPhotoThumb(parkName) {
   const key = venueKey(parkName)
   if (!CREDITS[key]) return null
   return { src: `/ballparks/thumb/${key}.webp` }

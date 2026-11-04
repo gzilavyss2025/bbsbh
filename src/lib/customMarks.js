@@ -32,9 +32,9 @@ import store from './data/custom-marks.json' with { type: 'json' }
 // Where a saved mark lives, as the browser sees it. Keyed by team id rather
 // than abbreviation because teamAbbr's 3-letter fallback collides across MiLB
 // (src/lib/logoArt.js says the same about milb-home/milb-away).
-export const CUSTOM_MARK_URL_ROOT = '/team-logos/custom'
+const CUSTOM_MARK_URL_ROOT = '/team-logos/custom'
 
-export function customMarkUrl(teamId, slug) {
+function customMarkUrl(teamId, slug) {
   return `${CUSTOM_MARK_URL_ROOT}/${teamId}-${slug}.svg`
 }
 

@@ -3,7 +3,7 @@
 // and lose it (a blown lead), or trail/tie that late and still win (a
 // clutch win, incl. walk-offs and go-ahead road wins that hold)? Pure, no
 // node imports — read by the nightly gen-team-score.mjs precompute.
-export const LATE_INNING_START = 8
+const LATE_INNING_START = 8
 
 // Half-inning-granular: a lead can flip within a single inning (tied in the
 // top of the 9th, answered right back in the bottom), so this walks every

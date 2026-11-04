@@ -69,8 +69,8 @@ import MLB_TEAM_COLORS_JSON from '../../lib/data/mlb-team-colors.json' with { ty
 // Expect 41 to 65 stories over 12 consecutive measured windows, median ~55 —
 // against 30 to 54 for two days. FETCH_DAYS is backtested, not derived; see
 // THE WINDOW IS NOT THE FETCH above before touching either.
-export const WINDOW_DAYS = 3
-export const FETCH_DAYS = 5
+const WINDOW_DAYS = 3
+const FETCH_DAYS = 5
 
 // A MiLB level has the same thirty clubs an MLB level does, but far fewer of
 // its rows clear `filterStoryworthy` — an undebuted signing isn't suppressed

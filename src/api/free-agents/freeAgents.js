@@ -17,7 +17,7 @@ import { fetchPlayerContract, fetchContractsSeason } from '../person/contracts.j
 // The one note that marks a minor-league free agent. The MLB-only default hides
 // these rows and nothing else: declined options, waiver claims and trades stay,
 // with the note shown on the row (Gary, 2026-11-02).
-export const MINOR_LEAGUE_NOTE = 'Minor League Free Agent'
+const MINOR_LEAGUE_NOTE = 'Minor League Free Agent'
 
 export const POSITION_GROUPS = ['P', 'C', 'IF', 'OF', 'DH']
 

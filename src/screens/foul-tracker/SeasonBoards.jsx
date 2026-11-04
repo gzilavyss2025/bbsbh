@@ -131,7 +131,7 @@ const SIGNIFICANT_RATE_GAP = 0.05
 // enough to call out automatically (see SIGNIFICANT_RATE_GAP) — only
 // computable when BOTH sides cleared the sample floor, never from one lone
 // side.
-export function buildTeamPitchTypeRows(rates) {
+function buildTeamPitchTypeRows(rates) {
   const battingByCode = new Map((rates?.batting ?? []).map((r) => [r.code, r]))
   const pitchingByCode = new Map((rates?.pitching ?? []).map((r) => [r.code, r]))
   const codes = new Set([...battingByCode.keys(), ...pitchingByCode.keys()])
@@ -225,7 +225,7 @@ export function ByPitchType({ league, teamRates }) {
 // above/below it. A row whose two foul% figures diverge by SIGNIFICANT_
 // RATE_GAP or more gets a soft --marker "outlier" wash, the app's "notable, look
 // here" colour, rather than a new accent.
-export function TeamPitchCategoryGroup({ group }) {
+function TeamPitchCategoryGroup({ group }) {
   return (
     <>
       <tr className="foulboard__grouprow foulboard__grouprow--navy">
@@ -267,7 +267,7 @@ export function TeamPitchCategoryGroup({ group }) {
 // is which. Pitches leads (the sample size a reader should weigh the two
 // rates against) with Foul%/Whiff% following, same left-to-right order as
 // TeamPitchCategoryGroup's own Seen/Foul%/Whiff% triplet below.
-export function PitchCategoryGroup({ group }) {
+function PitchCategoryGroup({ group }) {
   return (
     <>
       <tr className="foulboard__grouprow foulboard__grouprow--navy">

@@ -20,8 +20,8 @@ export const STEP = 10
 export const FULL_SEASON = 150
 
 // The cumulative line, as a flat array so the stored checkpoints stay small.
-export const HIT_FIELDS = ['g', 'pa', 'ab', 'h', 'd', 't', 'hr', 'bb', 'hbp', 'sf', 'so', 'sb']
-export const PITCH_FIELDS = ['g', 'outs', 'bf', 'h', 'hr', 'bb', 'hbp', 'so', 'er']
+const HIT_FIELDS = ['g', 'pa', 'ab', 'h', 'd', 't', 'hr', 'bb', 'hbp', 'sf', 'so', 'sb']
+const PITCH_FIELDS = ['g', 'outs', 'bf', 'h', 'hr', 'bb', 'hbp', 'so', 'er']
 
 function hitAdd(line, st) {
   line.g += num(st.gamesPlayed) || 1
@@ -136,5 +136,5 @@ export const STATS = {
 // Who belongs in the league pool at a checkpoint. A hitter needs MIN_PA_PER_G plate
 // appearances a game, so a pinch-runner's 40 games do not sit beside a regular's 40.
 // A pitcher is sized by innings already, so every pitcher counts.
-export const MIN_PA_PER_G = 3
+const MIN_PA_PER_G = 3
 export const inPool = (role, line) => role !== 'hitting' || line.pa >= MIN_PA_PER_G * line.g

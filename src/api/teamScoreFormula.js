@@ -7,9 +7,9 @@ import { clamp, round1 } from '../lib/math/number.js'
 // of scripts/gen-team-score.mjs (which imports node:fs and can't be bundled
 // for the browser) so the "How this is calculated" modal can compute the
 // Current Form window's real ceiling/floor instead of hardcoding them.
-export const MIN_GAMES = 10
+const MIN_GAMES = 10
 export const CURRENT_FORM_GAMES = 10
-export const PythagoreanExponent = 1.83
+const PythagoreanExponent = 1.83
 
 // Season Quality is a true-talent estimate, so it shrinks hard toward .500
 // for a small sample (the "+9" prior is roughly 36 games' worth of pull).
@@ -28,7 +28,7 @@ const SEASON_TANH_SCALE = 2
 // schedules rarely deviate more than 2-3 points from a .500 average
 // opponent, so the cap mostly guards against small-sample extremes early in
 // a season rather than binding on a full one.
-export const SOS_WINS_PER_POINT = 0.8
+const SOS_WINS_PER_POINT = 0.8
 export const SOS_ADJUSTMENT_CAP = 2.5
 
 export function scheduleStrengthAdjustment(avgOpponentWinPct, games) {
@@ -82,18 +82,18 @@ export function venueRunFactor(avgVenueRunsPerGame, leagueAvgRunsPerGame, venueG
 // layering a second or third context adjustment on top of the late-swing
 // nudge below would stack multiple "how much does context matter"
 // corrections in a window too short to support any of them.
-export const CURRENT_FORM_PRIOR_GAMES = 2
-export const CURRENT_FORM_TANH_SCALE = 1.4
+const CURRENT_FORM_PRIOR_GAMES = 2
+const CURRENT_FORM_TANH_SCALE = 1.4
 
 // Late-innings swing nudge (Current Form only — see lateGameSwing.js for the
 // per-game classification). A base credit/penalty for any blown lead or
 // clutch win from the 8th inning on, plus a smaller per-run scale for how
 // big the lead/deficit was, capped per game so one wild finish can't
 // dominate and capped again in total so a whole window of them can't either.
-export const LATE_SWING_BASE = 0.25
-export const LATE_SWING_PER_RUN = 0.06
-export const LATE_SWING_RUN_CAP = 4
-export const LATE_SWING_TOTAL_CAP = 1.5
+const LATE_SWING_BASE = 0.25
+const LATE_SWING_PER_RUN = 0.06
+const LATE_SWING_RUN_CAP = 4
+const LATE_SWING_TOTAL_CAP = 1.5
 
 export function pythagoreanPct(runsScored, runsAllowed) {
   if (runsScored + runsAllowed <= 0) return 0.5

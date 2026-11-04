@@ -28,7 +28,7 @@ function triggerRect(el) {
 //               hover card (lib/playerHoverStore.js). Spread them on the
 //               trigger. They subscribe to nothing, so a trigger never
 //               re-renders on a hover.
-export function usePlayerLink(id, displayName) {
+function usePlayerLink(id, displayName) {
   const { asOf, sportId } = useLinkScope()
   const ref = useRef(null)
   // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the

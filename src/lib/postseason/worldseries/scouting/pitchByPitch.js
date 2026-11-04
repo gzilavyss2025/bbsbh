@@ -10,9 +10,9 @@ import { sum } from '../../../math/number.js'
 // rows Arm or Bats, because the baseline is the league and the hitters are one club's best nine).
 // The other three are PLACEHOLDER THRESHOLDS. Gary tunes them in the PR.
 export const EDGE_BAND = 0.02 // xwOBA this far (more than) below the league: Arm; above: Bats
-export const MIN_PA = 10 // plate-appearance-ending pitches the hitters need on a pitch, or no figure
-export const MIN_USE = 0.05 // a pitch under this share of his arsenal is left out
-export const MAX_HITTERS = 9 // the club's regulars: its hitters with the most postseason PA
+const MIN_PA = 10 // plate-appearance-ending pitches the hitters need on a pitch, or no figure
+const MIN_USE = 0.05 // a pitch under this share of his arsenal is left out
+const MAX_HITTERS = 9 // the club's regulars: its hitters with the most postseason PA
 
 
 // byDateRange hitting splits (the Hot bats read) -> person ids, most plate appearances first.

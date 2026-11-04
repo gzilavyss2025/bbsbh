@@ -18,7 +18,7 @@ export const METRICS = {
 // is about 27 px wide on a phone, so its figures set tight (scout.css).
 export const fmtCell = (metric, v) => (metric === 'xwoba' ? v.toFixed(3).replace(/^0/, '') : `${Math.round(v * 100)}`)
 
-export const fmtMetric = (metric, v) =>
+const fmtMetric = (metric, v) =>
   v == null ? '—' : metric === 'xwoba' ? v.toFixed(3).replace(/^0/, '') : `${Math.round(v * 100)}`
 
 // A rate in running text or a readout, with its unit: ".391" for xwOBA (est.),

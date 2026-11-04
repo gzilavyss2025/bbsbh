@@ -15,11 +15,11 @@ import { PlayerLink } from '../../../../../components/player/PlayerLink.jsx'
 // A man who joins the board on a tap stamps in, after the others have started to slide. The
 // keyframe is one of two identical ones picked by the tap count's parity, because a changed
 // animation-name restarts an animation and a changed delay does not.
-export const BOARD_KEYS = ['total', ...COMPONENTS.map((c) => c.key)]
+const BOARD_KEYS = ['total', ...COMPONENTS.map((c) => c.key)]
 const LEAD_H = 104
 const ROW_H = 77
 const topOf = (i) => (i <= 0 ? 0 : LEAD_H + (i - 1) * ROW_H)
-export const listHeight = (n) => (n > 0 ? topOf(n - 1) + (n === 1 ? LEAD_H : ROW_H) : 0)
+const listHeight = (n) => (n > 0 ? topOf(n - 1) + (n === 1 ? LEAD_H : ROW_H) : 0)
 
 export function LeaderList({ club, part, prev, gen, ref }) {
   const everyone = useMemo(() => {

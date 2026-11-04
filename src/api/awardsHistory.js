@@ -56,7 +56,7 @@ export function awardsSeasonInPlay(now = new Date()) {
   return null
 }
 
-export function leagueOf(awardId) {
+function leagueOf(awardId) {
   if (awardId.startsWith('AL')) return 'AL'
   if (awardId.startsWith('NL')) return 'NL'
   return null

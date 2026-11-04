@@ -55,7 +55,7 @@ import { feedWindow, fetchAffiliateParentMap, fetchPeople } from './leagueFeed.j
 // become a story with NO debut set, which is a superset of the rows that will
 // (the debut set only ever suppresses), and the position/debut lookup stays a
 // fraction of the club's raw row count.
-export async function fetchClubMoves(orgId, endDate, { signal } = {}) {
+async function fetchClubMoves(orgId, endDate, { signal } = {}) {
   const window = feedWindow(endDate)
   const [rows, affilToOrg] = await Promise.all([
     getJson(`/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`, {

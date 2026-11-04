@@ -34,7 +34,7 @@ const lastPitch = (play) => play.playEvents?.findLast((e) => e.isPitch) ?? null
 // The clip for one play: MLB's highlight, joined on the last pitch's playId (highlights.js),
 // else the Baseball Savant single-pitch clip of that pitch. Savant has none before 2016
 // (expresslane/clipIndex.js) or for an untracked pitch, so no button then.
-export function clipFor(play, items, day) {
+function clipFor(play, items, day) {
   const last = lastPitch(play)
   const clip = watch(highlightForPlay(items, last?.playId))
   if (clip) return clip

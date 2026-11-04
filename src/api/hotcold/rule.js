@@ -21,16 +21,16 @@
 import { FULL_SEASON, STATS, STEP, checkpointOf, foldSeason, inPool, sampleOf } from './line.js'
 
 // The tail, in percent, on each side.
-export const TAIL = 2
+const TAIL = 2
 // A checkpoint needs this many league lines before its tail means anything.
 export const MIN_POOL = 100
 // At most this many callouts on a page.
-export const MAX_FLAGS = 2
+const MAX_FLAGS = 2
 
 // The sample's weight: under EARLY_UNDER games (innings) is a start, from REAL_FROM on it
 // is a season.
 export const EARLY_UNDER = 30
-export const REAL_FROM = 90
+const REAL_FROM = 90
 export const weightOf = (n) => (n < EARLY_UNDER ? 'early' : n < REAL_FROM ? 'firm' : 'real')
 
 // Where `v` sits in a league, given the league's 101 quantiles (0th to 100th percentile,
@@ -56,7 +56,7 @@ export function percentileOf(v, q) {
 // FAR edges of the tie: a value shared by the 0th to 4th quantiles (0.00 ERA at 10 innings)
 // has at least 4% of the league at or below it, so it is no 2% tail, however the middle of
 // the tie reads. The tail test reads these; the ranking reads percentileOf.
-export function tailShares(v, q) {
+function tailShares(v, q) {
   const p = percentileOf(v, q)
   if (p == null) return null
   const last = q.length - 1

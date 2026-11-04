@@ -29,7 +29,7 @@ export function MarkImage({ url, alt }) {
 }
 
 // One outlined path in `currentColor` — a fielder's glove, waiting and empty.
-export function GloveMark() {
+function GloveMark() {
   return (
     <span className="idlab__glove" title="No art yet">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

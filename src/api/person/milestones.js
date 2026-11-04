@@ -182,7 +182,7 @@ export function careerPerSeasonRate(seasonTotals, statKey, currentSeason, recent
 // from the well-known Hall-of-Fame-caliber clubs: 3,000 hits, 500 HR, 300
 // wins, 3,000 K, …) and used only to ORDER the league-wide Milestone Watch
 // page rarest-first — never displayed as a claimed exact count.
-export const MILESTONE_RARITY = {
+const MILESTONE_RARITY = {
   hits: { 1000: 700, 1500: 400, 2000: 290, 2500: 150, 3000: 33, 3500: 5, 4000: 2 },
   homeRuns: { 100: 600, 150: 400, 200: 280, 250: 200, 300: 150, 350: 110, 400: 75, 450: 55, 500: 28, 550: 20, 600: 13, 700: 4, 762: 1 },
   rbi: { 1000: 250, 1500: 120, 2000: 6 },

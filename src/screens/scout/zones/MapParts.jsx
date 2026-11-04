@@ -8,7 +8,7 @@ import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 const pct = (x) => `${Math.round(x * 100)}`
 
-export function Swatch({ tone }) {
+function Swatch({ tone }) {
   return (
     <svg className="scout__swatch" aria-hidden="true">
       <rect className={`scout__region scout__region--${tone}`} width="14" height="14" />

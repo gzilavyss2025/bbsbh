@@ -45,7 +45,7 @@ export function BoardCard({ title, children }) {
 // splitDisplayName) with the team name underneath, a bigger centered team
 // logo. The table beneath still lists this same player at rank 1 with his
 // stats, so nothing here needs to repeat them.
-export function FoulFeatured({ player, favoriteTeamId, positions }) {
+function FoulFeatured({ player, favoriteTeamId, positions }) {
   const isFavorite = favoriteTeamId != null && player.teamId === favoriteTeamId
   const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(player.teamId) } : undefined
   const { first, last } = splitDisplayName(player.name)
@@ -173,7 +173,7 @@ export function FoulsPerWhiffBoard({ mostRows, fewestRows, avg, minPitches, favo
   )
 }
 
-export function FoulsPerWhiffColumn({ heading, hint, rows, favoriteTeamId }) {
+function FoulsPerWhiffColumn({ heading, hint, rows, favoriteTeamId }) {
   return (
     <div className="foulboard__whiffcol">
       <p className="foulboard__whiffcol-heading">

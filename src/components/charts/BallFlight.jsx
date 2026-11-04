@@ -43,7 +43,7 @@ function outcomeWord(ball) {
 // How long the opened card's ball takes to land (Gary, 2026-10-29): a grounder skims, a liner is
 // quick, a fly ball hangs, a popup hangs longest; anything else by its carry. Real hang times sped
 // up to well under a second, so the card settles fast.
-export function flightMs(ball) {
+function flightMs(ball) {
   const t = ball?.trajectory ?? ''
   if (t === 'ground_ball' || t === 'bunt_grounder') return 450
   if (t === 'line_drive') return 600

@@ -134,7 +134,7 @@ BALLPARKS.guaranteedratefield = BALLPARKS.ratefield
 // Dimension descriptors, in the order they read on the field (LF line → RF line,
 // then the three wall heights). `group` splits the two ranked families so the
 // modal can render distances and wall heights as separate lists.
-export const DIMENSIONS = [
+const DIMENSIONS = [
   { key: 'lf', group: 'dist', label: 'Left field' },
   { key: 'lc', group: 'dist', label: 'Left-center' },
   { key: 'cf', group: 'dist', label: 'Center field' },

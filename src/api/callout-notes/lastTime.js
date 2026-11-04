@@ -25,7 +25,7 @@ import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { gamePath } from '../../lib/route.js'
 import { SCORE_BASE, clampScore, magnitudeOf, otherSide, gameResult, dateText } from './shared.js'
 
-export const LAST_TIME_FLOOR = { nohitters: 1901, cycles: 1901, tripleplays: 1960 }
+const LAST_TIME_FLOOR = { nohitters: 1901, cycles: 1901, tripleplays: 1960 }
 // A year. Set from the measured league-wide gaps between consecutive feats (1960 and later for
 // triple plays, 1901 and later for the rest; the offseason counts, so most gaps are short):
 //   p95 of the gap:  no-hitters 520 d, cycles 440 d, triple plays 297 d (p99 370 d).

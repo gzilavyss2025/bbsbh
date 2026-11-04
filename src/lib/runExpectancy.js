@@ -9,7 +9,7 @@
 // exact pre-pitch state until the half-inning ends (inclusive of any runs the
 // rest of that plate appearance itself drives in).
 
-export const RE24_FALLBACK_MIN_N = 20 // below this many instances, use the
+const RE24_FALLBACK_MIN_N = 20 // below this many instances, use the
 // base/out-only RE24 total (summed across all 4 counts) instead of a noisy
 // per-count mean — same "don't trust a thin sample" guard as MIN_RANK_GAMES
 // elsewhere in this codebase.

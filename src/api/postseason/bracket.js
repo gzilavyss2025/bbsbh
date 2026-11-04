@@ -40,7 +40,7 @@ const LEAGUE_BY_ID = { 103: 'AL', 104: 'NL' }
 
 // A real MLB club: franchise ids run 108-147, plus 158. A placeholder's id is
 // far outside that range and its name holds a '/' or the word "Seed".
-export function isClub(team) {
+function isClub(team) {
   const id = Number(team?.id)
   if (!Number.isInteger(id)) return false
   if (!((id >= 108 && id <= 147) || id === 158)) return false

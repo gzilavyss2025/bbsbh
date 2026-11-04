@@ -14,7 +14,7 @@ import { sum } from '../../../lib/math/number.js'
 // WHO A BAND FAVORS: for xwOBA (est.) a higher rate favors the hitter; for
 // Whiff % it favors the pitcher; Swing % favors nobody, so it says "Swings
 // more" or "Swings less". A null rate is "Too few", never zero.
-export const FAVORS = { xwoba: 'hitter', whiff: 'pitcher', swing: null }
+const FAVORS = { xwoba: 'hitter', whiff: 'pitcher', swing: null }
 const STEP = { 1: 'Slight', 2: 'Clear' }
 
 export function whoFavors(metric, b) {
@@ -92,7 +92,7 @@ export function typeSentences(rows, metric, names, crowd) {
 
 // The whiff sentence under an xwOBA headline: the types where Whiff % favors
 // the pitcher. Null when there are none.
-export function whiffSentence(rows, names) {
+function whiffSentence(rows, names) {
   const way = rows.filter((r) => r.who === 'pitcher')
   if (!way.length) return null
   const each = way.map((r) => `${lower(r.name)} (${versus('whiff', r)})`)
@@ -125,7 +125,7 @@ export const leftOut = (board) =>
 
 const pct = (x) => `${Math.round(x * 100)}%`
 
-export function locationSentences(lens, metric, names, crowd) {
+function locationSentences(lens, metric, names, crowd) {
   if (!lens || lens.value == null) return []
   const out = [[
     { strong: fmtValue(metric, lens.value) },
