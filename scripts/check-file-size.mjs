@@ -78,6 +78,8 @@ const BUDGETS = {
   // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
   // flat file. Split a sheet by moving a component's rules into a subdirectory
   // (src/styles/system/, focus/, report/) before you raise a number here.
+  'src/styles/offseason/winter-home.css': 1040, // 1030: the redesigned long at-bats card (#2829); split before it grows again
+  'src/api/transactions/playerFacts.js': 680, // 662: dated facts and the settled-day caches (#2829)
   'src/styles/78-offseason.css': 800, // 706: the winter home page's rows moved to offseason/winter-home.css
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 800, // 900
@@ -126,7 +128,7 @@ const BUDGETS = {
   // a module boundary, which is the one pair that has to be read together.
   'scripts/gen-pitch-arsenal.mjs': 661, // 661
   'src/api/teamTransactions.js': 700, // 619
-  'src/api/transactions/templates.js': 650, // 607: the wire notes' call templates (27th man, last game, shuttle line)
+  'src/api/transactions/templates.js': 660, // 653 (dated wire notes, 2026-11-04); 607: the wire notes' call templates (27th man, last game, shuttle line)
   'src/api/boxscore.js': 800, // 762
   'src/screens/GameSelect.jsx': 850, // 822
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's

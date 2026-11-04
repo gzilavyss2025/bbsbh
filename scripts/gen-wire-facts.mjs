@@ -12,8 +12,8 @@
 // (public/data/team-transactions/, gen-team-transactions.mjs), each story with
 // its club filled in as the ledger page fills it; each subject's request is
 // playerFacts.js `factRequest`, and the file is keyed by its `factKey`. The
-// browser modules run unchanged under Node: node-site-fetch.mjs serves their
-// `/data/...` reads from public/.
+// browser modules run unchanged under Node: installSiteFetch below serves
+// their `/data/...` reads from public/.
 //
 // THE WINDOW. Sixty days, not the season: a season is ~10,000 players at ~3 KB
 // each, about 30 MB. Older moves read live once, then from the reader's own
@@ -23,11 +23,11 @@
 //   node scripts/gen-wire-facts.mjs              # days not yet built
 //   node scripts/gen-wire-facts.mjs --days=10    # a narrower window
 import { readdirSync, rmSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { installSiteFetch } from './lib/node-site-fetch.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const publicDir = join(here, '..', 'public')
@@ -37,6 +37,21 @@ const outDir = join(publicDir, 'data', 'wire-facts')
 const daysArg = process.argv.find((a) => a.startsWith('--days='))
 const WINDOW = daysArg ? Number(daysArg.split('=')[1]) : 60
 
+// A fetch of a site path (`/data/...`) reads public/ from disk; every other
+// URL goes to the real fetch.
+function installSiteFetch(dir) {
+  const real = globalThis.fetch
+  globalThis.fetch = async (input, init) => {
+    const url = String(input)
+    if (!url.startsWith('/')) return real(input, init)
+    try {
+      const body = await readFile(join(dir, url.split('?')[0]))
+      return new Response(body, { status: 200, headers: { 'content-type': 'application/json' } })
+    } catch {
+      return new Response('', { status: 404 })
+    }
+  }
+}
 installSiteFetch(publicDir)
 const { factKey, factRequest, fetchPlayerFacts, withoutContract } = await import('../src/api/transactions/playerFacts.js')
 const { subjectsOf } = await import('../src/api/transactions/templates.js')

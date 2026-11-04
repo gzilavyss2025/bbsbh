@@ -691,6 +691,7 @@ a.seasonnote__barrow:hover .seasonnote__barname {
     border-left: 0;
     padding-left: 0;
   }
+  /* layout-exempt: a fixed two-column list, not auto-fit */
   .seasonnote__sheet .card__body > .seasonnote__rest .seasonnote__bars {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -712,6 +713,7 @@ a.seasonnote__barrow:hover .seasonnote__barname {
 .seasonnote__bug .inhead .inhead__runs { font-size: var(--fs-num-xl, 2.25rem); top: -0.06em; }
 .seasonnote__bug .inhead__runs--away { padding-right: var(--space-2); }
 .seasonnote__bug .inhead__runs--home { padding-left: var(--space-2); }
+/* layout-exempt: restyles Gameday's scorebug outs stack inside the card */
 .seasonnote__bug .inhead__outs { flex-direction: column; }
 .seasonnote__bug .inhead .basestate { width: 32px; height: 32px; } /* raw-value-exempt: bases fill the band */
 .seasonnote__bug .inhead__half .teamlogo { width: 46px !important; height: 46px !important; } /* raw-value-exempt: marks fill the band */
@@ -790,6 +792,7 @@ a.seasonnote__barrow:hover .seasonnote__barname {
 
 /* THE MATCHUP AS TWO BROADCAST TILES: each in its club's colour, the mark a
    watermark behind, the name shouted, the face cut in at the right. */
+/* layout-exempt: the two matchup tiles, a fixed pair side by side */
 .seasonnote__sheet .seasonnote__matchup {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -871,6 +874,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
 }
 /* A census row: the count big at left, batter over pitcher with their marks,
    the date over the result at right. */
+/* layout-exempt: count, names, date in fixed tracks per row */
 #root button.seasonnote__barrow {
   display: grid;
   grid-template-columns: 2.25rem minmax(0, 1fr) auto;
@@ -891,7 +895,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
   font-family: var(--font-body);
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
-  letter-spacing: 0;
+  letter-spacing: var(--ls-none);
   color: var(--text-heading);
   white-space: nowrap;
   overflow: hidden;
@@ -992,6 +996,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
   scrollbar-width: none;
 }
 .seasonnote__clubs::-webkit-scrollbar { display: none; }
+/* layout-exempt: centres one club mark in its button */
 .seasonnote__clubpick {
   flex: none;
   display: grid;

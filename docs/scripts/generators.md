@@ -1329,8 +1329,8 @@ don't run these by hand.
 - `gen-wire-facts.mjs` → `wire-facts/{date}.json` — every move's player facts for one
   PAST day, keyed by `playerFacts.js` `factKey`, so the wire and the club ledgers open their
   notes with no statsapi reads. Runs after `gen-team-transactions.mjs` (it reads those
-  ledgers) and runs the browser's own `playerFacts.js` under Node through
-  `lib/node-site-fetch.mjs`. A day's facts are gated to its date, so its file is written once;
+  ledgers) and runs the browser's own `playerFacts.js` under Node (its
+  `installSiteFetch` serves `/data/...` reads from `public/`). A day's facts are gated to its date, so its file is written once;
   the window is the last 60 days, and older moves read live, then from the reader's browser.
 
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file

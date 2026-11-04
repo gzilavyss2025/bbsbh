@@ -384,7 +384,7 @@
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   font-style: normal;
-  line-height: 1;
+  line-height: var(--lh-solid);
 }
 .infopop__btn:hover,
 .infopop__btn:focus-visible {
