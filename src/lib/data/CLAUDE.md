@@ -23,8 +23,8 @@ lab or the runtime overlay edits.
 | `league-logo-manifest.json` | `components/passport/leagueMarks.js`; written by `scripts/gen-league-logos.mjs` |
 | `season-marks.json` | `identity/seasonMarks.js` → `components/logo/TeamLogo.jsx` (`season` prop); an era's optional `like` is an MLB team id whose mark it wears; written by the lab's Eras tab (`scripts/lib/eras/dev-season-marks.mjs`) |
 | `milb-ballparks.json` | `copy/registry.js`; written by `scripts/gen-milb-ballparks.mjs` |
-| `park-keys.json` | `parkNames.js` (`parkKey`; re-exported by `ballpark/parkKeys.js`, which also reads it) — each venue id's PINNED store key, append-only so a sponsor rename keeps the park's photo and copy; written by `scripts/gen-milb-ballparks.mjs` (a hand-added name or venue is kept) |
-| `parkNames.js` (JS, not a store) | `copy/registry.js` and `ballpark/ballparkData.js`: the one list of MLB parks (key, name, venue id, aliases) without the field geometry (#2898); `parkKey` lives here |
+| `park-keys.json` | `parkKey.js` (`parkKey`; re-exported by `ballpark/parkKeys.js`, which also reads it) — each venue id's PINNED store key, append-only so a sponsor rename keeps the park's photo and copy; written by `scripts/gen-milb-ballparks.mjs` (a hand-added name or venue is kept) |
+| `parkNames.js` (JS, not a store) | `copy/registry.js` and `ballpark/ballparkData.js`: the one list of MLB parks (key, name, venue id, aliases) without the field geometry (#2898). Keep it JSON-free: `ballparkData.js` reaches the edge function `api/preview.js`, whose bundler cannot parse `with { type: 'json' }` |
 | `park-wash-tuning.json` | `ballpark/parkWash.js` |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
 | `stamp-ink.json` | `stampInkTuning.js` → `stampInk.js` → `components/logbook/GameStamp.jsx` — also read at RENDER time, so a retune restyles every minted stamp |

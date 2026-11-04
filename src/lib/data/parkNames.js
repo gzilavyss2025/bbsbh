@@ -5,9 +5,11 @@
 // builds each record's name and its alias keys from this list, and
 // ../ballpark/layout/configurations.js holds the same venue ids (a test keeps
 // the two equal). A park renamed, added or aliased is edited HERE.
-// parkKeys.js explains why the store key is pinned.
+// JSON-FREE ON PURPOSE: ballparkData.js reaches the Vercel edge function
+// api/preview.js (via api/_lib/cards.js), whose bundler cannot parse
+// `import ... with { type: 'json' }`. parkKey, which reads park-keys.json, is in
+// ./parkKey.js.
 
-import PINNED from './park-keys.json' with { type: 'json' }
 import { venueKey } from '../ballpark/ballparkArt.js'
 
 // key is ballparkData's normalized venue name; aliases are former/sponsor keys.
@@ -57,23 +59,4 @@ export const PARK_KEYS = [...NAME_BY_KEY.keys()]
 // whose normalized form is a park key; null for a venue on no list.
 export function canonicalParkName(venueName, venueId = null) {
   return (venueId != null && NAME_BY_VENUE_ID.get(Number(venueId))) || NAME_BY_KEY.get(venueKey(venueName)) || null
-}
-
-// venueKey(any name a pinned venue has worn) -> that venue's pinned key.
-const KEY_BY_NAME = new Map()
-for (const { key, names } of Object.values(PINNED)) {
-  for (const name of names) KEY_BY_NAME.set(venueKey(name), key)
-}
-
-// The key a park's stores are filed under. The venue id wins when the caller
-// has one: it finds a renamed park even before the generator has recorded the
-// new name. Then any name the venue has worn. Then, for a venue on no list (a
-// neutral site, a park newer than the last generator run), the same
-// canonical-name key the stores have always used.
-export function parkKey(venueName, venueId = null) {
-  const pinned = venueId != null ? PINNED[venueId]?.key : null
-  if (pinned) return pinned
-  const raw = venueKey(venueName)
-  if (!raw) return ''
-  return KEY_BY_NAME.get(raw) ?? venueKey(canonicalParkName(venueName, venueId) || venueName)
 }

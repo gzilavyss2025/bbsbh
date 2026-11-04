@@ -32,9 +32,10 @@
 import PINNED from '../data/park-keys.json' with { type: 'json' }
 import { venueKey } from './ballparkArt.js'
 import { ballparkFor } from './ballparkData.js'
-import { canonicalParkName, parkKey } from '../data/parkNames.js'
+import { canonicalParkName } from '../data/parkNames.js'
+import { parkKey } from '../data/parkKey.js'
 
-// parkKey lives in ./parkNames.js (no geometry import); re-exported for callers.
+// parkKey lives in ../data/parkKey.js (no geometry import); re-exported for callers.
 export { parkKey }
 
 // Every name the venue has worn, newest first, with the caller's own name in

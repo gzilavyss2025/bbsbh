@@ -5,7 +5,8 @@ import PINNED from '../src/lib/data/park-keys.json' with { type: 'json' }
 import MILB_BALLPARKS from '../src/lib/data/milb-ballparks.json' with { type: 'json' }
 import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
 import { CONFIGURATIONS } from '../src/lib/ballpark/layout/configurations.js'
-import { PARKS, PARK_KEYS, canonicalParkName, parkKey } from '../src/lib/data/parkNames.js'
+import { PARKS, PARK_KEYS, canonicalParkName } from '../src/lib/data/parkNames.js'
+import { parkKey } from '../src/lib/data/parkKey.js'
 import { parkKey as reexported } from '../src/lib/ballpark/parkKeys.js'
 import { FIELD_IDS as RUNTIME_IDS } from '../src/copy/registry.js'
 import { FIELDS as FULL_FIELDS } from '../src/copy/registryFull.js'

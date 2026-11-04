@@ -33,7 +33,8 @@
 
 import { awardFields } from './awardFields.js'
 import { offseasonFields } from './offseasonFields.js'
-import { PARKS, PARK_KEYS, parkKey } from '../lib/data/parkNames.js'
+import { PARKS, PARK_KEYS } from '../lib/data/parkNames.js'
+import { parkKey } from '../lib/data/parkKey.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
 
 // Groups order the admin panel and let it render section headers. Keep ids
