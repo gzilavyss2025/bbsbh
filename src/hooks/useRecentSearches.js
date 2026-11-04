@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { localStore } from '../lib/account/localStore.js'
 import {
   RECENT_SEARCHES_KEY,
   addRecentSearch,
@@ -14,24 +15,10 @@ import {
 // private browsing used to throw on write) degrades to an in-memory list for
 // the session rather than taking the search screen down with it.
 
-function readStored() {
-  try {
-    return parseRecentSearches(window.localStorage.getItem(RECENT_SEARCHES_KEY))
-  } catch {
-    return []
-  }
-}
-
-function writeStored(list) {
-  try {
-    window.localStorage.setItem(RECENT_SEARCHES_KEY, serializeRecentSearches(list))
-  } catch {
-    /* storage unavailable — the in-memory list still works for this session */
-  }
-}
+const store = localStore(RECENT_SEARCHES_KEY, parseRecentSearches, serializeRecentSearches)
 
 export function useRecentSearches() {
-  const [recent, setRecent] = useState(readStored)
+  const [recent, setRecent] = useState(store.read)
 
   // The list is mirrored in a ref so a writer can read the current value and
   // persist WITHOUT doing it inside a setState updater. That matters here more
@@ -43,7 +30,7 @@ export function useRecentSearches() {
   const listRef = useRef(recent)
   const commit = useCallback((next) => {
     listRef.current = next
-    writeStored(next)
+    store.write(next)
     setRecent(next)
   }, [])
 
@@ -53,7 +40,7 @@ export function useRecentSearches() {
   useEffect(() => {
     const onStorage = (e) => {
       if (e.key !== RECENT_SEARCHES_KEY) return
-      const stored = readStored()
+      const stored = store.read()
       listRef.current = stored
       setRecent(stored)
     }

@@ -37,7 +37,7 @@
 // That is the honest answer, not a failure: there is no winner to be the ink.
 
 import { MILB_COLORS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
-import { contrastRatio, relativeLuminance } from './contrast.js'
+import { contrastRatio, relativeLuminance, toRgb } from './contrast.js'
 
 // The paper a stamp is pressed onto: --surface-card (--paper-2), the raised
 // sheet both the passport page and the Logbook grid cell are drawn on. Mirrored
@@ -60,11 +60,6 @@ const HEX = /^#[0-9a-f]{6}$/i
 // and the dev save endpoint's store validator, so a hex is "valid" the same
 // way in all three places.
 export const isHex = (value) => typeof value === 'string' && HEX.test(value)
-
-function toRgb(hex) {
-  const h = hex.slice(1)
-  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16))
-}
 
 function toHex([r, g, b]) {
   const channel = (c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')

@@ -6,6 +6,8 @@
 // there are hundreds of MiLB clubs. Pure string/number math; the fetching lives
 // in api/person-fetch.js (fetchTeamLogoTint).
 
+import { rgbToHsl, toRgb } from './contrast.js'
+
 // Every hex fill in the SVG, normalized to 6-digit lowercase. Handles both
 // `fill="#rgb"` / `fill="#rrggbb"` attributes and `fill:#…` inside a style="".
 function extractHexColors(svg) {
@@ -20,29 +22,6 @@ function extractHexColors(svg) {
   return out
 }
 
-function hexToRgb(h) {
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ]
-}
-
-function rgbToHsl([r, g, b]) {
-  r /= 255
-  g /= 255
-  b /= 255
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  const l = (max + min) / 2
-  let s = 0
-  if (max !== min) {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-  }
-  return { s, l }
-}
-
 // The brand color to build the wash from: the darkest reasonably-saturated
 // color in the mark. Going dark guarantees the wash (a pale tint of it) sets
 // off the whole logo without a border — the logo's dark parts contrast against
@@ -53,7 +32,7 @@ export function brandColorFromSvg(svg) {
   let best = null
   let bestScore = -1
   for (const h of extractHexColors(svg)) {
-    const { s, l } = rgbToHsl(hexToRgb(h))
+    const { s, l } = rgbToHsl(toRgb(h))
     if (l > 0.92 || l < 0.06) continue
     const score = (1 - l) * (0.4 + 0.6 * s)
     if (score > bestScore) {
@@ -67,7 +46,7 @@ export function brandColorFromSvg(svg) {
 // Mix a color toward white to a pale tint (`frac` = how much brand color).
 function mixWhite(h, frac) {
   const t = (c) => Math.round(c * frac + 255 * (1 - frac))
-  return `#${hexToRgb(h).map((c) => t(c).toString(16).padStart(2, '0')).join('')}`
+  return `#${toRgb(h).map((c) => t(c).toString(16).padStart(2, '0')).join('')}`
 }
 
 // The final background wash for a team, or null when the logo yielded no usable

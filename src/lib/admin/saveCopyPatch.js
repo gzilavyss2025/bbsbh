@@ -35,6 +35,7 @@
 // longer happen is two tabs editing DIFFERENT parks and one erasing the other.
 
 import { sanitizeOverrides } from '../../copy/registry.js'
+import { adminFetch } from './adminFetch.js'
 
 // `patch` is `{ fieldId: value }` for the fields being changed. A value of ''
 // clears that field; a field not named is left exactly as it is. Resolves to
@@ -47,16 +48,11 @@ import { sanitizeOverrides } from '../../copy/registry.js'
 // the network being gone, and each reads differently to whoever is standing in
 // front of it.
 export async function saveCopyPatch(getToken, patch) {
-  const token = await getToken()
-  if (!token) throw new Error('you are signed out — sign in again to save')
-
-  const res = await fetch('/api/copy', {
+  const data = await adminFetch(getToken, {
+    url: '/api/copy',
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify({ patch }),
+    body: { patch },
+    messages: { 501: 'the copy store is not configured on this deploy' },
   })
-  if (res.status === 403) throw new Error('this account is not on the admin list')
-  if (res.status === 501) throw new Error('the copy store is not configured on this deploy')
-  if (!res.ok) throw new Error('the save did not go through — nothing was changed')
-  return sanitizeOverrides((await res.json())?.copy)
+  return sanitizeOverrides(data?.copy)
 }

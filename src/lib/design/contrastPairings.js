@@ -16,31 +16,13 @@
 // If you intentionally retune a color, update the hex until the guard passes.
 // Do not loosen a threshold.
 
+import { contrastRatio } from '../contrast.js'
+
+// The WCAG ratio lives in contrast.js; scripts/check-contrast.mjs imports it from here.
+export const ratio = contrastRatio
+
 export const TEXT = 4.5 // normal-size body text
 export const UI = 3.0 // large text / non-text UI affordance
-
-export function toRgb(hex) {
-  let h = hex.replace('#', '')
-  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
-  if (h.length > 6) h = h.slice(0, 6) // ignore any alpha byte
-  const n = parseInt(h, 16)
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
-
-// WCAG relative luminance + contrast ratio.
-export function luminance(hex) {
-  const [r, g, b] = toRgb(hex).map((c) => {
-    const s = c / 255
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
-  })
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
-export function ratio(fg, bg) {
-  const a = luminance(fg)
-  const b = luminance(bg)
-  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
-}
 
 // The enforced pairings. `fg`/`bg` are token names or literal hex.
 export const PAIRINGS = [
