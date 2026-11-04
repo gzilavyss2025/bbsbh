@@ -5,7 +5,8 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { pitchCardInfo } from '../src/api/playbyplay/pitchInfo.js'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
-import { battingSideOf, runnersOnBase } from '../src/api/expresslane/runners.js'
+import { runnersOnBase } from '../src/api/expresslane/runners.js'
+import { battingSideOf } from '../src/api/gameday/stepCut.js'
 import { basesAt, countAt, replaySteps } from '../src/lib/pitcherCard/replaySteps.js'
 
 const FEED = JSON.parse(readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'))

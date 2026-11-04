@@ -44,7 +44,7 @@ export function foldGameLog(splits) {
       season.gs += gs
       season.pitches += num(st.numberOfPitches)
       season.outs += ipToOuts(st.inningsPitched)
-      // Starts only: the per-start rates (moundRateFor) must not count a swingman's relief outings.
+      // Starts only: the per-start rates must not count a swingman's relief outings.
       if (gs) {
         season.gsPitches += num(st.numberOfPitches)
         season.gsOuts += ipToOuts(st.inningsPitched)

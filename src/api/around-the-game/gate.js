@@ -27,6 +27,7 @@
 // because clamping would erase exactly the clubs the stat is finding.
 
 import { staticJson } from '../staticJson.js'
+import { ranked } from '../../lib/math/ranked.js'
 import { parkRecord } from '../../lib/ballpark/parkKeys.js'
 
 export const fetchGate = staticJson('/data/gate.json')
@@ -54,22 +55,6 @@ export function latestSeason(data) {
 //   clubs: { [teamId]: { venue, gate } } }.
 export function postseasonGate(data, season) {
   return data?.seasons?.[season]?.postseason ?? null
-}
-
-// Rank a list of already-shaped rows on one numeric field, best first (or
-// last, for a field whose good end is low). Ties SHARE the best rank, the same
-// convention attendance.js and comebackWins.js already use, and a row with no
-// value ranks null rather than last — it has not earned a place either way.
-export function ranked(rows, field, { lowIsBest = false } = {}) {
-  const usable = rows.filter((r) => r[field] != null)
-  return rows.map((r) => {
-    if (r[field] == null) return { ...r, rank: null, tied: false }
-    const ahead = usable.filter((o) =>
-      lowIsBest ? o[field] < r[field] : o[field] > r[field],
-    ).length
-    const tied = usable.filter((o) => o[field] === r[field]).length > 1
-    return { ...r, rank: ahead + 1, tied }
-  })
 }
 
 // The postseason block as the page shows it: the games it covers, the league

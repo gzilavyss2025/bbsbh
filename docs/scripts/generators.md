@@ -1679,7 +1679,7 @@ Re-run only to fold in a new season.
   `stats=season` `plateAppearances`), both `{ [personId]: { [season]: n } }`, hitting
   group only, for seasons from `FLD_START_SEASON` (2023). Older seasons were not
   checked. Adds about 0.8 KB per shard (1.5 KB at most). A pitcher has no `fld` row
-  unless he batted. `src/api/war.js` reads them with `fldByYearFor` / `paByYearFor`.
+  unless he batted. `src/api/war.js` carries them in the history shard.
 - `gen-hof-pace.mjs` → `public/data/hof-pace.json` (`npm run gen:hof-pace`) — every Hall of
   Fame player's CUMULATIVE career line by age, for the player page's "Hall of Fame pace" card
   (#1857, `.scratch/hof-pace/spec.md`). **Hand-run, once a year after the late-July induction**

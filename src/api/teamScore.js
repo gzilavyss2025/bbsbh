@@ -2,7 +2,7 @@ import { seasonGradeFor } from './seasonGradeFormula.js'
 import { staticJson } from './staticJson.js'
 import { latestAtOrBefore } from '../lib/math/snapshot.js'
 
-// Daily MLB team-quality snapshots. Like seasonScoreFor, this reader selects
+// Daily MLB team-quality snapshots. Like the season-score reader, this reader selects
 // only the latest snapshot at or before a Team Page's as-of cutoff.
 export const fetchTeamScores = staticJson('/data/team-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },

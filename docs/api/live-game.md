@@ -460,38 +460,26 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   then a hard 403, after roughly 25 requests in a few minutes), so the resolver is
   one request on demand. One caller rule the module states and cannot enforce:
   no surface may print a game-wide clip total.
-- **`expresslane/runners.js`** — reveal-only. Express Lane's SCORING DECK: which
-  men are standing on base at a given cursor, and whose box a steal gets written
-  on. It exists because a scorer does not write a stolen base on the batter's
-  box — he writes it on the RUNNER's box, the plate appearance in which that man
-  reached, which on the #22 sheet is a row further up. `expressDeck(feed,
-  inning, half, row)` returns the finished box, the men on (ordered third,
-  second, first), the men this play took OFF the bases, the capped card list;
-  `runnersOnBase` is the predicate — reached a base, has not scored,
-  `outAt == null`, and dropping that last one leaves a man on first who was
-  forced at second two pitches ago. `runnersDeparted(prev, entries)` is the
-  second question beside it (ADR-0072): a man on base at `cap - 1` and gone at
-  `cap` left on the cursor's OWN play, so his box stays for that one cursor
-  position — the run he brought home and the `FC 6-4` that erased him both get
-  written on HIS box, and taking it away in the same frame takes the diamond
+- **`expresslane/runners.js`** — reveal-only. The scoring deck's runner functions
+  (Gameday's scorebook box and the scorecard read them): which men are standing on
+  base at a given cap, and whose box a steal gets written on. It exists because a
+  scorer does not write a stolen base on the batter's box — he writes it on the
+  RUNNER's box, the plate appearance in which that man reached, which on the #22
+  sheet is a row further up. `runnersOnBase(entries)` is the predicate — reached a
+  base, has not scored, `outAt == null`, and dropping that last one leaves a man
+  on first who was forced at second two pitches ago. `runnersDeparted(prev,
+  entries)` is the second question beside it (ADR-0072): a man on base at `cap - 1`
+  and gone at `cap` left on the cursor's OWN play, so his box stays for that one
+  cursor position — the run he brought home and the `FC 6-4` that erased him both
+  get written on HIS box, and taking it away in the same frame takes the diamond
   with it. Its list is `departed` and its field is `from`, the base he left,
-  never `base`: he is not standing anywhere.
-  Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
-  `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
-  cursor row onto that cap. The cap is not optional and there is no variant of
-  `expressDeck` without the cursor — built off the finished half, a man who
-  reached first in the third carries a fully shaded diamond the moment his own
-  at-bat is revealed, telling the scorer the run came home before he scored the
-  play that drove it in. (2) THE JOIN INCLUDES `isTerminal`, not just
-  `atBatIndex`. Result mode keeps `action` rows, and an action row sits INSIDE a
-  plate appearance carrying that plate appearance's number; joined on the number
-  alone the cursor on a batter timeout drew the finished box of an at-bat whose
-  pitch had not been watched. A terminal row includes its own card; every other
-  row stops short of it, and the deck reports `pending` — the batter's name
-  only, identity and never result. (3) The cards come back with the three marks
-  `AtBatBox` draws but does not compute (`outType`, `centerCode`, `ladder`),
-  composed from the sheet's own two modules so one plate appearance draws the
-  same box here and on paper.
+  never `base`: he is not standing anywhere. `cardKey` is a card's identity (the
+  automatic runner has no `atBatIndex`). IT RE-DERIVES NOTHING:
+  `computeHalfInningFeed`'s `stepCap` already solved this for at-bat stepping
+  (ADR-0016), and these read cards built under that cap. The cap is not optional —
+  built off the finished half, a man who reached first in the third carries a
+  fully shaded diamond the moment his own at-bat is revealed, telling the scorer
+  the run came home before he scored the play that drove it in.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
@@ -633,8 +621,8 @@ was deleted in the Gameday swap (#2566). Each held on the six games in `docs/tes
   `midAtBat: false` is pre-pitch (pitching change, PH, PR, switches, mound visit). Filter
   `game_advisory` out of the pre-pitch list.
 - The sealed state of at-bat k: cap the feed through the pre-pitch entries before it, then
-  `runnersOnBase(entries)` with no exclusion. The revealed state: `expressDeck(feed, inning, half,
-  { atBatIndex, isTerminal: true })` gives `batter`, `runners` (batter excluded) and `departed`.
+  `runnersOnBase(entries)` with no exclusion. The revealed state: cap the feed through the card, then `runnersOnBase(entries, { excludeAtBatIndex })`
+  (batter excluded) and `runnersDeparted(prevEntries, entries, { excludeAtBatIndex })`.
 - Mid-at-bat runner moves: `runners[].details.playIndex` indexes `playEvents[]`; count the `isPitch`
   events before it for the pitch number, and leave out the batter's own runner entries (else a
   K + WP reach shows as a runner event). A pickoff reads "After pitch n" ("Before pitch 1" at 0);

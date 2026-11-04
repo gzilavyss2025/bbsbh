@@ -18,7 +18,7 @@
 // gen-gate.mjs.
 
 import { seasonStaticJson } from '../staticJson.js'
-import { ranked } from './gate.js'
+import { ranked } from '../../lib/math/ranked.js'
 
 // A season store (ADR-0086): abs/{season}/. Takes `{ seasonYear }`: a year,
 // 'all' (abs/all/), or nothing for the season abs/seasons.json names.

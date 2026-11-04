@@ -20,7 +20,7 @@
 // dragged, which is why nothing here is memoized beyond the one file read.
 
 import { staticJson } from '../staticJson.js'
-import { ranked } from './gate.js'
+import { ranked } from '../../lib/math/ranked.js'
 
 export const fetchDoubleheaders = staticJson('/data/doubleheaders.json', { fallback: null })
 

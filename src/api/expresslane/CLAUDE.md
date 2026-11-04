@@ -6,10 +6,7 @@ card carries its plate appearance's outcome. `clipIndex.js` is spoiler-free: a U
 resolver, no prose and no result. `eligibility.js` is spoiler-free: whether
 film can exist for a game at all.
 
-Two rules that directory adds, both stated in those headers and neither enforceable by the
-manifest. `expressDeck` takes ONE half-inning per call and has no whole-game builder, because a
-game-wide list states how many innings the game ran and so whether it went to extras
-(ADR-0008). The poster rule (no frame outside a revealed play) governs rendering and lives in `src/CLAUDE.md`.
+Nothing in `expresslane/` builds a half-inning any more, so its old one-half-per-call rule (ADR-0008) is dropped here: `runners.js` only reads entries its caller capped with `computeHalfInningFeed`. The poster rule (no frame outside a revealed play) governs rendering and lives in `src/CLAUDE.md`.
 
 Express Lane's screens, and its staging queue and byte store (`src/lib/expresslane/`), were
 deleted when Gameday replaced it (#2566). What stays: `runners.js` (Gameday's scorebook box and the

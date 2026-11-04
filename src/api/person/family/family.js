@@ -13,7 +13,7 @@ import { staticJsonBy } from '../../staticJson.js'
 // `relation` says what the OTHER man is to this player (his Father, his Son).
 // `personId` is null when the relative has no MLBAM id: show his name, link nothing.
 // The shard's `credit` lines must print beside the data, so a surface reads
-// `fetchFamilyShard` when it draws them. `familyOf` is for the entries alone.
+// `fetchFamilyShard` when it draws them.
 export const fetchFamilyShard = staticJsonBy((key) => `/data/family-ties/${key}.json`, { fallback: null })
 
 // The band's order: parents, then brothers, then sons, then everyone else. A
