@@ -84,23 +84,6 @@ export function startingPositionAbbr(box) {
   return box?.allPositions?.[0]?.abbreviation ?? box?.position?.abbreviation ?? ''
 }
 
-// Whether a player is a pitcher BY TRADE (primary position, two-way players
-// included), not by what he happens to be doing in this game. Roster-card
-// membership must key on this: a bench catcher mopping up a blowout gets an
-// in-game box position of 'P', and classifying him by that would move him
-// from the Bench card to the Bullpen card the moment he enters — an
-// unmistakable hint of a sealed-inning blowout. Primary position is fixed at
-// first pitch, so membership never shifts on a sealed event; only the
-// reveal-gated strike-through changes. Falls back to the in-game box position
-// for thin MiLB feeds that omit primaryPosition.
-function isPitcherByTrade(person, box) {
-  const abbr =
-    person?.primaryPosition?.abbreviation ??
-    box?.position?.abbreviation ??
-    ''
-  return abbr === 'P' || abbr === 'TWP'
-}
-
 // The ids of every player in this game whose birthday falls on the game's own
 // date — matched by MM-DD against gameData.datetime.officialDate, off each
 // player's gameData birthDate. Spoiler-free (a birthday is not a score) and
@@ -250,92 +233,6 @@ export function selectOpposingDefense(feed, battingSide) {
     )
 }
 
-// The bullpen card as it stood at first pitch: relievers still available
-// (boxscore.bullpen, which shrinks as pitchers are used) PLUS relievers who
-// have since entered (boxscore.pitchers minus its first entry — the starter,
-// who was never in the bullpen). An entered pitcher carries `enteredIdx`, the
-// half-index at which he first pitched, so the caller can strike him through
-// once the reveal mark reaches his entry; until then he renders like any other
-// available arm. Sorted by name, matching the API's own bullpen ordering, so
-// rows don't jump around as pitchers enter. Name / number / handedness.
-export function selectBullpen(feed, side) {
-  const team = feed?.liveData?.boxscore?.teams?.[side]
-  if (!team) return []
-  const boxPlayers = team.players ?? {}
-  const players = playerIndex(feed)
-  const entered = entryIndexById(feed)
-
-  // team.pitchers includes ANYONE who has pitched — position players mopping
-  // up included — so filter entrants to pitchers by trade (see
-  // isPitcherByTrade) or the card's membership itself leaks a sealed blowout.
-  const enteredArms = (team.pitchers ?? [])
-    .slice(1)
-    .filter((id) => isPitcherByTrade(players[`ID${id}`], boxPlayers[`ID${id}`]))
-  const ids = [...new Set([...(team.bullpen ?? []), ...enteredArms])]
-  return ids
-    .map((id) => {
-      const box = boxPlayers[`ID${id}`] ?? {}
-      const person = players[`ID${id}`] ?? {}
-      return {
-        id,
-        nameLastFirst: lastFirst(person.fullName ? person : box.person),
-        jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-        hand: person.pitchHand?.description ?? '', // 'Left' | 'Right'
-        enteredIdx: entered[id] ?? null,
-      }
-    })
-    .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
-}
-
-// The bench card as it stood at first pitch: position players still available
-// (boxscore.bench, which shrinks as subs enter) PLUS those who have since
-// entered — recovered via each boxscore player's gameStatus.isSubstitute flag
-// (position players only; substitute pitchers belong to the bullpen card).
-// Entered players carry `enteredIdx` exactly as in selectBullpen. Sorted by
-// name for the same row-stability. Name / number / position.
-export function selectBench(feed, side) {
-  const team = feed?.liveData?.boxscore?.teams?.[side]
-  if (!team) return []
-  const boxPlayers = team.players ?? {}
-  const players = playerIndex(feed)
-  const entered = entryIndexById(feed)
-
-  // Recover entered subs by PRIMARY position, not the in-game box position: a
-  // bench player who ends up pitching still belongs on the Bench card (his
-  // box position flips to 'P'), and a pitcher who pinch-runs must not appear
-  // here — either misclassification shifts card membership on a sealed-inning
-  // event. See isPitcherByTrade.
-  const benchIds = team.bench ?? []
-  const subIds = Object.values(boxPlayers)
-    .filter(
-      (p) =>
-        p?.gameStatus?.isSubstitute &&
-        !isPitcherByTrade(players[`ID${p.person?.id}`], p),
-    )
-    .map((p) => p.person?.id)
-    .filter((id) => id != null && !benchIds.includes(id))
-
-  return [...benchIds, ...subIds]
-    .map((id) => {
-      const box = boxPlayers[`ID${id}`] ?? {}
-      const person = players[`ID${id}`] ?? {}
-      return {
-        id,
-        nameLastFirst: lastFirst(person.fullName ? person : box.person),
-        jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-        // Primary position, not the in-game one: an entered sub's box position
-        // reads 'PH'/'PR' (or 'P' for a mop-up cameo), which would flag his
-        // still-sealed entry the moment it happened. Primary is fixed pre-game.
-        position:
-          person.primaryPosition?.abbreviation ??
-          box.position?.abbreviation ??
-          '',
-        enteredIdx: entered[id] ?? null,
-      }
-    })
-    .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
-}
-
 // Every personId on either team's box score roster — starters, bench, and
 // bullpen alike, whether or not they've appeared yet. Membership only, same
 // footing as selectBullpen/selectBench above: it says who's on the roster,
@@ -354,32 +251,6 @@ export function selectGameRosterIds(feed) {
     }
   }
   return [...ids]
-}
-
-// Is a bench/bullpen card entry crossed off — already IN the game — as the half
-// on screen stands? The two card selectors above hand every entry an
-// `enteredIdx`; this is the one place that decides what to do with it, and it
-// answers to TWO ceilings, both of which are ceilings and neither of which is
-// the whole answer on its own:
-//
-//  • `revealedThrough` is the SPOILER ceiling. An entry the reader has not
-//    reached yet renders like any other available player, so the card never
-//    hints at what a still-sealed half holds (ADR-0005 — the strike-through is
-//    the only thing on a roster row that a game event may move at all).
-//  • `halfIdx` is the ACCURACY ceiling — the half being read. A reader who has
-//    unsealed the whole game and paged back to the 1st is REPLAYING it, and a
-//    pinch-hitter who bats in the 8th sat on that bench in the 1st. Striking
-//    him there spoils nothing — the reader already owns the whole game — it is
-//    simply wrong about the moment the page is showing.
-//
-// The lower of the two wins, which is what leaves the live flow untouched: at
-// the frontier the half on screen IS the reveal mark, so the two ceilings agree
-// and a sub who enters in the half being scored still strikes through as he
-// always did. Pass `halfIdx` null on a surface with no one half in view.
-export function enteredAsOf(player, revealedThrough, halfIdx = null) {
-  const at = player?.enteredIdx
-  if (at == null) return false
-  return at <= Math.min(revealedThrough, halfIdx ?? Infinity)
 }
 
 // Team-level meta for a side: name, record, manager placeholder (manager is
@@ -754,27 +625,6 @@ function pitcherCard(feed, pitcherId) {
     jersey: boxscoreJersey(feed, pitcherId) || person.primaryNumber || '',
     hand: person.pitchHand?.code ?? '', // 'L' | 'R'
   }
-}
-
-// Whether `nowPitchingId` (HalfInning.jsx's own `nowPitching` — livePitcher ??
-// enteringPitcher, i.e. whoever's ACTUALLY on the mound as of what's
-// revealed) actually just took the mound THIS half, vs. carrying over from
-// the same team's previous half of the same parity (a team only pitches
-// every OTHER half, so "previous" means inning-1, same half). The game's
-// first half for either team (inning === 1) always reads fresh — there's no
-// earlier half of the same parity to have carried over from.
-//
-// Extracted so this decision — previously inlined in HalfInning.jsx and
-// compared against `livePitcher != null` alone — is unit-testable: that
-// earlier check mislabeled every pitcher continuing from his own previous
-// start as "Now pitching" (verified live: Chris Sale continuing from top 5th
-// into top 6th with no pitching change showed "Now pitching" every time),
-// since PlayByPlay's onCurrentPitcher reports a value unconditionally the
-// moment any of a half is revealed, not just on a genuine substitution.
-export function selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitchingId) {
-  if (inning === 1) return true
-  const previous = selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough)
-  return nowPitchingId !== previous?.id
 }
 
 // The game jersey number for a player id, checked across both boxscore sides

@@ -171,7 +171,6 @@
       "class": "reveal-only",
       "why": "Every number in the full box-score line is score-revealing. `selectBoxscore` must run inside the box score's SealBox reveal.",
       "importers": [
-        "api/boxscore/batterLine.js",
         "api/gameday/engine/engineLive.js",
         "components/game/GameResultFace.jsx",
         "screens/boxscore/InsightCards.jsx",
@@ -179,11 +178,6 @@
         "screens/postseason-live/LiveSeriesPage.jsx",
         "screens/PostseasonSeriesPage.jsx"
       ]
-    },
-    "boxscore/batterLine.js": {
-      "class": "reveal-gated",
-      "why": "The one line a due-up card prints under a batter: H-AB over the REVEALED halves, else his average entering the game. A thin wrapper over computeBatterLine and preGameAvg, so the cutoff is `revealedThrough` itself (ADR-0009) and nothing here reads past it. Split out of boxscore.js to keep it under its size budget.",
-      "importers": []
     },
     "boxscore/gameNotes.js": {
       "class": "reveal-only",
@@ -1007,10 +1001,6 @@
     "ovr/career.js": {
       "class": "spoiler-free",
       "why": "Pure OVR career blend: per-season Savant percentiles in, one percentile per metric out, with a recency weight and an age shift for sprint speed and fastball velocity (docs/ovr-rating.md). Season quality-of-contact figures on an open surface (ADR-0034), never a game's result. It fetches nothing and reads no game."
-    },
-    "ovr/savantHistory.js": {
-      "class": "spoiler-free",
-      "why": "Static savant-history/NN.json shards — Statcast percentile ranks for the completed seasons 2023-2025, the prior-season input of the OVR career blend. Same footing as savantPercentiles.js and war.js: a finished season's quality-of-contact ranks, never a game's result. No SealBox."
     },
     "ovr/history.js": {
       "class": "spoiler-free",

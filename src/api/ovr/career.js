@@ -1,7 +1,7 @@
 // Career blend for OVR (docs/ovr-rating.md, "Career rating"; #1717). Pure: one
 // percentile per metric per season in, one blended percentile per metric out.
 // No fetch, no React. The caller passes the current season (savant-percentiles.json)
-// and the stored ones (savantHistory.js), only for seasons the player has a row in.
+// and the stored ones (public/data/savant-history), only for seasons the player has a row in.
 import { clamp } from '../../lib/math/number.js'
 
 export const CONSTANTS = {

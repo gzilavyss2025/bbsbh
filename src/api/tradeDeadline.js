@@ -33,10 +33,6 @@ export const SEASONS = [
   { year: 2026, deadlineDate: '2026-08-03', windowStart: '2026-07-06', windowEnd: '2026-08-04' },
 ]
 
-export function seasonMeta(year) {
-  return SEASONS.find((s) => s.year === Number(year)) ?? null
-}
-
 // ---------------------------------------------------------------------------
 // Grouping — one story per distinct (date, description) pair, NOT connected
 // components over the team-id graph (tried first; see below for why that

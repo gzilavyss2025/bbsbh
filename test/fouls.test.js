@@ -21,7 +21,6 @@ import {
   leagueFoulRates,
   topFoulGames,
   teamPitchTypeRates,
-  FOUL_PRIORS,
   MIN_BATTER_GAMES,
 } from '../src/api/fouls.js'
 
@@ -409,13 +408,6 @@ test('reader selectors are null-safe on missing data', () => {
   const empty = foulLeaders(null, {})
   assert.deepEqual(empty.batters.byFouls, [])
   assert.deepEqual(empty.pitchers.byFoulsToWhiffs, [])
-})
-
-test('FOUL_PRIORS carries the literature constants for UI copy', () => {
-  assert.equal(FOUL_PRIORS.hitProbFoulRoute2K, 0.291)
-  assert.equal(FOUL_PRIORS.hitProbOtherRoute2K, 0.102)
-  assert.equal(FOUL_PRIORS.hitProbFoulRoute2K3Fouls, 0.335)
-  assert.match(FOUL_PRIORS.source, /SABR/)
 })
 
 // --- the season store (ADR-0086, #1200) ----------------------------------------

@@ -180,21 +180,6 @@ export const DOOR_COLUMNS = {
   hitting: ['G', 'PA', 'AVG', 'HR', 'OPS'],
   pitching: ['G', 'IP', 'ERA', 'K', 'BB'],
 }
-export const DOOR_COLUMNS_WIDE = {
-  hitting: [...DOOR_COLUMNS.hitting, 'OBP', 'SLG', 'K%', 'BB%'],
-  pitching: [...DOOR_COLUMNS.pitching, 'OBP', 'SLG', 'K%', 'BB%'],
-}
-
-// WHICH CELL CARRIES THE QUESTION. A split is asked to answer "how well", and
-// four of the five figures are context for the one that does — so the rate
-// stats take the page's darkest ink and the counting stats step back. It is
-// not the same cell for both groups: a bat is read on OPS with AVG beside it,
-// an arm on ERA alone, and the column that sits under OPS on a pitcher's card
-// is BB, which carries nothing.
-export const DOOR_EMPHASIS = {
-  hitting: [null, null, 'mid', null, 'key'],
-  pitching: [null, null, 'key', null, null],
-}
 
 // The career split rows for a set of situation codes, as a Map code -> stat.
 // Returns an empty Map on any failure: a missing label is one missing door,

@@ -221,46 +221,6 @@ export function arsenalSidesView(data, personId, isMlb) {
   }
 }
 
-// The "heat" band at the foot of the player page's Pitches card: how many
-// pitches at CENTURY_MPH+ this pitcher has thrown this season, and his
-// hardest reading of the year. Both were already gathered by
-// scripts/gen-pitch-arsenal.mjs's sweep and already ride the same shard file
-// the mix does (`century` / `maxVelo`, per pitch type) — this is a sum over
-// the types he actually threw, not a second fetch. Same completed-game
-// season-aggregate footing as the rest of this module.
-//
-// Same level rule as pitchArsenalFor: MLB and AAA are separate bodies of work
-// and are never pooled. Null when the file hasn't loaded, when he isn't in
-// it, or when he sits under CENTURY_CLUB_MIN — in which case the band simply
-// doesn't render, which is the right answer for the large majority of arms
-// who never touch triple digits.
-//
-// `rank`/`of` come from the generator's own league pass (`centuryRank`, keyed
-// by level): ranking him needs the whole level and the shard he rides in is
-// one hundredth of it, so the reader cannot derive it. `of` is the size of the
-// CENTURY CLUB at his level, not of the league — second of the 58 arms who
-// have been to triple digits, which is the only denominator that says
-// anything. Both stay null on a file written before that pass existed, and
-// the band then renders the two facts it does have.
-export function heatView(data, personId, isMlb) {
-  const entry = data?.pit?.[personId]
-  const types = isMlb ? entry?.mlb : entry?.aaa
-  if (!types || types.length === 0) return null
-  const count = types.reduce((n, t) => n + (t.century ?? 0), 0)
-  if (count < CENTURY_CLUB_MIN) return null
-  let maxVelo = null
-  for (const t of types) {
-    if (t.maxVelo != null && (maxVelo == null || t.maxVelo > maxVelo)) maxVelo = t.maxVelo
-  }
-  const place = entry.centuryRank?.[isMlb ? 'mlb' : 'aaa']
-  return {
-    count,
-    maxVelo: maxVelo == null ? null : Math.round(maxVelo * 10) / 10,
-    rank: place?.rank ?? null,
-    of: place?.of ?? null,
-  }
-}
-
 // The same season's mix, split by TIMES THROUGH THE ORDER — his first look at
 // a batter, his second, and his third or later. gen-pitch-arsenal.mjs counts
 // these in the sweep it already runs (the MLB Stats API publishes no such

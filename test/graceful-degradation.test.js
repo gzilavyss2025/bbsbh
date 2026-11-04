@@ -11,8 +11,6 @@ import {
   selectLineup,
   selectOpposingPitcher,
   selectOpposingDefense,
-  selectBullpen,
-  selectBench,
   selectTeamMeta,
   selectOfficials,
   selectGameInfo,
@@ -56,8 +54,6 @@ const SELECTORS = {
   selectLineup: (f) => selectLineup(f, 'away'),
   selectOpposingPitcher: (f) => selectOpposingPitcher(f, 'away'),
   selectOpposingDefense: (f) => selectOpposingDefense(f, 'home'),
-  selectBullpen: (f) => selectBullpen(f, 'home'),
-  selectBench: (f) => selectBench(f, 'away'),
   selectTeamMeta: (f) => selectTeamMeta(f, 'home'),
   selectOfficials,
   selectGameInfo,
@@ -98,8 +94,6 @@ test('array selectors degrade to an empty array, never undefined', () => {
   for (const feed of [null, {}, { liveData: {} }]) {
     assert.deepEqual(selectLineup(feed, 'away'), [])
     assert.deepEqual(selectOpposingDefense(feed, 'home'), [])
-    assert.deepEqual(selectBullpen(feed, 'home'), [])
-    assert.deepEqual(selectBench(feed, 'away'), [])
     assert.deepEqual(selectOfficials(feed), [])
     assert.deepEqual(selectDelays(feed), [])
     assert.deepEqual(selectPrePitchChanges(feed, 1, 'top'), [])

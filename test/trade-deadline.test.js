@@ -4,7 +4,6 @@ import { dedupeTransactions } from '../src/api/teamTransactions.js'
 import { bothSidesMlb } from '../scripts/gen-trade-deadline.mjs'
 import {
   groupTradeStories,
-  seasonMeta,
   SEASONS,
   buildEntryLine,
   buildLevelGamesLine,
@@ -380,16 +379,13 @@ test('groupTradeStories resolves an affiliate-level trade up to its MLB parent o
   assert.equal(padres.sends[0].surname, 'Barley')
 })
 
-test('SEASONS covers 2021-2026 with no gaps, and seasonMeta resolves each', () => {
+test('SEASONS covers 2021-2026 with no gaps', () => {
   const years = SEASONS.map((s) => s.year)
   assert.deepEqual(years, [2021, 2022, 2023, 2024, 2025, 2026])
-  for (const year of years) {
-    const meta = seasonMeta(year)
-    assert.ok(meta.deadlineDate.startsWith(String(year)) || meta.year === year)
+  for (const meta of SEASONS) {
     assert.ok(meta.windowStart < meta.deadlineDate)
     assert.ok(meta.deadlineDate <= meta.windowEnd)
   }
-  assert.equal(seasonMeta(2099), null)
 })
 
 // ---------------------------------------------------------------------------
