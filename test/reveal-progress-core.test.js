@@ -14,6 +14,7 @@ import {
   unlockedInnings,
   effectiveReveal,
   markAfterStep,
+  restoreReveal,
 } from '../src/hooks/revealProgressCore.js'
 import { halfIndex } from '../src/api/select.js'
 
@@ -271,4 +272,48 @@ test('markAfterStep ratchets the mark to the half before the one being stepped, 
   assert.equal(markAfterStep(-1, halfIndex(4, 'top')), halfIndex(3, 'bottom'))
   assert.equal(markAfterStep(-1, 0), -1)
   assert.equal(markAfterStep(9, halfIndex(4, 'top')), 9)
+})
+
+// --------------------------------------------------------------------------
+// restoreReveal — a page restored from the back/forward cache missed every
+// `storage` event fired while it sat there (#2913), so it re-reads storage and
+// applies what those events would have: a value only raises the mark, a REMOVED
+// key re-seals (the same door the storage listener has), and the at-bat cursor
+// never walks behind the other tab's progress.
+// --------------------------------------------------------------------------
+const inert = { halfIdx: -1, count: 0, sub: 0 }
+const at = (halfIdx, count, sub = 0) => ({ halfIdx, count, sub })
+
+test('restoreReveal picks up a reveal made in another tab while the page was cached', () => {
+  assert.equal(restoreReveal({ through: 3, cursor: inert }, '7', inert).through, 7)
+})
+
+test('restoreReveal never lowers the mark for a value, stale or mangled (ADR-0002)', () => {
+  const prev = { through: 7, cursor: inert }
+  assert.equal(restoreReveal(prev, '3', inert), prev)
+  assert.equal(restoreReveal(prev, 'garbage', inert), prev)
+})
+
+test('restoreReveal re-seals when the key was removed while the page was cached', () => {
+  const next = restoreReveal({ through: 7, cursor: at(8, 2) }, null, inert)
+  assert.equal(next.through, -1)
+  assert.deepEqual(next.cursor, inert)
+})
+
+test('restoreReveal takes a cursor the other tab moved ahead, and keeps its own when ahead', () => {
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 1) }, '7', at(8, 3)).cursor, at(8, 3))
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 1) }, '7', at(8, 1, 2)).cursor, at(8, 1, 2))
+  const prev = { through: 7, cursor: at(8, 3) }
+  assert.equal(restoreReveal(prev, '7', at(8, 1)), prev)
+})
+
+test('restoreReveal drops a cursor whose half the other tab committed', () => {
+  assert.deepEqual(restoreReveal({ through: 7, cursor: at(8, 2) }, '8', inert).cursor, inert)
+})
+
+test('restoreReveal returns prev when nothing changed', () => {
+  const prev = { through: 7, cursor: at(8, 2) }
+  assert.equal(restoreReveal(prev, '7', at(8, 2)), prev)
+  const sealed = { through: -1, cursor: inert }
+  assert.equal(restoreReveal(sealed, null, inert), sealed)
 })

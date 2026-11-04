@@ -66,6 +66,8 @@ function setup(initial) {
     reveal: (feed) => act(async () => root.render(createElement(Reveal, { feed }))),
     box: (gamePk) => act(async () => root.render(createElement(Box, { gamePk }))),
     run: (fn) => act(async () => fn()),
+    pageshow: (persisted) =>
+      act(async () => win.dispatchEvent(Object.assign(new Event('pageshow'), { persisted }))),
     storage: (key, newValue) =>
       act(async () => win.dispatchEvent(Object.assign(new Event('storage'), { key, newValue }))),
     done: async () => {
@@ -139,5 +141,51 @@ test('the box score: a late game-A open does not open game B', async () => {
   await t.run(() => openA())
   assert.equal(t.seen.box.boxOpened, false)
   assert.deepEqual(writesTo(t.writes, box(B)), [])
+  await t.done()
+})
+
+// #2913: a page restored from the back/forward cache missed the `storage` events fired
+// while it sat there. A persisted `pageshow` applies what they would have; an ordinary
+// one does nothing.
+test('a bfcache restore picks up the other tab\'s reveal and cursor, never lower', async () => {
+  const t = setup({ [mark(A)]: '3', [cursor(A)]: '4:1' })
+  await t.reveal({ gamePk: A })
+  t.store[mark(A)] = '7' // the other tab, while this page sat in the cache
+  t.store[cursor(A)] = '8:2'
+  await t.pageshow(false)
+  assert.equal(t.seen.reveal.revealedThrough, 3)
+  await t.pageshow(true)
+  assert.equal(t.seen.reveal.revealedThrough, 7)
+  assert.equal(t.seen.reveal.atBatCountFor(5, 'top'), 2)
+  t.store[mark(A)] = '2'
+  await t.pageshow(true)
+  assert.equal(t.seen.reveal.revealedThrough, 7)
+  await t.done()
+})
+
+test('a bfcache restore re-seals a game whose mark was erased, and writes nothing back', async () => {
+  const t = setup({ [mark(A)]: '7', [cursor(A)]: '8:2' })
+  await t.reveal({ gamePk: A })
+  delete t.store[mark(A)] // "erase my Tally data" in another tab
+  delete t.store[cursor(A)]
+  await t.pageshow(true)
+  assert.equal(t.seen.reveal.revealedThrough, -1)
+  assert.equal(t.seen.reveal.atBatCountFor(5, 'top'), 0)
+  assert.equal(t.store[mark(A)], undefined)
+  await t.done()
+})
+
+test('a bfcache restore opens or re-seals the box score to match storage', async () => {
+  const t = setup({})
+  await t.box(A)
+  t.store[box(A)] = '1'
+  await t.pageshow(false)
+  assert.equal(t.seen.box.boxOpened, false)
+  await t.pageshow(true)
+  assert.equal(t.seen.box.boxOpened, true)
+  delete t.store[box(A)]
+  await t.pageshow(true)
+  assert.equal(t.seen.box.boxOpened, false)
+  assert.equal(t.store[box(A)], undefined)
   await t.done()
 })
