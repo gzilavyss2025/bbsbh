@@ -1,8 +1,7 @@
 import { readSeasonShard, staticJsonBy } from './staticJson.js'
 import { shardKey100 } from '../lib/shardKey.js'
 import { combineSprayEntries, coveringRuns } from '../lib/seasons/combine.js'
-import { HIT_COORD_ORIGIN, HARD_HIT_MPH } from '../lib/ballpark/hitProjection.js'
-import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
+import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 
 // The season spray map's reader — where one batter's balls in play landed, and
 // how that changes against a right-handed or a left-handed pitcher.
@@ -242,61 +241,6 @@ export function directionOf(angleDeg, side) {
   return 'center'
 }
 
-// The sentence under the bar, so "pull" is never a word the reader has to
-// translate. Null when there is no single side to speak for — see directionMix.
-export function directionCaption(side) {
-  if (side === 'R') return 'Bats right — pull side is left field.'
-  if (side === 'L') return 'Bats left — pull side is right field.'
-  return null
-}
-
-// How small a side's share has to be before it stops making a split
-// two-sided. See directionMix.
-export const MIX_MINORITY_MAX = 0.1
-
-// The three thirds over a set of balls, or NULL when the sample was genuinely
-// hit from both sides of the plate.
-//
-// THE SWITCH-HITTER RULE. A switch-hitter's two halves are mirror images: he
-// pulls to right against a right-hander and to left against a left-hander. Add
-// them and "pull" describes left field and right field at once, which is not a
-// distribution — it is two of them printed on top of each other. So the All
-// view of a switch-hitter has no direction bar, and each split still has its
-// own. Decided from the BALLS rather than from his listed `b: 'S'`, so a listed
-// switch-hitter who batted only right-handed all season still gets his bar.
-//
-// A MAJORITY, NOT UNANIMITY, and the difference is not theoretical. Ozzie
-// Albies turned around for exactly one of his 240 balls in play against
-// right-handers this season; under a stricter rule that single at-bat withheld
-// the other 239 from the reader. A side holding under MIX_MINORITY_MAX of the
-// sample does not make the split two-sided, and its balls are dropped from the
-// count rather than folded into the other stance — the bar then describes one
-// stance and still sums to what it counted.
-export function directionMix(balls) {
-  if (!balls?.length) return null
-  const right = balls.filter((b) => b.side === 'R').length
-  const minority = Math.min(right, balls.length - right)
-  if (minority / balls.length > MIX_MINORITY_MAX) return null
-
-  const side = right * 2 > balls.length ? 'R' : 'L'
-  const mix = { side, pull: 0, center: 0, oppo: 0, n: 0 }
-  for (const b of balls) {
-    if (b.side !== side) continue
-    const third = directionOf(sprayAngle(b.x, b.y), side)
-    if (!third) continue
-    mix[third] += 1
-    mix.n += 1
-  }
-  return mix
-}
-
-// The balls a chip shows. 'all' is everything; 'R'/'L' is the hand that threw
-// the pitch, which is what "vs RHP" means.
-export function splitBalls(balls, split) {
-  if (split === 'all') return balls ?? []
-  return (balls ?? []).filter((b) => b.hand === split)
-}
-
 const ZERO = [0, 0, 0, 0, 0]
 
 // A chip's counts, read from the stored totals rather than from the plotted
@@ -312,25 +256,11 @@ export function splitTotals(entry, split) {
   return { bip, hits, xbh, hr, hard }
 }
 
-// The footnote under a chart whose diamonds under-count the season. Silent when
-// every home run had a landing point, and silent again if the plot somehow runs
-// AHEAD of the totals — that would be a generator bug, and a card is the wrong
-// place to announce one.
-export function hrNote(plotted, total) {
-  if (total <= 0 || plotted >= total) return null
-  return `${plotted} of ${total} HR had tracked landing points`
-}
-
 const SPLITS = [
   ['all', 'All'],
   ['R', 'vs RHP'],
   ['L', 'vs LHP'],
 ]
-
-// The scope a card can actually show for a view. The reader's pick lives in state
-// and outlasts a season change; the new season may carry no October balls (no
-// `scoped`), and the card is then the regular one. Report Regular for it too.
-export const sprayScopeOf = (view, want) => (want !== 'R' && view?.scoped?.[want] ? want : 'R')
 
 // One scope's card body over an entry, or null for an entry with no balls in
 // play at all. The card floor is NOT applied here — see sprayView.
@@ -384,75 +314,4 @@ export function sprayView(data, personId) {
   if (!postView) return view
   const all = viewOf(combineSprayEntries([entry, post]), personId, 1, season)
   return { ...view, scoped: { P: postView, A: all } }
-}
-
-// --- one park at a time (#1859) ----------------------------------------------
-//
-// A season is many parks, so the card's default field is a generic one. The
-// park view draws ONE configuration's real wall and only the balls hit there.
-// A ball is grouped by the wall it was hit at, not by the venue: the 2022 and
-// 2023 Comerica walls are two groups, never one drawing with both seasons' balls.
-
-// The configuration a ball was hit at, resolved once per venue and season. The
-// date is mid-season: every configuration covers whole seasons.
-function layoutKey(cache, venueId, season) {
-  const k = `${venueId}:${season}`
-  if (!cache.has(k)) {
-    cache.set(k, venueId != null && season != null
-      ? resolveBallparkLayout({ venueId, gameDate: `${season}-07-01` })
-      : null)
-  }
-  return cache.get(k)
-}
-
-// The parks a view's balls were hit at, most balls first, plus the two counts
-// the card's coverage note needs: balls with no park on record (`unknown`, a
-// season stored before parks were kept) and balls at a park the app cannot
-// draw (`offFile`, a minor-league park with no layout).
-export function sprayParks(balls) {
-  const cache = new Map()
-  const groups = new Map()
-  let unknown = 0
-  let offFile = 0
-  for (const b of balls ?? []) {
-    if (b.venueId == null) { unknown++; continue }
-    const layout = layoutKey(cache, b.venueId, b.season)
-    if (!layout) { offFile++; continue }
-    const g = groups.get(layout.configurationId) ??
-      { key: layout.configurationId, venueId: b.venueId, name: layout.name, layout, n: 0, seasons: new Set() }
-    g.n += 1
-    if (b.season != null) g.seasons.add(b.season)
-    groups.set(layout.configurationId, g)
-  }
-  // Two walls of one park in one view (an All-seasons view across a
-  // renovation) carry their seasons in the label, so the picker can tell them apart.
-  const list = [...groups.values()].map((g) => ({ ...g, seasons: [...g.seasons].sort() }))
-  const perVenue = new Map()
-  for (const g of list) perVenue.set(g.venueId, (perVenue.get(g.venueId) ?? 0) + 1)
-  for (const g of list) {
-    const span = g.seasons.length ? `${g.seasons[0]}${g.seasons.length > 1 ? `–${g.seasons.at(-1)}` : ''}` : ''
-    g.label = perVenue.get(g.venueId) > 1 && span ? `${g.name} (${span})` : g.name
-  }
-  list.sort((a, b) => b.n - a.n || a.label.localeCompare(b.label))
-  return { groups: list, unknown, offFile, total: (balls ?? []).length }
-}
-
-// A view narrowed to one park group. Every count is RECOMPUTED from the balls
-// hit there, because the stored denominators (`o`) are season totals with no
-// park: the chips, the facts and the foot all describe this park alone. They
-// count balls with a landing point (the rows), which is what a park can know.
-export function parkSubview(view, group) {
-  const balls = view.balls.filter((b) => b.venueId === group.venueId && group.seasons.includes(b.season))
-  const count = (bs) => ({
-    bip: bs.length,
-    hits: bs.filter((b) => b.result !== 'out').length,
-    xbh: bs.filter((b) => b.result === 'double' || b.result === 'triple' || b.result === 'hr').length,
-    hr: bs.filter((b) => b.result === 'hr').length,
-    hard: bs.filter((b) => b.exitVelo != null && b.exitVelo >= HARD_HIT_MPH).length,
-  })
-  const splits = SPLITS.map(([key, label]) => {
-    const totals = count(key === 'all' ? balls : balls.filter((b) => b.hand === key))
-    return { key, label, ...totals, thin: key !== 'all' && totals.bip < MIN_SPLIT_BIP }
-  })
-  return { ...view, balls, splits, park: group }
 }

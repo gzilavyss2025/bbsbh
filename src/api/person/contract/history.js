@@ -1,5 +1,5 @@
-// The historical-contract LEDGER's view model — the pure half of the player
-// page's Contract history card (components/player/ContractHistoryLedger.jsx).
+// The historical-contract row view model — the pure half of the player
+// page's Contract card (screens/player/next/modules/contract/contractView.js).
 // api/contractsHistory.js fetches and merges the rows (ADR-0067); everything
 // that decides what a reader SEES is here, so a test can exercise it over the
 // four real vocabularies without a browser.
@@ -63,11 +63,6 @@ const KIND_LABEL = {
   arbitration: 'Arbitration',
   unknown: 'Contract',
 }
-
-// Reading order inside one season: the DEAL first, then what it paid. A club
-// signs a player and a payroll line follows from it, so the ledger prints the
-// cause above the consequence. Never a sort on `rowKey` — see the header.
-const KIND_RANK = { extension: 0, freeAgency: 1, arbitration: 2, unknown: 3, salary: 4 }
 
 // One money form for the whole card: $51M, $6.35M, $781K. It follows the
 // contract card's own shortMoney (person/contract/view.js) rather than the
@@ -373,123 +368,4 @@ function arbitrationView(base, terms) {
     details,
     note: outcome ? null : 'Outcome not recorded',
   }
-}
-
-// The whole card: rows grouped into seasons, newest first, each season keeping
-// the deal-before-salary order above. The incoming rows are already sorted
-// season-descending by fetchPlayerContractHistory, and this re-groups rather
-// than re-sorting them on anything of its own beyond that.
-//
-// A season's `teamId` is the first club any of its rows names — salary rows
-// carry none at all (`teamId` is null on every one of them), so the club a
-// season belongs to has to come from the deal beside it, and a season made of
-// salary rows alone correctly has no club.
-//
-// A FREE-AGENCY ROW MAY NEVER NAME A SEASON. Its club is the one he left (see
-// contractRowView), so a season headed from it prints the wrong club and the
-// wrong mark — and the transaction timeline lower on the same tab names the
-// real one, so the page contradicts itself on a single screen. Ranking such a
-// row last would not fix it: on most clubbed seasons it is the ONLY row with a
-// club, so last is still first. It is excluded by kind, and a season with
-// nothing else to name it renders with no club at all. An absent club is
-// honest; a wrong one is not.
-// Excluded by KIND as well as by the null `teamId` contractRowView already
-// gives a free-agency row, so the rule still holds if a later shard ever fills
-// that field in with something.
-function namesTheSeason(view) {
-  return view.kind !== 'freeAgency' && view.teamId != null
-}
-
-// THE COLLAPSE, AND THE AXIS IT COUNTS ON. The deepest career here carries 27
-// rows across 26 seasons, and this is a phone-first page: printed whole, a long
-// career pushes every card under it off the bottom of a very long scroll for a
-// reader who came to see this season. Six seasons is about one screenful on an
-// iPhone, and the newest are the ones a reader is looking for, so the rest goes
-// one tap away — the same "cap the display, never the information" convention
-// the Awards index and the transaction timeline keep.
-//
-// BUT SEASONS ARE THE WRONG THING TO CAP ON THEIR OWN. A SALARY is the row a
-// deep career has one of in EVERY season, including the newest; a DEAL is the
-// row a reader came for, and it sits in the one season it was signed in, which
-// is usually an old one. A cap counted purely in seasons therefore throws the
-// deals away first: Pujols' collapsed card showed his $2.5M final year and hid
-// the $240M and the $100M that paid for the career (issue #1141). Measured over
-// the shipped shards, 1,406 careers are deep enough to collapse; 722 of them
-// lost at least one row that was not a salary, 618 lost a signing or an
-// extension specifically, and 22 lost every deal they had.
-//
-// So the cap falls on the SALARY rows alone: the six newest seasons whole, plus
-// every older season that carries a deal, shown with its deal rows only. It is
-// cheap — a mean of 0.87 rows added across those 1,406 careers, p90 2, worst
-// case 7 — and for 684 of them it changes nothing at all, because every deal
-// was already inside the six newest seasons.
-const SEASONS_VISIBLE = 6
-
-function collapseSeasons(seasons) {
-  const collapsed = []
-  for (const [index, season] of seasons.entries()) {
-    if (index < SEASONS_VISIBLE) {
-      collapsed.push(season)
-      continue
-    }
-    // An older season earns its place by carrying something that is not a
-    // salary — a deal, a case, or a row whose source this file has never met
-    // (`unknown`), which is kept for the same reason contractRowView carries it
-    // through: a row that exists should not vanish because it is unfamiliar.
-    const deals = season.rows.filter((view) => view.kind !== 'salary')
-    if (deals.length) collapsed.push({ ...season, rows: deals })
-  }
-  return collapsed
-}
-
-export function contractHistoryView(rows) {
-  const views = []
-  for (const row of rows ?? []) {
-    const view = contractRowView(row)
-    if (view) views.push(view)
-  }
-
-  const order = []
-  const bySeason = new Map()
-  for (const view of views) {
-    const key = view.season == null ? 'unknown' : view.season
-    if (!bySeason.has(key)) {
-      bySeason.set(key, { season: view.season, teamId: null, rows: [] })
-      order.push(key)
-    }
-    const group = bySeason.get(key)
-    group.rows.push(view)
-  }
-
-  const seasons = order.map((key) => {
-    const group = bySeason.get(key)
-    // Array.prototype.sort is stable, so rows of equal kind keep the order the
-    // merge handed over. The tie-break is therefore the incoming order, never
-    // a row's own `key` — the rowKey is opaque (see this file's header).
-    const sorted = [...group.rows].sort((a, b) => KIND_RANK[a.kind] - KIND_RANK[b.kind])
-    return { ...group, rows: sorted, teamId: sorted.find(namesTheSeason)?.teamId ?? null }
-  })
-
-  // Undated rows last, so a season the source never named cannot sit above a
-  // season it did.
-  seasons.sort((a, b) => {
-    if (a.season == null) return b.season == null ? 0 : 1
-    if (b.season == null) return -1
-    return b.season - a.season
-  })
-
-  // The collapse is a decision, so it is made here rather than in the card —
-  // the component keeps the toggle's state and draws whichever set it is given.
-  //
-  // `dense` asks whether the collapse is worth the tap it costs, and it is
-  // counted in SEASONS because that is the unit the toggle itself speaks in
-  // ("Show all 22 seasons"). Hiding one season buys about two lines of scroll
-  // back, and a career whose deals reach into every old season hides none at
-  // all — the toggle would then offer seasons already on the page, which is a
-  // control that lies. Below that bar the career is simply shown whole: 57 of
-  // the 1,406 deep careers land there, all of them 8 to 12 seasons and at most
-  // 18 rows, so the page a reader gets is still about one long screenful.
-  const collapsed = collapseSeasons(seasons)
-  const dense = seasons.length - collapsed.length > 1
-  return { seasons, rows: views.length, collapsed: dense ? collapsed : seasons, dense }
 }

@@ -178,10 +178,9 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.
   The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`. **The feat label** (`boxscore/FeatLabel.jsx`) renders only inside that same reveal and fetches after it (ADR-0101).
 - **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
-- **Clip posters** (`src/api/expresslane/clipIndex.js`, the Scout's `FilmPane`): a poster URL is
-  safe while the PICTURE is not — every frame carries the broadcast scorebug burned into the
-  pixels — so a poster may render only inside an already-revealed play, never as the placeholder
-  for the next clip.
+- **Clip posters**: no poster builder exists. A clip frame carries the broadcast scorebug burned
+  into the pixels, so any poster may render only inside an already-revealed play, never as the
+  placeholder for the next clip.
 
 ## Components with folder rules
 

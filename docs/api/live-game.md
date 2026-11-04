@@ -449,7 +449,6 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   event list of one half that `runners.js`'s deck is tested through. `rail.js` is reveal-only and
   has no screen importer now; a new caller reads it inside a `SealBox` reveal function.
 - **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
-  `playId → { mp4Url, posterUrl, durationSec }`, cached in IndexedDB by gamePk.
   `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
   that turns a playId into a playable clip — via
   `baseballsavant.mlb.com/sporty-videos?playId=`, whose HTML carries a
@@ -457,15 +456,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   fetcher is injectable so every test runs offline. `fastball-clips.mlb.com` is
   the same asset and is unusable: Referer-locked to mlb.com, browser-verified
   `MEDIA_ERR_SRC_NOT_SUPPORTED` from this origin. The token is deterministic, so
-  a hit is memoized and persisted; a MISS never is, because clips lag the pitch
+  a hit is memoized; a MISS never is, because clips lag the pitch
   by 8 to 26 minutes and caching the miss would seal a game against its own film.
   Nothing here ever bursts: `sporty-clips` blocks automated access (empty bodies,
   then a hard 403, after roughly 25 requests in a few minutes), so the resolver is
-  one request on demand and `buildClipIndex` walks its list one at a time and
-  stops asking once the answers stop arriving. Two caller rules the module states
-  and cannot enforce: a poster carries the broadcast scorebug burned into the
-  pixels, so it may render only inside an already-revealed play and never as the
-  placeholder for the NEXT clip; and no surface may print a game-wide clip total.
+  one request on demand. One caller rule the module states and cannot enforce:
+  no surface may print a game-wide clip total.
 - **`expresslane/runners.js`** — reveal-only. Express Lane's SCORING DECK: which
   men are standing on base at a given cursor, and whose box a steal gets written
   on. It exists because a scorer does not write a stolen base on the batter's
