@@ -161,3 +161,44 @@ No open issue duplicated any of them; gzilavyss2025/bbsbh#1817 (the 2026-10-08 a
 5. **rail.js (#2842):** delete it. The runner tests build their own rows.
 6. **Remaining findings:** one tracking issue, https://github.com/gzilavyss2025/bbsbh/issues/2844.
 7. **Guard:** `check-dead-exports` fails on test-only exports after the cuts land: https://github.com/gzilavyss2025/bbsbh/issues/2845.
+
+## Decisions, round 2 (Gary, 2026-11-04): the remaining findings
+
+| Item | Decision |
+| --- | --- |
+| B7 api incident comments | Move them to a new ADR, and keep a 3-line header in each file |
+| B8 `gen-og-image.mjs` + `og-image.html` | Delete them. `public/og-image.png` stays |
+| B10 `season-marks/fetch.mjs` | Delete it. The bootstrap is finished |
+| B11 `PitchLadder.jsx` + `WriteOnDemo` | Delete both |
+| B14 `ui/frame/ResultCard.jsx` | Delete it |
+| B19 player module `index.jsx` stubs | Keep them (module contract) |
+| B21 DEV-gate the lab routes | No: `/animation-lab`, `/design-lab` and `/wire-lab` keep shipping |
+| A23 `export` keyword sweep | Do it last, as one PR |
+| Grouping | One PR per area, not one per item |
+
+Area issues (all `ready-for-agent`, tracked on https://github.com/gzilavyss2025/bbsbh/issues/2844):
+
+| Issue | Area | Items | Estimate |
+| --- | --- | --- | --- |
+| https://github.com/gzilavyss2025/bbsbh/issues/2846 | scripts | A5 (scripts part), A6, A10, A12, A13, A16, B8, B10, B15 | about -700 |
+| https://github.com/gzilavyss2025/bbsbh/issues/2847 | api/ | A9, A11, A17, A19, B7, B17 | about -260, plus about 200 comment lines moved to an ADR |
+| https://github.com/gzilavyss2025/bbsbh/issues/2848 | src/api | A5 (api part), A20, B16 | about -260 |
+| https://github.com/gzilavyss2025/bbsbh/issues/2849 | components and screens | A7, A22, B9, B11, B12, B13, B14, B20 | about -650 |
+| https://github.com/gzilavyss2025/bbsbh/issues/2850 | dates and helpers | A5 (rest), A8, A15 | about -130 |
+| https://github.com/gzilavyss2025/bbsbh/issues/2851 | lib and hooks | A5 (lib part), A14, A21, B18 | about -155 |
+| https://github.com/gzilavyss2025/bbsbh/issues/2852 | export keyword sweep (last) | A23 | about 0 |
+
+Correction: B14's design-lab use is in `src/screens/designlab/report/ReportParts.jsx` and `src/screens/designlab/catalog.js`, not `screens/designlab/ReportParts.jsx`. The run prompt below carries the fix; the text of #2849 does not.
+
+## How it runs
+
+Gary takes the orchestrator prompt from this session (write-prompt, 2026-11-04) into a new cloud session: Opus 5.5 at medium effort, running `/orchestrate` Lane 2. It runs the issues in six waves:
+
+1. #2837, #2838, #2839, #2847, #2833, #2836 and #2851, all at once.
+2. #2834, #2840, #2842 and #2835.
+3. #2846, #2848 and #2849.
+4. #2850.
+5. #2845.
+6. #2852, last.
+
+The waves follow the files the issues share. #2843, running the migration, is left to Gary.
