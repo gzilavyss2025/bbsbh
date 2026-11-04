@@ -29,9 +29,9 @@ import { parseMetroZones, roundBox, STATE_FIPS, STATE_NAMES, stateZones } from '
 import { join } from 'node:path'
 
 const ROOT = join(import.meta.dirname, '..')
-const MAP_DIR = `${ROOT}public/data/from/map`
-const DATA_DIR = `${ROOT}scripts/data/from`
-const BIRTHPLACES = `${ROOT}public/data/birthplaces`
+const MAP_DIR = `${ROOT}/public/data/from/map`
+const DATA_DIR = `${ROOT}/scripts/data/from`
+const BIRTHPLACES = `${ROOT}/public/data/birthplaces`
 const VIEW = [975, 610]
 // Weights are areas in projected pixels. 2 gives the national outline (about 26 KB);
 // 0.5 keeps a zone edge true at the zoom a state is shown at.
