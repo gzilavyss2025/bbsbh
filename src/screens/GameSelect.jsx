@@ -17,14 +17,13 @@ import { cardLines } from '../api/postseason/text.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
-import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { SlateMasthead } from '../components/slatehead/SlateMasthead.jsx'
 import { fetchLevelCounts } from '../api/slate/levelCounts.js'
 import { ladderStops } from '../lib/slate/ladder.js'
-import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
+import { SiteSearchButton } from '../components/ui/control/SiteSearchButton.jsx'
 import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
 import { LazyPanel } from '../components/ui/state/LazyPanel.jsx'
@@ -32,11 +31,8 @@ import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
-import { WireDock } from '../components/transactions/WireDock.jsx'
-import { WireRail } from '../components/transactions/WireRail.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
-import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
@@ -69,6 +65,10 @@ const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldS
 const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
 const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
 const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
+const DerbyCard = lazyNamed(() => import('../components/allstar/DerbyCard.jsx'), 'DerbyCard')
+const LeaguePicker = lazyNamed(() => import('../components/winter/LeaguePicker.jsx'), 'LeaguePicker')
+const WireRail = lazyNamed(() => import('../components/transactions/WireRail.jsx'), 'WireRail')
+const WireDock = lazyNamed(() => import('../components/transactions/WireDock.jsx'), 'WireDock')
 const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
 // Neither the league nor the date persists anywhere. Both live in the URL
@@ -554,12 +554,14 @@ export function GameSelect({
           made here — above the club strip, which the pick then scopes. Every
           chip is a real address, never local state (ADR-0056). */}
       {onWinter && (
-        <LeaguePicker
-          leagues={winterBall.leagues}
-          leagueId={activeLeagueId}
-          dateStr={dateStr}
-          isToday={isToday}
-        />
+        <LazyPanel reserve="picker">
+          <LeaguePicker
+            leagues={winterBall.leagues}
+            leagueId={activeLeagueId}
+            dateStr={dateStr}
+            isToday={isToday}
+          />
+        </LazyPanel>
       )}
 
       {/* This level's whole club set as round chips (TeamFilterStrip, the
@@ -675,7 +677,9 @@ export function GameSelect({
             <ul className="gamelist">
               {sorted.length === 0 && isDerbyDay && (
                 <li>
-                  <DerbyCard />
+                  <LazyPanel reserve="derby">
+                    <DerbyCard />
+                  </LazyPanel>
                 </li>
               )}
               {listGames.map(renderCard)}
@@ -710,13 +714,15 @@ export function GameSelect({
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
         {wireOn && wide && !winter && (
-          <WireRail
-            endDate={dateStr}
-            sportId={sportId}
-            onPresence={setRailPresent}
-            fitTo={gamesColRef}
-            singleDay={!isToday}
-          />
+          <LazyPanel reserve="wire">
+            <WireRail
+              endDate={dateStr}
+              sportId={sportId}
+              onPresence={setRailPresent}
+              fitTo={gamesColRef}
+              singleDay={!isToday}
+            />
+          </LazyPanel>
         )}
 
         {/* October's copy of that column: the bracket, or the primer's. A World Series day draws its own
@@ -758,12 +764,14 @@ export function GameSelect({
         </LazyPanel>
       )}
       {wireOn && !wide && !winter && (
-        <WireDock
-          endDate={dateStr}
-          sportId={sportId}
-          onPresence={setDockPresent}
-          singleDay={!isToday}
-        />
+        <LazyPanel reserve="wire">
+          <WireDock
+            endDate={dateStr}
+            sportId={sportId}
+            onPresence={setDockPresent}
+            singleDay={!isToday}
+          />
+        </LazyPanel>
       )}
     </div>
   )

@@ -363,6 +363,16 @@ body:has(.wirelab) {
 .slate-reserve--bracket {
   min-height: 20rem;
 }
+.slate-reserve--wire {
+  display: none; /* the wire renders nothing while it loads (WireRail.jsx), so its stand-in takes no room */
+}
+.slate-reserve--picker {
+  margin-top: var(--space-2); /* .leaguepicker's own top margin */
+  min-height: 29px; /* one chip row, measured */
+}
+.slate-reserve--derby {
+  min-height: 99px; /* DerbyCard, measured at 390 and 1280 */
+}
 .slate-reserve--primer {
   min-height: 10rem;
 }

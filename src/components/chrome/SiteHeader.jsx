@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { TallyLockup } from './TallyBrand.jsx'
-import { SiteSearchButton } from './SiteSearch.jsx'
+import { SiteSearchButton } from '../ui/control/SiteSearchButton.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
 import { LogbookButton } from './LogbookButton.jsx'
 import { goHome } from '../../lib/home.js'

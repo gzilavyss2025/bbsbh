@@ -13,33 +13,8 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { Stack } from '../ui/layout/Stack.jsx'
 
-// The site-wide search trigger — a persistent icon button (not an always-open
-// input; on a phone-width header there's no room to dock one, and this is the
-// mobile-standard pattern anyway) that opens SiteSearchModal. Lives in
-// SiteHeader (every screen except the slate) and the slate's own topbar (see
-// GameSelect), so it's reachable from anywhere in the app.
-export function SiteSearchButton({ className = '' }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <>
-      <button
-        type="button"
-        className={`btn btn--ghost sitebar__search ${className}`}
-        onClick={() => setOpen(true)}
-        aria-label="Search players and teams"
-      >
-        <SearchGlyph />
-      </button>
-      {/* Rendered in place, NOT through ModalPortal: both hosts (SiteHeader and
-          the slate topbar) are already in the root stacking context, and the
-          ALL-CAPS invariant is a `#root *` rule — a portal to <body> would land
-          the whole search surface outside it and quietly break the app's casing
-          (see the Clerk note in index.css). */}
-      {open && <SiteSearchModal onClose={() => setOpen(false)} />}
-    </>
-  )
-}
-
+// The site-wide search sheet. Its trigger is ui/control/SiteSearchButton.jsx, which loads this file on the
+// first tap so the slate and every header do not ship the sheet.
 function SearchGlyph({ size = 18 }) {
   return (
     <svg
