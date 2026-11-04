@@ -10,7 +10,7 @@ import { MergeReceipt } from './MergeReceipt.jsx'
 // My Tally's account section — the only part of the page that knows Clerk
 // exists. It imports @clerk/clerk-react at its top level, so ProfilePage
 // dynamically imports it and only when `isClerkEnabled`, exactly like
-// AccountPitch, LogbookAccountGate and the cloud-sync components. Never a
+// LogbookAccountGate and the cloud-sync components. Never a
 // conditionally-called hook: Clerk's hooks throw with no ClerkProvider ancestor,
 // so the CONDITION is the render of this component, not a call inside it.
 //

@@ -19,8 +19,7 @@ test('the two contextual-prompt ids are exactly what the PRD scoped, less the re
 })
 
 test('intro-account and settings-pitch are deliberately NOT one-shot ids here', () => {
-  // intro-account is governed by its own bbsbh:intro flag; settings-pitch is
-  // the one panel allowed to persist. Neither belongs to the generic store.
+  // settings-pitch is the one panel allowed to persist. Neither belongs to the generic store.
   assert.equal(isPromptId('intro-account'), false)
   assert.equal(isPromptId('settings-pitch'), false)
 })

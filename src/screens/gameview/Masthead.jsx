@@ -54,10 +54,9 @@ export function MastheadSide({ date, gamePk, isLive, keepAwake, onSetKeepAwake }
   )
 }
 
-// Screen-wake-lock toggle, same switch convention as the Settings modal's
-// Game Score pref (FavoriteTeamModal.jsx's favteamsheet__prefToggle) but
-// compact enough to ride in the masthead next to Watch — this is a per-game,
-// in-the-moment choice, not something worth burying in a separate modal.
+// Screen-wake-lock toggle, compact enough to ride in the masthead next to
+// Watch — this is a per-game, in-the-moment choice, not something worth
+// burying in a separate modal.
 function KeepAwakeToggle({ on, onToggle }) {
   return (
     <button

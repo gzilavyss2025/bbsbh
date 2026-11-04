@@ -3,17 +3,13 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // The club strip — one finger-scrollable row of every club's mark, grayscaled
 // except the pick, centred on whatever is currently chosen. It is the ONE
-// favourite-team picker in the app: the first-visit welcome modal
-// (FavoriteTeamModal) and My Tally's Baseball section both render this, so the
-// two can never drift into two subtly different pickers the way the menu and
-// footer page lists once did.
+// favourite-team picker in the app: My Tally's Baseball section renders it, so
+// there is never a second, subtly different picker the way the menu and footer
+// page lists once were.
 //
 // Pure presentation, and deliberately so. It takes the club list as a PROP
 // rather than fetching one, because its two hosts legitimately want different
-// sources: /profile reads the same-origin static club file (no statsapi request
-// on a page whose whole promise is that it touches no game data), while the
-// intro modal keeps the live-with-static-fallback loader it has always used.
-// A picker that owned the fetch would have to pick one of those for both.
+// sources, and a picker that owned the fetch would have to pick one for all.
 //
 // Tapping a club calls `onPick` immediately — there is no Save step anywhere
 // this is used, and adding one would be a change to both hosts at once.

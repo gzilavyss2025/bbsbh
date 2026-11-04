@@ -12,12 +12,9 @@ import { profilePath } from '../../lib/route.js'
 // single header search button (see SiteSearch.jsx), reachable from every screen
 // rather than just the slate. Nothing here is score-revealing.
 //
-// **Settings is a destination now, not a modal.** It used to open
-// FavoriteTeamModal in a second, non-intro mode holding one control. It
-// navigates to `/profile` (My Tally) instead, where the club sits with the
-// level, keep-awake, motion, the progress ledger, the sync receipt and the
-// account — none of which fit a one-purpose sheet. The modal survives for the
-// first-visit intro only (GameSelect).
+// **Settings is a destination, not a modal.** It navigates to `/profile`
+// (My Tally), where the club sits with the level, keep-awake, motion, the
+// progress ledger, the sync receipt and the account.
 //
 // Bordered-button chrome is reserved for the three things you actually DO on
 // this screen (open Settings, look up a past matchup, print the logo sheet).

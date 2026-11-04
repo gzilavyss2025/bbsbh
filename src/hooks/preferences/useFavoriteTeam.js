@@ -8,12 +8,6 @@ import { usePreferences } from './usePreferences.js'
 // user's devices. Every call site keeps the same two-value shape it always had
 // for the club itself, so nothing above this line had to learn about the
 // document.
-//
-// This hook used to also answer "has this visitor ever answered?" as
-// `isFirstVisit: !has('club')` — first-visit detection now has its own
-// explicit flag (`useIntroFlag`, src/lib/account/intro.js), because the
-// two-step welcome modal needs to know more than a club opinion can express.
-// See that module's header for why the two questions had to be decoupled.
 export function useFavoriteTeam() {
   const { club, has, set } = usePreferences()
 

@@ -97,11 +97,6 @@ const NUDGE_MAX = 3
 const SPACING_RESIDUE = {
   '04a-wire-dock.css': { 62: 1 },
   '07-team-logo-and-buttons.css': { 18: 1 },
-  // 23 -> 22: the favourite-team sheet's two centring paddings are HALF A LOGO
-  // BUTTON, and the button narrowed to 44px when .vsteam__team's own padding
-  // joined the scale. A derived literal follows its input or it stops being
-  // derived — see the re-derivation note at that rule.
-  '08-site-shell.css': { 22: 2 },
   '16-identity-lab-shell.css': { 72: 1, 120: 1, 200: 1 },
   '19-pattern-and-sketch-labs.css': { 22: 1, 28: 1 },
   '21-box-score.css': { 72: 1 },
