@@ -55,7 +55,11 @@ concurrent sessions, so measure.
 - **Wake on events, not on a clock.** Three things wake you, cheapest first:
   1. A child's `send_message` (`DONE: PR #n` or `NEEDS PARENT: ...`). Every child
      prompt asks for it.
-  2. A PR event from `subscribe_pr_activity` (CI result, review, merge).
+  2. A child PR's CI result, read by you. Do NOT `subscribe_pr_activity` to a child's
+     PR: a PR's events go to one session, and once you hold them the child never
+     hears its CI go green and waits forever (2026-11-04, #2844 run). At each wake-up,
+     read every open child PR's `lint-and-build` straight from
+     `api.github.com/repos/<owner>/<repo>/commits/<head sha>/check-runs` (curl).
   3. A fallback `send_later`, only to catch a child that hangs in silence:
      20 minutes after you start a child, then 45, then 50 for each later one. Keep
      every gap under 55 minutes: a wake-up re-reads your whole context, and past the
@@ -192,7 +196,8 @@ mocked), and name the PR's preview link for that route in the handoff.
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe
-to the PR and drive it to green. When the work is done and CI is green, remove the
+to the PR and drive it to green; check CI yourself (the head's check-runs) rather than
+wait for a CI event. When the work is done and CI is green, remove the
 `wip` label (docs/development.md, "Draft PRs"), then send_message your parent
 "DONE: PR #<n>" at once. Do not wait to be asked.
 Never merge. Never push to main.
@@ -205,7 +210,7 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 "NEEDS PARENT: <what you need>".
 ```
 
-Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
+Do not subscribe to the child's PR (see Budget); read its CI yourself. Sonnet by default. Opus when the cause
 of a bug is unknown or the spoiler rule changes (that also goes to him first).
 
 ## Check once
@@ -260,7 +265,7 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    `/10272025`, with `?nointro`). Only the data that is keyed to the current season is
    missing there. Children then check the real page, not a copy of it.
 4. **Start a row as soon as what it depends on is done**, not when the whole wave is.
-   Subscribe to each PR; Budget says how you wake. A row whose "depends on" says
+   Do not subscribe to the children's PRs; Budget says how you wake. A row whose "depends on" says
    **merged** waits until that PR is on `main`: land it (see "Landing"), then start
    the row. If a prompt needs the earlier wave's code and the plan does not say which,
    ask him once for the whole plan: build on that branch (set `source_revision`), or
@@ -294,8 +299,8 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
 A backfill where each chunk rewrites one seed, one queue or one generated file
 (2026-11-03, #2761: 27 PRs in about seven hours) runs one child at a time:
 
-- Start the next chunk the moment the last one merges. Subscribe to each child's PR
-  yourself as well; a CI event often arrives before the child's `DONE`.
+- Start the next chunk the moment the last one merges. Read each child PR's CI
+  yourself at every wake-up; a green CI often lands before the child's `DONE`.
 - Fill every placeholder in a reused prompt, the PR title too (`CHUNK` became a
   literal title once). Fix a wrong example in the prompt before the next child,
   not after the chain.
@@ -377,7 +382,13 @@ one at a time, once it passes review. Vercel Pro makes a deployment per merge ch
    PRs** (a seed, a queue, generated shards; no code) skip the review when he says
    so: check instead that CI is green, the diff holds only the files the prompt
    allows, and the body says `Part of #n`. A slice in the same run that changes code
-   still gets a read of its diff and tests before the merge.
+   still gets a read of its diff and tests before the merge. **Tiered review** (Gary,
+   2026-11-04, #2844): a PR that only deletes code gets green CI, a read of its diff and a
+   repo-wide grep (JSON, CSS, strings) for every removed name, in place of `/code-review`.
+   A PR that moves or adds code, touches a reveal-only module, or changes a guard still gets
+   `/code-review high`. In that run the full reviews caught a loosened spoiler-guard test,
+   a deleted live-data test and a flag-parsing regression; the light checks caught leftover
+   dead CSS.
    - Correctness findings: `send_message` them to the child, and wait for its next
      `DONE`. Do not fix them yourself unless the child has stopped.
    - No correctness findings: merge it now, following the `merge-pr` skill's gates
