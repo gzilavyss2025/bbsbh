@@ -9,6 +9,7 @@ import { PenDots } from '../workload/PenDots.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
+import { once } from '../../lib/react/once.js'
 import { useCopy } from '../../copy/copyContext.js'
 import {
   resolveTreatment,
@@ -27,6 +28,10 @@ import {
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
+// Code only, never data: the card opens a scoring surface (ADR-0001). GameView
+// pulls the lineup page chunk in at module evaluation.
+const prefetchGame = once(() => import('../../screens/GameView.jsx'))
+
 export function GameCard({
   game,
   pinnedTeamId,
@@ -204,6 +209,8 @@ export function GameCard({
       <button
         type="button"
         className="gamecard__open"
+        onPointerDown={prefetchGame}
+        onPointerEnter={prefetchGame}
         onClick={() => onSelect(game)}
       >
         <div className="gamecard__teams">
