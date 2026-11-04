@@ -28,7 +28,8 @@
 // it means to change. It is smaller than the thing it replaces, and that is the
 // point: the race is gone because the client no longer needs a coherent read of
 // shared state through a cache it does not control. The merge rule itself lives
-// in `mergeOverrides` (src/copy/registry.js), used by both ends.
+// in `mergeOverrides` (src/copy/registryFull.js: the FULL set, so a ballpark save
+// keeps the /learn guide text), used by the server and the editor.
 //
 // Still last-write-wins per FIELD, which with one site owner is the right
 // trade — two tabs editing the same park's photo will not both win. What can no

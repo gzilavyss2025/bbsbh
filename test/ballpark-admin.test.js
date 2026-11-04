@@ -18,7 +18,8 @@
 //      own store.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { FIELD_IDS, mergeOverrides } from '../src/copy/registry.js'
+import { FIELD_IDS } from '../src/copy/registry.js'
+import { defaultCopy, mergeOverrides } from '../src/copy/registryFull.js'
 import {
   fieldIds,
   resolveParkName,
@@ -34,6 +35,8 @@ import {
 } from '../api/_lib/blob.js'
 
 const FENWAY = venueKey('Fenway Park')
+// A /learn guide id: only the full registry knows it, and a ballpark save must keep it.
+const GUIDE_ID = Object.keys(defaultCopy()).find((id) => id.startsWith('learn.'))
 
 // --------------------------------------------------------------------------
 // 1. The merge — the one that prevents silent, total copy loss
@@ -45,8 +48,10 @@ test('a partial save leaves every field it does not name exactly as it was', () 
     'offseason.springLabel': 'Show me the season',
     [`ballpark.${venueKey('Wrigley Field')}`]: 'The ivy is real.',
     [`ballpark.${FENWAY}Photo`]: 'https://example.com/old.jpg',
+    [GUIDE_ID]: 'Edited guide text.',
   }
   const merged = mergeOverrides(current, { [`ballpark.${FENWAY}Name`]: 'The Fens' })
+  assert.equal(merged[GUIDE_ID], 'Edited guide text.', 'a ballpark save keeps the /learn guide text')
 
   assert.equal(merged['offseason.leadNote'], 'Sure you want the scores?')
   assert.equal(merged['offseason.springLabel'], 'Show me the season')
