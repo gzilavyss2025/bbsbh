@@ -1,13 +1,20 @@
-// Warm a route chunk on a touch. Repeat calls are cheap (the browser's module map dedupes)
-// and a failed load retries on the next touch. Vite fires `vite:preloadError` with the very
-// error this catch receives, a tick BEFORE the catch runs; main.jsx defers its repair one
-// tick and skips errors marked here, so a flaky-network prefetch never reloads the app.
-const failed = new WeakSet()
+// Touch-prefetch for a slate game card: warm the HTTP cache for GameView's chunks, once per
+// page. <link rel=prefetch> only; no import(), so nothing lands in Vite's preload state or
+// the module map, and a failed prefetch fires no vite:preloadError (main.jsx's repair).
+// vite.config.js's gameViewPrefetch names the files in a <meta> in index.html (build only).
+export const prefetchLinks = (content) =>
+  (content ?? '').split(' ').filter(Boolean).map((href) => ({ href, as: href.endsWith('.css') ? 'style' : 'script' }))
 
-export const isPrefetchFailure = (err) => failed.has(err)
+let done = false
 
-export function prefetch(loader) {
-  loader().catch((err) => {
-    if (err && typeof err === 'object') failed.add(err)
-  })
+export function prefetchGameView(doc = document) {
+  if (done) return
+  const content = doc.querySelector('meta[name="game-view-prefetch"]')?.content
+  if (!content) return
+  done = true
+  for (const { href, as } of prefetchLinks(content)) {
+    const link = doc.createElement('link')
+    Object.assign(link, { rel: 'prefetch', as, href, crossOrigin: 'anonymous' })
+    doc.head.append(link)
+  }
 }

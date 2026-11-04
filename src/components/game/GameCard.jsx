@@ -9,7 +9,7 @@ import { PenDots } from '../workload/PenDots.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
-import { prefetch } from '../../lib/react/prefetch.js'
+import { prefetchGameView } from '../../lib/react/prefetch.js'
 import { useCopy } from '../../copy/copyContext.js'
 import {
   resolveTreatment,
@@ -22,10 +22,6 @@ import {
   TeamName,
   StatusText,
 } from './GameCardParts.jsx'
-
-// Code only, never data: the card opens a scoring surface (ADR-0001). GameView
-// pulls the lineup page chunk in at module evaluation.
-const prefetchGame = () => prefetch(() => import('../../screens/GameView.jsx'))
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -186,8 +182,8 @@ export function GameCard({
       ref={cardRef}
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''} ${parkInView ? 'gamecard--parkinview' : ''}`}
       style={Object.keys(style).length ? style : undefined}
-      onPointerDown={prefetchGame}
-      onPointerEnter={prefetchGame}
+      onPointerDown={() => prefetchGameView()}
+      onPointerEnter={() => prefetchGameView()}
     >
       {/* The ballpark, washed grayscale and faded in behind the WHOLE card as
           it crosses the screen (see the IntersectionObserver above). First

@@ -9,7 +9,6 @@ import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import { installCrashReporter, reportCrash } from './lib/crash/report.js'
 import { parseRoute } from './lib/route.js'
 import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
-import { isPrefetchFailure } from './lib/react/prefetch.js'
 import { recoverOnce, clearRecoveryFlag } from './lib/crash/recover.js'
 import { RootBoundary } from './components/ui/state/RootBoundary.jsx'
 import './index.css'
@@ -29,10 +28,7 @@ installCrashReporter(() => {
 // — localStorage is untouched). The flag clears a few seconds after a clean load
 // so the NEXT deploy can repair itself too. RootBoundary uses the same repair for
 // a render error.
-// A failed touch-prefetch (lib/react/prefetch.js) marks its error a tick later, so wait one tick.
-window.addEventListener('vite:preloadError', (e) => {
-  setTimeout(() => { if (!isPrefetchFailure(e.payload)) recoverOnce() })
-})
+window.addEventListener('vite:preloadError', () => { recoverOnce() })
 window.addEventListener('load', () => {
   setTimeout(() => clearRecoveryFlag(sessionStorage), 10_000)
 })

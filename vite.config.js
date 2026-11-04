@@ -115,6 +115,43 @@ function shellOnly(entries) {
   return { manifest, warnings: [] }
 }
 
+// Names GameView's chunks in index.html, for the slate card's touch-prefetch
+// (src/lib/react/prefetch.js): the route chunk, the lineup page it opens on, and their
+// static imports and CSS. Build-only (dev has no bundle). A <link rel=prefetch> warms the
+// HTTP cache and nothing else: a failed one fires no vite:preloadError and leaves no
+// failed entry in Vite's preload state or the module map.
+function gameViewPrefetch() {
+  const roots = ['src/screens/GameView.jsx', 'src/screens/lineup/next/LineupNextPage.jsx']
+  return {
+    name: 'game-view-prefetch',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx) {
+        if (!ctx.bundle) return
+        const chunks = Object.values(ctx.bundle).filter((c) => c.type === 'chunk')
+        const walk = (c, set) => {
+          if (set.has(c.fileName)) return
+          set.add(c.fileName)
+          for (const css of c.viteMetadata?.importedCss ?? []) set.add(css)
+          for (const f of c.imports) walk(ctx.bundle[f], set)
+        }
+        // The files index.html already loads need no prefetch.
+        const shell = new Set()
+        walk(ctx.chunk, shell)
+        const all = new Set()
+        for (const root of roots) {
+          const c = chunks.find((x) => x.facadeModuleId?.endsWith(root))
+          if (!c) throw new Error(`gameViewPrefetch: ${root} missing from the bundle`)
+          walk(c, all)
+        }
+        const urls = [...all].filter((u) => !shell.has(u))
+        const content = urls.map((u) => `/${u}`).join(' ')
+        return [{ tag: 'meta', attrs: { name: 'game-view-prefetch', content }, injectTo: 'head' }]
+      },
+    },
+  }
+}
+
 // Buffer a request body, or answer 413 and give up. Resolves null when nothing
 // usable arrived (too large, or the socket went away) — in which case the
 // response has already been sent or the connection is gone, and the caller
@@ -446,6 +483,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    gameViewPrefetch(),
     devDataSave(),
     VitePWA({
       registerType: 'autoUpdate',

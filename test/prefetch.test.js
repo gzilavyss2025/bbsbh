@@ -1,21 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { prefetch, isPrefetchFailure } from '../src/lib/react/prefetch.js'
+import { prefetchLinks } from '../src/lib/react/prefetch.js'
 
-test('a failed prefetch is marked so vite:preloadError recovery can skip it', async () => {
-  const err = new Error('offline')
-  prefetch(() => Promise.reject(err))
-  await Promise.resolve()
-  await Promise.resolve()
-  assert.equal(isPrefetchFailure(err), true)
-  assert.equal(isPrefetchFailure(new Error('route import')), false)
-  assert.equal(isPrefetchFailure(undefined), false)
+test('prefetchLinks reads the build meta: css as style, the rest as script', () => {
+  assert.deepEqual(prefetchLinks('/assets/GameView-a.js /assets/GameView-b.css'), [
+    { href: '/assets/GameView-a.js', as: 'script' },
+    { href: '/assets/GameView-b.css', as: 'style' },
+  ])
 })
 
-test('a failed prefetch is retried on the next call', async () => {
-  let n = 0
-  const load = () => (n++, Promise.reject(new Error('x')))
-  prefetch(load)
-  prefetch(load)
-  assert.equal(n, 2)
+test('prefetchLinks is empty with no meta (dev)', () => {
+  assert.deepEqual(prefetchLinks(undefined), [])
+  assert.deepEqual(prefetchLinks(''), [])
 })
