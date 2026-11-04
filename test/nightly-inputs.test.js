@@ -48,3 +48,7 @@ test('a closed gate lists its steps datasets as skipped, and freshness exempts t
   assert.deepEqual(r.stale.map((s) => s.name), ['war.json'])
   assert.deepEqual(r.skipped, ['vs-team-splits/'])
 })
+
+test('run_all opens both gates whatever the schedule says (a hand run that must run everything)', () => {
+  assert.deepEqual(decideGates({ upcoming: sched(), recent: sched(), runAll: true }), { upcoming: true, finals: true })
+})

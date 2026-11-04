@@ -59,7 +59,10 @@ const games = (sched) => (sched?.dates ?? []).flatMap((d) => d.games ?? [])
 const live = (g) => !['C', 'D'].includes(g.status?.codedGameState) // not cancelled, not postponed
 
 // upcoming / recent: the two schedule responses, or null when the read failed.
-export function decideGates({ upcoming, recent }) {
+// runAll: the workflow's run_all dispatch input. A hand run picking up a new or
+// fixed generator must run it even when no game is in either window.
+export function decideGates({ upcoming, recent, runAll = false }) {
+  if (runAll) return { upcoming: true, finals: true }
   return {
     upcoming: upcoming == null || games(upcoming).some(live),
     finals: recent == null || games(recent).some((g) => live(g) && g.status?.abstractGameCode === 'F'),
@@ -92,7 +95,7 @@ async function main() {
     readOrNull(`/api/v1/schedule?sportId=1&startDate=${iso(now)}&endDate=${iso(now + UPCOMING_DAYS * 864e5)}`),
     readOrNull(`/api/v1/schedule?sportId=1&startDate=${since}&endDate=${iso(now)}`),
   ])
-  const open = decideGates({ upcoming, recent })
+  const open = decideGates({ upcoming, recent, runAll: process.env.RUN_ALL === 'true' })
   const skipped = skippedDatasets(open)
   console.log(`upcoming=${open.upcoming} finals=${open.finals} (Finals since ${since}); skipping ${skipped.length} datasets`)
   if (process.env.GITHUB_OUTPUT) {

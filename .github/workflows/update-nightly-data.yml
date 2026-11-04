@@ -98,6 +98,11 @@ on:
         description: "'cron' when the Vercel cron dispatched it; a hand run never skips"
         required: false
         default: hand
+      run_all:
+        description: "Run every step, even the ones the input gates would skip (no game scheduled or none gone Final). Tick this after merging a new or fixed game-data generator."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -109,7 +114,8 @@ jobs:
   # full run would rewrite every generatedAt stamp, commit, and deploy again,
   # so a SCHEDULED run (or the Vercel cron's dispatch, trigger: cron) skips when another run is in flight or succeeded in the
   # last 18 hours. A hand dispatch never skips: the maintainer dispatches after
-  # a merge to pick up a new generator, and that must always run. 18 hours sits
+  # a merge to pick up a new generator, and that must always run (tick run_all
+  # when it is a game-data generator the input gates would otherwise skip). 18 hours sits
   # under check-data-freshness.mjs's 20-hour budget. If the API call fails, the
   # gate lets the run go ahead: a duplicate beats a dropped night.
   gate:
@@ -181,6 +187,8 @@ jobs:
       - name: Input gates
         id: inputs
         continue-on-error: true
+        env:
+          RUN_ALL: ${{ inputs.run_all }}
         run: node scripts/nightly/inputs.mjs
 
       # ---- Structural data: slow-moving upstream, rebuilt nightly --------
@@ -770,10 +778,21 @@ jobs:
             for i in 1 2 3 4 5; do
               if git push; then pushed=1; break; fi
               git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
-              # -X theirs: on a conflict keep THIS run's side (in a rebase,
-              # "theirs" is the commit being replayed). Two runs that collide
-              # both rewrite the heartbeat, which would otherwise stop the push.
-              git rebase -X theirs "origin/$(git rev-parse --abbrev-ref HEAD)"
+              # Two runs that collide both rewrite the heartbeat. Only that file
+              # is resolved, to THIS run's side (in a rebase "theirs" is the
+              # commit being replayed); a conflict in any data file aborts and
+              # fails the job, so a hand-landed fix is never overwritten.
+              if ! git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"; then
+                if [ "$(git diff --name-only --diff-filter=U)" = "scripts/data/nightly-heartbeat.json" ]; then
+                  git checkout --theirs -- scripts/data/nightly-heartbeat.json
+                  git add scripts/data/nightly-heartbeat.json
+                  GIT_EDITOR=true git rebase --continue
+                else
+                  git rebase --abort
+                  echo "::error::rebase conflict in a data file; not overwriting main" >&2
+                  exit 1
+                fi
+              fi
               sleep $((RANDOM % 10 + 1))
             done
             if [ -z "$pushed" ]; then
