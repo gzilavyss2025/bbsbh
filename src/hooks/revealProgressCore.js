@@ -62,6 +62,14 @@ export function markAfterStep(revealedThrough, halfIdx) {
   return mergeMark(revealedThrough, halfIdx - 1)
 }
 
+// A page restored from the back/forward cache (`pageshow`, `persisted`) missed every
+// `storage` event fired while it sat there, so it re-reads the stored mark (#2913).
+// Same forward-only merge as everything else: a re-read may raise the mark, never lower
+// it, and a removed or mangled value (-1) changes nothing (ADR-0002).
+export function markOnPageShow(prev, { persisted }, raw) {
+  return persisted ? mergeMark(prev, parseRevealMark(raw)) : prev
+}
+
 // How many innings are currently visible: regulation, plus one more for each
 // extra inning whose predecessor's bottom has already been fully revealed
 // (extras never spoil — ADR-0008).

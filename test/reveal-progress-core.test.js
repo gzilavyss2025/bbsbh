@@ -14,6 +14,7 @@ import {
   unlockedInnings,
   effectiveReveal,
   markAfterStep,
+  markOnPageShow,
 } from '../src/hooks/revealProgressCore.js'
 import { halfIndex } from '../src/api/select.js'
 
@@ -271,4 +272,23 @@ test('markAfterStep ratchets the mark to the half before the one being stepped, 
   assert.equal(markAfterStep(-1, halfIndex(4, 'top')), halfIndex(3, 'bottom'))
   assert.equal(markAfterStep(-1, 0), -1)
   assert.equal(markAfterStep(9, halfIndex(4, 'top')), 9)
+})
+
+// --------------------------------------------------------------------------
+// markOnPageShow — a page restored from the back/forward cache missed every
+// `storage` event fired while it sat there (#2913), so it re-reads the stored
+// mark. The re-read is the same forward-only merge: it may raise, never lower.
+// --------------------------------------------------------------------------
+test('markOnPageShow picks up a reveal made in another tab while the page was cached', () => {
+  assert.equal(markOnPageShow(3, { persisted: true }, '7'), 7)
+})
+
+test('markOnPageShow never lowers the mark (ADR-0002)', () => {
+  assert.equal(markOnPageShow(7, { persisted: true }, '3'), 7)
+  assert.equal(markOnPageShow(7, { persisted: true }, null), 7)
+  assert.equal(markOnPageShow(7, { persisted: true }, 'garbage'), 7)
+})
+
+test('markOnPageShow ignores an ordinary load (not a bfcache restore)', () => {
+  assert.equal(markOnPageShow(3, { persisted: false }, '7'), 3)
 })

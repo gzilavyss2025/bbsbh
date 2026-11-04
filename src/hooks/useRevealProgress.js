@@ -10,6 +10,7 @@ import {
   parseBoxRevealMark,
   catchUpMarkIn,
   markAfterStep,
+  markOnPageShow,
   mergeMark,
   offerCatchUp,
   unlockedInnings,
@@ -321,9 +322,23 @@ export function useRevealProgress(feed, regulation, actualCount) {
       // Same parse + forward-only merge as every other reveal source.
       else mergeRevealedThrough(parseRevealMark(e.newValue))
     }
+    // A back/forward-cache restore fires no `storage` events for what changed while the
+    // page was cached, so it asks storage again — forward-only (#2913).
+    function onPageShow(e) {
+      try {
+        const raw = window.localStorage.getItem(storageKey)
+        update((prev) => ({ ...prev, through: markOnPageShow(prev.through, e, raw) }))
+      } catch {
+        // Storage unavailable — the page keeps the mark it had.
+      }
+    }
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [storageKey, mergeRevealedThrough, resealAll])
+    window.addEventListener('pageshow', onPageShow)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('pageshow', onPageShow)
+    }
+  }, [storageKey, update, mergeRevealedThrough, resealAll])
 
   useEffect(() => {
     if (!state.gamePk) return
