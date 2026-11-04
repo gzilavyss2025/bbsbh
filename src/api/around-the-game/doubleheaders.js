@@ -20,6 +20,7 @@
 // dragged, which is why nothing here is memoized beyond the one file read.
 
 import { staticJson } from '../staticJson.js'
+import { ranked } from '../../lib/math/ranked.js'
 
 export const fetchDoubleheaders = staticJson('/data/doubleheaders.json', { fallback: null })
 
@@ -118,19 +119,6 @@ export function topOpponents(byOpponent) {
       .map((o) => o.teamId)
       .sort((a, b) => a - b),
   }
-}
-
-// Rank rows on one field, best first, ties SHARING the best rank — the
-// convention gate.js and comebackWins.js already use. A row with no value
-// ranks null rather than last.
-function ranked(rows, field) {
-  const usable = rows.filter((r) => r[field] != null)
-  return rows.map((r) => {
-    if (r[field] == null) return { ...r, rank: null, tied: false }
-    const ahead = usable.filter((o) => o[field] > r[field]).length
-    const tied = usable.filter((o) => o[field] === r[field]).length > 1
-    return { ...r, rank: ahead + 1, tied }
-  })
 }
 
 // What each sort column ranks on. `pctValue` is the numeric win percentage

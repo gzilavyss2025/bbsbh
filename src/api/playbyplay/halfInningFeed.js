@@ -281,7 +281,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         })
       } else if (et === 'offensive_substitution' && e.position?.abbreviation === 'PR') {
         // A pinch runner entering mid-flow — its own notification at the
-        // moment it happens (see pinchRunningPlayers), separate from the
+        // moment it happens, separate from the
         // strike-through this same swap leaves on the replaced runner's card.
         // text/segments are a fallback only (EventNote), for the vanishingly
         // unlikely case the incoming runner isn't in gameData.players.

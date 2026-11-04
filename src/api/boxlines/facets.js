@@ -31,7 +31,7 @@
 import { askableGameTypes, POSTSEASON, REGULAR_SEASON } from './rows.js'
 
 // "2024-09-29" -> 0 (Sunday) .. 6. Manual y/m/d at midday UTC, the same
-// timezone-proof construction dayBefore uses in rows.js: a local-midnight Date
+// timezone-proof construction dayBefore uses in lib/dates.js: a local-midnight Date
 // would land a west-coast night game on the previous weekday.
 export function weekdayOf(iso) {
   const [y, m, d] = String(iso).split('-').map(Number)

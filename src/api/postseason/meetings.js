@@ -27,7 +27,9 @@
 import { selectMeetings } from '../../lib/postseason/worldseries/scouting/meetings.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { getJson } from '../statsapi.js'
-import { dayBefore, keptGames } from './fetch.js'
+import { keptGames } from './fetch.js'
+import { dayBefore } from '../../lib/dates.js'
+import { numOrNull } from '../../lib/math/number.js'
 
 const FIELDS = 'dates,date,games,gamePk,gameType,officialDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 
@@ -41,8 +43,6 @@ export function meetingsUrl(clubA, clubB, slateDate) {
 // The play's clip key: the plate appearance's last pitch (the join clipIndex.js and watchClip.js use).
 // Null where the feed lists no pitch events.
 const terminalPlayId = (play) => (play?.playEvents ?? []).filter((e) => e?.isPitch).at(-1)?.playId ?? null
-
-const num = (v) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : null)
 
 function side(feed, s) {
   const { gameData: gd, liveData: ld } = feed ?? {}
@@ -61,20 +61,20 @@ function side(feed, s) {
   return {
     id: gd?.teams?.[s]?.id ?? null,
     abbr: gd?.teams?.[s]?.abbreviation ?? '',
-    runs: num(line?.runs),
-    hits: num(line?.hits),
-    errors: num(line?.errors),
+    runs: numOrNull(line?.runs),
+    hits: numOrNull(line?.hits),
+    errors: numOrNull(line?.errors),
     starter: {
       id: sp,
       name: box?.players?.[`ID${sp}`]?.person?.fullName ?? '',
       hand: gd?.players?.[`ID${sp}`]?.pitchHand?.code ?? '',
       ip: st?.inningsPitched ?? null,
-      h: num(st?.hits),
-      r: num(st?.runs),
-      er: num(st?.earnedRuns),
-      bb: num(st?.baseOnBalls),
-      k: num(st?.strikeOuts),
-      pitches: num(st?.numberOfPitches),
+      h: numOrNull(st?.hits),
+      r: numOrNull(st?.runs),
+      er: numOrNull(st?.earnedRuns),
+      bb: numOrNull(st?.baseOnBalls),
+      k: numOrNull(st?.strikeOuts),
+      pitches: numOrNull(st?.numberOfPitches),
       mix,
     },
     lineup: (box?.battingOrder ?? []).map((id) => ({
@@ -99,7 +99,7 @@ export function meetingCard(feed, gamePk) {
     decisionIds: { w: dec?.winner?.id ?? null, l: dec?.loser?.id ?? null, s: dec?.save?.id ?? null },
     away: side(feed, 'away'),
     home: side(feed, 'home'),
-    innings: (ld?.linescore?.innings ?? []).map((i) => [num(i.away?.runs), num(i.home?.runs)]),
+    innings: (ld?.linescore?.innings ?? []).map((i) => [numOrNull(i.away?.runs), numOrNull(i.home?.runs)]),
     scoring: (ld?.plays?.scoringPlays ?? [])
       .map((i) => plays[i])
       .filter(Boolean)

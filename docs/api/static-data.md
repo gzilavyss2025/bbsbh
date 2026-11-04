@@ -77,8 +77,7 @@ for each generator; the reader modules:
   union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `src/api/player/overview.js` threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash. The same shard also carries `fld` (fielding runs) and
-  `pa` (plate appearances) maps for 2023 on, read with `fldByYearFor(personId, history)` /
-  `paByYearFor(personId, history)` (pure, `{}` for an unknown player). No UI reads them yet.
+  `pa` (plate appearances) maps for 2023 on, read straight off the history shard (`history.fld[personId]` / `history.pa[personId]`). No UI reads them yet.
 - `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
   `public/data/milb-alumni/{teamId}.json` (`scripts/gen-milb-alumni.mjs`, nightly).
   Not its own module: this reader sits beside `fetchAffiliates`, which already
@@ -296,8 +295,8 @@ for each generator; the reader modules:
   the wrong season is worse than no card.
 - `milbSeasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
   (`public/data/milb-seasons/{NN}.json`, bucketed on `personId % 100`, hand-run by
-  `gen-milb-seasons.mjs`). `fetchMilbSeasons(personId)` gives rows
-  `{ season, sport, group, n, v, pct }`: the season total at one level, `n` plate
+  `gen-milb-seasons.mjs`). The rows are
+  `{ season, sport, group, n, v, pct }` (`unpackRow`; no reader function in `src/` yet): the season total at one level, `n` plate
   appearances or outs, `v` OPS or ERA (null on a dash), `pct` the percentile in that
   level-season (null under 40 PA or 30 outs). The shard stores rows as arrays
   (`packRow`/`unpackRow`). The current season is not in it: read `prospect-trend.json`.
@@ -647,8 +646,8 @@ for each generator; the reader modules:
 - `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
   `public/data/season-score.json`. The nightly generator stores snapshots by
   season, team, and completed date rather than one mutable current row;
-  `seasonScoreFor` selects the latest snapshot at or before the Team Page's
-  standings cutoff. The static reader degrades to no badge before the first
+  the reader selects the latest snapshot at or before the Team Page's
+  standings cutoff (`latestAtOrBefore`). The static reader degrades to no badge before the first
   generated file exists. See `docs/season-score.md` and ADR-0018.
 - `teamScore.js` + `seasonGradeFormula.js` — dated Quality/Current Form readers
   and the Team Page's headroom-aware Season Grade. Grade combines Quality with
@@ -663,8 +662,7 @@ for each generator; the reader modules:
   per threshold the club's `wins`/`att`/`rate` (`sub/att`) plus the pooled MLB
   baseline `leagueRate` (`Σsub/Σatt`) and a count-based `rank`/`of`/`tied` (raw
   win count, sample-size-proof — a rate rank would let a 1-of-1 club top it).
-  `comebackWinsFor` selects one raw row; `leagueComebackWinsFor` is the legacy
-  `{ teamId, stat }` count shape (still exported for reuse). The postseason is a
+  The postseason is a
   separate `seasons[y].post.byTeamId`; `comebackPostFor` reads it as raw `wins`/`att`
   counts (no rate, no baseline) and `comebackRatesFor` returns it as `post` (null
   for a club that missed October); the card shows it under the rails. Spoiler-free (a
@@ -684,11 +682,11 @@ for each generator; the reader modules:
   whose park has a listed capacity, so its `of` can be smaller. The sellout
   count is the one figure the GENERATOR derives (it needs the per-game gates);
   it ships the threshold it counted at, which the reader passes through as
-  `selloutPct`. `attendanceFor` selects the raw row. MLB only — the generator
+  `selloutPct`. The raw row is `data.seasons[y].byTeamId[teamId]`. MLB only — the generator
   is. Spoiler-free (a Final-games aggregate, same footing as WAR) — no
   `SealBox`; the Facts rows render only when the club has one. A separate
   `seasons[y].postseason.byTeamId` block (gameType F,D,L,W, same row shape) is
-  read by `postseasonAttendanceFor`; it never feeds the season row or a rank (#1439).
+  read straight off the file; it never feeds the season row or a rank (#1439).
 - `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
   `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;
@@ -1140,8 +1138,8 @@ for each generator; the reader modules:
   shape and the licence notes.
 - `person/family/family.js` — a player's family links, from
   `public/data/family-ties/{NN}.json` (`gen-family-ties.mjs`, hand-run, ADR-0100),
-  sharded on `shardKey100(mlbamId)` and read through `staticJsonBy`. `familyOf(personId)`
-  returns `[{ relation, personId|null, name }]` or `[]`. `relation` says what the OTHER
+  sharded on `shardKey100(mlbamId)` and read through `staticJsonBy`. A player's entry in the shard is
+  `[{ relation, personId|null, name }]`, or absent. `relation` says what the OTHER
   man is to this player (his Father, his Son). A null `personId` means the relative has
   no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
   shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the

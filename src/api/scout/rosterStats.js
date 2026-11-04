@@ -13,7 +13,7 @@
 // Field paths checked live on 2026-10-22 against the 2025 Series (LAD 119, Freeman 518692, Call 669743).
 import { isStarter } from '../../lib/postseason/worldseries/scouting/roster.js'
 import { aggregateSplits, withoutMultiTeamAggregate } from '../person/stats.js'
-import { dayBefore } from '../postseason/fetch.js'
+import { dayBefore } from '../../lib/dates.js'
 import { fetchSeriesRoster } from '../postseason/roster.js'
 import { getJson } from '../statsapi.js'
 

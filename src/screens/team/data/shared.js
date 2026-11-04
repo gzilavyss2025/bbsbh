@@ -2,7 +2,7 @@ import { lastName } from '../../../api/select.js'
 import { firstLast } from '../../../api/person.js'
 import { isWinterSport } from '../../../lib/winter/leagues.js'
 import { winterSeasonFor } from '../../../lib/winter/window.js'
-import { isoToday } from '../../../lib/dates.js'
+import { dayBefore, isoToday } from '../../../lib/dates.js'
 import FROZEN_SEASONS from '../../../lib/data/frozen-seasons.json' with { type: 'json' }
 import { postseasonRecordsPath } from '../../../lib/postseason/recordsRoute.js'
 
@@ -48,15 +48,6 @@ export function dayOfWeekRecord(games) {
 // ---------------------------------------------------------------------------
 // Dates and cutoffs
 // ---------------------------------------------------------------------------
-
-// The day BEFORE `iso`. Every dated (`?d=`) team-hub request is cut off here
-// rather than at `asOf` itself, so a visitor mid-scoring never sees a record,
-// standing or result that already counts tonight's game.
-export function dayBefore(iso) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
 
 // The season a page is about: the `?d=` year on a dated link, else this year.
 //

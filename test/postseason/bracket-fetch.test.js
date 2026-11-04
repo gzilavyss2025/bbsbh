@@ -5,9 +5,9 @@
 // asks for every date but for no result field at all. Both are pinned here on
 // the URL itself, and the row normalizers on real captured answers.
 import assert from 'node:assert/strict'
+import { dayBefore } from '../../src/lib/dates.js'
 import test, { mock } from 'node:test'
 import {
-  dayBefore,
   fetchPostseasonResults,
   fetchPostseasonSkeleton,
   resultRowsFrom,

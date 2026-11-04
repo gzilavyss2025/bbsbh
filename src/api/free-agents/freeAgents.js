@@ -99,23 +99,6 @@ export function filterFreeAgents(rows, { group = null, teamId = null, unsignedOn
   )
 }
 
-// The four header tiles, over the MLB-only list.
-export function summarizeFreeAgents(rows) {
-  const mlb = rows.filter((r) => !r.minor)
-  const signed = mlb.filter((r) => r.signed)
-  const unsigned = mlb.filter((r) => !r.signed)
-  const latest = [...signed].sort((a, b) => String(b.dateSigned).localeCompare(String(a.dateSigned)))[0] ?? null
-  const best = sortFreeAgents(unsigned).find((r) => r.war != null) ?? null
-  return {
-    declared: mlb.length,
-    signed: signed.length,
-    unsigned: unsigned.length,
-    latest,
-    best,
-    optionsDeclined: mlb.filter((r) => r.optionDeclined).length,
-  }
-}
-
 // One short stat line: a slash line and homers for a hitter, ERA/IP/K (and
 // saves when he has any) for a pitcher. A two-way player reads as his group.
 export function statLine({ hitting, pitching } = {}, isPitcher) {

@@ -1,4 +1,4 @@
-// Coverage for the pure parse behind gen-milb-seasons.mjs and the shard reader:
+// Coverage for the pure parse behind gen-milb-seasons.mjs:
 // the total-row choice, the odd-season skip, the dotted-string parse, the null
 // rules and the playing-time floor. The fixtures are real statsapi rows
 // (`/people?hydrate=stats(type=[yearByYear],sportId=N)`, pulled 2026-10-08).
@@ -9,7 +9,6 @@ import {
   FULL_WEIGHT_OUTS,
   FULL_WEIGHT_PA,
   LEVEL_WEIGHT,
-  fetchMilbSeasons,
   milbShardKey,
   packRow,
   unpackRow,
@@ -104,23 +103,6 @@ test('the level weights and full-weight playing time are start values for step 5
   assert.deepEqual(LEVEL_WEIGHT, { 11: 0.6, 12: 0.5, 13: 0.35, 14: 0.25, 16: 0.1 })
   assert.equal(FULL_WEIGHT_PA, 400)
   assert.equal(FULL_WEIGHT_OUTS, 450) // 150 IP
-})
-
-test('the reader unpacks its shard, and gives [] for a player the shard lacks or a missing shard', async () => {
-  const real = globalThis.fetch
-  globalThis.fetch = async (url) =>
-    String(url).endsWith('/data/milb-seasons/08.json')
-      ? { ok: true, json: async () => ({ players: { 815908: [[2025, 13, 'h', 123, 0.915, 96]] } }) }
-      : { ok: false, status: 404 }
-  try {
-    assert.deepEqual(await fetchMilbSeasons(815908), [
-      { season: 2025, sport: 13, group: 'hitting', n: 123, v: 0.915, pct: 96 },
-    ])
-    assert.deepEqual(await fetchMilbSeasons(108), []) // shard 08, player not in it
-    assert.deepEqual(await fetchMilbSeasons(5), []) // no shard 05
-  } finally {
-    globalThis.fetch = real
-  }
 })
 
 test('a player in both id lists (war.json keys are strings, top-prospects ids are numbers) is listed once', () => {

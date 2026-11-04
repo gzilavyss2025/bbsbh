@@ -57,30 +57,6 @@ export async function fetchPitchArsenalFor(personId, { seasonYear, strict } = {}
   )
 }
 
-// The player page's SCOPE (#1503): 'reg', 'post' or 'all'. The readers below
-// all read `data.pit[id]`, so a scope is a copy of `data` whose `pit` holds the
-// scope's entry for this one man: the shard's `post` bucket (ADR-0094), or the
-// two buckets added by combineArsenalEntries. Counts add and velocity is
-// weighted by pitches, never an average of two averages, and neither bucket is
-// ever written over. 'reg' hands back `data` itself, so every number on the
-// regular-season card is the one it was before the scope existed.
-export function arsenalScoped(data, personId, scope = 'reg') {
-  if (scope === 'reg' || !data) return data
-  const id = String(personId)
-  const entry =
-    scope === 'post' ? data.post?.[id] ?? null : combineArsenalEntries([data.pit?.[id] ?? null, data.post?.[id] ?? null])
-  return { ...data, pit: entry ? { [id]: entry } : {} }
-}
-
-// His postseason pitches, at either level. Zero means the scope control has
-// nothing to offer him.
-export function postPitchesOf(data, personId) {
-  const entry = data?.post?.[String(personId)]
-  let n = 0
-  for (const level of [entry?.mlb, entry?.aaa]) for (const t of level ?? []) n += t.pitches ?? 0
-  return n
-}
-
 // ONE START'S PITCH MIX (#1915): `{ code: n }` for one pitcher in one game, from
 // public/data/pitch-arsenal-starts/{season}/{NN}.json (his %100 bucket, a season store). Its
 // own shard set: the buckets above are at their size ceiling. A completed-game aggregate like
@@ -196,25 +172,6 @@ export function arsenalLevelOf(data, personId) {
   if (!entry) return null
   const count = (types) => (types ?? []).reduce((sum, t) => sum + (t.pitches ?? 0), 0)
   return count(entry.mlb) >= count(entry.aaa)
-}
-
-// The player page's Pitches card on a PICKED season (#1202). The live card
-// reads statsapi's pitchArsenal (person/advanced.js's arsenalView) for the
-// current season; a past season, or every season combined, comes from this
-// store. Same rows, so the card changes nothing: { code, name, velo, usage (a
-// fraction), count }, most-thrown first. Null under the same floor as
-// pitchArsenalFor — a season he did not pitch is no card, never zeros.
-export function arsenalMixRows(data, personId, isMlb) {
-  const rows = pitchArsenalFor(data, personId, isMlb)
-  return rows
-    ? rows.map((t) => ({
-        code: t.code,
-        name: t.description || t.code,
-        velo: t.avgVelo ?? null,
-        usage: t.pct / 100,
-        count: t.pitches,
-      }))
-    : null
 }
 
 // One pitch type as ONE side of the plate saw it, unpacked from the `vs` pair

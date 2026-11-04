@@ -15,9 +15,9 @@
 // SPOILER CLASSIFICATION: reveal-only. The kept fields describe one batted ball;
 // call it only from the replay, inside the half's reveal.
 
-const GF_URL = 'https://baseballsavant.mlb.com/gf?game_pk='
+import { numOrNull } from '../../lib/math/number.js'
 
-const num = (v) => (v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v))
+const GF_URL = 'https://baseballsavant.mlb.com/gf?game_pk='
 
 export async function fetchSavantBatTracking(gamePk, sportId) {
   const out = new Map()
@@ -28,10 +28,10 @@ export async function fetchSavantBatTracking(gamePk, sportId) {
   for (const row of [...(body.team_home ?? []), ...(body.team_away ?? [])]) {
     if (!row?.play_id) continue
     out.set(row.play_id, {
-      batSpeed: num(row.batSpeed),
-      xba: num(row.xba),
+      batSpeed: numOrNull(row.batSpeed),
+      xba: numOrNull(row.xba),
       barrel: row.is_barrel == null ? null : row.is_barrel === 1,
-      hrParks: num(row.contextMetrics?.homeRunBallparks),
+      hrParks: numOrNull(row.contextMetrics?.homeRunBallparks),
     })
   }
   return out

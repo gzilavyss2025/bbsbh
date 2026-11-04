@@ -14,6 +14,7 @@
 // inside the half's reveal.
 
 import { csvObjects } from '../../lib/csv/parse.js'
+import { numOrNull } from '../../lib/math/number.js'
 
 export function statcastUrl(gamePk, date) {
   const params = new URLSearchParams({
@@ -28,17 +29,15 @@ export function statcastUrl(gamePk, date) {
   return `https://baseballsavant.mlb.com/statcast_search/csv?${params}`
 }
 
-const num = (v) => (v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v))
-
 // CSV text -> the five kept fields of each row that has a measured attack angle.
 export function parseAttack(text) {
   return csvObjects(text)
     .map((r) => ({
-      game_pk: num(r.game_pk),
-      at_bat_number: num(r.at_bat_number),
-      pitch_number: num(r.pitch_number),
-      attack_angle: num(r.attack_angle),
-      attack_direction: num(r.attack_direction),
+      game_pk: numOrNull(r.game_pk),
+      at_bat_number: numOrNull(r.at_bat_number),
+      pitch_number: numOrNull(r.pitch_number),
+      attack_angle: numOrNull(r.attack_angle),
+      attack_direction: numOrNull(r.attack_direction),
     }))
     .filter((r) => r.attack_angle != null && r.at_bat_number != null && r.pitch_number != null)
 }

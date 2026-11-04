@@ -8,6 +8,14 @@ export function num(x) {
   return Number.isFinite(n) ? n : 0
 }
 
+// A finite number, else null. Blank (`null`, `undefined`, `''`) and non-numbers read as null:
+// "no value", which `num` above would flatten to 0.
+export function numOrNull(x) {
+  if (x == null || x === '') return null
+  const n = Number(x)
+  return Number.isFinite(n) ? n : null
+}
+
 // `n` held within [lo, hi]. Needs lo <= hi; NaN stays NaN.
 export function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n))

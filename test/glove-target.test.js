@@ -12,7 +12,6 @@ import {
   REFERENCE_RINGS,
   RIM_IN,
   gloveTargetBias,
-  gloveTargetTypes,
   gloveTargetView,
 } from '../src/api/gloveTarget.js'
 
@@ -22,24 +21,6 @@ const entry = {
   SL: { n: 206, miss: 10.64, dots: [[-1, -1]] },
 }
 const shard = { season: 2026, pit: { 592332: entry } }
-
-// ---------------------------------------------------------------------------
-// the chip row
-// ---------------------------------------------------------------------------
-
-test('All leads the chips, then his own pitches by how often he threw them', () => {
-  assert.deepEqual(gloveTargetTypes(entry).map((t) => t.code), ['ALL', 'FF', 'SL'])
-})
-
-test('each chip carries the count and the median behind it', () => {
-  const [, ff] = gloveTargetTypes(entry)
-  assert.equal(ff.n, 1130)
-  assert.equal(ff.miss, 7.78)
-})
-
-test('no entry means no chips, not a crash', () => {
-  assert.deepEqual(gloveTargetTypes(null), [])
-})
 
 // ---------------------------------------------------------------------------
 // the view

@@ -10,11 +10,11 @@
 //   • the row shape the sheet renders (newest first, his club's runs first,
 //     the box-score path from the schedule join).
 import assert from 'node:assert/strict'
+import { dayBefore } from '../src/lib/dates.js'
 import test from 'node:test'
 import {
   askableGameTypes,
   boxLineRows,
-  dayBefore,
   logRequestPlan,
   matchingSplits,
   POSTSEASON,
@@ -182,6 +182,7 @@ test('dayBefore steps back one calendar day across a month boundary', () => {
   assert.equal(dayBefore('2024-09-29'), '2024-09-28')
   assert.equal(dayBefore('2026-03-01'), '2026-02-28')
   assert.equal(dayBefore('2026-01-01'), '2025-12-31')
+  assert.equal(dayBefore('2024-9-5'), '2024-09-04') // non-padded dates stay accepted
 })
 
 test('the request plan asks for the cutoff season only through the day before, and never a later season', () => {

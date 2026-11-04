@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/history/moves.css'
-import { dayBefore } from '../../../../../api/player/context.js'
+import { dayBefore } from '../../../../../lib/dates.js'
 import { transactionRowsFor } from '../../../../../api/player/history.js'
 import { fetchTransactions } from '../../../../../api/person-fetch.js'
 import { fetchRookieRecord } from '../../../../../api/rookies.js'

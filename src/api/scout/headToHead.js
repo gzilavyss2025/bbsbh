@@ -72,6 +72,7 @@
 // network-only fetch (vite.config.js). An open surface (ADR-0034): no SealBox.
 
 import { csvObjects } from '../../lib/csv/parse.js'
+import { numOrNull } from '../../lib/math/number.js'
 import { isRealDate } from '../../lib/dates.js'
 import { baseballToday, shiftDays } from '../../lib/time/standingsDates.js'
 import { HIT_EVENT_TYPES, NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
@@ -123,39 +124,32 @@ export function parseSavantRows(text) {
   return rows.filter((r) => r.plate_x || r.events)
 }
 
-// A CSV cell as a number, or null when blank or not a number.
-const num = (v) => {
-  if (v == null || v === '') return null
-  const n = Number(v)
-  return Number.isFinite(n) ? n : null
-}
-
 // One tracked pitch, in the shape the pitch modal reads (header, `pitchList`).
 export function pitchOf(r) {
   return {
-    n: num(r.pitch_number),
+    n: numOrNull(r.pitch_number),
     code: r.pitch_type || null,
-    mph: num(r.release_speed),
+    mph: numOrNull(r.release_speed),
     call: r.description || null,
-    balls: num(r.balls),
-    strikes: num(r.strikes),
-    px: num(r.plate_x),
-    pz: num(r.plate_z),
-    szTop: num(r.sz_top),
-    szBot: num(r.sz_bot),
-    spin: num(r.release_spin_rate),
-    pfxX: num(r.pfx_x),
-    pfxZ: num(r.pfx_z),
-    vx0: num(r.vx0),
-    vy0: num(r.vy0),
-    vz0: num(r.vz0),
-    ax: num(r.ax),
-    ay: num(r.ay),
-    az: num(r.az),
-    release: [num(r.release_pos_x), num(r.release_pos_y), num(r.release_pos_z)],
-    launchSpeed: num(r.launch_speed),
-    launchAngle: num(r.launch_angle),
-    xwoba: num(r.estimated_woba_using_speedangle),
+    balls: numOrNull(r.balls),
+    strikes: numOrNull(r.strikes),
+    px: numOrNull(r.plate_x),
+    pz: numOrNull(r.plate_z),
+    szTop: numOrNull(r.sz_top),
+    szBot: numOrNull(r.sz_bot),
+    spin: numOrNull(r.release_spin_rate),
+    pfxX: numOrNull(r.pfx_x),
+    pfxZ: numOrNull(r.pfx_z),
+    vx0: numOrNull(r.vx0),
+    vy0: numOrNull(r.vy0),
+    vz0: numOrNull(r.vz0),
+    ax: numOrNull(r.ax),
+    ay: numOrNull(r.ay),
+    az: numOrNull(r.az),
+    release: [numOrNull(r.release_pos_x), numOrNull(r.release_pos_y), numOrNull(r.release_pos_z)],
+    launchSpeed: numOrNull(r.launch_speed),
+    launchAngle: numOrNull(r.launch_angle),
+    xwoba: numOrNull(r.estimated_woba_using_speedangle),
   }
 }
 
@@ -190,7 +184,7 @@ export function plateAppearances(rows) {
         bbType: r.bb_type || null,
         pitches: pitchList.length,
         pitchList,
-        inning: num(r.inning),
+        inning: numOrNull(r.inning),
         half: HALF[r.inning_topbot] ?? null,
         stand: r.stand || null,
       }

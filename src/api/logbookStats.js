@@ -39,6 +39,8 @@
 // many are still resolving instead of quietly reporting a smaller total as if
 // it were the whole book.
 
+import { POSTSEASON_TYPES } from './game.js'
+
 // A game is a blowout at this margin or wider. Five is the conventional line —
 // it is where a game stops being one swing away in the ninth — and it sits well
 // clear of the one-run band the page counts separately.
@@ -53,8 +55,6 @@ export const BLOWOUT_MARGIN = 5
 // rarely holds. Stated rather than hidden; see `stampGameFacts` in
 // src/api/logbook.js for the other half of that shape.
 export const REGULATION_INNINGS = 9
-
-const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
 // The empty result, so a caller destructures the same shape whether the
 // collection is empty, still resolving, or complete. Every list is a list and

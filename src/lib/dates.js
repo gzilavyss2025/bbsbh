@@ -240,3 +240,12 @@ export function firstPitchText(gameDate, startTimeTBD = false) {
   if (startTimeTBD || !gameDate) return 'TBD'
   return timeOfDay(Date.parse(gameDate)) || 'TBD'
 }
+
+// "2026-09-30" -> "2026-09-29". Manual y/m/d (so "2024-9-5" is fine), midday UTC, so a
+// DST edge or a local-timezone offset can never move the answer by a day.
+export function dayBefore(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number)
+  const t = new Date(Date.UTC(y, m - 1, d, 12))
+  t.setUTCDate(t.getUTCDate() - 1)
+  return t.toISOString().slice(0, 10)
+}
