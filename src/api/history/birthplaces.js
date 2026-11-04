@@ -16,8 +16,8 @@ import { staticJsonBy } from '../staticJson.js'
 // south-west corner: '40_-74' holds 40..42 N, 74..72 W.
 // { credit: [line, ...], places: [{ lat, lon, people: [{ personId, name, year }] }] }.
 // `year` is the birth year, or null when the file has no birthdate.
-export const NEAR_MILES = 50
-export const CELL_DEGREES = 2
+const NEAR_MILES = 50
+const CELL_DEGREES = 2
 
 const corner = (deg) => Math.floor(deg / CELL_DEGREES) * CELL_DEGREES
 export const birthplaceCell = (lat, lon) => `${corner(lat)}_${corner(lon)}`
@@ -42,7 +42,7 @@ export function cellsNear(lat, lon, miles = NEAR_MILES) {
   return cells
 }
 
-export const fetchBirthplaceCell = staticJsonBy((cell) => `/data/birthplaces/${cell}.json`, { fallback: null })
+const fetchBirthplaceCell = staticJsonBy((cell) => `/data/birthplaces/${cell}.json`, { fallback: null })
 
 // Players born within `miles` of { lat, lon } -> { people, credit }. A missing
 // point, or no one near it, gives { people: [], credit: [] }.

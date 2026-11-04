@@ -6,7 +6,7 @@ import { isolateFrames } from './atlas.js'
 const decoded = new Map()
 const palettes = new Map()
 export const STADIUM_URL = '/art/ballpark/night.png'
-export const ATLAS_URL = '/art/ballpark/home-run.png'
+const ATLAS_URL = '/art/ballpark/home-run.png'
 export const HOME_RUN_ART = { url: ATLAS_URL, columns: 4, rows: 3, height: 420, centerX: 0.62, top: 12 }
 export const DEFENSE_ART = { url: '/art/ballpark/catch.png', columns: 4, rows: 3, height: 410, centerX: 0.64, top: 16 }
 

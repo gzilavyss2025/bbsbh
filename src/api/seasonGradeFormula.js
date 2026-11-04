@@ -6,7 +6,7 @@ import { clamp, round1 } from '../lib/math/number.js'
 // only the remaining headroom (or footing), so it can distinguish an
 // extraordinary season without letting a merely surprising team outrank the
 // league's genuinely elite clubs.
-export const SEASON_GRADE_ACHIEVEMENT_WEIGHT = 0.6
+const SEASON_GRADE_ACHIEVEMENT_WEIGHT = 0.6
 
 export function seasonGradeFromScores(quality, surprise) {
   if (!Number.isFinite(quality) || !Number.isFinite(surprise)) return null

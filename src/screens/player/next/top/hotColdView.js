@@ -113,7 +113,7 @@ export function listView(flag, { name, season }) {
 // checkpoint, the rule set in slice 1: a season cut short by an injury or a demotion just
 // after it says nothing about where a start like his ends up, so its row shows no "ended"
 // and the summary leaves it out.
-export const FINISH_MIN = 30
+const FINISH_MIN = 30
 const wentOn = (flag, b) => b.finalValue != null && b.finalSample != null && b.finalSample >= flag.checkpoint + FINISH_MIN
 
 // How the seasons further out than his ended (#1855 slice 3), or null when none went on

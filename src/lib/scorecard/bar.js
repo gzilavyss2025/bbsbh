@@ -18,7 +18,7 @@ import { movesText, playWords } from './words.js'
 
 // The tap lock (G6, ADR-0046): a constant after every reveal and every turn.
 // It never reads what the tap did, so no result can shorten or lengthen it.
-export const LOCK_MS = 700
+const LOCK_MS = 700
 export const tapLocked = (now, lastAt, ms = LOCK_MS) => lastAt != null && now - lastAt < ms
 
 // `frontier` is the clamped view's `grid.frontier`: the next at-bat, if the feed

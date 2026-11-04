@@ -14,7 +14,7 @@ export const sampleOf = (flag) => `${flag.sample} ${flag.role === 'pitching' ? '
 export const valueOf = (flag) => LIST_VALUE[flag.role][flag.key](flag.value)
 
 // A group shows its top PREVIEW rows; "+ N more" shows the rest.
-export const PREVIEW = 3
+const PREVIEW = 3
 
 // The rows a group shows. `openIndex` is the open row's place, so a row that sits under
 // "+ N more" stays on screen when it is opened from a list of names.

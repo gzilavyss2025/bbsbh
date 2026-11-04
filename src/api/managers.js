@@ -106,7 +106,7 @@ export async function loadManagerHistory(personId) {
 // table. Bench Coach/Pitching Coach/etc. stints carry no record of their own,
 // so they're excluded here; the full timeline (every role) is just `stints`
 // itself, rendered with each entry's own `isManager` flag.
-export function managerialStints(stints) {
+function managerialStints(stints) {
   return (stints ?? []).filter((s) => s.isManager)
 }
 

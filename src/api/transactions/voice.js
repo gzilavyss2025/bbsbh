@@ -32,7 +32,7 @@ export const ordinal = (n) => {
 }
 // AP: "third round", "11th round".
 const ORDINALS = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth']
-export const roundText = (n) => ORDINALS[Number(n)] ?? ordinal(n)
+const roundText = (n) => ORDINALS[Number(n)] ?? ordinal(n)
 // A draft round as a note says it. The feed writes a competitive-balance
 // round as "CB-A" or "CB-B" (Logan Driscoll, 2019), not a number.
 const cbRound = (r) => /^CB-?([AB])$/i.exec(String(r ?? ''))?.[1]?.toUpperCase() ?? null

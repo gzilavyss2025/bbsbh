@@ -8,7 +8,7 @@ import { LEAD_MS, SETTLE_MS, flightFrame } from './contactFlight.js'
 // background tab does not jump the ball to the end). `shot` changes on every tap, so a
 // second tap on the same ball flies it again. Reduced motion, or no ball: Infinity, the
 // settled frame, and no loop.
-export function useFlightClock(shot, model) {
+function useFlightClock(shot, model) {
   const [clock, setClock] = useState({ shot: -1, t: Infinity })
   const reduced = motionIsReduced()
   useEffect(() => {
@@ -84,7 +84,7 @@ export function AutoAdvance({ playing, idx, onAdvance }) {
 
 // The marks of the flight, drawn over the dots. Decoration: the dot and the panel carry
 // the meaning, so the group is hidden from assistive tech and takes no taps.
-export function FlightMarks({ frame, home }) {
+function FlightMarks({ frame, home }) {
   const f = frame
   return (
     <g className="fcontact__fx" aria-hidden="true">

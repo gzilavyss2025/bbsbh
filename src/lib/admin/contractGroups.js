@@ -161,7 +161,7 @@ export function buildGroups(rows) {
   )
 }
 
-export function isRowResolved(row, overrides) {
+function isRowResolved(row, overrides) {
   return Boolean(overrides?.[row.rowKey])
 }
 

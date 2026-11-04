@@ -80,7 +80,7 @@ const MARK_LIFT = 15
 // of this file so it can stay component-only for Fast Refresh; the two dev
 // labs that preview this texture import the same helpers from there.
 
-export { PinstripePattern, RecolorFilter } from './winprob/WinProbBands.jsx'
+export { RecolorFilter } from './winprob/WinProbBands.jsx'
 
 export function WinProbChart({
   points,

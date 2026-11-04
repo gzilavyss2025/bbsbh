@@ -40,7 +40,7 @@ import { staticJson, staticJsonBy } from './staticJson.js'
 
 // The shared header: the club catalog, each club's next opponent, and the
 // personId -> club map that says which shard holds a given player.
-export const fetchVsTeamSplitsIndex = staticJson('/data/vs-team-splits/index.json')
+const fetchVsTeamSplitsIndex = staticJson('/data/vs-team-splits/index.json')
 
 const fetchShard = staticJsonBy((teamId) => `/data/vs-team-splits/${teamId}.json`)
 

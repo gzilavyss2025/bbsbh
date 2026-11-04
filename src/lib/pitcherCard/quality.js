@@ -8,11 +8,11 @@ export const LUCKY_XBA = 0.25 // a hit below this
 
 // The later signals (#1771, docs/contact-replay.md §7.3): a first cut, tuned on real games.
 export const BLAST_SUM = 164 // Savant's blast: squared-up % + bat speed (mph) at or above this
-export const FAST_SWING_MPH = 75 // Savant's "fast swing"
-export const SHORTEN_MPH = 5 // two strikes: this far under his own season bat speed (the league gap is only ~2)
-export const SHORTEN_MAX_MPH = 15 // ...but not further: a swing that slow is a check swing or a bunt try, not a shortened one (849810 and 849815: 17 swings from 1.5 to 56 mph, then none under 59.5)
-export const TOPPED_GAP = -20 // launch angle minus attack angle, at or under this: driven down
-export const UNDER_GAP = 45 // at or over this: the bat went under the ball (2026-10-13 and 14: the 10th and 90th percentiles are -23 and 45)
+const FAST_SWING_MPH = 75 // Savant's "fast swing"
+const SHORTEN_MPH = 5 // two strikes: this far under his own season bat speed (the league gap is only ~2)
+const SHORTEN_MAX_MPH = 15 // ...but not further: a swing that slow is a check swing or a bunt try, not a shortened one (849810 and 849815: 17 swings from 1.5 to 56 mph, then none under 59.5)
+const TOPPED_GAP = -20 // launch angle minus attack angle, at or under this: driven down
+const UNDER_GAP = 45 // at or over this: the bat went under the ball (2026-10-13 and 14: the 10th and 90th percentiles are -23 and 45)
 
 const HITS = new Set(['single', 'double', 'triple', 'home_run'])
 const NEITHER = new Set(['field_error', 'fielders_choice', 'catcher_interf']) // not a clean hit or out

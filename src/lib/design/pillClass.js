@@ -12,7 +12,7 @@
 import { TEXT, ratio } from './contrastPairings.js'
 
 export const FILLS = ['outline', 'paper', 'ink', 'seal', 'marker', 'solid']
-export const ROLES = ['tag', 'control']
+const ROLES = ['tag', 'control']
 
 // `mark` (ADR-0112) is the small box shape: one figure or one or two letters, at
 // least as wide as it is tall (a rank, a clinch letter). A figure mark is wide

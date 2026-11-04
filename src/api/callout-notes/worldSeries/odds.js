@@ -9,7 +9,7 @@ import { ordinal } from '../../../lib/format.js'
 import { SCORE_BASE, clampScore, skewBonus, magnitudeOf } from '../shared.js'
 
 // A club that has not played in this many seasons gets the drought note.
-export const WS_DROUGHT_SEASONS = 20
+const WS_DROUGHT_SEASONS = 20
 // Gap, in seasons, that earns the full magnitude bonus.
 const GAP_FULL = 25
 

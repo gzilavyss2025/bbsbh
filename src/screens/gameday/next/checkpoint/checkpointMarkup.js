@@ -16,7 +16,7 @@ import { ordinal } from '../../../../lib/format.js'
 // switch is the app's Segmented control. `Seen` (Checkpoint.jsx) records the notes drawn in the callout
 // ledger; `on` says whether the phone shows the notes page.
 
-export const LABEL = { tally: 'Tally', pitching: 'Pitching', atBats: 'At-bats', gameSoFar: 'Game', facts: 'Notes' }
+const LABEL = { tally: 'Tally', pitching: 'Pitching', atBats: 'At-bats', gameSoFar: 'Game', facts: 'Notes' }
 // The wider tiers' buttons under the tally (Gary, 2026-10-29), in this order.
 const WIDE = ['pitching', 'atBats', 'gameSoFar', 'facts']
 const WIDE_LABEL = { pitching: 'Pitching', atBats: 'Half inning', gameSoFar: 'Due up', facts: 'Game notes' }

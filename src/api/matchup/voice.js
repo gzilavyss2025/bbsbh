@@ -52,12 +52,12 @@ export const SHAPES = 3
 // A clause may begin with something other than a name — the pull axis reads
 // "hitters pull 33% against Newcomb" — so any clause promoted to the start of a
 // sentence gets capitalised here rather than at each call site.
-export const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s)
+const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s)
 
 // `bClause`/`pClause` name which clause leads (shapes 0/1) and which follows;
 // `bName`/`bareClause` are always the side that narrates shape 2's turn — see
 // each caller's own header for which real-world side plays that role.
-export function assemble(shape, { bName, bClause, pClause, bareClause, lgText, turn }) {
+function assemble(shape, { bName, bClause, pClause, bareClause, lgText, turn }) {
   if (shape === 0 && lgText) {
     return `${cap(bClause)} this season — ${lgText}. ${cap(pClause)}.`
   }
@@ -88,7 +88,7 @@ export function fitShort(shape, parts) {
 // An intensifier ("just") is allowed on exactly ONE side of a note, and only
 // when that side is this far out. A word that appears by default is a tic; a
 // word conditioned on the number is judgment.
-export const EMPHASIS_Z = 1.5
+const EMPHASIS_Z = 1.5
 
 // "just" is a DIMINUTIVE. It belongs only on a number that is small for its
 // own league mean — "hits just 52% of his batted balls hard" is nonsense when

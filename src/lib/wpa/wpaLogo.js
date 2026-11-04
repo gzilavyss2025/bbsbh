@@ -111,7 +111,7 @@ export const LOGO_COLOR_OVERRIDES = {
 // exists" vs. "tile a file procured for this purpose only" — and merging
 // them would mean copying these two clubs' art into a second directory to
 // express what the redirect already says.
-export const WPA_MARK_SOURCE_OVERRIDES = {
+const WPA_MARK_SOURCE_OVERRIDES = {
   // Braves Alt 2 Navy (treatment 'main') — the plain "A" cap mark stays the
   // club's Main mark everywhere else (card tile, header, etc.); the WPA band
   // alone swaps in the Atlanta script wordmark, the same art the Road Grey

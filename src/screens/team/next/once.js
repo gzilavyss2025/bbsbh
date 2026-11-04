@@ -5,7 +5,7 @@ import { DIRECT } from '../data/sources.js'
 // A failed load is forgotten at once.
 const loads = new Map()
 
-export function once(key, load) {
+function once(key, load) {
   if (!loads.has(key)) loads.set(key, load().catch((e) => (loads.delete(key), Promise.reject(e))))
   return loads.get(key)
 }

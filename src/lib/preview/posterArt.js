@@ -29,7 +29,7 @@ import { loadPosterImages } from './posterImages.js'
 // the default navy even for a club with curated colours on file. Main is the
 // club's own bar in the absence of a jersey, which is also what the treatment
 // tile resolver does with a falsy treatment.
-export function barFor(teamId, treatment) {
+function barFor(teamId, treatment) {
   if (!teamId) return { theme: null, markUrl: null, reink: true }
   const worn = treatment || 'main'
   const { url } = mastheadMarkFor(teamId, worn)
@@ -43,7 +43,7 @@ export function barFor(teamId, treatment) {
 // TeamTreatmentMark's resolver, asked the same way it asks: MLB clubs read the
 // per-treatment table, a MiLB affiliate reads milbColors' Home/Away pair, and
 // anything else gets the plain paper tile.
-export function tileFor(teamId, treatment, side) {
+function tileFor(teamId, treatment, side) {
   if (!teamId) return null
   if (isMlbTeamId(teamId)) return { offsetX: 0, offsetY: 0, ...treatmentTile(teamId, treatment) }
   return side ? milbTreatmentTile(teamId, side) : null

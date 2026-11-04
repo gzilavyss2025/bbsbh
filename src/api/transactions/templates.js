@@ -26,7 +26,7 @@ import { an, gamesText, homers, ipText, nameAge, nowText, num, optionsSentence, 
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
-export function subjectOf(story) {
+function subjectOf(story) {
   return story.rail?.find((slot) => slot.playerId)?.playerId ?? story.cutline?.find((seg) => seg.playerId)?.playerId ?? null
 }
 

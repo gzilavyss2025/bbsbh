@@ -10,7 +10,7 @@ import { W, PLOT_L, PLOT_T, PLOT_H } from './plot.js'
 // background doesn't apply to an SVG shape's `fill`. Tiled small (4x4) since
 // the WPA band's own logo tile is itself tiny.
 const PINSTRIPE_TILE = 4
-export function PinstripePattern({ id, color, bg = '#fff' }) {
+function PinstripePattern({ id, color, bg = '#fff' }) {
   return (
     <pattern id={id} patternUnits="userSpaceOnUse" width={PINSTRIPE_TILE} height={PINSTRIPE_TILE}>
       <rect width={PINSTRIPE_TILE} height={PINSTRIPE_TILE} fill={bg} />

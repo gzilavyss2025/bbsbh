@@ -77,7 +77,7 @@ export function isStampMode(value) {
 
 // 'on' | 'off' — the same state-map vocabulary as books.js, and for the same
 // reason. See `applyRemoteStamps`.
-export function isStampState(value) {
+function isStampState(value) {
   return value === 'on' || value === 'off'
 }
 
@@ -85,7 +85,7 @@ const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 
 // The one date shape the whole app shares (toApiDate in dates.js, the feed's
 // officialDate). Anything else is not a day this app can be looking at.
-export function isDayString(value) {
+function isDayString(value) {
   return typeof value === 'string' && DAY_RE.test(value)
 }
 
@@ -464,7 +464,7 @@ export function applyRemoteStamps(local, remote) {
 // Are these the same record? Every field a device can change, compared. Used by
 // the sync diff below so a record that merely round-tripped through JSON isn't
 // republished.
-export function sameStampRecord(a, b) {
+function sameStampRecord(a, b) {
   if (!a || !b) return !a && !b
   return (
     a.state === b.state &&

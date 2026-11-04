@@ -119,7 +119,7 @@ export function splitScale(entries) {
 // The segments one entry draws on a track of `scale`: where zero sits, as a percentage across the
 // track, and each part's offset from zero and width. The split bar and the club card's mini bars
 // (#2295) both draw from this, so the clamping lives in one place.
-export function splitSegments(entry, scale) {
+function splitSegments(entry, scale) {
   const pos = scale?.pos ?? 0
   const neg = scale?.neg ?? 0
   const span = pos + neg

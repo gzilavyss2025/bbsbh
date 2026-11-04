@@ -14,7 +14,7 @@ import { staticJsonBy } from '../staticJson.js'
 // `debuted`. The caller passes the month and day of THE PAGE'S OWN date, never a
 // clock of its own. The shard's `credit` lines must print beside the data, so a
 // surface reads `fetchOnThisDayShard` when it draws them.
-export const fetchOnThisDayShard = staticJsonBy((mmdd) => `/data/on-this-day/${mmdd}.json`, { fallback: null })
+const fetchOnThisDayShard = staticJsonBy((mmdd) => `/data/on-this-day/${mmdd}.json`, { fallback: null })
 
 const two = (n) => String(n).padStart(2, '0')
 

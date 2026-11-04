@@ -425,7 +425,7 @@ async function accuracyIndex(level = 'MLB', seasonYear, strict) {
 // rings a pitch up there) and `over`, how much of his misses cluster in that
 // cell above the league baseline (> 0 = he's worse there than a typical ump).
 // Returns null for rows predating the cell schema (no grid to draw).
-export function umpireZoneCells(season, leagueShare) {
+function umpireZoneCells(season, leagueShare) {
   if (!season?.cellCalled) return null
   const missTotal = (season.cellMiss ?? []).reduce((a, b) => a + b, 0)
   return season.cellCalled.map((called, i) => {
@@ -448,7 +448,7 @@ export function umpireZoneCells(season, leagueShare) {
 // anything meaningful (a nearly perfect game has no signal).
 const REGION_WORDS = { high: 'up', low: 'low', inside: 'inside', outside: 'outside' }
 
-export function accuracyTendency(season) {
+function accuracyTendency(season) {
   if (!season) return null
   const misses = (season.expanded ?? 0) + (season.squeezed ?? 0)
   if (misses < 5) return null

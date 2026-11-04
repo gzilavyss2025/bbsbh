@@ -29,7 +29,7 @@ export const RANK_MIN_FIELD = 8
 // How close to either end of the field a club must sit. The middle of the
 // table is noise — the same call the lopsidedness floors in these families
 // already make (LEAD_LOPSIDED, DOW_LOPSIDED, SCORELESS_LOPSIDED).
-export const RANK_NOTABLE = 3
+const RANK_NOTABLE = 3
 
 // The level a rank is measured inside, in broadcast words. Deliberately NOT
 // src/lib/teams.js's SPORT_LABEL: that table is the level SWITCHER's vocabulary

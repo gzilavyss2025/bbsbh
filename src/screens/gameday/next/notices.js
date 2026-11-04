@@ -5,7 +5,7 @@
 
 // "2 hr 42 min" / "1 hr" / "38 min": a stoppage's length. It lived in DelayCard.jsx
 // until that card was deleted (#2747); the strip is its one reader now.
-export function formatDelay(min) {
+function formatDelay(min) {
   const h = Math.floor(min / 60)
   const m = min % 60
   if (h && m) return `${h} hr ${m} min`

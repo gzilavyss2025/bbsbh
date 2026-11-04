@@ -36,7 +36,7 @@ export function GameHighBoard({ title, rows, favoriteTeamId, gameLinks, position
 // until then, or if the lookup failed, it renders as a plain non-clickable
 // badge (same degrade-gracefully rule the rest of the app applies to any
 // dependent fetch).
-export function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
+function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
   const navigate = useNav()
   const hasScore = b.maxGameHisScore != null && b.maxGameOppScore != null
   const link = b.maxGamePk != null ? gameLinks?.[b.maxGamePk] : null
@@ -128,7 +128,7 @@ export function SouvenirGameBoard({ title, rows, gameLinks }) {
   )
 }
 
-export function SouvenirGameRow({ g, rank, gameLinks }) {
+function SouvenirGameRow({ g, rank, gameLinks }) {
   const navigate = useNav()
   const link = gameLinks?.[g.gamePk]
   const MatchupTag = link ? 'button' : 'div'

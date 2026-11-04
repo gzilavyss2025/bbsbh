@@ -43,11 +43,11 @@
 // A tied game has no winner: the winner-based tags give it no row.
 import { ON_BASE_EVENTS } from '../../api/callout-notes/shared.js'
 
-export const WS_BIG_SCORE = 10
-export const WS_BIG_COMEBACK = 4
-export const WS_REACHED_BASE = 5
+const WS_BIG_SCORE = 10
+const WS_BIG_COMEBACK = 4
+const WS_REACHED_BASE = 5
 export const WS_MULTI_HR = 3
-export const WS_EXTRA_INNINGS = 10
+const WS_EXTRA_INNINGS = 10
 
 const HITS = new Set(['single', 'double', 'triple', 'home_run'])
 
@@ -94,11 +94,11 @@ export const isGameEndingDp = (last) => Boolean(last) && (evt(last) ?? '').inclu
 export const isTriplePlay = (p) => evt(p) === 'triple_play' || /triple play/i.test(p.result?.description ?? '')
 
 // ids that threw a pitch in `plays`.
-export const pitcherIds = (plays) => new Set(plays.map((p) => p.matchup?.pitcher?.id).filter(Boolean))
+const pitcherIds = (plays) => new Set(plays.map((p) => p.matchup?.pitcher?.id).filter(Boolean))
 
 // The two starting pitchers, from the plays: the first arm each side fields. The live card
 // reads the lineup instead (boxscore pitchers[0], known before the first pitch).
-export function startingPitchers(plays) {
+function startingPitchers(plays) {
   const first = {}
   for (const p of plays) first[fieldingSide(p)] ??= p.matchup?.pitcher?.id
   return Object.values(first).filter(Boolean)
@@ -109,7 +109,7 @@ export const isPitcherHitAt = (plays, i, starters) =>
   HITS.has(evt(plays[i])) && (starters.includes(batterId(plays[i])) || pitcherIds(plays.slice(0, i + 1)).has(batterId(plays[i])))
 
 // The largest deficit the side `winner` faced after any play.
-export function largestDeficit(plays, winner) {
+function largestDeficit(plays, winner) {
   let worst = 0
   for (const p of plays) {
     const a = p.result?.awayScore ?? 0
@@ -120,7 +120,7 @@ export function largestDeficit(plays, winner) {
 }
 
 // Score after the last play of inning 8 or earlier -> { trailing: side, won: 0|1 } or null when level.
-export function trailingAfter8(plays, { winner }) {
+function trailingAfter8(plays, { winner }) {
   const through8 = plays.filter((p) => p.about.inning <= 8)
   const last = through8[through8.length - 1]
   if (!last) return null

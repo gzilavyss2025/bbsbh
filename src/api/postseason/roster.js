@@ -22,7 +22,7 @@
 
 import { getJson } from '../statsapi.js'
 
-export const POSTSEASON_ROSTER_SIZE = 26
+const POSTSEASON_ROSTER_SIZE = 26
 
 const ROSTER_FIELDS = 'roster,person,id,fullName,jerseyNumber,position,abbreviation'
 

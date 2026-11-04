@@ -82,7 +82,7 @@ export function stanceRect(stance, view) {
 
 // Home plate, the zone's width, drawn under the low band. The pentagon is
 // symmetric about the zone's centre, so the mirror leaves it alone.
-export const PLATE_DEPTH = 9
+const PLATE_DEPTH = 9
 export function platePoints(view) {
   const [x, width] = span(projX(-EDGE, view), projX(EDGE, view))
   const y = sy(pzOf(Z_EDGES[5])) + 3
@@ -103,7 +103,7 @@ export function mapBox(stance, view, s = stanceRect(stance, view)) {
 
 // The map's two sides, the one drawn on the viewer's left first. Field
 // sides, never "left" or "right" (ADR-0077, ADR-0124).
-export const SIDE_LABEL = { side3b: '3B side', side1b: '1B side' }
+const SIDE_LABEL = { side3b: '3B side', side1b: '1B side' }
 export const sidesInOrder = (view) =>
   (regionRect('side1b', view).x < regionRect('side3b', view).x ? ['side1b', 'side3b'] : ['side3b', 'side1b'])
     .map((r) => SIDE_LABEL[r])

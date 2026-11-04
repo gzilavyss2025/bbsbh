@@ -72,7 +72,7 @@ export function proj(x, y, z) {
 // The projector for a view: the card's own `proj` for 'hitter', so the Now
 // Pitching card cannot drift; the centre-field camera for 'pitcher'.
 const PITCHER_CAM = camera('pitcher')
-export const projFor = (view) => (view === 'pitcher' ? PITCHER_CAM : proj)
+const projFor = (view) => (view === 'pitcher' ? PITCHER_CAM : proj)
 
 const G = 32.17 // ft/s²
 const Y0 = 54.2 // release, ft from the front of the plate
@@ -82,7 +82,7 @@ const ARM_X = -1.9 // release side for a right-hander (his arm side, from behind
 const N = 40 // segments per path
 
 // Flight time to the plate, s. 0.92 stands in for drag.
-export function flightTime(mph) {
+function flightTime(mph) {
   return (Y0 - YP) / (mph * 1.4667 * 0.92)
 }
 

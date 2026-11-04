@@ -83,7 +83,7 @@ export function setBat(poly, cap, b, opacity, ink = false) {
 // Phase C (§9): `attack +9° · measured`, in ink in a fixed slot at the scene's top left. It used to ride above
 // the barrel end, which is the contact point, so it sat on the bat and the zone (design critique, #1771).
 const LABEL_HALF = 66 // px: half the text's width at --fs-cell
-export function setAttackLabel(node, deg) {
+function setAttackLabel(node, deg) {
   const n = Math.round(deg)
   node.textContent = `attack ${n < 0 ? '-' : '+'}${Math.abs(n)}° · measured`
   put(node, { x: LABEL_HALF + 8, y: 20, visibility: 'visible' })

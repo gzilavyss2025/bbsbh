@@ -17,9 +17,9 @@
 import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
 import { clamp } from '../../../../../lib/math/number.js'
 
-export const G = 32.174
+const G = 32.174
 export const PLATE_Z = 1.417 // the front of the plate; the plate crosses here
-export const RUBBER_Z = 60.5
+const RUBBER_Z = 60.5
 export const ZONE = { x: 0.708, y0: 1.63, y1: 3.22 }
 export const ZD = PLATE_Z + 23.8 // about 175 ms before the plate: where a hitter must commit
 
@@ -120,7 +120,7 @@ export function sparkD(path) {
 }
 
 // Height of the path above a straight line from release to landing, sampled n+1 times: the drop sparkline.
-export function dropCurve(path, n = 16) {
+function dropCurve(path, n = 16) {
   const a = path.at(0)
   const b = path.at(path.T)
   return Array.from({ length: n + 1 }, (_, i) => path.at((path.T * i) / n)[1] - lerp(a[1], b[1], i / n))

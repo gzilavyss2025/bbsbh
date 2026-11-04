@@ -30,10 +30,10 @@
 //   flush    the body is flush (body="flush"). A named flush card has no padded
 //            body to clear the tab, so card--flush lets the card clear it.
 //   stampIn  the card drops into its shadow as it appears (motion/stamp-in.css).
-export const FRAMES = ['sheet', 'ledger', 'stamped']
-export const TONES = ['plain', 'tint', 'soft', 'ink', 'event']
-export const BODIES = ['padded', 'flush']
-export const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'button']
+const FRAMES = ['sheet', 'ledger', 'stamped']
+const TONES = ['plain', 'tint', 'soft', 'ink', 'event']
+const BODIES = ['padded', 'flush']
+const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'button']
 const INTERACTIVE = ['a', 'button']
 
 export function cardClassName({

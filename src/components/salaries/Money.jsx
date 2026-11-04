@@ -22,7 +22,7 @@ export function moneyLabel(value) {
   return `$${millions.format(value / 1_000_000)}M`
 }
 
-export function exactMoney(value) {
+function exactMoney(value) {
   return value == null || !Number.isFinite(value) ? '—' : exact.format(value)
 }
 

@@ -1,7 +1,7 @@
 // The picker map's zoom (#1526, SPEC §9.3). The map is a 975 x 610 canvas; a state's box
 // `b = [x0, y0, x1, y1]` (from map/us.json) is scaled to fill `factor` of it and centred.
 export const MAP_VIEW = [975, 610]
-export const PICKER_ZOOM = 0.86
+const PICKER_ZOOM = 0.86
 export const LOCATOR_ZOOM = 0.6 // a place page's locator shows the state smaller, with room around it
 
 export function zoomTransform(box, factor = PICKER_ZOOM, view = MAP_VIEW) {

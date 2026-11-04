@@ -101,7 +101,7 @@ const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.',
 export const dateText = (iso) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}, ${iso.slice(0, 4)}`
 export const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 // How far a W-L record sits from .500, 0–0.5 — the lopsidedness bonus scale.
-export const skew = (w, l) => (w + l > 0 ? Math.abs(w / (w + l) - 0.5) : 0)
+const skew = (w, l) => (w + l > 0 ? Math.abs(w / (w + l) - 0.5) : 0)
 
 // 'W-L' -> { w, l, total, pct } | null. The precompute writes records both as
 // display strings (the older families) and as {w,l} objects (the newer,

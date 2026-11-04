@@ -35,7 +35,7 @@ export const spotAt = (pos, win) => {
   return { x: at.left, y: at.top }
 }
 
-export const FIELD_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
+const FIELD_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
 // Where a ring's innings tag sits so it clears its neighbours (above, below, left, right).
 export const TAG_SIDE = { C: 'b', '1B': 'r', '2B': 'a', '3B': 'l', SS: 'a', LF: 'b', CF: 'b', RF: 'b' }
 

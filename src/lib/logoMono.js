@@ -60,9 +60,9 @@ const PASS_THROUGH = new Set([
 //     color at this lightness is a real brand color (the Brewers' #ffc52f
 //     gold, the tans in Biloxi's oyster), and knocking those out would leave
 //     the same holes the old CSS filter did, only inverted.
-export const KNOCKOUT_NEAR_WHITE_LIGHTNESS = 0.85
-export const KNOCKOUT_MIN_LIGHTNESS = 0.82
-export const KNOCKOUT_MAX_SATURATION = 0.28
+const KNOCKOUT_NEAR_WHITE_LIGHTNESS = 0.85
+const KNOCKOUT_MIN_LIGHTNESS = 0.82
+const KNOCKOUT_MAX_SATURATION = 0.28
 
 // 'ink' | 'knockout' | null (null = not a classifiable color; leave the value
 // exactly as it is). Anything drawable we can't read — a gradient or pattern

@@ -386,7 +386,7 @@ export function ilStintRow(s, levelByTeamId) {
 // player stayed at one level all year (the common case).
 // ---------------------------------------------------------------------------
 
-export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSeason, currentSportId }) {
+function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSeason, currentSportId }) {
   const cur = Number(currentSeason)
   const byLevel = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {

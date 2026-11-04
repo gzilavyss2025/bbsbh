@@ -59,7 +59,7 @@ function skyWord(code, isDay) {
 // A fixed dome is always closed. For a retractable we trust an explicit override
 // first, then the box-score condition string as the cross-check ("Roof Closed" /
 // "Dome" / "Roof Open"); absent any signal it stays 'unknown' rather than guess.
-export function resolveRoofState({ roofType, boxCondition, override } = {}) {
+function resolveRoofState({ roofType, boxCondition, override } = {}) {
   if (override === 'open' || override === 'closed') return override
 
   const rt = (roofType ?? '').toLowerCase()
@@ -99,7 +99,7 @@ function windFragment(windMph, fromDeg, cfBearing) {
 //
 // reading: { tempF, code, isDay, windMph, windFromDeg }
 // opts:    { roofState, cfBearing }
-export function formatScorebookWeather(reading, { roofState, cfBearing } = {}) {
+function formatScorebookWeather(reading, { roofState, cfBearing } = {}) {
   if (!reading || reading.tempF == null) return ''
 
   const temp = `${Math.round(reading.tempF)}°F`

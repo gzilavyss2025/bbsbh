@@ -34,7 +34,7 @@ export const fetchAbsChallenges = ({ scope, ...season } = {}) => (byScope[scope]
 // 2026's debut; Triple-A has run it for several seasons, which is why its
 // numbers are worth reading beside MLB's rather than folded into them — two
 // different leagues of hitters, catchers and umpires, each with its own habits.
-export const LEVELS = [
+const LEVELS = [
   { key: 'MLB', label: 'MLB' },
   { key: 'AAA', label: 'Triple-A' },
 ]
@@ -274,7 +274,7 @@ export function callSplitOffBy(anomalies) {
 // every inning past the ninth is pooled into one column — and the pooling is
 // what makes the constant harmless: a seven-inning game's eighth is already
 // inside the pool it belongs to.
-export const REGULATION_INNINGS = 9
+const REGULATION_INNINGS = 9
 
 // THE INNING SERIES A CHART IS DRAWN FROM: nine regulation columns and one for
 // everything after them.
@@ -435,7 +435,7 @@ export function ranOutSeries(nights) {
 // and a board that cannot reach it is not offered at all — which is what
 // happens to the pitchers' in-game loss board, where the rulebook allows one
 // loss per pitcher and no more.
-export const STREAK_MIN_RUN = 2
+const STREAK_MIN_RUN = 2
 
 // The roles a streak board can be grouped by, in the order the page offers
 // them. `other` is the bucket for a challenger the box score put at no

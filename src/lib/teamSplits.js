@@ -233,7 +233,7 @@ for (const { location, mascot } of rows) {
 
 // Returns { location, mascot } for a team's full name, or null when the team
 // isn't in the table (the caller then falls back to the API's teamName).
-export function lookupSplit(fullName = '') {
+function lookupSplit(fullName = '') {
   return SPLITS.get(normalize(fullName)) ?? null
 }
 

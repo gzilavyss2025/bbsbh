@@ -226,7 +226,7 @@ export function rosterPitchingStat(r, teamId) {
 // A roster row's season fielding splits, one per position played — see
 // fetchTeamRoster's hydrate note (api/team.js) on why this needs live
 // verification. Feeds the Preferred Lineup diamond below.
-export function rosterFieldingSplits(r, teamId) {
+function rosterFieldingSplits(r, teamId) {
   const stats = r.person?.stats ?? []
   return preferTeamSplits(stats.find((s) => s.group?.displayName === 'fielding')?.splits ?? [], teamId)
 }

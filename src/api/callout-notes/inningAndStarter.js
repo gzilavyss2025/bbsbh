@@ -16,7 +16,7 @@ import { ordinal } from '../../lib/format.js'
 // box-score roll-up (tonight's half-inning runs folded in via extraF/extraA).
 // Noteworthy only past a real sample, a real margin, AND a dominance ratio —
 // an 88-80 grind or a 9-2 April blip is neither.
-export const INNING_DIFF_MIN_GAMES = 15
+const INNING_DIFF_MIN_GAMES = 15
 const INNING_DIFF_MIN_MARGIN = 12
 const INNING_DIFF_RATIO = 2
 export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA = 0, word = 'tonight') {

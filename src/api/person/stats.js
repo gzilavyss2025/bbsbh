@@ -402,7 +402,7 @@ export const RANK_STATS = {
     { key: 'hits', label: 'H', chipOnly: true },
   ],
 }
-export const RANK_FLOOR = 10
+const RANK_FLOOR = 10
 const RANK_MAX_CHIPS = 4
 
 // The splits that carry a ranking. A traded player has one per league, so a count of

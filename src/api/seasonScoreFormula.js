@@ -31,7 +31,7 @@ export const HOME_WIN_PROBABILITY = 0.54
 // home-field signal itself (SE ~= sqrt(2*0.54*0.46/81)/2), so even a full
 // 3-season trailing sample (~480 combined home+road decisions) should get
 // only about half weight toward its own observed split.
-export const HOME_FIELD_PRIOR_GAMES = 480
+const HOME_FIELD_PRIOR_GAMES = 480
 export const HOME_FIELD_FACTOR_MIN = 0.50
 export const HOME_FIELD_FACTOR_MAX = 0.60
 

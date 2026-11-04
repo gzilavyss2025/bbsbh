@@ -200,7 +200,7 @@ function categoryKeyOf(award) {
 // this module doesn't fetch (see header) — so it's left null here and filled
 // in by loadPlayer.js's careerTimeline.js-style historical resolution, the
 // same one a career timeline entry gets. Returns null (a dash) until then.
-export function orgIdFor(teamId) {
+function orgIdFor(teamId) {
   return teamId && isMlbTeamId(teamId) ? teamId : null
 }
 

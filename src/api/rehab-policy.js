@@ -71,7 +71,7 @@ export function meetsStintCap(stat, group) {
 // assignment (DES, DFA), sent outright (OUT), claimed off waivers (CLW), or a
 // free agent (SFA). Zastryzny again, 2026: rehab 09-09, DES 09-17, OUT 09-19 —
 // without these codes the list kept him to the 30-day cap (#1361).
-export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR', 'DES', 'DFA', 'OUT', 'CLW', 'SFA'])
+const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR', 'DES', 'DFA', 'OUT', 'CLW', 'SFA'])
 
 // MLB hard-caps a rehab assignment at 30 days. A stint with no closing row (a
 // missed transaction, or a schedule lookup that came back empty) would otherwise
@@ -79,10 +79,10 @@ export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR', '
 // says. Day 30 is still open, day 31 is closed. The player page and gen-rehab.mjs
 // both apply it (#1280); the 7-club-games stale rule stays in gen-rehab.mjs
 // because it needs game logs.
-export const REHAB_MAX_DAYS = 30
+const REHAB_MAX_DAYS = 30
 
 // Whole days from one ISO date (YYYY-MM-DD) to another.
-export function isoDaysBetween(fromIso, toIso) {
+function isoDaysBetween(fromIso, toIso) {
   return Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86400000)
 }
 

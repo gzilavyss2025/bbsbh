@@ -17,7 +17,7 @@ import { ipToOuts } from '../lib/math/innings.js'
 
 // Bill James Game Score from a pitching line: 40 + 2*outs + K - 2*H - 4*ER -
 // 2*(R-ER) - BB. An average start lands near 50; a gem in the 80s-90s.
-export function gameScore(s) {
+function gameScore(s) {
   const outs = ipToOuts(s.inningsPitched)
   const r = s.runs ?? 0
   const er = s.earnedRuns ?? 0
@@ -31,7 +31,7 @@ export function gameScore(s) {
 // WPA half of the blend already measures that. Gated on having actually
 // pitched — the formula's constant 40 would otherwise hand -10 to every
 // pinch hitter with an empty pitching line.
-export function pitcherPoints(s) {
+function pitcherPoints(s) {
   if (!s || (ipToOuts(s.inningsPitched) === 0 && (s.battersFaced ?? 0) === 0)) return 0
   return gameScore(s) - 50
 }
@@ -42,7 +42,7 @@ export function pitcherPoints(s) {
 // -11, a 2-4 with a homer +16, a two-homer day around +26 — the same
 // magnitude a hero's WPA carries, so neither half of the blend drowns the
 // other.
-export function batterPoints(b) {
+function batterPoints(b) {
   if (!b) return 0
   const h = b.hits ?? 0
   const singles = h - (b.doubles ?? 0) - (b.triples ?? 0) - (b.homeRuns ?? 0)

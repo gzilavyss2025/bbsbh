@@ -311,8 +311,8 @@ export function droughtFor(ledger, slot, { opponentId = null, seasonsBack = null
 // than four, and eight clubs carrying none. Three-and-three triples that to
 // ninety-eight and the card stops being a list of remarkable things; five-and-
 // three cuts it to twelve and eighteen clubs go silent.
-export const MIN_SPAN_CHANCES = 4
-export const MAX_SPAN_YEARS = 3
+const MIN_SPAN_CHANCES = 4
+const MAX_SPAN_YEARS = 3
 
 export function isNotable(drought, slot, { asOfDate = null } = {}) {
   if (!drought || !drought.sinceWin) return false
@@ -417,9 +417,9 @@ export function eventDroughtFor(ledger, event) {
 // and across twenty families and thirty clubs a threshold that admits six-try
 // samples fills the card with noise. A drought has to have been POSSIBLE often
 // enough to be about the club rather than about the sample.
-export const MIN_EVENT_CHANCES = 20
-export const MIN_EVENT_STREAK = 8
-export const MAX_EVENT_P = 0.05
+const MIN_EVENT_CHANCES = 20
+const MIN_EVENT_STREAK = 8
+const MAX_EVENT_P = 0.05
 
 export function isNotableEvent(drought) {
   if (!drought || !drought.last) return false

@@ -12,8 +12,8 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // View is not here: it changes the scene first, so it sits on the scene's
 // bar. A switch hitter's "All" hands stays off (Gary, item 1): his two
 // stances are two maps.
-export const HANDS = [[null, 'All'], ['R', 'vs R'], ['L', 'vs L']]
-export const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
+const HANDS = [[null, 'All'], ['R', 'vs R'], ['L', 'vs L']]
+const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 const HAND_CHIP = { R: 'vs RHP', L: 'vs LHP' }
 const SCOPE_CHIP = { reg: 'Regular season', post: 'Postseason', all: 'All games' }
 

@@ -1,6 +1,6 @@
 // The Foul balls cards' shared number formats (#1891, #2016): percent, signed gap, the baseline row.
-export const DASH = '—'
-export const MINUS = '−'
+const DASH = '—'
+const MINUS = '−'
 
 export const pct = (x, d = 1) => (Number.isFinite(x) ? `${(x * 100).toFixed(d)}%` : DASH)
 export const signed = (n, text) => (n === 0 ? text : `${n > 0 ? '+' : MINUS}${text}`)
