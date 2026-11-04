@@ -184,13 +184,21 @@ export function collectDatasets(dataDir = DATA_DIR) {
 }
 
 // Pure, so test/data-freshness.test.js can drive it without a data directory.
-export function evaluate(datasets, { now = Date.now(), maxAgeHours = MAX_AGE_HOURS } = {}) {
+// `skipped`: datasets whose step the nightly input gates skipped this run
+// (scripts/nightly/inputs.mjs). Their stamps did not move because their step
+// did not run, which is not a dead generator.
+export function evaluate(datasets, { now = Date.now(), maxAgeHours = MAX_AGE_HOURS, skipped = [] } = {}) {
   const stale = []
   const unreadable = []
   const unstamped = []
   const excepted = []
+  const skippedNow = []
   let checked = 0
   for (const { name, stamp } of datasets) {
+    if (skipped.includes(name)) {
+      skippedNow.push(name)
+      continue
+    }
     if (name in EXCEPT) {
       excepted.push({ name, why: EXCEPT[name] })
       continue
@@ -210,7 +218,7 @@ export function evaluate(datasets, { now = Date.now(), maxAgeHours = MAX_AGE_HOU
       stale.push({ name, key: stamp.key, value: stamp.value, ageHours })
     }
   }
-  return { stale, unreadable, unstamped, excepted, checked }
+  return { stale, unreadable, unstamped, excepted, checked, skipped: skippedNow }
 }
 
 function main() {
@@ -225,7 +233,10 @@ function main() {
     console.error('\n✗ Data-freshness guard found no datasets under public/data.\n')
     process.exit(1)
   }
-  const { stale, unreadable, unstamped, excepted, checked } = evaluate(datasets)
+  // The nightly job passes what its input gates skipped (scripts/nightly/inputs.mjs).
+  const skipped = (process.env.NIGHTLY_SKIPPED ?? '').split(',').filter(Boolean)
+  const { stale, unreadable, unstamped, excepted, checked, skipped: skippedNow } = evaluate(datasets, { skipped })
+  if (skippedNow.length) console.log(`  ${skippedNow.length} datasets skipped by the input gates: ${skippedNow.join(', ')}`)
   const overBudget = unstamped.length > UNSTAMPED_BUDGET
 
   if (stale.length || unreadable.length || overBudget) {

@@ -171,6 +171,17 @@ jobs:
           done
           echo "still not all settled after 4 hours — proceeding anyway (matches the old fixed ~7am ET run time)"
 
+      # Input gates (scripts/nightly/inputs.mjs): a game-prep step needs an MLB
+      # game scheduled in the next 14 days, a game-result step a game gone Final
+      # since the last run. Read off the schedule, never the calendar, so spring
+      # training switches them back on by itself. A failed read opens the gate.
+      # `!= 'false'` below, not `== 'true'`: if this step itself fails, its
+      # outputs are empty and every gated step still runs.
+      - name: Input gates
+        id: inputs
+        continue-on-error: true
+        run: node scripts/nightly/inputs.mjs
+
       # ---- Structural data: slow-moving upstream, rebuilt nightly --------
       # Three separate Monday crons until 2026-08-28, then a Monday-GATED block
       # here until 2026-08-29. They run every night now, unconditionally, and
@@ -220,6 +231,7 @@ jobs:
 
       - name: Game notes
         id: game-notes
+        if: steps.inputs.outputs.upcoming != 'false'
         continue-on-error: true
         run: node scripts/gen-game-notes.mjs
       - name: WAR
@@ -247,14 +259,17 @@ jobs:
         run: node scripts/gen-rehab.mjs
       - name: Tensest moments
         id: tensest
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-tensest.mjs
       - name: Umpires
         id: umpires
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-umpires.mjs
       - name: Umpire accuracy
         id: umpire-accuracy
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-umpire-accuracy.mjs
       - name: Minor-league leaders
@@ -282,6 +297,7 @@ jobs:
       # night in season is ~15 games. A first run on an unswept season is ~2,300.
       - name: Twelve-pitch at-bats
         id: long-at-bats
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-long-at-bats.mjs
       # Notable games: the no-hitters, cycles and triple plays behind /notable (D4,
@@ -303,27 +319,32 @@ jobs:
         run: node scripts/gen-youngest-regulars.mjs
       - name: Game call-outs
         id: callouts
+        if: steps.inputs.outputs.upcoming != 'false'
         continue-on-error: true
         run: node scripts/gen-callouts.mjs
       - name: Former teammates
         id: former-teammates
-        if: steps.war.outcome == 'success'
+        if: steps.inputs.outputs.upcoming != 'false' && steps.war.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-former-teammates.mjs
       - name: Career matchups
         id: career-matchups
+        if: steps.inputs.outputs.upcoming != 'false'
         continue-on-error: true
         run: node scripts/gen-career-matchups.mjs
       - name: Foul tracker
         id: fouls
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-fouls.mjs
       - name: Pitcher workload
         id: workload
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-workload.mjs
       - name: Vs-team splits
         id: vs-team-splits
+        if: steps.inputs.outputs.upcoming != 'false'
         continue-on-error: true
         run: node scripts/gen-vs-team-splits.mjs
       - name: Savant percentiles
@@ -336,10 +357,12 @@ jobs:
         run: node scripts/gen-savant-matchup.mjs
       - name: Run value
         id: run-value
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-run-value.mjs
       - name: Club defense and running
         id: club-defense-running
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-club-defense-running.mjs
       - name: Milestone watch
@@ -352,10 +375,12 @@ jobs:
         run: node scripts/gen-rookies.mjs
       - name: Season Surprise Score
         id: season-score
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-season-score.mjs
       - name: Team Scores
         id: team-score
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-team-score.mjs
       - name: Team transactions
@@ -449,6 +474,7 @@ jobs:
         run: node scripts/gen-ovr.mjs
       - name: Comeback wins
         id: comeback-wins
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
       # This year's award winners, folded into the Awards History file as MLB
@@ -490,6 +516,7 @@ jobs:
       # the same class of miss as the postseason-odds one above.
       - name: ABS challenges
         id: abs-challenges
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: |
           node scripts/gen-abs-challenges.mjs --recheck --days=14
@@ -501,6 +528,7 @@ jobs:
         run: node scripts/gen-jerseys.mjs
       - name: Pitch arsenal
         id: pitch-arsenal
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-pitch-arsenal.mjs
       # TARGET COMMAND — how far a pitcher finishes from the catcher's glove.
@@ -516,6 +544,7 @@ jobs:
       # steps, so the cost is paid once a night rather than once a generator.
       - name: Target command
         id: target-command
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-command.mjs
       # GLOVE TARGET — the cloud behind those figures: one dot per pitch, at the
@@ -526,6 +555,7 @@ jobs:
       # staged by the `git add -A -- public …` below like every other bucket set.
       - name: Glove target
         id: glove-target
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-command-zone.mjs
       # COMMAND RECEIVED — the catcher-side cut, and the heaviest of the three.
@@ -538,6 +568,7 @@ jobs:
       # have already banked their files.
       - name: Command received
         id: command-received
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-command-received.mjs
       # The batter-side sibling of the pitch-arsenal step above, off the same two levels and
@@ -549,6 +580,7 @@ jobs:
       # full backfill.
       - name: Spray map
         id: spray
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-spray.mjs
       # The Ballpark card's own attendance file. Stateless like the Gate step
@@ -557,6 +589,7 @@ jobs:
       # and no longer does; see gen-attendance.mjs's header.
       - name: Attendance
         id: attendance
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-attendance.mjs
       # The Gate + The Clock (src/screens/around-the-game/). One stateless sweep of the
@@ -566,6 +599,7 @@ jobs:
       # owns the Ballpark card's own, much smaller file.
       - name: Gate and pace
         id: gate
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-gate.mjs
       # The Farm Report. READS two files it does not fetch —
@@ -581,6 +615,7 @@ jobs:
       # nothing incremental, nothing to backfill.
       - name: Doubleheaders
         id: doubleheaders
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-doubleheaders.mjs
       # the run differential report. A full rebuild of 1901-to-now every night —
@@ -592,6 +627,7 @@ jobs:
       # October of every year arrives on one specific night.
       - name: Run differential
         id: run-differential
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-run-differential.mjs
       - name: Farm system
@@ -610,7 +646,7 @@ jobs:
       # Append-only over newly-Final games at all five levels.
       - name: Team situational records
         id: team-records
-        if: steps.teams.outcome == 'success'
+        if: steps.inputs.outputs.finals != 'false' && steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-team-records.mjs
       # The MLB postseason's twin of the ledger above (1995 to now, one file a
@@ -620,6 +656,7 @@ jobs:
       # ingests nothing and only re-stamps public/data/postseason-records/index.json.
       - name: Postseason situational records
         id: postseason-records
+        if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-postseason-records.mjs
       # The multi-season schedule-shape ledger behind the Team hub's Last Time
@@ -692,6 +729,8 @@ jobs:
         id: freshness
         if: always()
         continue-on-error: true
+        env:
+          NIGHTLY_SKIPPED: ${{ steps.inputs.outputs.skipped }}
         run: node scripts/check-data-freshness.mjs
 
       - name: Commit if changed

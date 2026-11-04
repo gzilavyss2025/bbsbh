@@ -49,6 +49,9 @@ are rules rather than reference:
   added beside `team-records/`'s. Never raise the budget as a reflex fix for a
   guard failure — that unstamped count is a ratchet the guard checks against
   itself, and widening it on request is exactly the drift it exists to catch.
+- **A nightly step that only prepares for games or only reads finished ones goes in
+  `GATES`** (`scripts/nightly/inputs.mjs`), with the datasets it writes. It then skips
+  itself when no game is scheduled or none went Final, and freshness exempts it.
 - **A run stamp under a new key name goes in `STAMP_KEYS`** (`scripts/nightly/stamp-only.mjs`).
   The nightly commit drops a file whose only change is a stamp; an unknown stamp key
   reads as real data and commits, and deploys, every night.
