@@ -36,9 +36,9 @@ import { albersUsa } from './lib/from/project.mjs'
 import { join } from 'node:path'
 
 const ROOT = join(import.meta.dirname, '..')
-const DATA = `${ROOT}scripts/data/from`
-const OUT = `${ROOT}public/data/from`
-const BIRTHPLACES = `${ROOT}public/data/birthplaces`
+const DATA = `${ROOT}/scripts/data/from`
+const OUT = `${ROOT}/public/data/from`
+const BIRTHPLACES = `${ROOT}/public/data/birthplaces`
 const args = process.argv.slice(2)
 
 async function writeText(path, text) {
