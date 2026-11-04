@@ -161,7 +161,7 @@ function shortSeason(facts, who, sub) {
     if (last) out.push(`${sub({ cap: true, pos: true })} last big-league season was ${last.season}: ${didText(last.line, facts.pitcher).replace(/^(hit|posted) /, '').replace(/^a /, `${an(last.line.era)} `)}.`)
     return out
   }
-  const played = g ? `${playedText(g, facts.pitcher)} for ${the(team)} in ${facts.season}` : `did not play in the majors in ${facts.season}`
+  const played = g ? `${playedText(g, facts.pitcher)} for ${the(team)} in ${facts.season}` : facts.midSeason ? `has not played in the majors yet in ${facts.season}` : `did not play in the majors in ${facts.season}`
   const why = facts.injured === 'long' ? ' and spent most of the year on the injured list' : facts.injured ? ' and spent time on the injured list' : ''
   const out = [`${who} ${played}${why}.`]
   if (last) {
@@ -270,7 +270,7 @@ export function seasonSentence(facts, moveDate = null) {
   }
   const m = facts.minors
   if (m?.line) return `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${facts.season}.`
-  return `${who} did not play in ${facts.season}.`
+  return facts.midSeason ? `${who} has not played yet in ${facts.season}.` : `${who} did not play in ${facts.season}.`
 }
 
 // "in Double-A with the Biloxi Shuckers", or "across High-A and Double-A".
@@ -466,7 +466,11 @@ export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
     }
   } else {
     const days = daysText(daysBetween(stint.from, stint.to))
-    let s = v === 0 ? `${name} missed ${days}` : `${name} returns after missing ${days}`
+    // A stint that ran past the season says "did not play in 2026" (a June return has no games yet either).
+    const wholeSeason = facts.season && !facts.seasonLine?.games && !((stint.to ?? moveDate)?.slice(5, 7) < '10')
+    let s = wholeSeason
+      ? `${name} did not play in ${facts.season}`
+      : v === 0 ? `${name} missed ${days}` : `${name} returns after missing ${days}`
     if (stint.injury) s += ` (${lower(stint.injury)})`
     if (at > 0) s += `, his ${nth(at + 1)} stint this season`
     out.push(`${s}.`)

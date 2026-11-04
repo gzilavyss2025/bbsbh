@@ -1869,10 +1869,8 @@ test('C6c: the offseason card names are label SectionHeads', () => {
   // champion it is the World Series hero, whose own tab names it.
   assert.doesNotMatch(src('components/offseason/SeasonRecord.jsx'), /Season record<\/SectionHead>/)
   assert.match(src('components/offseason/SeasonRecord.jsx'), /if \(inward && champion\) return <ChampionHero bracket=\{bracket\} \/>/)
-  // The notebook's three stamped cards name themselves with the t-label recipe.
-  for (const name of ['The longest at-bat', 'Next longest']) {
-    assert.match(src('components/offseason/LongAtBats.jsx'), new RegExp(`className="t-label t-label--bold seasonnote__what">${name}<`))
-  }
+  // The notebook is one card since the 2026-11-03 redesign, named by its SectionHead.
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<SectionHead as="h3" className="oseason__head">\s*Longest at-bats of \{season\}/)
   assert.match(src('components/offseason/YoungestRegulars.jsx'), /<SectionHead look="label" as="h4">/)
 })
 

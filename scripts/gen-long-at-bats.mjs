@@ -9,10 +9,10 @@
 // is a census ("N of 186,000 plate appearances"), so it needs every at-bat of
 // the season counted, not a leaderboard of the players who took the most.
 //
-// ONE SMALL CALL PER GAME. `/game/{pk}/playByPlay?fields=…` is 28 KB against
-// 555 KB untrimmed, because `pitchIndex` is the feed's own list of which
-// playEvents were pitches — its LENGTH is the at-bat's pitch count, so the
-// pitch events themselves never have to come down the wire. That makes this the
+// ONE SMALL CALL PER GAME. `/game/{pk}/playByPlay?fields=…` is about 34 KB
+// against 555 KB untrimmed: each play's events come down with only their
+// `isPitch` flag, which is the pitch count (lib/long-at-bats.mjs pitchesIn;
+// `pitchIndex` alone over-counts, since it lists pickoffs and step-offs too). That makes this the
 // cheapest of the nightly feed sweeps by a factor of twenty (compare
 // gen-fouls.mjs, which needs the pitches themselves and takes the full feed).
 //
@@ -62,7 +62,7 @@ const scanPath = join(here, 'data', 'long-at-bats-scan.json')
 // scorer would stop and read rather than a long-ish one. Measured against a
 // fortnight of 2026: 19 of 14,081 plate appearances, which is about 250 across
 // a season. Few enough to list, many enough to be a note.
-const THRESHOLD = 12
+const THRESHOLD = 10 // ten since 2026-11-03 (Gary): 851 at-bats in 2026, against 112 at twelve
 const CONCURRENCY = 6
 // A whole season's worth of trimmed play-by-play is ~68 MB, so a first run is a
 // long one. Checkpoint often enough that an interrupted backfill resumes where
@@ -70,7 +70,7 @@ const CONCURRENCY = 6
 const CHECKPOINT_EVERY = 200
 
 const PLAY_FIELDS =
-  'allPlays,about,halfInning,atBatIndex,matchup,batter,pitcher,id,fullName,pitchIndex,result,type,eventType'
+  'allPlays,about,halfInning,atBatIndex,matchup,batter,pitcher,id,fullName,pitchIndex,playEvents,isPitch,result,type,event,eventType'
 
 const args = process.argv.slice(2)
 const rescan = args.includes('--rescan')

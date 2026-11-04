@@ -11,7 +11,7 @@
 import { getJson } from '../statsapi.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchTopProspects } from '../prospects.js'
-import { FULL_SEASON } from './templates.js'
+import { CALLS, FULL_SEASON } from './templates.js'
 import { isMlbTeamId } from '../../lib/teams.js'
 import { shiftDays } from '../../lib/time/standingsDates.js'
 
@@ -242,10 +242,25 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     // Every arrival, oldest first: a quick second move ("two days after
     // Milwaukee got him from Cleveland") reads the one before.
     arrivals: moves.filter((t) => ARRIVALS[t.typeCode] && t.toTeam?.id).map((t) => arrivalOf(t, person.fullName)),
-    contract: contract
-      ? { terms: contract.terms ?? null, club: contract.clubAbbrev ?? null, season: contract.season ?? null, options: contract.options?.remaining ?? null }
-      : null,
+    contract: shapeContract(contract),
   }
+}
+
+function shapeContract(contract) {
+  return contract
+    ? { terms: contract.terms ?? null, club: contract.clubAbbrev ?? null, season: contract.season ?? null, options: contract.options?.remaining ?? null }
+    : null
+}
+
+// A settled day's facts are kept without the contract (both stores), so the
+// contract is read fresh: a December extension shows on a September move.
+export function withoutContract(facts) {
+  const rest = { ...facts }
+  delete rest.contract
+  return rest
+}
+async function withContract(personId, facts) {
+  return facts && { ...facts, contract: shapeContract(await fetchPlayerContract(personId).catch(() => null)) }
 }
 
 // The season a move speaks for: the one just finished, until spring training.
@@ -284,12 +299,173 @@ export function lastAffiliated(rows, arrivedOn) {
   return row ? { season: row.season, level: LEVEL_WORDS[row.level] ?? null } : null
 }
 
+// What one subject of a move asks fetchPlayerFacts for. Each player's own
+// template decides what more he reads: an injured-list move, the stint and his
+// line before it; a trade, his line up to the deal; a call, his line around it;
+// an arrival, his last affiliated season. The club that made the move is the one
+// he joined, even when the move sends him to a farm club. Shared by the wire
+// (WireFacts.jsx) and the nightly pre-build (scripts/gen-wire-facts.mjs), so
+// both ask the same question and land on the same key.
+export function factRequest(story, date, { playerId, template }) {
+  return [
+    Number(playerId),
+    {
+      season: factSeason(date),
+      teamId: story.teamId,
+      asOf: date,
+      ilMove: template.startsWith('il-') ? date : null,
+      tradeMove: template === 'trade' ? date : null,
+      callMove: CALLS.has(template) ? { kind: template, date } : null,
+      arrival: template === 'arrival',
+    },
+  ]
+}
+
+// His lines and age as they stood the day before `asOf`. byDateRange over many
+// years answers one split per club plus the total, which carries no team
+// (person 547180 through 2026-04-30: PHI 889, WSH 927, total 1,816 games).
+export async function asOfFacts(personId, person, facts, asOf) {
+  const until = shiftDays(asOf, -1)
+  const group = facts.pitcher ? 'pitching' : 'hitting'
+  const range = (from) =>
+    getJson(`/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&sportId=1&startDate=${from}&endDate=${until}`)
+      .then((r) => {
+        const splits = r?.stats?.[0]?.splits ?? []
+        return (splits.find((x) => !x.team) ?? splits[0])?.stat ?? null
+      })
+      .catch(() => null)
+  const [seasonStat, careerStat] = await Promise.all([range(`${facts.season}-01-01`), range('1876-01-01')])
+  const born = person?.birthDate
+  const age = born ? Math.floor((Date.parse(asOf) - Date.parse(born)) / (365.2425 * 864e5)) : facts.age
+  return {
+    age,
+    // A move inside the season it reads: its line is a season SO FAR.
+    midSeason: asOf.startsWith(String(facts.season)) && asOf.slice(5, 7) < '10',
+    seasonLine: seasonStat ? shapeLine(seasonStat, facts.pitcher) : null,
+    seasonClubs: [],
+    // No line before the move (a first call-up, or a failed read) is no line:
+    // the current career would carry games played after it.
+    careerLine: careerStat ? shapeLine(careerStat, facts.pitcher) : null,
+    // A move after its season (a November non-tender) keeps that season's row.
+    rows: (facts.rows ?? []).filter((r) => (asOf.slice(5, 7) >= '10' ? r.season <= facts.season : r.season < facts.season)),
+  }
+}
+
+// His minor-league season to the day before `asOf`, one level at a time:
+// byDateRange takes one sportId per call and names no sport on its splits, so
+// each level's are tagged here for shapeMinors. A pitcher traded April 14 with
+// all 26 of his Triple-A games still to come (person 658551) shows none.
+const MILB_SPORTS = [[11, 'AAA'], [12, 'AA'], [13, 'A+'], [14, 'A']]
+async function minorsAsOf(personId, group, season, asOf) {
+  const until = shiftDays(asOf, -1)
+  const levels = await Promise.all(
+    MILB_SPORTS.map(([sportId, abbreviation]) =>
+      getJson(`/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&sportId=${sportId}&startDate=${season}-01-01&endDate=${until}`)
+        .then((r) => (r?.stats?.[0]?.splits ?? []).map((x) => ({ ...x, sport: { abbreviation } })))
+        .catch(() => []),
+    ),
+  )
+  return levels.flat()
+}
+
 // `callMove` ({ kind, date }: a recall, option or selected contract) adds his
 // minor-league line up to a call, or his big-league line over the stint an
 // option ends. `arrival` (an arrival from outside affiliated ball) adds his
 // last season in affiliated ball.
-export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null, tradeMove = null, callMove = null, arrival = false } = {}) {
-  const key = `${personId}|${season}|${teamId}|${ilMove}|${tradeMove}|${callMove?.kind}|${callMove?.date}|${arrival}`
+// `asOf` (the move's date) dates the rest: his season and career lines run to
+// the day before it, his age is his age that day, and the sheet's table stops at
+// that season — so an April move never carries a September line (Gary, 2026-11-03).
+//
+// A move from a day already over reads facts that can no longer change, so its
+// answer is kept in this browser (localStorage, FACTS_STORE) and a return visit
+// reads it with no request at all. Today's moves always read live.
+const FACTS_STORE = 'bbsbh:wirefacts:v1:'
+const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD, the reader's own day
+function readStored(key) {
+  try {
+    const raw = localStorage.getItem(FACTS_STORE + key)
+    return raw ? JSON.parse(raw).f ?? null : null
+  } catch {
+    return null
+  }
+}
+// Each entry carries its move's day (`d`). When storage is full, the oldest half
+// of these entries goes and the write is tried once more, so this store can never
+// crowd out the reveal marks (`bbsbh:reveal:`) that share the origin's quota.
+function writeStored(key, facts, asOf) {
+  const value = JSON.stringify({ d: asOf, f: withoutContract(facts) })
+  try {
+    localStorage.setItem(FACTS_STORE + key, value)
+  } catch {
+    try {
+      evictOldest()
+      localStorage.setItem(FACTS_STORE + key, value)
+    } catch {
+      // Blocked storage: the note still shows, it is only read again next time.
+    }
+  }
+}
+function evictOldest() {
+  const mine = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i)
+    if (!k?.startsWith(FACTS_STORE)) continue
+    let d = ''
+    try {
+      d = JSON.parse(localStorage.getItem(k))?.d ?? ''
+    } catch {
+      // unreadable: oldest
+    }
+    mine.push([d, k])
+  }
+  mine.sort((a, b) => (a[0] < b[0] ? -1 : 1))
+  for (const [, k] of mine.slice(0, Math.max(1, Math.ceil(mine.length / 2)))) localStorage.removeItem(k)
+}
+// One move's facts, keyed the same in the browser and in the nightly file.
+export function factKey(personId, { season, teamId = null, ilMove = null, tradeMove = null, callMove = null, arrival = false, asOf = null }) {
+  return `${personId}|${season}|${teamId}|${ilMove}|${tradeMove}|${callMove?.kind}|${callMove?.date}|${arrival}|${asOf}`
+}
+
+// public/data/wire-facts/{date}.json (scripts/gen-wire-facts.mjs): every
+// move's facts for one past day, built the night after. One read per day, kept
+// for the visit; a day outside the file's window answers 404 and reads live.
+const days = new Map()
+const unbuilt = new Set()
+function prebuiltDay(date) {
+  if (!days.has(date)) {
+    days.set(
+      date,
+      fetch(`/data/wire-facts/${date}.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    )
+  }
+  return days.get(date)
+}
+
+export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null, tradeMove = null, callMove = null, arrival = false, asOf = null } = {}) {
+  const key = factKey(personId, { season, teamId, ilMove, tradeMove, callMove, arrival, asOf })
+  const settled = asOf != null && asOf < today()
+  if (!cache.has(key) && settled) {
+    const stored = readStored(key)
+    if (stored) cache.set(key, withContract(personId, stored))
+  }
+  // Then the night's pre-built file for the move's day, before any live read.
+  if (!cache.has(key) && settled && !unbuilt.has(key)) {
+    cache.set(
+      key,
+      prebuiltDay(asOf).then((day) => {
+        if (day?.[key]) {
+          writeStored(key, day[key], asOf)
+          return withContract(personId, day[key])
+        }
+        cache.delete(key)
+        unbuilt.add(key) // read live once; never ask the file for it again
+        return fetchPlayerFacts(personId, { season, teamId, ilMove, tradeMove, callMove, arrival, asOf })
+      }),
+    )
+    return cache.get(key)
+  }
   if (!cache.has(key)) {
     cache.set(
       key,
@@ -321,6 +497,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
             const stat = range?.stats?.[0]?.splits?.[0]?.stat
             if (stat) facts.trade = { line: shapeLine(stat, facts.pitcher), fromTeamId: deal.fromTeamId, toTeamId: deal.teamId }
           }
+          if (facts && asOf) Object.assign(facts, await asOfFacts(personId, person, facts, asOf))
           if (facts && callMove) Object.assign(facts, await callFacts(personId, facts, callMove, teamId))
           if (facts && arrival) {
             const { rows } = await fetchScopeRows(personId, 'milb', facts.pitcher)
@@ -331,12 +508,18 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
           if (!facts || full) return facts
           const group = facts.pitcher ? 'pitching' : 'hitting'
-          const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
-          const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
-          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
+          const minors = asOf
+            ? await minorsAsOf(personId, group, season, asOf)
+            : (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
+          const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors })
+          const extra = ['midSeason', 'seasonLine', 'seasonClubs', 'careerLine', 'age', 'rows', 'stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })
         .then(withTradeIds)
+        .then((facts) => {
+          if (facts && settled) writeStored(key, facts, asOf)
+          return facts
+        })
         .catch(() => {
           cache.delete(key)
           return null

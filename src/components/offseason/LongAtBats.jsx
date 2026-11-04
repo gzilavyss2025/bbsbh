@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -7,65 +7,38 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 
-const lastName = (name) => name.split(' ').slice(1).join(' ') || name
+// The list's foot fades only while there is more below it.
+// The picked at-bat's scorebug and zone load in their own chunk (LongAtBatDetail.jsx).
+const Scorebug = lazy(() => import('./LongAtBatDetail.jsx').then((m) => ({ default: m.Scorebug })))
+const AtBatZone = lazy(() => import('./LongAtBatDetail.jsx').then((m) => ({ default: m.AtBatZone })))
 
-// THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
-// #1078, step 4 of #1038).
-//
-// The wire above this says what is happening to the rosters. This says what
-// happened in the season a reader has just put their scorebook away on, and it
-// is the note the design study picked for MLB because it is the one thing a
-// SCORER notices that a highlight reel never shows: the at-bat that would not
-// end. Twelve pitches is four lines of a scorebook cell.
-//
-// A CENSUS, NOT A LEADERBOARD. The number is how many there were in the whole
-// regular season, out of every plate appearance played — which is only sayable because
-// pitch coverage at MLB is complete and every game was read
-// (scripts/gen-long-at-bats.mjs). When it is not complete the note says so
-// instead of quietly presenting a sample as a count; `coverage.complete` is
-// exactly that check, and it is the difference between "170 of 173,710" and a
-// sentence that would be false.
-//
-// AND IT NAMES NO RESULT, which took deciding rather than assuming. A row names
-// a batter, a pitcher, a date and a pitch count. It does NOT name the at-bat's
-// result, its inning, or anything about the game around it — because a
-// twelve-pitch at-bat is a LENGTH, and a length is true of the at-bat whoever
-// won. The generator does not store the outcome, so there is nothing here to
-// leak it. Opening a row opens that game at its first lineup page, sealed under
-// the same `revealedThrough` mark the slate's own cards hand over
-// (api/notebook.js). That is the same line the picked-game card walks at the
-// minor levels (ADR-0080), and the reason #1078's own spoiler note only asks a
-// report to declare itself when it is about a RESULT.
-//
-// THE ROW IS THE /fouls PAGE'S, and that is a deliberate borrowing. "Most
-// fouls in one plate appearance" draws the batter's face pinned left and the
-// pitcher's pinned right, their names and clubs facing each other across the
-// count — because a long at-bat is two men refusing to give in, and a table row
-// cannot show that. This note is about the same event measured a different way,
-// so it reads the same way.
-//
-// WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
-// line carries the score, the inning, the outs, the bases and what the at-bat
-// finally did — a report page's ordinary right, and none of it this note's. The
-// slot holds the DATE here instead, which is the one thing about the at-bat
-// that opens its game without saying a word about it.
-//
-// FIVE UP FRONT, THEN TEN AT A TIME. The whole census is the answer — trimming
-// it to a round number is the one thing research.md §7 forbids outright — but
-// the whole census is 170 rows, and each one carries two faces now, so opening
-// all of it in one press dropped a reader into eight thousand pixels of scroll
-// with the rest of the page somewhere below it. The door pages instead. Every
-// row is still reachable; none of them arrives uninvited.
-const LEAD_ROWS = 4
-const STEP = 10
+const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight >= el.scrollHeight - 2))
+
+// "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
+const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
+
+// THE LONGEST AT-BATS OF THE SEASON (issue #1078, redesigned 2026-11-03). A
+// census, not a leaderboard: every at-bat of ten or more pitches, out of every
+// plate appearance played, and only when every game was read
+// (scripts/gen-long-at-bats.mjs, `coverage.complete`). The census line sums the
+// regular season and the postseason (Gary, 2026-11-03; a departure from
+// ADR-0104 for this card). The picked at-bat shows Gameday's scorebug as it
+// began, the zone, and how it ended: this page is an open surface (ADR-0034).
+// Opening its date opens the game sealed (api/notebook.js).
+
 
 export function LongAtBats({ season }) {
   const { data } = useAsync(() => fetchLongAtBats(season), [season])
   // How many rows are on screen, not a boolean — the door adds to it rather
   // than flipping it.
-  const [visible, setVisible] = useState(LEAD_ROWS)
+  // Which at-bat the scorebug, tiles and zone show: an index into the census.
+  const [pick, setPick] = useState(0)
+  // A club filter: an at-bat stays when the club is on either side of it.
+  const [club, setClub] = useState(null)
   const linkProps = useRouteLink()
 
   const rows = data?.rows ?? []
@@ -78,130 +51,155 @@ export function LongAtBats({ season }) {
   // it is read. A complete zero is still a count.
   const post = data.post?.coverage.complete ? data.post : null
 
-  const [top, ...rest] = rows
-  const shown = rest.slice(0, visible)
-  const hidden = rest.length - shown.length
-  // The last press of the door is a short one — a button saying "10 more"
-  // that produced five would be a small lie about the file's own count.
-  const next = Math.min(STEP, hidden)
+  // The postseason's long at-bats join the list, each marked.
+  // `key`: a row's own id. pk + batter + pitches is not unique at ten pitches
+  // (one batter can see a pitcher twice for ten in a game), and a repeated React
+  // key left a stale row standing at the head of a filtered list.
+  const every = [...rows, ...(post?.rows ?? []).map((r) => ({ ...r, post: true }))]
+    .sort((a, b) => b.pitches - a.pitches || (a.date < b.date ? -1 : 1))
+    .map((r, i) => ({ ...r, key: i }))
+  const clubs = [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
+    .filter(Boolean)
+    .sort((a, b) => (teamAbbr({ id: a }) < teamAbbr({ id: b }) ? -1 : 1))
+  const all = club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every
+  const top = all[pick] ?? all[0]
+  const pickClub = (id) => {
+    setClub(id)
+    setPick(0)
+  }
+  // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
+  const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
+  // Every row, in a list that scrolls in its own box (five rows tall).
   const path = atBatGamePath(top)
 
-  // THREE STAMPED CARDS IN ONE ROW: the census figure, the longest at-bat
-  // drawn one square per pitch, and the next longest as bars measured against
-  // it. A phone stacks them.
+  // ONE CARD, ONE UNIT: the longest at-bat drawn one square per pitch, the
+  // next longest in the same squares beside it, and the census as one line under
+  // both. A phone stacks the two halves.
   return (
-    <section className="seasonnote seasonnote--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
+    <section className="seasonnote seasonnote--stories" aria-label={`The longest at-bats of ${season}`}>
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}
-      <SectionHead as="h3" className="oseason__head" note={<>{season} season</>}>
-        The notebook
+      <SectionHead as="h3" className="oseason__head">
+        Longest at-bats of {season}
       </SectionHead>
 
-      <div className="seasonnote__row">
-        <Card frame="stamped" as="div" className="seasonnote__figure">
-          <p className="seasonnote__n">{rows.length}</p>
-          <p className="t-label t-label--bold seasonnote__what">
-            At-bats of {data.threshold}+ pitches
-          </p>
-          <p className="seasonnote__under infopop-row">
-            of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> in{' '}
-            <span className="seasonnote__against">{count(data.coverage.games)}</span> games
-            <InfoPopover label="How the at-bats are counted" className="infopop--paper">
-              Regular season only; the postseason is never summed in
-              {post
-                ? ` (it had ${post.rows.length} of ${count(post.coverage.plateAppearances)} plate appearances, in ${count(post.coverage.games)} games)`
-                : ''}
-              . A batter left mid-count by an inning-ending caught stealing starts a new
-              at-bat next inning, and is counted as one. Each one opens its game, sealed.
-            </InfoPopover>
-          </p>
-        </Card>
-
-        <Card frame="stamped" as="div" className="seasonnote__longest">
-          <p className="t-label t-label--bold seasonnote__what">The longest at-bat</p>
-          <div className="seasonnote__pair">
-            <Headshot personId={top.batter.id} name={top.batter.name} teamId={top.batter.teamId} className="seasonnote__shot" />
-            <div className="seasonnote__who">
-              <PlayerLink id={top.batter.id} name={top.batter.name} className="seasonnote__name">
-                {top.batter.name}
-              </PlayerLink>
-              <span className="seasonnote__club">{clubAbbr(top, top.batter.teamId)}</span>
-            </div>
-            <span className="seasonnote__vs" aria-hidden="true">vs</span>
-            <div className="seasonnote__who seasonnote__who--pitcher">
-              <PlayerLink id={top.pitcher.id} name={top.pitcher.name} className="seasonnote__name">
-                {top.pitcher.name}
-              </PlayerLink>
-              <span className="seasonnote__club">{clubAbbr(top, top.pitcher.teamId)}</span>
-            </div>
-            <Headshot personId={top.pitcher.id} name={top.pitcher.name} teamId={top.pitcher.teamId} className="seasonnote__shot" />
-          </div>
-          {/* One square per pitch: the length IS the note, so it is drawn. */}
-          <ol className="seasonnote__pips" aria-label={`${top.pitches} pitches`}>
-            {Array.from({ length: top.pitches }, (_, i) => (
-              <li key={i} className="seasonnote__pip" />
-            ))}
-          </ol>
-          <div className="seasonnote__foot">
-            <span className="seasonnote__count">{top.pitches} pitches</span>
-            {path && (
-              <a className="door door--boxed seasonnote__when" {...linkProps(path)}>
-                {monthDayShort(top.date)}
-                <span className="sr-only"> — open this game</span>
-                <span aria-hidden="true">›</span>
-              </a>
-            )}
-          </div>
-        </Card>
-
-        <Card frame="stamped" as="div" className="seasonnote__rest">
-          <p className="t-label t-label--bold seasonnote__what">Next longest</p>
-          <ol className="seasonnote__bars">
-            {shown.map((row) => {
-              const rowPath = atBatGamePath(row)
-              const label = (
-                <>
-                  <span className="seasonnote__barname">
-                    {lastName(row.batter.name)} v {lastName(row.pitcher.name)}
-                  </span>
-                  <span className="seasonnote__barn">{row.pitches}</span>
-                  <span className="seasonnote__bar" aria-hidden="true">
-                    <span style={{ width: `${(row.pitches / top.pitches) * 100}%` }} />
-                  </span>
-                </>
-              )
-              return (
-                <li key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                  {rowPath ? (
-                    <a
-                      className="seasonnote__barrow"
-                      {...linkProps(rowPath)}
-                      aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)} — open this game`}
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <span className="seasonnote__barrow">{label}</span>
-                  )}
-                </li>
-              )
-            })}
-          </ol>
-          {(hidden > 0 || visible > LEAD_ROWS) && (
+      <Card frame="stamped" as="div" className="seasonnote__sheet">
+        <div className="seasonnote__clubs" role="group" aria-label="Filter by club">
+          <button type="button" className="seasonnote__clubpick seasonnote__clubpick--all" aria-pressed={club === null} onClick={() => pickClub(null)}>
+            All
+          </button>
+          {clubs.map((id) => (
             <button
+              key={id}
               type="button"
-              className="door door--boxed oseason__door"
-              aria-label={hidden > 0 ? `Show ${next} more at-bats` : 'Show fewer at-bats'}
-              onClick={() => setVisible((n) => (hidden > 0 ? n + STEP : LEAD_ROWS))}
+              className="seasonnote__clubpick"
+              aria-pressed={club === id}
+              aria-label={teamAbbr({ id })}
+              onClick={() => pickClub(club === id ? null : id)}
             >
-              {hidden > 0 ? `${next} more` : 'Show fewer'}
+              <TeamLogo teamId={id} size={26} />
             </button>
-          )}
-          <p className="sr-only" role="status">
-            Showing {shown.length + 1} of {rows.length} at-bats.
-          </p>
-        </Card>
-      </div>
+          ))}
+        </div>
+        <div className="seasonnote__row">
+          <div className="seasonnote__longest">
+            <p className="seasonnote__big">
+              <span className="seasonnote__n">{top.pitches}</span>
+              <span className="t-label t-label--bold">pitches</span>
+              {path && (
+                <a className="seasonnote__when" {...linkProps(path)}>
+                  {monthDayShort(top.date)}, {top.date.slice(0, 4)}
+                  <span className="sr-only"> — open this game</span>
+                  <span aria-hidden="true">›</span>
+                </a>
+              )}
+            </p>
+            <Suspense fallback={null}>
+              <Scorebug row={top} />
+            </Suspense>
+            {/* Two stacked lines, as a broadcast matchup reads: who is up, who is throwing. */}
+            <ul className="seasonnote__matchup">
+              {[
+                ['At bat', top.batter],
+                ['Pitching', top.pitcher],
+              ].map(([role, p]) => (
+                <li
+                  key={role}
+                  className="seasonnote__side"
+                  // A club may colour a card that identifies the club (ADR-0030's addendum).
+                  style={{ '--side-club': teamPrimaryColor(p.teamId) || 'var(--surface-stamped-ink)' }}
+                >
+                  <TeamLogo teamId={p.teamId} size={120} variant="mono" className="seasonnote__sidemark" />
+                  <div className="seasonnote__who">
+                    <span className="seasonnote__role">{role}</span>
+                    <PlayerLink id={p.id} name={p.name} className="seasonnote__name">
+                      {p.name}
+                    </PlayerLink>
+                    <span className="seasonnote__club">{clubAbbr(top, p.teamId)}</span>
+                  </div>
+                  <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="seasonnote__shot" />
+                </li>
+              ))}
+            </ul>
+            <div className="seasonnote__rest">
+                <ol
+              className="seasonnote__bars"
+              // The foot fades only while there is more below; at the end, or a list
+              // that fits, it sits flat.
+              ref={(el) => el && markEnd(el)}
+              onScroll={(e) => markEnd(e.currentTarget)}
+            >
+                  {all.map((row, i) => (
+                    <li key={row.key}>
+                      <button
+                        type="button"
+                        className="seasonnote__barrow"
+                        aria-pressed={i === pick}
+                        aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)}`}
+                        onClick={() => setPick(i)}
+                      >
+                        <span className="seasonnote__barn">{row.pitches}</span>
+                    <span className="seasonnote__barwho">
+                      <span className="seasonnote__barside">
+                        <TeamLogo teamId={row.batter.teamId} size={18} />
+                        <span className="seasonnote__barname">{row.batter.name}</span>
+                      </span>
+                      <span className="seasonnote__barside">
+                        <TeamLogo teamId={row.pitcher.teamId} size={18} />
+                        <span className="seasonnote__barname seasonnote__barname--p">{row.pitcher.name}</span>
+                      </span>
+                    </span>
+                    <span className="seasonnote__barmeta">
+                      <span>
+                        {row.post && <span className="seasonnote__barpost">Postseason</span>}{row.post && ' · '}
+                        {monthDayShort(row.date)}
+                      </span>
+                      {row.event && <span className="seasonnote__barevent">{row.event}</span>}
+                    </span>
+                  </button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+          </div>
+
+          <Suspense fallback={null}>
+            <AtBatZone key={`${top.pk}-${top.batter.id}-${top.pitches}`} row={top} />
+          </Suspense>
+        </div>
+
+
+        <p className="seasonnote__census infopop-row">
+          <span className="seasonnote__against">{every.length}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
+          <span className="seasonnote__against">{count(oneIn(plateAppearances, every.length))}</span> plate appearances
+          <InfoPopover label="How the at-bats are counted" className="infopop--paper">
+            Regular season and postseason together: {count(plateAppearances)} plate appearances
+            {post ? ` (${rows.length} of the long ones in the regular season, ${post.rows.length} in the postseason)` : ''}
+            . A batter left mid-count by an inning-ending caught stealing starts a new
+            at-bat next inning, and is counted as one. Each one opens its game, sealed.
+          </InfoPopover>
+        </p>
+      </Card>
     </section>
   )
 }
