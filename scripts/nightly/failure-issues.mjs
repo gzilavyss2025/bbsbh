@@ -21,14 +21,14 @@ export const NOTE_MARK = 'skipped by the input gates'
 // issues as [{ number, title, noted? }], noted when a comment carries NOTE_MARK.
 // gated: the step ids the input gates own (inputs.mjs GATES). A skipped step
 // outside it was skipped by its producer's failure, not a gate, so it gets no
-// gate note. Omitted: every skipped step counts (the unit tests' default).
-export function planIssues(steps, open, gated = null) {
+// gate note.
+export function planIssues(steps, open, gated) {
   const byTitle = new Map(open.map((i) => [i.title, i]))
   const plan = { open: [], comment: [], close: [], note: [] }
   for (const [id, { outcome }] of Object.entries(steps)) {
     const issue = byTitle.get(titleFor(id))
     const number = issue?.number
-    if (outcome === 'skipped' && issue && !issue.noted && (!gated || gated.has(id))) plan.note.push({ id, number })
+    if (outcome === 'skipped' && issue && !issue.noted && gated.has(id)) plan.note.push({ id, number })
     if (outcome === 'failure') {
       if (number) plan.comment.push({ id, number })
       else plan.open.push(id)
@@ -43,9 +43,8 @@ export function planIssues(steps, open, gated = null) {
 // (--check), so a new generator needs no entry in a hand-kept list to count.
 // The input-gate step fails OPEN (every gated step still runs), so its failure
 // gets an issue but does not turn the night red on its own.
-const FAIL_OPEN = new Set(['inputs'])
 export const failedSteps = (steps) =>
-  Object.entries(steps).filter(([id, s]) => s.outcome === 'failure' && !FAIL_OPEN.has(id)).map(([id]) => id)
+  Object.entries(steps).filter(([id, s]) => s.outcome === 'failure' && id !== 'inputs').map(([id]) => id)
 
 function check() {
   const failed = failedSteps(JSON.parse(process.env.STEPS_JSON ?? '{}'))

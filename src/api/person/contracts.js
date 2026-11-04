@@ -14,11 +14,6 @@ const fetchShard = staticJsonBy(
 // signing re-ranks a pool, so a rank kept inside each shard rewrote all 100.
 const fetchPayRanks = staticJson('/data/pay-ranks.json', { fallback: null })
 
-export const withPayRank = (contract, payRanks, personId) => ({
-  ...contract,
-  payRank: payRanks?.ranks?.[personId] ?? null,
-})
-
 // `payRank: true` joins the pay rank (the Contract card is its only reader), so
 // the free-agents list, wire notes and the overview never download the ranks file.
 export async function fetchPlayerContract(personId, { payRank = false } = {}) {
@@ -27,7 +22,8 @@ export async function fetchPlayerContract(personId, { payRank = false } = {}) {
   const contract = shard?.players?.[personId]
   if (!contract) return null
   const record = { ...contract, source: shard.meta }
-  return payRank ? withPayRank(record, payRanks, personId) : record
+  if (payRank) record.payRank = payRanks?.ranks?.[personId] ?? null
+  return record
 }
 
 // The one season the contract files cover (every shard's meta carries it).
