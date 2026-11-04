@@ -10,29 +10,22 @@
 // directly rather than taking a storage argument, so it is verified in the
 // browser (e2e) rather than under node:test, which has no `window` at all.
 
-const KEY_PREFIX = 'bbsbh:mergeReceipt:'
+import { localStore } from './localStore.js'
+
+// Storage unreadable reads as "not seen" — show it, at worst once per visit. The
+// failure a one-shot flag protects against is nagging, not a spoiler. A failed
+// write is dropped; the caller's own in-session state keeps the dismissal.
+const flag = (userId) =>
+  localStore(`bbsbh:mergeReceipt:${userId}`, Boolean, () => String(Date.now()))
 
 // No identity, nothing to show — the safe default while Clerk is still
 // resolving, or for a signed-out visitor.
 export function hasSeenMergeReceipt(userId) {
-  if (!userId) return true
-  try {
-    return Boolean(window.localStorage.getItem(KEY_PREFIX + userId))
-  } catch {
-    // Storage unreadable — show it, at worst once per visit. The failure a
-    // one-shot flag protects against is nagging, not a spoiler.
-    return false
-  }
+  return !userId || flag(userId).read()
 }
 
 export function markMergeReceiptSeen(userId) {
-  if (!userId) return
-  try {
-    window.localStorage.setItem(KEY_PREFIX + userId, String(Date.now()))
-  } catch {
-    // Private mode. The caller's own in-session state still keeps the
-    // dismissal from reversing itself for the rest of this visit.
-  }
+  if (userId) flag(userId).write(true)
 }
 
 // The card's lines, as a pure rule — the other half of the receipt both

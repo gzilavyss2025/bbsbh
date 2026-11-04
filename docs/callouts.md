@@ -175,11 +175,10 @@ over one a tier above it.
   keyed by person in a bundle: `leader`, the three on-base-streak tenses
   (`onBaseRiding` / `onBaseExtended` / `onBaseEnded`), `sbStreak`, `homerRec`,
   and Margin Notes' `scorelessStreak`.
-- **Where it comes from.** A **manual** scan, not a cron:
-  `scripts/scan-game-notes-insights.mjs extract` pulls the clubs' PDFs through
-  the shipped parser and writes a dossier (blurbs + roster + the facts we
-  already computed); an agent reads and classifies it; `… apply` validates that
-  classification into `public/data/game-notes-corroboration.json`. The closed
+- **Where it comes from.** A **manual** scan, not a cron
+  (its harness, `scripts/scan-game-notes-insights.mjs`, was deleted in #2837 with
+  the parser it ran on; see git history): an agent read each club's Game Notes
+  PDFs and classified them into `public/data/game-notes-corroboration.json`. The closed
   vocabulary, the staleness window (7 days) and the per-club cap (12) live in
   `scripts/lib/game-notes-corroboration.mjs`.
 - **The spoiler rule applies in full.** Club notes are stuffed with recaps

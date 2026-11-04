@@ -1,18 +1,13 @@
 // Express Lane Tier 2 — the clip index (src/api/expresslane/clipIndex.js).
 //
 // Every test here runs offline. The Savant resolver takes an injectable
-// fetcher, so the parse, the memoization, the degradation path and the
-// sequential queue are all exercised with a fake — no live network, and no
+// fetcher, so the parse, the memoization and the degradation path are all exercised with a fake — no live network, and no
 // request to a host that blocks automated access.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   parseSportyVideoHtml,
   resolveClipUrl,
-  clipPosterUrl,
-  buildClipIndex,
-  loadClipIndex,
-  saveClipIndex,
 } from '../src/api/expresslane/clipIndex.js'
 
 // The shape the Savant page returns: a video element whose source is an
@@ -156,125 +151,4 @@ test('a signal aborted mid-flight gives null, not a throw', async () => {
   const pending = resolveClipUrl('id-midflight', { fetchImpl: slow, signal: controller.signal })
   controller.abort()
   assert.equal(await pending, null)
-})
-
-// --- posters --------------------------------------------------------------
-
-test('a poster derives from the playId with no network call', () => {
-  assert.equal(
-    clipPosterUrl('uuid-1'),
-    'https://img.mlbstatic.com/mlb-photos/image/upload/w_640,q_auto:good/fastball/uuid-1_home.jpg',
-  )
-  assert.equal(
-    clipPosterUrl('uuid-1', { feed: 'away', width: 320 }),
-    'https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:good/fastball/uuid-1_away.jpg',
-  )
-  // Every clip exists in both booths, so an unknown value falls to the home
-  // feed rather than building a URL for a booth that does not exist.
-  assert.ok(clipPosterUrl('uuid-1', { feed: 'radio' }).endsWith('_home.jpg'))
-  assert.equal(clipPosterUrl(null), null)
-  assert.equal(clipPosterUrl(''), null)
-})
-
-// --- the index ------------------------------------------------------------
-
-test('the index carries an entry for every requested playId', async () => {
-  const fake = fakeFetcher({ 'ix-a': page('ta'), 'ix-c': page('tc') })
-  const index = await buildClipIndex(['ix-a', 'ix-b', 'ix-c'], { fetchImpl: fake.impl })
-  assert.deepEqual([...index.keys()], ['ix-a', 'ix-b', 'ix-c'])
-  assert.equal(index.get('ix-a').mp4Url, 'https://sporty-clips.mlb.com/ta.mp4')
-  // The one with no clip is "not posted yet", never a missing key.
-  assert.equal(index.get('ix-b').mp4Url, null)
-  assert.equal(index.get('ix-b').durationSec, null)
-  assert.ok(index.get('ix-b').posterUrl, 'a poster still derives')
-  assert.equal(index.get('ix-c').mp4Url, 'https://sporty-clips.mlb.com/tc.mp4')
-})
-
-test('the index resolves one at a time, never in parallel', async () => {
-  // A burst is the shape that gets a client blocked, silently and mid-game.
-  const fake = fakeFetcher({ 'sq-1': page('t1'), 'sq-2': page('t2'), 'sq-3': page('t3') })
-  await buildClipIndex(['sq-1', 'sq-2', 'sq-3'], { fetchImpl: fake.impl })
-  assert.equal(fake.maxInFlight, 1)
-  assert.deepEqual(
-    fake.calls.map((u) => u.split('playId=')[1]),
-    ['sq-1', 'sq-2', 'sq-3'],
-  )
-})
-
-test('the index stops asking once the answers stop arriving', async () => {
-  // The publication frontier of a game that just ended, and a host that has
-  // started refusing, look the same from here and want the same answer.
-  const fake = fakeFetcher({ 'cb-0': page('t0') })
-  const ids = ['cb-0', 'cb-1', 'cb-2', 'cb-3', 'cb-4', 'cb-5', 'cb-6', 'cb-7']
-  const index = await buildClipIndex(ids, { fetchImpl: fake.impl, maxConsecutiveMisses: 3 })
-  assert.equal(index.size, 8, 'every id still gets an entry')
-  assert.equal(fake.calls.length, 4, 'one hit, then three misses, then it stopped')
-  for (const id of ids.slice(1)) assert.equal(index.get(id).mp4Url, null)
-})
-
-test('a run of misses resets on a hit', async () => {
-  const fake = fakeFetcher({ 'rs-0': page('a'), 'rs-2': page('b'), 'rs-4': page('c') })
-  const ids = ['rs-0', 'rs-1', 'rs-2', 'rs-3', 'rs-4']
-  const index = await buildClipIndex(ids, { fetchImpl: fake.impl, maxConsecutiveMisses: 2 })
-  assert.equal(fake.calls.length, 5)
-  assert.equal(index.get('rs-4').mp4Url, 'https://sporty-clips.mlb.com/c.mp4')
-})
-
-test('an abort stops the queue and marks the rest not posted', async () => {
-  const fake = fakeFetcher({ 'ab-1': page('t1'), 'ab-2': page('t2') })
-  const controller = new AbortController()
-  controller.abort()
-  const index = await buildClipIndex(['ab-1', 'ab-2'], {
-    fetchImpl: fake.impl,
-    signal: controller.signal,
-  })
-  assert.equal(index.size, 2)
-  assert.equal(index.get('ab-1').mp4Url, null)
-  assert.equal(fake.calls.length, 0)
-})
-
-test('an optional duration rides along, from a Map or a plain object', async () => {
-  const fake = fakeFetcher({ 'du-1': page('t1'), 'du-2': page('t2') })
-  const fromMap = await buildClipIndex(['du-1'], {
-    fetchImpl: fake.impl,
-    durations: new Map([['du-1', 11.4]]),
-  })
-  assert.equal(fromMap.get('du-1').durationSec, 11.4)
-  const fromObject = await buildClipIndex(['du-2'], {
-    fetchImpl: fake.impl,
-    durations: { 'du-2': 7.5 },
-  })
-  assert.equal(fromObject.get('du-2').durationSec, 7.5)
-})
-
-test('the index tolerates an empty or missing list', async () => {
-  assert.equal((await buildClipIndex(null)).size, 0)
-  assert.equal((await buildClipIndex([])).size, 0)
-  assert.equal((await buildClipIndex([null, ''])).size, 0)
-})
-
-test('the index carries the booth into every poster', async () => {
-  const fake = fakeFetcher({ 'bo-1': page('t1') })
-  const index = await buildClipIndex(['bo-1'], { fetchImpl: fake.impl, feed: 'away' })
-  assert.ok(index.get('bo-1').posterUrl.endsWith('_away.jpg'))
-})
-
-// --- the IndexedDB cache --------------------------------------------------
-
-test('with no IndexedDB the cache is simply empty, and a write says so', async () => {
-  // Node has none, a private-browsing window may refuse one, and WebKit evicts
-  // by origin under pressure. An empty read is normal, not an error.
-  assert.equal((await loadClipIndex(823035, { idb: undefined })).size, 0)
-  assert.equal((await loadClipIndex(823035, { idb: null })).size, 0)
-  assert.equal(await saveClipIndex(823035, new Map(), { idb: null }), false)
-})
-
-test('an IndexedDB that throws on open degrades the same way', async () => {
-  const hostile = {
-    open() {
-      throw new DOMException('denied')
-    },
-  }
-  assert.equal((await loadClipIndex(823035, { idb: hostile })).size, 0)
-  assert.equal(await saveClipIndex(823035, new Map(), { idb: hostile }), false)
 })

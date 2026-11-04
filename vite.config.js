@@ -498,8 +498,8 @@ export default defineConfig({
         manifestTransforms: [shellOnly],
         // What is left to exclude, now that `data/**.json` is opted OUT by
         // default above: the ART. Two directories of images that a page
-        // reaches for a couple of files at a time, plus the pdfjs chunk and
-        // the link-preview card, each with its own reason below.
+        // reaches for a couple of files at a time, plus the link-preview card,
+        // each with its own reason below.
         globIgnores: [
           // Gameday's big-play celebration art (~6.5 MB), also the Animation
           // Lab's. Each role loads after the reveal tap that earns it; an
@@ -518,12 +518,6 @@ export default defineConfig({
           // be pure cost; the CacheFirst rule below keeps the ones actually
           // seen available offline.
           '**/data/logos/mono/*.svg',
-          // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
-          // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
-          // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
-          // the app-shell precache so it never lands on the install of a user
-          // who never taps it; it's runtime-cached on first use instead (below).
-          '**/assets/pdf*',
           // The 1200x630 link-preview card. It is referenced ONLY by absolute
           // URL from index.html's og:image/twitter:image tags, i.e. by social
           // crawlers, which never run a service worker — and no app surface
@@ -798,15 +792,6 @@ export default defineConfig({
             // copy at the park.
             urlPattern: ({ url }) => /^\/data\/callouts\/\d{8}\/\d+\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
-            method: 'GET',
-          },
-          {
-            // pdfjs chunk + worker (excluded from precache above). They're
-            // content-hashed and immutable, so CacheFirst: fetched on the first
-            // What's Brewing open, then served from cache on later opens (incl.
-            // offline). Carries no score — it's a PDF parser, not data.
-            urlPattern: ({ url }) => /\/assets\/pdf.*\.(m?js)$/.test(url.pathname),
-            handler: 'CacheFirst',
             method: 'GET',
           },
           {

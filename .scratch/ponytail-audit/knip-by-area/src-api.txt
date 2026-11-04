@@ -1,0 +1,120 @@
+LEVELS                                        src/api/around-the-game/absChallenges.js:36:14                 
+REGULATION_INNINGS                            src/api/around-the-game/absChallenges.js:290:14                
+STREAK_MIN_RUN                                src/api/around-the-game/absChallenges.js:451:14                
+leagueOf                            function  src/api/awardsHistory.js:59:17                                 
+gamesLine                           function  src/api/boxlines/careerSplits.js:129:17                        
+fetchFieldingStarts                 function  src/api/boxlines/careerSplits.js:237:23                        
+parseRecord                                   src/api/callout-notes.js:43:3                                  
+foldedRecordText                              src/api/callout-notes.js:44:3                                  
+gameResult                                    src/api/callout-notes.js:45:3                                  
+CORROBORATION_BONUS                           src/api/callout-notes.js:48:3                                  
+buildTiedAfterHeldNotes                       src/api/callout-notes.js:71:3                                  
+buildRunsScoredNote                           src/api/callout-notes.js:75:3                                  
+buildRunsAllowedNote                          src/api/callout-notes.js:76:3                                  
+buildComebackNote                             src/api/callout-notes.js:77:3                                  
+buildCloseGameNotes                           src/api/callout-notes.js:78:3                                  
+INNING_DIFF_MIN_GAMES                         src/api/callout-notes.js:82:3                                  
+WEEKDAYS                                      src/api/callout-notes/checkpoints.js:251:14                    
+INNING_DIFF_MIN_GAMES                         src/api/callout-notes/inningAndStarter.js:19:14                
+LAST_TIME_FLOOR                               src/api/callout-notes/lastTime.js:28:14                        
+RANK_NOTABLE                                  src/api/callout-notes/rank.js:32:14                            
+skew                                          src/api/callout-notes/shared.js:104:14                         
+WS_DROUGHT_SEASONS                            src/api/callout-notes/worldSeries/odds.js:12:14                
+enrichTimelineEntries               function  src/api/careerTimeline.js:65:23                                
+START_CHALLENGES                              src/api/challenges.js:29:14                                    
+seedFrom                                      src/api/classics/deck.js:12:10                                 
+teamsUrl                                      src/api/classics/deck.js:24:14                                 
+MINOR_LEAGUE_NOTE                             src/api/free-agents/freeAgents.js:20:14                        
+MOMENT_BASE                                   src/api/gameday/moments/moments.js:46:14                       
+fetchGloveTargetShard                         src/api/gloveTarget.js:30:14                                   
+SIGNIFICANCE_TAGS                             src/api/highlights.js:83:14                                    
+NEAR_MILES                                    src/api/history/birthplaces.js:19:14                           
+CELL_DEGREES                                  src/api/history/birthplaces.js:20:14                           
+fetchBirthplaceCell                           src/api/history/birthplaces.js:45:14                           
+fetchOnThisDayShard                           src/api/history/onThisDay.js:17:14                             
+HIT_FIELDS                                    src/api/hotcold/line.js:23:14                                  
+PITCH_FIELDS                                  src/api/hotcold/line.js:24:14                                  
+MIN_PA_PER_G                                  src/api/hotcold/line.js:139:14                                 
+TAIL                                          src/api/hotcold/rule.js:24:14                                  
+MAX_FLAGS                                     src/api/hotcold/rule.js:28:14                                  
+REAL_FROM                                     src/api/hotcold/rule.js:33:14                                  
+tailShares                          function  src/api/hotcold/rule.js:59:17                                  
+LATE_INNING_START                             src/api/lateGameSwing.js:6:14                                  
+resolveScopeTeams                   function  src/api/leaders.js:62:23                                       
+MANAGER_HISTORY_FIRST_SEASON                  src/api/managers.js:35:10                                      
+managerialStints                    function  src/api/managers.js:109:17                                     
+cap                                           src/api/matchup/voice.js:55:14                                 
+assemble                            function  src/api/matchup/voice.js:60:17                                 
+EMPHASIS_Z                                    src/api/matchup/voice.js:91:14                                 
+historicalClubName                  function  src/api/milbHistory.js:62:23                                   
+gameScore                           function  src/api/performanceScore.js:20:17                              
+pitcherPoints                       function  src/api/performanceScore.js:34:17                              
+batterPoints                        function  src/api/performanceScore.js:45:17                              
+isPitcher                                     src/api/person.js:21:3                                         
+gameLogLimit                                  src/api/person.js:46:3                                         
+loggedSplits                                  src/api/person.js:47:3                                         
+milestoneWatchView                            src/api/person.js:58:3                                         
+MILESTONE_RARITY                              src/api/person.js:61:3                                         
+arsenalView                                   src/api/person.js:67:3                                         
+MAJOR_AWARDS                                  src/api/person.js:93:3                                         
+DEFAULT_AWARD_ORDER                           src/api/person.js:94:3                                         
+awardLeague                                   src/api/person.js:95:3                                         
+rankAwards                                    src/api/person.js:98:3                                         
+rankKeyOf                                     src/api/person.js:99:3                                         
+parseAwardOrder                               src/api/person.js:100:3                                        
+formatAwardOrder                              src/api/person.js:101:3                                        
+parseAwardCap                                 src/api/person.js:102:3                                        
+knownRankKeys                                 src/api/person.js:103:3                                        
+otherLevelSeasonBlocks                        src/api/person.js:110:3                                        
+otherLevelSeasonBlocks              function  src/api/person/activity.js:389:17                              
+orgIdFor                            function  src/api/person/awards.js:203:17                                
+fetchFamilyShard                              src/api/person/family/family.js:17:14                          
+MILESTONE_RARITY                              src/api/person/milestones.js:185:14                            
+round3                                        src/api/person/shared.js:27:14                                 
+RANK_FLOOR                                    src/api/person/stats.js:405:14                                 
+sentenceCaseEventText                         src/api/playbyplay.js:56:3                                     
+pinchRunningPlayers                           src/api/playbyplay.js:61:3                                     
+pinchRunningPlayers                 function  src/api/playbyplay/notificationCards.js:181:17                 
+isClub                              function  src/api/postseason/bracket.js:43:17                            
+POSTSEASON_ROSTER_SIZE                        src/api/postseason/roster.js:25:14                             
+QUALIFICATION_FLOOR                           src/api/prospectTrend.js:165:14                                
+MOVEMENT_FLOOR                                src/api/prospectTrend.js:184:14                                
+REHAB_END_CODES                               src/api/rehab-policy.js:74:14                                  
+REHAB_MAX_DAYS                                src/api/rehab-policy.js:82:14                                  
+isoDaysBetween                      function  src/api/rehab-policy.js:85:17                                  
+MIN_REST_DAYS                                 src/api/rotation/projectedStarters.js:43:14                    
+REGULAR_STARTS                                src/api/rotation/projectedStarters.js:47:14                    
+PITCHER_METRICS                               src/api/savantPercentiles.js:151:14                            
+fetchAllStarInfo                    function  src/api/schedule.js:275:23                                     
+MIN_SPAN_CHANCES                              src/api/scheduleShape.js:314:14                                
+MAX_SPAN_YEARS                                src/api/scheduleShape.js:315:14                                
+MIN_EVENT_CHANCES                             src/api/scheduleShape.js:420:14                                
+MIN_EVENT_STREAK                              src/api/scheduleShape.js:421:14                                
+MAX_EVENT_P                                   src/api/scheduleShape.js:422:14                                
+pitchOf                             function  src/api/scout/headToHead.js:134:17                             
+SEASON_GRADE_ACHIEVEMENT_WEIGHT               src/api/seasonGradeFormula.js:9:14                             
+HOME_FIELD_PRIOR_GAMES                        src/api/seasonScoreFormula.js:34:14                            
+ordersByQuality                     function  src/api/situationalRecordRankings.js:181:17                    
+seasonsOf                           function  src/api/staticJson.js:131:23                                   
+MIN_GAMES                                     src/api/teamScoreFormula.js:10:14                              
+PythagoreanExponent                           src/api/teamScoreFormula.js:12:14                              
+SOS_WINS_PER_POINT                            src/api/teamScoreFormula.js:31:14                              
+CURRENT_FORM_PRIOR_GAMES                      src/api/teamScoreFormula.js:85:14                              
+CURRENT_FORM_TANH_SCALE                       src/api/teamScoreFormula.js:86:14                              
+LATE_SWING_BASE                               src/api/teamScoreFormula.js:93:14                              
+LATE_SWING_PER_RUN                            src/api/teamScoreFormula.js:94:14                              
+LATE_SWING_RUN_CAP                            src/api/teamScoreFormula.js:95:14                              
+LATE_SWING_TOTAL_CAP                          src/api/teamScoreFormula.js:96:14                              
+fetchClubMoves                      function  src/api/transactions/clubFeed.js:58:23                         
+WINDOW_DAYS                                   src/api/transactions/leagueFeed.js:72:14                       
+FETCH_DAYS                                    src/api/transactions/leagueFeed.js:73:14                       
+prospectOf                          function  src/api/transactions/playerFacts.js:106:17                     
+factSeason                          function  src/api/transactions/playerFacts.js:267:17                     
+subjectOf                           function  src/api/transactions/templates.js:29:17                        
+roundText                                     src/api/transactions/voice.js:35:14                            
+umpireZoneCells                     function  src/api/umpires.js:428:17                                      
+accuracyTendency                    function  src/api/umpires.js:451:17                                      
+fetchVsTeamSplitsIndex                        src/api/vsTeamSplits.js:43:14                                  
+resolveRoofState                    function  src/api/weather.js:62:17                                       
+formatScorebookWeather              function  src/api/weather.js:102:17                                      
+extractBlurbs                       function  src/api/whatsBrewing.js:979:17                                 

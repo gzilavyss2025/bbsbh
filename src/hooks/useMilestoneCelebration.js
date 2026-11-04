@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { localStore } from '../lib/account/localStore.js'
 import {
   MILESTONE_CELEBRATIONS_KEY,
   hasCelebratedMilestone,
@@ -7,22 +8,11 @@ import {
   serializeMilestoneCelebrations,
 } from '../lib/milestoneCelebrations.js'
 
-function readCelebrations() {
-  try {
-    return parseMilestoneCelebrations(window.localStorage.getItem(MILESTONE_CELEBRATIONS_KEY))
-  } catch {
-    return {}
-  }
-}
-
-function writeCelebrations(map) {
-  try {
-    window.localStorage.setItem(MILESTONE_CELEBRATIONS_KEY, serializeMilestoneCelebrations(map))
-  } catch {
-    // Private mode — the mark still applies for the rest of this visit, via
-    // the React state the caller holds.
-  }
-}
+const store = localStore(
+  MILESTONE_CELEBRATIONS_KEY,
+  parseMilestoneCelebrations,
+  serializeMilestoneCelebrations,
+)
 
 // One milestone collection's one-shot completion-animation state
 // (src/lib/milestoneCelebrations.js) — same shape as
@@ -31,12 +21,12 @@ function writeCelebrations(map) {
 // completion is device-scoped, and the worst case of skipping that wiring is
 // the animation playing once more in an already-open second tab.
 export function useMilestoneCelebration(id) {
-  const [celebrations, setCelebrations] = useState(readCelebrations)
+  const [celebrations, setCelebrations] = useState(store.read)
   const celebrated = hasCelebratedMilestone(celebrations, id)
   const celebrate = useCallback(() => {
     setCelebrations((prev) => {
       const next = markMilestoneCelebrated(prev, id)
-      if (next !== prev) writeCelebrations(next)
+      if (next !== prev) store.write(next)
       return next
     })
   }, [id])

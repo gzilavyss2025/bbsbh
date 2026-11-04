@@ -22,6 +22,7 @@
 // Still last-write-wins per FIELD, which with one site owner is the right trade.
 
 import { sanitizeIdentityOverrides } from '../identity/fields.js'
+import { adminFetch } from './adminFetch.js'
 
 // `patch` is `{ fieldId: value }` for the fields being changed. A value of ''
 // clears that field; a field not named is left exactly as it is. Resolves to the
@@ -36,23 +37,16 @@ import { sanitizeIdentityOverrides } from '../identity/fields.js'
 // the one whose text is worth relaying verbatim; it names the club, the bar and
 // the ratio.
 export async function saveIdentityPatch(getToken, patch) {
-  const token = await getToken()
-  if (!token) throw new Error('you are signed out — sign in again to save')
-
-  const res = await fetch('/api/identity', {
+  const data = await adminFetch(getToken, {
+    url: '/api/identity',
     method: 'PATCH',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify({ patch }),
+    body: { patch },
+    messages: {
+      501: 'the identity store is not configured on this deploy',
+      422: async (res) =>
+        (await res.json().then((b) => b?.error).catch(() => null)) ||
+        'the endpoint refused this tuning — nothing was changed',
+    },
   })
-  if (res.status === 403) throw new Error('this account is not on the admin list')
-  if (res.status === 501) throw new Error('the identity store is not configured on this deploy')
-  if (res.status === 422) {
-    const reason = await res
-      .json()
-      .then((body) => body?.error)
-      .catch(() => null)
-    throw new Error(reason || 'the endpoint refused this tuning — nothing was changed')
-  }
-  if (!res.ok) throw new Error('the save did not go through — nothing was changed')
-  return sanitizeIdentityOverrides((await res.json())?.identity)
+  return sanitizeIdentityOverrides(data?.identity)
 }

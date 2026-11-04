@@ -340,7 +340,7 @@
     },
     "expresslane/clipIndex.js": {
       "class": "spoiler-free",
-      "why": "Express Lane Tier 2 — the per-game clip index, playId to { mp4Url, posterUrl, durationSec }. Examined and carries no per-game result: no title, no blurb, no description, no count, no out, no score. Every value is a URL built from a playId the app already holds, a duration, or a null. Two cautions it records but cannot enforce, both belonging to its CALLERS: a poster frame carries the broadcast scorebug burned into the pixels (score, inning, count, outs — read off real frames), so it may render only inside an already-revealed play and never as the loading placeholder for the NEXT clip; and no surface may print a game-wide clip total, which would state game length and so whether the game went to extras (ADR-0008). The module's own header states both."
+      "why": "Express Lane Tier 2 — the clip URL resolver, playId to an mp4 URL (or null). Examined and carries no per-game result: no title, no blurb, no description, no count, no out, no score. Every value is a URL built from a playId the app already holds, or a null. One caution it records but cannot enforce, belonging to its CALLERS: no surface may print a game-wide clip total, which would state game length and so whether the game went to extras (ADR-0008). The module's own header states it."
     },
     "expresslane/eligibility.js": {
       "class": "spoiler-free",
@@ -558,7 +558,7 @@
     },
     "hitterForm.js": {
       "class": "cutoff-gated",
-      "why": "The player page's Recent form card — live lastXGames splits. Current-day only; the card skips under a spoiler `asOf`."
+      "why": "The player page's batter Form trend — the game log in order, and rolling OPS windows over it. Current-day only; the card skips under a spoiler `asOf`."
     },
     "jerseys.js": {
       "class": "spoiler-free",
@@ -1387,14 +1387,6 @@
     "weather.js": {
       "class": "spoiler-free",
       "why": "First-pitch conditions from a weather service keyed to the park's lat/lon. Never the box-score weather field."
-    },
-    "whatsBrewing.js": {
-      "class": "spoiler-free",
-      "why": "Client-side parse of a club's pre-game press-notes PDF into narrative blurbs. Pre-game copy."
-    },
-    "whatsBrewingClubs.js": {
-      "class": "spoiler-free",
-      "why": "A teamId-to-title map, split out so TeamInfo's gate check imports it without pulling the parser out of its lazy chunk."
     },
     "winprob.js": {
       "class": "reveal-only",

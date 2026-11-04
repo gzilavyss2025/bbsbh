@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 // wait reads in the same scorebook voice. Decorative art is aria-hidden;
 // `message` is empty by default (the board reads as self-explanatory on its
 // own) but callers can still pass a status line where the wait needs more
-// context (GameFinder, WhatsBrewingModal), rendered next to the board and
+// context (GameFinder), rendered next to the board and
 // still announced via the container's aria-live region. Reduced-motion
 // users see the plate resting on 1.
 //

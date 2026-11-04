@@ -16,30 +16,24 @@
 
 import { setIdentityOverrides } from './overlay.js'
 import { sanitizeIdentityOverrides } from './fields.js'
+import { localStore } from '../account/localStore.js'
 
-const CACHE_KEY = 'bbsbh:identityOverrides'
+// A cache from a build whose field catalog has since changed throws in parse and
+// reads as "nothing cached" (parse(null)); the shipped JSON stands.
+const cache = localStore(
+  'bbsbh:identityOverrides',
+  (raw) => (raw ? sanitizeIdentityOverrides(JSON.parse(raw)) : null),
+  JSON.stringify,
+)
 
 // Apply whatever this browser saw last. Call it BEFORE the first render —
 // main.jsx does, above `mount()`.
 export function hydrateIdentityFromCache() {
-  try {
-    const raw = window.localStorage.getItem(CACHE_KEY)
-    if (!raw) return
-    setIdentityOverrides(sanitizeIdentityOverrides(JSON.parse(raw)))
-  } catch {
-    // Storage disabled, or a cache from a build whose field catalog has since
-    // changed. Either way the shipped JSON stands and the fetch below will
-    // rewrite the cache.
-  }
+  const cached = cache.read()
+  if (cached) setIdentityOverrides(cached)
 }
 
-export function cacheIdentityOverrides(overrides) {
-  try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(overrides))
-  } catch {
-    // Private mode. The in-memory overlay still applies for this session.
-  }
-}
+export const cacheIdentityOverrides = cache.write
 
 // Revalidate against the API and adopt the answer. Deliberately swallows
 // everything: an unconfigured deploy answers 501 and an offline one answers

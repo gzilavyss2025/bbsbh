@@ -7,15 +7,11 @@
 //      generator's fold, the season combine and the decoder. One run out of
 //      step puts every later ball in the wrong park.
 //   2. A ball with no park on record is never given one.
-//   3. A park view groups by the WALL, not the venue: the 2022 and 2026
-//      Comerica walls are two groups.
-//   4. A park view's counts come from the balls hit there, not from the
-//      season totals.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { aggregateGameSpray, foldGame, SCHEMA_VERSION } from '../scripts/gen-spray.mjs'
-import { decodeSprayBalls, withSeasonRuns, sprayParks, parkSubview } from '../src/api/spray.js'
+import { decodeSprayBalls, withSeasonRuns } from '../src/api/spray.js'
 import { combineSprayEntries } from '../src/lib/seasons/combine.js'
 import { CONFIGURATIONS } from '../src/lib/ballpark/layout/configurations.js'
 
@@ -67,49 +63,6 @@ test('an All-seasons view keeps each ball with its own season', () => {
   const old = { n: 'A', t: 116, b: 'R', p: [[3, 3, 90, 1, 0, 0, 0, 9]], o: {} }
   const mixed = combineSprayEntries([withSeasonRuns(old, 2021), withSeasonRuns(s2026, 2026)])
   assert.deepEqual(decodeSprayBalls(mixed).map((b) => [b.venueId, b.season]), [[null, 2021], [2394, 2026]])
-})
-
-const ball = (venueId, season, over = {}) => ({
-  x: 125, y: 100, exitVelo: 90, result: 'single', hand: 'R', side: 'R', level: 'mlb', pitcherId: 9, venueId, season, ...over,
-})
-
-test('the park view groups by wall: two Comerica walls are two groups', () => {
-  const parks = sprayParks([ball(2394, 2022), ball(2394, 2022), ball(2394, 2026), ball(32, 2026)])
-  const byKey = Object.fromEntries(parks.groups.map((g) => [g.key, g]))
-  assert.equal(byKey['comericapark-2000'].n, 2)
-  assert.equal(byKey['comericapark-2023'].n, 1)
-  // Two walls of one park name their seasons; a lone park does not.
-  assert.equal(byKey['comericapark-2000'].label, 'Comerica Park (2022)')
-  assert.equal(byKey.americanfamilyfield.label, 'American Family Field')
-  assert.equal(parks.groups[0].key, 'comericapark-2000', 'most balls first')
-})
-
-test('the coverage counts keep unknown and off-file balls out of every park', () => {
-  const parks = sprayParks([ball(null, 2026), ball(2523, 2025), ball(32, 2026)])
-  assert.equal(parks.unknown, 1, 'no park on record')
-  assert.equal(parks.offFile, 1, 'a park with no layout (Steinbrenner Field, 2025)')
-  assert.equal(parks.total, 3)
-  assert.deepEqual(parks.groups.map((g) => g.n), [1])
-})
-
-test('a park view recomputes every count from the balls hit there', () => {
-  const view = {
-    name: 'A', levels: ['mlb'],
-    balls: [
-      ball(32, 2026, { result: 'hr', exitVelo: 104 }),
-      ball(32, 2026, { result: 'out', hand: 'L' }),
-      ball(3, 2026, { result: 'double' }),
-    ],
-    splits: [{ key: 'all', label: 'All', bip: 500, hits: 150, xbh: 50, hr: 20, hard: 200, thin: false }],
-  }
-  const group = sprayParks(view.balls).groups.find((g) => g.venueId === 32)
-  const sub = parkSubview(view, group)
-  assert.equal(sub.balls.length, 2)
-  assert.deepEqual(
-    sub.splits.map(({ key, bip, hits, xbh, hr, hard }) => [key, bip, hits, xbh, hr, hard]),
-    [['all', 2, 1, 1, 1, 1], ['R', 1, 1, 1, 1, 1], ['L', 1, 0, 0, 0, 0]],
-  )
-  assert.equal(sub.park, group)
 })
 
 test('every ballpark configuration covers whole seasons (the store keeps no dates)', () => {

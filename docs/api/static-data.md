@@ -266,26 +266,6 @@ for each generator; the reader modules:
   download per club. The page's pure half is
   `src/lib/gameNotes/archive.js`; `scripts/download-game-notes.mjs` saves the same
   archive's PDFs to a gitignored folder.
-- `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a
-  `CONFIG` map keyed by teamId; all 30 MLB clubs), it parses the narrative blurbs
-  out of the PDF for an in-app modal (`WhatsBrewingModal.jsx`). No game surface
-  opens that modal any more — the parse proved too brittle across the clubs'
-  shifting templates, so every Game Notes button links straight to the PDF; the
-  one caller left is the unlisted `/game-notes-debug` QA page. Parses
-  client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
-  main bundle — see `vite.config.js`) rather than in the cron, because tonight's
-  note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
-  template needs its own calibration, so `CONFIG` carries a `layout` per club —
-  `column` (Brewers' narrow-column sheet) or `flow-bold`/`flow` (league-standard
-  full-width, most other clubs) — plus font/geometry tunables (single zone or a
-  `columns:` array for multi-column pages). `hasWhatsBrewing`/
-  `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
-  teamId→title map) rather than here, so a caller's gate check can import them
-  statically without pulling this whole parser out of its lazy chunk; add a
-  club = add a `CONFIG` entry here + a title there (not a new parser). See
-  `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
-  and `docs/whats-brewing.md` for parsing details + the Node harness
-  (`extractForTeam`).
 - `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
   `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is
   eight full-level stat pulls (~4,700 players), so `gen-minors-leaders.mjs` (daily
@@ -537,9 +517,7 @@ for each generator; the reader modules:
   filler. See `.scratch/player-profile-card/scope.md` §4.
 - `spray.js` — one batter's season balls in play and where they landed (and,
   from schema version 2, at which park: `g` runs, decoded onto each ball as
-  `venueId` and `season`; `sprayParks` groups a view's balls by the ballpark
-  configuration they were hit at, and `parkSubview` narrows a view to one park
-  with every count recomputed from its balls, #1859), from
+  `venueId` and `season`, #1859), from
   `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
   `personId % 100`; the season `spray/seasons.json` names, ADR-0086; a sibling
   `NN.contact.json` holds the Contact card's columns, #1912, below). Completed-game season aggregates over games that were
@@ -555,15 +533,11 @@ for each generator; the reader modules:
   side, level, pitcherId]` — positional because a season is ~190,000 rows and
   eight spelled-out keys apiece quadruples the committed bytes); `o` holds the
   per-pitcher-hand TOTALS, swept independently. They differ by about one ball in
-  two thousand, and home runs are among them — so `hrNote` prints "16 of 17 HR
-  had tracked landing points" rather than letting the card under-report a man's
-  season forever. `sprayView(data, personId)` assembles the card and returns
+  two thousand, and home runs are among them, so a card that wants the season
+  total reads `o`, not the plotted rows. `sprayView(data, personId)` assembles the card and returns
   null under `MIN_SPRAY_BIP`; `MIN_SPLIT_BIP` grays a chip too thin to read
-  without hiding it. `directionMix` is the one piece with a rule you cannot
-  guess: pull is a fact about the BATTER, so a switch-hitter's All view has no
-  direction bar at all (two mirrored halves do not sum), while each split keeps
-  its own — decided by a MAJORITY of the sample rather than unanimity, since one
-  turned-around at-bat should not withhold the other 239. The stored
+  without hiding it. `directionOf` is pull / center / oppo for one ball, a fact about the
+  BATTER (his side flips the sign). The stored
   `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
   can share these shards instead of sweeping the season twice.
   **The contact store** (#1912) is `NN.contact.json` beside each shard, read only by
@@ -638,18 +612,10 @@ for each generator; the reader modules:
   names — `SimilarHitters.jsx` resolves its
   three rows' names/clubs itself with one batched
   `people?personIds=…&hydrate=currentTeam` call.
-- `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
-  slot the pitcher page fills with `workload.js`'s Recent workload): live
-  `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
-  out in one `Promise.all`; `hitterFormView` is the pure shaping. It returns a
-  small TIME SERIES, not a facts list: one row per window, a `season` anchor
-  row that is the baseline the windows are measured against, and per row a
-  signed OPS delta plus a `lean` on a FIXED ±.300 scale (a scale fitted to the
-  player would draw every hitter alive at full width). `RecentFormCard` renders
-  that as a ledger with diverging bars. Current-day only (the card skips under
-  a spoiler `asOf`), and NOT
-  `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
-  projection — the name differs on purpose so the two never collide.
+- `hitterForm.js` — the PLAYER page's batter Form trend: `inOrder` (a game log, oldest
+  first) and `rollingSeries(log, w)` (the OPS of every w-game stretch, plus the best and worst).
+  Current-day only (the card skips under a spoiler `asOf`), and NOT `src/api/recentForm.js`,
+  which is the TEAM page's unrelated Last-10 roster projection.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`

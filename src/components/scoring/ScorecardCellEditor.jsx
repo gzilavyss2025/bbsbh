@@ -11,7 +11,7 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 // re-reads an override — this is the margin-pencil layer, not a data entry
 // tool.
 //
-// Same dialog contract as BallparkModal/WhatsBrewingModal: backdrop tap,
+// Same dialog contract as BallparkModal: backdrop tap,
 // close button, or Escape dismisses; focus moves into the sheet on open and
 // back to the trigger on close. Portalled (ModalPortal) so it stays above the
 // page chrome from either scorecard surface. Docked to the TOP of the screen

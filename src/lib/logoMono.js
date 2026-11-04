@@ -26,6 +26,8 @@
 // scripts/gen-mono-logos.mjs, which precomputes one file per club into
 // public/data/logos/mono/.
 
+import { rgbToHsl, toRgb } from './contrast.js'
+
 // A mark drawn as an `<image>` (embedded raster) or `<foreignObject>` carries
 // no fills to classify, so it can't be re-inked at all — those bail to null and
 // the caller falls back to the full-color mark.
@@ -43,26 +45,6 @@ const PASS_THROUGH = new Set([
   'context-fill',
   'context-stroke',
 ])
-
-function hexToRgb(h) {
-  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
-  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
-}
-
-function rgbToHsl([r, g, b]) {
-  r /= 255
-  g /= 255
-  b /= 255
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  const l = (max + min) / 2
-  let s = 0
-  if (max !== min) {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-  }
-  return { s, l }
-}
 
 // A fill is KNOCKOUT when it's the paper the mark is drawn against rather than
 // part of the mark. Two bands, tuned by rendering every club's art (see the
@@ -92,7 +74,7 @@ export function classifyPaint(value) {
   if (v === 'white') return 'knockout'
   const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(v)
   if (!hex) return 'ink'
-  const { s, l } = rgbToHsl(hexToRgb(hex[1]))
+  const { s, l } = rgbToHsl(toRgb(hex[1]))
   if (l >= KNOCKOUT_NEAR_WHITE_LIGHTNESS) return 'knockout'
   return l >= KNOCKOUT_MIN_LIGHTNESS && s <= KNOCKOUT_MAX_SATURATION ? 'knockout' : 'ink'
 }

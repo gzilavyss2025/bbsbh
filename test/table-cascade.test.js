@@ -1043,7 +1043,6 @@ const T8 = [
   { jsx: 'screens/StandingsPage.jsx', tags: 2, sticky: true, extra: 'clubtable--full' },
   { jsx: 'screens/PostseasonRacePage.jsx', tags: 1, sticky: true, extra: 'clubtable--full' },
   { jsx: 'components/teamstats/PostseasonOddsModal.jsx', tags: 1, sticky: false, extra: 'psoddstable' },
-  { jsx: 'screens/GameNotesDebugPage.jsx', tags: 1, sticky: false },
 ]
 const T8_CSS = ['29-team-transactions.css', '30-standings.css', '31-wild-card.css', '39-manager-page.css']
 const T8_NS = ['clubtable', 'clubtable--full', 'psoddstable']
@@ -1066,7 +1065,7 @@ test('T8: each club table renders on Table with the frame, density, sticky and l
     }
     tables += own.length
   }
-  assert.equal(tables, 5, 'T8 moves 5 tables')
+  assert.equal(tables, 4, 'T8 moves 4 tables')
 })
 
 test('T8: two boards on one page have two different labels', () => {
