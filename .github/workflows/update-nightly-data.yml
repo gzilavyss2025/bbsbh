@@ -101,6 +101,7 @@ on:
 
 permissions:
   contents: write
+  issues: write # scripts/nightly/failure-issues.mjs
 
 jobs:
   # The nightly Claude routine dispatches this workflow about an hour after the
@@ -734,6 +735,7 @@ jobs:
         run: node scripts/check-data-freshness.mjs
 
       - name: Commit if changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -796,6 +798,17 @@ jobs:
       # 0 and produced NOTHING leaves a stale file and reports success. Every
       # incident in this file's header is that shape. always(), because a night
       # where something already failed is exactly when the staleness matters.
+      # One needs-triage issue per failed step, closed the night it passes
+      # again; steps that run on continue-on-error otherwise fail in silence.
+      - name: Failure issues
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STEPS_JSON: ${{ toJSON(steps) }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/nightly/failure-issues.mjs
+
       - name: Fail if any generator errored
         if: |
           steps.teams.outcome == 'failure' ||
