@@ -379,7 +379,7 @@ async function minorsAsOf(personId, group, season, asOf) {
 // A move from a day already over reads facts that can no longer change, so its
 // answer is kept in this browser (localStorage, FACTS_STORE) and a return visit
 // reads it with no request at all. Today's moves always read live.
-const FACTS_STORE = 'bbsbh:wirefacts:v1:'
+const FACTS_STORE = 'bbsbh:wirefacts:v2:'
 const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD, the reader's own day
 function readStored(key) {
   try {
@@ -512,6 +512,10 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
             ? await minorsAsOf(personId, group, season, asOf)
             : (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors })
+          // The season before, too: a big leaguer stuck in Triple-A is judged
+          // on his last two years there, not on a big-league year long gone.
+          const prev = (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${Number(season) - 1}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
+          withMinors.minorsPrev = shapeMinors(prev, facts.pitcher)
           const extra = ['midSeason', 'seasonLine', 'seasonClubs', 'careerLine', 'age', 'rows', 'stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })

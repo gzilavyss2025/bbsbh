@@ -8,6 +8,18 @@ import { WinterCalendar } from './WinterCalendar.jsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { ALL_MLB_TEAM_IDS, teamAbbr } from '../../lib/teams.js'
+const MLB_CLUBS = new Set(ALL_MLB_TEAM_IDS)
+
+// A club's moves: the ones it filed, and the ones that name it (a trade partner).
+function involves(story, teamId) {
+  return story.teamId === teamId || (story.cutline ?? []).some((seg) => seg.teamId === teamId)
+}
+function forClub(days, teamId) {
+  if (teamId == null || !days) return days
+  return days.map((day) => ({ ...day, stories: (day.stories ?? []).filter((s) => involves(s, teamId)) }))
+}
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -49,6 +61,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   const [kept, setKept] = useState(null)
   const listRef = useRef(null)
   const [visible, setVisible] = useState(STEP)
+  const [teamId, setTeamId] = useState(null)
   const span = windowDaysFor(sportId)
   // One window per page, newest first, each ending where the last began. It
   // may reach back past the winter's first day: October's moves are moves too.
@@ -72,7 +85,42 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
 
   // While an older window loads, keep the moves already on screen.
   if (data && data !== kept) setKept(data)
-  const items = flattenDays(data ?? kept)
+  const days = data ?? kept
+  const items = flattenDays(forClub(days, teamId))
+  // The clubs in hand, the same strip as the longest at-bats (LongAtBats.jsx).
+  const clubs = [
+    ...new Set(
+      (days ?? []).flatMap((day) =>
+        (day.stories ?? []).flatMap((st) => [st.teamId, ...(st.cutline ?? []).map((seg) => seg.teamId)]),
+      ),
+    ),
+  ]
+    .filter((id) => MLB_CLUBS.has(id))
+    .sort((x, y) => (teamAbbr({ id: x }) < teamAbbr({ id: y }) ? -1 : 1))
+  const pickClub = (id) => {
+    setTeamId(id)
+    setVisible(STEP)
+    setCap(null)
+  }
+  const clubStrip = clubs.length > 0 && (
+    <div className="seasonnote__clubs oseason__clubs" role="group" aria-label="Filter by club">
+      <button type="button" className="seasonnote__clubpick seasonnote__clubpick--all" aria-pressed={teamId === null} onClick={() => pickClub(null)}>
+        All
+      </button>
+      {clubs.map((id) => (
+        <button
+          key={id}
+          type="button"
+          className="seasonnote__clubpick"
+          aria-pressed={teamId === id}
+          aria-label={teamAbbr({ id })}
+          onClick={() => pickClub(teamId === id ? null : id)}
+        >
+          <TeamLogo teamId={id} size={26} />
+        </button>
+      ))}
+    </div>
+  )
   const total = items.filter((item) => item.kind === 'story').length
   const shown = takeStories(items, visible)
   // The card keeps the height its first ten moves gave it; more moves scroll
@@ -122,13 +170,18 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           failure — the same silence the rail keeps. On the offseason page that
           silence would leave the reader looking at a bare heading, so the lead
           says which of the two it is rather than showing an empty ledger. */}
-      {total > 0 ? (
+      {clubs.length > 0 ? (
         <>
           {/* The ledger card: its moves, and the door as its footer bar. */}
           <div className="oseason__ledger">
+            {clubStrip}
             {/* One ledger line per move: faces, the sentence, the club. */}
             <ul className="oseason__list" ref={listRef} style={cap ? { maxHeight: cap, overflowY: 'auto' } : undefined}>
-              <MoveItems items={shown} marks />
+              {total > 0 ? (
+                <MoveItems items={shown} marks />
+              ) : (
+                <li className="oseason__none">{`No moves for this club in the last ${windowDaysFor(sportId) * pages} days.`}</li>
+              )}
             </ul>
             <button
               type="button"
