@@ -101,13 +101,11 @@ export function fenceFor(config, dist) {
     const v = FIELDS.venues[config.venueId]
     if (v?.fence) {
       points = v.fence
-      audit = v.audit
       source = { kind: 'gameday', season: FIELDS.season, url: FIELDS.sources.fence.replace('{venueId}', config.venueId) }
     }
   } else if (config.fence === 'milb') {
     const v = FIELDS.milb.venues[config.venueId]
     points = v.fence ?? threePointWall(v.posted)
-    audit = v.audit
     source = { kind: 'milb', season: FIELDS.season, url: FIELDS.milb.sources.fence.replace('{venueId}', config.venueId) }
   } else if (config.fence === 'seed') {
     points = WALLS[config.seedKey] ?? null

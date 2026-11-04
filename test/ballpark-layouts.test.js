@@ -25,6 +25,16 @@ import { buildFieldGeometry, diagramInput, HOME } from '../src/lib/ballpark/ball
 import { bearing, clipToFoulLines, fenceProblems, heightAt } from '../src/lib/ballpark/layout/fenceShape.js'
 import { FIELDS, threePointWall } from '../src/lib/ballpark/layout/fences.js'
 import { checkLayers } from '../scripts/lib/ballpark/field-svg.mjs'
+import { readFileSync } from 'node:fs'
+
+// The import's audit numbers: build-only, not shipped (#2903), so read from disk.
+const AUDIT = JSON.parse(readFileSync(new URL('../src/lib/ballpark/layout/fields-audit.json', import.meta.url), 'utf8'))
+// Gameday / minor-league outlines carry no runtime audit; seed walls compute theirs.
+const auditOf = (l) => {
+  const kind = l.provenance.fence?.kind
+  const venueId = CONFIGURATIONS.find((c) => c.id === l.configurationId)?.venueId ?? l.configurationId.replace('milb-', '')
+  return kind === 'gameday' ? AUDIT.venues[venueId] : kind === 'milb' ? AUDIT.milb[venueId] : l.audit
+}
 
 const layout = (q) => resolveBallparkLayout(q)?.configurationId ?? null
 
@@ -115,7 +125,8 @@ test('every drawn outline passed its audit', () => {
     // A minor-league outline is checked only against posted signs: an estimate.
     // A three-point wall has no audit at all: its gaps are interpolated.
     const kind = l.provenance.fence?.kind
-    if (l.audit) assert.ok(l.audit.pass, l.configurationId)
+    const audit = auditOf(l)
+    if (audit) assert.ok(audit.pass, l.configurationId)
     else assert.equal(kind, 'milb', `${l.configurationId}: only a three-point wall goes unaudited`)
     assert.equal(l.quality.fence, kind === 'milb' ? 'estimated' : 'audited', l.configurationId)
   }
@@ -153,7 +164,7 @@ test('the imported store is complete for every current MLB park', () => {
     const v = FIELDS.venues[c.venueId]
     assert.ok(v?.measured, `venue ${c.venueId} has a Savant row`)
     if (v.fence) {
-      assert.ok(v.audit.pass, `venue ${c.venueId} stores only a passing outline`)
+      assert.ok(AUDIT.venues[c.venueId].pass, `venue ${c.venueId} stores only a passing outline`)
       assert.ok(v.fence.length >= 4)
       // Pole to pole, left to right: the first point is in left field.
       assert.ok(v.fence[0][0] < 0 && v.fence.at(-1)[0] > 0)
@@ -366,8 +377,8 @@ test('every stored minor-league outline fits its posted signs and is a valid fen
       assert.ok(Object.values(v.posted).every(Number.isFinite) || [lf, cf, rf].every(Number.isFinite), `${id}: kept only for its posted distances`)
       continue
     }
-    assert.ok(v.audit.pass, id)
-    for (const k of ['lf', 'cf', 'rf']) assert.ok(Math.abs(v.audit[k]) <= FIELDS.milb.toleranceFt, `${id} ${k}`)
+    assert.ok(AUDIT.milb[id].pass, id)
+    for (const k of ['lf', 'cf', 'rf']) assert.ok(Math.abs(AUDIT.milb[id][k]) <= FIELDS.milb.toleranceFt, `${id} ${k}`)
     assert.deepEqual(fenceProblems(clipToFoulLines(v.fence)), [], id)
   }
   // An MLB-measured park is never shadowed by the minor-league pass.
