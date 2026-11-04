@@ -25,6 +25,8 @@ tables is the reason this layer exists, so wire it in rather than adding
 another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5) rather than `better-sqlite3` — the workflows run generators with no
 `npm install` step, and a built-in avoids adding install latency.
 A `bySeason` group keeps every season, one frozen dump per old season (ADR-0086).
+**The dumps and `data/callouts-archive/` are not in this repo** (ADR-0128): they live in
+the private `bbsbh-state` repo. Run `npm run state:pull` before a generator that reads them.
 
 ## Generator rules
 

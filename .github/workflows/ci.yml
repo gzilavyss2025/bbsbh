@@ -35,6 +35,16 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      # The checks on the real generator state (test-state/), which lives in the
+      # private bbsbh-state repo (#2886). GITHUB_TOKEN cannot read another repo,
+      # so this checkout uses GH_BOT_TOKEN.
+      - uses: actions/checkout@v7
+        with:
+          repository: gzilavyss2025/bbsbh-state
+          path: .state
+          token: ${{ secrets.GH_BOT_TOKEN }}
+      - run: npm run state:pull
+      - run: npm run test:state
       - run: npm run build
       # Needs the artifact, so it can't live in `npm run lint`: asserts the
       # dev-only write-back endpoint never reached the shipped bundle. See
