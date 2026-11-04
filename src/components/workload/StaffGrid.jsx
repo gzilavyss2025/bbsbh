@@ -30,7 +30,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //
 // `rows` is staffGridFor's output. Null or empty renders nothing — a club with
 // no arms on file is a gap in the file, not an empty bullpen.
-export function StaffGrid({ rows, showDots = true, showKey = true }) {
+export function StaffGrid({ rows }) {
   const counts = useMemo(
     () => bullpenStatusCounts((rows ?? []).map((r) => r.status)),
     [rows],
@@ -41,16 +41,14 @@ export function StaffGrid({ rows, showDots = true, showKey = true }) {
 
   return (
     <Stack gap="snug" className="staffgrid">
-      {showDots && (
-        <Cluster className="staffgrid__summary" align="center">
-          <PenDots counts={counts} />
-          <span className="staffgrid__tally">
-            {counts.fresh} available
-            {counts.limited > 0 && ` · ${counts.limited} limited`}
-            {counts.down > 0 && ` · ${counts.down} down`}
-          </span>
-        </Cluster>
-      )}
+      <Cluster className="staffgrid__summary" align="center">
+        <PenDots counts={counts} />
+        <span className="staffgrid__tally">
+          {counts.fresh} available
+          {counts.limited > 0 && ` · ${counts.limited} limited`}
+          {counts.down > 0 && ` · ${counts.down} down`}
+        </span>
+      </Cluster>
 
       <div className="staffgrid__head">
         <span className="staffgrid__hlabel">Arm</span>
@@ -97,11 +95,9 @@ export function StaffGrid({ rows, showDots = true, showKey = true }) {
         ))}
       </ul>
 
-      {showKey && (
-        <div className="staffgrid__key">
-          <DayStripKey />
-        </div>
-      )}
+      <div className="staffgrid__key">
+        <DayStripKey />
+      </div>
     </Stack>
   )
 }

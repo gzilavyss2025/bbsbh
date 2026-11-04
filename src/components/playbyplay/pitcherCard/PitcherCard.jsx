@@ -51,11 +51,10 @@ import { SeasonLines } from './SeasonLines.jsx'
 // draws final). The repeat at the head of the next at-bat is this same card: it shares the
 // answer through `cardData` below, keyed by arm and game: once the first card has loaded it asks
 // the network for nothing and draws complete on its first render (opened directly, with no first
-// card, it is the first asker and arrives like any card). `after` renders what sits right below the card and
-// arrives with it (the departing arm's line), told whether the card has settled.
+// card, it is the first asker and arrives like any card).
 const cardData = keyedCache()
 
-export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment, after, tonight = null, showLast = true, gameday = false, tabs = null }) {
+export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, side, treatment, tonight = null, showLast = true, gameday = false, tabs = null }) {
   const game = feed?.gameData ?? {}
   const officialDate = game.datetime?.officialDate ?? null
   const season = game.game?.season ?? null
@@ -71,7 +70,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
   const key = `${id}|${season}|${sportId}|${gameType}|${officialDate}|${gameNumber}`
   // A read that lost the pitch-arsenal shard (a failed fetch gives null) is shown but not kept, so the next ask retries it.
   const kept = (a) => a != null && (!(sportId === 1 || sportId === 11) || a.shard != null)
-  const { data: asked, loading } = useAsync(
+  const { data: asked } = useAsync(
     () =>
       cardData.load(key, async () => {
         if (!id || !officialDate) return null
@@ -110,7 +109,6 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
           teamId={teamId}
           teamName={teamName}
           label={label}
-          entering={entering}
           flag={flag}
           logo={!gameday}
           stacked={gameday}
@@ -146,7 +144,6 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
           />
         </Unfold>
       </div>
-      {after?.(open || !loading)}
     </>
   )
 }

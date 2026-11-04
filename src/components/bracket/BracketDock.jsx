@@ -13,7 +13,6 @@
 // (ADR-0087). No seal, no kraft.
 import '../../styles/80-postseason-bracket.css'
 import '../../styles/postseason/home.css'
-import { useEffect } from 'react'
 import { recordLine } from '../../api/postseason/text.js'
 import { aliveClubs, seriesPlayingToday } from '../../lib/postseason/bracketDisplay.js'
 import { Pill } from '../ui/control/Pill.jsx'
@@ -36,15 +35,10 @@ function todayLine(bracket, slateDate) {
   return 'No games today'
 }
 
-export function BracketDock({ bracket, cutoff, slateDate, onPresence }) {
+export function BracketDock({ bracket, cutoff, slateDate }) {
   const historyIds = useBracketHistoryIds()
-  const present = Boolean(bracket)
 
-  useEffect(() => {
-    onPresence?.(present)
-  }, [onPresence, present])
-
-  if (!present) return null
+  if (!bracket) return null
 
   const alive = aliveClubs(bracket).length
   const line = todayLine(bracket, slateDate)

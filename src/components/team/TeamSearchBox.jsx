@@ -10,7 +10,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 // already-chosen team as a chip with a clear button, for that same picker
 // use. (Site-wide team search lives in the header's merged search modal —
 // see SiteSearch.jsx — not here.)
-export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team name…', onPick, selected = null }) {
+export function TeamSearchBox({ placeholder = 'Team name…', onPick, selected = null }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const directory = useAsync(fetchTeamDirectory, [])
@@ -25,7 +25,7 @@ export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team name�
 
   return (
     <Stack gap="tight" className="searchbox">
-      <label className="t-label">{label}</label>
+      <label className="t-label">Find a team</label>
       {selected ? (
         <div className="searchbox__chosen">
           <span>{selected.name}</span>

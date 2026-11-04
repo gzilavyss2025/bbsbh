@@ -1,7 +1,6 @@
 import { useContext, useId, useRef, useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
-import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, boxLeftOfPlate, catcherX, stanceArt, sy } from '../../lib/zone/zoneGeometry.js'
 import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
@@ -257,12 +256,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
 // same 16%-mix row-tint idiom StatBox/foul-tracker/umpire-pages already use
 // for "this one's the one to look at"). It's always the final row: the at-bat
 // ends on its last pitch by definition.
-//
-// PICKING IS OPT-IN (the at-bat replay, AtBatReplay.jsx). `pick` { nos, picked,
-// onPick, onHover } turns the number dot of each pitch in `nos` into a ghost
-// .btn that plays that pitch; its hit area is the whole row (pitcher-card/card.css).
-// Without it the list is the static one the zone sheet shows.
-export function PitchList({ pitchDetails, pick }) {
+export function PitchList({ pitchDetails }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
   const lastNo = pitches[pitches.length - 1].no
@@ -273,21 +267,7 @@ export function PitchList({ pitchDetails, pick }) {
           className={`pitchlist__row ${p.no === lastNo ? 'pitchlist__row--decisive' : ''}`}
           key={p.no}
         >
-          {pick?.nos.has(p.no) ? (
-            <Button
-              skin="ghost"
-              className="pitchlist__pick"
-              pressed={pick.picked === p.no}
-              aria-label={`Play pitch ${p.no}`}
-              onClick={() => pick.onPick(p.no)}
-              onMouseEnter={pick.onHover && (() => pick.onHover(p.no))}
-              onMouseLeave={pick.onHover && (() => pick.onHover(null))}
-            >
-              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
-            </Button>
-          ) : (
-            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
-          )}
+          <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
             {p.mph != null ? `${p.mph} MPH, ` : ''}

@@ -28,8 +28,8 @@ import { moveKey } from '../../lib/scorecard/words.js'
 // row) keep sticking to the real pane, which a transform would break.
 //
 // Two modes:
-//  • Empty template (no `grid`) — nine blank rows over `templateInnings` innings
-//    (default 11, the paper sheet's own count); `lineup` (optional,
+//  • Empty template (no `grid`) — nine blank rows over 11 innings
+//    (the paper sheet's own count); `lineup` (optional,
 //    [{ pos, name, jersey }]) fills only the left column.
 //  • Loaded game (`grid` from api/scorecardGame.js) — one plate appearance per
 //    cell. Most innings are one column; an inning where a slot batted around
@@ -116,7 +116,6 @@ function slotRow(grid, lineup, slotIndex) {
 export function ScorecardSheet({
   lineup = [],
   grid = null,
-  templateInnings = 11,
   notes = null,
   onCellTap = null,
   onFrontierTap = null,
@@ -160,7 +159,7 @@ export function ScorecardSheet({
         inningStart: c.inningStart,
         inning: c.inning,
       }))
-    : Array.from({ length: templateInnings }, (_, i) => i + 1).map((n) => ({
+    : Array.from({ length: 11 }, (_, i) => i + 1).map((n) => ({
         key: n,
         colIndex: null,
         label: n,
