@@ -33,11 +33,10 @@ The catalog is `docs/scripts/generators.md`: one entry per `gen-*.mjs`, grouped 
 are rules rather than reference:
 
 - **Wire a new generator into the cron that runs it, in the same commit.** A
-  nightly step is three edits to `.github/workflows/update-nightly-data.yml`,
-  not one: the `run` step, the `git add` list in "Commit if changed", and the
-  "Fail if any generator errored" condition. Miss the second and the job
-  computes the file and throws it away; miss the third and a broken generator
-  reports green. Both have happened (see that workflow's own header).
+  nightly step is one edit to `.github/workflows/update-nightly-data.yml`: the
+  `run` step, with an `id` and `continue-on-error: true`. Staging (`git add -A`)
+  and the fail check (every step's outcome) are structural now; both used to be
+  hand-kept lists, and both drifted (see that workflow's own header).
 - **A generator that is NOT on a cron must say what runs it.** The catalog's
   cadence groups are the record. A date-keyed file has no way to look stale, so one
   generator on no cron served a twenty-three-day-old snapshot quietly (the story is the

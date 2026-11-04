@@ -241,3 +241,11 @@ export const previousTeamSnapshot = (db) => {
   )
   return (season, teamId, metric, date) => stmt.get(season, teamId, metric, date)?.payload_json
 }
+
+// Deletes a team's row for one date and metric. A repeat (repeatsPrevious) also
+// drops a row an earlier run stored that same date, or a same-day rerun whose
+// payload went back to the day before would leave that stale row behind.
+export const dropTeamSnapshot = (db) => {
+  const stmt = db.prepare(`DELETE FROM team_snapshots WHERE season = ? AND team_id = ? AND metric = ? AND date = ?`)
+  return (season, teamId, metric, date) => stmt.run(season, teamId, metric, date)
+}

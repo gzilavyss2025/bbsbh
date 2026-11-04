@@ -25,7 +25,7 @@ import {
   CURRENT_FORM_GAMES,
 } from '../src/api/teamScoreFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
-import { openDb, dumpGroup, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
+import { openDb, dumpGroup, dropTeamSnapshot, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
 import { round1, round2 } from '../src/lib/math/number.js'
@@ -278,6 +278,7 @@ async function main() {
   const db = await openDb()
   const insert = upsertSnapshot(db)
   const previous = previousTeamSnapshot(db)
+  const drop = dropTeamSnapshot(db)
   for (const asOf of dates) {
     const games = await fetchCompletedGames(asOf)
     const season = Number(asOf.slice(0, 4))
@@ -291,6 +292,8 @@ async function main() {
         repeatsPrevious(previous(season, id, 'quality', asOf), snapshot.season) &&
         repeatsPrevious(previous(season, id, 'current_form', asOf), snapshot.currentForm)
       ) {
+        drop(season, id, 'quality', asOf)
+        drop(season, id, 'current_form', asOf)
         repeats++
         continue
       }

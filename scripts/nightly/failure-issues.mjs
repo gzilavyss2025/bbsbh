@@ -4,22 +4,31 @@
 // last step goes red; the failure email then says nothing about which. This
 // opens a needs-triage issue for each failed step, comments on it when the step
 // fails again, and closes it the first night the step passes. A step the input
-// gates skipped (scripts/nightly/inputs.mjs) proves nothing, so its issue stays.
+// gates skipped (scripts/nightly/inputs.mjs) proves nothing, so its issue stays
+// open; the first such night adds one note (NOTE_MARK) saying how to retest.
 //
-// Run as the job's last step with STEPS_JSON=${{ toJSON(steps) }}, RUN_URL and
+// Run as the job's second-to-last step with STEPS_JSON=${{ toJSON(steps) }}, RUN_URL and
 // GH_TOKEN; it drives the `gh` CLI the runner ships with. The step log is
 // linked, not quoted: a job cannot read its own logs until it has finished.
+// With --check (the last step) it only fails the job when any step failed.
 import { execFileSync } from 'node:child_process'
+import { GATES } from './inputs.mjs'
 
 export const titleFor = (id) => `Nightly data: step "${id}" failed`
+export const NOTE_MARK = 'skipped by the input gates'
 
 // steps: the workflow's `steps` context ({ id: { outcome } }); open: the open
-// issues as [{ number, title }].
-export function planIssues(steps, open) {
-  const byTitle = new Map(open.map((i) => [i.title, i.number]))
-  const plan = { open: [], comment: [], close: [] }
+// issues as [{ number, title, noted? }], noted when a comment carries NOTE_MARK.
+// gated: the step ids the input gates own (inputs.mjs GATES). A skipped step
+// outside it was skipped by its producer's failure, not a gate, so it gets no
+// gate note.
+export function planIssues(steps, open, gated) {
+  const byTitle = new Map(open.map((i) => [i.title, i]))
+  const plan = { open: [], comment: [], close: [], note: [] }
   for (const [id, { outcome }] of Object.entries(steps)) {
-    const number = byTitle.get(titleFor(id))
+    const issue = byTitle.get(titleFor(id))
+    const number = issue?.number
+    if (outcome === 'skipped' && issue && !issue.noted && gated.has(id)) plan.note.push({ id, number })
     if (outcome === 'failure') {
       if (number) plan.comment.push({ id, number })
       else plan.open.push(id)
@@ -30,13 +39,30 @@ export function planIssues(steps, open) {
   return plan
 }
 
+// The steps that failed, by id. The job's last step fails the job from this
+// (--check), so a new generator needs no entry in a hand-kept list to count.
+// The input-gate step fails OPEN (every gated step still runs), so its failure
+// gets an issue but does not turn the night red on its own.
+export const failedSteps = (steps) =>
+  Object.entries(steps).filter(([id, s]) => s.outcome === 'failure' && id !== 'inputs').map(([id]) => id)
+
+function check() {
+  const failed = failedSteps(JSON.parse(process.env.STEPS_JSON ?? '{}'))
+  if (failed.length) {
+    console.error(`Nightly steps failed: ${failed.join(', ')}. See their logs above; each has a needs-triage issue.`)
+    process.exit(1)
+  }
+  console.log('Every nightly step that ran passed.')
+}
+
 function main() {
   const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' })
   const steps = JSON.parse(process.env.STEPS_JSON ?? '{}')
   const run = process.env.RUN_URL ?? ''
   const day = new Date().toISOString().slice(0, 10)
-  const open = JSON.parse(gh('issue', 'list', '--state', 'open', '--search', 'in:title "Nightly data: step"', '--json', 'number,title', '--limit', '100'))
-  const plan = planIssues(steps, open)
+  const open = JSON.parse(gh('issue', 'list', '--state', 'open', '--search', 'in:title "Nightly data: step"', '--json', 'number,title,comments', '--limit', '100'))
+    .map((i) => ({ number: i.number, title: i.title, noted: (i.comments ?? []).some((c) => c.body?.includes(NOTE_MARK)) }))
+  const plan = planIssues(steps, open, new Set(Object.keys(GATES)))
   for (const id of plan.open) {
     gh('issue', 'create', '--title', titleFor(id), '--label', 'needs-triage', '--body',
       `The nightly data step \`${id}\` failed on ${day}.\n\nStep log: ${run}\n\n` +
@@ -44,7 +70,15 @@ function main() {
   }
   for (const { id, number } of plan.comment) gh('issue', 'comment', String(number), '--body', `\`${id}\` failed again on ${day}: ${run}`)
   for (const { id, number } of plan.close) gh('issue', 'close', String(number), '--comment', `\`${id}\` passed on ${day}: ${run}`)
-  console.log(`failure issues: ${plan.open.length} opened, ${plan.comment.length} commented, ${plan.close.length} closed`)
+  for (const { id, number } of plan.note) {
+    gh('issue', 'comment', String(number), '--body',
+      `\`${id}\` is ${NOTE_MARK} (no game scheduled or none gone Final), so it is not retested until games resume. ` +
+        'To retest it now, run the "Update nightly data" workflow by hand with run_all ticked.')
+  }
+  console.log(`failure issues: ${plan.open.length} opened, ${plan.comment.length} commented, ${plan.close.length} closed, ${plan.note.length} noted`)
 }
 
-if (import.meta.main) main()
+if (import.meta.main) {
+  if (process.argv.includes('--check')) check()
+  else main()
+}

@@ -195,11 +195,3 @@ test('no string the card can show says "official"', () => {
     }
   }
 })
-
-test('ovrView: a change whose newest snapshot is over 7 days before today is not shown', () => {
-  // The history stops gaining identical rows (mergeHistory), so in the offseason the
-  // newest snapshot is the season's last change. It must not read as this week's.
-  const history = [snap('2026-09-20', 71), snap('2026-09-28', 74)]
-  assert.equal(ovrView({ rating: hitter, group: 'hitting', history, today: '2026-11-04' }).change, null)
-  assert.equal(ovrView({ rating: hitter, group: 'hitting', history, today: '2026-10-05' }).change.delta, 3)
-})

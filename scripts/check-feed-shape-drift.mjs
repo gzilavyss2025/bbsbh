@@ -27,12 +27,15 @@
 
 const MAX_DEPTH = 5
 
-// One exception to "a finished game never changes": gameData.players carries each
-// player's CURRENT bio, not the one from game day. A player who is released or
-// goes unsigned loses his jersey number, so his primaryNumber path disappears from
-// the old game's feed. That is roster state, not API shape. It failed the
-// 2026-11-04 nightly for Jake Bauers (641343) and JoJo Romero (668941).
-const ROSTER_STATE = /^gameData\.players\.ID\d+\.primaryNumber$/
+// One exception to "a finished game never changes": a player-keyed block
+// (gameData.players, the boxscore's players) carries each player's CURRENT bio,
+// not the one from game day. A released player loses his jersey number, and the
+// 2026-11-04 nightly failed on exactly that (Jake Bauers, 641343). So the
+// ID-keyed children collapse to one `ID*` path, which resolves when ANY player
+// still has it: one player's roster change passes, a field every player lost
+// (MLB renamed it) still fails.
+const PLAYER_KEY = /^ID\d+$/
+const ANY_PLAYER = 'ID*'
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -57,24 +60,39 @@ function collectPaths(value, prefix, depth, out) {
     return
   }
   for (const key of Object.keys(value)) {
-    const p = prefix ? `${prefix}.${key}` : key
+    const p = prefix ? `${prefix}.${PLAYER_KEY.test(key) ? ANY_PLAYER : key}` : key
     out.add(p)
     collectPaths(value[key], p, depth + 1, out)
   }
 }
 
 function resolvePath(root, dotPath) {
-  let cur = root
-  for (const seg of dotPath.split('.')) {
-    const isArray = seg.endsWith('[]')
-    const key = isArray ? seg.slice(0, -2) : seg
-    cur = cur?.[key]
-    if (isArray) cur = Array.isArray(cur) && cur.length ? cur[0] : undefined
-    if (cur === undefined) return undefined
-  }
-  return cur
+  return resolveSegs(root, dotPath.split('.'))
 }
 
+function resolveSegs(cur, segs) {
+  if (!segs.length) return cur
+  const [seg, ...rest] = segs
+  if (seg === ANY_PLAYER) {
+    for (const [key, child] of Object.entries(cur ?? {})) {
+      if (PLAYER_KEY.test(key) && resolveSegs(child, rest) !== undefined) return child
+    }
+    return undefined
+  }
+  const isArray = seg.endsWith('[]')
+  let next = cur?.[isArray ? seg.slice(0, -2) : seg]
+  if (isArray) next = Array.isArray(next) && next.length ? next[0] : undefined
+  return next === undefined ? undefined : resolveSegs(next, rest)
+}
+
+// Paths the captured fixture has that the fresh fetch no longer resolves, sorted.
+export function missingPaths(fixture, fresh) {
+  const expected = new Set()
+  collectPaths(fixture, '', 0, expected)
+  return [...expected].filter((p) => resolvePath(fresh, p) === undefined).sort()
+}
+
+async function main() {
 let manifest
 try {
   manifest = JSON.parse(readFileSync(path.join(FIXTURES_DIR, 'manifest.json'), 'utf8'))
@@ -117,7 +135,7 @@ for (const { label, file } of TARGETS) {
     continue
   }
 
-  const missing = [...expectedPaths].filter((p) => !ROSTER_STATE.test(p) && resolvePath(fresh, p) === undefined).sort()
+  const missing = missingPaths(fixture, fresh)
 
   if (missing.length) {
     console.error(
@@ -136,3 +154,6 @@ for (const { label, file } of TARGETS) {
     )
   }
 }
+}
+
+if (import.meta.main) await main()

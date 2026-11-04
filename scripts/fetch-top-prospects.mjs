@@ -27,7 +27,7 @@
 // bare URL for the standalone Top 100 page + player-page badge, the
 // query-string URL for each team page's own prospect table.
 import { getJson } from './lib/statsapi.mjs'
-import { withStatsapiNames } from './lib/milb/prospect-names.mjs'
+import { namesWithFallback, withStatsapiNames } from './lib/milb/prospect-names.mjs'
 
 const TOP100_URL = 'https://www.mlb.com/prospects/stats/top-prospects'
 const ORG_URL = 'https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1'
@@ -166,22 +166,25 @@ async function fetchList(url) {
 // public API the rest of the app uses), batched, for every prospect id.
 // Numbers: the scraped Pipeline data has none, and many MiLB prospects have no
 // number yet. Names: the Pipeline page flips a name's accents from one scrape to
-// the next (withStatsapiNames). A failed batch degrades to the scraped data.
+// the next (withStatsapiNames). getJson already retries a batch; one that still
+// fails leaves its players to namesWithFallback (the name already on disk).
 async function fetchPeople(playerIds) {
   const numbers = new Map()
   const names = new Map()
+  const failed = new Set()
   for (let i = 0; i < playerIds.length; i += 150) {
+    const batch = playerIds.slice(i, i + 150)
     try {
-      const data = await getJson(`/api/v1/people?personIds=${playerIds.slice(i, i + 150).join(',')}`)
+      const data = await getJson(`/api/v1/people?personIds=${batch.join(',')}`)
       for (const p of data.people ?? []) {
         numbers.set(p.id, p.primaryNumber ?? null)
         if (p.fullName) names.set(p.id, p.fullName)
       }
     } catch {
-      // keep what earlier batches returned
+      for (const id of batch) failed.add(id)
     }
   }
-  return { numbers, names }
+  return { numbers, names, failed }
 }
 
 async function main() {
@@ -195,7 +198,14 @@ async function main() {
   const top100Deduped = dedupeByPlayer(top100Raw)
   const orgDeduped = dedupeByPlayer(orgRaw)
   const ids = [...new Set([...top100Deduped, ...orgDeduped].map((e) => e.playerId))]
-  const { numbers: jerseyNumbers, names } = await fetchPeople(ids)
+  const { numbers: jerseyNumbers, names: fresh, failed } = await fetchPeople(ids)
+  let onDisk = null
+  try {
+    onDisk = JSON.parse(await (await import('node:fs/promises')).readFile(OUT_PATH, 'utf8'))
+  } catch {
+    // first run: no file yet
+  }
+  const names = namesWithFallback(fresh, onDisk, failed)
   const players = withStatsapiNames(top100Deduped.map((e) => slim(e, 'rank', jerseyNumbers)), names)
     .sort((a, b) => a.rank - b.rank)
   const top100Ids = new Map(players.map((p) => [p.playerId, p.rank]))

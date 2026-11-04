@@ -12,24 +12,24 @@ const game = (codedGameState, abstractGameCode = 'F') => ({ status: { codedGameS
 const sched = (...games) => ({ dates: [{ games }] })
 
 test('no games in either window closes both gates', () => {
-  assert.deepEqual(decideGates({ upcoming: sched(), recent: sched() }), { upcoming: false, finals: false })
+  assert.deepEqual(decideGates({ upcoming: sched(), recent: sched(), recentAaa: sched() }), { upcoming: false, finals: false, finalsAaa: false })
 })
 
 test('a scheduled spring game opens upcoming; a played Final opens finals', () => {
-  assert.deepEqual(decideGates({ upcoming: sched(game('S', 'P')), recent: sched(game('F')) }), { upcoming: true, finals: true })
+  assert.deepEqual(decideGates({ upcoming: sched(game('S', 'P')), recent: sched(game('F')), recentAaa: sched() }), { upcoming: true, finals: true, finalsAaa: true })
 })
 
 test('a cancelled or postponed game opens neither gate', () => {
-  assert.deepEqual(decideGates({ upcoming: sched(game('C'), game('D')), recent: sched(game('C'), game('D')) }), { upcoming: false, finals: false })
+  assert.deepEqual(decideGates({ upcoming: sched(game('C'), game('D')), recent: sched(game('C'), game('D')), recentAaa: sched(game('C')) }), { upcoming: false, finals: false, finalsAaa: false })
 })
 
 test('a schedule that could not be read opens its gate: a wasted run beats a dark step', () => {
-  assert.deepEqual(decideGates({ upcoming: null, recent: null }), { upcoming: true, finals: true })
+  assert.deepEqual(decideGates({ upcoming: null, recent: null, recentAaa: null }), { upcoming: true, finals: true, finalsAaa: true })
 })
 
 test('every gated step names the datasets it writes, and those exist as freshness names', () => {
   for (const [step, g] of Object.entries(GATES)) {
-    assert.ok(['upcoming', 'finals'].includes(g.when), step)
+    assert.ok(['upcoming', 'finals', 'finalsAaa'].includes(g.when), step)
     assert.ok(g.datasets.length > 0, step)
     for (const d of g.datasets) {
       assert.match(d, /\.json$|\/$/, `${step}: ${d}`)
@@ -50,5 +50,16 @@ test('a closed gate lists its steps datasets as skipped, and freshness exempts t
 })
 
 test('run_all opens both gates whatever the schedule says (a hand run that must run everything)', () => {
-  assert.deepEqual(decideGates({ upcoming: sched(), recent: sched(), runAll: true }), { upcoming: true, finals: true })
+  assert.deepEqual(decideGates({ upcoming: sched(), recent: sched(), recentAaa: sched(), runAll: true }), { upcoming: true, finals: true, finalsAaa: true })
+})
+
+test('an AAA-only Final opens only the AAA gate: MLB-only steps stay skipped', () => {
+  const open = decideGates({ upcoming: sched(), recent: sched(), recentAaa: sched(game('F')) })
+  assert.equal(open.finals, false)
+  assert.equal(open.finalsAaa, true)
+  // umpires, umpire accuracy and ABS read AAA; spray does not.
+  for (const id of ['umpires', 'umpire-accuracy', 'abs-challenges']) assert.equal(GATES[id].when, 'finalsAaa', id)
+  assert.equal(GATES.spray.when, 'finals')
+  // An MLB Final opens both: an AAA step reads MLB games too.
+  assert.equal(decideGates({ upcoming: sched(), recent: sched(game('F')), recentAaa: sched() }).finalsAaa, true)
 })

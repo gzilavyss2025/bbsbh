@@ -48,7 +48,7 @@ import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
 import { packProspectTrend } from '../src/api/prospectTrend.js'
 import { buildPopulations, snapshotRow, movementSince, historyRow } from './lib/prospectPercentile.mjs'
 import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
-import { openDb, dumpGroup } from './lib/db.js'
+import { openDb, dumpGroup, repeatsPrevious } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = import.meta.dirname
@@ -83,18 +83,15 @@ const upsertSnapshot = (db) =>
      ON CONFLICT(date, player_id, board, source) DO UPDATE SET payload_json = excluded.payload_json`,
   )
 
-// Exports today's rows, each with a `movement` computed against the nearest
-// EARLIER snapshot at least MOVEMENT_WINDOW_DAYS back — a plain self-join
-// over the table this generator itself has been filling in — plus the player's FULL recorded history
-// (today's row included), oldest first, for the trend chart.
-function exportJson(db, today, levelAverageAge, asOf) {
-  const rows = db
-    .prepare(
-      `SELECT player_id, board, payload_json FROM player_snapshots
-       WHERE date = ? AND source = ?
-       ORDER BY player_id`,
-    )
-    .all(today, SOURCE)
+// Exports this run's rows (`rows`: { player_id, board, payload_json }, computed
+// now, whether or not they were stored), each with a `movement` computed against
+// the nearest EARLIER snapshot at least MOVEMENT_WINDOW_DAYS back — a plain
+// self-join over the table this generator itself has been filling in — plus the
+// player's FULL recorded history, oldest first, for the trend chart. A row equal
+// to the player's previous one is not stored (repeatsPrevious), so in the
+// offseason the history ends at the last real change instead of gaining a copy
+// of it every night.
+function exportJson(db, rows, levelAverageAge, asOf, today) {
   const historyStmt = db.prepare(
     `SELECT date, payload_json FROM player_snapshots
      WHERE player_id = ? AND board = ? AND source = ?
@@ -161,17 +158,34 @@ async function main() {
 
   const db = await openDb()
   const insert = upsertSnapshot(db)
+  const previous = db.prepare(
+    `SELECT payload_json FROM player_snapshots
+     WHERE player_id = ? AND board = ? AND source = ? AND date < ?
+     ORDER BY date DESC LIMIT 1`,
+  )
+  const dropToday = db.prepare(`DELETE FROM player_snapshots WHERE date = ? AND player_id = ? AND board = ? AND source = ?`)
   const today = new Date().toISOString().slice(0, 10)
   let qualifiedCount = 0
+  let repeats = 0
+  const rows = []
   for (const p of pool) {
     const row = snapshotRow(p, populations)
     if (!row) continue
     if (row.payload.percentile != null) qualifiedCount++
-    insert.run(today, p.id, row.group, SOURCE, JSON.stringify(row.payload))
+    const payloadJson = JSON.stringify(row.payload)
+    rows.push({ player_id: p.id, board: row.group, payload_json: payloadJson })
+    // A repeat also drops a row an earlier run stored TODAY, or a same-day rerun
+    // whose payload went back to yesterday's would leave that stale row behind.
+    if (repeatsPrevious(previous.get(p.id, row.group, SOURCE, today)?.payload_json, row.payload)) {
+      dropToday.run(today, p.id, row.group, SOURCE)
+      repeats++
+    } else insert.run(today, p.id, row.group, SOURCE, payloadJson)
   }
+  rows.sort((a, b) => a.player_id - b.player_id)
   await dumpGroup(db, 'player-snapshots')
 
-  await writeJsonAtomic(out, packProspectTrend(exportJson(db, today, levelAverageAge, asOf)))
+  await writeJsonAtomic(out, packProspectTrend(exportJson(db, rows, levelAverageAge, asOf, today)))
+  console.log(`${repeats} of ${rows.length} rows unchanged since the last snapshot, not stored`)
   db.close()
   console.log(`wrote ${out} (${pool.length} prospects with a current-level line, ${qualifiedCount} qualified)`)
 }

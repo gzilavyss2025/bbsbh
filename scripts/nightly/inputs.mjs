@@ -7,6 +7,9 @@
 //             UPCOMING_DAYS days: game-prep steps (notes, call-outs, matchups).
 //   finals    an MLB game went Final since the last run (the heartbeat's ranAt,
 //             minus a day for a late game): game-result steps.
+//   finalsAaa an MLB or AAA game did: the three steps that read AAA too
+//             (umpires, umpire accuracy, ABS), so an AAA-only day such as the
+//             MLB All-Star break runs them without rebuilding MLB-only data.
 //
 // Gated on the SCHEDULE, never the calendar (the workflow header's lesson: "a
 // calendar gate is not self-healing"): the night spring training appears, the
@@ -29,8 +32,8 @@ export const GATES = {
   'former-teammates': { when: 'upcoming', datasets: ['former-teammates/'] },
   'career-matchups': { when: 'upcoming', datasets: ['career-matchups.json'] },
   'vs-team-splits': { when: 'upcoming', datasets: ['vs-team-splits/'] },
-  umpires: { when: 'finals', datasets: ['umpires/'] },
-  'umpire-accuracy': { when: 'finals', datasets: ['umpire-accuracy/'] },
+  umpires: { when: 'finalsAaa', datasets: ['umpires/'] },
+  'umpire-accuracy': { when: 'finalsAaa', datasets: ['umpire-accuracy/'] },
   tensest: { when: 'finals', datasets: ['tensest.json'] },
   'long-at-bats': { when: 'finals', datasets: ['long-at-bats/'] },
   fouls: { when: 'finals', datasets: ['fouls/'] },
@@ -40,7 +43,7 @@ export const GATES = {
   'season-score': { when: 'finals', datasets: ['season-score.json'] },
   'team-score': { when: 'finals', datasets: ['team-score.json'] },
   'comeback-wins': { when: 'finals', datasets: ['comeback-wins.json'] },
-  'abs-challenges': { when: 'finals', datasets: ['abs/'] },
+  'abs-challenges': { when: 'finalsAaa', datasets: ['abs/'] },
   'pitch-arsenal': { when: 'finals', datasets: ['pitch-arsenal/', 'pitch-arsenal-pool/', 'pitch-command/'] },
   'target-command': { when: 'finals', datasets: ['target-command.json'] },
   'glove-target': { when: 'finals', datasets: ['glove-target/'] },
@@ -60,12 +63,13 @@ const live = (g) => !['C', 'D'].includes(g.status?.codedGameState) // not cancel
 // upcoming / recent: the two schedule responses, or null when the read failed.
 // runAll: the workflow's run_all dispatch input. A hand run picking up a new or
 // fixed generator must run it even when no game is in either window.
-export function decideGates({ upcoming, recent, runAll = false }) {
-  if (runAll) return { upcoming: true, finals: true }
-  return {
-    upcoming: upcoming == null || games(upcoming).some(live),
-    finals: recent == null || games(recent).some((g) => live(g) && g.status?.abstractGameCode === 'F'),
-  }
+// recent / recentAaa: the MLB and AAA schedules since the last run. Each read
+// that failed (null) opens its gate.
+export function decideGates({ upcoming, recent, recentAaa, runAll = false }) {
+  if (runAll) return { upcoming: true, finals: true, finalsAaa: true }
+  const anyFinal = (sched) => sched == null || games(sched).some((g) => live(g) && g.status?.abstractGameCode === 'F')
+  const finals = anyFinal(recent)
+  return { upcoming: upcoming == null || games(upcoming).some(live), finals, finalsAaa: finals || anyFinal(recentAaa) }
 }
 
 export const skippedDatasets = (open) =>
@@ -90,15 +94,16 @@ async function main() {
   } catch {
     // no heartbeat: look back two days
   }
-  const [upcoming, recent] = await Promise.all([
+  const [upcoming, recent, recentAaa] = await Promise.all([
     readOrNull(`/api/v1/schedule?sportId=1&startDate=${iso(now)}&endDate=${iso(now + UPCOMING_DAYS * 864e5)}`),
     readOrNull(`/api/v1/schedule?sportId=1&startDate=${since}&endDate=${iso(now)}`),
+    readOrNull(`/api/v1/schedule?sportId=11&startDate=${since}&endDate=${iso(now)}`),
   ])
-  const open = decideGates({ upcoming, recent, runAll: process.env.RUN_ALL === 'true' })
+  const open = decideGates({ upcoming, recent, recentAaa, runAll: process.env.RUN_ALL === 'true' })
   const skipped = skippedDatasets(open)
-  console.log(`upcoming=${open.upcoming} finals=${open.finals} (Finals since ${since}); skipping ${skipped.length} datasets`)
+  console.log(`upcoming=${open.upcoming} finals=${open.finals} finalsAaa=${open.finalsAaa} (Finals since ${since}); skipping ${skipped.length} datasets`)
   if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `upcoming=${open.upcoming}\nfinals=${open.finals}\nskipped=${skipped.join(',')}\n`)
+    appendFileSync(process.env.GITHUB_OUTPUT, `upcoming=${open.upcoming}\nfinals=${open.finals}\nfinalsAaa=${open.finalsAaa}\nskipped=${skipped.join(',')}\n`)
   }
 }
 
