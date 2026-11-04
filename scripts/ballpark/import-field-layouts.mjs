@@ -71,8 +71,6 @@ function savantRows(html) {
   return rows
 }
 
-// Whole units: one is 2.4 ft, finer than any card draws (#2903). The audit runs on these.
-const round0 = (pts) => pts.map(([x, y]) => [Math.round(x), Math.round(y)])
 const r1 = (n) => (n == null ? null : Math.round(n * 10) / 10)
 
 const rows = savantRows(await text(SAVANT(year)))
@@ -92,7 +90,6 @@ for (const r of rows) {
   let layers = {}
   try {
     const out = fenceFromSvg(await text(GAMEDAY(r.venue_id)), { poles: measured.dist })
-    if (out) out.points = round0(out.points)
     if (!out) note = 'Gameday SVG has no Outfield/foul-line layers'
     else {
       if (out.fittedScale) fitted.push(out.fittedScale)
@@ -182,7 +179,6 @@ for (const [id, sportId] of milbVenues) {
     const svg = await text(GAMEDAY(id))
     const named = fenceFromSvg(svg)
     const out = named ?? legacyFenceFromSvg(svg)
-    if (out) out.points = round0(out.points)
     style = out ? (named ? 'named' : 'legacy') : null
     if (out) {
       audit = auditPosted(out.points, posted)
