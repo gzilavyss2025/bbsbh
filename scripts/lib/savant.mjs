@@ -12,7 +12,7 @@
 // gen-savant-percentiles.mjs's RAW_METRICS note). Check coverage, warn loudly
 // in the job log, and let the previous night's committed file stand.
 
-import { setTimeout as sleep } from 'node:timers/promises'
+import { withRetry } from './net/retry.mjs'
 import { median as plainMedian, round1 } from '../../src/lib/math/number.js'
 import { csvObjects, parseCsv } from '../../src/lib/csv/parse.js'
 
@@ -43,23 +43,21 @@ export async function fetchCustomBoard(type, { season, selections, min = 25, att
     `&selections=${selections.join(',')}` +
     `&chart=false&x=k_percent&y=k_percent&r=no&chartType=beeswarm` +
     `&sort=k_percent&sortDir=desc&csv=true`
-  return withRetry(`Savant custom ${type}`, attempts, async () => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const rows = csvObjects(await res.text())
-    if (!rows.length) throw new Error('empty response')
-    return rows
-  })
+  return fetchSavantCsv(`Savant custom ${type}`, url, { attempts })
 }
 
-// Any Savant CSV leaderboard by full URL, with the same retry and fail-loud
-// habits as the two boards above. The caller owns the URL, so it owns the trap
+// Any Savant CSV leaderboard by full URL; the boards above and below are calls to it. The caller owns the URL, so it owns the trap
 // that comes with it: check the columns it reads against a live response.
 // `columns` are header names the caller reads: a header that lost one throws,
 // even on a body with no rows. `allowEmpty` makes a header-only body no rows
 // instead of an error (a per-club board where one club may have none).
+//
+// Savant refuses a cold connection often enough that a single-shot nightly job fails on it —
+// observed repeatedly on 2026-08-20 as a 10s connect timeout that succeeded on the immediate
+// retry. Linear backoff (net/retry.mjs), and the LAST failure is rethrown so the job still dies
+// loudly rather than committing a thin file.
 export async function fetchSavantCsv(label, url, { attempts = 4, columns = [], allowEmpty = false } = {}) {
-  return withRetry(label, attempts, async () => {
+  const read = async () => {
     const res = await fetch(url)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const text = await res.text()
@@ -69,7 +67,17 @@ export async function fetchSavantCsv(label, url, { attempts = 4, columns = [], a
     const rows = csvObjects(text)
     if (!rows.length && !allowEmpty) throw new Error('empty response')
     return rows
-  })
+  }
+  let retries = 0
+  const shouldRetry = (err) => {
+    console.error(`${label}: ${err.message} — retry ${++retries}/${attempts - 1}`)
+    return true
+  }
+  try {
+    return await withRetry(read, { tries: attempts, delayMs: 2500, shouldRetry })
+  } catch (err) {
+    throw new Error(`${label}: ${err?.message ?? 'failed'} after ${attempts} attempts`)
+  }
 }
 
 // Savant's `pitch-arsenal-stats` leaderboard — a direct per-pitch-type join,
@@ -81,33 +89,7 @@ export async function fetchArsenalBoard(type, { season, min = 10, attempts = 4 }
   const url =
     `https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats` +
     `?type=${type}&pitchType=&year=${season}&team=&min=${min}&csv=true`
-  return withRetry(`Savant arsenal ${type}`, attempts, async () => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const rows = csvObjects(await res.text())
-    if (!rows.length) throw new Error('empty response')
-    return rows
-  })
-}
-
-// Savant refuses a cold connection often enough that a single-shot nightly job
-// fails on it — observed repeatedly on 2026-08-20 as a 10s connect timeout that
-// succeeded on the immediate retry. Linear backoff, and the LAST failure is
-// rethrown so the job still dies loudly rather than committing a thin file.
-export async function withRetry(label, attempts, fn) {
-  let last
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn()
-    } catch (err) {
-      last = err
-      if (i < attempts - 1) {
-        console.error(`${label}: ${err.message} — retry ${i + 1}/${attempts - 1}`)
-        await sleep(2500 * (i + 1))
-      }
-    }
-  }
-  throw new Error(`${label}: ${last?.message ?? 'failed'} after ${attempts} attempts`)
+  return fetchSavantCsv(`Savant arsenal ${type}`, url, { attempts })
 }
 
 // Mean and population SD of one numeric column, over the rows that have it.

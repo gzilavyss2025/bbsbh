@@ -47,7 +47,7 @@
 // Run by hand: node scripts/gen-run-value.mjs
 import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
-import { csvObjects, num, round1, withRetry } from './lib/savant.mjs'
+import { fetchSavantCsv, num, round1 } from './lib/savant.mjs'
 import { getPeople } from './lib/statsapi.mjs'
 
 const here = import.meta.dirname
@@ -69,21 +69,11 @@ const MIN_INNINGS = 1
 // so a legitimately small early-April file still passes.
 const MIN_ROWS = { bat: 200, pit: 200, fld: 100, run: 50 }
 
-async function fetchCsv(label, url, { attempts = 4 } = {}) {
-  return withRetry(label, attempts, async () => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const rows = csvObjects(await res.text())
-    if (!rows.length) throw new Error('empty response')
-    return rows
-  })
-}
-
 // The swing/take board, one side of the plate at a time. `type=All` is the
 // whole-season roll-up rather than one of its attack-region splits, and
 // `sub_type=null` is what Savant's own page sends for it.
 const swingTake = (group) =>
-  fetchCsv(
+  fetchSavantCsv(
     `Savant swing-take ${group}`,
     `https://baseballsavant.mlb.com/leaderboard/swing-take` +
       `?year=${season}&team=&group=${group}&type=All&sub_type=null&min=${MIN_PITCHES}&csv=true`,
@@ -92,7 +82,7 @@ const swingTake = (group) =>
 // Fielding. `type=fielder` is the per-player board; the same path also serves
 // club and batter-side views, which are a different shape entirely.
 const fielding = () =>
-  fetchCsv(
+  fetchSavantCsv(
     'Savant fielding-run-value',
     `https://baseballsavant.mlb.com/leaderboard/fielding-run-value` +
       `?type=fielder&seasonStart=${season}&seasonEnd=${season}&minInnings=${MIN_INNINGS}&csv=true`,
@@ -102,7 +92,7 @@ const fielding = () =>
 // id is `player_id` but the name is `entity_name`, and the total is
 // `runner_runs_tot`.
 const baserunning = () =>
-  fetchCsv(
+  fetchSavantCsv(
     'Savant baserunning-run-value',
     `https://baseballsavant.mlb.com/leaderboard/baserunning-run-value?year=${season}&csv=true`,
   )
