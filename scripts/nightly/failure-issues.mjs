@@ -7,9 +7,10 @@
 // gates skipped (scripts/nightly/inputs.mjs) proves nothing, so its issue stays
 // open; the first such night adds one note (NOTE_MARK) saying how to retest.
 //
-// Run as the job's last step with STEPS_JSON=${{ toJSON(steps) }}, RUN_URL and
+// Run as the job's second-to-last step with STEPS_JSON=${{ toJSON(steps) }}, RUN_URL and
 // GH_TOKEN; it drives the `gh` CLI the runner ships with. The step log is
 // linked, not quoted: a job cannot read its own logs until it has finished.
+// With --check (the last step) it only fails the job when any step failed.
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
@@ -35,6 +36,19 @@ export function planIssues(steps, open) {
   return plan
 }
 
+// The steps that failed, by id. The job's last step fails the job from this
+// (--check), so a new generator needs no entry in a hand-kept list to count.
+export const failedSteps = (steps) => Object.entries(steps).filter(([, s]) => s.outcome === 'failure').map(([id]) => id)
+
+function check() {
+  const failed = failedSteps(JSON.parse(process.env.STEPS_JSON ?? '{}'))
+  if (failed.length) {
+    console.error(`Nightly steps failed: ${failed.join(', ')}. See their logs above; each has a needs-triage issue.`)
+    process.exit(1)
+  }
+  console.log('Every nightly step that ran passed.')
+}
+
 function main() {
   const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' })
   const steps = JSON.parse(process.env.STEPS_JSON ?? '{}')
@@ -58,4 +72,7 @@ function main() {
   console.log(`failure issues: ${plan.open.length} opened, ${plan.comment.length} commented, ${plan.close.length} closed, ${plan.note.length} noted`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  if (process.argv.includes('--check')) check()
+  else main()
+}

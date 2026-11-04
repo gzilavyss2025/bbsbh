@@ -69,8 +69,8 @@ name: Update nightly data
 # green. Both have happened." Two of the three are now structural.
 # scripts/warm-previews.mjs (added 2026-07-22) is the one step here that
 # ISN'T a gen-*.mjs data generator — it writes no public/data/* file, so it
-# deliberately has no entry in the commit step's `git add` list, only in the
-# fail-check below. It proactively warms api/preview.js + api/og.js's edge
+# deliberately has no entry in the commit step's `git add` list; the last
+# step's fail check covers it like every other step. It proactively warms api/preview.js + api/og.js's edge
 # cache for today's MLB slate against bbsbh.vercel.app itself.
 # The generators here are otherwise unchanged and fully independent (each
 # writes its own public/data/* file with no read dependency on another's
@@ -828,70 +828,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: node scripts/nightly/failure-issues.mjs
 
-      - name: Fail if any generator errored
-        if: |
-          steps.teams.outcome == 'failure' ||
-          steps.mono-logos.outcome == 'failure' ||
-          steps.milb-ballparks.outcome == 'failure' ||
-          steps.affiliates.outcome == 'failure' ||
-          steps.top-prospects.outcome == 'failure' ||
-          steps.game-notes.outcome == 'failure' ||
-          steps.war.outcome == 'failure' ||
-          steps.milb-alumni.outcome == 'failure' ||
-          steps.rehab.outcome == 'failure' ||
-          steps.umpires.outcome == 'failure' ||
-          steps.tensest.outcome == 'failure' ||
-          steps.umpire-accuracy.outcome == 'failure' ||
-          steps.minors-leaders.outcome == 'failure' ||
-          steps.milb-pool.outcome == 'failure' ||
-          steps.long-at-bats.outcome == 'failure' ||
-          steps.notable.outcome == 'failure' ||
-          steps.youngest-regulars.outcome == 'failure' ||
-          steps.callouts.outcome == 'failure' ||
-          steps.former-teammates.outcome == 'failure' ||
-          steps.career-matchups.outcome == 'failure' ||
-          steps.fouls.outcome == 'failure' ||
-          steps.workload.outcome == 'failure' ||
-          steps.vs-team-splits.outcome == 'failure' ||
-          steps.savant-percentiles.outcome == 'failure' ||
-          steps.ovr.outcome == 'failure' ||
-          steps.savant-matchup.outcome == 'failure' ||
-          steps.run-value.outcome == 'failure' ||
-          steps.club-defense-running.outcome == 'failure' ||
-          steps.milestones.outcome == 'failure' ||
-          steps.rookies.outcome == 'failure' ||
-          steps.season-score.outcome == 'failure' ||
-          steps.team-score.outcome == 'failure' ||
-          steps.team-transactions.outcome == 'failure' ||
-          steps.wire-facts.outcome == 'failure' ||
-          steps.postseason-odds.outcome == 'failure' ||
-          steps.manager-history.outcome == 'failure' ||
-          steps.player-contracts.outcome == 'failure' ||
-          steps.salaries.outcome == 'failure' ||
-          steps.prospect-trend.outcome == 'failure' ||
-          steps.comeback-wins.outcome == 'failure' ||
-          steps.awards-history.outcome == 'failure' ||
-          steps.notable-players.outcome == 'failure' ||
-          steps.abs-challenges.outcome == 'failure' ||
-          steps.jerseys.outcome == 'failure' ||
-          steps.pitch-arsenal.outcome == 'failure' ||
-          steps.spray.outcome == 'failure' ||
-          steps.attendance.outcome == 'failure' ||
-          steps.gate.outcome == 'failure' ||
-          steps.doubleheaders.outcome == 'failure' ||
-          steps.run-differential.outcome == 'failure' ||
-          steps.farm-system.outcome == 'failure' ||
-          steps.highlights.outcome == 'failure' ||
-          steps.team-records.outcome == 'failure' ||
-          steps.postseason-records.outcome == 'failure' ||
-          steps.schedule-shape.outcome == 'failure' ||
-          steps.where-from.outcome == 'failure' ||
-          steps.outliers.outcome == 'failure' ||
-          steps.warm-previews.outcome == 'failure' ||
-          steps.compress-logos.outcome == 'failure' ||
-          steps.nine-keys.outcome == 'failure' ||
-          steps.feed-shape-drift.outcome == 'failure' ||
-          steps.freshness.outcome == 'failure'
-        run: |
-          echo "One or more nightly generators failed — see the step logs above."
-          exit 1
+      # Fails the job when ANY step failed (toJSON(steps)), so a new generator
+      # needs no entry here. It replaced a 60-line hand-kept list of step ids.
+      - name: Fail if any step errored
+        if: always()
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: node scripts/nightly/failure-issues.mjs --check

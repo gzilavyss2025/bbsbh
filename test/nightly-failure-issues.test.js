@@ -29,3 +29,10 @@ test('a skipped step whose issue already carries the note is not noted again', (
 test('an unrelated open issue is never touched', () => {
   assert.deepEqual(planIssues(steps({ war: 'success' }), [{ number: 9, title: 'Explore moving nightly data out of git' }]), { open: [], comment: [], close: [], note: [] })
 })
+
+test('failedSteps lists every step that failed, whatever its id, and nothing that passed or was skipped', async () => {
+  const { failedSteps } = await import('../scripts/nightly/failure-issues.mjs')
+  // A step added to the workflow fails the job without being listed anywhere: the
+  // hand-kept 60-line `if:` this replaced missed new generators twice (workflow header).
+  assert.deepEqual(failedSteps(steps({ war: 'success', 'brand-new-gen': 'failure', spray: 'skipped', freshness: 'failure' })), ['brand-new-gen', 'freshness'])
+})
