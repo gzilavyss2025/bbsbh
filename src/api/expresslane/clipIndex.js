@@ -7,7 +7,7 @@
 // Nothing here reads a score, a count, an out or a play. There is no prose:
 // no clip title, no blurb, no result. Every value is a URL or a
 // null, and a URL is built from a `playId` the app already holds. So this
-// module is safe at render top-level, on any surface — unlike rail.js beside
+// module is safe at render top-level, on any surface — unlike runners.js beside
 // it, which is reveal-only.
 //
 // A CAUTION FOR ITS CALLERS, which this module cannot enforce:
