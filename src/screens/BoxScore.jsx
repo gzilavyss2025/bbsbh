@@ -1,3 +1,5 @@
+import '../styles/21a-box-score-stars.css'
+import '../styles/21b-box-score-tally.css'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'

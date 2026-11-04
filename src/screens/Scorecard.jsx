@@ -1,3 +1,4 @@
+import '../styles/scorecard/index.css'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ScorecardSheet } from '../components/scoring/ScorecardSheet.jsx'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'

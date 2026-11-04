@@ -146,9 +146,7 @@
    motion/ is: src/styles is a flat directory at its own ratchet. */
 @import './styles/charts/winprob.css';
 @import './styles/21-box-score.css';
-@import './styles/21a-box-score-stars.css';
 @import './styles/box-score/scoring-summary.css';
-@import './styles/21b-box-score-tally.css';
 @import './styles/22-box-score-tables.css';
 /* The DOOR — the one "there is more behind this" control the app draws
    (#1130), and the first of the shared rules the design-system collapse pulls
@@ -183,14 +181,6 @@
 @import './styles/38-umpire-pages.css';
 @import './styles/39-manager-page.css';
 @import './styles/40-game-modals.css';
-@import './styles/scorecard/grid.css';
-@import './styles/scorecard/box.css';
-@import './styles/scorecard/page.css';
-@import './styles/scorecard/footer.css';
-@import './styles/scorecard/lens.css';
-@import './styles/scorecard/lens-bar.css';
-@import './styles/scorecard/lens-cards.css';
-@import './styles/scorecard/lens-carry.css';
 @import './styles/44-pre-game-cards.css';
 @import './styles/46-consent-modal.css';
 /* The JUMP BAR (#1883): HubTabBar variant="anchor". */
@@ -243,7 +233,6 @@
 @import './styles/motion/strike.css';
 @import './styles/motion/playbyplay.css';
 @import './styles/motion/innings.css';
-@import './styles/motion/scorecard-lens.css';
 @import './styles/motion/stamp-in.css';
 @import './styles/motion/player-rise.css';
 @import './styles/motion/menurail.css';
@@ -323,6 +312,11 @@
                               partial cannot exist. Every selector in it is
                               .dlab__*, shared with no other partial, and only
                               that one unlisted route loads it.)
+     scorecard/*  motion/scorecard-lens   screens/Scorecard.jsx (the game scorecard and
+                              /scorecard-lab), screens/animlab/motionDemos.jsx
+     21a-box-score-stars, 21b-box-score-tally
+                              screens/BoxScore.jsx (21, 22 and 23 stay: the
+                              postseason, salaries and slate pages share them)
      scout/scout              screens/scout/ScoutPage.jsx (/scout, #1410) —
                               .scout__* only, a SUBDIRECTORY for the same
                               file-budget reason as designlab/)
