@@ -1,6 +1,9 @@
 // Date helpers. The MLB schedule endpoint expects YYYY-MM-DD in the park's
 // local sense, but for slate selection the user's local date is close enough.
 import { baseballToday } from './time/standingsDates.js'
+import { monthAbbr } from './time/months.js'
+
+export { monthAbbr }
 
 export function toApiDate(date = new Date()) {
   const y = date.getFullYear()
@@ -46,15 +49,22 @@ export function addDays(date, n) {
 }
 
 // "YYYY-MM-DD" as a local-midnight Date (manual y/m/d, so a weekday can't drift across a DST
-// edge), or null for a missing/garbled value. The one parse the formatters below share.
-function localDate(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return null
-  const [y, m, d] = apiDate.split('-').map(Number)
-  return new Date(y, m - 1, d)
+// edge), or null for a missing/garbled value. `loose` also takes "2026-7-5". The one parse the
+// formatters below share.
+function localDate(apiDate, loose) {
+  const m = (loose ? /^(\d{4})-(\d{1,2})-(\d{1,2})$/ : /^(\d{4})-(\d\d)-(\d\d)$/).exec(apiDate ?? '')
+  return m && new Date(+m[1], m[2] - 1, +m[3])
 }
 
-// An apiDate formatter for these Intl options; '' for a missing/garbled date.
-const fmt = (opts) => (apiDate) => localDate(apiDate)?.toLocaleDateString(undefined, opts) ?? ''
+// An apiDate formatter for these Intl options (en-US, like every date here); '' for a
+// missing/garbled date.
+const fmt = (opts, loose) => {
+  const f = new Intl.DateTimeFormat('en-US', opts)
+  return (apiDate) => {
+    const d = localDate(apiDate, loose)
+    return d ? f.format(d) : ''
+  }
+}
 
 // Whether an apiDate ("YYYY-MM-DD") falls within the last `days` days of
 // today, inclusive of today itself — used to flag a "new" callout on a
@@ -80,16 +90,18 @@ export function monthDay(apiDate) {
   return m ? `${Number(m[1])}/${Number(m[2])}` : ''
 }
 
-const MONTH = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' })
-// "Jan".."Dec" from a 0-based month index: the one spelling every caption shares.
-export const monthAbbr = (i) => MONTH.format(Date.UTC(2000, i, 1))
-
 // "Jul 5" — month name and day, no weekday and no year, read straight off the
 // YYYY-MM-DD (a trailing time or zone is ignored). The one spelling for a
 // caption or a row date; monthDay above is the compact "7/5". Returns '' for a missing/garbled date.
 export function monthDayName(apiDate) {
   const m = /^\d{4}-(\d{2})-(\d{2})/.exec(apiDate ?? '')
   return m ? `${monthAbbr(Number(m[1]) - 1)} ${Number(m[2])}` : ''
+}
+
+// "Jul 5, 2019" — monthDayName plus the year (monthDayYear below is the compact "4/14/26").
+export function monthDayNameYear(apiDate) {
+  const md = monthDayName(apiDate)
+  return md ? `${md}, ${apiDate.slice(0, 4)}` : ''
 }
 
 // "4/14/26" — compact month/day/2-digit-year, for a context where the season
@@ -111,18 +123,19 @@ export function isFriday(apiDate) {
 
 // "MON" — 3-letter uppercase weekday abbreviation, for a compact date badge
 // (foul tracker's single-game-highs link). Returns '' for a missing/garbled date.
+const weekdayShort = fmt({ weekday: 'short' })
 export function weekdayAbbr(apiDate) {
-  return fmt({ weekday: 'short' })(apiDate).slice(0, 3).toUpperCase() // caps-js-exempt
+  return weekdayShort(apiDate).slice(0, 3).toUpperCase() // caps-js-exempt
 }
 
 // "Fri, Jul 5" style label for the slate header.
-export const humanDate = fmt({ weekday: 'short', month: 'short', day: 'numeric' })
+export const humanDate = fmt({ weekday: 'short', month: 'short', day: 'numeric' }, true)
 
 // "Fri, Jul 5, 2026" — humanDate plus the year, for the game page's own
 // masthead (GameView.jsx): unlike the slate list humanDate serves elsewhere,
 // this header can be reached long after the fact (a shared deep link, a
 // history/postseason page), where the year isn't implied by "today."
-export const humanDateWithYear = fmt({ weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+export const humanDateWithYear = fmt({ weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }, true)
 
 // "Fri, June 12, 2026" — the full date line the scorebook header wants, so it
 // can be copied straight onto the sheet. Returns '' for a missing/garbled date

@@ -1,4 +1,4 @@
-import { monthDayName } from '../lib/dates.js'
+import { monthDayNameYear } from '../lib/dates.js'
 import '../styles/47-trade-deadline.css'
 import { useState } from 'react'
 import { loadTradeDeadlineSeason, SEASONS } from '../api/tradeDeadline.js'
@@ -39,8 +39,7 @@ function SeasonNav({ year, navigate }) {
 }
 
 function monthDayYear(iso) {
-  const md = monthDayName(iso)
-  return md ? `${md}, ${iso.slice(0, 4)}` : ''
+  return monthDayNameYear(iso)
 }
 
 // Unlike lib/teamFilter.js's filterByTeam (one team id per row), a trade

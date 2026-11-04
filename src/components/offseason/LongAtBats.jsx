@@ -3,7 +3,7 @@ import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
-import { monthDayName } from '../../lib/dates.js'
+import { monthDayName, monthDayNameYear } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
@@ -94,7 +94,7 @@ export function LongAtBats({ season }) {
               <span className="t-label t-label--bold">pitches</span>
               {path && (
                 <a className="seasonnote__when" {...linkProps(path)}>
-                  {monthDayName(top.date)}, {top.date.slice(0, 4)}
+                  {monthDayNameYear(top.date)}
                   <span className="sr-only"> — open this game</span>
                   <span aria-hidden="true">›</span>
                 </a>

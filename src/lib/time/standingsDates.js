@@ -11,6 +11,7 @@
 // it labels.
 
 import { offseasonPhase } from './seasonPhase.js'
+import { monthAbbr } from './months.js'
 
 // MLB seasons open in late March / early April; an earlier month-first button
 // would only ever show empty pre-season standings, so the quick-jumps start at
@@ -68,7 +69,7 @@ export function buildJumps(today) {
   for (let m = FIRST_SEASON_MONTH; m <= curMonth; m++) {
     const date = `${y}-${String(m).padStart(2, '0')}-01`
     if (date < today) {
-      jumps.push({ key: `m${m}`, label: `${new Date(Date.UTC(y, m - 1)).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} 1`, date })
+      jumps.push({ key: `m${m}`, label: `${monthAbbr(m - 1)} 1`, date })
     }
   }
   return jumps

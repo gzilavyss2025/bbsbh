@@ -2,7 +2,7 @@
 // Pure. The meetings come from api/postseason/meetings.js, already cut off the day before the
 // slate date (ADR-0087, ADR-0117, selectMeetings), so every number here is open.
 import { teamClubNameShort } from '../../../teams.js'
-import { monthDayName } from '../../../dates.js'
+import { monthAbbr } from '../../../time/months.js'
 
 
 const SUFFIX = /^(jr|sr|ii|iii|iv)\.?$/i
@@ -26,7 +26,7 @@ function inningTag(inning) {
 // 'Mon Aug 4' from 'YYYY-MM-DD'; '' for a date that is not one.
 function dayLabel(date) {
   const d = new Date(`${date}T00:00:00Z`)
-  return Number.isNaN(d.getTime()) ? '' : `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${monthDayName(date)}`
+  return Number.isNaN(d.getTime()) ? '' : `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${monthAbbr(d.getUTCMonth())} ${d.getUTCDate()}`
 }
 
 // { FF: 52, SL: 30 } -> [{ code, pct }] biggest first, percents summing to 100

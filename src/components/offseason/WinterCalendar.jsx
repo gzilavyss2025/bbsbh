@@ -3,7 +3,6 @@ import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { currentMilestone, daysBetween, parseWinterCalendar } from '../../lib/time/seasonPhase.js'
-import { monthDayName } from '../../lib/dates.js'
 import { useRouteLink } from '../../lib/nav.js'
 
 // THE WINTER CALENDAR — the dated strip under the wire, and the countdown that
@@ -63,8 +62,8 @@ export function WinterCalendar({ winter }) {
   // a strip: the month once, then each date as a day number beside its label.
   const months = []
   rows.forEach((row, i) => {
-    const day = monthDayName(row.date).split(' ')[1]
     const [y, m, d] = row.date.split('-').map(Number)
+    const day = String(d)
     const dow = new Date(y, m - 1, d).toLocaleString('en-US', { weekday: 'short' })
     const mon = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' })
     if (months.at(-1)?.mon !== mon) months.push({ mon, items: [] })

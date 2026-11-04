@@ -2,7 +2,7 @@
 // onto Intl (#2850): the output must not change when a MONTHS array goes.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { weekdayAbbr, monthDayName, humanDate, humanDateWithYear, scorebookDate } from '../src/lib/dates.js'
+import { weekdayAbbr, monthDayName, monthDayNameYear, monthAbbr, humanDate, humanDateWithYear, scorebookDate } from '../src/lib/dates.js'
 import { seasonAxis } from '../src/screens/player/next/modules/contact/contactPlay.js'
 import { filmRoomModel } from '../src/lib/postseason/worldseries/scouting/filmRoom.js'
 import { meetingLabel } from '../src/lib/postseason/worldseries/tape.js'
@@ -39,4 +39,23 @@ test('the film room day reads "Tue Aug 4"', () => {
   const side = (id) => ({ id, abbr: 'X', runs: 1, hits: 1, errors: 0, starter: { id, name: 'A B', hand: 'R', ip: '6.0', h: 1, r: 0, er: 0, bb: 0, k: 1, pitches: 9, mix: {} }, lineup: [] })
   const [m] = filmRoomModel([{ gamePk: 1, date: '2026-08-04', venue: 'V', ump: 'U', decisions: {}, away: side(1), home: side(2), scoring: [] }])
   assert.equal(m.day, 'Tue Aug 4')
+})
+
+test('monthAbbr gives \'\' for an index that is not a month', () => {
+  for (const bad of [NaN, 12, -1, 1.5, undefined]) assert.equal(monthAbbr(bad), '')
+  assert.equal(monthAbbr(0), 'Jan')
+  assert.equal(monthAbbr(11), 'Dec')
+})
+
+test('monthDayNameYear reads "Jul 3, 2019" and degrades to empty', () => {
+  assert.equal(monthDayNameYear('2019-07-03'), 'Jul 3, 2019')
+  assert.equal(monthDayNameYear(''), '')
+  assert.equal(monthDayNameYear(null), '')
+})
+
+test('humanDate still reads a date that is not zero-padded; scorebookDate does not', () => {
+  assert.equal(humanDate('2026-7-5'), 'Sun, Jul 5')
+  assert.equal(humanDateWithYear('2026-7-5'), 'Sun, Jul 5, 2026')
+  assert.equal(scorebookDate('2026-7-5'), '')
+  assert.equal(humanDate(undefined), '')
 })

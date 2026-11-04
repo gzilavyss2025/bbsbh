@@ -1,4 +1,4 @@
-import { monthDayName } from '../../../../lib/dates.js'
+import { monthDayName, monthDayNameYear } from '../../../../lib/dates.js'
 import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/scheduleShape.js'
 import { ALL_MLB_TEAM_IDS, teamClubName, teamLocationName } from '../../../../lib/teams.js'
 import '../../../../styles/65-team-records.css'
@@ -44,7 +44,7 @@ function when(iso) {
   // The year is dropped inside the current season and kept outside it. "Jul 3"
   // reads as this year to anyone holding a scorecard; "May 18, 2019" has to say
   // so, because the whole force of the line is how long ago it was.
-  return y === now ? monthDayName(iso) : `${monthDayName(iso)}, ${y}`
+  return y === now ? monthDayName(iso) : monthDayNameYear(iso)
 }
 
 // The cities that host two clubs, plus any club whose "location" is really just

@@ -4,6 +4,7 @@ import { reportCrash } from '../../lib/crash/report.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
+import { monthName } from '../../lib/time/months.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -94,8 +95,9 @@ export const TYPE_TONE = {
 export function datelineParts(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
-  const long = (opts) => date.toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' })
-  return { weekday: long({ weekday: 'long' }), month: long({ month: 'long' }), day: d }
+  if (Number.isNaN(date.getTime())) return { weekday: '', month: '', day: d }
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })
+  return { weekday, month: monthName(date.getUTCMonth()), day: d }
 }
 export function dateline(iso) {
   const { weekday, month, day } = datelineParts(iso)
