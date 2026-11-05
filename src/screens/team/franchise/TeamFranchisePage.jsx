@@ -43,7 +43,7 @@ export function TeamFranchisePage({ id }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, rows, summary, hof, retired, leaders, history } = data
+  const { team, rows, summary, hof, retired, leaders, history, venues } = data
   const first = rows[0]?.season
   const last = rows[rows.length - 1]?.season
   return (
@@ -79,7 +79,7 @@ export function TeamFranchisePage({ id }) {
                 <HallOfFame team={team} hof={hof} names={summary?.names} />
                 <RetiredNumbers retired={retired} hof={hof} leaders={leaders} />
                 <Managers rows={rows} best={summary?.winningestManager?.id ?? null} />
-                <Parks history={history} />
+                <Parks history={history} live={venues} />
               </div>
             </section>
           </div>

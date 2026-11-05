@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
 import { clubPeople, managersView, parksView, retiredTiles, yearRuns } from '../src/screens/team/franchise/people/peopleView.js'
 import { summaryView } from '../src/screens/team/franchise/summary/summaryView.js'
 import { summarizeFranchise } from '../src/api/history/franchiseSummary.js'
-import { parkHistory } from '../src/api/franchiseHistory.js'
 
 // #2784: the franchise page's summary and People and places, shaped for the cards.
 
@@ -103,9 +102,9 @@ test('hofHeading: one name says it; a club that moved or renamed says "this fran
 
 // #2788: the Parks card, on the real franchise-history files.
 const history = (id) => JSON.parse(readFileSync(new URL(`../public/data/franchise-history/${id}.json`, import.meta.url), 'utf8'))
-const parksFor = (id) => {
+const parksFor = (id, live) => {
   const d = history(id)
-  return parksView({ spans: d.spans, parks: parkHistory(d.spans, d.mates), through: d.through })
+  return parksView({ spans: d.spans, mates: d.mates, through: d.through }, live)
 }
 
 test('parksView: newest first, the current name with the old ones as "also", "on" for a park in use', () => {
@@ -122,4 +121,15 @@ test('parksView: a park left and returned to keeps two runs; a shared park names
   assert.deepEqual(parksFor(119).find((p) => p.id === 22).mates, ['Los Angeles Angels 1962–1965'])
   assert.equal(parksFor(119).find((p) => p.id === 3150).name, 'Washington Park')
   assert.deepEqual(parksView(), [])
+})
+
+test('parksView: a live season after the file extends the runs; a club that moved back is not "on" at the old park', () => {
+  const rays = parksFor(139, [{ season: 2026, venue: { id: 12, name: 'Tropicana Field' } }])
+  assert.deepEqual(rays.map((p) => [p.name, p.years]), [
+    ['Tropicana Field', '1998–2024, 2026 on'],
+    ['George M. Steinbrenner Field', '2025'],
+  ])
+  const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
+  assert.equal(brewers[0].years, '2001 on')
+  assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
 })

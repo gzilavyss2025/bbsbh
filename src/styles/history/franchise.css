@@ -346,5 +346,8 @@ a.frnums__link:focus-visible {
   font-weight: var(--w-bold);
 }
 .frparks__foot {
-  margin: var(--space-3) calc(-1 * var(--space-3h)) calc(-1 * var(--space-3h));
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
 }

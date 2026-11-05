@@ -1,4 +1,4 @@
-import { fetchStandings, fetchTeam } from '../../../api/team.js'
+import { fetchSeasonVenue, fetchStandings, fetchTeam } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
 import { getJson } from '../../../api/statsapi.js'
 import { franchiseLedger } from '../../../api/history/franchiseLedger.js'
@@ -37,7 +37,7 @@ async function liveSeason(team, season, name) {
   return liveRow({ teamId: team.id, season, name, records, dates, manager })
 }
 
-// -> { team, rows, summary, hof, retired, leaders, history } (rows oldest first), or { team, rows: [] } for a
+// -> { team, rows, summary, hof, retired, leaders, history, venues } (rows oldest first), or { team, rows: [] } for a
 // club with no ledger (MiLB). The summary (#2784) reads every row the table shows, live ones too,
 // so a title won this season counts before the offseason ledger run. The stores are static files.
 export async function loadFranchise(id) {
@@ -56,7 +56,11 @@ export async function loadFranchise(id) {
   const year = Number(isoToday().slice(0, 4))
   const seasons = []
   for (let s = (through ?? year) + 1; s <= year; s++) seasons.push(s)
-  const live = (await Promise.all(seasons.map((s) => liveSeason(team, s, stored[stored.length - 1].name)))).filter(Boolean)
-  const rows = [...stored, ...live]
-  return { team, rows, summary: summarizeFranchise(rows, pennants), hof, retired, leaders, history }
+  const [live, venues] = await Promise.all([
+    Promise.all(seasons.map((s) => liveSeason(team, s, stored[stored.length - 1].name))),
+    // The park of each season the history file has not reached (#2788): a club can move.
+    Promise.all(seasons.filter((s) => s > (history.through ?? year)).map(async (s) => ({ season: s, venue: await fetchSeasonVenue(team.id, s) }))),
+  ])
+  const rows = [...stored, ...live.filter(Boolean)]
+  return { team, rows, summary: summarizeFranchise(rows, pennants), hof, retired, leaders, history, venues }
 }

@@ -1,3 +1,5 @@
+import { parkHistory } from '../../../../api/franchiseHistory.js'
+
 // People and places on the franchise page (#2784), shaped for the cards. Pure: no fetch, no clock.
 
 // [1981, 1982, 1984, 1985] -> "1981–82, 1984–85". A run's end year drops its century when it
@@ -84,29 +86,34 @@ export function clubPeople(hof, leaders) {
   return out.map((p) => ({ id: p.id, name: p.name }))
 }
 
-const years = (from, to) => (from === to ? String(from) : `${from}–${to}`)
 
-// The club's home parks (#2788), newest first, from franchiseFor (api/franchiseHistory.js):
-// `spans` by season, `parks` from parkHistory, `through` the file's last season. A park's name is
-// the one its newest span gives it (the venue's current name); any other is "also named". A run
-// that reaches `through` reads "2001 on". `clubs` are the club's own names there; `mates` the
+// The club's home parks (#2788), newest first. `history` is franchiseFor's file ({ spans, mates,
+// through }); `live` is [{ season, venue: { id, name } | null }] for each season after `through`
+// (loadFranchise reads them), so a club that moved this year (the Rays, back at Tropicana in 2026)
+// is not "on" at last year's park. A season with no venue read is left out. A park's name is the one
+// its newest span gives it (the venue's current name); any other is "also named". A run that
+// reaches the newest season reads "2001 on". `clubs` are the club's own names there; `mates` the
 // other clubs that used it in the same seasons. The data starts in 1901 and holds one park per run
 // of seasons, so a one-off neutral site is not in it.
-export function parksView({ spans, parks, through } = {}) {
-  return (parks ?? [])
+export function parksView(history, live = []) {
+  const known = history?.spans ?? []
+  if (!known.length) return []
+  const name = known[known.length - 1].name
+  const extra = live.filter((l) => l.venue?.id && l.season > (history.through ?? 0))
+  const spans = [...known, ...extra.map((l) => ({ from: l.season, to: l.season, name, venueId: l.venue.id, venueName: l.venue.name }))]
+  const newest = Math.max(history.through ?? 0, ...extra.map((l) => l.season))
+  return parkHistory(spans, history.mates ?? {})
+    .sort((a, b) => b.runs[b.runs.length - 1][1] - a.runs[a.runs.length - 1][1])
     .map((p) => {
-      const mine = (spans ?? []).filter((s) => s.venueId === p.venueId)
-      const name = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
+      const mine = spans.filter((s) => s.venueId === p.venueId)
+      const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
       return {
         id: p.venueId,
-        name,
-        also: p.names.filter((n) => n !== name),
-        years: p.runs.map(([a, b]) => (b === through ? `${a} on` : years(a, b))).join(', '),
-        last: p.runs[p.runs.length - 1][1],
+        name: current,
+        also: p.names.filter((n) => n !== current),
+        years: p.runs.map(([a, b]) => (b === newest ? `${a} on` : years(a, b))).join(', '),
         clubs: [...new Set(mine.map((s) => s.name))],
-        mates: (p.mates ?? []).map((m) => `${m.name} ${years(m.from, m.to)}`),
+        mates: p.mates.map((m) => `${m.name} ${years(m.from, m.to)}`),
       }
     })
-    .sort((a, b) => b.last - a.last)
-    .map(({ last, ...rest }) => rest) // eslint-disable-line no-unused-vars
 }
