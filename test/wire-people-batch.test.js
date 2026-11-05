@@ -1,11 +1,11 @@
-// person-fetch.js fetchPersonBatched: the career/bio read of every move that asks in
+// personBatch.js fetchPersonBatched: the career/bio read of every move that asks in
 // one tick is ONE people?personIds= call, split back out per player.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchPersonBatched } from '../src/api/person-fetch.js'
+import { fetchPersonBatched } from '../src/api/transactions/personBatch.js'
 
 // `known` ids exist; `failBatch` answers every personIds call 400 (not retried).
-function stubPeople(known, { failBatch = false } = {}) {
+function stubPeople(known, { failBatch = false, garbage = false } = {}) {
   const real = globalThis.fetch
   const urls = []
   globalThis.fetch = async (url) => {
@@ -15,6 +15,7 @@ function stubPeople(known, { failBatch = false } = {}) {
       ? u.searchParams.get('personIds').split(',').map(Number)
       : [Number(u.pathname.split('/').pop())]
     if ((failBatch && u.searchParams.has('personIds')) || ids.some(Number.isNaN)) return new Response('{}', { status: u.searchParams.has('personIds') ? 400 : 404 })
+    if (garbage && u.searchParams.has('personIds')) return new Response(JSON.stringify({ people: {} }), { status: 200 })
     const people = ids.filter((id) => known.includes(id)).map((id) => ({ id, fullName: `P${id}` }))
     // A single read of an unknown id is a 404, as statsapi answers it.
     if (!u.searchParams.has('personIds') && !people.length) return new Response('{}', { status: 404 })
@@ -77,6 +78,26 @@ test('26 players make two calls and none is dropped', async () => {
     const got = await Promise.all(ids.map((id) => fetchPersonBatched(id)))
     assert.equal(urls.length, 2)
     assert.deepEqual(got.map((d) => d.people[0].id), ids)
+  } finally {
+    restore()
+  }
+})
+
+test('a 200 whose people is not a list falls back, it never leaves a caller waiting', async () => {
+  const { restore } = stubPeople([11, 22], { garbage: true })
+  try {
+    const got = await Promise.all([fetchPersonBatched(11), fetchPersonBatched(22)])
+    assert.deepEqual(got.map((d) => d.people[0].id), [11, 22])
+  } finally {
+    restore()
+  }
+})
+
+test('an id the API would 400 the whole batch for reads singly', async () => {
+  const { urls, restore } = stubPeople([11])
+  try {
+    await Promise.allSettled([fetchPersonBatched(11), fetchPersonBatched(1.5), fetchPersonBatched(99999999999)])
+    assert.ok(!urls.some((u) => /personIds=[^&]*(1\.5|99999999999)/.test(u)))
   } finally {
     restore()
   }
