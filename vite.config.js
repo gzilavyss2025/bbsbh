@@ -70,11 +70,12 @@ import { describeLogoCaveat } from './src/lib/logoArt.js'
 // is another one.
 
 // Vercel sets VERCEL_GIT_COMMIT_SHA for every build; `vite dev`/a local
-// `vite build` has none, so fall back to the checked-out HEAD. Bridging it
-// onto a VITE_-prefixed process.env var is what makes Vite expose it to
-// client code as import.meta.env.VITE_BUILD_COMMIT — see src/lib/buildInfo.js,
-// which the footer's build indicator reads (root CLAUDE.md's testing note on
-// confirming you're looking at the version you just merged).
+// `vite build` has none, so fall back to the checked-out HEAD. The SHA goes
+// into index.html as `<meta name="build-commit">`, NOT into the JS: a define
+// or import.meta.env value lands in the entry chunk, so every deploy (even a
+// nightly data-only one) renamed ~340 chunks and made every installed PWA
+// re-download them (#2873). index.html is one small file. src/lib/buildInfo.js
+// reads the tag for the footer's build stamp and the crash reporter.
 function resolveBuildCommit() {
   if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA
   try {
@@ -83,7 +84,15 @@ function resolveBuildCommit() {
     return ''
   }
 }
-process.env.VITE_BUILD_COMMIT = resolveBuildCommit()
+
+function buildCommitMeta() {
+  const commit = resolveBuildCommit()
+  return {
+    name: 'build-commit-meta',
+    transformIndexHtml: () =>
+      commit ? [{ tag: 'meta', attrs: { name: 'build-commit', content: commit }, injectTo: 'head' }] : [],
+  }
+}
 
 // The service worker's precache filter (see `manifestTransforms` below). Keeps
 // every non-code entry the glob found, and of `assets/`, only the fonts and
@@ -446,6 +455,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    buildCommitMeta(),
     devDataSave(),
     VitePWA({
       registerType: 'autoUpdate',

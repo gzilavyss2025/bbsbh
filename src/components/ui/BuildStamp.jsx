@@ -5,7 +5,7 @@ import { BUILD_COMMIT_SHORT, BUILD_COMMIT_URL } from '../../lib/buildInfo.js'
 // rather than a stale tab/cache. Shared by SiteFooter (the slate) and
 // ReportFooter (every standalone report page), so both footers' legal blocks
 // stay in sync without a second copy of this markup. Renders nothing when
-// the commit couldn't be resolved at build time (see buildInfo.js).
+// the commit is not in index.html (see buildInfo.js).
 export function BuildStamp() {
   if (!BUILD_COMMIT_SHORT) return null
   return (

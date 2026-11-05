@@ -150,6 +150,13 @@ list says what each guard checks.
   first load. In `scripts/bundle/` because `scripts/` is at its `check-dir-size` budget;
   tested in `test/bundle-size-guard.test.js`; how to read it: `docs/testing.md`, "Bundle
   size". Run as `npm run build && npm run check:bundle`.
+- `bundle/check-commit-not-in-js.mjs` — post-build (not part of `npm run lint`): fails when
+  `dist/index.html` lacks `<meta name="build-commit">`, or when that SHA turns up in any JS
+  or CSS chunk (full or short), or when a bare `import.meta.env` read inlined the whole
+  env object (`SSR:!1,VITE_…`), which on Vercel carries per-deploy variables. Tested in
+  `test/commit-guard.test.js`. The commit belongs in `index.html` only: in a chunk it renamed ~340 files and
+  ~40 precached ones on every deploy, data-only ones included (#2873). Run as
+  `npm run build && npm run check:commit`.
 - `check-report-pages.mjs` — fails if `SiteMenu.jsx` (the hamburger menu) or
   `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
   `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two

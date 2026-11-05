@@ -20,8 +20,9 @@ installCrashReporter(() => {
   return { route, build: BUILD_COMMIT_SHORT }
 })
 
-// Every deploy renames the content-hashed chunk files (see App.jsx's per-route
-// `lazy()` imports), so a tab or installed app left open across one gets a failed
+// A deploy that changes code renames the content-hashed chunks it touches (a
+// data-only one renames none, #2873; see App.jsx's per-route `lazy()` imports),
+// so a tab or installed app left open across one can get a failed
 // dynamic import the next time it opens a route it hasn't loaded yet. Vite fires
 // this event for exactly that case. Repair once a session: drop the cached app
 // files and the service worker, then reload from the network (lib/crash/recover.js
