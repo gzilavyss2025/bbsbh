@@ -407,7 +407,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
 /* The list scrolls in its own box, five rows tall. Every row is one height,
    --census-row-h: LongAtBats.jsx draws only the rows in view and pads the rest. */
 .seasonnote__longest .seasonnote__bars {
-  --census-row-h: 3.5rem;
+  --census-row-h: max(3.5rem, 56px); /* raw-value-exempt: the row's content is px, so the row never gets shorter than it */
   max-height: calc(5 * var(--census-row-h));
   overflow-y: auto;
   overscroll-behavior: contain;

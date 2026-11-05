@@ -29,9 +29,8 @@ const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight 
 // card once per block, not once per frame.
 const BUFFER = 12
 const STEP = 6
-// Until a row is measured: --census-row-h is 3.5rem, so 3.5 root font sizes.
-const ROW_REM = 3.5
-const guessRowH = () => ROW_REM * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)
+// Until a row is measured: --census-row-h is max(3.5rem, 56px), the row's content being px.
+const guessRowH = () => Math.max(56, 3.5 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16))
 
 // "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
 const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
@@ -56,10 +55,7 @@ export function LongAtBats({ season }) {
   const [club, setClub] = useState(null)
   const linkProps = useRouteLink()
   const listRef = useRef(null)
-  // The row that holds focus stays drawn even when it scrolls out of the window.
-  const [focused, setFocused] = useState(null)
   const [geo, setGeo] = useState(() => ({ rowH: guessRowH(), viewH: 0 }))
-  const [block, setBlock] = useState(0)
 
   const rows = data?.rows ?? []
   // A file for a season the page is not naming, a season still being played, or
@@ -97,6 +93,14 @@ export function LongAtBats({ season }) {
     () => (club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every),
     [every, club],
   )
+  // Where the window sits and which row holds focus (it stays drawn even when it scrolls
+  // out of the window). Tied to the list they were taken
+  // from: a new season, new data or a club filter is a new `all`, and a fresh list
+  // starts at the top with nothing focused.
+  const [pos, setPos] = useState({ list: all, block: 0, focused: null })
+  const { block, focused } = pos.list === all ? pos : { block: 0, focused: null }
+  const setBlock = (b) => setPos((p) => (p.list === all && p.block === b ? p : { list: all, focused: p.list === all ? p.focused : null, block: b }))
+  const setFocused = (f) => setPos((p) => (p.list === all && p.focused === f ? p : { list: all, block: p.list === all ? p.block : 0, focused: f }))
 
   // Measure the box and one row, and again whenever the box resizes (text size,
   // rotation): the row height is the CSS token's, read off the DOM. getBoundingClientRect,
@@ -111,6 +115,7 @@ export function LongAtBats({ season }) {
       setGeo((g) => (g.viewH === viewH && (!rowH || g.rowH === rowH) ? g : { viewH, rowH: rowH || g.rowH }))
     }
     measure()
+    if (typeof ResizeObserver === 'undefined') return undefined
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
@@ -122,9 +127,7 @@ export function LongAtBats({ season }) {
   const pickClub = (id) => {
     setClub(id)
     setPick(0)
-    setFocused(null)
     if (listRef.current) listRef.current.scrollTop = 0
-    setBlock(0)
   }
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
   const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
@@ -261,7 +264,8 @@ export function LongAtBats({ season }) {
                     setFocused(li ? Number(li.getAttribute('aria-posinset')) - 1 : null)
                   }}
                   onBlur={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget)) setFocused(null)
+                    // Focus leaving the page (an app switch) has no relatedTarget: keep the row.
+                    if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) setFocused(null)
                   }}
                 >
                   {items}
