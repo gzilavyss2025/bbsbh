@@ -395,15 +395,26 @@ export function GameSelect({
 
   // Is the slate looking at a winter? Read off the dates statsapi publishes for
   // the season, never off the games coming back empty (hooks/useOffseason.js).
-  const { phase: offseason, winter, pending: winterPending } = useOffseason(
-    dateStr,
-    sportId,
-    seasonMeta.data,
-  )
-  const winterLikely = Boolean(offseason) || isEmptyDay
+  const {
+    phase: offseason,
+    winter: winterRows,
+    pending: winterPending,
+    expectWinter,
+  } = useOffseason(dateStr, sportId, seasonMeta.data)
+  // Saved rows can name the winter before the slate has loaded, so the winter page itself
+  // waits for the slate to say it is empty (it must never draw above game cards), and a
+  // reserve of its size holds the room meanwhile. A day the saved rows call in season gets
+  // neither: it keeps the ordinary empty-day page. The chunk starts early on saved rows only.
+  const slotShown = Boolean(winterRows) && isEmptyDay
+  const winter = Boolean(winterRows) && (loading || isEmptyDay) ? winterRows : null
+  const holdForWinter =
+    !slotShown &&
+    expectWinter &&
+    (loading || winterPending || seasonMeta.loading) &&
+    (offseason ? loading || isEmptyDay : isEmptyDay)
   useEffect(() => {
-    if (winterLikely) loadOffseasonSlot()
-  }, [winterLikely])
+    if (offseason) loadOffseasonSlot()
+  }, [offseason])
 
   // The banner's date always comes from an actual forward schedule scan
   // (fetchNextGameDate), never straight from statsapi's firstDate2ndHalf —
@@ -664,12 +675,12 @@ export function GameSelect({
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
           {/* Rows still on their way: hold the panel's room now, so what lands below does not jump. */}
-          {!winter && (winterPending || seasonMeta.loading) && (
+          {holdForWinter && (
             <div aria-hidden="true" className="slate-reserve slate-reserve--offseason" />
           )}
-          {winter && (
+          {slotShown && (
             <LazyPanel reserve="offseason">
-              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winterRows} />
             </LazyPanel>
           )}
 
@@ -710,7 +721,7 @@ export function GameSelect({
               </LazyPanel>
             )}
             {/* Not while the winter is still being decided: the club list would be drawn, then thrown away. */}
-            {offDayTeams.length > 0 && !winter && !winterPending && !seasonMeta.loading && !october && (
+            {offDayTeams.length > 0 && !winter && !holdForWinter && !october && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}

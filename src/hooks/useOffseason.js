@@ -7,7 +7,7 @@ import {
   milestoneProjectionPaused,
   offseasonPhase,
 } from '../lib/time/seasonPhase.js'
-import { readSeasonRow, saveSeasonRow } from '../lib/time/seasonRows.js'
+import { readSeasonRow, rowFitsYear, saveSeasonRow, taggedRows } from '../lib/time/seasonRows.js'
 import { baseballToday } from '../lib/time/standingsDates.js'
 import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 
@@ -49,29 +49,40 @@ import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 // sixth tab cannot appear on the rail and be missed by this gate.
 const LEVEL_TABS = LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB).map((l) => l.sportId)
 
-// The whole decision, pure. `net` is what the network has answered so far
-// ({ season, level, next }, each null until it lands); anything it has not
-// answered is read from the rows remembered on this device (`load`, see
-// lib/time/seasonRows.js). The network always wins, so a stale remembered row is
-// corrected the moment the fresh one arrives, and a first visit with nothing
-// remembered behaves exactly as it did before rows were remembered. Keyed by the
-// DATE's year, so on 2027-01-02 a remembered 2026 row is never read.
-export function resolveOffseason(dateStr, sportId, net, load = readSeasonRow) {
+// The whole decision, pure, in two steps (the hook memoises each once). `net` is what
+// the network has answered so far ({ season, level, next }, each null until it
+// lands); anything it has not answered is read from the rows remembered on this
+// device (`load`, see lib/time/seasonRows.js). The network wins, so a stale
+// remembered row is corrected the moment the fresh one arrives, and a first visit
+// with nothing remembered behaves as it did before rows were remembered. Keyed by
+// the DATE's year, so on 2027-01-02 a remembered 2026 row is never read, and a
+// network row for another year (the render where the date just changed) is ignored.
+export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const isLevel = LEVEL_TABS.includes(sportId)
   const year = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
-  const seasonRow = net.season ?? load(SPORT_IDS.MLB, year)
-  const levelRows = isLevel ? (net.level ?? load(sportId, year)) : null
+  const pick = (fresh, id) => (rowFitsYear(fresh, year) ? fresh : load(id, year))
+  const seasonRow = pick(net.season, SPORT_IDS.MLB)
+  const levelRows = isLevel ? pick(net.level, sportId) : null
   const phase = isLevel
     ? levelOffseasonPhase(dateStr, levelRows)
     : sportId === SPORT_IDS.MLB
       ? offseasonPhase(dateStr, seasonRow)
       : null
-  if (!phase) return { phase: null, winter: null }
+  // Is a winter to be expected? Yes when the rows say so, and yes when there are no
+  // rows at all (a first visit: the answer is on its way). No when rows are in hand
+  // and say it is the season: that day keeps its ordinary empty-day page.
+  const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
+  return { phase, seasonRow, expectWinter: Boolean(phase) || !known }
+}
+
+export function winterOf(dateStr, sportId, base, nextRow, load = readSeasonRow) {
+  const { phase, seasonRow } = base
+  if (!phase) return null
   const forward =
-    net.next ??
+    nextRow ??
     (phase.springFromNextSeason ? load(SPORT_IDS.MLB, phase.springFromNextSeason) : null) ??
     (phase.openerFromNextSeason ? load(sportId, phase.openerFromNextSeason) : null)
-  return { phase, winter: winterFrom(dateStr, isLevel, phase, seasonRow, forward) }
+  return winterFrom(dateStr, LEVEL_TABS.includes(sportId), phase, seasonRow, forward)
 }
 
 // Everything the offseason page draws itself from, or null. Held back until
@@ -130,17 +141,23 @@ export function useOffseason(dateStr, sportId, seasonRow) {
   // day (`seasonRow` is that signal); remembered rows decide the phase without it.
   const levelSeason = isLevel && seasonRow && dateYear ? dateYear : null
 
-  const levelRows = useAsync(
-    () => (levelSeason ? fetchLevelSeasonDates(sportId, levelSeason) : Promise.resolve(null)),
+  // Tagged with the key they were fetched for (see taggedRows): the render where the
+  // key changes still holds the previous key's data, which must neither decide a phase
+  // nor be saved under the new key.
+  const levelFetch = useAsync(
+    () =>
+      levelSeason
+        ? fetchLevelSeasonDates(sportId, levelSeason).then((rows) => ({ sportId, year: levelSeason, rows }))
+        : Promise.resolve(null),
     [levelSeason, sportId],
   )
+  const levelRows = taggedRows(levelFetch.data, sportId, levelSeason)
 
-  const net = { season: seasonRow, level: levelRows.data, next: null }
-  const { phase } = useMemo(
-    () => resolveOffseason(dateStr, sportId, net),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dateStr, sportId, seasonRow, levelRows.data],
+  const base = useMemo(
+    () => phaseOf(dateStr, sportId, { season: seasonRow, level: levelRows }),
+    [dateStr, sportId, seasonRow, levelRows],
   )
+  const { phase } = base
 
   // November and December read forward one row for the two dates the winter
   // calendar is allowed to state as fact — spring training's first game and
@@ -153,37 +170,38 @@ export function useOffseason(dateStr, sportId, seasonRow) {
   // its September-to-December branch has next season's opener on next year's
   // league rows. Only one of the two ever runs — a phase carries one forward
   // year or the other, never both.
-  const next = useAsync(() => {
-    if (phase?.springFromNextSeason) return fetchSeasonMeta(phase.springFromNextSeason)
-    if (phase?.openerFromNextSeason) {
-      return fetchLevelSeasonDates(sportId, phase.openerFromNextSeason)
-    }
-    return Promise.resolve(null)
-  }, [phase?.openerFromNextSeason, phase?.springFromNextSeason, sportId])
+  const nextId = phase?.springFromNextSeason ? SPORT_IDS.MLB : sportId
+  const nextYear = phase?.springFromNextSeason ?? phase?.openerFromNextSeason ?? null
+  const nextFetch = useAsync(() => {
+    if (!nextYear) return Promise.resolve(null)
+    const read = phase.springFromNextSeason
+      ? fetchSeasonMeta(nextYear)
+      : fetchLevelSeasonDates(sportId, nextYear)
+    return read.then((rows) => ({ sportId: nextId, year: nextYear, rows }))
+  }, [nextId, nextYear, sportId])
+  const nextRow = taggedRows(nextFetch.data, nextId, nextYear)
 
-  const { winter } = useMemo(
-    () => resolveOffseason(dateStr, sportId, { ...net, next: next.data }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dateStr, sportId, seasonRow, levelRows.data, next.data],
+  const winter = useMemo(
+    () => winterOf(dateStr, sportId, base, nextRow),
+    [dateStr, sportId, base, nextRow],
   )
 
-  // Remember what the network said, for the next load's first frame.
+  // Remember what the network said, for the next load's first frame. Each save names
+  // the key its data was fetched for, and saveSeasonRow checks the row against it.
   useEffect(() => saveSeasonRow(SPORT_IDS.MLB, dateYear, seasonRow), [dateYear, seasonRow])
-  useEffect(() => saveSeasonRow(sportId, levelSeason, levelRows.data), [sportId, levelSeason, levelRows.data])
-  useEffect(() => {
-    if (phase?.springFromNextSeason) saveSeasonRow(SPORT_IDS.MLB, phase.springFromNextSeason, next.data)
-    else saveSeasonRow(sportId, phase?.openerFromNextSeason, next.data)
-  }, [sportId, phase?.springFromNextSeason, phase?.openerFromNextSeason, next.data])
+  useEffect(() => saveSeasonRow(sportId, levelSeason, levelRows), [sportId, levelSeason, levelRows])
+  useEffect(() => saveSeasonRow(nextId, nextYear, nextRow), [nextId, nextYear, nextRow])
 
   // `phase` is what the slate gates its own behaviour on — it is known one
   // render before `winter` is, and "the season is over" is true whether or not
   // the date it counts to has landed yet. `winter` is what the page draws from.
   // `pending`: rows are still on their way (a level's, or the next season's), so
   // the slate must not draw a stand-in it would throw away a beat later.
+  const answered = (d, id, year) => d?.sportId === id && d?.year === year
   const pending =
-    (Boolean(levelSeason) && levelRows.loading) ||
-    (Boolean(phase?.springFromNextSeason || phase?.openerFromNextSeason) && next.loading)
-  return { phase, winter, pending }
+    (Boolean(levelSeason) && !answered(levelFetch.data, sportId, levelSeason)) ||
+    (Boolean(nextYear) && !answered(nextFetch.data, nextId, nextYear))
+  return { phase, winter, pending, expectWinter: base.expectWinter }
 }
 
 // True while the postseason is on: Milestone Watch hides its ETAs then (#1438).
