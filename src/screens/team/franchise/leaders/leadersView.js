@@ -60,4 +60,3 @@ export function leadersView(leaders, mode, all) {
     .filter((g) => g.lists.length)
 }
 
-export const CATEGORY_COUNT = HITTING.length + PITCHING.length

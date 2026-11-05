@@ -254,6 +254,7 @@ a.frnums__link:focus-visible {
 .frmgr__name {
   white-space: normal;
 }
+
 /* THE ALL-TIME LEADERS CARD (#2785): the switch, then each group's top-five lists, two across on a
    phone and five across from the 740px step. The door opens the card in place. */
 .frpage .frlead {
@@ -282,14 +283,14 @@ a.frnums__link:focus-visible {
   gap: var(--space-4) var(--space-3);
 }
 /* A season row carries the year too, so a phone draws one list across. */
-.frlead__lists--season {
+.frlead--season .frlead__lists {
   grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 740px) {
   .frlead__lists {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
-  .frlead__lists--season {
+  .frlead--season .frlead__lists {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -322,7 +323,7 @@ a.frnums__link:focus-visible {
   font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
 }
-.frlead__rows--season .frlead__row {
+.frlead--season .frlead__row {
   grid-template-columns: 1.1em minmax(0, 1fr) auto auto;
 }
 .frlead__rank,
