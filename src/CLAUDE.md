@@ -78,9 +78,9 @@ component.
 The `useAsync` hook runs a promise on mount/deps-change and exposes
 `{ loading, error, data, reload }`. Two seams it guards: a per-run token discards
 out-of-order completions (a slow request left in flight across a deps change must
-not clobber newer data), and a deps change resets `data` to null while `reload`
-(same deps) keeps the last-good data — stale-while-revalidate for the live-game
-Refresh, never across games/dates.
+not clobber newer data), and a deps change answers `{ loading: true, data: null }` from
+that very render (#2925; never the previous deps' state) while `reload` (same deps) keeps
+the last-good data — stale-while-revalidate for the live-game Refresh, never across games/dates.
 
 ## UI-side spoiler enforcement
 
