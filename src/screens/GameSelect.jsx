@@ -412,9 +412,9 @@ export function GameSelect({
   const needsResumeLookup =
     isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark && !bracketCoversPage
   const resumeLookup = useAsync(
-    () =>
+    (signal) =>
       needsResumeLookup
-        ? fetchNextGameDate(sportId, dateStr, 10, activeLeagueId)
+        ? fetchNextGameDate(sportId, dateStr, 10, activeLeagueId, signal)
         : Promise.resolve(null),
     [needsResumeLookup, sportId, dateStr, activeLeagueId],
   )

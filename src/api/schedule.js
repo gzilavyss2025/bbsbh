@@ -314,11 +314,13 @@ export async function fetchAllStarGame(season) {
 // by day (bounded) rather than a range query since statsapi has no "next date
 // with games" endpoint; sequential so the common one-day-off case (a Monday
 // MiLB off day) resolves on the first hop instead of firing the whole window.
-// Returns null if nothing turns up within the window (e.g. off-season).
-export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10, leagueId = null) {
+// Returns null if nothing turns up within the window (e.g. off-season), or once
+// `signal` aborts: a scan its caller dropped stops before the next hop (#2914).
+export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10, leagueId = null, signal = null) {
   const [y, m, d] = fromDateStr.split('-').map(Number)
   const from = new Date(y, m - 1, d)
   for (let i = 1; i <= maxDays; i++) {
+    if (signal?.aborted) return null
     const copy = new Date(from)
     copy.setDate(copy.getDate() + i)
     const dateStr = `${copy.getFullYear()}-${String(copy.getMonth() + 1).padStart(2, '0')}-${String(copy.getDate()).padStart(2, '0')}`
