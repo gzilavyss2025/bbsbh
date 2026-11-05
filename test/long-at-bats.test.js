@@ -29,7 +29,7 @@ import {
   sortRows,
 } from '../scripts/lib/long-at-bats.mjs'
 import { POSTSEASON_GAME_TYPES as SHARED_POSTSEASON } from '../scripts/lib/records/postseason.mjs'
-import { atBatGamePath, ageGap, count, defaultLeagueId, years } from '../src/api/notebook.js'
+import { atBatGamePath, ageGap, atBatsForClub, count, defaultLeagueId, years } from '../src/api/notebook.js'
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
@@ -137,6 +137,17 @@ test('a row opens its game at the address the slate would build', () => {
   assert.equal(atBatGamePath({ ...row, g: 2 }), '/07052026/milari-2/lineup1')
   assert.equal(atBatGamePath({ date: '2026-07-05' }), null)
   assert.equal(atBatGamePath(null), null)
+})
+
+// Issue #2934: picking a club in the strip keeps the at-bats that club was on
+// either side of, and its count is the census line's number.
+test('a picked club keeps its at-bats on either side, and none picked keeps them all', () => {
+  const row = (batter, pitcher) => ({ batter: { teamId: batter }, pitcher: { teamId: pitcher } })
+  const rows = [row(158, 112), row(112, 158), row(145, 114), row(114, 145)]
+  assert.deepEqual(atBatsForClub(rows, 158), [rows[0], rows[1]])
+  assert.deepEqual(atBatsForClub(rows, 114), [rows[2], rows[3]])
+  assert.deepEqual(atBatsForClub(rows, 999), [])
+  assert.equal(atBatsForClub(rows, null), rows)
 })
 
 test('the note formats an age as a measurement and a denominator as a count', () => {

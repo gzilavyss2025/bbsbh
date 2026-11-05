@@ -12,9 +12,15 @@ globalThis.fetch = async (url) => {
     return { ok: false, status: 404, headers: new Headers(), json: async () => ({}), text: async () => '' }
   }
 }
-const { franchiseSummary, summarizeFranchise } = await import('../src/api/history/franchiseSummary.js')
+const { summarizeFranchise } = await import('../src/api/history/franchiseSummary.js')
 const { franchiseLedger } = await import('../src/api/history/franchiseLedger.js')
 const { pennantsFor } = await import('../src/api/history/leaguePennants.js')
+
+// The real files through the pure summary, as the franchise page reads them (its live rows aside).
+async function franchiseSummary(id) {
+  const { through, rows } = await franchiseLedger(id)
+  return { through, ...summarizeFranchise(rows, await pennantsFor(id)) }
+}
 
 const row = (season, name, w, l, managers = [], postseason = null) => ({ season, name, w, l, managers, postseason })
 
@@ -78,6 +84,17 @@ test('winningest manager: equal wins go to fewer losses; no manager data reads n
   const none = summarizeFranchise([row(1950, 'X', 80, 74)], [])
   assert.equal(none.winningestManager, null)
   assert.equal(none.managersFrom, null)
+})
+
+test('summarizeFranchise: managers, one entry each with every season he is listed in and whether a split is missing', () => {
+  const s = summarizeFranchise(
+    [row(2014, 'B', 82, 80, [{ id: 1, name: 'Ron', w: 82, l: 80 }]), row(2015, 'B', 68, 94, [{ id: 2, name: 'Craig', w: 61, l: 76 }, { id: 1, name: 'Ron' }])],
+    [],
+  )
+  assert.deepEqual(s.managers, [
+    { id: 1, name: 'Ron', w: 82, l: 80, seasons: 1, years: [2014, 2015], partial: true },
+    { id: 2, name: 'Craig', w: 61, l: 76, seasons: 1, years: [2015], partial: false },
+  ])
 })
 
 test('summarizeFranchise: no rows reads empty, not a crash', () => {

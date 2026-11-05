@@ -25,15 +25,17 @@ export function postLabel(postseason) {
   return { short: `${verb} ${short}`, long: `${verb} ${long}`, title: postseason.round === 'World Series' && postseason.won === true }
 }
 
+// A winning percentage, ".492"; a dash with no games.
+export const pct = (w, l) => (w + l ? (w / (w + l)).toFixed(3).replace(/^0/, '') : DASH)
+
 // One row's cells. The finish is the division rank, or the league rank before divisions.
 export function seasonCells(row) {
-  const games = row.w + row.l
   const rank = row.divisionRank ?? row.leagueRank
   const diff = row.rs == null || row.ra == null ? null : row.rs - row.ra
   return {
     season: row.season,
     wl: `${row.w}-${row.l}`,
-    pct: games ? (row.w / games).toFixed(3).replace(/^0/, '') : DASH,
+    pct: pct(row.w, row.l),
     finish: rank ? ordinal(rank) : DASH,
     gb: row.gb ? String(row.gb) : DASH,
     post: postLabel(row.postseason),
@@ -41,9 +43,18 @@ export function seasonCells(row) {
     ra: row.ra ?? DASH,
     diff: diff == null ? DASH : diff > 0 ? `+${diff}` : String(diff),
     managers: (row.managers ?? []).map((m) => ({ id: m.id, name: m.name })),
-    note: row.note ?? null,
+    tag: row.note ? (NOTE_TAG[row.note] ?? 'Note') : null,
     inProgress: Boolean(row.inProgress),
   }
+}
+
+// An odd season's short tag on its row (#2784). The ledger writes three notes; any other reads "Note".
+const NOTE_TAG = { 'split season': 'Split', strike: 'Strike', '60-game season': '60 G' }
+
+// Rows (any order) -> the noted seasons as one line under the table, oldest first, or null.
+export function oddSeasons(rows) {
+  const noted = (rows ?? []).filter((r) => r.note).sort((a, b) => a.season - b.season)
+  return noted.length ? noted.map((r) => `${r.season} ${r.note}`).join(' · ') : null
 }
 
 // Rows (any order) -> the table's items, newest first: { kind: 'season', row } and, above the
@@ -120,6 +131,8 @@ export function liveRow({ teamId, season, name, records, dates, manager }) {
     leagueRank: rank(t.leagueRank),
     rs: t.runsScored ?? null,
     ra: t.runsAllowed ?? null,
+    // No w/l: fetchManager names one manager (an interim first), not who managed which games. The
+    // page marks him † for this season until the offseason ledger run splits it (#2784 review).
     managers: manager?.personId ? [{ id: manager.personId, name: manager.name }] : [],
     postseason: furthestSeries(all, teamId),
     note: null,

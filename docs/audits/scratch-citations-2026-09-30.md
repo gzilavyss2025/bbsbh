@@ -1,5 +1,7 @@
 # `.scratch/` citation report (issue #1304, report only)
 
+> Screenshots removed in `fddef29a22` (#2874); restore one with `git show fddef29a22^:<path> > <path>`.
+
 Checked on `origin/main` **f5a7e675a** (2026-09-30). This report deletes nothing and edits nothing in `.scratch/`.
 It counts **tracked** files only: 2,510 files, 152.6 MB. Untracked `.scratch/` folders on the owner's laptop are not visible to this check, so they are not in any number here.
 

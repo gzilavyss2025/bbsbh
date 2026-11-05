@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseRoute } from '../src/lib/route.js'
-import { ledgerItems, liveRow, postLabel, seasonCells } from '../src/screens/team/franchise/ledgerRows.js'
+import { ledgerItems, liveRow, oddSeasons, postLabel, seasonCells } from '../src/screens/team/franchise/ledgerRows.js'
 
 // #2763: the franchise page's route and the pure shaping of its season ledger.
 
@@ -106,6 +106,8 @@ test('liveRow: a finished season that ended in a World Series win, no tag', () =
   assert.deepEqual([r.season, r.w, r.l, r.gb, r.divisionRank, r.rs, r.ra], [2026, 103, 59, 0, 1, 832, 618])
   assert.deepEqual(r.postseason, { round: 'World Series', won: true })
   assert.equal(r.inProgress, false)
+  // #2784 review: fetchManager names one manager (an interim first), never who managed which
+  // games, so the live row credits no W-L. The page shows it with the † until the ledger run splits it.
   assert.deepEqual(r.managers, [{ id: 580268, name: 'Pat Murphy' }])
 })
 
@@ -152,4 +154,19 @@ test('liveRow: a game listed twice (suspended, then resumed) counts once', () =>
   const dates = [{ games: [ws(1, true), ws(2, true), ws(3, false), ws(4, true)] }, { games: [ws(4, true), { ...ws(5, true), status: { abstractGameState: 'Preview' } }] }]
   const r = liveRow({ ...base, records: standings(103, 59), dates })
   assert.deepEqual(r.postseason, { round: 'World Series', won: null })
+})
+
+// #2784: an odd season carries a short tag on its row; the notes read as one line under the table.
+test('seasonCells: an odd season gets a short tag; any other row has none', () => {
+  assert.equal(seasonCells(row(2020, { note: '60-game season' })).tag, '60 G')
+  assert.equal(seasonCells(row(1994, { note: 'strike' })).tag, 'Strike')
+  assert.equal(seasonCells(row(1981, { note: 'split season' })).tag, 'Split')
+  assert.equal(seasonCells(row(1999, { note: 'a note no one mapped' })).tag, 'Note')
+  assert.equal(seasonCells(row(2019)).tag, null)
+})
+
+test('oddSeasons: the noted seasons oldest first as one line, or null when none', () => {
+  const rows = [row(2020, { note: '60-game season' }), row(1981, { note: 'split season' }), row(1994, { note: 'strike' }), row(2019)]
+  assert.equal(oddSeasons(rows), '1981 split season · 1994 strike · 2020 60-game season')
+  assert.equal(oddSeasons([row(2019)]), null)
 })

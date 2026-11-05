@@ -63,6 +63,7 @@ export const SCORE_BASE = {
   tiedAfter: 40,
   starterRec: 40,
   vsTeam: 40,
+  nugget: 38, // a season count with a well-known number (#2809), just under vsTeam
   leader: 35,
   sbStreak: 35,
   marathonAb: 45,
@@ -228,6 +229,7 @@ export const SHOWN_DECAY = 25
 export const ONCE_PER_GAME_KINDS = new Set([
   // pre-half / between-innings season and calendar facts
   'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'wsSeriesOdds', 'wsStarterStart',
+  'nugget', // a season count frozen before tonight (#2809)
   // Margin Notes' season aggregates (pitcher-callouts.js's buildPitcherNotes)
   'homeAway', 'cgShutout', 'scorelessStreak', 'workload', 'backToBack',
   'penFatigue', 'leverage', 'centuryClub', 'sideSplit', 'recentAppearances',

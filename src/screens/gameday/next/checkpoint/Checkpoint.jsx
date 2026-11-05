@@ -5,6 +5,7 @@ import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { fetchSavantMatchup } from '../../../../api/matchup/savant.js'
 import { fetchHitterEntryLines } from '../../../../api/player/hitterEntryLines.js'
+import { loadNuggets } from '../../../../api/nuggets/nuggets.js'
 import { halfIndex } from '../../../../api/select.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { fetchOnce } from '../../../../lib/gameday/fetchOnce.js'
@@ -19,7 +20,7 @@ import { checkpointMarkup } from './checkpointMarkup.js'
 // is the one state here; the mount keys this on the half, so a new half opens on the tally.
 //
 // The notes take what BetweenInnings.jsx gives buildBetweenInnings: InningViewer's `notes` (bundle,
-// margin notes, workload, date), plus the Savant rates, the World Series inputs and the ledger's counts
+// margin notes, workload, date), plus the Savant rates, the World Series inputs, the nugget store and the ledger's counts
 // for the next half, frozen for the half. A note counts as shown once it is on screen: at T, L and D or
 // under Motion: Reduced every page is, on the phone only while the Notes page is open.
 // The rosters' entry lines, once per roster for the session: the checkpoint remounts every half.
@@ -38,6 +39,9 @@ export function Checkpoint({ notes, inning, half, feed, ...props }) {
     [order, gd?.game?.season, gd?.datetime?.officialDate],
   ).data ?? null
   const { seriesHistory, wsStarts } = useWsCalloutInputs(feed)
+  // The season's nugget store, MLB only (#2809); buildBetweenInnings keeps the ones dated before tonight.
+  const nuggetSeason = (gd?.teams?.home?.sport?.id ?? 1) === 1 ? gd?.game?.season : null
+  const nuggets = useAsync(() => loadNuggets(nuggetSeason), [nuggetSeason]).data ?? null
   const ledger = useCalloutLedger()
   const stagedIdx = halfIndex(inning, half) + 1
   const shownCounts = useMemo(() => ledger.countsFor(stagedIdx), [ledger, stagedIdx])
@@ -49,7 +53,7 @@ export function Checkpoint({ notes, inning, half, feed, ...props }) {
   useFitNames()
   return checkpointMarkup(createElement, {
     SealBox, Seen, Headshot, Scroll: NotesScroll, PlayerLink, entry, feed, inning, half, ...props, page, onPage: setPage,
-    notes: notes && { ...notes, shownCounts, savantMatchup, seriesHistory, wsStarts }, wide,
+    notes: notes && { ...notes, shownCounts, savantMatchup, seriesHistory, wsStarts, nuggets }, wide,
   })
 }
 
