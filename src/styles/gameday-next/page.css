@@ -112,8 +112,9 @@
 .gdnext__bar .gdnext__advance { position: relative; flex: 1; min-width: 0; white-space: nowrap; }
 /* The advance owns the bar's dead space around it: up and down to the bar's edges (the bar's
    overflow clip trims the reach, and its top rule stays the page's), right to its end, left across
-   the gap to the step switch, so a thumb that misses still steps. Offsets from the button, not the
-   bar, so the area holds under .btn:active (e2e/reveal-hit-area.spec.js). */
+   the gap to its neighbour (the step switch, or Win % on the drawer tiers), so a thumb that misses
+   still steps. Offsets from the button, not the bar, so the area holds under .btn:active
+   (e2e/reveal-hit-area.spec.js). */
 .gdnext__bar .gdnext__advance::after {
   content: '';
   position: absolute;
