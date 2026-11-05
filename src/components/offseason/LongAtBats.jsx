@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useLayoutEffect, useRef, useState } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
@@ -12,6 +12,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ClubStrip } from './ClubStrip.jsx'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
+import { windowSlice } from '../../lib/react/windowSlice.js'
 
 // The list's foot fades only while there is more below it.
 // The picked at-bat's scorebug and zone load in their own chunk (LongAtBatDetail.jsx).
@@ -19,6 +20,12 @@ const Scorebug = lazyNamed(() => import('./LongAtBatDetail.jsx'), 'Scorebug')
 const AtBatZone = lazyNamed(() => import('./LongAtBatDetail.jsx'), 'AtBatZone')
 
 const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight >= el.scrollHeight - 2))
+
+// The list draws only the rows in view plus this many each side. Every row has
+// one height (--census-row-h in winter-long-at-bats.css); two empty <li> spacers in the
+// <ol> stand in for the rows not drawn, so the scroll box stays full length.
+const BUFFER = 5
+const FALLBACK_ROW_H = 55
 
 // "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
 const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
@@ -42,6 +49,16 @@ export function LongAtBats({ season }) {
   // A club filter: an at-bat stays when the club is on either side of it.
   const [club, setClub] = useState(null)
   const linkProps = useRouteLink()
+  const listRef = useRef(null)
+  const [view, setView] = useState({ scrollTop: 0, viewH: 0, rowH: FALLBACK_ROW_H })
+
+  // Measure the box and one row once the list is in the page: the row height is
+  // the CSS token's, read off the DOM, never a pixel guess here.
+  useLayoutEffect(() => {
+    const el = listRef.current
+    const li = el?.querySelector('li[aria-posinset]')
+    if (el && li) setView((v) => ({ ...v, viewH: el.clientHeight, rowH: li.offsetHeight || v.rowH }))
+  }, [data])
 
   const rows = data?.rows ?? []
   // A file for a season the page is not naming, a season still being played, or
@@ -68,11 +85,14 @@ export function LongAtBats({ season }) {
   const pickClub = (id) => {
     setClub(id)
     setPick(0)
+    if (listRef.current) listRef.current.scrollTop = 0
+    setView((v) => ({ ...v, scrollTop: 0 }))
   }
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
   const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
   // Every row, in a list that scrolls in its own box (five rows tall).
   const path = atBatGamePath(top)
+  const { start, end } = windowSlice({ ...view, total: all.length, buffer: BUFFER })
 
   // ONE CARD, ONE UNIT: the longest at-bat drawn one square per pitch, the
   // next longest in the same squares beside it, and the census as one line under
@@ -129,14 +149,25 @@ export function LongAtBats({ season }) {
             </ul>
             <div className="seasonnote__rest">
                 <ol
-              className="seasonnote__bars"
-              // The foot fades only while there is more below; at the end, or a list
-              // that fits, it sits flat.
-              ref={(el) => el && markEnd(el)}
-              onScroll={(e) => markEnd(e.currentTarget)}
-            >
-                  {all.map((row, i) => (
-                    <li key={row.key}>
+                  className="seasonnote__bars"
+                  ref={(el) => {
+                    listRef.current = el
+                    if (el) markEnd(el)
+                  }}
+                  // The foot fades only while there is more below; at the end, or a list
+                  // that fits, it sits flat. Rows not drawn are two empty spacers, so the
+                  // box keeps its full length; each <li> says its place in the whole census.
+                  onScroll={(e) => {
+                    const { scrollTop } = e.currentTarget
+                    markEnd(e.currentTarget)
+                    setView((v) => ({ ...v, scrollTop }))
+                  }}
+                >
+                  <li aria-hidden="true" style={{ height: start * view.rowH }} />
+                  {all.slice(start, end).map((row, j) => {
+                    const i = start + j
+                    return (
+                    <li key={row.key} aria-setsize={all.length} aria-posinset={i + 1}>
                       <button
                         type="button"
                         className="seasonnote__barrow"
@@ -164,7 +195,9 @@ export function LongAtBats({ season }) {
                     </span>
                   </button>
                     </li>
-                  ))}
+                    )
+                  })}
+                  <li aria-hidden="true" style={{ height: (all.length - end) * view.rowH }} />
                 </ol>
               </div>
           </div>
