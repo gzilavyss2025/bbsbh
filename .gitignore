@@ -34,6 +34,11 @@ pnpm-debug.log*
 # the local copy of every archived Game Notes PDF (~2 GB), saved by
 # scripts/download-game-notes.mjs (#1258). Re-run it to top the folder up.
 /game-notes-archive/
+# screenshots under .scratch (#2874). Put a screenshot that matters in the PR or
+# issue, where GitHub hosts it. The 1,985 PNGs that were tracked here were
+# removed without a history rewrite; docs/audits/scratch-citations-2026-09-30.md
+# says how to restore one.
+.scratch/**/*.png
 # fetched Game Notes PDFs (large, re-fetch fresh per session — see .scratch/game-notes/README.md)
 .scratch/game-notes/pdfs/
 # …and the curation scan's extracted dossiers (issue #774; the scanner script

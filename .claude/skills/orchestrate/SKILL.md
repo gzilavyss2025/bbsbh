@@ -151,8 +151,9 @@ Start one Opus session per issue, titled `orch: #n shape`. Tell it to:
 2. Build 2 or 3 rough versions with real or mock data (mock anchor game 823035,
    `e2e/fixtures/mock-api.js`). Render them in the preinstalled Chromium at 390px
    with `?nointro`. Do not run `npm run e2e`. Say what was mocked.
-3. Commit the screenshots to `.scratch/<slug>/mockups/` on its branch, open a
-   draft PR, and also send them with `SendUserFile`.
+3. Open a draft PR, put the screenshots in its description (GitHub hosts them),
+   and also send them with `SendUserFile`. Do not commit them: `.gitignore`
+   ignores `.scratch/**/*.png` (#2874).
 4. Write the draft spec in `.scratch/<slug>/spec.md`: the goal in his words; the
    option he chose; slices of at most 5 files, each naming the pattern to follow
    and a done test; a model per slice; out of scope; ADRs; spoiler-rule impact.

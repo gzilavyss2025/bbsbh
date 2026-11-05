@@ -94,7 +94,8 @@ step 4.
 
    - *Disposable — say so and offer to remove, he has approved this before:*
      untracked files in a **merged** worktree that are only proof shots (before
-     and after PNGs under `.scratch/**/before|after|crops/`). The work they
+     and after PNGs under `.scratch/**/before|after|crops/`; `.gitignore` hides
+     them from `git status`, see #2874). The work they
      proved is in `main`. Also PR-body drafts (`PR_BODY.md`, `COMMENT_<n>.md`)
      once the PR is merged or closed.
    - *Keep — never offer to delete:* untracked working notes, data or scripts
