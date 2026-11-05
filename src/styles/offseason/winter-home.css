@@ -235,6 +235,10 @@
 .ohero .springcount {
   margin: 0;
 }
+/* Stands in for ChampionHero while the bracket loads (measured 650px at 390px). */
+.srecord-reserve {
+  min-height: 40.5rem;
+}
 /* The side column: the countdown, then the record's doors under it. */
 /* layout-exempt: countdown over its doors */
 .ohero__side {

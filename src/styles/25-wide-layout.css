@@ -358,7 +358,8 @@ body:has(.wirelab) {
   min-height: 66rem;
 }
 .slate-reserve--offseason {
-  min-height: 40rem;
+  /* More than a phone screen, so the footer below starts off-screen and its move is no shift (#2907). */
+  min-height: 60rem;
 }
 .slate-reserve--bracket {
   min-height: 20rem;

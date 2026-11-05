@@ -60,13 +60,16 @@ const MILB_POSTSEASON = 'https://www.milb.com/events/playoffs' // word-choice-ex
 
 export function SeasonRecord({ sportId, season, dateStr }) {
   const inward = sportId === SPORT_IDS.MLB
-  const { bracket } = usePostseasonBracket(inward ? dateStr : null, { season })
+  const { bracket, loading } = usePostseasonBracket(inward ? dateStr : null, { season })
   const champion = bracket?.champion ?? null
   const labelled = recordRowIsLabelled(champion)
   // MLB with a champion: the series page's World Series hero (ChampionHero,
   // the MVP and the clubs). Its doors stand apart, under the countdown
   // (OffseasonLead.jsx renders RecordDoors there).
   if (inward && champion) return <ChampionHero bracket={bracket} />
+  // The champion's hero is ~650px at 390px wide and lands after the bracket read; a small
+  // card here first pushed the countdown down by the difference (#2907). Hold its height.
+  if (inward && loading) return <div className="srecord-reserve" aria-hidden="true" />
 
 
   return (

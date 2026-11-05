@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { fetchLevelSeasonDates, fetchSeasonMeta } from '../api/schedule.js'
 import { useAsync } from './useAsync.js'
 import {
@@ -7,6 +7,7 @@ import {
   milestoneProjectionPaused,
   offseasonPhase,
 } from '../lib/time/seasonPhase.js'
+import { readSeasonRow, saveSeasonRow } from '../lib/time/seasonRows.js'
 import { baseballToday } from '../lib/time/standingsDates.js'
 import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 
@@ -48,12 +49,85 @@ import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 // sixth tab cannot appear on the rail and be missed by this gate.
 const LEVEL_TABS = LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB).map((l) => l.sportId)
 
+// The whole decision, pure. `net` is what the network has answered so far
+// ({ season, level, next }, each null until it lands); anything it has not
+// answered is read from the rows remembered on this device (`load`, see
+// lib/time/seasonRows.js). The network always wins, so a stale remembered row is
+// corrected the moment the fresh one arrives, and a first visit with nothing
+// remembered behaves exactly as it did before rows were remembered. Keyed by the
+// DATE's year, so on 2027-01-02 a remembered 2026 row is never read.
+export function resolveOffseason(dateStr, sportId, net, load = readSeasonRow) {
+  const isLevel = LEVEL_TABS.includes(sportId)
+  const year = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
+  const seasonRow = net.season ?? load(SPORT_IDS.MLB, year)
+  const levelRows = isLevel ? (net.level ?? load(sportId, year)) : null
+  const phase = isLevel
+    ? levelOffseasonPhase(dateStr, levelRows)
+    : sportId === SPORT_IDS.MLB
+      ? offseasonPhase(dateStr, seasonRow)
+      : null
+  if (!phase) return { phase: null, winter: null }
+  const forward =
+    net.next ??
+    (phase.springFromNextSeason ? load(SPORT_IDS.MLB, phase.springFromNextSeason) : null) ??
+    (phase.openerFromNextSeason ? load(sportId, phase.openerFromNextSeason) : null)
+  return { phase, winter: winterFrom(dateStr, isLevel, phase, seasonRow, forward) }
+}
+
+// Everything the offseason page draws itself from, or null. Held back until
+// the date it counts to is known, so the page cannot appear without its
+// countdown and then grow one under the reader a beat later. A saved row may
+// decide the phase, but the countdown still needs a date (never one without).
+function winterFrom(dateStr, isLevel, phase, seasonRow, forward) {
+  if (isLevel) {
+    // The opener is on the rows in hand from January on, and a year forward
+    // before that. Either way it is the date the winter ends AND the date it
+    // counts to: a minor league goes from no baseball to Opening Day with no
+    // spring in between.
+    const openingDay = phase.openingDay ?? levelOpeningDay(forward)
+    if (!openingDay) return null
+    return {
+      seasonEnded: phase.seasonEnded,
+      today: dateStr,
+      // Only the calendar strip's lower bound, and only in the branch that
+      // does not carry the real one: after the January rollover the rows in
+      // hand describe the season AHEAD, so last September's exact date would
+      // cost a third fetch to say what a floor says well enough. The four
+      // levels' measured starts run September 12 to September 29.
+      startDate: phase.startDate ?? `${phase.seasonEnded}-09-01`,
+      endDate: openingDay,
+      springStartDate: null,
+      openingDay,
+    }
+  }
+  // True in January and February, when the row in hand is already NEXT
+  // season's and carries both dates itself.
+  const rolledOver = Boolean(phase.springStartDate)
+  const springStartDate = phase.springStartDate ?? forward?.springStartDate ?? null
+  if (!springStartDate) return null
+  return {
+    seasonEnded: phase.seasonEnded,
+    today: dateStr,
+    // The exact opening date when this date's own row carries it. After the
+    // rollover it is on the previous year's row, which is not worth a third
+    // fetch: the window only decides which typed milestones are in range, and
+    // every offseasonStartDate measured falls on November 1 or 2.
+    startDate: phase.startDate ?? `${phase.seasonEnded}-11-01`,
+    endDate: springStartDate,
+    springStartDate,
+    openingDay:
+      (rolledOver ? seasonRow?.regularSeasonStartDate : forward?.regularSeasonStartDate) ?? null,
+  }
+}
+
 export function useOffseason(dateStr, sportId, seasonRow) {
   const isLevel = LEVEL_TABS.includes(sportId)
   // The calendar year the viewed DATE is in — the year whose rows describe the
   // winter around it. Never the current year: paging back to last October has
   // to answer about last October.
   const dateYear = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
+  // The level's own rows are fetched only once the slate has said it is an empty
+  // day (`seasonRow` is that signal); remembered rows decide the phase without it.
   const levelSeason = isLevel && seasonRow && dateYear ? dateYear : null
 
   const levelRows = useAsync(
@@ -61,10 +135,12 @@ export function useOffseason(dateStr, sportId, seasonRow) {
     [levelSeason, sportId],
   )
 
-  const phase = useMemo(() => {
-    if (isLevel) return levelOffseasonPhase(dateStr, levelRows.data)
-    return sportId === SPORT_IDS.MLB ? offseasonPhase(dateStr, seasonRow) : null
-  }, [dateStr, isLevel, levelRows.data, seasonRow, sportId])
+  const net = { season: seasonRow, level: levelRows.data, next: null }
+  const { phase } = useMemo(
+    () => resolveOffseason(dateStr, sportId, net),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dateStr, sportId, seasonRow, levelRows.data],
+  )
 
   // November and December read forward one row for the two dates the winter
   // calendar is allowed to state as fact — spring training's first game and
@@ -85,57 +161,29 @@ export function useOffseason(dateStr, sportId, seasonRow) {
     return Promise.resolve(null)
   }, [phase?.openerFromNextSeason, phase?.springFromNextSeason, sportId])
 
-  // Everything the offseason page draws itself from, or null. Held back until
-  // the date it counts to is known, so the page cannot appear without its
-  // countdown and then grow one under the reader a beat later.
-  const winter = useMemo(() => {
-    if (!phase) return null
-    const forward = next.data
-    if (isLevel) {
-      // The opener is on the rows in hand from January on, and a year forward
-      // before that. Either way it is the date the winter ends AND the date it
-      // counts to: a minor league goes from no baseball to Opening Day with no
-      // spring in between.
-      const openingDay = phase.openingDay ?? levelOpeningDay(forward)
-      if (!openingDay) return null
-      return {
-        seasonEnded: phase.seasonEnded,
-        today: dateStr,
-        // Only the calendar strip's lower bound, and only in the branch that
-        // does not carry the real one: after the January rollover the rows in
-        // hand describe the season AHEAD, so last September's exact date would
-        // cost a third fetch to say what a floor says well enough. The four
-        // levels' measured starts run September 12 to September 29.
-        startDate: phase.startDate ?? `${phase.seasonEnded}-09-01`,
-        endDate: openingDay,
-        springStartDate: null,
-        openingDay,
-      }
-    }
-    // True in January and February, when the row in hand is already NEXT
-    // season's and carries both dates itself.
-    const rolledOver = Boolean(phase.springStartDate)
-    const springStartDate = phase.springStartDate ?? forward?.springStartDate ?? null
-    if (!springStartDate) return null
-    return {
-      seasonEnded: phase.seasonEnded,
-      today: dateStr,
-      // The exact opening date when this date's own row carries it. After the
-      // rollover it is on the previous year's row, which is not worth a third
-      // fetch: the window only decides which typed milestones are in range, and
-      // every offseasonStartDate measured falls on November 1 or 2.
-      startDate: phase.startDate ?? `${phase.seasonEnded}-11-01`,
-      endDate: springStartDate,
-      springStartDate,
-      openingDay:
-        (rolledOver ? seasonRow?.regularSeasonStartDate : forward?.regularSeasonStartDate) ?? null,
-    }
-  }, [dateStr, isLevel, next.data, phase, seasonRow])
+  const { winter } = useMemo(
+    () => resolveOffseason(dateStr, sportId, { ...net, next: next.data }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dateStr, sportId, seasonRow, levelRows.data, next.data],
+  )
+
+  // Remember what the network said, for the next load's first frame.
+  useEffect(() => saveSeasonRow(SPORT_IDS.MLB, dateYear, seasonRow), [dateYear, seasonRow])
+  useEffect(() => saveSeasonRow(sportId, levelSeason, levelRows.data), [sportId, levelSeason, levelRows.data])
+  useEffect(() => {
+    if (phase?.springFromNextSeason) saveSeasonRow(SPORT_IDS.MLB, phase.springFromNextSeason, next.data)
+    else saveSeasonRow(sportId, phase?.openerFromNextSeason, next.data)
+  }, [sportId, phase?.springFromNextSeason, phase?.openerFromNextSeason, next.data])
 
   // `phase` is what the slate gates its own behaviour on — it is known one
   // render before `winter` is, and "the season is over" is true whether or not
   // the date it counts to has landed yet. `winter` is what the page draws from.
-  return { phase, winter }
+  // `pending`: rows are still on their way (a level's, or the next season's), so
+  // the slate must not draw a stand-in it would throw away a beat later.
+  const pending =
+    (Boolean(levelSeason) && levelRows.loading) ||
+    (Boolean(phase?.springFromNextSeason || phase?.openerFromNextSeason) && next.loading)
+  return { phase, winter, pending }
 }
 
 // True while the postseason is on: Milestone Watch hides its ETAs then (#1438).

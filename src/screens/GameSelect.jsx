@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
@@ -69,6 +69,9 @@ const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldS
 const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
 const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
 const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
+// Its chunk starts the moment the winter is likely (remembered rows say so, or the slate came back
+// empty and the season row is on its way), not after the whole row chain resolves (#2907).
+const loadOffseasonSlot = () => import('../components/offseason/OffseasonSlot.jsx')
 const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
 // Neither the league nor the date persists anywhere. Both live in the URL
@@ -372,10 +375,14 @@ export function GameSelect({
   // ONE fetch, two questions: this row carries the break bounds AND the dates
   // that say whether the season is over, so the offseason gate below costs an
   // empty day nothing it was not already spending.
-  const seasonMeta = useAsync(
-    () => (isEmptyDay ? fetchSeasonMeta(season) : Promise.resolve(null)),
+  // The result is wrapped ({ row }) so "not asked yet" (data null) differs from "asked, no row":
+  // the render where isEmptyDay flips true still holds the last run's state, and the club list
+  // would paint for that frame and then be thrown away (#2907).
+  const seasonRes = useAsync(
+    () => (isEmptyDay ? fetchSeasonMeta(season).then((row) => ({ row })) : Promise.resolve(null)),
     [isEmptyDay, season],
   )
+  const seasonMeta = { loading: isEmptyDay && (seasonRes.loading || seasonRes.data === null), data: seasonRes.data?.row ?? null }
   const breakWindow = useMemo(
     () => allStarBreakWindow(allStarInfoFrom(seasonMeta.data), dateStr),
     [seasonMeta.data, dateStr],
@@ -388,7 +395,15 @@ export function GameSelect({
 
   // Is the slate looking at a winter? Read off the dates statsapi publishes for
   // the season, never off the games coming back empty (hooks/useOffseason.js).
-  const { phase: offseason, winter } = useOffseason(dateStr, sportId, seasonMeta.data)
+  const { phase: offseason, winter, pending: winterPending } = useOffseason(
+    dateStr,
+    sportId,
+    seasonMeta.data,
+  )
+  const winterLikely = Boolean(offseason) || isEmptyDay
+  useEffect(() => {
+    if (winterLikely) loadOffseasonSlot()
+  }, [winterLikely])
 
   // The banner's date always comes from an actual forward schedule scan
   // (fetchNextGameDate), never straight from statsapi's firstDate2ndHalf —
@@ -648,6 +663,10 @@ export function GameSelect({
               are in season. The empty games area holds the winter instead of
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
+          {/* Rows still on their way: hold the panel's room now, so what lands below does not jump. */}
+          {!winter && (winterPending || seasonMeta.loading) && (
+            <div aria-hidden="true" className="slate-reserve slate-reserve--offseason" />
+          )}
           {winter && (
             <LazyPanel reserve="offseason">
               <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
@@ -690,7 +709,8 @@ export function GameSelect({
                 <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />
               </LazyPanel>
             )}
-            {offDayTeams.length > 0 && !winter && !october && (
+            {/* Not while the winter is still being decided: the club list would be drawn, then thrown away. */}
+            {offDayTeams.length > 0 && !winter && !winterPending && !seasonMeta.loading && !october && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}
