@@ -104,6 +104,10 @@ for each generator; the reader modules:
   calls. `gen-rehab.mjs` (daily cron) imports the one stint rule (`rehabListRow` /
   `openRehabStint` in `rehab-policy.js`) that `person.js`'s `detectRehabAssignment`
   also calls, so the list and the banner agree on every day (#1362).
+- `nuggets/nuggets.js` — the nugget store, `public/data/nuggets/{season}.json` (#2809, ADR-0129), for Between Innings'
+  `nugget` notes. Cost-driven: dating a crossing needs a game log per player. Cutoff-gated: `nuggetsForGame`
+  returns only nuggets dated strictly before the game's own date and within 7 days of it, because a nugget's date
+  is a game date.
 - `tensest/tensest.js` — the Tensest Moments page (`/tensest`), from `public/data/tensest.json`. Cost-driven: the
   leverage of every at-bat sits in one `winProbability` feed per game, so `gen-tensest.mjs` (nightly, incremental)
   keeps only the league's top 50 and each club's top 25 batting and pitching. Spoiler-free: not one of the four

@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import { nuggetsForGame, CARD_WINDOW_DAYS } from '../src/api/nuggets/nuggets.js'
+import { buildNuggetNotes, nuggetText, agedLead } from '../src/api/callout-notes/nugget.js'
+import { buildBetweenInnings } from '../src/api/between-innings.js'
+import { buildFeed } from './fixtures/mini-game.js'
+
+// A small store in the generator's shape (scripts/gen-nuggets.mjs).
+const store = {
+  season: 2026,
+  nuggets: {
+    sho1: [
+      { player: 300, date: '2026-06-30', count: 4, anchor: 'rushmore', relation: 'equal' },
+      { player: 300, date: '2026-07-07', count: 5, anchor: 'great-lakes', relation: 'equal' }, // the game's own date
+    ],
+    k200: [
+      { player: 200, date: '2026-07-06', count: 11, anchor: 'moon-walked', relation: 'fewer' },
+      { player: 999, date: '2026-07-06', count: 11, anchor: 'moon-walked', relation: 'fewer' }, // not in this game
+    ],
+    cg1: [{ player: 200, date: '2026-06-01', count: 3, anchor: null, relation: null }], // more than 7 days old
+  },
+}
+const GAME_DATE = '2026-07-07'
+
+test('the reader returns only nuggets dated BEFORE the game\'s date, for its players, within the window', () => {
+  const got = nuggetsForGame(store, { gameDate: GAME_DATE, players: [300, 200] })
+  assert.deepEqual(got.map((n) => `${n.threshold}:${n.player}:${n.date}`).sort(), ['k200:200:2026-07-06', 'sho1:300:2026-06-30'])
+  assert.ok(got.every((n) => n.date < GAME_DATE))
+})
+
+test(`the window is ${CARD_WINDOW_DAYS} days`, () => {
+  assert.equal(CARD_WINDOW_DAYS, 7)
+  assert.equal(nuggetsForGame(store, { gameDate: '2026-07-08', players: [300] }).find((n) => n.date === '2026-06-30'), undefined)
+  assert.ok(nuggetsForGame(store, { gameDate: '2026-07-07', players: [300] }).find((n) => n.date === '2026-06-30'))
+})
+
+test('the reader answers [] without a store, a date or players', () => {
+  assert.deepEqual(nuggetsForGame(null, { gameDate: GAME_DATE, players: [300] }), [])
+  assert.deepEqual(nuggetsForGame(store, { gameDate: null, players: [300] }), [])
+  assert.deepEqual(nuggetsForGame(store, { gameDate: GAME_DATE, players: [] }), [])
+})
+
+test('the note text: count, group, label, and the anchor comparison', () => {
+  const n = { threshold: 'sho1', player: 1, date: '2026-09-25', count: 11, anchor: 'moon-walked', relation: 'fewer' }
+  assert.equal(nuggetText(n, { anchored: true }), 'One of 11 pitchers with a shutout, fewer than the 12 people who have walked on the moon')
+  assert.equal(nuggetText(n, { anchored: false }), 'One of 11 pitchers with a shutout')
+  assert.equal(nuggetText({ ...n, threshold: 'rbi100', count: 9, anchor: 'scotus', relation: 'equal' }, { anchored: true }),
+    'One of 9 hitters with 100 RBI, as many as the 9 Supreme Court justices')
+  assert.equal(nuggetText({ ...n, count: 6, anchor: 'great-lakes', relation: 'more' }, { anchored: true }),
+    'One of 6 pitchers with a shutout, more than the 5 Great Lakes')
+  assert.equal(nuggetText({ ...n, count: 1, anchor: null, relation: null }, { anchored: false }), 'The only pitcher with a shutout')
+})
+
+test('aging: no date on the next day, a month name later that season, the year after it', () => {
+  assert.equal(agedLead('2026-05-03', '2026-05-04'), '')
+  assert.equal(agedLead('2026-05-03', '2026-09-01'), 'In May, ')
+  assert.equal(agedLead('2026-05-03', '2027-04-01'), 'In 2026, ')
+  const n = { threshold: 'rbi100', player: 1, date: '2026-05-03', count: 9, anchor: null, relation: null }
+  assert.equal(nuggetText(n, { anchored: false, viewDate: '2026-09-01' }), 'In May, one of 9 hitters with 100 RBI')
+})
+
+test('only the top-ranked nugget gets the anchor; the rest are plain, and a plain count past plainMax is cut', () => {
+  const list = [
+    { threshold: 'k200', player: 200, date: '2026-07-06', count: 11, anchor: 'moon-walked', relation: 'fewer' },
+    { threshold: 'sho1', player: 300, date: '2026-06-30', count: 4, anchor: 'rushmore', relation: 'equal' },
+    { threshold: 'cg1', player: 300, date: '2026-06-30', count: 12, anchor: 'moon-walked', relation: 'equal' }, // plainMax 10
+  ]
+  const notes = buildNuggetNotes(list, { sideOf: (id) => (id === 300 ? 'away' : 'home') })
+  assert.deepEqual(notes.map((n) => n.text), [
+    'One of 4 pitchers with a shutout, as many as the 4 presidents on Mount Rushmore',
+    'One of 11 pitchers with 200 strikeouts',
+  ])
+  assert.ok(notes.every((n) => n.kind === 'nugget' && n.personId != null && n.dedupeKey))
+  assert.equal(notes[0].side, 'away')
+  assert.ok(notes[0].score > notes[1].score, 'a smaller count scores higher')
+})
+
+// Done means (#2809): a nugget dated on a game's own date never reaches a scoring surface.
+test('Between Innings never shows a nugget dated on the game\'s own date', () => {
+  const feed = buildFeed()
+  feed.gameData.probablePitchers = { away: { id: 300 }, home: { id: 200 } }
+  feed.gameData.datetime = { ...(feed.gameData.datetime ?? {}), officialDate: GAME_DATE }
+  const bundle = { away: { teamId: 158, name: 'Away Club' }, home: { teamId: 138, name: 'Home Club' } }
+  const onlyToday = { season: 2026, nuggets: { sho1: [store.nuggets.sho1[1]] } }
+  for (const [inning, half] of [[1, 'top'], [1, 'bottom'], [2, 'top']]) {
+    const cards = buildBetweenInnings({ feed, bundle, inning, half, revealedThrough: 2, gameDate: GAME_DATE, nuggets: onlyToday })
+    assert.equal(cards.filter((n) => n.kind === 'nugget').length, 0)
+    assert.ok(!cards.some((n) => /Great Lakes/.test(n.text)))
+  }
+  const cards = buildBetweenInnings({ feed, bundle, inning: 1, half: 'top', revealedThrough: 0, gameDate: GAME_DATE, nuggets: store })
+  const nugget = cards.find((n) => n.kind === 'nugget')
+  assert.ok(nugget, 'an older nugget for a starter does show')
+  assert.ok(!cards.some((n) => /Great Lakes/.test(n.text)))
+})

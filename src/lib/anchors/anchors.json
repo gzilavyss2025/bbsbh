@@ -1,0 +1,341 @@
+{
+  "_about": "The anchor registry (issue #2809). Each anchor is a well-known count a reader already feels. checked is the date a person last read the source. pick.js picks only status verified; a volatile anchor is skipped 180 days after its newest checked date. Excluded anchors stay here with the reason, so nobody adds them again. Seeded from .scratch/anchor-callouts/anchors.seed.json.",
+  "_fields": {
+    "id": "stable key",
+    "count": "the number",
+    "unit": "'people' and 'things' pair with player thresholds; 'teams' pairs only with club thresholds (none in v1)",
+    "phrase": "the noun phrase WITHOUT the count: reads as 'the {count} {phrase}'",
+    "tier": "1 = nearly everyone knows it, 2 = most baseball fans, 3 = niche (never picked unless nothing else fits)",
+    "kind": "'static' never changes, 'volatile' can change next year",
+    "status": "'verified' | 'unverified' (caveat asks for a re-check first) | 'disputed' | 'stale' | 'unsourced'",
+    "caveat": "what a writer must not claim"
+  },
+  "anchors": [
+    {
+      "id": "moon-walked",
+      "count": 12,
+      "unit": "people",
+      "phrase": "people who have walked on the moon",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.space.com/how-many-people-have-walked-on-the-moon",
+          "checked": "2026-11-03"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Artemis_II",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Artemis II (April 2026) flew around the moon and did not land. The count stays 12 until a landing."
+    },
+    {
+      "id": "moon-flown",
+      "count": 28,
+      "unit": "people",
+      "phrase": "people who have flown to or around the moon",
+      "tier": 2,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/List_of_people_who_have_flown_to_the_Moon",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "24 from Apollo plus 4 from Artemis II. Becomes volatile with Artemis III. Re-check when any crewed lunar flight flies."
+    },
+    {
+      "id": "moon-twice",
+      "count": 3,
+      "unit": "people",
+      "phrase": "people who have flown to the moon twice",
+      "tier": 3,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/List_of_people_who_have_flown_to_the_Moon",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Lovell, Young, Cernan. Could change with a later Artemis crew."
+    },
+    {
+      "id": "triple-crown-horses",
+      "count": 13,
+      "unit": "things",
+      "phrase": "horses that have won the Triple Crown",
+      "tier": 2,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.si.com/horse-racing/2018/05/04/triple-crown-winners-kentucky-derby-belmont-stakes-preakness-stakes",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Last winner was Justify in 2018. A new winner makes it 14. Old articles say 12."
+    },
+    {
+      "id": "scotus",
+      "count": 9,
+      "unit": "people",
+      "phrase": "Supreme Court justices",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.history.com/articles/supreme-court-justices-number-constitution",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Congress sets the number and set nine in 1869. It is a law, not a constitutional fixed number."
+    },
+    {
+      "id": "rushmore",
+      "count": 4,
+      "unit": "people",
+      "phrase": "presidents on Mount Rushmore",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://dakotaathome.sd.gov/search/6ab04070-1868-5cfe-82ea-a06148ff957a",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": ""
+    },
+    {
+      "id": "great-lakes",
+      "count": 5,
+      "unit": "things",
+      "phrase": "Great Lakes",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Great_Lakes",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Michigan and Huron are one body of water by hydrology. Some readers will say four."
+    },
+    {
+      "id": "planets",
+      "count": 8,
+      "unit": "things",
+      "phrase": "planets in the solar system",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.iau.org/news/pressreleases/detail/iau0603",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Eight by the 2006 IAU vote. The Pluto decision is still disputed in places."
+    },
+    {
+      "id": "calendar-slam",
+      "count": 5,
+      "unit": "people",
+      "phrase": "tennis players with a calendar-year Grand Slam",
+      "tier": 2,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.topendsports.com/events/tennis-grand-slam/winners-titles.htm",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Budge, Connolly, Laver, Court, Graf (singles). The ITF counts the slam differently."
+    },
+    {
+      "id": "mercury-seven",
+      "count": 7,
+      "unit": "people",
+      "phrase": "Mercury Seven astronauts",
+      "tier": 2,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Mercury_Seven",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": ""
+    },
+    {
+      "id": "bill-of-rights",
+      "count": 10,
+      "unit": "things",
+      "phrase": "amendments in the Bill of Rights",
+      "tier": 1,
+      "kind": "static",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://explore.britannica.com/study/bill-of-rights",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": ""
+    },
+    {
+      "id": "amendments",
+      "count": 27,
+      "unit": "things",
+      "phrase": "amendments to the Constitution",
+      "tier": 2,
+      "kind": "static",
+      "status": "unverified",
+      "sources": [
+        {
+          "url": "https://worldatlas.com/articles/how-many-amendments-have-been-added-to-the-constitution.html",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "The sources found were weak. Check the National Archives before the first release."
+    },
+    {
+      "id": "presidents",
+      "count": 45,
+      "unit": "people",
+      "phrase": "people who have been president",
+      "tier": 1,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://www.fox7austin.com/news/trump-45th-and-47th-president",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "47 presidencies, 45 people (Cleveland served twice). Never write 47."
+    },
+    {
+      "id": "nobel-twice",
+      "count": 4,
+      "unit": "people",
+      "phrase": "people who have won two Nobel Prizes",
+      "tier": 2,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://worldatlas.com/articles/who-has-won-more-than-one-nobel-prize.html",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Curie, Pauling, Bardeen, Sanger. Two organizations also won more than once."
+    },
+    {
+      "id": "perfect-games",
+      "count": 24,
+      "unit": "things",
+      "phrase": "perfect games in MLB history",
+      "tier": 2,
+      "kind": "volatile",
+      "status": "unverified",
+      "sources": [
+        {
+          "url": "https://www.britannica.com/print/article/2227073",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Undated source. Re-count against MLB.com before use. A new perfect game changes it."
+    },
+    {
+      "id": "unassisted-triple-plays",
+      "count": 15,
+      "unit": "things",
+      "phrase": "unassisted triple plays in MLB history",
+      "tier": 3,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://aws.baseball-reference.com/bullpen/Category:Feats",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "Sources disagree on early cases (1878 Hines). Use the official list only."
+    },
+    {
+      "id": "dolphins-perfect",
+      "count": 1,
+      "unit": "teams",
+      "phrase": "NFL team with a perfect season",
+      "tier": 1,
+      "kind": "volatile",
+      "status": "verified",
+      "sources": [
+        {
+          "url": "https://profootballhof.com/football-history/the-perfect-season-1972-miami-dolphins",
+          "checked": "2026-11-03"
+        }
+      ],
+      "caveat": "1972 Dolphins, 17-0. Count of one: pair only with a cohort of one."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "egot",
+      "count": "21 or 22",
+      "status": "disputed",
+      "why": "ABC says 21, CinemaBlend says 22 (Feb 2026)."
+    },
+    {
+      "id": "challenger-deep",
+      "count": 27,
+      "status": "stale",
+      "why": "Latest count found is from July 2022."
+    },
+    {
+      "id": "space-travelers",
+      "count": "746 to 781",
+      "status": "disputed",
+      "why": "Sources differ on whether suborbital flights count. Volatile."
+    },
+    {
+      "id": "living-ex-presidents",
+      "count": 4,
+      "status": "volatile",
+      "why": "Changes with every death and every election."
+    },
+    {
+      "id": "everest-summits",
+      "count": "~1008 in spring 2026",
+      "status": "unsourced",
+      "why": "One season, not audited, not an all-time count."
+    },
+    {
+      "id": "comaneci-only-ten",
+      "count": 1,
+      "status": "false",
+      "why": "Others also scored a perfect 10 (Kim 1976, Retton 1984, Silivas 1988)."
+    },
+    {
+      "id": "beatles",
+      "count": 4,
+      "status": "unsourced",
+      "why": "Search returned nothing. Common knowledge. Add with a source."
+    },
+    {
+      "id": "golf-career-slam",
+      "count": "6?",
+      "status": "unsourced",
+      "why": "Search returned nothing on golf."
+    }
+  ]
+}

@@ -63,6 +63,7 @@ export const SCORE_BASE = {
   tiedAfter: 40,
   starterRec: 40,
   vsTeam: 40,
+  nugget: 38, // a season count with a well-known number (#2809), just under vsTeam
   leader: 35,
   sbStreak: 35,
   marathonAb: 45,
