@@ -1325,10 +1325,6 @@
       "class": "spoiler-free",
       "why": "The wire's major/minor rule: whether a roster-move story is a full card or one line, from who moved, the move's type codes and the favorite team, plus the nightly notable-players.json id lists. No score anywhere on the path."
     },
-    "transactions/personBatch.js": {
-      "class": "spoiler-free",
-      "why": "One batched people read (bio, career and year-by-year lines, transactions) for the wire's player facts. Never a game's score."
-    },
     "transactions/playerFacts.js": {
       "class": "spoiler-free",
       "why": "A wire story's player background: age, the season's line by club, the career line, his clubs, how he joined his club, and his Cot's contract. Season and career stats, never a game's score."

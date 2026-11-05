@@ -7,6 +7,7 @@
 
 import { MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { getJson } from './statsapi.js'
+import { chunk } from '../lib/math/number.js'
 
 // Pruned feed views for the player-page "firsts" scans below. Each reads only a
 // tiny slice of a concluded game's feed, so a `fields=` allowlist fetches ~1 KB
@@ -53,6 +54,35 @@ export async function fetchPerson(personId) {
     return data.people?.[0] ?? null
   } catch {
     return null
+  }
+}
+
+// The wire's career/bio read (transactions/playerFacts.js), batched: callers in one tick share
+// one people?personIds= call (25 a call), each getting `{ people: [person] }`. A failed chunk, a
+// bad id and a player the feed omits read singly, so a miss rejects (and is retried) as his 404 did.
+const WIRE_HYDRATE = 'transactions,draft,stats(group=[hitting,pitching],type=[yearByYear,career],sportId=1)' // paths checked on 676051 + 673357, 2026-11-05
+let queue = new Map() // id -> [[resolve, reject], ...]
+const readOne = (id) => getJson(`/api/v1/people/${id}?hydrate=${WIRE_HYDRATE}`)
+export function fetchPersonBatched(id) {
+  const n = Number(id)
+  if (!Number.isFinite(n) || n <= 0) return readOne(id)
+  return new Promise((resolve, reject) => {
+    if (!queue.size) setTimeout(flushPeople, 0)
+    queue.set(n, [...(queue.get(n) ?? []), [resolve, reject]])
+  })
+}
+function flushPeople() {
+  const batch = queue
+  queue = new Map()
+  const settle = (id, read) => read.then((d) => batch.get(id).forEach(([ok]) => ok(d)), (e) => batch.get(id).forEach(([, no]) => no(e)))
+  for (const ids of chunk([...batch.keys()], 25)) {
+    getJson(`/api/v1/people?personIds=${ids.join(',')}&hydrate=${WIRE_HYDRATE}`).then(
+      (data) => ids.forEach((id) => {
+        const people = (data?.people ?? []).filter((p) => p.id === id)
+        settle(id, people.length ? Promise.resolve({ people }) : readOne(id))
+      }),
+      () => ids.forEach((id) => settle(id, readOne(id))),
+    )
   }
 }
 

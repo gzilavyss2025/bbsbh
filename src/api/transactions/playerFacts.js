@@ -9,7 +9,7 @@
 // (api/person/contracts.js). Field paths checked on Codi Heuer (676051) and
 // Luis Robert Jr. (673357), 2026-11-02.
 import { getJson } from '../statsapi.js'
-import { fetchPerson } from './personBatch.js'
+import { fetchPersonBatched } from '../person-fetch.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchTopProspects } from '../prospects.js'
 import { CALLS, FULL_SEASON } from './templates.js'
@@ -470,7 +470,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
   if (!cache.has(key)) {
     cache.set(
       key,
-      Promise.all([fetchPerson(personId), fetchPlayerContract(personId), fetchTopProspects()])
+      Promise.all([fetchPersonBatched(personId), fetchPlayerContract(personId), fetchTopProspects()])
         .then(async ([data, contract, prospects]) => {
           const person = data?.people?.[0]
           const facts = shapeFacts(person, { contract, season, teamId, prospects })

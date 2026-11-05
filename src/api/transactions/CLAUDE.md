@@ -31,7 +31,8 @@ Rules:
   from its own page. It is safe to merge because the grouping is a function of its rows alone
   (`groupIntoStories` orders a day by row id first) and because the join is by DAY, never
   by story.
-- **`personBatch.js` batches the people read.** `fetchPerson` folds every player asked for
-  within 40 ms into one `people?personIds=` call (25 a call); the as-of `byDateRange`, milb and
-  contract reads stay per player. A settled day reads the nightly file first, so live reads are
-  today's moves plus the hours before the 08:17 UTC build.
+- **`playerFacts.js` reads people through `fetchPersonBatched`** (`../person-fetch.js`): every
+  player asked for in one tick shares one `people?personIds=` call; a failed chunk, a bad id or a
+  missing player reads singly. The as-of `byDateRange`, milb and contract reads stay per player. A
+  settled day reads the nightly file first; live reads are today's moves, days past the 60-day
+  window, keys the file lacks (`unbuilt`), and the hours before the 08:17 UTC build.
