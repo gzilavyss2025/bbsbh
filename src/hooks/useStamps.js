@@ -18,7 +18,7 @@ import {
   stampsForSeason,
   unplaceStamp,
 } from '../lib/stamps.js'
-import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
+import { localStore, onStorageOrRestore, readOwner, writeOwner } from '../lib/account/localStore.js'
 import { savePhotos } from '../lib/scorecard-photos/store.js'
 
 // The Logbook's React entry point (ADR-0035). Mirrors useRevealProgress.js: the
@@ -138,8 +138,7 @@ export function useStamps() {
       latest.current = next
       setStamps(next)
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return onStorageOrRestore([STAMPS_KEY], onStorage)
   }, [])
 
   // Put a stamp on a page of the passport book, or move one already there.

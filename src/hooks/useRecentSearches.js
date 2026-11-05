@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { localStore } from '../lib/account/localStore.js'
+import { localStore, onStorageOrRestore } from '../lib/account/localStore.js'
 import {
   RECENT_SEARCHES_KEY,
   addRecentSearch,
@@ -44,8 +44,7 @@ export function useRecentSearches() {
       listRef.current = stored
       setRecent(stored)
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return onStorageOrRestore([RECENT_SEARCHES_KEY], onStorage)
   }, [])
 
   const remember = useCallback(

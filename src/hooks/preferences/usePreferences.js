@@ -13,7 +13,7 @@ import {
   writeOwnerTo,
   writePreferencesTo,
 } from '../../lib/account/preferencesStorage.js'
-import { notifyStorage } from '../../lib/account/localStore.js'
+import { notifyStorage, onStorageOrRestore } from '../../lib/account/localStore.js'
 
 // My Tally's preference store. Mirrors useStamps.js exactly: the rules are the
 // React-free core in src/lib/account/preferences.js (unit-tested there, and
@@ -126,8 +126,7 @@ export function usePreferences() {
       // write, where it belongs.
       setPrefs(() => readPreferences())
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return onStorageOrRestore([PREFS_KEY], onStorage)
   }, [])
 
   // `has` is what tells a first visit from a deliberate choice: the document

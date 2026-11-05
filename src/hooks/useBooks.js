@@ -13,7 +13,7 @@ import {
   serializeBooks,
   updateBookCover,
 } from '../lib/books.js'
-import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
+import { localStore, onStorageOrRestore, readOwner, writeOwner } from '../lib/account/localStore.js'
 
 // The multi-book shelf's React entry point. Mirrors useStamps.js exactly: the
 // rules are the React-free core in src/lib/books.js (unit-tested there); this
@@ -221,8 +221,7 @@ export function useBooks() {
       latest.current = next
       setBooks(next)
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return onStorageOrRestore([BOOKS_KEY], onStorage)
   }, [])
 
   // Every live book, newest-created first — the shelf's own reading order.

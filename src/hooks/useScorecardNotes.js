@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { localStore } from '../lib/account/localStore.js'
+import { localStore, onStorageOrRestore } from '../lib/account/localStore.js'
 import {
   SHEET_NOTES_KEY,
   EMPTY_SHEET_NOTES,
@@ -35,8 +35,7 @@ export function useScorecardNotes(gamePk) {
       if (e.key !== storageKey) return
       setNotes(parseSheetNotes(e.newValue))
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return onStorageOrRestore([storageKey], onStorage)
   }, [storageKey])
 
   const setCell = useCallback((atBatIndex, patch) => {

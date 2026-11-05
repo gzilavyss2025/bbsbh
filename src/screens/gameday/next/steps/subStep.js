@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import { firstStepEnd, openAtBat } from '../../../../api/gameday/subSteps.js'
-import { localStore } from '../../../../lib/account/localStore.js'
+import { localStore, onStorageOrRestore } from '../../../../lib/account/localStore.js'
 
 // Sub-step stepping (ADR-0123; #2570 pitch mode, #2571 event taps). Indexes and a flag only: the
 // sub-steps themselves are api/gameday/subSteps.js, read at the tap (nextSub) and inside SealBox
@@ -9,7 +9,8 @@ import { localStore } from '../../../../lib/account/localStore.js'
 
 // The pitch-mode flag (decision 12): one per game under bbsbh:pitchmode:{gamePk}, a flag, never a
 // score, so a reload or another tab of the same game keeps it and any other game starts in at-bat mode.
-const store = (gamePk) => localStore(`bbsbh:pitchmode:${gamePk}`, (v) => v === '1', (on) => (on ? '1' : '0'))
+const pitchModeKey = (gamePk) => `bbsbh:pitchmode:${gamePk}`
+const store = (gamePk) => localStore(pitchModeKey(gamePk), (v) => v === '1', (on) => (on ? '1' : '0'))
 export const readPitchMode = (gamePk) => (gamePk ? store(gamePk).read() : false)
 export function writePitchMode(gamePk, on) {
   if (!gamePk) return
@@ -19,11 +20,9 @@ export function writePitchMode(gamePk, on) {
 }
 
 // ponytail: storage-backed only; where storage is refused the switch stays in at-bat mode.
-const subscribe = (fn) => {
-  window.addEventListener('storage', fn)
-  return () => window.removeEventListener('storage', fn)
-}
+// onStorageOrRestore: a change another tab made while this page sat in the bfcache shows on Back (#2937).
 export function usePitchMode(gamePk) {
+  const subscribe = useCallback((fn) => onStorageOrRestore([pitchModeKey(gamePk)], fn), [gamePk])
   const on = useSyncExternalStore(subscribe, () => readPitchMode(gamePk), () => false)
   return [on, useCallback((v) => writePitchMode(gamePk, v), [gamePk])]
 }
