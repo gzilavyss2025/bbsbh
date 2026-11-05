@@ -9,13 +9,13 @@
 // (api/person/contracts.js). Field paths checked on Codi Heuer (676051) and
 // Luis Robert Jr. (673357), 2026-11-02.
 import { getJson } from '../statsapi.js'
+import { fetchPerson } from './personBatch.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchTopProspects } from '../prospects.js'
 import { CALLS, FULL_SEASON } from './templates.js'
 import { isMlbTeamId } from '../../lib/teams.js'
 import { shiftDays } from '../../lib/time/standingsDates.js'
 
-const HYDRATE = 'transactions,draft,stats(group=[hitting,pitching],type=[yearByYear,career],sportId=1)'
 // The moves that bring a player to a club, and the words for each.
 // ACQ, OBT, PUR and CP are one event: a player bought from outside affiliated ball.
 const ARRIVALS = { TR: 'trade', SFA: 'free agent', SGN: 'signing', CLW: 'waiver claim', DR: 'draft', PUR: 'purchase', ACQ: 'purchase', OBT: 'purchase', CP: 'purchase', R5: 'Rule 5 draft' }
@@ -470,7 +470,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
   if (!cache.has(key)) {
     cache.set(
       key,
-      Promise.all([getJson(`/api/v1/people/${personId}?hydrate=${HYDRATE}`), fetchPlayerContract(personId), fetchTopProspects()])
+      Promise.all([fetchPerson(personId), fetchPlayerContract(personId), fetchTopProspects()])
         .then(async ([data, contract, prospects]) => {
           const person = data?.people?.[0]
           const facts = shapeFacts(person, { contract, season, teamId, prospects })
