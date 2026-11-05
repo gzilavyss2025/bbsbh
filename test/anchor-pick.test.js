@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { pick, relationOf, VOLATILE_DAYS } from '../src/lib/anchors/pick.js'
+import { pick, relationOf, isExpired, VOLATILE_DAYS } from '../src/lib/anchors/pick.js'
 
 // Issue #2809, Done means. The seed's own fixtures, against the real registry.
 const ON = '2026-09-25'
@@ -73,6 +73,13 @@ test(`a volatile anchor is skipped ${VOLATILE_DAYS} days after its last check; a
 test('an equal gap on both sides goes to the anchor above the count ("fewer than")', () => {
   // 11 sits one under the moon (12) and one over the Bill of Rights (10), both tier 1.
   for (const seed of ['a', 'b', 'c', 'd', 'e']) assert.equal(pick(11, { unit: 'people', date: ON, seed }).anchor.id, 'moon-walked')
+})
+
+test('a volatile anchor read with a missing or invalid date counts as expired', () => {
+  const a = { id: 'v', count: 10, unit: 'people', tier: 1, kind: 'volatile', status: 'verified', sources: [{ url: 'u', checked: '2026-01-01' }] }
+  assert.equal(isExpired(a, undefined), true)
+  assert.equal(isExpired(a, 'not-a-date'), true)
+  assert.equal(isExpired({ ...a, kind: 'static' }, undefined), false)
 })
 
 test('a tie goes to the lower tier, then to a stable hash of the seed', () => {

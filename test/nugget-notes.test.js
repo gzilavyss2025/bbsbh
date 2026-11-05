@@ -3,6 +3,7 @@ import test from 'node:test'
 import { nuggetsForGame, CARD_WINDOW_DAYS } from '../src/api/nuggets/nuggets.js'
 import { buildNuggetNotes, nuggetText } from '../src/api/callout-notes/nugget.js'
 import { buildBetweenInnings } from '../src/api/between-innings.js'
+import { ONCE_PER_GAME_KINDS } from '../src/api/callout-notes/shared.js'
 import { buildFeed } from './fixtures/mini-game.js'
 
 // A small store in the generator's shape (scripts/gen-nuggets.mjs).
@@ -65,6 +66,37 @@ test('only the top-ranked nugget gets the anchor; the rest are plain, and a plai
   assert.ok(notes.every((n) => n.kind === 'nugget' && n.personId != null && n.dedupeKey))
   assert.equal(notes[0].side, 'away')
   assert.ok(notes[0].score > notes[1].score, 'a smaller count scores higher')
+})
+
+// Parent review (#2949) 1: the comparison is worked out from the anchor as it reads today, so a
+// published note never contradicts itself, and an anchor no longer verified or past its
+// re-check window is not shown.
+test('the relation is recomputed from the live anchor, and a stale or unverified anchor is dropped', () => {
+  const stale = { threshold: 'sho1', player: 1, date: '2026-09-25', count: 13, anchor: 'triple-crown-horses', relation: 'fewer' }
+  assert.equal(nuggetText(stale, { anchored: true, date: '2026-09-26' }), 'One of 13 pitchers with a shutout, as many as the 13 horses that have won the Triple Crown')
+  assert.equal(nuggetText(stale, { anchored: true, date: '2027-06-01' }), 'One of 13 pitchers with a shutout', 'volatile, past 180 days')
+  const unverified = { ...stale, count: 27, anchor: 'amendments', relation: 'equal' }
+  assert.equal(nuggetText(unverified, { anchored: true, date: '2026-09-26' }), 'One of 27 pitchers with a shutout')
+})
+
+// Parent review (#2949) 3 and 4: a nugget is a once-a-game fact, and the anchor goes to the
+// nugget that leads among those still to show.
+test('a nugget shows once a game, and the next one up takes the anchor', () => {
+  assert.ok(ONCE_PER_GAME_KINDS.has('nugget'))
+  const list = [
+    { threshold: 'sho1', player: 300, date: '2026-06-30', count: 4, anchor: 'rushmore', relation: 'equal' },
+    { threshold: 'k200', player: 200, date: '2026-07-06', count: 11, anchor: 'moon-walked', relation: 'fewer' },
+  ]
+  const shownCounts = new Map([['nugget-sho1-300', 1]])
+  assert.deepEqual(buildNuggetNotes(list, { shownCounts, date: GAME_DATE }).map((n) => n.text),
+    ['One of 11 pitchers with 200 strikeouts, fewer than the 12 people who have walked on the moon'])
+  const feed = buildFeed()
+  feed.gameData.probablePitchers = { away: { id: 300 }, home: { id: 200 } }
+  const bundle = { away: { teamId: 158, name: 'Away Club' }, home: { teamId: 138, name: 'Home Club' } }
+  const cards = buildBetweenInnings({ feed, bundle, inning: 1, half: 'top', revealedThrough: 0, gameDate: GAME_DATE, nuggets: store, shownCounts })
+  const nuggets = cards.filter((n) => n.kind === 'nugget')
+  assert.equal(nuggets.length, 1)
+  assert.match(nuggets[0].text, /fewer than the 12 people/)
 })
 
 // Review (#2949): the anchor belongs to the top nugget on the card, or to none.

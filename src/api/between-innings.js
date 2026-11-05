@@ -138,9 +138,9 @@ export function buildBetweenInnings({
     const due = selectDueUpNow(feed, nInning, nHalf, revealedThrough)
     for (const b of due?.batters ?? []) if (b.id != null) sideOf.set(b.id, due.battingSide)
     const dt = feed?.gameData?.datetime
-    const nuggetDate = [dt?.officialDate, dt?.originalDate, gameDate].filter(Boolean).sort()[0]
+    const nuggetDate = [dt?.originalDate, dt?.officialDate ?? gameDate].filter(Boolean).sort()[0]
     const list = nuggetsForGame(nuggets, { gameDate: nuggetDate, players: [...sideOf.keys()] })
-    pool.push(...buildNuggetNotes(list, { sideOf: (id) => sideOf.get(id) ?? null }))
+    pool.push(...buildNuggetNotes(list, { sideOf: (id) => sideOf.get(id) ?? null, shownCounts, date: nuggetDate }))
   }
 
   // The hard allowlist — a structural filter, not implicit trust in the callers above.

@@ -60,14 +60,16 @@ const byDate = (a, b) => a.date.localeCompare(b.date) || a.player - b.player
 // Append the dated new crossers to a threshold's list. Old entries are never rewritten
 // (their count and anchor are frozen at mint). A new entry's count is every entry on or
 // before its date, the other new crossers included. A player already listed is skipped,
-// so a second run adds nothing.
+// so a second run adds nothing. A crossing dated `today` or later waits for a later run: that
+// day may still be in play, and a same-day crosser minted later would leave this one's
+// frozen count one short.
 //
 // The key is MLB's person id, which statsapi never reassigns to another person, so this
 // needs no lib/reassignable-merge.mjs (scripts/CLAUDE.md).
-export function mintNuggets(have, crossers, { pickAnchor }) {
+export function mintNuggets(have, crossers, { pickAnchor, today = null }) {
   const list = [...(have ?? [])]
   const known = new Set(list.map((n) => n.player))
-  const fresh = (crossers ?? []).filter((c) => c.date && !known.has(c.player) && known.add(c.player))
+  const fresh = (crossers ?? []).filter((c) => c.date && (!today || c.date < today) && !known.has(c.player) && known.add(c.player))
   const all = [...list, ...fresh]
   const minted = fresh.map((c) => {
     const count = all.filter((n) => n.date <= c.date).length

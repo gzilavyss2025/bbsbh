@@ -8,8 +8,9 @@
 //   1. Two season-totals calls (hitting, pitching), regular season, MLB only.
 //   2. Players who meet a threshold and have no entry yet are the new crossers.
 //   3. Each new crosser's game log dates the crossing, so a late run loses nothing.
-//   4. Append them with their count and anchor. Old entries are never rewritten. If a game
-//      log fails to load, that threshold waits a night (mintOrHold), so no count is short.
+//   4. Append them with their count and anchor. Old entries are never rewritten. A crossing
+//      dated today waits for the next run. If a game log fails to load, that threshold waits
+//      too (mintOrHold), so no count is short, and the step exits non-zero so the night shows red.
 // A second run adds nothing. A backfill is the same code on a missing file.
 //
 // Also writes public/data/nuggets/index.json: the seasons on file and the run's
@@ -28,6 +29,7 @@ import { parseArgs, strOpt } from './lib/args.mjs'
 import { sumByPlayer, crossingDate, newCrossers, mintOrHold } from './lib/nuggets/nuggets.mjs'
 import { THRESHOLDS } from '../src/lib/nuggets/thresholds.js'
 import { pick } from '../src/lib/anchors/pick.js'
+import { baseballToday } from '../src/lib/time/standingsDates.js'
 
 const DIR = join(import.meta.dirname, '..', 'public', 'data', 'nuggets')
 const CONCURRENCY = 6
@@ -37,11 +39,9 @@ const season = arg ? Number(arg) : await fetchSeasonInPlay()
 const OUT = join(DIR, `${season}.json`)
 
 const groups = [...new Set(THRESHOLDS.map((t) => t.group))]
-const totals = {}
-for (const group of groups) {
-  const body = await getJson(`/api/v1/stats?stats=season&group=${group}&season=${season}&sportIds=1&gameType=R&playerPool=all&limit=3000`)
-  totals[group] = sumByPlayer(body?.stats?.[0]?.splits)
-}
+const bodies = await Promise.all(groups.map((group) =>
+  getJson(`/api/v1/stats?stats=season&group=${group}&season=${season}&sportIds=1&gameType=R&playerPool=all&limit=3000`)))
+const totals = Object.fromEntries(groups.map((group, i) => [group, sumByPlayer(bodies[i]?.stats?.[0]?.splits)]))
 if (groups.every((g) => totals[g].size === 0)) {
   console.log(`nuggets: ${season} has no season totals yet; nothing written`)
   process.exit(0)
@@ -61,13 +61,16 @@ const gameLog = (id, group) => {
   return logs.get(key)
 }
 
+// A crossing dated today (US Pacific, the last zone to roll over) waits for the next run.
+const today = baseballToday()
 let added = 0
+const heldIds = []
 for (const t of THRESHOLDS) {
   const have = nuggets[t.id] ?? []
   const ids = newCrossers(totals[t.group], t, have)
   const dated = await mapConcurrent(ids, CONCURRENCY, async (player) => ({ player, date: crossingDate(await gameLog(player, t.group), t) }))
-  const { list, held } = mintOrHold(have, dated, { pickAnchor: (count, o) => pick(count, { unit: 'people', ...o }) })
-  if (held) console.warn(`nuggets: ${t.id}: a game log failed to load; this threshold waits for the next run`)
+  const { list, held } = mintOrHold(have, dated, { today, pickAnchor: (count, o) => pick(count, { unit: 'people', ...o }) })
+  if (held) heldIds.push(t.id)
   const undated = dated.filter((c) => c && !c.date).length
   if (undated) console.warn(`nuggets: ${t.id}: ${undated} crosser(s) whose game log never reaches the line`)
   nuggets[t.id] = list
@@ -80,3 +83,9 @@ const seasons = (await readdir(DIR)).map((f) => /^(\d{4})\.json$/.exec(f)?.[1]).
 await writeJsonAtomic(join(DIR, 'index.json'), { generatedAt, seasons }, 1)
 const total = Object.values(nuggets).reduce((n, l) => n + l.length, 0)
 console.log(`nuggets: ${season}, ${added} new, ${total} in all across ${THRESHOLDS.length} thresholds`)
+// A held threshold is written unchanged, so its stamp still moves and the freshness check
+// cannot see it. Fail the step instead: the nightly job then reports it (its fail check).
+if (heldIds.length) {
+  console.error(`nuggets: a game log failed to load, so these thresholds wait for the next run: ${heldIds.join(', ')}`)
+  process.exitCode = 1
+}

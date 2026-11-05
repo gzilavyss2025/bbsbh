@@ -77,6 +77,15 @@ test('mintOrHold holds a threshold for the night when any game log failed to loa
   assert.deepEqual(ok.list.map((n) => n.player), [1, 2])
 })
 
+// Parent review (#2949) 2: a day still being played may have more crossers than one run sees,
+// and their counts are frozen, so a crossing on or after `today` waits for the next run.
+test('mintNuggets waits on a crossing dated today or later', () => {
+  const out = mintNuggets([], [{ player: 1, date: '2026-05-09' }, { player: 2, date: '2026-05-10' }], { pickAnchor: pickNone, today: '2026-05-10' })
+  assert.deepEqual(out.map((n) => n.player), [1])
+  const next = mintNuggets(out, [{ player: 2, date: '2026-05-10' }, { player: 3, date: '2026-05-10' }], { pickAnchor: pickNone, today: '2026-05-11' })
+  assert.deepEqual(next.map((n) => [n.player, n.count]), [[1, 1], [2, 3], [3, 3]])
+})
+
 test('mintNuggets freezes the anchor pick with the count', () => {
   const pickAnchor = (count, { seed }) => ({ anchor: { id: `a${count}` }, relation: 'equal', seed })
   const [n] = mintNuggets([], [{ player: 7, date: '2026-05-01' }], { pickAnchor })

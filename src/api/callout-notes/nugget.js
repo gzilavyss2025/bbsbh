@@ -10,41 +10,55 @@
 // - No date on a game's own card. The aged lead ("In May, ...") waits for the player-page
 //   list, the first surface that shows an older nugget. Never "first", "fastest" or "fewest".
 import { thresholdById, GROUP_NOUN } from '../../lib/nuggets/thresholds.js'
-import { anchorById } from '../../lib/anchors/pick.js'
+import { anchorById, isExpired, relationOf } from '../../lib/anchors/pick.js'
 import { SCORE_BASE, magnitudeOf, clampScore } from './shared.js'
 
 const RELATION = { fewer: 'fewer than', equal: 'as many as', more: 'more than' }
 
+// The nugget's anchor as it reads on `date`, or null: still verified and inside its re-check
+// window. The relation is worked out from the anchor's count as it reads now, never the one frozen at mint, so a
+// changed anchor (a 14th Triple Crown winner) cannot make a note contradict itself.
+function liveAnchor(id, date) {
+  const a = anchorById(id)
+  return a && a.status === 'verified' && !isExpired(a, date) ? a : null
+}
+
 // The sentence, without the subject's name (house rule: the card shows it).
-export function nuggetText(n, { anchored }) {
+export function nuggetText(n, { anchored, date }) {
   const t = thresholdById(n.threshold)
   if (!t) return null
   const noun = GROUP_NOUN[t.group]
   const head = n.count === 1 ? `The only ${noun.one} with ${t.label}` : `One of ${n.count} ${noun.many} with ${t.label}`
-  const anchor = anchored ? anchorById(n.anchor) : null
-  if (!anchor || !RELATION[n.relation]) return head
-  return `${head}, ${RELATION[n.relation]} the ${anchor.count} ${anchor.phrase}`
+  const anchor = anchored ? liveAnchor(n.anchor, date) : null
+  if (!anchor) return head
+  return `${head}, ${RELATION[relationOf(n.count, anchor.count)]} the ${anchor.count} ${anchor.phrase}`
 }
 
 // A count of one earns the whole bonus; twenty or more earns none.
 const scoreOf = (count) => clampScore(SCORE_BASE.nugget + magnitudeOf(20 - Math.min(count, 20), 19))
 
-// Notes for one card, best first. `sideOf(playerId)` -> 'away' | 'home' | null.
-export function buildNuggetNotes(list, { sideOf = () => null } = {}) {
+const keyOf = (n) => `nugget-${n.threshold}-${n.player}`
+
+// Notes for one card, best first. `sideOf(playerId)` -> 'away' | 'home' | null. A nugget is a
+// once-a-game fact (ONCE_PER_GAME_KINDS), so one this reader already saw (`shownCounts`, the
+// ledger's read) is left out here, before the anchor is handed out: the anchor goes to the
+// nugget that leads among those still to show. `date`: the game's date, for the anchor's
+// re-check window.
+export function buildNuggetNotes(list, { sideOf = () => null, shownCounts = null, date = null } = {}) {
   const ranked = (list ?? [])
-    .filter((n) => thresholdById(n.threshold) && Number.isInteger(n.count) && n.count > 0)
+    .filter((n) => thresholdById(n.threshold) && Number.isInteger(n.count) && n.count > 0 && !(shownCounts?.get(keyOf(n)) > 0))
     .map((n) => ({ n, score: scoreOf(n.count) }))
     .sort((a, b) => b.score - a.score || b.n.date.localeCompare(a.n.date) || a.n.player - b.n.player)
   const notes = []
   for (const { n, score } of ranked) {
-    const anchored = notes.length === 0 && anchorById(n.anchor) != null
+    const anchored = notes.length === 0 && liveAnchor(n.anchor, date) != null
     if (!anchored && n.count > thresholdById(n.threshold).plainMax) continue
     notes.push({
-      text: nuggetText(n, { anchored }),
+      text: nuggetText(n, { anchored, date }),
       personId: n.player,
       side: sideOf(n.player),
       kind: 'nugget',
-      dedupeKey: `nugget-${n.threshold}-${n.player}`,
+      dedupeKey: keyOf(n),
       score,
     })
   }

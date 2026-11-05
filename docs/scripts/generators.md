@@ -119,7 +119,8 @@ don't run these by hand.
   with the count that day and the anchor `src/lib/anchors/pick.js` chose, frozen. Two season-totals calls, then one
   game log per new crosser; append-only, so a second run adds nothing and a backfill is the same code on a missing
   file (about 5 s for 2026). Pure half `scripts/lib/nuggets/nuggets.mjs`, tested in `test/nuggets-pure.test.js`.
-  `index.json` carries the stamp. Gated on `finals`. App reads it via `src/api/nuggets/nuggets.js`.
+  `index.json` carries the stamp. A crossing dated today (US Pacific) waits for the next run; a failed game log
+  holds its threshold and exits non-zero. Gated on `finals`. App reads it via `src/api/nuggets/nuggets.js`.
 - `gen-tensest.mjs` → `public/data/tensest.json` + `scripts/data/tensest-state.json` — the season's tensest
   at-bats by MLB's own leverage index (`leverageIndex` on each `winProbability` play): the league's top 50 and each
   club's top 25 batting and 25 pitching, postseason included. One feed per game, 2,400+ games a season, so it is

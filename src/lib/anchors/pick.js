@@ -14,10 +14,10 @@
 //      then a stable hash of `seed` (player id and date), so one player does not always
 //      get the moon.
 import registry from './anchors.json' with { type: 'json' }
+import { daysBetween } from '../time/seasonPhase.js'
 
 export const VOLATILE_DAYS = 180
 const NICHE_TIER = 3
-const DAY_MS = 86_400_000
 
 const PAIRS = { people: new Set(['people', 'things']), teams: new Set(['teams']) }
 
@@ -25,11 +25,11 @@ export const relationOf = (count, n) => (count < n ? 'fewer' : count === n ? 'eq
 
 const lastChecked = (a) => (a.sources ?? []).map((s) => s.checked).filter(Boolean).sort().at(-1) ?? null
 
+// A volatile anchor read with no checked date, or on no valid date, counts as expired.
 export function isExpired(a, date) {
   if (a.kind !== 'volatile') return false
-  const checked = lastChecked(a)
-  if (!checked) return true
-  return Date.parse(date) - Date.parse(checked) > VOLATILE_DAYS * DAY_MS
+  const age = daysBetween(lastChecked(a), date)
+  return age == null || age > VOLATILE_DAYS
 }
 
 // FNV-1a, so the spread is the same in node and the browser.

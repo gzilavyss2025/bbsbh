@@ -30,7 +30,15 @@ such days up to it. A daily snapshot would repeat itself and could not answer "w
   `nuggetsForGame` in `src/api/nuggets/nuggets.js`, not in its callers, and `test/nugget-notes.test.js`
   fails if a nugget dated on the game's own date reaches Between Innings.
 - **Only the top-ranked nugget on a card gets its anchor.** The rest show as plain counts, and a
-  plain count shows only at or under its threshold's `plainMax`.
+  plain count shows only at or under its threshold's `plainMax`. A nugget shows once a game
+  (`ONCE_PER_GAME_KINDS`), and the anchor goes to the top one this reader has not seen yet.
+- **The sentence reads the anchor as it is on the game's date.** The relation ("fewer than", "as
+  many as") is worked out from the anchor's current count, and an anchor no longer verified or
+  past its re-check window is dropped, so a note never contradicts itself. The stored `anchor` id
+  is the pick frozen at mint; the stored `relation` is the record of that day.
+- **A crossing dated today waits.** The generator mints only crossings dated before the baseball
+  day (US Pacific), so a same-day crosser seen on a later run never leaves a frozen count short.
+  A game log that fails to load holds its threshold for the night and fails the step.
 - The first surface is Between Innings (the Gameday checkpoint's Notes page), for the two
   announced starters and the hitters due up next half (`selectDueUpNow`, which gates itself).
 
