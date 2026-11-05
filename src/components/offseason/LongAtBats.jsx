@@ -1,7 +1,7 @@
 import { Suspense, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
+import { atBatGamePath, atBatsForClub, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { monthDayName, monthDayNameYear } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -89,10 +89,7 @@ export function LongAtBats({ season }) {
     [every],
   )
   // A club filter: an at-bat stays when the club is on either side of it.
-  const all = useMemo(
-    () => (club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every),
-    [every, club],
-  )
+  const all = useMemo(() => atBatsForClub(every, club), [every, club])
   // Where the window sits and which row holds focus (it stays drawn even when it scrolls
   // out of the window). Tied to the list they were taken
   // from: a new season, new data or a club filter is a new `all`, and a fresh list
@@ -279,9 +276,21 @@ export function LongAtBats({ season }) {
         </div>
 
 
-        <p className="seasonnote__census infopop-row">
-          <span className="seasonnote__against">{every.length}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
-          <span className="seasonnote__against">{count(oneIn(plateAppearances, every.length))}</span> plate appearances
+        <p className="seasonnote__census infopop-row" aria-live="polite">
+          {club ? (
+            // A picked club's own count. The rate stays the season's: the file has no
+            // per-club plate appearances to divide by.
+            <>
+              <span className="seasonnote__against">{all.length}</span> of the{' '}
+              <span className="seasonnote__against">{count(every.length)}</span> at-bats of {data.threshold}+ pitches in {season} had{' '}
+              {teamAbbr({ id: club })} on one side
+            </>
+          ) : (
+            <>
+              <span className="seasonnote__against">{every.length}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
+              <span className="seasonnote__against">{count(oneIn(plateAppearances, every.length))}</span> plate appearances
+            </>
+          )}
           <InfoPopover label="How the at-bats are counted" className="infopop--paper">
             Regular season and postseason together: {count(plateAppearances)} plate appearances
             {post ? ` (${rows.length} of the long ones in the regular season, ${post.rows.length} in the postseason)` : ''}
