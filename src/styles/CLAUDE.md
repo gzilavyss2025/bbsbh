@@ -52,7 +52,8 @@ Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`
 
 The advance's **tap target is the dead space around it**: `.gdnext__bar .gdnext__advance::after`
 (`styles/gameday-next/page.css`) reaches the bar's top and bottom edges (the bar's overflow clip
-trims it), its right end, and the gap to the step switch. It offsets from the button, not the bar
+trims it), its right end, and the gap to the control just left of it (the step switch; Win % on
+the drawer tiers L/D, where Defense, Box and Win % sit between). It offsets from the button, not the bar
 (else the area re-collapses mid-tap under `.btn:active`). The switch and the Menu keep their own
 taps. `e2e/reveal-hit-area.spec.js` pins it.
 

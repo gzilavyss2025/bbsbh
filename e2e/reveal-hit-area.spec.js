@@ -12,6 +12,7 @@ import { test, expect } from './fixtures.js'
 // the advance and the control just left of it. On the phone that is the
 // At-bat | Pitch switch; on the drawer tiers (desktop) Defense, Box and Win %
 // sit between the switch and the advance, so the neighbour is Win % (#2773).
+// On tier T (no drawer) the neighbour is the switch again.
 //
 // Anchor game per docs/test-games.md: 2026-07-07 MIL@STL g2 (gamePk 823035).
 // Its top of the 1st is sealed on arrival. A step writes the at-bat cursor
@@ -46,9 +47,10 @@ async function barSpots(page) {
       neighbourEdgeX: nb.right - 1,
       switchEdgeX: sw.right - 1,
       switchY: sw.top + sw.height / 2,
-      // The bar's right end. On the drawer tiers the bar has no side padding and the advance runs to
-      // the viewport's edge, so the midpoint would be x = innerWidth, off-screen (#2773): take the
-      // bar's last pixel instead.
+      // The bar's right end. On the phone (tier P) that is dead space past the button. On the wider
+      // tiers the bar has no side padding and the button itself runs to the viewport's edge, so there
+      // is no dead space there; the midpoint would be x = innerWidth, off-screen (#2773). Take the
+      // bar's last pixel: a thumb at the end still steps, though there it is the button's own box.
       rightX: Math.min((adv.right + rBar.right) / 2, rBar.right - 1),
       aboveBarY: rBar.top - 6,
       centreX: window.innerWidth / 2,
@@ -89,7 +91,7 @@ test('the dead space below the button steps an at-bat too', async ({ page }) => 
   await expect.poll(() => stored(page, CURSOR)).toBe('0:1')
 })
 
-test('the dead space reaches the seam with the step switch and the bar end, and stops at the switch', async ({ page }) => {
+test('the dead space reaches the seam with its neighbour and the bar end, and stops at the neighbour', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
 
@@ -106,11 +108,14 @@ test('the dead space reaches the seam with the step switch and the bar end, and 
   await expect.poll(() => stored(page, CURSOR)).toBe('0:2')
   expect(await stored(page, MARK)).toBeNull()
 
-  // The advance's area stops at its neighbour: the last pixel of the neighbour
-  // is the neighbour's, not the advance's.
+  // The advance's area stops at its neighbour: the neighbour's last pixel hit-tests
+  // to the neighbour itself (not the advance, the bar, or nothing).
   const edgeOwner = await page.evaluate(({ x, y }) => {
+    const nb = document.querySelector('.gdnext__bar .gdnext__advance').previousElementSibling
     const hit = document.elementFromPoint(x, y)
-    return hit?.closest('.gdnext__advance') ? 'advance' : 'neighbour'
+    if (!hit) return 'nothing'
+    if (hit.closest('.gdnext__advance')) return 'advance'
+    return nb.contains(hit) ? 'neighbour' : hit.className
   }, { x: rested.neighbourEdgeX, y: rested.advY })
   expect(edgeOwner).toBe('neighbour')
 
