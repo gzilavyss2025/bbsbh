@@ -1,6 +1,7 @@
 /* ==== TEAM HISTORY (the new player page, #2019) ====
-   A season ledger of club badges: the year on the left, the clubs on the right. A farm club's
-   badge flips (FlipCard) to its parent org. The current club is the one inked badge. Tokens only. */
+   A season ledger of club badges: the year on the left, the clubs on the right. A badge flips
+   (FlipCard): a farm club's to its parent org, an MLB club's to the club in full, and the back
+   face opens that season (#2779). The current club is the one inked badge. Tokens only. */
 
 .teamhist {
   container-type: inline-size;
@@ -69,16 +70,35 @@
   font: inherit;
   text-align: left;
 }
-button.teamhist__badge {
+/* A badge that flips (#2779): the face is a button, front and back. The back face adds the
+   door to that club's season under it, an anchor of its own, never inside the button. */
+.teamhist__flip {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-press);
 }
-button.teamhist__badge:active {
+.teamhist__flip:active {
   transform: translate(2px, 2px);
 }
-button.teamhist__badge:focus-visible {
+.teamhist__flip:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+.teamhist__door {
+  display: block;
+  padding: var(--space-1h) var(--space-2) var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
 }
 /* layout-exempt: the mark beside the name and its line */
 .teamhist__face {

@@ -16,10 +16,13 @@ import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { FlipCard } from '../../../../../components/ui/FlipCard.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
+import { useRouteLink } from '../../../../../lib/nav.js'
+import { teamPath } from '../../../../../lib/route.js'
+import { yearAsOf } from '../../../../../lib/dates.js'
 import { FamilyBand } from './FamilyBand.jsx'
 import { PennantBand } from './PennantBand.jsx'
 import { playerPennants } from './pennantsView.js'
-import { relativeLine, teamsView } from './teamsView.js'
+import { badgeDoor, relativeLine, teamsView } from './teamsView.js'
 
 const nicknames = async (ids) => {
   const teams = await Promise.all([...new Set(ids)].filter(Boolean).map(fetchTeam))
@@ -71,30 +74,45 @@ function Face({ teamId, name, sub, cur, flips }) {
   )
 }
 
-function Badge({ b }) {
+// A badge flips on the first tap (#2779; Gary, 2026-11-05). An MLB badge's back face is the club in
+// full; a farm badge's is its parent club, as before. The back face carries "Open {year} {club} →"
+// to that club's season page (the row's last season). The flip is a button and the link is its own
+// anchor beside it on the back face, so no control sits inside another.
+function Badge({ b, season }) {
   const [flipped, setFlipped] = useState(false)
+  const link = useRouteLink()
   const label = `${b.full}, ${b.sub.replace(' G', ' games')}${b.cur ? ', current club' : ''}`
-  if (!b.flip) {
+  const door = badgeDoor(b, season)
+  if (!door) {
     return (
       <div className="teamhist__badge" role="group" aria-label={label}>
         <Face {...b} />
       </div>
     )
   }
+  const back = b.flip ?? { teamId: b.teamId, name: b.full, sub: `${season} · ${b.sub}`, cur: b.cur }
+  const href = teamPath(door.teamId, { name: door.full ?? undefined, d: yearAsOf(String(door.season)) })
   return (
-    <button
-      type="button"
-      className="teamhist__badge"
-      aria-pressed={flipped}
-      aria-label={`${label}. ${flipped ? `Showing the parent club: ${b.flip.name}.` : 'Flip to show the parent club.'}`}
-      onClick={() => setFlipped((f) => !f)}
-    >
+    <div className="teamhist__badge">
       <FlipCard
         flipped={flipped}
-        renderFront={() => <Face {...b} flips />}
-        renderBack={() => <Face {...b.flip} flips />}
+        renderFront={() => (
+          <button type="button" className="teamhist__flip" aria-pressed={false} aria-label={`${label}. ${b.flip ? 'Flip to show the parent club.' : 'Flip for the season link.'}`} onClick={() => setFlipped(true)}>
+            <Face {...b} flips />
+          </button>
+        )}
+        renderBack={() => (
+          <div className="teamhist__back">
+            <button type="button" className="teamhist__flip" aria-pressed aria-label={`${b.flip ? `Showing the parent club: ${b.flip.name}` : b.full}. Flip back.`} onClick={() => setFlipped(false)}>
+              <Face {...back} flips />
+            </button>
+            <a className="plink teamhist__door" {...link(href)}>
+              Open {door.season} {door.name} →
+            </a>
+          </div>
+        )}
       />
-    </button>
+    </div>
   )
 }
 
@@ -113,7 +131,7 @@ function Row({ r }) {
               Traded to <TeamLogo teamId={x.to} size={16} /> {teamAbbr({ id: x.to })} {x.date}
             </span>
           ) : (
-            <Badge key={x.teamId} b={x} />
+            <Badge key={x.teamId} b={x} season={r.to} />
           ),
         )}
       </div>

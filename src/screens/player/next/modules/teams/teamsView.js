@@ -102,3 +102,12 @@ export function relativeLine(pos, splits, nick) {
   const g = [...byTeam.values()].reduce((a, b) => a + b, 0)
   return [pos, nick(top), span(Math.min(...ys), Math.max(...ys)), gamesText(g)].filter(Boolean).join(' · ')
 }
+
+// The season page a flipped badge opens (#2779; Gary, 2026-11-05): an MLB badge its own club, a
+// farm badge its parent club (`?y=` is MLB only), in `season`, the LAST season of the badge's row.
+// A farm badge with no parent on file has nowhere to go: null.
+export function badgeDoor(b, season) {
+  if (b.mlb) return { teamId: b.teamId, name: b.name, full: b.full, season }
+  if (b.flip?.teamId) return { teamId: b.flip.teamId, name: b.flip.name, full: null, season }
+  return null
+}

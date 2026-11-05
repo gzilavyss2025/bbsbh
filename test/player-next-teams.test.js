@@ -163,3 +163,14 @@ test('relativeLine: position, his most-games club, the span and the games', () =
   assert.equal(relativeLine('P', [], () => ''), 'P')
   assert.equal(relativeLine('', [], () => ''), '')
 })
+
+// #2779: a badge's back face links to a season page. An MLB badge opens its own club, a farm
+// badge its parent club; a run of seasons opens the last one.
+test('badgeDoor: the club and season a flipped badge opens', async () => {
+  const { badgeDoor } = await import('../src/screens/player/next/modules/teams/teamsView.js')
+  const mlb = { kind: 'badge', teamId: 158, mlb: true, name: 'Brewers', full: 'Milwaukee Brewers', flip: null }
+  const farm = { kind: 'badge', teamId: 556, mlb: false, name: 'Sounds', full: 'Nashville Sounds', flip: { teamId: 158, name: 'Brewers', sub: 'AAA affiliate' } }
+  assert.deepEqual(badgeDoor(mlb, 2021), { teamId: 158, name: 'Brewers', full: 'Milwaukee Brewers', season: 2021 })
+  assert.deepEqual(badgeDoor(farm, 2021), { teamId: 158, name: 'Brewers', full: null, season: 2021 })
+  assert.equal(badgeDoor({ ...farm, flip: null }, 2021), null)
+})
