@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T17:24:12.697Z",
+  "generatedAt": "2026-11-05T07:56:41.827Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1158,6 +1158,18 @@
     }
   ],
   "orgProspects": [
+    {
+      "orgRank": 28,
+      "playerId": 694214,
+      "name": "Samuel Zavala",
+      "teamId": 11,
+      "team": "",
+      "position": "CF",
+      "levelRaw": "AA",
+      "statLine": ".235, 14 HR, 44 RBI",
+      "age": 22,
+      "topRank": null
+    },
     {
       "orgRank": 1,
       "playerId": 805796,
@@ -9771,18 +9783,6 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".273, 6 HR, 45 RBI",
-      "age": 22,
-      "topRank": null
-    },
-    {
-      "orgRank": 28,
-      "playerId": 694214,
-      "name": "Samuel Zavala",
-      "teamId": 145,
-      "team": "cws",
-      "position": "CF",
-      "levelRaw": "AA",
-      "statLine": ".235, 14 HR, 44 RBI",
       "age": 22,
       "topRank": null
     },
