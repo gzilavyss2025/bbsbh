@@ -4,8 +4,7 @@ import { Fragment } from 'react'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
 import { useRouteLink } from '../../../lib/nav.js'
-import { managerPath, teamPath } from '../../../lib/route.js'
-import { isoToday } from '../../../lib/dates.js'
+import { managerPath, teamSeasonPath } from '../../../lib/route.js'
 import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
@@ -96,9 +95,8 @@ export function TeamFranchisePage({ id }) {
 
 function Ledger({ team, rows }) {
   const link = useRouteLink()
-  const year = Number(isoToday().slice(0, 4))
   // A past season opens at `?y=` (its last day); this season opens the live page.
-  const seasonHref = (season) => teamPath(team.id, { name: team.name, d: season < year ? `${season}-12-31` : null })
+  const seasonHref = (season) => teamSeasonPath(team.id, season, { name: team.name })
   const odd = oddSeasons(rows)
   return (
     <Card frame="stamped" body="flush" label="Season by season" count={`${rows.length} ${rows.length === 1 ? 'season' : 'seasons'}`} className="frl">
