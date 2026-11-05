@@ -18,8 +18,9 @@
 // leaderboard table folded into a blurb) that a rule-based matcher would be
 // wrong more often than right, while a reader gets through the mess fine. The
 // exploration that settled this is .scratch/game-notes/INSIGHTS-EXPLORATION.md.
-// scripts/scan-game-notes-insights.mjs is that reading job's harness: it is run
-// BY HAND by an agent who classifies what it extracts. No API key, no workflow.
+// Its harness, scripts/scan-game-notes-insights.mjs, was deleted in #2837 (see
+// git history); it was run BY HAND by an agent who classified what it
+// extracted. No API key, no workflow.
 //
 // THE SPOILER RULE APPLIES IN FULL. A club's notes are written after a game and
 // are full of recaps ("dropped Game 1, 5-3") — those are `result` tier and are

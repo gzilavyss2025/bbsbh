@@ -188,7 +188,7 @@ test('foldGameLog: starter-only sums skip relief outings; each app keeps opponen
   ])
   assert.equal(season.pitches, 110)
   assert.equal(season.gsPitches, 90)
-  assert.equal(season.gsOuts, 18)
+  assert.equal('gsOuts' in season, false) // no reader; cut in #2844
   assert.deepEqual(allApps[2], { d: '2026-10-07', p: 56, gs: 1, o: 135, h: false, t: 'D', g: 3 })
   assert.equal(allApps[0].h, true)
 })

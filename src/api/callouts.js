@@ -128,7 +128,7 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       pre-game Game Notes PDF (issue #774). Not a note and never rendered: it
 //       only nudges the matching note's worthiness score (corroborationBonus,
 //       callout-notes/shared.js), and it is absent unless the manual scan
-//       (scripts/scan-game-notes-insights.mjs) found a live entry for a club in
+//       (its harness was deleted in #2837) found a live entry for a club in
 //       this game.
 //     series?:{ id, gamePks, games, stats:{ batting, pitching, totals } } — LCS and
 //       World Series games only; read it with seriesBlockFor (the primer takes it

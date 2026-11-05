@@ -33,7 +33,7 @@ export const fetchWorkload = staticJson('/data/workload.json')
 // this; it lives here because a generator is a top-level script and cannot be
 // unit-tested (test/workload.test.js).
 export function foldGameLog(splits) {
-  const season = { g: 0, gs: 0, pitches: 0, outs: 0, gsPitches: 0, gsOuts: 0, bf: 0, strikes: 0 }
+  const season = { g: 0, gs: 0, pitches: 0, outs: 0, gsPitches: 0, bf: 0, strikes: 0 }
   const allApps = []
   for (const s of splits ?? []) {
     if (!s?.date) continue
@@ -44,11 +44,8 @@ export function foldGameLog(splits) {
       season.gs += gs
       season.pitches += num(st.numberOfPitches)
       season.outs += ipToOuts(st.inningsPitched)
-      // Starts only: the per-start rates must not count a swingman's relief outings.
-      if (gs) {
-        season.gsPitches += num(st.numberOfPitches)
-        season.gsOuts += ipToOuts(st.inningsPitched)
-      }
+      // Starts only: the per-start rate must not count a swingman's relief outings.
+      if (gs) season.gsPitches += num(st.numberOfPitches)
       season.bf += num(st.battersFaced)
       season.strikes += num(st.strikes)
     }

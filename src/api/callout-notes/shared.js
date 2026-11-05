@@ -188,7 +188,7 @@ export const skewBonus = (w, l) => magnitudeOf(skew(w, l), 0.5)
 //
 // `bundle.corroborated` is `{ personId: [kind] }`, written by gen-callouts.mjs
 // from public/data/game-notes-corroboration.json — itself the product of a
-// manual, hand-classified scan (scripts/scan-game-notes-insights.mjs), where
+// manual, hand-classified scan (its harness was deleted in #2837), where
 // every recap-tier blurb is refused before it can reach this file. Absent on
 // every bundle generated before that scan ran, which is exactly a zero bonus.
 export const CORROBORATION_BONUS = 6
