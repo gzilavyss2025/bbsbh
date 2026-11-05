@@ -10,6 +10,7 @@
 // adds install bytes/count and a second visit) | --sources (list the elements behind
 // each layout shift) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
 import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
 import { parseArgs } from 'node:util'
 import { chromium } from 'playwright'
@@ -33,7 +34,8 @@ if (!Number.isInteger(runs) || runs < 1) throw new Error('--runs is a whole numb
 const wait = Number(o.wait)
 if (!(wait >= 0)) throw new Error('--wait is a number of seconds')
 const date = o.date && o.date.match(/^(\d{4})-(\d\d)-(\d\d)$/)
-if (o.date && !date) throw new Error('--date is YYYY-MM-DD')
+if (o.date && (!date || new Date(o.date).toISOString().slice(0, 10) !== o.date)) throw new Error('--date is a real date, YYYY-MM-DD')
+if (o.date && positionals[0]) throw new Error('give a route or --date, not both')
 const route = positionals[0] ?? (date ? `/${date[2]}${date[3]}${date[1]}?nointro` : '/?nointro')
 let BASE
 
@@ -50,11 +52,11 @@ function observe() {
     try { new PerformanceObserver((l) => l.getEntries().forEach(fn)).observe({ type, buffered: true }) } catch { /* unsupported */ }
   }
   watch('paint', (e) => { if (e.name === 'first-contentful-paint') m.fcp = e.startTime })
-  watch('largest-contentful-paint', (e) => { m.lcp = e.startTime; m.lcpEl = desc(e.element) + (e.url ? ' ' + e.url.split('/').pop().slice(0, 40) : '') })
+  watch('largest-contentful-paint', (e) => { m.lcp = e.startTime; m.lcpEl = [desc(e.element), e.url && e.url.split('/').pop().slice(0, 40)].filter(Boolean).join(' ') })
   watch('longtask', (e) => m.longTasks.push(e.duration))
   watch('layout-shift', (e) => {
     if (e.hadRecentInput) return
-    m.shifts.push({ v: e.value, t: e.startTime, els: e.sources.map((s) => desc(s.node)) })
+    m.shifts.push({ v: e.value, t: e.startTime, els: e.sources.map((s) => desc(s.node)).filter(Boolean) })
   })
 }
 
@@ -104,7 +106,10 @@ async function oneVisit(page, url, scroll = true) {
 
 async function swInstall(page) {
   return page.evaluate(async () => {
-    await navigator.serviceWorker.ready
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('service worker not ready after 30 s')), 30000)),
+    ])
     let n = 0, bytes = 0
     for (const k of (await caches.keys()).filter((k) => k.includes('precache'))) {
       for (const r of await (await caches.open(k)).keys()) {
@@ -153,12 +158,14 @@ const port = await new Promise((res, rej) => {
   const srv = createServer().once('error', rej).listen(0, () => { const { port } = srv.address(); srv.close(() => res(port)) })
 })
 BASE = `http://localhost:${port}`
-const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { stdio: 'ignore' })
+// Run vite directly (not through npx) so server.kill() stops the preview itself, not a wrapper.
+const root = fileURLToPath(new URL('../../', import.meta.url))
+const server = spawn(`${root}node_modules/.bin/vite`, ['preview', '--port', String(port), '--strictPort'], { cwd: root, stdio: 'ignore' })
 let exited = null
-server.on('exit', (code) => { exited = code })
+server.on('exit', (code, signal) => { exited = signal ?? code })
 try {
   for (let i = 0; ; i++) {
-    if (exited !== null) throw new Error(`vite preview exited (code ${exited}); run \`npm run build\` first`)
+    if (exited !== null) throw new Error(`vite preview exited (${exited}); run \`npm run build\` first`)
     if (await fetch(BASE).then((r) => r.ok, () => false)) break
     if (i >= 60) throw new Error('vite preview did not start in 30 s')
     await new Promise((r) => setTimeout(r, 500))
@@ -177,7 +184,7 @@ try {
     return `${med(a).toFixed(d)}${u} (${Math.min(...a).toFixed(d)}–${Math.max(...a).toFixed(d)})${note}`
   }
   const col = (f) => results.map(f)
-  const mode = o.sw ? 'service worker on, 2nd visit (warm; SW traffic not throttled)' : `${o.storage} storage`
+  const mode = o.sw ? 'service worker on, 2nd visit (warm; requests the worker serves are NOT throttled)' : `${o.storage} storage`
   console.log(`**${route}** · 390×844, CPU 4×, 6 Mbps / 150 ms · ${mode} · ${runs} run(s), median (min–max)\n`)
   console.log('| Metric | Value |\n| --- | --- |')
   const rows = [
@@ -192,7 +199,7 @@ try {
     ['Requests on load', fmt(col((r) => r.reqLoad))],
     ['Extra requests while scrolling', fmt(col((r) => r.reqScroll))],
   ]
-  if (o.sw) rows.push(['SW precache (files, unthrottled)', fmt(col((r) => r.install?.n))], ['SW precache (KB)', fmt(col((r) => r.install && r.install.bytes / 1024))])
+  if (o.sw) rows.push(['SW precache (files)', fmt(col((r) => r.install?.n))], ['SW precache (KB)', fmt(col((r) => r.install && r.install.bytes / 1024))])
   for (const [k, v] of rows) console.log(`| ${k} | ${v} |`)
   const last = results.at(-1)
   const top = (obj) => Object.entries(obj).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ')

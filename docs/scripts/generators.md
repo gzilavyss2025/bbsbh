@@ -2164,9 +2164,10 @@ Re-run only to fold in a new season.
   each layout shift), `--date YYYY-MM-DD` (that day's slate; pick an in-season date from
   `docs/test-games.md`), `--wait S`. It picks a free port and fails if the preview exits.
   Layout shift is the web-vitals figure (largest session window), split at the moment the
-  scroll starts. The warm and `--sw` visits are primed in a separate page. With `--sw`, CDP
-  throttling does not reach the service-worker target, so the install numbers (precache
-  files and KB, `precache` caches only) are unthrottled.
+  scroll starts. The warm and `--sw` visits are primed in a separate page. With `--sw`,
+  CDP throttling does not reach the service-worker target, so every request the worker
+  serves on the second visit is unthrottled, not only the install: treat `--sw` timings as
+  a best case. The precache numbers count `precache` caches only.
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
   layer over the research JSON under `.scratch/` and `public/data/`, and the first
