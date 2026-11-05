@@ -19,7 +19,15 @@ export function yearRuns(seasons) {
     .join(', ')
 }
 
-const pct = (w, l) => (w + l ? (w / (w + l)).toFixed(3).replace(/^0/, '') : '—')
+export const pct = (w, l) => (w + l ? (w / (w + l)).toFixed(3).replace(/^0/, '') : '—')
+export const years = (from, to) => (from === to ? String(from) : `${from}–${to}`)
+
+// The Hall of Fame card's first group. The plaques name the club as it was then, so a club that
+// moved or renamed (the Expos' plaques on the Nationals' page) does not take today's name.
+export function hofHeading(teamName, names) {
+  const distinct = new Set((names ?? []).map((n) => n.name))
+  return distinct.size > 1 ? 'Inducted with this franchise' : `Inducted as ${teamName}`
+}
 
 // Ledger rows (any order) -> every manager, newest first (by his last season, then his first).
 // A season he shared with no split on file (no w/l) still lists its year, and marks him

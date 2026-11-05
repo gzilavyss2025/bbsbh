@@ -87,7 +87,7 @@
   min-width: 0;
 }
 @media (min-width: 1200px) {
-  .screen.frpage--wide {
+  .screen.frpage {
     max-width: 1272px;
   }
   /* layout-exempt: the summary's side column beside the ledger, the approved wireframe */
@@ -124,7 +124,7 @@
 .frsum__facts {
   display: grid;
   grid-template-columns: 6.5rem minmax(0, 1fr);
-  gap: var(--space-2) var(--space-2);
+  gap: var(--space-2);
   margin: var(--space-4) 0 0;
   font-size: var(--fs-small);
 }
@@ -136,7 +136,6 @@
 }
 
 /* PEOPLE AND PLACES: the band head, then the cards; two across from the 740px step. */
-.frpeople__group,
 .frpage__people {
   margin-top: var(--space-12);
 }
@@ -254,7 +253,4 @@ a.frnums__link:focus-visible {
 
 .frmgr__name {
   white-space: normal;
-}
-.frmgr__grid .frl__left {
-  text-align: left;
 }
