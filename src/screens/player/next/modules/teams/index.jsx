@@ -126,7 +126,7 @@ export default function TeamsModule({ bio, asOf, season, onEmpty, onCount }) {
   // The `once` slot hands a two-way player 'hitting'; a career is read on his primary group (bio.isPitcher).
   const group = bio.isPitcher ? 'pitching' : 'hitting'
   const { data, loading: busy } = useAsync(() => loadTeams(bio, group, asOf), [bio.id, group, asOf])
-  // useAsync keeps the last player's data for one render after the id changes.
+  // A guard only: useAsync already answers pending on the render the id changes (#2925).
   const mine = data?.id === bio.id
   const loading = busy || Boolean(data && !mine)
   const view =

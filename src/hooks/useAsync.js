@@ -33,8 +33,14 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
   // in the effect cleanup also covers unmount, so no separate mounted ref.
   const runId = useRef(0)
   const abortController = useRef(null)
+  // The run the effect last started. A `reload` kept from older deps is a no-op: it
+  // must neither abort the current deps' request nor land its answer under them.
+  const currentRun = useRef(null)
 
   const run = useCallback(() => {
+    // The run this request answers for: the effect sets it just before calling, and
+    // `reload` only calls through when it is still this deps' run.
+    const tag = currentRun.current
     const id = ++runId.current
     abortController.current?.abort()
     const controller = new AbortController()
@@ -44,7 +50,7 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
       .then(() => fn(controller.signal))
       .then((data) => {
         if (runId.current === id)
-          setState((s) => ({ loading: false, error: null, data, lastUpdated: Date.now(), run: s.run }))
+          setState({ loading: false, error: null, data, lastUpdated: Date.now(), run: tag })
       })
       .catch((error) => {
         // Keep the last-good data on failure (stale-while-revalidate). A
@@ -52,7 +58,7 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
         // already-loaded feed — callers distinguish "have data + error" (show a
         // non-blocking notice) from a true cold-load failure (data still null).
         if (runId.current === id)
-          setState((s) => ({ ...s, loading: false, error }))
+          setState((s) => ({ ...s, loading: false, error, run: tag }))
       })
     // `deps` is a caller-supplied array forwarded straight through — inherent
     // to a generic data-fetching hook wrapping useCallback, and can never be
@@ -72,6 +78,7 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
     // `run` identity, not as a derived-from-props value.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((s) => (s.run === run ? s : { ...PENDING, run }))
+    currentRun.current = run
     run()
     return () => {
       // Deliberately the LIVE counter, not a snapshot — bumping it is what
@@ -82,6 +89,10 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
       abortController.current?.abort()
       abortController.current = null
     }
+  }, [run])
+
+  const reload = useCallback(() => {
+    if (currentRun.current === run) run()
   }, [run])
 
   useEffect(() => {
@@ -97,5 +108,5 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
   // still holds the previous deps' run. Answer the pending shape instead: no caller ever
   // sees the old deps' `{ loading: false, data }` under the new deps (#2925).
   const { loading, error, data, lastUpdated } = state.run === run ? state : PENDING
-  return { loading, error, data, lastUpdated, reload: run }
+  return { loading, error, data, lastUpdated, reload }
 }

@@ -59,7 +59,7 @@ export function TeammatesPage() {
   const [a, b] = picks
   const result = useAsync(() => (a && b ? search(a, b) : Promise.resolve(null)), [a?.id, b?.id])
   // Only the result for the CURRENT pair counts. A re-pick must not show the old
-  // chain under the new names, not even for the one render before useAsync resets.
+  // chain under the new names (a guard only: useAsync already answers pending on a re-pick, #2925).
   const current = a && b && result.data?.pair === `${a.id}-${b.id}` ? result.data : null
   const { chain, names, absent, throughSeason, credit } = current ?? {}
   const links = chain ? (chain.length - 1) / 2 : 0

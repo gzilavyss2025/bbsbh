@@ -21,9 +21,9 @@ export function rowFitsYear(row, year) {
   return typeof date === 'string' && Number(date.slice(0, 4)) === year
 }
 
-// A fetch's result is tagged with the key it was fetched FOR ({ sportId, year, rows }),
-// because useAsync still holds the previous key's data for one render after the key
-// changes. Only a result tagged for the key in hand counts. `undefined` means the
+// A fetch's result is tagged with the key it was fetched FOR ({ sportId, year, rows }).
+// Only a result tagged for the key in hand counts (useAsync already answers pending on
+// the render the key changes, #2925; the tag is a guard). `undefined` means the
 // network has not answered for this key yet; `null` means it answered with nothing.
 export const taggedRows = (data, sportId, year) =>
   data && data.sportId === sportId && data.year === year ? data.rows : undefined

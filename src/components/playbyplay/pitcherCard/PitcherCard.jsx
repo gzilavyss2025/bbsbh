@@ -89,7 +89,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
     [key],
   )
   // A kept answer is in hand on the first render; otherwise it is the fetch's, and only this key's
-  // (useAsync clears the last key's answer in an effect, one render late).
+  // (a guard only: useAsync already answers pending on the render the key changes, #2925).
   const data = cardData.peek(key) ?? (asked?.key === key ? asked : null)
 
   const role = pitcherRole(data?.line)

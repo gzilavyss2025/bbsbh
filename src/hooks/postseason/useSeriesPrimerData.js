@@ -16,8 +16,8 @@ export function useSeriesPrimerData(series, cutoff) {
   const counted = series?.games ?? []
   const todayPk = series?.cutoffGame?.gamePk ?? null
   const seriesId = series?.id ?? null
-  // The answer carries the key it was read for. A deps change leaves the old
-  // answer in place for one render, and that one must not count as ready.
+  // The answer carries the key it was read for, a guard only: useAsync already
+  // answers pending on the render the deps change (#2925).
   const key = `${seriesId}:${todayPk}`
   const { loading, data: shard } = useAsync(
     () =>
@@ -31,7 +31,7 @@ export function useSeriesPrimerData(series, cutoff) {
   const { needLive } = planShard(block, counted)
   // Held back until the shard answers, so a good shard costs no live read.
   const { loading: logLoading, error: logError, data: log } = useSeriesLog(shardLoading || !needLive ? [] : counted)
-  // `log?.stats` is null for the empty log a deps change leaves behind for one render.
+  // `log?.stats` is null for the empty log useSeriesLog answers while it has nothing to read.
   const logPending = needLive && !logError && (logLoading || !log?.stats)
   return { ...primerData(block, counted, log), loading: shardLoading || logPending, error: logError }
 }

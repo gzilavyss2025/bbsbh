@@ -25,7 +25,7 @@ export default function AwardsModule({ bio, asOf, onEmpty, onCount }) {
     async () => ({ id: bio.id, asOf, ledger: await awardLedgerFor(await fetchPlayerAwards(bio.id), endDateOf(asOf)) }),
     [bio.id, asOf],
   )
-  // useAsync keeps the last read's data for one render after the player or the date changes.
+  // A guard only: useAsync already answers pending on the render the player or date changes (#2925).
   const loading = busy || Boolean(data && (data.id !== bio.id || data.asOf !== asOf))
   const view = useMemo(() => {
     if (loading || !data) return null

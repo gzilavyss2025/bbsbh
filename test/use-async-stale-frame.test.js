@@ -57,3 +57,17 @@ test('reload keeps the loaded data while it refetches (stale-while-revalidate)',
   assert.ok(p.frames.every((f) => f.data === 'data:A'), 'reload never blanks the data')
   await p.done()
 })
+
+test("an older deps' reload called after a deps change never shows under the new deps", async () => {
+  const p = mount()
+  await p.render('A')
+  const reloadA = p.current().reload
+  await p.render('B')
+  assert.equal(p.current().data, 'data:B')
+  p.frames.length = 0
+  await p.run(() => reloadA())
+  assert.ok(p.frames.every((f) => f.data !== 'data:A'), 'A\'s data never renders under B')
+  assert.equal(p.current().data, 'data:B', 'B keeps its own answer')
+  assert.equal(p.current().loading, false, 'B is not left pending')
+  await p.done()
+})

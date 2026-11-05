@@ -23,7 +23,7 @@ export default function PathModule({ bio, role, asOf, onEmpty, onCount }) {
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const skip = group === 'pitching' && bio.twoWay
   const { data, loading: busy } = useAsync(() => (skip ? null : loadPath(bio.id, asOf, group)), [bio.id, asOf, group, skip])
-  // useAsync keeps the last player's data for one render after the id changes; an error ends the load with no data.
+  // A guard only: useAsync already answers pending on the render the id changes (#2925); an error ends the load with no data.
   const mine = data?.bio?.id === bio.id
   const loading = !skip && (busy || Boolean(data && !mine))
   const view = mine ? pathView(data) : null
