@@ -4,6 +4,7 @@
 // same allowlist, so whatever else a request carries is never logged. No score, id or URL, ever.
 // Inert by nature: no store, no secret. Always answers 204.
 import { buildCrashPayload } from '../src/lib/crash/report.js'
+import { buildVitalsPayload } from '../src/lib/crash/vitals.js'
 
 export const config = { runtime: 'edge' }
 
@@ -13,8 +14,16 @@ export default async function handler(request) {
   if (request.method === 'POST') {
     try {
       const text = (await request.text()).slice(0, MAX_BODY)
-      const payload = buildCrashPayload(JSON.parse(text))
-      if (payload) console.log(`bbsbh-crash ${JSON.stringify(payload)}`)
+      const body = JSON.parse(text)
+      // Field vitals (src/lib/crash/vitals.js) ride the same sink: api/ is at its file cap, and
+      // the same allowlist rebuild runs here. One `bbsbh-vitals` line a page load.
+      if (body && typeof body === 'object' && 'vitals' in body) {
+        const vitals = buildVitalsPayload(body.vitals)
+        if (vitals) console.log(`bbsbh-vitals ${JSON.stringify(vitals)}`)
+      } else {
+        const payload = buildCrashPayload(body)
+        if (payload) console.log(`bbsbh-crash ${JSON.stringify(payload)}`)
+      }
     } catch { /* a malformed report is dropped */ }
   }
   return new Response(null, { status: 204 })

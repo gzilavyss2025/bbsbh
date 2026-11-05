@@ -7,6 +7,7 @@ import { CopyProvider } from './copy/CopyProvider.jsx'
 import { hydrateIdentityFromCache, refreshIdentityOverrides } from './lib/identity/hydrate.js'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import { installCrashReporter, reportCrash } from './lib/crash/report.js'
+import { installVitalsReporter } from './lib/crash/vitals.js'
 import { parseRoute } from './lib/route.js'
 import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
 import { recoverOnce, clearRecoveryFlag } from './lib/crash/recover.js'
@@ -14,11 +15,15 @@ import { RootBoundary } from './components/ui/state/RootBoundary.jsx'
 import './index.css'
 
 // The crash signal (#2514): the route's NAME and the build, never the URL (lib/crash/report.js).
-installCrashReporter(() => {
+const reportContext = () => {
   let route = ''
   try { route = parseRoute(window.location.pathname)?.name ?? '' } catch { /* no route name */ }
   return { route, build: BUILD_COMMIT_SHORT }
-})
+}
+installCrashReporter(reportContext)
+// Field vitals: one `bbsbh-vitals` log line a page load, with an installed-app flag
+// (lib/crash/vitals.js). Production only, so the dev server stays quiet.
+if (import.meta.env.PROD) installVitalsReporter(reportContext)
 
 // A deploy that changes code renames the content-hashed chunks it touches (a
 // data-only one renames none, #2873; see App.jsx's per-route `lazy()` imports),
