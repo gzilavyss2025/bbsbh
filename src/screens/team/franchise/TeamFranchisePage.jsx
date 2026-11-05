@@ -47,7 +47,7 @@ export function TeamFranchisePage({ id }) {
   const first = rows[0]?.season
   const last = rows[rows.length - 1]?.season
   return (
-    <div className={rows.length ? 'screen team-hub frpage frpage--wide' : 'screen team-hub frpage'}>
+    <div className="screen team-hub frpage">
       <SiteHeader />
       <BackBtn onClick={back} />
       <header className="team-hub__id">
@@ -76,7 +76,7 @@ export function TeamFranchisePage({ id }) {
                 People and places
               </SectionHead>
               <div className="frpage__cards">
-                <HallOfFame team={team} hof={hof} />
+                <HallOfFame team={team} hof={hof} names={summary?.names} />
                 <RetiredNumbers retired={retired} hof={hof} leaders={leaders} />
                 <Managers rows={rows} best={summary?.winningestManager?.id ?? null} />
                 <Parks history={history} />

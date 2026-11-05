@@ -1,17 +1,13 @@
 // The franchise summary card (#2784), shaped from summarizeFranchise's result
 // (api/history/franchiseSummary.js). Pure: no fetch, no clock.
-import { yearRuns } from '../people/peopleView.js'
-
-const pct = (w, l) => (w + l ? (w / (w + l)).toFixed(3).replace(/^0/, '') : '—')
-const span = (from, to) => (from === to ? String(from) : `${from}–${to}`)
+import { pct, years as span, yearRuns } from '../people/peopleView.js'
 
 // A tile's caption lists the years while there are two at most; a longer list reads "Last {year}"
-// there and moves whole into a fact row (`{key}Runs`), so a tile never grows a paragraph.
-function listed(key, items, short) {
-  if (!items.length) return { [`${key}Caption`]: null, [`${key}Runs`]: null }
-  if (items.length <= 2) return { [`${key}Caption`]: short, [`${key}Runs`]: null }
-  const years = items.map((x) => x.season ?? x)
-  return { [`${key}Caption`]: `Last ${years[years.length - 1]}`, [`${key}Runs`]: yearRuns(years) }
+// there and moves whole into a fact row (`runs`), so a tile never grows a paragraph.
+function listed(items, short) {
+  if (items.length <= 2) return { caption: items.length ? short : null, runs: null }
+  const ys = items.map((x) => x.season ?? x)
+  return { caption: `Last ${ys[ys.length - 1]}`, runs: yearRuns(ys) }
 }
 
 // `last` is the newest season on the page. The current name reads "1970 on" when its run
@@ -31,9 +27,9 @@ export function summaryView(s) {
     lastPostseason: s.postseasons.length ? Math.max(...s.postseasons) : null,
     postseasonYears: yearRuns(s.postseasons),
     pennants: s.pennants.length,
-    ...listed('pennant', pennants, pennants.map((p) => `${p.season} ${p.league}`).join(' · ')),
+    pennant: listed(pennants, pennants.map((p) => `${p.season} ${p.league}`).join(' · ')),
     titles: s.titles.length,
-    ...listed('title', titles, yearRuns(titles)),
+    title: listed(titles, yearRuns(titles)),
     names: s.names.map((n) => ({ name: n.name, years: n.to === last && n.from !== last ? `${n.from} on` : span(n.from, n.to) })),
     best: best ? { id: best.id, name: best.name, wl: `${best.w}-${best.l}`, seasons: best.seasons } : null,
     // Manager data starts in 1969. Say so only for a club that is older than that.

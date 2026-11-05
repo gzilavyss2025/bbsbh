@@ -13,7 +13,7 @@ export function Managers({ rows, best }) {
   if (!list.length) return null
   return (
     <Card frame="stamped" body="flush" label="Managers" count={String(list.length)} className="frmgr">
-      <Table frame="bare" label="Managers, newest first" className="frmgr__grid">
+      <Table frame="bare" label="Managers, newest first" className="frl__grid frmgr__grid">
         <thead>
           <tr>
             <th scope="col" className="frl__left">Manager</th>
@@ -29,7 +29,12 @@ export function Managers({ rows, best }) {
                 <a className="plink" {...link(managerPath(m.id, m.name))}>
                   {m.name}
                 </a>
-                {m.partial && <span aria-label="a shared season has no split on file"> †</span>}
+                {m.partial && (
+                  <>
+                    <span aria-hidden="true"> †</span>
+                    <span className="sr-only"> (a shared season has no split on file)</span>
+                  </>
+                )}
                 {m.best && <span className="frl__tag">Most wins</span>}
               </th>
               <td className="frl__left">{m.years}</td>
