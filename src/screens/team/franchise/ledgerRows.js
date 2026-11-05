@@ -41,9 +41,18 @@ export function seasonCells(row) {
     ra: row.ra ?? DASH,
     diff: diff == null ? DASH : diff > 0 ? `+${diff}` : String(diff),
     managers: (row.managers ?? []).map((m) => ({ id: m.id, name: m.name })),
-    note: row.note ?? null,
+    tag: row.note ? (NOTE_TAG[row.note] ?? 'Note') : null,
     inProgress: Boolean(row.inProgress),
   }
+}
+
+// An odd season's short tag on its row (#2784). The ledger writes three notes; any other reads "Note".
+const NOTE_TAG = { 'split season': 'Split', strike: 'Strike', '60-game season': '60 G' }
+
+// Rows (any order) -> the noted seasons as one line under the table, oldest first, or null.
+export function oddSeasons(rows) {
+  const noted = (rows ?? []).filter((r) => r.note).sort((a, b) => a.season - b.season)
+  return noted.length ? noted.map((r) => `${r.season} ${r.note}`).join(' · ') : null
 }
 
 // Rows (any order) -> the table's items, newest first: { kind: 'season', row } and, above the
@@ -120,7 +129,9 @@ export function liveRow({ teamId, season, name, records, dates, manager }) {
     leagueRank: rank(t.leagueRank),
     rs: t.runsScored ?? null,
     ra: t.runsAllowed ?? null,
-    managers: manager?.personId ? [{ id: manager.personId, name: manager.name }] : [],
+    // The one manager on file is credited the season, as a stored single-manager season is. The
+    // offseason ledger run replaces the row, and splits a season two managers shared.
+    managers: manager?.personId ? [{ id: manager.personId, name: manager.name, w: t.wins, l: t.losses }] : [],
     postseason: furthestSeries(all, teamId),
     note: null,
     inProgress: all.some((gm) => gm.status?.abstractGameState !== 'Final'),

@@ -49,14 +49,212 @@
   text-align: left;
 }
 
-/* A season's note (1981 split, 1994 strike, 2020 60 games) on its own line under the row. */
-.frl__note :is(th, td) {
-  border-top: 0;
-  padding-top: 0;
+/* An odd season (1981 split, 1994 strike, 2020 60 games, #2784): a small ink tag on its year,
+   and one line of notes under the table (.frl__foot). The tag doubles as the manager list's
+   "Most wins" mark. */
+.frl__tag {
+  display: inline-block;
+  margin-left: var(--space-1h);
+  padding: 0 var(--space-1);
+  background: var(--surface-stamped-ink);
+  color: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  vertical-align: middle;
 }
-.frl__note td {
-  text-align: left;
+.frl__row .frl__tag {
+  display: block;
+  width: fit-content;
+  margin: var(--space-1) 0 0;
+}
+.frl__foot {
+  margin: 0;
+  padding: var(--space-2) var(--space-3h) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-read);
   font-size: var(--fs-small);
   color: var(--text-muted);
+}
+
+/* THE PAGE'S TWO COLUMNS (#2784). On a phone and at the 740px step: the summary, then the
+   ledger and People and places, one column. From 1200px the screen widens past the global 960px
+   cap (as the slate does for its rail, 25-wide-layout.css) and the summary takes a side column,
+   so the ledger keeps the width it had. The side column scrolls with the page, not sticky. */
+.frpage__side,
+.frpage__main {
+  min-width: 0;
+}
+@media (min-width: 1200px) {
+  .screen.frpage--wide {
+    max-width: 1272px;
+  }
+  /* layout-exempt: the summary's side column beside the ledger, the approved wireframe */
+  .frpage__body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+  .frpage__side {
+    flex: 0 0 340px; /* raw-value-exempt: the side column, wide enough for three tiles; the ledger keeps about 900 */
+  }
+  .frpage__main {
+    flex: 1 1 auto;
+  }
+}
+
+/* The summary card: four tiles in two columns, then the facts. */
+.frpage .frsum {
+  margin-top: var(--space-6);
+}
+/* layout-exempt: the record across the top, the other three tiles three across under it */
+.frsum__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.frsum__lead {
+  grid-column: 1 / -1;
+}
+.frsum__tiles .stattile__caption {
+  overflow-wrap: anywhere;
+}
+/* layout-exempt: label beside value */
+.frsum__facts {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--space-2) var(--space-2);
+  margin: var(--space-4) 0 0;
+  font-size: var(--fs-small);
+}
+.frsum__facts dd {
+  margin: 0;
+}
+.frsum__name {
+  display: block;
+}
+
+/* PEOPLE AND PLACES: the band head, then the cards; two across from the 740px step. */
+.frpeople__group,
+.frpage__people {
+  margin-top: var(--space-12);
+}
+/* layout-exempt: the People and places cards, one column on a phone, two at the wide step */
+.frpage__cards {
+  display: grid;
+  gap: 0 var(--space-6);
+  align-items: start;
+}
+@media (min-width: 740px) {
+  .frpage__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.frpage__cards > .card {
+  margin-top: var(--space-6);
+}
+
+.frpeople__group {
+  margin: var(--space-4) 0 var(--space-1h);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.frpeople__group:first-child {
+  margin-top: 0;
+}
+.frpeople__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: a name beside its induction year */
+.frpeople__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1h) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
+}
+.frpeople__sub {
+  display: block;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.frpeople__fig {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Retired numbers: a tile per number, three across on a phone. */
+/* layout-exempt: the number tiles, three across */
+.frnums__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: a tile is the tap target, so its own column of number, name, year and tag */
+.frnums__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  height: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-body);
+  text-decoration: none;
+  box-sizing: border-box;
+}
+a.frnums__link:hover {
+  background: var(--surface-row-hover);
+}
+a.frnums__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.frnums__number {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.frnums__name {
+  font-size: var(--fs-small);
+}
+.frnums__year {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.frnums__role {
+  align-self: flex-start;
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--border-stamped);
+  font-size: var(--fs-compact);
+}
+.frnums__league {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.frmgr__name {
+  white-space: normal;
+}
+.frmgr__grid .frl__left {
+  text-align: left;
 }
