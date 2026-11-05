@@ -21,8 +21,9 @@ test('a short list draws every row', () => {
   assert.deepEqual(windowSlice({ scrollTop: 0, viewH: 275, rowH: 55, total: 4, buffer: 3 }), { start: 0, end: 4 })
 })
 
-test('an unmeasured row height draws the first screenful, never NaN', () => {
-  assert.deepEqual(windowSlice({ scrollTop: 0, viewH: 0, rowH: 0, total: 851, buffer: 3 }), { start: 0, end: 3 })
+test('unmeasured geometry draws a real first screenful (five rows) plus the buffer, never NaN', () => {
+  assert.deepEqual(windowSlice({ scrollTop: 0, viewH: 0, rowH: 0, total: 851, buffer: 3 }), { start: 0, end: 8 })
+  assert.deepEqual(windowSlice({ scrollTop: 0, viewH: 0, rowH: 0, total: 6, buffer: 3 }), { start: 0, end: 6 })
 })
 
 test('a stale scrollTop past a shrunken list stays in range', () => {

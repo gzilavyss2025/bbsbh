@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
@@ -24,8 +24,14 @@ const markEnd = (el) => (el.dataset.end = String(el.scrollTop + el.clientHeight 
 // The list draws only the rows in view plus this many each side. Every row has
 // one height (--census-row-h in winter-long-at-bats.css); two empty <li> spacers in the
 // <ol> stand in for the rows not drawn, so the scroll box stays full length.
-const BUFFER = 5
-const FALLBACK_ROW_H = 55
+// BUFFER is about two screens either side, so an iOS momentum flick does not outrun
+// the drawn rows. The window moves in STEP-row blocks, so a scroll re-renders the
+// card once per block, not once per frame.
+const BUFFER = 12
+const STEP = 6
+// Until a row is measured: --census-row-h is 3.5rem, so 3.5 root font sizes.
+const ROW_REM = 3.5
+const guessRowH = () => ROW_REM * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)
 
 // "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
 const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
@@ -50,49 +56,139 @@ export function LongAtBats({ season }) {
   const [club, setClub] = useState(null)
   const linkProps = useRouteLink()
   const listRef = useRef(null)
-  const [view, setView] = useState({ scrollTop: 0, viewH: 0, rowH: FALLBACK_ROW_H })
-
-  // Measure the box and one row once the list is in the page: the row height is
-  // the CSS token's, read off the DOM, never a pixel guess here.
-  useLayoutEffect(() => {
-    const el = listRef.current
-    const li = el?.querySelector('li[aria-posinset]')
-    if (el && li) setView((v) => ({ ...v, viewH: el.clientHeight, rowH: li.offsetHeight || v.rowH }))
-  }, [data])
+  // The row that holds focus stays drawn even when it scrolls out of the window.
+  const [focused, setFocused] = useState(null)
+  const [geo, setGeo] = useState(() => ({ rowH: guessRowH(), viewH: 0 }))
+  const [block, setBlock] = useState(0)
 
   const rows = data?.rows ?? []
   // A file for a season the page is not naming, a season still being played, or
   // one the sweep has not finished is not a census. The note is a count or it
   // is nothing.
-  if (rows.length === 0 || data?.season !== season || !data?.coverage?.complete) return null
+  const ok = rows.length > 0 && data?.season === season && !!data?.coverage?.complete
 
   // Its own census, shown only once the file has one and every postseason game on
   // it is read. A complete zero is still a count.
-  const post = data.post?.coverage.complete ? data.post : null
+  const post = data?.post?.coverage.complete ? data.post : null
 
   // The postseason's long at-bats join the list, each marked.
   // `key`: a row's own id. pk + batter + pitches is not unique at ten pitches
   // (one batter can see a pitcher twice for ten in a game), and a repeated React
   // key left a stale row standing at the head of a filtered list.
-  const every = [...rows, ...(post?.rows ?? []).map((r) => ({ ...r, post: true }))]
-    .sort((a, b) => b.pitches - a.pitches || (a.date < b.date ? -1 : 1))
-    .map((r, i) => ({ ...r, key: i }))
-  const clubs = [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
-    .filter(Boolean)
-    .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b })))
-  const all = club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every
+  // Memoized: scrolling must not re-sort 850 rows.
+  const every = useMemo(
+    () =>
+      ok
+        ? [...rows, ...(post?.rows ?? []).map((r) => ({ ...r, post: true }))]
+            .sort((a, b) => b.pitches - a.pitches || (a.date < b.date ? -1 : 1))
+            .map((r, i) => ({ ...r, key: i }))
+        : [],
+    [data, ok], // eslint-disable-line react-hooks/exhaustive-deps -- rows and post come from data
+  )
+  const clubs = useMemo(
+    () =>
+      [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
+        .filter(Boolean)
+        .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b }))),
+    [every],
+  )
+  // A club filter: an at-bat stays when the club is on either side of it.
+  const all = useMemo(
+    () => (club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every),
+    [every, club],
+  )
+
+  // Measure the box and one row, and again whenever the box resizes (text size,
+  // rotation): the row height is the CSS token's, read off the DOM. getBoundingClientRect,
+  // not offsetHeight, which rounds and would drift over 850 rows.
+  useLayoutEffect(() => {
+    const el = listRef.current
+    if (!el) return undefined
+    const measure = () => {
+      const li = el.querySelector('li[aria-posinset]')
+      const rowH = li ? li.getBoundingClientRect().height : 0
+      const viewH = el.getBoundingClientRect().height
+      setGeo((g) => (g.viewH === viewH && (!rowH || g.rowH === rowH) ? g : { viewH, rowH: rowH || g.rowH }))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [ok])
+
+  if (!ok) return null
+
   const top = all[pick] ?? all[0]
   const pickClub = (id) => {
     setClub(id)
     setPick(0)
+    setFocused(null)
     if (listRef.current) listRef.current.scrollTop = 0
-    setView((v) => ({ ...v, scrollTop: 0 }))
+    setBlock(0)
   }
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
   const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
   // Every row, in a list that scrolls in its own box (five rows tall).
   const path = atBatGamePath(top)
-  const { start, end } = windowSlice({ ...view, total: all.length, buffer: BUFFER })
+  const { start, end } = windowSlice({
+    scrollTop: block * STEP * geo.rowH,
+    viewH: geo.viewH,
+    rowH: geo.rowH,
+    total: all.length,
+    buffer: BUFFER,
+  })
+  // The window, plus the picked row and the focused row wherever they sit; a gap
+  // between two drawn rows is one empty spacer, so the box keeps its full length.
+  const extra = [...new Set([pick, focused])]
+    .filter((i) => i != null && i < all.length && (i < start || i >= end))
+    .sort((a, b) => a - b)
+  const drawn = [
+    ...extra.filter((i) => i < start),
+    ...Array.from({ length: end - start }, (_, j) => start + j),
+    ...extra.filter((i) => i >= end),
+  ]
+  const gap = (n, k) => n > 0 && <li key={k} aria-hidden="true" style={{ height: n * geo.rowH }} />
+  const renderRow = (i) => {
+    const row = all[i]
+    return (
+      <li key={row.key} aria-setsize={all.length} aria-posinset={i + 1}>
+        <button
+          type="button"
+          className="seasonnote__barrow"
+          aria-pressed={i === pick}
+          aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayName(row.date)}`}
+          onClick={() => setPick(i)}
+        >
+          <span className="seasonnote__barn">{row.pitches}</span>
+          <span className="seasonnote__barwho">
+            <span className="seasonnote__barside">
+              <TeamLogo teamId={row.batter.teamId} size={18} />
+              <span className="seasonnote__barname">{row.batter.name}</span>
+            </span>
+            <span className="seasonnote__barside">
+              <TeamLogo teamId={row.pitcher.teamId} size={18} />
+              <span className="seasonnote__barname seasonnote__barname--p">{row.pitcher.name}</span>
+            </span>
+          </span>
+          <span className="seasonnote__barmeta">
+            <span>
+              {row.post && <span className="seasonnote__barpost">Postseason</span>}
+              {row.post && ' · '}
+              {monthDayName(row.date)}
+            </span>
+            {row.event && <span className="seasonnote__barevent">{row.event}</span>}
+          </span>
+        </button>
+      </li>
+    )
+  }
+  const items = []
+  let prev = -1
+  for (const i of drawn) {
+    items.push(gap(i - prev - 1, `gap${i}`), renderRow(i))
+    prev = i
+  }
+  items.push(gap(all.length - 1 - prev, 'gap-end'))
 
   // ONE CARD, ONE UNIT: the longest at-bat drawn one square per pitch, the
   // next longest in the same squares beside it, and the census as one line under
@@ -155,49 +251,20 @@ export function LongAtBats({ season }) {
                     if (el) markEnd(el)
                   }}
                   // The foot fades only while there is more below; at the end, or a list
-                  // that fits, it sits flat. Rows not drawn are two empty spacers, so the
-                  // box keeps its full length; each <li> says its place in the whole census.
+                  // that fits, it sits flat. Each <li> says its place in the whole census.
                   onScroll={(e) => {
-                    const { scrollTop } = e.currentTarget
                     markEnd(e.currentTarget)
-                    setView((v) => ({ ...v, scrollTop }))
+                    setBlock(Math.floor(Math.floor(e.currentTarget.scrollTop / geo.rowH) / STEP))
+                  }}
+                  onFocus={(e) => {
+                    const li = e.target.closest('li[aria-posinset]')
+                    setFocused(li ? Number(li.getAttribute('aria-posinset')) - 1 : null)
+                  }}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget)) setFocused(null)
                   }}
                 >
-                  <li aria-hidden="true" style={{ height: start * view.rowH }} />
-                  {all.slice(start, end).map((row, j) => {
-                    const i = start + j
-                    return (
-                    <li key={row.key} aria-setsize={all.length} aria-posinset={i + 1}>
-                      <button
-                        type="button"
-                        className="seasonnote__barrow"
-                        aria-pressed={i === pick}
-                        aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayName(row.date)}`}
-                        onClick={() => setPick(i)}
-                      >
-                        <span className="seasonnote__barn">{row.pitches}</span>
-                    <span className="seasonnote__barwho">
-                      <span className="seasonnote__barside">
-                        <TeamLogo teamId={row.batter.teamId} size={18} />
-                        <span className="seasonnote__barname">{row.batter.name}</span>
-                      </span>
-                      <span className="seasonnote__barside">
-                        <TeamLogo teamId={row.pitcher.teamId} size={18} />
-                        <span className="seasonnote__barname seasonnote__barname--p">{row.pitcher.name}</span>
-                      </span>
-                    </span>
-                    <span className="seasonnote__barmeta">
-                      <span>
-                        {row.post && <span className="seasonnote__barpost">Postseason</span>}{row.post && ' · '}
-                        {monthDayName(row.date)}
-                      </span>
-                      {row.event && <span className="seasonnote__barevent">{row.event}</span>}
-                    </span>
-                  </button>
-                    </li>
-                    )
-                  })}
-                  <li aria-hidden="true" style={{ height: (all.length - end) * view.rowH }} />
+                  {items}
                 </ol>
               </div>
           </div>
