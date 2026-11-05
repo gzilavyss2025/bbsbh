@@ -50,9 +50,9 @@ or trigger a Vercel deployment.** Exceptions: `/stack-prs` run by Gary; the
 orchestrator, which under his standing permission merges each green child PR after its
 own review, or stacks when that helps (`.claude/skills/orchestrate/`, "Landing"); and
 `merge-pr` when Gary says "merge the pr" (green CI only, no stack). Keep
-work-in-progress off `main` (Vercel Pro since 2026-10-29). Every push to a PR branch gets a preview URL on the PR's Vercel check; it
-needs a Vercel sign-in. Verify in your own container first; the preview is for Gary:
-end your handoff with the preview link for the route you changed, `?nointro` added.
+work-in-progress off `main` (Vercel Pro since 2026-10-29). `claude/**` branches get **no** Vercel preview (cost,
+2026-11-05): verify in your own container and end your handoff with the route you changed, `?nointro`
+added. Merging to `main` is the first deploy. Gary can push a branch under another name for a preview.
 
 **Cloud is the default** (`CLAUDE_CODE_REMOTE=true`; Gary works in claude.ai/code). One
 container, one branch: use the branch the session gives you, cut from current
