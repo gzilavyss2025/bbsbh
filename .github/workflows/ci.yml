@@ -59,3 +59,7 @@ jobs:
       # or when Clerk or pdf.js text lands in the first load. Prints the ten biggest
       # chunks. See docs/testing.md, "Bundle size".
       - run: npm run check:bundle
+      # Also needs the artifact: fails when the build commit SHA lands in any JS or
+      # CSS chunk. It belongs in index.html only, so a data-only deploy renames no
+      # chunk and installed apps re-download nothing (#2873).
+      - run: npm run check:commit

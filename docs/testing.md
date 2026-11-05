@@ -300,6 +300,16 @@ it sets each budget to 3% over today, never raises one, and refuses while anythi
 Rebase onto `main` and re-measure before you merge a change to a budget (the rule in
 `scripts/CLAUDE.md`): a number taken behind `main` goes stale.
 
+## Build commit stays out of the JS — `npm run check:commit` (CI-gated)
+
+The footer's build stamp reads the commit from `<meta name="build-commit">` in
+`index.html` (`buildCommitMeta` in `vite.config.js`, `src/lib/buildInfo.js`). A
+per-deploy value inside a chunk changes its hash and renames every chunk that imports
+it, so each deploy, a data-only one included, made installed apps download ~40
+precached chunks again (#2873). `scripts/bundle/check-commit-not-in-js.mjs` fails when
+the SHA is in any file under `dist/assets/`. The same rule holds for any new
+per-deploy value (a timestamp, a define): put it in `index.html`, not in the JS.
+
 ## Making the tests actually bite
 
 A test only has impact if a failure *stops* something. The chain here:
