@@ -75,3 +75,30 @@ export function clubPeople(hof, leaders) {
   for (const group of [leaders?.career, leaders?.season]) for (const list of Object.values(group ?? {})) out.push(...list)
   return out.map((p) => ({ id: p.id, name: p.name }))
 }
+
+const years = (from, to) => (from === to ? String(from) : `${from}–${to}`)
+
+// The club's home parks (#2788), newest first, from franchiseFor (api/franchiseHistory.js):
+// `spans` by season, `parks` from parkHistory, `through` the file's last season. A park's name is
+// the one its newest span gives it (the venue's current name); any other is "also named". A run
+// that reaches `through` reads "2001 on". `clubs` are the club's own names there; `mates` the
+// other clubs that used it in the same seasons. The data starts in 1901 and holds one park per run
+// of seasons, so a one-off neutral site is not in it.
+export function parksView({ spans, parks, through } = {}) {
+  return (parks ?? [])
+    .map((p) => {
+      const mine = (spans ?? []).filter((s) => s.venueId === p.venueId)
+      const name = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
+      return {
+        id: p.venueId,
+        name,
+        also: p.names.filter((n) => n !== name),
+        years: p.runs.map(([a, b]) => (b === through ? `${a} on` : years(a, b))).join(', '),
+        last: p.runs[p.runs.length - 1][1],
+        clubs: [...new Set(mine.map((s) => s.name))],
+        mates: (p.mates ?? []).map((m) => `${m.name} ${years(m.from, m.to)}`),
+      }
+    })
+    .sort((a, b) => b.last - a.last)
+    .map(({ last, ...rest }) => rest) // eslint-disable-line no-unused-vars
+}

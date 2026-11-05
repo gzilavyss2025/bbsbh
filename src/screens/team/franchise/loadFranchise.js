@@ -7,6 +7,7 @@ import { pennantsFor } from '../../../api/history/leaguePennants.js'
 import { hallOfFamersFor } from '../../../api/history/franchiseHof.js'
 import { retiredNumbersFor } from '../../../api/history/retiredNumbers.js'
 import { franchiseLeaders } from '../../../api/history/franchiseLeaders.js'
+import { franchiseFor } from '../../../api/franchiseHistory.js'
 import { isoToday } from '../../../lib/dates.js'
 import { clubRecord, liveRow } from './ledgerRows.js'
 
@@ -36,19 +37,20 @@ async function liveSeason(team, season, name) {
   return liveRow({ teamId: team.id, season, name, records, dates, manager })
 }
 
-// -> { team, rows, summary, hof, retired, leaders } (rows oldest first), or { team, rows: [] } for a
+// -> { team, rows, summary, hof, retired, leaders, history } (rows oldest first), or { team, rows: [] } for a
 // club with no ledger (MiLB). The summary (#2784) reads every row the table shows, live ones too,
 // so a title won this season counts before the offseason ledger run. The stores are static files.
 export async function loadFranchise(id) {
   const team = await fetchTeam(id)
   if (!team) return null
   if ((team.sport?.id ?? 1) !== 1) return { team, rows: [] }
-  const [{ through, rows: stored }, pennants, hof, retired, leaders] = await Promise.all([
+  const [{ through, rows: stored }, pennants, hof, retired, leaders, history] = await Promise.all([
     franchiseLedger(team.id),
     pennantsFor(team.id),
     hallOfFamersFor(team.id),
     retiredNumbersFor(team.id),
     franchiseLeaders(team.id),
+    franchiseFor(team.id),
   ])
   if (!stored.length) return { team, rows: stored }
   const year = Number(isoToday().slice(0, 4))
@@ -56,5 +58,5 @@ export async function loadFranchise(id) {
   for (let s = (through ?? year) + 1; s <= year; s++) seasons.push(s)
   const live = (await Promise.all(seasons.map((s) => liveSeason(team, s, stored[stored.length - 1].name)))).filter(Boolean)
   const rows = [...stored, ...live]
-  return { team, rows, summary: summarizeFranchise(rows, pennants), hof, retired, leaders }
+  return { team, rows, summary: summarizeFranchise(rows, pennants), hof, retired, leaders, history }
 }

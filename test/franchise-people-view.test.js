@@ -1,8 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { clubPeople, managersView, retiredTiles, yearRuns } from '../src/screens/team/franchise/people/peopleView.js'
+import { readFileSync } from 'node:fs'
+import { clubPeople, managersView, parksView, retiredTiles, yearRuns } from '../src/screens/team/franchise/people/peopleView.js'
 import { summaryView } from '../src/screens/team/franchise/summary/summaryView.js'
 import { summarizeFranchise } from '../src/api/history/franchiseSummary.js'
+import { parkHistory } from '../src/api/franchiseHistory.js'
 
 // #2784: the franchise page's summary and People and places, shaped for the cards.
 
@@ -90,4 +92,27 @@ test('summaryView: a long pennant or title list moves out of the tile caption in
   assert.equal(short.pennantRuns, null)
   assert.equal(short.titleCaption, '2026')
   assert.equal(short.titleRuns, null)
+})
+
+// #2788: the Parks card, on the real franchise-history files.
+const history = (id) => JSON.parse(readFileSync(new URL(`../public/data/franchise-history/${id}.json`, import.meta.url), 'utf8'))
+const parksFor = (id) => {
+  const d = history(id)
+  return parksView({ spans: d.spans, parks: parkHistory(d.spans, d.mates), through: d.through })
+}
+
+test('parksView: newest first, the current name with the old ones as "also", "on" for a park in use', () => {
+  assert.deepEqual(parksFor(158), [
+    { id: 32, name: 'American Family Field', also: ['Miller Park'], years: '2001 on', clubs: ['Milwaukee Brewers'], mates: [] },
+    { id: 23, name: 'Milwaukee County Stadium', also: [], years: '1970–2000', clubs: ['Milwaukee Brewers'], mates: [] },
+    { id: 3144, name: "Sick's Stadium", also: [], years: '1969', clubs: ['Seattle Pilots'], mates: [] },
+  ])
+})
+
+test('parksView: a park left and returned to keeps two runs; a shared park names the other club', () => {
+  const yankees = parksFor(147)
+  assert.equal(yankees.find((p) => p.id === 9).years, '1923–1973, 1976–2008')
+  assert.deepEqual(parksFor(119).find((p) => p.id === 22).mates, ['Los Angeles Angels 1962–1965'])
+  assert.equal(parksFor(119).find((p) => p.id === 3150).name, 'Washington Park')
+  assert.deepEqual(parksView(), [])
 })

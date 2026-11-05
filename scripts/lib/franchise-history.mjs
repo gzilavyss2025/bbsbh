@@ -17,7 +17,8 @@ function ranges(seasons) {
 // AT&T) stays one span: `venueNames` keeps every name, `venueName` is the newest.
 export function collapseSeasons(rows) {
   const spans = []
-  for (const r of [...rows].sort((a, b) => a.season - b.season)) {
+  // The feed spells some names with a trailing space (Brooklyn's Washington Park, 3150).
+  for (const r of [...rows].map((x) => ({ ...x, venueName: x.venueName?.trim() ?? x.venueName })).sort((a, b) => a.season - b.season)) {
     const last = spans[spans.length - 1]
     if (
       last &&
