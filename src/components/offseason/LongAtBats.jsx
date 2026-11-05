@@ -13,6 +13,7 @@ import { ClubStrip } from './ClubStrip.jsx'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 import { windowSlice } from '../../lib/react/windowSlice.js'
+import { heldFor } from '../../lib/react/heldFor.js'
 
 // The list's foot fades only while there is more below it.
 // The picked at-bat's scorebug and zone load in their own chunk (LongAtBatDetail.jsx).
@@ -49,10 +50,9 @@ export function LongAtBats({ season }) {
   const { data } = useAsync(() => fetchLongAtBats(season), [season])
   // How many rows are on screen, not a boolean — the door adds to it rather
   // than flipping it.
-  // Which at-bat the scorebug, tiles and zone show: an index into the census.
-  const [pick, setPick] = useState(0)
-  // A club filter: an at-bat stays when the club is on either side of it.
-  const [club, setClub] = useState(null)
+  // The club filter and which at-bat the scorebug, tiles and zone show (an index into
+  // the filtered list), held for the census they were taken from (`every`, below).
+  const [sel, setSel] = useState({ list: null, club: null, pick: 0 })
   const linkProps = useRouteLink()
   const listRef = useRef(null)
   const [geo, setGeo] = useState(() => ({ rowH: guessRowH(), viewH: 0 }))
@@ -88,9 +88,12 @@ export function LongAtBats({ season }) {
         .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b }))),
     [every],
   )
-  // A pick the list cannot show (a season change while one was held) is no pick.
-  const picked = clubs.includes(club) ? club : null
-  const all = useMemo(() => atBatsForClub(every, picked), [every, picked])
+  // A new census starts with no club and its first row: a club held from the last one may
+  // not be in it, and an empty filtered list has no top row to draw (heldFor).
+  const kept = heldFor(sel, every)
+  const club = kept ? sel.club : null
+  const pick = kept ? sel.pick : 0
+  const all = useMemo(() => atBatsForClub(every, club), [every, club])
   // Where the window sits and which row holds focus (it stays drawn even when it scrolls
   // out of the window). Tied to the list they were taken
   // from: a new season, new data or a club filter is a new `all`, and a fresh list
@@ -123,8 +126,7 @@ export function LongAtBats({ season }) {
 
   const top = all[pick] ?? all[0]
   const pickClub = (id) => {
-    setClub(id)
-    setPick(0)
+    setSel({ list: every, club: id, pick: 0 })
     if (listRef.current) listRef.current.scrollTop = 0
   }
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
@@ -158,7 +160,7 @@ export function LongAtBats({ season }) {
           className="seasonnote__barrow"
           aria-pressed={i === pick}
           aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayName(row.date)}`}
-          onClick={() => setPick(i)}
+          onClick={() => setSel({ list: every, club, pick: i })}
         >
           <span className="seasonnote__barn">{row.pitches}</span>
           <span className="seasonnote__barwho">
@@ -203,7 +205,7 @@ export function LongAtBats({ season }) {
       </SectionHead>
 
       <Card frame="stamped" as="div" className="seasonnote__sheet">
-        <ClubStrip clubs={clubs} value={picked} onPick={pickClub} />
+        <ClubStrip clubs={clubs} value={club} onPick={pickClub} />
         <div className="seasonnote__row">
           <div className="seasonnote__longest">
             <p className="seasonnote__big">
@@ -278,17 +280,17 @@ export function LongAtBats({ season }) {
 
 
         <p className="seasonnote__census infopop-row">
-          {picked ? (
+          {club ? (
             // A picked club's own count, with no rate: the file has no per-club plate
             // appearances to divide by. The club as the file names it (clubAbbr).
             <>
               <span className="seasonnote__against">{count(all.length)}</span> of the{' '}
               <span className="seasonnote__against">{count(every.length)}</span> at-bats of {data.threshold}+ pitches in {season} had{' '}
-              {clubAbbr(all[0], picked)} on one side
+              {clubAbbr(all[0], club) || teamAbbr({ id: club })} on one side
             </>
           ) : (
             <>
-              <span className="seasonnote__against">{every.length}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
+              <span className="seasonnote__against">{count(every.length)}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
               <span className="seasonnote__against">{count(oneIn(plateAppearances, every.length))}</span> plate appearances
             </>
           )}
