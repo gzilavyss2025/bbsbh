@@ -63,7 +63,7 @@ sessions that share one machine. In the cloud, these rules change:
   leave their PRs open. The maintainer lands them (`merge-pr` or `/stack-prs`), or the
   orchestrator does under his standing permission: one PR at a time after its review, or
   a stack when that helps (`.claude/skills/orchestrate/`, "Landing").
-  A PR branch gets its own preview; the maintainer looks there, not at `main`.
+  A `claude/**` branch gets no preview (`vercel.json`); the first deploy is the merge to `main`.
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that
@@ -169,8 +169,8 @@ each file's shape and reason live in `src/api/CLAUDE.md` (the reader module) and
 
 Hosted on Vercel, auto-deploying `main` to production on every push. The team moved
 from Hobby to Pro on 2026-10-29, so deployments are no longer scarce (Hobby capped
-them at about 100 a day). Every branch now gets a preview deployment: the PR's
-Vercel check links it, and Vercel Authentication protects it, so a viewer signs in to
+them at about 100 a day). Branches other than `claude/**` and `dependabot/**` get a preview deployment (those two
+are turned off, below): the PR's Vercel check links it, and Vercel Authentication protects it, so a viewer signs in to
 Vercel first (a cloud session passes `VERCEL_AUTOMATION_BYPASS_SECRET` instead, when
 the environment has it; see `.claude/skills/run/`). The maintainer can pin comments
 to a preview from the Vercel toolbar; `.claude/skills/steward/` says how a session
@@ -188,8 +188,11 @@ the first draft at 100 blocked the maintainer's own phone. The Firewall's
 Persistent Actions list shows who tripped it. Both settings live only in the
 dashboard. One setting in `vercel.json` still trims deployments:
 
-- `git.deploymentEnabled: { "dependabot/**": false }` — Dependabot branches get no
-  preview; their weekly grouped PR lands in a stack like any other.
+- `git.deploymentEnabled: { "dependabot/**": false, "claude/**": false }` — Dependabot
+  and `claude/**` branches get no preview (the latter added 2026-11-05: 75 of the last
+  100 deployments were previews). A PR on such a branch has no Vercel check or
+  deployment comment, so the `merge-pr` preview gate does not apply to it. Pushing the
+  same commit under a non-`claude/` branch name makes a preview.
 - `ignoreCommand: scripts/vercel-ignore-build.sh` — Vercel's Ignored Build Step;
   skips a deployment when the push touched only docs/scripts/workflow files with no
   effect on the deployed app (diffs against `VERCEL_GIT_PREVIOUS_SHA`, the last commit
@@ -363,9 +366,8 @@ files. Treat isolation as a hard requirement:
 - Prefer merging/closing promptly over letting several `claude/*` branches sit open
   in parallel — the longer one lives, the more likely another session's PR conflicts
   with it.
-- Every PR branch gets a Vercel preview deployment (see Deployment below). Still
-  verify in your own container first; the preview URL on the PR check is for the
-  maintainer to look at on a phone, and it asks for a Vercel sign-in.
+- `claude/**` branches get no Vercel preview (see Deployment below), so verify in your
+  own container. A branch pushed under any other name still gets one.
 
 ### End-of-task handoff and cleanup
 
@@ -380,7 +382,7 @@ Based on: origin/main at <short SHA>, or dependency PR #<number>
 State: clean and pushed / dirty with named files
 Validation: commands and result
 Local example: http://localhost:<port>/<exact-route>, or not applicable
-Preview: https://bbsbh-git-<branch>-gareedge.vercel.app/<exact-route>?nointro, or not built yet
+Preview: none for claude/** branches; Local example above is the check
 Cleanup: safe after PR merges / do not remove yet
 ```
 

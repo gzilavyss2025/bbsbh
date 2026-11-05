@@ -117,6 +117,12 @@ export function clubAbbr(row, teamId) {
   return ''
 }
 
+// A club filter (the club strip, issue #2934): an at-bat stays when the club
+// batted or pitched in it. No club keeps every row.
+export function atBatsForClub(rows, club) {
+  return club ? rows.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : rows
+}
+
 // The at-bat's own game, opened at its first lineup page — the same address the
 // slate's cards build, so it arrives sealed under the same `revealedThrough`
 // mark as any other game.

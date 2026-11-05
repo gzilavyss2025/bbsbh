@@ -1437,6 +1437,14 @@
     "from/whereFrom.js": {
       "class": "spoiler-free",
       "why": "Static from/*.json: schools, birthplaces and map shapes. Where a man went to school or was born says nothing about a game. Open surface (ADR-0034); no SealBox."
+    },
+    "nuggets/nuggets.js": {
+      "class": "cutoff-gated",
+      "why": "The nugget store's reader (#2809): the day a player's season total met a named threshold, with the count that day. No score, but the DATE is a game date, so on a scoring surface the cut is the gate: nuggetsForGame returns only nuggets dated strictly before the game's own date, within the card's 7-day window, and test/nugget-notes.test.js pins it. Its one scoring-surface caller is between-innings.js."
+    },
+    "callout-notes/nugget.js": {
+      "class": "spoiler-free",
+      "why": "The `nugget` note family's wording and ranking (#2809): count, threshold label and the frozen anchor. It reads no feed and no date it is not handed; the date cut that makes a list safe for a scoring surface is nuggets/nuggets.js's."
     }
   }
 }

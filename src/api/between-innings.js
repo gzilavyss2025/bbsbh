@@ -32,6 +32,9 @@ import { halfIndex, derivedHalfStartingPitcherId, openingHalfFor } from './selec
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
 import { isWorldSeriesKind } from '../lib/worldSeries/calloutKind.js'
+import { selectDueUpNow } from './dueup.js'
+import { nuggetsForGame } from './nuggets/nuggets.js'
+import { buildNuggetNotes } from './callout-notes/nugget.js'
 import {
   buildStarterTeamRecordNote,
   buildBullpenThinNote,
@@ -61,6 +64,10 @@ export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
   // players are, which rides on the same caller-gated selectors the lineup and
   // defense cards already use.
   'matchupSkill', 'matchupStyle', 'matchupArsenal',
+  // A season count with a well-known number (#2809). It reads no liveData; nuggetsForGame
+  // returns only nuggets dated before the game, and WHO it is about rides the same gated
+  // due-up selector the matchup notes use, plus the announced starters.
+  'nugget',
 ])
 
 // Top of inning N -> bottom of N; bottom of N -> top of N+1 (api/dueup.js
@@ -71,7 +78,7 @@ function nextHalfOf(inning, half) {
 
 export function buildBetweenInnings({
   feed, bundle, marginNotes = [], inning, half, revealedThrough, workload, gameDate,
-  shownCounts = null, savantMatchup = null, seriesHistory = null, wsStarts = null,
+  shownCounts = null, savantMatchup = null, seriesHistory = null, wsStarts = null, nuggets = null,
 }) {
   if (!bundle) return []
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
@@ -121,6 +128,20 @@ export function buildBetweenInnings({
   pool.push(...matchupNotesForHalf({
     feed, data: savantMatchup, inning: nInning, half: nHalf, revealedThrough,
   }))
+
+  // Nuggets for the two starters and the hitters due up next half, dated before tonight.
+  // The cut is the game's EARLIEST date: a resumed game's crossing before the suspension is tonight's.
+  if (nuggets) {
+    const sideOf = new Map()
+    if (away != null) sideOf.set(away, 'away')
+    if (home != null) sideOf.set(home, 'home')
+    const due = selectDueUpNow(feed, nInning, nHalf, revealedThrough)
+    for (const b of due?.batters ?? []) if (b.id != null) sideOf.set(b.id, due.battingSide)
+    const dt = feed?.gameData?.datetime
+    const nuggetDate = [dt?.originalDate, dt?.officialDate ?? gameDate].filter(Boolean).sort()[0]
+    const list = nuggetsForGame(nuggets, { gameDate: nuggetDate, players: [...sideOf.keys()] })
+    pool.push(...buildNuggetNotes(list, { sideOf: (id) => sideOf.get(id) ?? null, shownCounts, date: nuggetDate }))
+  }
 
   // The hard allowlist — a structural filter, not implicit trust in the callers above.
   const allowed = pool.filter((n) => n && BETWEEN_INNINGS_ALLOWED_KINDS.has(n.kind))

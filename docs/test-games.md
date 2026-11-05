@@ -272,3 +272,18 @@ not pinned — no candidate could be confirmed against a live feed with
 confidence, so nothing was added rather than guessing. If a good one turns
 up, verify it the same way (schedule → gamePk → grep the feed for the actual
 event) before adding it here.
+
+## Nuggets: a season count on Between Innings (#2809)
+
+Three Brewers games around a crossing in `public/data/nuggets/2026.json`. A note shows only for a
+nugget dated before the game and within 7 days (`src/api/nuggets/nuggets.js`). Between Innings
+needs the game's callouts bundle, and the repo keeps only the recent ones (ADR-0128), so for a
+past game put a minimal bundle at `public/data/callouts/{MMDDYYYY}/{gamePk}.json` locally
+(`{"gamePk":…,"date":…,"sportId":1,"away":{"teamId":…,"name":…},"home":{…}}`) and never commit it.
+Set `bbsbh:reveal:{gamePk}` to close a half, open that half, and tap through to its checkpoint's Notes.
+
+| gamePk | Game | What it exercises |
+|---|---|---|
+| 823751 | MIN @ MIL, 2026-08-09 | Misiorowski crosses 200 K in this game: no nugget note (dated on the game's own date) |
+| 823914 | MIL @ LAD, 2026-08-15 | His next start: "The only pitcher with 200 strikeouts" (plain, a count of one), Middle 1st |
+| 823412 | MIL @ PHI, 2026-09-22 | Anchored: Bauers, "one of 9 hitters with 90 walks, as many as the 9 Supreme Court justices" (End 1st); Chourio, "one of 15 hitters with 20 home runs and 20 steals, more than the 13 horses that have won the Triple Crown" (End 3rd) |

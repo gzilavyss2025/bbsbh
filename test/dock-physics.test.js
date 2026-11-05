@@ -14,6 +14,7 @@ import {
   rubberband,
   scrimAlpha,
   settleMs,
+  snapPlan,
   velocityFrom,
 } from '../src/components/ui/dock/dockPhysics.js'
 
@@ -184,4 +185,24 @@ test('the scrim stays clear until the sheet passes the working height', () => {
   assert.ok(scrimAlpha(detents[0], detents) > 0.3, 'full')
   const between = (detents[0] + detents[1]) / 2
   assert.ok(scrimAlpha(between, detents) > 0 && scrimAlpha(between, detents) < 0.34)
+})
+
+// What the snap effect paints, and whether it animates. The sheet rests off-screen
+// in CSS until the first real measure, so an unmeasured snap must paint NOTHING:
+// the placeholder detents are all 0, the OPEN position (#2952).
+test('snapPlan: paints nothing before the first real measure', () => {
+  assert.equal(snapPlan({ measured: false, prev: null, index: 2, detents: [0, 0, 0], from: 0 }), null)
+})
+
+test('snapPlan: a real measure of 0 still paints (the rail can measure 0)', () => {
+  assert.deepEqual(snapPlan({ measured: true, prev: null, index: 2, detents: [0, 0, 0], from: 0 }), { offset: 0, ms: 0 })
+})
+
+test('snapPlan: the first paint and a resize jump; only a changed detent settles', () => {
+  const detents = [0, 400, 700]
+  assert.equal(snapPlan({ measured: true, prev: null, index: 2, detents, from: 700 }).ms, 0)
+  assert.equal(snapPlan({ measured: true, prev: 2, index: 2, detents, from: 650 }).ms, 0)
+  const move = snapPlan({ measured: true, prev: 2, index: 1, detents, from: 700 })
+  assert.deepEqual(move, { offset: 400, ms: settleMs(-300) })
+  assert.equal(snapPlan({ measured: true, prev: 2, index: 1, detents, from: 700, reducedMotion: true }).ms, 0)
 })

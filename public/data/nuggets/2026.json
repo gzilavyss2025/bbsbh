@@ -1,0 +1,961 @@
+{
+ "season": 2026,
+ "generatedAt": "2026-11-05T13:24:34.163Z",
+ "nuggets": {
+  "rbi100": [
+   {
+    "player": 701398,
+    "date": "2026-08-26",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 676475,
+    "date": "2026-08-30",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 691023,
+    "date": "2026-09-04",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 624413,
+    "date": "2026-09-13",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 691718,
+    "date": "2026-09-14",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 670541,
+    "date": "2026-09-22",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 682928,
+    "date": "2026-09-22",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 691406,
+    "date": "2026-09-26",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 668930,
+    "date": "2026-09-27",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   }
+  ],
+  "rbi100-r100": [
+   {
+    "player": 691718,
+    "date": "2026-09-14",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 670541,
+    "date": "2026-09-23",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 624413,
+    "date": "2026-09-25",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 691406,
+    "date": "2026-09-26",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 668930,
+    "date": "2026-09-27",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   }
+  ],
+  "hr20-sb20": [
+   {
+    "player": 691718,
+    "date": "2026-07-08",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 682928,
+    "date": "2026-08-03",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 682829,
+    "date": "2026-08-07",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 701538,
+    "date": "2026-08-22",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 668227,
+    "date": "2026-08-23",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 677594,
+    "date": "2026-09-03",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 665487,
+    "date": "2026-09-06",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 682998,
+    "date": "2026-09-11",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 695578,
+    "date": "2026-09-12",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 687263,
+    "date": "2026-09-13",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 691023,
+    "date": "2026-09-16",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   },
+   {
+    "player": 660670,
+    "date": "2026-09-19",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   },
+   {
+    "player": 678246,
+    "date": "2026-09-19",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   },
+   {
+    "player": 665833,
+    "date": "2026-09-20",
+    "count": 15,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 694192,
+    "date": "2026-09-20",
+    "count": 15,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 680776,
+    "date": "2026-09-23",
+    "count": 16,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 701807,
+    "date": "2026-09-25",
+    "count": 17,
+    "anchor": "unassisted-triple-plays",
+    "relation": "more"
+   }
+  ],
+  "hr40": [
+   {
+    "player": 656941,
+    "date": "2026-08-26",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 691718,
+    "date": "2026-09-06",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 691406,
+    "date": "2026-09-11",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 670541,
+    "date": "2026-09-17",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 621566,
+    "date": "2026-09-18",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 624413,
+    "date": "2026-09-21",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 700250,
+    "date": "2026-09-23",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 696100,
+    "date": "2026-09-26",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   }
+  ],
+  "sb30": [
+   {
+    "player": 683083,
+    "date": "2026-06-23",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 677951,
+    "date": "2026-07-05",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 665862,
+    "date": "2026-07-29",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 802415,
+    "date": "2026-08-05",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 691718,
+    "date": "2026-08-07",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 676609,
+    "date": "2026-08-16",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 665487,
+    "date": "2026-08-24",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 608070,
+    "date": "2026-08-25",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 665923,
+    "date": "2026-08-30",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 672640,
+    "date": "2026-09-06",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 664983,
+    "date": "2026-09-16",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   },
+   {
+    "player": 682928,
+    "date": "2026-09-18",
+    "count": 12,
+    "anchor": "moon-walked",
+    "relation": "equal"
+   },
+   {
+    "player": 666152,
+    "date": "2026-09-22",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   },
+   {
+    "player": 665833,
+    "date": "2026-09-25",
+    "count": 15,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 682829,
+    "date": "2026-09-25",
+    "count": 15,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 647304,
+    "date": "2026-09-26",
+    "count": 16,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   }
+  ],
+  "bb90": [
+   {
+    "player": 695578,
+    "date": "2026-08-01",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 547180,
+    "date": "2026-08-18",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 621493,
+    "date": "2026-08-21",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 670541,
+    "date": "2026-08-23",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 656941,
+    "date": "2026-09-06",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 545361,
+    "date": "2026-09-08",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 678246,
+    "date": "2026-09-15",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 805808,
+    "date": "2026-09-15",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 641343,
+    "date": "2026-09-16",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 672695,
+    "date": "2026-09-18",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 808959,
+    "date": "2026-09-20",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   },
+   {
+    "player": 683737,
+    "date": "2026-09-22",
+    "count": 12,
+    "anchor": "moon-walked",
+    "relation": "equal"
+   },
+   {
+    "player": 668930,
+    "date": "2026-09-26",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   }
+  ],
+  "k200": [
+   {
+    "player": 694819,
+    "date": "2026-08-09",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 656302,
+    "date": "2026-08-16",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 668909,
+    "date": "2026-08-20",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 666200,
+    "date": "2026-08-26",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 693645,
+    "date": "2026-08-28",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 650911,
+    "date": "2026-08-29",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 676917,
+    "date": "2026-09-18",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 672282,
+    "date": "2026-09-19",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 671737,
+    "date": "2026-09-22",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 519242,
+    "date": "2026-09-23",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 694973,
+    "date": "2026-09-24",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   },
+   {
+    "player": 594798,
+    "date": "2026-09-25",
+    "count": 12,
+    "anchor": "moon-walked",
+    "relation": "equal"
+   },
+   {
+    "player": 669302,
+    "date": "2026-09-27",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   }
+  ],
+  "k250": [
+   {
+    "player": 694819,
+    "date": "2026-09-27",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   }
+  ],
+  "sv30": [
+   {
+    "player": 671922,
+    "date": "2026-07-28",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 641329,
+    "date": "2026-07-30",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 695243,
+    "date": "2026-08-10",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 676617,
+    "date": "2026-08-11",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 670280,
+    "date": "2026-08-21",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 547973,
+    "date": "2026-08-24",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 686973,
+    "date": "2026-08-26",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 628452,
+    "date": "2026-09-04",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 661395,
+    "date": "2026-09-05",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 656641,
+    "date": "2026-09-15",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 656730,
+    "date": "2026-09-23",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   }
+  ],
+  "w15": [
+   {
+    "player": 650911,
+    "date": "2026-08-06",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 543243,
+    "date": "2026-08-15",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 656492,
+    "date": "2026-08-23",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 695505,
+    "date": "2026-08-30",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 593958,
+    "date": "2026-09-06",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 694819,
+    "date": "2026-09-15",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 607259,
+    "date": "2026-09-16",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 656876,
+    "date": "2026-09-17",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   }
+  ],
+  "sho1": [
+   {
+    "player": 645261,
+    "date": "2026-04-01",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 641927,
+    "date": "2026-05-12",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 650911,
+    "date": "2026-05-16",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 663568,
+    "date": "2026-05-23",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 694819,
+    "date": "2026-06-12",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 669160,
+    "date": "2026-06-15",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 656302,
+    "date": "2026-07-25",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 702070,
+    "date": "2026-08-16",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 519242,
+    "date": "2026-08-27",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 666200,
+    "date": "2026-09-07",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 691587,
+    "date": "2026-09-25",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   }
+  ],
+  "cg1": [
+   {
+    "player": 645261,
+    "date": "2026-04-01",
+    "count": 1,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 669923,
+    "date": "2026-04-07",
+    "count": 2,
+    "anchor": "moon-twice",
+    "relation": "fewer"
+   },
+   {
+    "player": 641927,
+    "date": "2026-05-12",
+    "count": 3,
+    "anchor": "rushmore",
+    "relation": "fewer"
+   },
+   {
+    "player": 518876,
+    "date": "2026-05-15",
+    "count": 4,
+    "anchor": "rushmore",
+    "relation": "equal"
+   },
+   {
+    "player": 650911,
+    "date": "2026-05-16",
+    "count": 5,
+    "anchor": "great-lakes",
+    "relation": "equal"
+   },
+   {
+    "player": 669372,
+    "date": "2026-05-18",
+    "count": 6,
+    "anchor": "great-lakes",
+    "relation": "more"
+   },
+   {
+    "player": 663568,
+    "date": "2026-05-23",
+    "count": 7,
+    "anchor": "mercury-seven",
+    "relation": "equal"
+   },
+   {
+    "player": 694819,
+    "date": "2026-06-12",
+    "count": 8,
+    "anchor": "planets",
+    "relation": "equal"
+   },
+   {
+    "player": 669160,
+    "date": "2026-06-15",
+    "count": 9,
+    "anchor": "scotus",
+    "relation": "equal"
+   },
+   {
+    "player": 657277,
+    "date": "2026-06-21",
+    "count": 10,
+    "anchor": "bill-of-rights",
+    "relation": "equal"
+   },
+   {
+    "player": 808967,
+    "date": "2026-07-19",
+    "count": 11,
+    "anchor": "moon-walked",
+    "relation": "fewer"
+   },
+   {
+    "player": 656302,
+    "date": "2026-07-25",
+    "count": 12,
+    "anchor": "moon-walked",
+    "relation": "equal"
+   },
+   {
+    "player": 607536,
+    "date": "2026-08-02",
+    "count": 13,
+    "anchor": "triple-crown-horses",
+    "relation": "equal"
+   },
+   {
+    "player": 669358,
+    "date": "2026-08-07",
+    "count": 14,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 607259,
+    "date": "2026-08-11",
+    "count": 15,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 677952,
+    "date": "2026-08-13",
+    "count": 16,
+    "anchor": "triple-crown-horses",
+    "relation": "more"
+   },
+   {
+    "player": 702070,
+    "date": "2026-08-16",
+    "count": 17,
+    "anchor": "unassisted-triple-plays",
+    "relation": "more"
+   },
+   {
+    "player": 519242,
+    "date": "2026-08-27",
+    "count": 18,
+    "anchor": "unassisted-triple-plays",
+    "relation": "more"
+   },
+   {
+    "player": 700712,
+    "date": "2026-09-06",
+    "count": 19,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 666200,
+    "date": "2026-09-07",
+    "count": 20,
+    "anchor": null,
+    "relation": null
+   },
+   {
+    "player": 691587,
+    "date": "2026-09-25",
+    "count": 21,
+    "anchor": null,
+    "relation": null
+   }
+  ]
+ }
+}
