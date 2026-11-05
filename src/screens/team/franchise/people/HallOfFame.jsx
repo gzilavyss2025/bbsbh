@@ -1,7 +1,8 @@
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { playerPath } from '../../../../lib/route.js'
-import { hofHeading, yearRuns } from './peopleView.js'
+import { seasonRuns } from '../../../../components/team/ladder/layout.js'
+import { hofHeading } from './peopleView.js'
 
 // The club's Hall of Famers in two labelled groups (#2784, store #2597): the plaques that name the
 // club, then everyone else who played here, with his seasons here. A group with no one is left out;
@@ -23,17 +24,17 @@ export function HallOfFame({ team, hof, names }) {
     </li>
   )
   return (
-    <Card frame="stamped" label="Hall of Famers" count={String(inducted.length + also.length)} className="frpeople">
+    <Card frame="stamped" label="Hall of Famers" labelAs="h3" count={String(inducted.length + also.length)} className="frpeople">
       {inducted.length > 0 && (
         <>
-          <h3 className="frpeople__group">{hofHeading(team.name, names)}</h3>
+          <h4 className="frpeople__group t-label t-label--bold">{hofHeading(team.name, names)}</h4>
           <ul className="frpeople__list">{inducted.map((p) => row(p, null))}</ul>
         </>
       )}
       {also.length > 0 && (
         <>
-          <h3 className="frpeople__group">Also played here</h3>
-          <ul className="frpeople__list">{also.map((p) => row(p, yearRuns(p.seasons)))}</ul>
+          <h4 className="frpeople__group t-label t-label--bold">Also played here</h4>
+          <ul className="frpeople__list">{also.map((p) => row(p, seasonRuns(p.seasons)))}</ul>
         </>
       )}
     </Card>
