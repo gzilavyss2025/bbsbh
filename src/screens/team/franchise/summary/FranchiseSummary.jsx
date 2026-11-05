@@ -12,7 +12,7 @@ export function FranchiseSummary({ summary }) {
   const v = summaryView(summary)
   if (!v) return null
   return (
-    <Card frame="stamped" label="Franchise" count={`${v.seasons} seasons`} className="frsum">
+    <Card frame="stamped" label="Franchise" count={`${v.seasons} ${v.seasons === 1 ? 'season' : 'seasons'}`} className="frsum">
       <div className="frsum__tiles">
         <StatTile tone="ink" label="Record" value={v.record} caption={`${v.pct} · ${v.span}`} className="frsum__lead" />
         <StatTile tone="tint" label="Postseasons" value={v.postseasons} caption={v.lastPostseason ? `Last ${v.lastPostseason}` : null} />
@@ -53,7 +53,7 @@ export function FranchiseSummary({ summary }) {
               <a className="plink" {...link(managerPath(v.best.id, v.best.name))}>
                 {v.best.name}
               </a>{' '}
-              {v.best.wl} · {v.best.seasons} seasons
+              {v.best.wl} · {v.best.seasons} {v.best.seasons === 1 ? 'season' : 'seasons'}
             </dd>
           </>
         )}

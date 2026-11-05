@@ -25,15 +25,17 @@ export function postLabel(postseason) {
   return { short: `${verb} ${short}`, long: `${verb} ${long}`, title: postseason.round === 'World Series' && postseason.won === true }
 }
 
+// A winning percentage, ".492"; a dash with no games.
+export const pct = (w, l) => (w + l ? (w / (w + l)).toFixed(3).replace(/^0/, '') : DASH)
+
 // One row's cells. The finish is the division rank, or the league rank before divisions.
 export function seasonCells(row) {
-  const games = row.w + row.l
   const rank = row.divisionRank ?? row.leagueRank
   const diff = row.rs == null || row.ra == null ? null : row.rs - row.ra
   return {
     season: row.season,
     wl: `${row.w}-${row.l}`,
-    pct: games ? (row.w / games).toFixed(3).replace(/^0/, '') : DASH,
+    pct: pct(row.w, row.l),
     finish: rank ? ordinal(rank) : DASH,
     gb: row.gb ? String(row.gb) : DASH,
     post: postLabel(row.postseason),
@@ -129,9 +131,9 @@ export function liveRow({ teamId, season, name, records, dates, manager }) {
     leagueRank: rank(t.leagueRank),
     rs: t.runsScored ?? null,
     ra: t.runsAllowed ?? null,
-    // The one manager on file is credited the season, as a stored single-manager season is. The
-    // offseason ledger run replaces the row, and splits a season two managers shared.
-    managers: manager?.personId ? [{ id: manager.personId, name: manager.name, w: t.wins, l: t.losses }] : [],
+    // No w/l: fetchManager names one manager (an interim first), not who managed which games. The
+    // page marks him † for this season until the offseason ledger run splits it (#2784 review).
+    managers: manager?.personId ? [{ id: manager.personId, name: manager.name }] : [],
     postseason: furthestSeries(all, teamId),
     note: null,
     inProgress: all.some((gm) => gm.status?.abstractGameState !== 'Final'),

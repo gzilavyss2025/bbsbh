@@ -8,7 +8,7 @@ export function Parks({ history, live }) {
   const parks = parksView(history, live)
   if (!parks.length) return null
   return (
-    <Card frame="stamped" label="Parks" count={String(parks.length)} className="frpeople">
+    <Card frame="stamped" label="Parks" labelAs="h3" count={String(parks.length)} className="frpeople">
       <ul className="frpeople__list">
         {parks.map((p) => (
           <li key={p.id} className="frpeople__row">
@@ -24,7 +24,7 @@ export function Parks({ history, live }) {
           </li>
         ))}
       </ul>
-      <p className="frparks__foot">Home parks by season. A one-off neutral site is not listed.</p>
+      <p className="hint frparks__foot">Home parks by season. A one-off neutral site is not listed.</p>
     </Card>
   )
 }

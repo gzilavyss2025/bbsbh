@@ -1,18 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { clubPeople, managersView, parksView, retiredTiles, yearRuns } from '../src/screens/team/franchise/people/peopleView.js'
+import { clubPeople, managersView, parksView, retiredTiles } from '../src/screens/team/franchise/people/peopleView.js'
 import { summaryView } from '../src/screens/team/franchise/summary/summaryView.js'
 import { summarizeFranchise } from '../src/api/history/franchiseSummary.js'
 
 // #2784: the franchise page's summary and People and places, shaped for the cards.
-
-test('yearRuns: runs of seasons, the end year short within a century and whole across one', () => {
-  assert.equal(yearRuns([1981, 1982, 1984, 1985]), '1981–82, 1984–85')
-  assert.equal(yearRuns([2020, 2018, 2019, 2021, 2023]), '2018–21, 2023')
-  assert.equal(yearRuns([1999, 2000, 2001]), '1999–2001')
-  assert.equal(yearRuns([]), '')
-})
 
 const r = (season, managers, extra = {}) => ({ season, name: 'Milwaukee Brewers', w: 90, l: 72, managers, postseason: null, ...extra })
 const murphy = (w, l) => ({ id: 580268, name: 'Pat Murphy', w, l })
@@ -20,17 +13,17 @@ const counsell = (w, l) => ({ id: 112736, name: 'Craig Counsell', w, l })
 
 test('managersView: newest first, W-L summed, pct, the winningest marked', () => {
   const rows = [r(2023, [counsell(92, 70)]), r(2024, [murphy(93, 69)]), r(2022, [counsell(86, 76)])]
-  const v = managersView(rows, 112736)
+  const v = managersView(summarizeFranchise(rows, []).managers, 112736)
   assert.deepEqual(v.map((m) => [m.name, m.years, m.wl, m.pct, m.best, m.partial]), [
-    ['Pat Murphy', '2024', '93-69', '.574', false, false],
-    ['Craig Counsell', '2022–23', '178-146', '.549', true, false],
+    ['Pat Murphy', '’24', '93-69', '.574', false, false],
+    ['Craig Counsell', '’22–’23', '178-146', '.549', true, false],
   ])
 })
 
 test('managersView: a shared season with no split lists its year and marks him partial', () => {
   const rows = [r(2008, [{ id: 1, name: 'Ned Yost III', w: 83, l: 67 }, { id: 2, name: 'Dale Sveum' }]), r(2007, [{ id: 1, name: 'Ned Yost III', w: 83, l: 79 }])]
-  const v = managersView(rows, null)
-  assert.deepEqual(v.find((m) => m.id === 2), { id: 2, name: 'Dale Sveum', years: '2008', wl: '—', pct: '—', partial: true, best: false })
+  const v = managersView(summarizeFranchise(rows, []).managers, null)
+  assert.deepEqual(v.find((m) => m.id === 2), { id: 2, name: 'Dale Sveum', years: '’08', wl: '—', pct: '—', partial: true, best: false })
   assert.equal(v.find((m) => m.id === 1).partial, false)
 })
 
@@ -65,7 +58,7 @@ test('summaryView: the live season counts, so a title won this year shows', () =
   assert.equal(v.seasons, 3)
   assert.equal(v.record, '232-254')
   assert.equal(v.titles, 1)
-  assert.equal(v.title.caption, '2026')
+  assert.equal(v.title.caption, '’26')
   assert.equal(v.pennant.caption, '1982 AL · 2026 NL')
   assert.deepEqual(v.names, [{ name: 'Seattle Pilots', years: '1969' }, { name: 'Milwaukee Brewers', years: '1970 on' }])
   assert.equal(v.best.name, 'Pat Murphy')
@@ -83,13 +76,13 @@ test('summaryView: a long pennant or title list moves out of the tile caption in
   const rows = [1, 2, 3].map((i) => r(1920 + i, [], { postseason: { round: 'World Series', won: true } }))
   const v = summaryView(summarizeFranchise(rows, [{ season: 1921, league: 'AL' }, { season: 1922, league: 'AL' }, { season: 1923, league: 'AL' }]))
   assert.equal(v.pennant.caption, 'Last 1923')
-  assert.equal(v.pennant.runs, '1921–23')
+  assert.equal(v.pennant.runs, '’21–’23')
   assert.equal(v.title.caption, 'Last 1923')
-  assert.equal(v.title.runs, '1921–23')
+  assert.equal(v.title.runs, '’21–’23')
   const short = summaryView(summarizeFranchise([r(1982, []), r(2026, [], { postseason: { round: 'World Series', won: true } })], [{ season: 1982, league: 'AL' }, { season: 2026, league: 'NL' }]))
   assert.equal(short.pennant.caption, '1982 AL · 2026 NL')
   assert.equal(short.pennant.runs, null)
-  assert.equal(short.title.caption, '2026')
+  assert.equal(short.title.caption, '’26')
   assert.equal(short.title.runs, null)
 })
 
@@ -132,4 +125,19 @@ test('parksView: a live season after the file extends the runs; a club that move
   const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
   assert.equal(brewers[0].years, '2001 on')
   assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
+})
+
+// #2784 review: the retired-numbers file has no ids, so a name two ids share links nowhere.
+test('retiredTiles: a name that maps to two ids in the club files gets no link', () => {
+  const t = retiredTiles([{ number: 10, name: 'Dave Roberts', role: 'player', year: 2000 }], [
+    { id: 121396, name: 'Dave Roberts' },
+    { id: 121397, name: 'Dave Roberts' },
+  ])
+  assert.equal(t[0].playerId, null)
+})
+
+test('managersView: a live season with no split marks its manager partial and leaves it out of his W-L', () => {
+  const rows = [r(2025, [murphy(97, 65)]), r(2026, [{ id: 580268, name: 'Pat Murphy' }], { w: 103, l: 59 })]
+  const [m] = managersView(summarizeFranchise(rows, []).managers, 580268)
+  assert.deepEqual([m.years, m.wl, m.partial], ['’25–’26', '97-65', true])
 })

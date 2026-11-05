@@ -14,7 +14,7 @@ export function RetiredNumbers({ retired, hof, leaders }) {
   const league = retired?.league ?? []
   if (!tiles.length && !league.length) return null
   return (
-    <Card frame="stamped" label="Retired numbers" count={String(tiles.length + league.length)} className="frnums">
+    <Card frame="stamped" label="Retired numbers" labelAs="h3" count={String(tiles.length + league.length)} className="frnums">
       {tiles.length > 0 && (
         <ul className="frnums__grid">
           {tiles.map((t) => {

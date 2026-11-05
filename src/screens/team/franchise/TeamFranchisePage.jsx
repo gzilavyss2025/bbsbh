@@ -15,7 +15,7 @@ import { Table } from '../../../components/ui/table/Table.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
-import { loadFranchise } from './loadFranchise.js'
+import { loadFranchise, loadFranchisePeople } from './loadFranchise.js'
 import { ledgerItems, oddSeasons, seasonCells } from './ledgerRows.js'
 import { FranchiseSummary } from './summary/FranchiseSummary.jsx'
 import { HallOfFame } from './people/HallOfFame.jsx'
@@ -37,13 +37,16 @@ const COLUMNS = 10
 export function TeamFranchisePage({ id }) {
   const teamId = Number(id)
   const { loading, error, data } = useAsync(() => loadFranchise(teamId), [teamId])
+  // People and places waits for the ledger and never holds it up; a MiLB club (no rows) reads none.
+  const hasRows = Boolean(data?.rows?.length)
+  const people = useAsync(() => (hasRows ? loadFranchisePeople(teamId) : null), [teamId, hasRows]).data
   useDocumentTitle(data?.team ? `${data.team.name} · Franchise History` : null)
   const back = () => window.history.back()
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, rows, summary, hof, retired, leaders, history, venues } = data
+  const { team, rows, summary } = data
   const first = rows[0]?.season
   const last = rows[rows.length - 1]?.season
   return (
@@ -70,16 +73,16 @@ export function TeamFranchisePage({ id }) {
           </aside>
           <div className="frpage__main">
             <Ledger team={team} rows={rows} />
-            <LeadersCard leaders={leaders} />
+            {people && <LeadersCard leaders={people.leaders} />}
             <section className="frpage__people" aria-labelledby="frpage-people">
               <SectionHead look="band" house as="h2" titleId="frpage-people">
                 People and places
               </SectionHead>
               <div className="frpage__cards">
-                <HallOfFame team={team} hof={hof} names={summary?.names} />
-                <RetiredNumbers retired={retired} hof={hof} leaders={leaders} />
-                <Managers rows={rows} best={summary?.winningestManager?.id ?? null} />
-                <Parks history={history} live={venues} />
+                {people && <HallOfFame team={team} hof={people.hof} names={summary?.names} />}
+                {people && <RetiredNumbers retired={people.retired} hof={people.hof} leaders={people.leaders} />}
+                <Managers managers={summary?.managers} best={summary?.winningestManager?.id ?? null} />
+                {people && <Parks history={people.history} live={people.venues} />}
               </div>
             </section>
           </div>
@@ -98,7 +101,7 @@ function Ledger({ team, rows }) {
   const seasonHref = (season) => teamPath(team.id, { name: team.name, d: season < year ? `${season}-12-31` : null })
   const odd = oddSeasons(rows)
   return (
-    <Card frame="stamped" body="flush" label="Season by season" count={`${rows.length} seasons`} className="frl">
+    <Card frame="stamped" body="flush" label="Season by season" count={`${rows.length} ${rows.length === 1 ? 'season' : 'seasons'}`} className="frl">
       <Table frame="bare" sticky label="Season by season" className="frl__grid">
         <thead>
           <tr>
@@ -128,7 +131,7 @@ function Ledger({ team, rows }) {
           )}
         </tbody>
       </Table>
-      {odd && <p className="frl__foot">Odd seasons: {odd}.</p>}
+      {odd && <p className="hint frl__hint">Odd seasons: {odd}.</p>}
     </Card>
   )
 }
