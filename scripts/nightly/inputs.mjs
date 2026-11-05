@@ -37,6 +37,7 @@ export const GATES = {
   tensest: { when: 'finals', datasets: ['tensest.json'] },
   nuggets: { when: 'finals', datasets: ['nuggets/'] },
   'long-at-bats': { when: 'finals', datasets: ['long-at-bats/'] },
+  'outfield-outs': { when: 'finals', datasets: ['outfield-outs/'] },
   fouls: { when: 'finals', datasets: ['fouls/'] },
   workload: { when: 'finals', datasets: ['workload.json', 'workload-summary.json'] },
   'run-value': { when: 'finals', datasets: ['run-value.json'] },

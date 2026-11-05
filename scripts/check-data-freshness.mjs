@@ -107,6 +107,10 @@ export const EXCEPT = {
   // seasons swept and the date the data runs through) is its own clock. A feat is rare, so
   // an unchanged file is the healthy state, and a stamp would rewrite it nightly for nothing.
   'notable/': 'the season in play is refreshed nightly, older seasons are frozen; each file states its own coverage and carries no clock',
+  // outfield-outs/ (issue #2976) is the same shape: a finished season is frozen, and a
+  // nightly run rewrites a season file only when its qualifiers or counts moved. A
+  // winter night that finds nothing new leaves generatedAt old, which is the healthy state.
+  'outfield-outs/': 'the season in play is refreshed nightly, finished seasons are frozen; a file is rewritten only when its counts move',
   // One file per PAST day, written once and never again (gen-wire-facts.mjs):
   // a day's facts are gated to its date and cannot change. Each night adds the
   // day before; the newest file's name is the clock.
