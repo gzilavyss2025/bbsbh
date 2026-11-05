@@ -9,7 +9,9 @@ import { test, expect } from './fixtures.js'
 // The old innings bar carried a reveal PAIR ("Next at-bat" / "Rest of half")
 // that split the dead space between them. Gameday has one forward action and
 // no "Rest of half" (#2568), so the seam this file pins is now the one between
-// the advance and the At-bat | Pitch switch.
+// the advance and the control just left of it. On the phone that is the
+// At-bat | Pitch switch; on the drawer tiers (desktop) Defense, Box and Win %
+// sit between the switch and the advance, so the neighbour is Win % (#2773).
 //
 // Anchor game per docs/test-games.md: 2026-07-07 MIL@STL g2 (gamePk 823035).
 // Its top of the 1st is sealed on arrival. A step writes the at-bat cursor
@@ -27,20 +29,27 @@ async function barSpots(page) {
   await page.waitForSelector('.gdnext__bar .gdnext__advance')
   return page.evaluate(() => {
     const bar = document.querySelector('.gdnext__bar')
-    const adv = bar.querySelector('.gdnext__advance').getBoundingClientRect()
+    const advEl = bar.querySelector('.gdnext__advance')
+    const adv = advEl.getBoundingClientRect()
     const sw = bar.querySelector('.gdnext__switch').getBoundingClientRect()
+    // The control just left of the advance: the switch on the phone, Win % on the drawer tiers.
+    const nb = advEl.previousElementSibling.getBoundingClientRect()
     const rBar = bar.getBoundingClientRect()
     return {
       advX: adv.left + adv.width / 2,
       advY: adv.top + adv.height / 2,
       deadY: (rBar.top + adv.top) / 2 + 1,
       belowY: (adv.bottom + rBar.bottom) / 2,
-      seamX: (sw.right + adv.left) / 2,
-      // One pixel inside the switch's right edge: the last point that is the switch's, where the
-      // advance's area (which reaches left across the gap) must stop.
+      seamX: (nb.right + adv.left) / 2,
+      // One pixel inside the neighbour's right edge: the last point that is the neighbour's, where
+      // the advance's area (which reaches left across the gap) must stop.
+      neighbourEdgeX: nb.right - 1,
       switchEdgeX: sw.right - 1,
       switchY: sw.top + sw.height / 2,
-      rightX: (adv.right + rBar.right) / 2,
+      // The bar's right end. On the drawer tiers the bar has no side padding and the advance runs to
+      // the viewport's edge, so the midpoint would be x = innerWidth, off-screen (#2773): take the
+      // bar's last pixel instead.
+      rightX: Math.min((adv.right + rBar.right) / 2, rBar.right - 1),
       aboveBarY: rBar.top - 6,
       centreX: window.innerWidth / 2,
     }
@@ -84,7 +93,7 @@ test('the dead space reaches the seam with the step switch and the bar end, and 
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
 
-  // The gap between the switch and the advance, and the bar's right end, are
+  // The gap between the advance and its left neighbour, and the bar's right end, are
   // the advance's: each steps one at-bat.
   await page.mouse.click(at.seamX, at.advY)
   await expect.poll(() => stored(page, CURSOR)).toBe('0:1')
@@ -97,9 +106,17 @@ test('the dead space reaches the seam with the step switch and the bar end, and 
   await expect.poll(() => stored(page, CURSOR)).toBe('0:2')
   expect(await stored(page, MARK)).toBeNull()
 
+  // The advance's area stops at its neighbour: the last pixel of the neighbour
+  // is the neighbour's, not the advance's.
+  const edgeOwner = await page.evaluate(({ x, y }) => {
+    const hit = document.elementFromPoint(x, y)
+    return hit?.closest('.gdnext__advance') ? 'advance' : 'neighbour'
+  }, { x: rested.neighbourEdgeX, y: rested.advY })
+  expect(edgeOwner).toBe('neighbour')
+
   // The switch keeps its own taps right up to its edge: a tap one pixel inside
-  // its right edge, where the advance's area begins, sets Pitch mode and steps
-  // nothing (ADR-0123: the switch reveals nothing).
+  // its right edge sets Pitch mode and steps nothing (ADR-0123: the switch
+  // reveals nothing). On the phone this is also where the advance's area begins.
   await page.mouse.click(rested.switchEdgeX, rested.switchY)
   await expect.poll(() => stored(page, PITCH_MODE)).not.toBeNull()
   await page.waitForTimeout(1500)
