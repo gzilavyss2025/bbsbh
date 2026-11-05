@@ -678,7 +678,7 @@ export function GameSelect({
                   <DerbyCard />
                 </li>
               )}
-              {listGames.map(renderCard)}
+              {listGames.map((g, idx) => renderCard(g, idx))}
             </ul>
 
             {/* Any idle club, the whole-league All-Star case included. Not in the
