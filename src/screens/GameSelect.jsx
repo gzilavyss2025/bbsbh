@@ -232,11 +232,8 @@ export function GameSelect({
   // (not "now") so paging near a year boundary still asks for the season the
   // displayed date actually falls in; fetchAffiliates degrades to [] offline.
   const season = Number(dateStr.slice(0, 4))
-  // An AFL club reports `parentOrgName: "Office of the Commissioner"` — it is a
-  // composite of six or seven organisations and an affiliate of nothing, and
-  // the same is true of every club in the three winter leagues. So there is no
-  // club here for a favourite to resolve to, and asking would spend a fetch to
-  // be told so.
+  // AFL and winter-league clubs are affiliates of nothing (an AFL club's parentOrgName is
+  // "Office of the Commissioner"), so there is no club to resolve to: skip the fetch.
   const affiliates = useAsync(
     () =>
       sportId === SPORT_IDS.MLB || onWinter
