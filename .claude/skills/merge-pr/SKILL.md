@@ -31,7 +31,8 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
    - The `lint-and-build` check passed on the head SHA. Still running: wait for it
      (`send_later` or a PR event, not a `sleep` loop). Red: stop, and give the failing
      step from the job log.
-   - The Vercel preview deployment for the head SHA is not failed (the `Vercel`
+   - A `claude/**` branch has no preview (`vercel.json`); skip this gate for it, since
+     `lint-and-build` already runs the build. Any other branch: the Vercel preview deployment for the head SHA is not failed (the `Vercel`
      check, or the vercel[bot] comment's Deployment column). Production builds the
      same way, so a failed preview is a failed deploy. "Ignored" is fine: the push
      touched nothing that deploys, and the earlier preview stands. Still building:

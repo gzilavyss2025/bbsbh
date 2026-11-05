@@ -200,4 +200,5 @@ list says what each guard checks.
   this fails once one goes stale. It does not check that the data is still shaped right;
   `check-feed-shape-drift.mjs` does, from the nightly cron.
 - `vercel-ignore-build.sh` — Vercel's Ignored Build Step (skips a deploy when a push
-  touched only docs/scripts/workflow files). See `docs/development.md`.
+  touched only docs/scripts/workflow files, or only merged `main` into a PR branch). See
+  `docs/development.md`; pinned by `test/vercel-ignore-build.test.js`.
