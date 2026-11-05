@@ -179,6 +179,7 @@
   display: block;
 }
 .frpeople__fig {
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -327,4 +328,14 @@ a.frnums__link:focus-visible {
 }
 .frlead__value {
   font-weight: var(--w-bold);
+}
+
+/* The parks card (#2788): a park's current name, a caption line, and its seasons. */
+.frparks__name {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.frparks__foot {
+  margin: var(--space-2) 0 0;
+  padding-bottom: 0;
 }

@@ -1,3 +1,5 @@
+import { parkHistory } from '../../../../api/franchiseHistory.js'
+
 // People and places on the franchise page (#2784), shaped for the cards. Pure: no fetch, no clock.
 import { seasonRuns } from '../../../../components/team/ladder/layout.js'
 import { pct } from '../ledgerRows.js'
@@ -52,4 +54,36 @@ export function clubPeople(hof, leaders) {
   const out = [...(hof?.inductedAs ?? []), ...(hof?.alsoPlayed ?? [])]
   for (const group of [leaders?.career, leaders?.season]) for (const list of Object.values(group ?? {})) out.push(...list)
   return out.map((p) => ({ id: p.id, name: p.name }))
+}
+
+
+// The club's home parks (#2788), newest first. `history` is franchiseFor's file ({ spans, mates,
+// through }); `live` is [{ season, venue: { id, name } | null }] for each season after `through`
+// (loadFranchise reads them), so a club that moved this year (the Rays, back at Tropicana in 2026)
+// is not "on" at last year's park. A season with no venue read is left out. A park's name is the one
+// its newest span gives it (the venue's current name); any other is "also named". A run that
+// reaches the newest season reads "2001 on". `clubs` are the club's own names there; `mates` the
+// other clubs that used it in the same seasons. The data starts in 1901 and holds one park per run
+// of seasons, so a one-off neutral site is not in it.
+export function parksView(history, live = []) {
+  const known = history?.spans ?? []
+  if (!known.length) return []
+  const name = known[known.length - 1].name
+  const extra = live.filter((l) => l.venue?.id && l.season > (history.through ?? 0))
+  const spans = [...known, ...extra.map((l) => ({ from: l.season, to: l.season, name, venueId: l.venue.id, venueName: l.venue.name }))]
+  const newest = Math.max(history.through ?? 0, ...extra.map((l) => l.season))
+  return parkHistory(spans, history.mates ?? {})
+    .sort((a, b) => b.runs[b.runs.length - 1][1] - a.runs[a.runs.length - 1][1])
+    .map((p) => {
+      const mine = spans.filter((s) => s.venueId === p.venueId)
+      const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
+      return {
+        id: p.venueId,
+        name: current,
+        also: p.names.filter((n) => n !== current),
+        years: p.runs.map(([a, b]) => (b === newest ? `${a} on` : years(a, b))).join(', '),
+        clubs: [...new Set(mine.map((s) => s.name))],
+        mates: p.mates.map((m) => `${m.name} ${years(m.from, m.to)}`),
+      }
+    })
 }

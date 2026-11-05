@@ -112,3 +112,14 @@ test('venueForSeason: null for a season no span holds, no spans, or a span with 
   assert.equal(venueForSeason(undefined, 2018), null)
   assert.equal(venueForSeason([{ from: 2000, to: 2005, venueId: null }], 2003), null)
 })
+
+// #2788: the feed spells Brooklyn's Washington Park (3150) with a trailing space.
+test('collapseSeasons: a venue name is trimmed', () => {
+  const rows = [
+    { season: 1910, name: 'Brooklyn Superbas', league: 'National League', venueId: 3150, venueName: 'Washington Park ' },
+    { season: 1911, name: 'Brooklyn Superbas', league: 'National League', venueId: 3150, venueName: 'Washington Park' },
+  ]
+  const [span] = collapseSeasons(rows)
+  assert.equal(span.venueName, 'Washington Park')
+  assert.deepEqual(span.venueNames, ['Washington Park'])
+})

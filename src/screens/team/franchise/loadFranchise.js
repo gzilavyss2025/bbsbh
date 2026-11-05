@@ -1,4 +1,4 @@
-import { fetchStandings, fetchTeam } from '../../../api/team.js'
+import { fetchSeasonVenue, fetchStandings, fetchTeam } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
 import { getJson } from '../../../api/statsapi.js'
 import { franchiseLedger } from '../../../api/history/franchiseLedger.js'
@@ -7,6 +7,7 @@ import { pennantsFor } from '../../../api/history/leaguePennants.js'
 import { hallOfFamersFor } from '../../../api/history/franchiseHof.js'
 import { retiredNumbersFor } from '../../../api/history/retiredNumbers.js'
 import { franchiseLeaders } from '../../../api/history/franchiseLeaders.js'
+import { franchiseFor } from '../../../api/franchiseHistory.js'
 import { isoToday } from '../../../lib/dates.js'
 import { clubRecord, liveRow } from './ledgerRows.js'
 
@@ -54,8 +55,19 @@ export async function loadFranchise(id) {
 }
 
 // People and places, loaded after the ledger so the table never waits on it (#2784 review): the
-// Hall of Famers, the retired numbers, and the all-time leaders (whose ids link the number tiles).
+// Hall of Famers, the retired numbers, the all-time leaders (whose ids link the number tiles) and
+// the parks (#2788): the franchise-history file, plus the park of each season after it, since a
+// club can move (the Rays, back at Tropicana in 2026).
 export async function loadFranchisePeople(teamId) {
-  const [hof, retired, leaders] = await Promise.all([hallOfFamersFor(teamId), retiredNumbersFor(teamId), franchiseLeaders(teamId)])
-  return { hof, retired, leaders }
+  const [hof, retired, leaders, history] = await Promise.all([
+    hallOfFamersFor(teamId),
+    retiredNumbersFor(teamId),
+    franchiseLeaders(teamId),
+    franchiseFor(teamId),
+  ])
+  const year = Number(isoToday().slice(0, 4))
+  const after = []
+  if (history.through != null) for (let s = history.through + 1; s <= year; s++) after.push(s)
+  const venues = await Promise.all(after.map(async (s) => ({ season: s, venue: await fetchSeasonVenue(teamId, s) })))
+  return { hof, retired, leaders, history, venues }
 }

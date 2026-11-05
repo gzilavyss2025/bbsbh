@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { clubPeople, managersView, retiredTiles } from '../src/screens/team/franchise/people/peopleView.js'
+import { readFileSync } from 'node:fs'
+import { clubPeople, managersView, parksView, retiredTiles } from '../src/screens/team/franchise/people/peopleView.js'
 import { summaryView } from '../src/screens/team/franchise/summary/summaryView.js'
 import { summarizeFranchise } from '../src/api/history/franchiseSummary.js'
 
@@ -90,6 +91,40 @@ test('hofHeading: one name says it; a club that moved or renamed says "this fran
   assert.equal(hofHeading('Toronto Blue Jays', [{ name: 'Toronto Blue Jays' }]), 'Inducted as Toronto Blue Jays')
   assert.equal(hofHeading('Washington Nationals', [{ name: 'Montreal Expos' }, { name: 'Washington Nationals' }]), 'Inducted with this franchise')
   assert.equal(hofHeading('Milwaukee Brewers', null), 'Inducted as Milwaukee Brewers')
+})
+
+// #2788: the Parks card, on the real franchise-history files.
+const history = (id) => JSON.parse(readFileSync(new URL(`../public/data/franchise-history/${id}.json`, import.meta.url), 'utf8'))
+const parksFor = (id, live) => {
+  const d = history(id)
+  return parksView({ spans: d.spans, mates: d.mates, through: d.through }, live)
+}
+
+test('parksView: newest first, the current name with the old ones as "also", "on" for a park in use', () => {
+  assert.deepEqual(parksFor(158), [
+    { id: 32, name: 'American Family Field', also: ['Miller Park'], years: '2001 on', clubs: ['Milwaukee Brewers'], mates: [] },
+    { id: 23, name: 'Milwaukee County Stadium', also: [], years: '1970–2000', clubs: ['Milwaukee Brewers'], mates: [] },
+    { id: 3144, name: "Sick's Stadium", also: [], years: '1969', clubs: ['Seattle Pilots'], mates: [] },
+  ])
+})
+
+test('parksView: a park left and returned to keeps two runs; a shared park names the other club', () => {
+  const yankees = parksFor(147)
+  assert.equal(yankees.find((p) => p.id === 9).years, '1923–1973, 1976–2008')
+  assert.deepEqual(parksFor(119).find((p) => p.id === 22).mates, ['Los Angeles Angels 1962–1965'])
+  assert.equal(parksFor(119).find((p) => p.id === 3150).name, 'Washington Park')
+  assert.deepEqual(parksView(), [])
+})
+
+test('parksView: a live season after the file extends the runs; a club that moved back is not "on" at the old park', () => {
+  const rays = parksFor(139, [{ season: 2026, venue: { id: 12, name: 'Tropicana Field' } }])
+  assert.deepEqual(rays.map((p) => [p.name, p.years]), [
+    ['Tropicana Field', '1998–2024, 2026 on'],
+    ['George M. Steinbrenner Field', '2025'],
+  ])
+  const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
+  assert.equal(brewers[0].years, '2001 on')
+  assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
 })
 
 // #2784 review: the retired-numbers file has no ids, so a name two ids share links nowhere.

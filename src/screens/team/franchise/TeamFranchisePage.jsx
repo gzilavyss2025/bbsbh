@@ -21,6 +21,7 @@ import { FranchiseSummary } from './summary/FranchiseSummary.jsx'
 import { HallOfFame } from './people/HallOfFame.jsx'
 import { RetiredNumbers } from './people/RetiredNumbers.jsx'
 import { Managers } from './people/Managers.jsx'
+import { Parks } from './people/Parks.jsx'
 import { LeadersCard } from './leaders/LeadersCard.jsx'
 
 // THE FRANCHISE PAGE (#2586, U1 #2763): one club across all its seasons, newest first, each row
@@ -28,7 +29,7 @@ import { LeadersCard } from './leaders/LeadersCard.jsx'
 // that scrolls sideways in its own box, the year pinned) and a full-width table on a wide screen.
 // U2 (#2784, wireframe approved 2026-11-05) adds the summary, first on a phone and in a side
 // column at the widest step, and People and places under the ledger. U3 (#2785) puts the
-// all-time leaders card between them. History, an open surface
+// all-time leaders card between them; #2788 adds the parks. History, an open surface
 // (ADR-0034): nothing is sealed, and the page reads no cutoff.
 
 const COLUMNS = 10
@@ -81,6 +82,7 @@ export function TeamFranchisePage({ id }) {
                 {people && <HallOfFame team={team} hof={people.hof} names={summary?.names} />}
                 {people && <RetiredNumbers retired={people.retired} hof={people.hof} leaders={people.leaders} />}
                 <Managers managers={summary?.managers} best={summary?.winningestManager?.id ?? null} />
+                {people && <Parks history={people.history} live={people.venues} />}
               </div>
             </section>
           </div>
