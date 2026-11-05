@@ -49,6 +49,21 @@ import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 // sixth tab cannot appear on the rail and be missed by this gate.
 const LEVEL_TABS = LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB).map((l) => l.sportId)
 
+// The no-rows guess, per level: [first winter day, first season day] as MM-DD (#2936).
+// Off statsapi's /league rows for 2023-2027 (the last league out, the first league back):
+// AAA out Sep 28-Oct 1, back Mar 26-31; AA out Sep 24-28, back Apr 2-6; A+ out Sep 16-21 and
+// A out Sep 17-21, both back Apr 2-6. Each bound is the EARLIEST measured date. In September a
+// level's last week is all games, so guessing a winter a few days early holds no room on any
+// day that draws one. In spring, after the first opener an empty day is most likely an off
+// day, which must not get a winter's reserve. A level missing here guesses no winter.
+const LEVEL_WINTER_GUESS = {
+  [SPORT_IDS.AAA]: ['09-28', '03-26'],
+  [SPORT_IDS.AA]: ['09-24', '04-02'],
+  [SPORT_IDS['A+']]: ['09-16', '04-02'],
+  [SPORT_IDS.A]: ['09-17', '04-02'],
+}
+const inWinterGuess = (md, [opens, closes]) => md >= opens || md < closes
+
 // The whole decision, pure, in two steps (the hook memoises each once). `net` is what
 // the network has answered so far ({ season, level, next }, each null until it
 // lands); anything it has not answered is read from the rows remembered on this
@@ -66,9 +81,9 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const pick = (fresh, id) =>
     fresh === undefined ? load(id, year) : rowFitsYear(fresh, year) ? fresh : null
   const seasonRow = pick(net.season, SPORT_IDS.MLB)
-  // A settled-null MLB row is the network saying there is no winter to read: on a level tab
-  // that beats saved level rows too, which are only used while the MLB row is unanswered.
-  const levelRows = isLevel ? (net.season === null ? null : pick(net.level, sportId)) : null
+  // A level reads its own rows only. The MLB row says nothing about it, so a failed MLB read
+  // (null) leaves the level to its own answer or its saved rows (#2936).
+  const levelRows = isLevel ? pick(net.level, sportId) : null
   const phase = isLevel
     ? levelOffseasonPhase(dateStr, levelRows)
     : sportId === SPORT_IDS.MLB
@@ -77,12 +92,15 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   // Is a winter to be expected (to hold room for it)? Only on a tab that can have one.
   // Yes when the rows say so. With no rows at all (a first visit, or storage blocked) the
   // calendar guesses, per sport: MLB's winter starts when the World Series window ends (every
-  // measured offseasonStartDate is November 1 or 2) and runs to the end of February; the levels are out from the end of September to
-  // their early-April openers. No when rows are in hand and say it is the season: that day keeps its ordinary empty-day page.
+  // measured offseasonStartDate is November 1 or 2) and runs to the end of February; each level
+  // from its own measured dates (LEVEL_WINTER_GUESS). No when rows are in hand and say it is the
+  // season: that day keeps its ordinary empty-day page.
   const canHaveWinter = isLevel || sportId === SPORT_IDS.MLB
   const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
   const md = dateStr?.slice(5)
-  const winterMonths = isLevel ? md >= '09-29' || md < '04-01' : md >= '11-01' || md < '03-01'
+  const winterMonths = isLevel
+    ? Boolean(LEVEL_WINTER_GUESS[sportId]) && inWinterGuess(md, LEVEL_WINTER_GUESS[sportId])
+    : inWinterGuess(md, ['11-01', '03-01'])
   return { phase, seasonRow, expectWinter: canHaveWinter && (Boolean(phase) || (!known && winterMonths)) }
 }
 
@@ -153,15 +171,23 @@ function winterFrom(dateStr, isLevel, phase, seasonRow, forward) {
   }
 }
 
+// The year to ask for a level's /league rows, or null. `seasonRow` is the slate's MLB read,
+// asked only on an empty day: `undefined` until it answers, then the row or null. Its ANSWER is
+// the empty-day signal, whatever it says, so a failed MLB read still asks for the level's rows
+// (#2936).
+export function levelFetchYear(dateStr, sportId, seasonRow) {
+  const year = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
+  return LEVEL_TABS.includes(sportId) && seasonRow !== undefined && year ? year : null
+}
+
 export function useOffseason(dateStr, sportId, seasonRow) {
-  const isLevel = LEVEL_TABS.includes(sportId)
   // The calendar year the viewed DATE is in — the year whose rows describe the
   // winter around it. Never the current year: paging back to last October has
   // to answer about last October.
   const dateYear = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
   // The level's own rows are fetched only once the slate has said it is an empty
-  // day (`seasonRow` is that signal); remembered rows decide the phase without it.
-  const levelSeason = isLevel && seasonRow && dateYear ? dateYear : null
+  // day (`seasonRow` answering is that signal); remembered rows decide the phase without it.
+  const levelSeason = levelFetchYear(dateStr, sportId, seasonRow)
 
   // Tagged with the key they were fetched for (see taggedRows): the render where the
   // key changes still holds the previous key's data, which must neither decide a phase
