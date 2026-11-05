@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
@@ -34,7 +34,7 @@ import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
-import { useOffseason } from '../hooks/useOffseason.js'
+import { useOffseason, useSeasonMeta } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
@@ -69,6 +69,9 @@ const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldS
 const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
 const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
 const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
+// Its chunk starts as soon as remembered rows say it is the winter, not after the slate and the
+// season-row chain resolve (#2907).
+const loadOffseasonSlot = () => import('../components/offseason/OffseasonSlot.jsx')
 const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
 // Neither the league nor the date persists anywhere. Both live in the URL
@@ -372,10 +375,7 @@ export function GameSelect({
   // ONE fetch, two questions: this row carries the break bounds AND the dates
   // that say whether the season is over, so the offseason gate below costs an
   // empty day nothing it was not already spending.
-  const seasonMeta = useAsync(
-    () => (isEmptyDay ? fetchSeasonMeta(season) : Promise.resolve(null)),
-    [isEmptyDay, season],
-  )
+  const seasonMeta = useSeasonMeta(isEmptyDay, season)
   const breakWindow = useMemo(
     () => allStarBreakWindow(allStarInfoFrom(seasonMeta.data), dateStr),
     [seasonMeta.data, dateStr],
@@ -388,7 +388,27 @@ export function GameSelect({
 
   // Is the slate looking at a winter? Read off the dates statsapi publishes for
   // the season, never off the games coming back empty (hooks/useOffseason.js).
-  const { phase: offseason, winter } = useOffseason(dateStr, sportId, seasonMeta.data)
+  const {
+    phase: offseason,
+    winter: winterRows,
+    pending: winterPending,
+    expectWinter,
+  } = useOffseason(dateStr, sportId, seasonMeta.data)
+  // Saved rows can name the winter before the slate has loaded, so the winter page itself
+  // waits for the slate to say it is empty (it must never draw above game cards), and a
+  // reserve of its size holds the room meanwhile. A day the saved rows call in season gets
+  // neither: it keeps the ordinary empty-day page. The chunk starts early on saved rows only.
+  const slotShown = Boolean(winterRows) && isEmptyDay
+  // Everything else that gives way to the winter (the wire rail, the club list) waits for the same signal.
+  const winter = slotShown ? winterRows : null
+  const holdForWinter =
+    !slotShown &&
+    expectWinter &&
+    (loading || winterPending || seasonMeta.loading) &&
+    (offseason ? loading || isEmptyDay : isEmptyDay)
+  useEffect(() => {
+    if (offseason) loadOffseasonSlot()
+  }, [offseason])
 
   // The banner's date always comes from an actual forward schedule scan
   // (fetchNextGameDate), never straight from statsapi's firstDate2ndHalf —
@@ -648,9 +668,13 @@ export function GameSelect({
               are in season. The empty games area holds the winter instead of
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
-          {winter && (
+          {/* Rows still on their way: hold the panel's room now, so what lands below does not jump. */}
+          {holdForWinter && (
+            <div aria-hidden="true" className="slate-reserve slate-reserve--offseason" />
+          )}
+          {slotShown && (
             <LazyPanel reserve="offseason">
-              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
+              <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winterRows} />
             </LazyPanel>
           )}
 
@@ -690,7 +714,8 @@ export function GameSelect({
                 <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />
               </LazyPanel>
             )}
-            {offDayTeams.length > 0 && !winter && !october && (
+            {/* Not while the winter is still being decided: the club list would be drawn, then thrown away. */}
+            {offDayTeams.length > 0 && !winter && !holdForWinter && !october && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}

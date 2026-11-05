@@ -9,8 +9,10 @@ import { DecidedHero } from './Hero.jsx'
 
 // A Series photo of the MVP, picked by hand from the clincher's MLB highlights (an image id on
 // img.mlbstatic.com). 2026: Contreras lifting the MVP trophy after Game 5.
-const MVP_PHOTOS = { 2026: 'cz7beynol16rtuq2neot' }
-const photoUrl = (id) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_900,h_900,f_jpg,c_fill,g_center/mlb/${id}.jpg`
+const MVP_PHOTOS = { 2026: { id: 'cz7beynol16rtuq2neot', club: 158 } } // club: the photo's side (Brewers), known before the award loads
+const photoUrl = (id, w = 900) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_${w},h_${w},f_jpg,q_auto:good,c_fill,g_center/mlb/${id}.jpg`
+// 450 for a 1x screen, 900 for 2x and up (the phone slab is about 360 CSS px wide).
+const photoSrcSet = (id) => `${photoUrl(id, 450)} 450w, ${photoUrl(id)} 900w`
 
 // The club's secondary outside, its primary in the middle (the Brewers: gold, navy, gold).
 function stripeFor(teamId) {
@@ -19,18 +21,23 @@ function stripeFor(teamId) {
 }
 
 // The decided World Series on the home slate: the series page's MVP hero (LiveSeriesPage.jsx),
-// read the same way. Before MLB names the MVP (a 404) the hero keeps the clubs' marks.
+// read the same way. The Series photo draws at once, from a static id, so it needs no award fetch. If the
+// award settles with no MVP (a 404, or offline) the hero falls back to the clubs' marks.
 export function ChampionHero({ bracket }) {
   const ws = bracket.worldSeries
   const mode = seriesMode(ws)
   const season = bracket.season
-  const { data: award } = useAsync(() => fetchSeasonAward('WSMVP', season), [season])
+  const { data: award, loading } = useAsync(() => fetchSeasonAward('WSMVP', season), [season])
   const { data: log } = useSeriesLog(ws?.games ?? [])
   if (!mode) return null
   const mvp = award?.recipients?.[0] ?? null
+  const pick = MVP_PHOTOS[season]
+  const ids = mode.series.slots.map((x) => x.club.id)
+  // Keep the photo's side while the award loads and once it names an MVP we can place; else the marks.
+  const photoClub = pick && ids.includes(pick.club) && (loading || ids.includes(mvp?.teamId)) ? pick.club : null
   return (
     <div className="ww-champhero">
-      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoUrl(MVP_PHOTOS[season])} stripe={stripeFor(mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
+      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? photoUrl(pick.id) : null} photoSrcSet={photoClub ? photoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
     </div>
   )
 }
