@@ -10,7 +10,7 @@ import '../../../../../styles/player-next/both/firsts.css'
 // so a two-way player has one card for each role.
 export function FirstsCard({ bio, role, asOf, onEmpty, onCount }) {
   const { data, loading: busy } = useAsync(() => loadFirsts(bio.id, asOf, role === 'pitching' ? 'pitching' : 'hitting'), [bio.id, asOf, role])
-  // useAsync keeps the last player's data for one render after the id changes.
+  // A guard only: useAsync already answers pending on the render the id changes (#2925).
   const mine = data?.bio?.id === bio.id
   const loading = busy || Boolean(data && !mine)
   const view = mine ? firstsView({ firsts: data.firsts, role }) : null

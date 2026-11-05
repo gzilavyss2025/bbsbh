@@ -48,7 +48,7 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   `useCalloutLedgerValue` by rendering a probe component with
   `react-dom/server`'s `renderToStaticMarkup`. `local-store-pins.test.js` also renders through `react-dom/server`
   (`renderToString`). `reveal-progress-game-switch.test.js` needs effects, so it mounts
-  through `react-dom/client`'s `createRoot` on a stub container and a stub `window`. That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
+  through `react-dom/client`'s `createRoot` on a stub container and a stub `window`, and `use-async-stale-frame.test.js` mounts `useAsync` the same way. That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
   (`revealProgressCore.js` is the pattern) when a hook's logic can live in one; use
   the probe only when the value the hook returns IS the thing under test.
 - **Prefer asserting the field(s) under test, not the whole object**, when adding new

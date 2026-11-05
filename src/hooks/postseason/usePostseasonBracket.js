@@ -31,10 +31,9 @@ export function bracketCutoff(date, today = toApiDate(new Date())) {
   return capSlateDate(date, today, null)
 }
 
-// useAsync keeps the last result for one render after its deps change. So a
-// slate paged from 10-06 back to 10-05 would draw the bracket heading into
-// 10-06 on 10-05's slate: a later result on an earlier date. Hand a bracket
-// back only when it was built for THIS cutoff.
+// Hand a bracket back only when it was built for THIS cutoff, so a slate paged
+// from 10-06 back to 10-05 never draws 10-06's bracket on 10-05's slate. A guard
+// only: useAsync already answers pending on the render the cutoff changes (#2925).
 export function bracketFor(data, cutoff) {
   return cutoff && data?.cutoff === cutoff ? data : null
 }
