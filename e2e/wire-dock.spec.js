@@ -83,9 +83,12 @@ test('a phone gets the dock and never the rail', async ({ page }) => {
   await expect(page.locator('.wiredock')).toHaveAttribute('data-state', 'rail')
 
   // At rest it is one move — not a ledger, and not nothing — over a ledger of
-  // several. (The rail carried a count until 2026-11-03; Gary dropped it.)
+  // several. (The rail carried a count until 2026-11-03; Gary dropped it.) The
+  // ledger mounts when the sheet first leaves the rail (#2952, #2953).
   await expect(page.locator('.wiredock__cut')).not.toBeEmpty()
-  expect(await page.locator('.wiredock__list .wire__row').count()).toBeGreaterThan(1)
+  expect(await page.locator('.wiredock__list .wire__row').count()).toBe(0)
+  await page.locator('.wiredock__latest').click()
+  await expect(page.locator('.wiredock__list .wire__row').nth(1)).toBeAttached()
 })
 
 test('a desktop gets the rail beside the games and never the dock', async ({ page }) => {

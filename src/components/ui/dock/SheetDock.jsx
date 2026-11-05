@@ -135,6 +135,11 @@ export function SheetDock({
   const expandedRef = useRef(null)
 
   const [index, setIndex] = useState(RAIL)
+  // The body mounts the first time the sheet leaves the rail, and stays. At the
+  // rail it is off-screen, and a ledger of 35 story cards costs a long task and
+  // a statsapi read per player to draw something nobody can see.
+  const [opened, setOpened] = useState(false)
+  if (index !== RAIL && !opened) setOpened(true)
   const [detents, setDetents] = useState(() => detentOffsets(0, 0))
   const [dragging, setDragging] = useState(false)
 
@@ -244,8 +249,13 @@ export function SheetDock({
   useEffect(() => {
     const target = detents[index]
     if (drag.current.active) return
+    // The placeholder detents ([0, 0, 0]) are the OPEN position: painting them
+    // shows the open sheet for the frames before measure()'s real ones land.
+    // The sheet rests off-screen in CSS until they do.
+    if (detents[RAIL] === 0) return
     const sheet = sheetRef.current
-    const from = sheet ? liveOffset(sheet, target) : target
+    // The first paint has nothing to settle from, so it reads no style.
+    const from = sheet && settling.current ? liveOffset(sheet, target) : target
     const ms = settling.current && !prefersReducedMotion() ? settleMs(target - from) : 0
     paint(target, ms)
     settling.current = true
@@ -454,7 +464,7 @@ export function SheetDock({
           onPointerDown={onListDown}
           onPointerMove={onListMove}
         >
-          {children}
+          {opened && children}
         </Body>
       </section>
     </div>
