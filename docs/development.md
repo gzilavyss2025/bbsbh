@@ -193,7 +193,10 @@ dashboard. One setting in `vercel.json` still trims deployments:
 - `ignoreCommand: scripts/vercel-ignore-build.sh` — Vercel's Ignored Build Step;
   skips a deployment when the push touched only docs/scripts/workflow files with no
   effect on the deployed app (diffs against `VERCEL_GIT_PREVIOUS_SHA`, the last commit
-  Vercel actually deployed, so a multi-commit push is judged as a whole). Defaults to
+  Vercel actually deployed, so a multi-commit push is judged as a whole). It also skips
+  a PR-branch push that only merges `main` in (HEAD is a merge and its first parent is
+  unchanged on app paths); never on `main`. A merge that also fixed conflicts in `src`
+  is skipped too, so that preview lags until the next push. Defaults to
   building whenever it can't confidently tell — a missed skip just costs one
   deployment; a wrong skip is a silent non-deploy.
 
