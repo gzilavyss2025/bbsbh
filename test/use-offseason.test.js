@@ -4,7 +4,7 @@
 // /seasons and /league rows; the dates are modelled on 2026/2027, not read live.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { phaseOf, winterOf } from '../src/hooks/useOffseason.js'
+import { answered, phaseOf, winterOf } from '../src/hooks/useOffseason.js'
 import { readSeasonRow, saveSeasonRow, taggedRows } from '../src/lib/time/seasonRows.js'
 
 const MLB_2026 = {
@@ -134,13 +134,41 @@ test('nothing saved: expect a winter only when the calendar allows one', () => {
   const none = store({})
   const expect = (d, id = 1) => resolveOffseason(d, id, NONE, none).expectWinter
   assert.equal(expect('2026-07-14'), false) // the All-Star break
-  assert.equal(expect('2026-10-14'), false)
-  assert.equal(expect('2026-10-15'), true)
+  assert.equal(expect('2026-10-20'), false) // a postseason off day (#2928)
+  assert.equal(expect('2026-10-31'), false) // the World Series window
+  assert.equal(expect('2026-11-01'), true)
   assert.equal(expect('2026-11-04'), true)
   assert.equal(expect('2027-02-28'), true)
   assert.equal(expect('2027-03-01'), false)
   assert.equal(expect('2026-07-14', 13), false) // a Triple-A Monday off
+  assert.equal(expect('2026-09-20', 13), false)
+  assert.equal(expect('2026-10-05', 13), true) // the levels are out well before MLB (#2928)
   assert.equal(expect('2026-11-04', 13), true)
+  assert.equal(expect('2027-03-20', 13), true) // and stay out until their April opener
+  assert.equal(expect('2027-04-05', 13), false)
+})
+
+test('a settled-null MLB row means no level winter, whatever is saved (#2928)', () => {
+  const load = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: null }, load).phase, null)
+  // not answered yet: the saved rows still decide
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: undefined }, load).phase.seasonEnded, 2026)
+})
+
+test('a next-season answer for another year supplies no countdown dates (#2928)', () => {
+  const load = store({ '1:2026': MLB_2026 })
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: MLB_2026 }, load).winter, null)
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: MLB_2027 }, load).winter.endDate, '2027-02-18')
+  const loadL = store({ '13:2026': LEVEL_2026 })
+  assert.equal(resolveOffseason('2026-11-04', 13, { next: LEVEL_2026 }, loadL).winter, null)
+})
+
+test('a rejected fetch settles pending; a stale one does not (#2928)', () => {
+  const ok = { sportId: 13, year: 2026, rows: [] }
+  assert.equal(answered({ data: ok }, 13, 2026), true)
+  assert.equal(answered({ data: ok }, 13, 2027), false)
+  assert.equal(answered({ data: null, error: new Error('x') }, 13, 2026), true)
+  assert.equal(answered({ data: null, error: null }, 13, 2026), false)
 })
 
 test('a tab that can never have an offseason page never expects one', () => {
