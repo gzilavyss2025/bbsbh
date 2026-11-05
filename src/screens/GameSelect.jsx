@@ -34,7 +34,7 @@ import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
-import { useOffseason } from '../hooks/useOffseason.js'
+import { useOffseason, useSeasonMeta } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
@@ -69,8 +69,8 @@ const WorldSeriesHome = lazyNamed(() => import('../components/worldseries/WorldS
 const PostseasonBracket = lazyNamed(() => import('../components/bracket/PostseasonBracket.jsx'), 'PostseasonBracket')
 const SeriesPrimer = lazyNamed(() => import('../components/postseason/SeriesPrimer.jsx'), 'SeriesPrimer')
 const BracketDock = lazyNamed(() => import('../components/bracket/BracketDock.jsx'), 'BracketDock')
-// Its chunk starts the moment the winter is likely (remembered rows say so, or the slate came back
-// empty and the season row is on its way), not after the whole row chain resolves (#2907).
+// Its chunk starts as soon as remembered rows say it is the winter, not after the slate and the
+// season-row chain resolve (#2907).
 const loadOffseasonSlot = () => import('../components/offseason/OffseasonSlot.jsx')
 const OffseasonSlot = lazyNamed(() => import('../components/offseason/OffseasonSlot.jsx'), 'OffseasonSlot')
 
@@ -375,14 +375,7 @@ export function GameSelect({
   // ONE fetch, two questions: this row carries the break bounds AND the dates
   // that say whether the season is over, so the offseason gate below costs an
   // empty day nothing it was not already spending.
-  // The result is wrapped ({ row }) so "not asked yet" (data null) differs from "asked, no row":
-  // the render where isEmptyDay flips true still holds the last run's state, and the club list
-  // would paint for that frame and then be thrown away (#2907).
-  const seasonRes = useAsync(
-    () => (isEmptyDay ? fetchSeasonMeta(season).then((row) => ({ row })) : Promise.resolve(null)),
-    [isEmptyDay, season],
-  )
-  const seasonMeta = { loading: isEmptyDay && (seasonRes.loading || seasonRes.data === null), data: seasonRes.data?.row ?? null }
+  const seasonMeta = useSeasonMeta(isEmptyDay, season)
   const breakWindow = useMemo(
     () => allStarBreakWindow(allStarInfoFrom(seasonMeta.data), dateStr),
     [seasonMeta.data, dateStr],
@@ -406,7 +399,8 @@ export function GameSelect({
   // reserve of its size holds the room meanwhile. A day the saved rows call in season gets
   // neither: it keeps the ordinary empty-day page. The chunk starts early on saved rows only.
   const slotShown = Boolean(winterRows) && isEmptyDay
-  const winter = Boolean(winterRows) && (loading || isEmptyDay) ? winterRows : null
+  // Everything else that gives way to the winter (the wire rail, the club list) waits for the same signal.
+  const winter = slotShown ? winterRows : null
   const holdForWinter =
     !slotShown &&
     expectWinter &&

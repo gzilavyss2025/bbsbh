@@ -108,25 +108,54 @@ test('a saved in-season row says season, not winter: no reserve, the old empty-d
   const r = resolveOffseason('2026-07-07', 1, NONE, store({ '1:2026': MLB_2026 }))
   assert.equal(r.phase, null)
   assert.equal(r.expectWinter, false)
-  // nothing saved at all is unknown, which expects a winter (first visit)
-  assert.equal(resolveOffseason('2026-07-07', 1, NONE, store({})).expectWinter, true)
+  // nothing saved at all is unknown: the calendar decides (see the next test)
+  assert.equal(resolveOffseason('2026-11-07', 1, NONE, store({})).expectWinter, true)
   // a saved winter expects one
   assert.equal(resolveOffseason('2026-11-04', 1, NONE, store({ '1:2026': MLB_2026 })).expectWinter, true)
 })
 
-test('a network row for another year is ignored, not preferred over the saved one', () => {
-  // the render where the date changed still holds the previous date's row
+test('the network wins once it has answered, even degraded; saved rows only while it is pending', () => {
   const load = store({ '1:2026': MLB_2026, '1:2027': MLB_2027 })
-  const stale = { ...MLB_2027, seasonId: '2027' }
-  assert.equal(resolveOffseason('2026-11-04', 1, { season: stale }, load).phase.seasonEnded, 2026)
+  // pending (undefined): the saved row decides
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: undefined }, load).phase.seasonEnded, 2026)
+  // answered with nothing, or with a row that is not this year's: phase null, as without saved rows
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, load).phase, null)
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: MLB_2027 }, load).phase, null)
+  // a level: league rows answered but missing dates (a league without them) is not rescued by a saved row
+  const loadLevel = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
+  const bad = [{ leagueId: 117, name: 'no dates' }]
+  assert.equal(resolveOffseason('2026-11-04', 13, { level: bad }, loadLevel).phase, null)
+  assert.equal(resolveOffseason('2026-11-04', 13, { level: undefined }, loadLevel).phase.seasonEnded, 2026)
+  // the next row too: a settled miss means no countdown date
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, load).winter, null)
+})
+
+test('nothing saved: expect a winter only when the calendar allows one', () => {
+  const none = store({})
+  const expect = (d, id = 1) => resolveOffseason(d, id, NONE, none).expectWinter
+  assert.equal(expect('2026-07-14'), false) // the All-Star break
+  assert.equal(expect('2026-10-14'), false)
+  assert.equal(expect('2026-10-15'), true)
+  assert.equal(expect('2026-11-04'), true)
+  assert.equal(expect('2027-02-28'), true)
+  assert.equal(expect('2027-03-01'), false)
+  assert.equal(expect('2026-07-14', 13), false) // a Triple-A Monday off
+  assert.equal(expect('2026-11-04', 13), true)
+})
+
+test('a tab that can never have an offseason page never expects one', () => {
+  assert.equal(resolveOffseason('2026-11-04', 999, NONE, store({})).expectWinter, false)
+  assert.equal(resolveOffseason('2026-11-04', 51, NONE, store({})).expectWinter, false)
 })
 
 test('fetched rows carry the key they were fetched for (AAA to AA never saves AAA under 12)', () => {
   const aaa = { sportId: 13, year: 2026, rows: LEVEL_2026 }
   assert.equal(taggedRows(aaa, 13, 2026), LEVEL_2026)
-  assert.equal(taggedRows(aaa, 12, 2026), null)
-  assert.equal(taggedRows(aaa, 13, 2027), null)
-  assert.equal(taggedRows(null, 13, 2026), null)
+  // undefined = still pending (another key's data, or none); a settled miss is null
+  assert.equal(taggedRows(aaa, 12, 2026), undefined)
+  assert.equal(taggedRows(aaa, 13, 2027), undefined)
+  assert.equal(taggedRows(null, 13, 2026), undefined)
+  assert.equal(taggedRows({ sportId: 13, year: 2026, rows: null }, 13, 2026), null)
 })
 
 test('save and read check a row against its key', () => {

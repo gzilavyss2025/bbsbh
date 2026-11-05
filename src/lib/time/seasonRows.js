@@ -23,9 +23,10 @@ export function rowFitsYear(row, year) {
 
 // A fetch's result is tagged with the key it was fetched FOR ({ sportId, year, rows }),
 // because useAsync still holds the previous key's data for one render after the key
-// changes. Only a result tagged for the key in hand counts.
+// changes. Only a result tagged for the key in hand counts. `undefined` means the
+// network has not answered for this key yet; `null` means it answered with nothing.
 export const taggedRows = (data, sportId, year) =>
-  data && data.sportId === sportId && data.year === year ? data.rows : null
+  data && data.sportId === sportId && data.year === year ? data.rows : undefined
 
 export function readSeasonRow(sportId, year) {
   if (!sportId || !year) return null

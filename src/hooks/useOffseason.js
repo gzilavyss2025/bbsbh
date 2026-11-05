@@ -60,7 +60,11 @@ const LEVEL_TABS = LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB).map((l) => 
 export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const isLevel = LEVEL_TABS.includes(sportId)
   const year = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
-  const pick = (fresh, id) => (rowFitsYear(fresh, year) ? fresh : load(id, year))
+  // `undefined` = the network has not answered: use the saved row. Anything else is
+  // the network's answer and it decides, even a degraded one (null, or a row that is
+  // not this year's): that is phase null, as it was before rows were remembered.
+  const pick = (fresh, id) =>
+    fresh === undefined ? load(id, year) : rowFitsYear(fresh, year) ? fresh : null
   const seasonRow = pick(net.season, SPORT_IDS.MLB)
   const levelRows = isLevel ? pick(net.level, sportId) : null
   const phase = isLevel
@@ -68,20 +72,29 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
     : sportId === SPORT_IDS.MLB
       ? offseasonPhase(dateStr, seasonRow)
       : null
-  // Is a winter to be expected? Yes when the rows say so, and yes when there are no
-  // rows at all (a first visit: the answer is on its way). No when rows are in hand
-  // and say it is the season: that day keeps its ordinary empty-day page.
+  // Is a winter to be expected (to hold room for it)? Only on a tab that can have one.
+  // Yes when the rows say so. With no rows at all (a first visit, or storage blocked) the
+  // calendar guesses: between mid-October and the end of February. No when rows are in
+  // hand and say it is the season: that day keeps its ordinary empty-day page.
+  const canHaveWinter = isLevel || sportId === SPORT_IDS.MLB
   const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
-  return { phase, seasonRow, expectWinter: Boolean(phase) || !known }
+  const md = dateStr?.slice(5)
+  const winterMonths = md >= '10-15' || md < '03-01'
+  return { phase, seasonRow, expectWinter: canHaveWinter && (Boolean(phase) || (!known && winterMonths)) }
 }
 
 export function winterOf(dateStr, sportId, base, nextRow, load = readSeasonRow) {
   const { phase, seasonRow } = base
   if (!phase) return null
+  // The network's answer (even null) beats a saved row; `undefined` is "not answered yet".
   const forward =
-    nextRow ??
-    (phase.springFromNextSeason ? load(SPORT_IDS.MLB, phase.springFromNextSeason) : null) ??
-    (phase.openerFromNextSeason ? load(sportId, phase.openerFromNextSeason) : null)
+    nextRow !== undefined
+      ? nextRow
+      : phase.springFromNextSeason
+        ? load(SPORT_IDS.MLB, phase.springFromNextSeason)
+        : phase.openerFromNextSeason
+          ? load(sportId, phase.openerFromNextSeason)
+          : null
   return winterFrom(dateStr, LEVEL_TABS.includes(sportId), phase, seasonRow, forward)
 }
 
@@ -202,6 +215,24 @@ export function useOffseason(dateStr, sportId, seasonRow) {
     (Boolean(levelSeason) && !answered(levelFetch.data, sportId, levelSeason)) ||
     (Boolean(nextYear) && !answered(nextFetch.data, nextId, nextYear))
   return { phase, winter, pending, expectWinter: base.expectWinter }
+}
+
+// This season's row, asked for only on an empty day (`enabled`). The result is wrapped
+// ({ year, row }) so "not asked yet" differs from "asked, no row": the render where `enabled`
+// flips, or the year changes, still holds the last run's state (#2907). `data` is undefined until
+// the answer for THIS year is in, then the row or null — useOffseason lets an answer, even a
+// missing one, beat a remembered row. `loading` settles on a rejection too, so a future throw
+// cannot hold the slate's reserve forever.
+export function useSeasonMeta(enabled, season) {
+  const res = useAsync(
+    () => (enabled ? fetchSeasonMeta(season).then((row) => ({ year: season, row })) : Promise.resolve(null)),
+    [enabled, season],
+  )
+  const answered = res.data?.year === season
+  return {
+    loading: enabled && !res.error && (res.loading || !answered),
+    data: answered ? res.data.row : undefined,
+  }
 }
 
 // True while the postseason is on: Milestone Watch hides its ETAs then (#1438).
