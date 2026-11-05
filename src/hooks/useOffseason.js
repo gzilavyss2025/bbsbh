@@ -66,9 +66,10 @@ export const LEVEL_WINTER_GUESS = {
 const MLB_WINTER_GUESS = ['11-01', '03-01']
 
 // The whole decision, pure, in two steps (the hook memoises each once). `net` is what
-// the network has answered so far ({ season, level, next }, each null until it
-// lands); anything it has not answered is read from the rows remembered on this
-// device (`load`, see lib/time/seasonRows.js). The network wins, so a stale
+// the network has answered so far ({ season, level, next }); anything it has not
+// answered, or answered null, is read from the rows remembered on this device (`load`,
+// see lib/time/seasonRows.js). Null is a FAILED read, not an answer: fetchSeasonMeta and
+// fetchLevelSeasonDates answer null on any error (#2936). A real answer wins, so a stale
 // remembered row is corrected the moment the fresh one arrives, and a first visit
 // with nothing remembered behaves as it did before rows were remembered. Keyed by
 // the DATE's year, so on 2027-01-02 a remembered 2026 row is never read, and a
@@ -76,17 +77,13 @@ const MLB_WINTER_GUESS = ['11-01', '03-01']
 export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const isLevel = LEVEL_TABS.includes(sportId)
   const year = dateStr?.length === 10 ? Number(dateStr.slice(0, 4)) : null
-  // `undefined` = the network has not answered: use the saved row. Anything else is
-  // the network's answer and it decides, even a degraded one (null, or a row that is
-  // not this year's): that is phase null, as it was before rows were remembered.
+  // `undefined` (pending) or null (failed): use the saved row. A real answer decides,
+  // even a degraded one (a row that is not this year's): that is phase null.
   const pick = (fresh, id) =>
-    fresh === undefined ? load(id, year) : rowFitsYear(fresh, year) ? fresh : null
+    fresh == null ? load(id, year) : rowFitsYear(fresh, year) ? fresh : null
   const seasonRow = pick(net.season, SPORT_IDS.MLB)
-  // A level reads its own rows only. The MLB row says nothing about it, so a failed MLB read
-  // (null) leaves the level to its own answer or its saved rows (#2936). The level's own null
-  // is a failed read too (fetchLevelSeasonDates answers null on any error, and a level always
-  // publishes leagues), so offline the saved rows still decide.
-  const levelRows = isLevel ? pick(net.level ?? undefined, sportId) : null
+  // A level reads its own rows only: the MLB row says nothing about it (#2936).
+  const levelRows = isLevel ? pick(net.level, sportId) : null
   const phase = isLevel
     ? levelOffseasonPhase(dateStr, levelRows)
     : sportId === SPORT_IDS.MLB
@@ -96,12 +93,11 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   // Yes when the rows say so. With no rows at all (a first visit, or storage blocked) the
   // calendar guesses, per sport: MLB_WINTER_GUESS, LEVEL_WINTER_GUESS. No when rows are in hand and say it is the
   // season: that day keeps its ordinary empty-day page.
-  const canHaveWinter = isLevel || sportId === SPORT_IDS.MLB
   const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
   const md = dateStr?.slice(5)
-  const guess = isLevel ? LEVEL_WINTER_GUESS[sportId] : MLB_WINTER_GUESS
+  const guess = isLevel ? LEVEL_WINTER_GUESS[sportId] : sportId === SPORT_IDS.MLB ? MLB_WINTER_GUESS : null
   const winterMonths = Boolean(guess) && (md >= guess[0] || md < guess[1])
-  return { phase, seasonRow, expectWinter: canHaveWinter && (Boolean(phase) || (!known && winterMonths)) }
+  return { phase, seasonRow, expectWinter: Boolean(guess) && (Boolean(phase) || (!known && winterMonths)) }
 }
 
 // Has a useAsync fetch settled for this key? A rejection settles it too, so `pending` cannot hold
@@ -112,10 +108,10 @@ export const answered = (fetch, id, year) =>
 export function winterOf(dateStr, sportId, base, nextRow, load = readSeasonRow) {
   const { phase, seasonRow } = base
   if (!phase) return null
-  // The network's answer (even null) beats a saved row; `undefined` is "not answered yet".
+  // A real answer beats a saved row; `undefined` (pending) and null (failed) read the saved one.
   const nextYear = phase.springFromNextSeason ?? phase.openerFromNextSeason
   const forward =
-    nextRow !== undefined
+    nextRow != null
       ? rowFitsYear(nextRow, nextYear) ? nextRow : null
       : phase.springFromNextSeason
         ? load(SPORT_IDS.MLB, phase.springFromNextSeason)

@@ -628,10 +628,12 @@ export function GameSelect({
             onRetry={slate.reload}
             // Suppressed for a day the break window or Off Day banner will claim
             // (below) — briefly while either lookup is still in flight too, so
-            // neither flashes "No games scheduled." before the fetch resolves.
+            // neither flashes "No games scheduled." before the fetch resolves. The winter
+            // claims it only once its page draws (`winter`): a phase with no countdown date
+            // (offline, nothing saved for next season) keeps the words, not a blank (#2936).
             emptyMessage={
               seasonMeta.loading || winterWait || breakWindow || resumeLookupPending ||
-              showOffDayBanner || offseason || bracketCoversPage
+              showOffDayBanner || winter || bracketCoversPage
                 ? null
                 : 'No games scheduled.'
             }

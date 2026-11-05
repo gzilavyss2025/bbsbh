@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { LEVEL_WINTER_GUESS, answered, levelFetchYear, phaseOf, winterOf } from '../src/hooks/useOffseason.js'
-import { LEVELS } from '../src/lib/teams.js'
+import { LEVELS, SPORT_IDS } from '../src/lib/teams.js'
 import { readSeasonRow, saveSeasonRow, taggedRows } from '../src/lib/time/seasonRows.js'
 
 const MLB_2026 = {
@@ -115,20 +115,37 @@ test('a saved in-season row says season, not winter: no reserve, the old empty-d
   assert.equal(resolveOffseason('2026-11-04', 1, NONE, store({ '1:2026': MLB_2026 })).expectWinter, true)
 })
 
-test('the network wins once it has answered, even degraded; saved rows only while it is pending', () => {
+// A real answer wins; a failed read (null: the fetchers answer null on any error) is no answer,
+// and the saved row decides, for all three reads (#2936).
+test('a real answer beats a saved row; a failed read (null) falls back to it', () => {
   const load = store({ '1:2026': MLB_2026, '1:2027': MLB_2027 })
-  // pending (undefined): the saved row decides
+  // pending (undefined) or failed (null): the saved row decides
   assert.equal(resolveOffseason('2026-11-04', 1, { season: undefined }, load).phase.seasonEnded, 2026)
-  // answered with nothing, or with a row that is not this year's: phase null, as without saved rows
-  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, load).phase, null)
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, load).phase.seasonEnded, 2026)
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, store({})).phase, null)
+  // answered with a row that is not this year's: phase null, whatever is saved
   assert.equal(resolveOffseason('2026-11-04', 1, { season: MLB_2027 }, load).phase, null)
   // a level: league rows answered but missing dates (a league without them) is not rescued by a saved row
   const loadLevel = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
   const bad = [{ leagueId: 117, name: 'no dates' }]
   assert.equal(resolveOffseason('2026-11-04', 13, { level: bad }, loadLevel).phase, null)
   assert.equal(resolveOffseason('2026-11-04', 13, { level: undefined }, loadLevel).phase.seasonEnded, 2026)
-  // the next row too: a settled miss means no countdown date
-  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, load).winter, null)
+  // the next row too: a failed read counts down to the saved row's date, and without one there is no date
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, load).winter.springStartDate, '2027-02-18')
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, store({ '1:2026': MLB_2026 })).winter, null)
+})
+
+// The parent's review of #2954: offline on a level tab in November, with this year's and next
+// year's rows saved, every read fails. The phase came from the saved rows but the countdown did
+// not, so the slate drew neither the winter page nor its empty-day copy.
+test('offline on a level tab, the saved rows draw the whole winter, countdown included (#2936)', () => {
+  const load = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
+  const offline = { season: null, level: null, next: null }
+  const { phase, winter } = resolveOffseason('2026-11-04', 13, offline, load)
+  assert.equal(phase.seasonEnded, 2026)
+  assert.equal(winter.openingDay, '2027-04-02')
+  // nothing saved for next year: no countdown date, and no phase-without-winter surprise past it
+  assert.equal(resolveOffseason('2026-11-04', 13, offline, store({ '13:2026': LEVEL_2026 })).winter, null)
 })
 
 test('nothing saved: expect a winter only when the calendar allows one', () => {
@@ -205,7 +222,7 @@ test('a level tab asks for its rows once the MLB read answers, even with null (#
 })
 
 test('every level tab on the rail has its own winter guess (#2936)', () => {
-  for (const { sportId } of LEVELS.filter((l) => l.sportId !== 1)) {
+  for (const { sportId } of LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB)) {
     assert.ok(LEVEL_WINTER_GUESS[sportId], `sportId ${sportId} has no LEVEL_WINTER_GUESS entry`)
   }
 })
