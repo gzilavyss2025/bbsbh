@@ -1,5 +1,7 @@
 # The spacing residue, and the decision the odd band needs
 
+> Screenshots removed in `fddef29a22` (#2874); restore one with `git show fddef29a22^:<path> > <path>`.
+
 Companion to ADR-0085. That ADR mints the three half-steps, records the sweep,
 and lists what the sweep could not reach. This file is the evidence for the one
 question it deliberately does not answer: **what to do with the odd
