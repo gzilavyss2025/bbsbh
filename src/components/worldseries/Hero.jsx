@@ -279,7 +279,7 @@ const SIDES = ['away', 'home']
 // `washBehind` (the home slate): the action photo sits behind the MVP's cut-out, not across the stage.
 // `photo`: a Series photo URL that takes the MVP's side in place of the cut-out; `stripe`, two
 // colours [outer, inner], edges it with a three-band club stripe.
-export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
+export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
   // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
   // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
   const [noPhoto, setNoPhoto] = useState(false)
@@ -290,25 +290,27 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
   const slotOf = Object.fromEntries(series.slots.map((s) => [s.club.id, s]))
   const dates = series.games.map((g) => g.date).filter(Boolean)
   const mark = seriesMark({ season: Number(dates[0]?.slice(0, 4)), round: 'worldseries' })
+  // `photoTeamId`: the club whose side the static photo takes, so the slab draws before `mvp` lands.
   const mvpAt = hero.players.findIndex(Boolean)
+  const slabAt = mvpAt >= 0 ? mvpAt : photo ? ids.indexOf(photoTeamId) : -1
   return (
-    <Card frame="stamped" label="Overview" className={`ww-hero ww-hero--decided${mvpAt >= 0 ? ' ww-hero--mvp' : ''}`}>
+    <Card frame="stamped" label="Overview" className={`ww-hero ww-hero--decided${slabAt >= 0 ? ' ww-hero--mvp' : ''}`}>
       <Stack gap="base">
         <div className="ww-hero__matchup">
           <div className="ww-hero__stage">
             <div className="ww-hero__split">
-              {mvpAt < 0 || noPhoto ? (
+              {slabAt < 0 || noPhoto ? (
                 <>
                   <Slab side="away" clubId={ids[0]} player={null} />
                   <Slab side="home" clubId={ids[1]} player={null} />
                 </>
               ) : (
                 SIDES.map((side, i) => (
-                  <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === mvpAt ? '' : ' ww-hero__slab--action'}`}>
-                    {i === mvpAt ? (
+                  <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === slabAt ? '' : ' ww-hero__slab--action'}`}>
+                    {i === slabAt ? (
                       photo ? (
                         <>
-                          <img src={photo} alt="" className="ww-hero__photo" decoding="async" />
+                          <img src={photo} alt="" className="ww-hero__photo" decoding="async" fetchPriority="high" />
                           {stripe && <span className="ww-hero__stripe" aria-hidden="true" style={{ '--stripe-out': stripe[0], '--stripe-in': stripe[1] }} />}
                         </>
                       ) : <>
@@ -316,7 +318,7 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
                         <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="ww-hero__cut" />
                       </>
                     ) : (
-                      !washBehind && <Wash key={mvp.playerId} personId={mvp.playerId} />
+                      !washBehind && mvp && <Wash key={mvp.playerId} personId={mvp.playerId} />
                     )}
                   </div>
                 ))

@@ -130,7 +130,7 @@ export function WinterCalendar({ winter }) {
 // there is no honest version of it without the day.
 // A spring training photo across the top of the card, picked by hand (an
 // image id on img.mlbstatic.com, its 5x2 cut).
-const SPRING_PHOTO = 'https://img.mlbstatic.com/mlb-images/image/private/t_5x2/t_w2208/mlb/rqr0tlmzxa0bntwmdvxu.jpg'
+const SPRING_PHOTO = 'https://img.mlbstatic.com/mlb-images/image/private/t_5x2/t_w1080/mlb/rqr0tlmzxa0bntwmdvxu.jpg'
 // The two spring leagues' own marks on MLB's logo CDN: 114 is the Cactus
 // League (Arizona), 115 the Grapefruit League (Florida).
 const SPRING_LEAGUES = [

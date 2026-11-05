@@ -10,6 +10,7 @@ import { DecidedHero } from './Hero.jsx'
 // A Series photo of the MVP, picked by hand from the clincher's MLB highlights (an image id on
 // img.mlbstatic.com). 2026: Contreras lifting the MVP trophy after Game 5.
 const MVP_PHOTOS = { 2026: 'cz7beynol16rtuq2neot' }
+const MVP_PHOTO_CLUB = { 2026: 158 } // the MVP's club (Brewers), so his side is known before the award loads
 const photoUrl = (id) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_900,h_900,f_jpg,c_fill,g_center/mlb/${id}.jpg`
 
 // The club's secondary outside, its primary in the middle (the Brewers: gold, navy, gold).
@@ -30,7 +31,7 @@ export function ChampionHero({ bracket }) {
   const mvp = award?.recipients?.[0] ?? null
   return (
     <div className="ww-champhero">
-      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoUrl(MVP_PHOTOS[season])} stripe={stripeFor(mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
+      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoUrl(MVP_PHOTOS[season])} photoTeamId={MVP_PHOTO_CLUB[season]} stripe={stripeFor(mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
     </div>
   )
 }
