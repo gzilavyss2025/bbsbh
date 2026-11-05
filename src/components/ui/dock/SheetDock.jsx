@@ -6,6 +6,7 @@ import {
   rubberband,
   scrimAlpha,
   settleMs,
+  snapPlan,
   velocityFrom,
 } from './dockPhysics.js'
 import { Button } from '../control/Button.jsx'
@@ -138,8 +139,11 @@ export function SheetDock({
   // The body mounts the first time the sheet leaves the rail, and stays. At the
   // rail it is off-screen, and a ledger of 35 story cards costs a long task and
   // a statsapi read per player to draw something nobody can see.
+  // A press on the rail latches it too (a drag up must not slide an empty sheet).
   const [opened, setOpened] = useState(false)
   if (index !== RAIL && !opened) setOpened(true)
+  // False until measure() has run: the placeholder detents are not a position.
+  const [measured, setMeasured] = useState(false)
   const [detents, setDetents] = useState(() => detentOffsets(0, 0))
   const [dragging, setDragging] = useState(false)
 
@@ -209,6 +213,7 @@ export function SheetDock({
     if (railH > 0) document.documentElement.style.setProperty('--wire-rail-h', `${railH}px`)
     const next = detentOffsets(vh, railH)
     setDetents((prev) => (prev.every((v, i) => v === next[i]) ? prev : next))
+    setMeasured(true)
   }, [])
 
   useLayoutEffect(() => {
@@ -243,23 +248,19 @@ export function SheetDock({
   }, [])
 
   // A committed detent change repaints with a settle; a detent RECALCULATION
-  // (a resize, a rotation) repaints without one, because nothing moved from the
-  // reader's point of view — the geometry did.
-  const settling = useRef(false)
+  // (a resize, a rotation) repaints without one (snapPlan).
+  const lastIndex = useRef(null)
   useEffect(() => {
-    const target = detents[index]
     if (drag.current.active) return
-    // The placeholder detents ([0, 0, 0]) are the OPEN position: painting them
-    // shows the open sheet for the frames before measure()'s real ones land.
-    // The sheet rests off-screen in CSS until they do.
-    if (detents[RAIL] === 0) return
     const sheet = sheetRef.current
-    // The first paint has nothing to settle from, so it reads no style.
-    const from = sheet && settling.current ? liveOffset(sheet, target) : target
-    const ms = settling.current && !prefersReducedMotion() ? settleMs(target - from) : 0
-    paint(target, ms)
-    settling.current = true
-  }, [detents, index, paint])
+    const target = detents[index]
+    const prev = lastIndex.current
+    const from = sheet && prev != null && prev !== index ? liveOffset(sheet, target) : target
+    const plan = snapPlan({ measured, prev, index, detents, from, reducedMotion: prefersReducedMotion() })
+    if (!plan) return
+    paint(plan.offset, plan.ms)
+    lastIndex.current = index
+  }, [measured, detents, index, paint])
 
   // ---------------------------------------------------------------- gesture
   const beginDrag = useCallback((event, fromList) => {
@@ -289,6 +290,7 @@ export function SheetDock({
     // A control that owns its own press (the collapse chevron) never starts a
     // gesture — capturing the pointer here would eat its click.
     if (event.target?.closest?.('[data-nodrag]')) return
+    setOpened(true)
     beginDrag(event, false)
   }, [beginDrag])
 
@@ -348,7 +350,6 @@ export function SheetDock({
     const sheet = sheetRef.current
     if (!sheet) return
     const offset = liveOffset(sheet, detents[index])
-    settling.current = true
 
     // A press that went nowhere is a tap, and a tap on the rail opens the dock
     // one step. Fitts's law rather than decoration: the whole 62px strip is the

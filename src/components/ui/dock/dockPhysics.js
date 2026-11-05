@@ -148,3 +148,16 @@ export function scrimAlpha(offset, detents, max = 0.34) {
   const t = (half - offset) / (half - full)
   return Math.max(0, Math.min(1, t)) * max
 }
+
+// What the snap effect paints. `null` until the first real measure: the
+// placeholder detents are all 0, the OPEN position, so painting them shows the
+// open sheet for a frame (#2952). Only a CHANGED detent settles; the first
+// paint and a resize or rotation re-measure (`prev === index`) jump, because
+// nothing moved from the reader's point of view. `from` is where the sheet is
+// now, read only by the caller when a settle is possible.
+export function snapPlan({ measured, prev, index, detents, from = 0, reducedMotion = false }) {
+  if (!measured) return null
+  const offset = detents[index]
+  const moved = prev != null && prev !== index
+  return { offset, ms: moved && !reducedMotion ? settleMs(offset - from) : 0 }
+}
