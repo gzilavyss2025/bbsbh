@@ -351,6 +351,10 @@ export function GameSelect({
   // Uses the SAME bracket the fold and the full view draw, so "alive" can
   // never disagree between the grid and the bracket above it.
   const offDayTeams = useMemo(() => {
+    // Until the schedule answers, `sorted` is empty and every club would count as idle:
+    // the grid would draw, then give way to the cards (CLS 0.52). A day with no games
+    // answers `[]` (truthy), so it keeps its grid.
+    if (!data) return []
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
     const all = bracketCoversPage
       ? offDayAliveTeams(postseasonBracket.bracket, playing)
@@ -362,7 +366,7 @@ export function GameSelect({
       if (pa !== pb) return pa - pb
       return (a.name ?? '').localeCompare(b.name ?? '')
     })
-  }, [bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
+  }, [data, bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
