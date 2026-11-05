@@ -3,9 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "engines": {
-    "node": "^22.18.0 || 24.x"
-  },
   "description": "Tally Baseball companion for scorekeeping, delayed watching, and baseball research.",
   "scripts": {
     "dev": "vite",
