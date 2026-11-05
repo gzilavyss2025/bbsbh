@@ -1,9 +1,7 @@
-import { franchiseLedger } from './franchiseLedger.js'
-import { pennantsFor } from './leaguePennants.js'
-
 // A club's franchise summary (#2600), derived from its season ledger (#2595) and its pennants.
-// No file of its own. Finished seasons only: the ledger stops the season before today's, while
-// `pennants` is pennantsFor as it stands, so it can hold the current season's pennant.
+// No file of its own. The franchise page (screens/team/franchise/loadFranchise.js) passes the ledger
+// rows plus its live rows (the ledger stops the season before today's); `pennants` is pennantsFor
+// as it stands, so it can hold the current season's pennant.
 //
 // Winningest manager: each manager's w-l summed over the ledger seasons that carry it (a season
 // he managed alone, or a shared season split by scripts/manager-transitions-seed.json). A shared
@@ -12,7 +10,9 @@ import { pennantsFor } from './leaguePennants.js'
 
 // Pure. -> { names: [{ name, from, to }], seasons: { from, to, count } | null, record: { w, l },
 //   postseasons: [season], titles: [season], pennants, winningestManager: { id, name, w, l, seasons } | null,
-//   managersFrom: season | null }
+//   managers: [{ id, name, w, l, seasons, years, partial }], managersFrom: season | null }
+// `managers` holds everyone listed, in ledger order: `w`/`l`/`seasons` count the seasons with a
+// split, `years` every season he is listed in, `partial` true when one of them has no split.
 export function summarizeFranchise(rows, pennants) {
   const list = [...(rows ?? [])].sort((a, b) => a.season - b.season)
   const names = []
@@ -24,15 +24,20 @@ export function summarizeFranchise(rows, pennants) {
     else names.push({ name: r.name, from: r.season, to: r.season })
     if (r.managers?.length && managersFrom == null) managersFrom = r.season
     for (const m of r.managers ?? []) {
-      if (m.w == null || m.l == null) continue
-      const t = byManager.get(m.id) ?? { id: m.id, name: m.name, w: 0, l: 0, seasons: 0 }
-      t.w += m.w
-      t.l += m.l
-      t.seasons += 1
+      const t = byManager.get(m.id) ?? { id: m.id, name: m.name, w: 0, l: 0, seasons: 0, years: [], partial: false }
+      t.years.push(r.season)
+      if (m.w == null || m.l == null) t.partial = true
+      else {
+        t.w += m.w
+        t.l += m.l
+        t.seasons += 1
+      }
       byManager.set(m.id, t)
     }
   }
-  const best = [...byManager.values()].sort((a, b) => b.w - a.w || a.l - b.l || a.id - b.id)[0] ?? null
+  const managers = [...byManager.values()]
+  const top = managers.filter((m) => m.seasons).sort((a, b) => b.w - a.w || a.l - b.l || a.id - b.id)[0]
+  const best = top ? { id: top.id, name: top.name, w: top.w, l: top.l, seasons: top.seasons } : null
   return {
     names,
     seasons: list.length ? { from: list[0].season, to: list[list.length - 1].season, count: list.length } : null,
@@ -41,11 +46,8 @@ export function summarizeFranchise(rows, pennants) {
     titles: list.filter((r) => r.postseason?.round === 'World Series' && r.postseason.won).map((r) => r.season),
     pennants: pennants ?? [],
     winningestManager: best,
+    managers,
     managersFrom,
   }
 }
 
-export async function franchiseSummary(teamId) {
-  const [{ through, rows }, pennants] = await Promise.all([franchiseLedger(teamId), pennantsFor(teamId)])
-  return { teamId: Number(teamId), through, ...summarizeFranchise(rows, pennants) }
-}
