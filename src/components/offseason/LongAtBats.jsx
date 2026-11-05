@@ -88,8 +88,9 @@ export function LongAtBats({ season }) {
         .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b }))),
     [every],
   )
-  // A club filter: an at-bat stays when the club is on either side of it.
-  const all = useMemo(() => atBatsForClub(every, club), [every, club])
+  // A pick the list cannot show (a season change while one was held) is no pick.
+  const picked = clubs.includes(club) ? club : null
+  const all = useMemo(() => atBatsForClub(every, picked), [every, picked])
   // Where the window sits and which row holds focus (it stays drawn even when it scrolls
   // out of the window). Tied to the list they were taken
   // from: a new season, new data or a club filter is a new `all`, and a fresh list
@@ -202,7 +203,7 @@ export function LongAtBats({ season }) {
       </SectionHead>
 
       <Card frame="stamped" as="div" className="seasonnote__sheet">
-        <ClubStrip clubs={clubs} value={club} onPick={pickClub} />
+        <ClubStrip clubs={clubs} value={picked} onPick={pickClub} />
         <div className="seasonnote__row">
           <div className="seasonnote__longest">
             <p className="seasonnote__big">
@@ -276,14 +277,14 @@ export function LongAtBats({ season }) {
         </div>
 
 
-        <p className="seasonnote__census infopop-row" aria-live="polite">
-          {club ? (
-            // A picked club's own count. The rate stays the season's: the file has no
-            // per-club plate appearances to divide by.
+        <p className="seasonnote__census infopop-row">
+          {picked ? (
+            // A picked club's own count, with no rate: the file has no per-club plate
+            // appearances to divide by. The club as the file names it (clubAbbr).
             <>
-              <span className="seasonnote__against">{all.length}</span> of the{' '}
+              <span className="seasonnote__against">{count(all.length)}</span> of the{' '}
               <span className="seasonnote__against">{count(every.length)}</span> at-bats of {data.threshold}+ pitches in {season} had{' '}
-              {teamAbbr({ id: club })} on one side
+              {clubAbbr(all[0], picked)} on one side
             </>
           ) : (
             <>
