@@ -244,3 +244,87 @@ a.frnums__link:focus-visible {
 .frmgr__name {
   white-space: normal;
 }
+
+/* THE ALL-TIME LEADERS CARD (#2785): the switch, then each group's top-five lists, two across on a
+   phone and five across from the 740px step. The door opens the card in place. */
+.frpage .frlead {
+  margin-top: var(--space-6);
+}
+.frlead__body {
+  padding: var(--space-4) var(--space-3h) var(--space-3h);
+}
+.frlead__group {
+  margin-top: var(--space-4);
+}
+.frlead__grouphead {
+  margin: 0 0 var(--space-2);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+/* layout-exempt: a fixed count of lists across, two on a phone and five wide */
+.frlead__lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-3);
+}
+/* A season row carries the year too, so a phone draws one list across. */
+.frlead--season .frlead__lists {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 740px) {
+  .frlead__lists {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .frlead--season .frlead__lists {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.frlead__list {
+  min-width: 0;
+  padding-top: var(--space-1h);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.frlead__cat {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.frlead__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: rank, name, figure (and the year in Season) on one line */
+.frlead__row {
+  display: grid;
+  grid-template-columns: 1.1em minmax(0, 1fr) auto;
+  gap: var(--space-1h);
+  align-items: baseline;
+  padding: var(--space-1) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+}
+.frlead--season .frlead__row {
+  grid-template-columns: 1.1em minmax(0, 1fr) auto auto;
+}
+.frlead__rank,
+.frlead__year {
+  color: var(--text-caption);
+}
+.frlead__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.frlead__value {
+  font-weight: var(--w-bold);
+}
