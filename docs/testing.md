@@ -307,8 +307,12 @@ The footer's build stamp reads the commit from `<meta name="build-commit">` in
 per-deploy value inside a chunk changes its hash and renames every chunk that imports
 it, so each deploy, a data-only one included, made installed apps download ~40
 precached chunks again (#2873). `scripts/bundle/check-commit-not-in-js.mjs` fails when
-the SHA is in any file under `dist/assets/`. The same rule holds for any new
-per-deploy value (a timestamp, a define): put it in `index.html`, not in the JS.
+the SHA (full or short) is in any file under `dist/assets/`, or when Vite's inlined env
+object (`SSR:!1,VITE_…`) is. A bare `import.meta.env` read inlines every `VITE_*`
+variable, and Vercel's include `VITE_VERCEL_GIT_COMMIT_SHA`; CI has none, so only the
+structural check sees that leak. Read env keys statically (`import.meta.env.VITE_X`).
+The same rule holds for any new per-deploy value (a timestamp, a define): put it in
+`index.html`, not in the JS. Pure half: `test/commit-guard.test.js`.
 
 ## Making the tests actually bite
 
