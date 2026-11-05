@@ -270,6 +270,25 @@ don't run these by hand.
   twelve-pitch at-bat is a length — and `test/long-at-bats.test.js` asserts that
   of the committed file by vocabulary. `--rescan` re-ingests every game;
   `--season=2026` pins the year.
+- `gen-outfield-outs.mjs` → `public/data/outfield-outs/{season}.json` — every regular-season
+  team-game in which the batting club made **no out to an outfielder** (issue #2976, "Kept it in
+  the infield"). Each qualifier stores gamePk, date, the batting club's id, the opponent's id and
+  the OF-hit count. Each season also stores the near-miss count (exactly one OF out), the team-game
+  total and the excluded counts. No score, winner or inning. The classifier is
+  `scripts/lib/outfield/outfield-outs.mjs`, tested in `test/outfield-outs.test.js`. Decisions:
+  - Only plate appearances count. A caught stealing or pickoff is a runner out, not a batted ball.
+  - The fielder is the **first credit on the batter's own runner entry**, not the play's first
+    credit. A runner doubled off or thrown out by an outfielder sits on another runner's entry, so it
+    cannot change who fielded the batter's ball. Without a credit, `hitData.location` on the last
+    playEvent with hitData is the fallback.
+  - `field_error` is neither an out nor an OF hit. A home run is allowed and counts as neither.
+  - Empty feed: a Final game with no plate appearance is excluded whole (632457, 746577, 823490).
+  - Coverage: a team-game is excluded when fewer than 90% of its balls in play name a fielder.
+    Excluded team-games are counted, not guessed at.
+  Nightly: the season in play, reading only unseen games (about 15 a night). A first run over
+  2021–2026 is about 14.6k calls at concurrency 20; `--from=2021 --to=2026` runs that backfill.
+  Incremental, with the scan at `scripts/data/outfield-outs-scan.json`. The default season is
+  `fetchSeasonInPlay()`, not the calendar year (#1465).
 - `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays}.json` — the
   games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
