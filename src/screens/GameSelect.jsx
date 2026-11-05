@@ -226,6 +226,21 @@ export function GameSelect({
         : LEVELS,
     [winterBall.tabVisible, winterBall.defaultLeagueId],
   )
+  // The favorite team is always an MLB club (the club picker only offers
+  // those), so on a MiLB level its own game never appears — pin its current
+  // affiliate at THIS level instead. Season keys off the slate's own date
+  // (not "now") so paging near a year boundary still asks for the season the
+  // displayed date actually falls in; fetchAffiliates degrades to [] offline.
+  const season = Number(dateStr.slice(0, 4))
+  // AFL and winter-league clubs are affiliates of nothing (an AFL club's parentOrgName is
+  // "Office of the Commissioner"), so there is no club to resolve to: skip the fetch.
+  const affiliates = useAsync(
+    () =>
+      sportId === SPORT_IDS.MLB || onWinter
+        ? Promise.resolve([])
+        : fetchAffiliates(favoriteTeamId, season),
+    [favoriteTeamId, season, sportId, onWinter],
+  )
   const slate = useAsync(
     () =>
       onWinter && !activeLeagueId
@@ -233,7 +248,10 @@ export function GameSelect({
         : fetchSchedule(dateStr, sportId, undefined, activeLeagueId),
     [dateStr, sportId, onWinter, activeLeagueId],
   )
-  const { loading, error, data } = slate
+  // Hold the cards until affiliates answer too: the pinned card re-sorts to the top (CLS 0.31).
+  const { error } = slate
+  const loading = slate.loading || affiliates.loading
+  const data = affiliates.loading ? null : slate.data
   // Each level's game count for the ladder: one score-free call for all five
   // (api/slate/levelCounts.js), and the winter's off the calendar useWinter
   // already holds. Re-read on foreground, as the slate is, so a makeup added
@@ -254,24 +272,6 @@ export function GameSelect({
   // line wanted here — a date or level switch is a cold load again.
   const coldLoad = loading && !data
 
-  // The favorite team is always an MLB club (the club picker only offers
-  // those), so on a MiLB level its own game never appears — pin its current
-  // affiliate at THIS level instead. Season keys off the slate's own date
-  // (not "now") so paging near a year boundary still asks for the season the
-  // displayed date actually falls in; fetchAffiliates degrades to [] offline.
-  const season = Number(dateStr.slice(0, 4))
-  // An AFL club reports `parentOrgName: "Office of the Commissioner"` — it is a
-  // composite of six or seven organisations and an affiliate of nothing, and
-  // the same is true of every club in the three winter leagues. So there is no
-  // club here for a favourite to resolve to, and asking would spend a fetch to
-  // be told so.
-  const affiliates = useAsync(
-    () =>
-      sportId === SPORT_IDS.MLB || onWinter
-        ? Promise.resolve([])
-        : fetchAffiliates(favoriteTeamId, season),
-    [favoriteTeamId, season, sportId, onWinter],
-  )
   const favoriteAffiliateIds = useMemo(
     () => new Set((affiliates.data ?? []).map((a) => a.id)),
     [affiliates.data],
@@ -351,6 +351,8 @@ export function GameSelect({
   // Uses the SAME bracket the fold and the full view draw, so "alive" can
   // never disagree between the grid and the bracket above it.
   const offDayTeams = useMemo(() => {
+    // Unanswered schedule = every club "idle" (CLS 0.52). A gameless day answers `[]`, truthy.
+    if (!data) return []
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
     const all = bracketCoversPage
       ? offDayAliveTeams(postseasonBracket.bracket, playing)
@@ -362,7 +364,7 @@ export function GameSelect({
       if (pa !== pb) return pa - pb
       return (a.name ?? '').localeCompare(b.name ?? '')
     })
-  }, [bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
+  }, [data, bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
@@ -628,10 +630,12 @@ export function GameSelect({
             onRetry={slate.reload}
             // Suppressed for a day the break window or Off Day banner will claim
             // (below) — briefly while either lookup is still in flight too, so
-            // neither flashes "No games scheduled." before the fetch resolves.
+            // neither flashes "No games scheduled." before the fetch resolves. The winter
+            // claims it only once its page draws (`winter`): a phase with no countdown date
+            // (offline, nothing saved for next season) keeps the words, not a blank (#2936).
             emptyMessage={
               seasonMeta.loading || winterWait || breakWindow || resumeLookupPending ||
-              showOffDayBanner || offseason || bracketCoversPage
+              showOffDayBanner || winter || bracketCoversPage
                 ? null
                 : 'No games scheduled.'
             }
