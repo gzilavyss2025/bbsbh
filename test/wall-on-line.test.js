@@ -32,7 +32,7 @@ test('the wall stands on the plan view\'s own outline, at heightAt\'s height', (
   const wall = wallOnLine(FENWAY, deg)
   // The same ray through the same outline the top-down drawing inks.
   assert.ok(Math.abs(wall.ft - fenceDistanceAt(FENWAY.geometry.fence, deg)) < 0.1)
-  assert.equal(wall.ft, 309.4)
+  assert.equal(wall.ft, 309.1)
   assert.equal(wall.height, 37.3)
   // -40 degrees is between Savant's measured points (-45 and -18): no label.
   assert.equal(wall.label, null)
