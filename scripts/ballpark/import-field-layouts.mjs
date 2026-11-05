@@ -42,6 +42,8 @@ import {
 import { getJson, statsapiUrl } from '../lib/statsapi.mjs'
 import { ballparkFor } from '../../src/lib/ballpark/ballparkData.js'
 import { CONFIGURATIONS } from '../../src/lib/ballpark/layout/configurations.js'
+import { resolveBallparkLayout } from '../../src/lib/ballpark/layout/resolveLayout.js'
+import { roundFence, wholeUnits, fairArea } from '../lib/ballpark/round-outline.mjs'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 import { join } from 'node:path'
 
@@ -71,6 +73,9 @@ function savantRows(html) {
   return rows
 }
 
+// The CF sign the renderer reads the marker against (the layout's posted distance).
+const signCf = (id, fallback) => resolveBallparkLayout({ venueId: Number(id), gameDate: new Date().toISOString().slice(0, 10) })?.measurements.dist.cf ?? fallback
+
 const r1 = (n) => (n == null ? null : Math.round(n * 10) / 10)
 
 const rows = savantRows(await text(SAVANT(year)))
@@ -95,11 +100,13 @@ for (const r of rows) {
       if (out.fittedScale) fitted.push(out.fittedScale)
       audit = auditOutline(out.points, out.areaSqFt, measured)
       if (audit.pass) {
-        fence = out.points
+        // Whole units where the CF marker keeps its angle (round-outline.mjs, #2931).
+        fence = roundFence(out.points, signCf(r.venue_id, measured.dist.cf), (w) => auditOutline(w, out.areaSqFt + fairArea(w) - fairArea(out.points), measured).pass)
+        if (fence !== out.points) audit = auditOutline(fence, out.areaSqFt + fairArea(fence) - fairArea(out.points), measured)
         // The softer layers ride only on an audited fence, and only when
         // plausible (slice 5): the playing surface and the track's inner edge.
         const ok = checkLayers(out.points, measured.areaSqFt, out)
-        layers = { ...(ok.surface ? { surface: out.surface } : {}), ...(ok.track ? { trackInner: out.trackInner } : {}) }
+        layers = { ...(ok.surface ? { surface: wholeUnits(out.surface) } : {}), ...(ok.track ? { trackInner: wholeUnits(out.trackInner) } : {}) }
         if (!ok.surface || !ok.track) console.log(`  ${r.venue_id}: stylized ${[!ok.surface && 'foul ground', !ok.track && 'track'].filter(Boolean).join(' and ')} (failed the plausibility check)`)
       }
     }
@@ -182,7 +189,10 @@ for (const [id, sportId] of milbVenues) {
     style = out ? (named ? 'named' : 'legacy') : null
     if (out) {
       audit = auditPosted(out.points, posted)
-      if (audit.pass) fence = out.points
+      if (audit.pass) {
+        fence = roundFence(out.points, signCf(id, posted.cf), (w) => auditPosted(w, posted).pass)
+        if (fence !== out.points) audit = auditPosted(fence, posted)
+      }
       if (!named && posted.cf) {
         // The scale that would put this drawing's CF on its posted sign, for
         // the log's check on LEGACY_SCALE_FT_PER_UNIT.
