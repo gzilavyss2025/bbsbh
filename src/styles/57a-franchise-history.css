@@ -16,6 +16,26 @@
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
 }
+/* An era is a door to its last season (#2779): the whole cell is the tap target, and the name
+   wears the dotted link rule. */
+/* layout-exempt: the era's years, name, league and park stacked in its tap target */
+.fhist__era {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  color: inherit;
+  text-decoration: none;
+}
+.fhist__era .fhist__name {
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
+}
+.fhist__era:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
 .fhist__years {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
@@ -53,4 +73,9 @@
   width: var(--space-8);
   height: var(--space-8);
   object-fit: contain;
+}
+
+/* The door to the franchise page (#2786), the card's foot. */
+.fhist__door {
+  margin-top: var(--space-3);
 }

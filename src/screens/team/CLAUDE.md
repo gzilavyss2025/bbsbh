@@ -65,7 +65,8 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   The source line portals into the foot's `#tnext-credits` slot (Gary, 2026-10-30), the one
   sanctioned reach outside a band's folder; inline until the slot exists.
   A season's book (ADR-0052): a date does not move it, except that a frozen past season reads its own copy.
-- **About** (`next/about/`): the ballpark, franchise history (MLB), jerseys
+- **About** (`next/about/`): the ballpark, franchise history (MLB; each era opens its last season and
+  the foot is the door to the franchise page, #2779/#2786), jerseys
   (these follow `?d=`) and, for MiLB, Made The Show.
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the
   Affiliate chip, the Game Notes card, and the `#tnext-credits` slot. It adds no request.

@@ -35,7 +35,7 @@ export default function About({ team, asOf, onReady, onCount }) {
   return (
     <Stack gap="section" className="tnext__about">
       <BallparkCard team={team} venue={d.venue} layoutDate={d.venue === undefined ? undefined : asOf} attendance={d.attendance} cardProps={card('Ballpark', i++)} />
-      {d.franchise && <FranchiseHistory {...d.franchise} cardProps={card('Franchise history', i++)} />}
+      {d.franchise && <FranchiseHistory {...d.franchise} team={team} asOf={asOf} cardProps={card('Franchise history', i++)} />}
       {d.pennants?.length > 0 && <PennantWall pennants={d.pennants} cardProps={card('Pennants', i++)} />}
       {door && <Door className="tnext__about-door" {...linkProps(door)}>Postseason history</Door>}
       {jerseyCombos.length > 0 && (

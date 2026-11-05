@@ -59,3 +59,9 @@ export function venueForSeason(spans, season) {
   const span = (spans ?? []).find((s) => s.from <= season && season <= s.to)
   return span?.venueId == null ? null : { id: span.venueId, name: span.venueName }
 }
+
+// Pure: the season an era opens on the About band (#2779): its last, or null (the live page) for
+// the era still running, the one that reaches the file's last season `through`.
+export function eraSeason(span, through) {
+  return span.to >= through ? null : span.to
+}
