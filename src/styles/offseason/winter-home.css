@@ -327,6 +327,18 @@
 .wintercal {
   margin-bottom: var(--space-6);
 }
+/* Below the fold on the offseason page: skip style/layout/paint until near the viewport (#2910).
+   `auto` keeps the real height once drawn; the number is the measured one (layout containment stops margin collapse, so +18px), 390px then wide. */
+.oseason > .wintercal,
+.oseason > .oseason__ledger {
+  content-visibility: auto;
+}
+.oseason > .wintercal { contain-intrinsic-size: auto 620px; }
+.oseason > .oseason__ledger { contain-intrinsic-size: auto 400px; }
+@media (min-width: 740px) {
+  .oseason > .wintercal { contain-intrinsic-size: auto 345px; }
+  .oseason > .oseason__ledger { contain-intrinsic-size: auto 306px; }
+}
 /* A month per column, as many as fit; on a phone they wrap two-up. */
 /* layout-exempt: calendar month columns */
 .wintercal__months {
