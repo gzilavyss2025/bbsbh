@@ -36,25 +36,26 @@ async function liveSeason(team, season, name) {
   return liveRow({ teamId: team.id, season, name, records, dates, manager })
 }
 
-// -> { team, rows, summary, hof, retired, leaders } (rows oldest first), or { team, rows: [] } for a
-// club with no ledger (MiLB). The summary (#2784) reads every row the table shows, live ones too,
-// so a title won this season counts before the offseason ledger run. The stores are static files.
+// -> { team, rows, summary } (rows oldest first), or { team, rows: [] } for a club with no ledger
+// (MiLB). The summary (#2784) reads every row the table shows, live ones too, so a title won this
+// season counts before the offseason ledger run.
 export async function loadFranchise(id) {
   const team = await fetchTeam(id)
   if (!team) return null
   if ((team.sport?.id ?? 1) !== 1) return { team, rows: [] }
-  const [{ through, rows: stored }, pennants, hof, retired, leaders] = await Promise.all([
-    franchiseLedger(team.id),
-    pennantsFor(team.id),
-    hallOfFamersFor(team.id),
-    retiredNumbersFor(team.id),
-    franchiseLeaders(team.id),
-  ])
+  const [{ through, rows: stored }, pennants] = await Promise.all([franchiseLedger(team.id), pennantsFor(team.id)])
   if (!stored.length) return { team, rows: stored }
   const year = Number(isoToday().slice(0, 4))
   const seasons = []
   for (let s = (through ?? year) + 1; s <= year; s++) seasons.push(s)
   const live = (await Promise.all(seasons.map((s) => liveSeason(team, s, stored[stored.length - 1].name)))).filter(Boolean)
   const rows = [...stored, ...live]
-  return { team, rows, summary: summarizeFranchise(rows, pennants), hof, retired, leaders }
+  return { team, rows, summary: summarizeFranchise(rows, pennants) }
+}
+
+// People and places, loaded after the ledger so the table never waits on it (#2784 review): the
+// Hall of Famers, the retired numbers, and the all-time leaders (whose ids link the number tiles).
+export async function loadFranchisePeople(teamId) {
+  const [hof, retired, leaders] = await Promise.all([hallOfFamersFor(teamId), retiredNumbersFor(teamId), franchiseLeaders(teamId)])
+  return { hof, retired, leaders }
 }

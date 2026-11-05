@@ -1,5 +1,6 @@
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
+import { InfoPopover } from '../../../../components/ui/InfoPopover.jsx'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { managerPath } from '../../../../lib/route.js'
 import { managersView } from './peopleView.js'
@@ -7,12 +8,12 @@ import { managersView } from './peopleView.js'
 // Every manager on the ledger, newest first, with his seasons, W-L and pct (#2784). The winningest
 // (the summary's pick) wears a tag. A season he shared with no split on file is left out of his
 // W-L, marked † with one footnote. Manager data starts in 1969 (managersFrom).
-export function Managers({ rows, best }) {
+export function Managers({ managers, best }) {
   const link = useRouteLink()
-  const list = managersView(rows, best)
+  const list = managersView(managers, best)
   if (!list.length) return null
   return (
-    <Card frame="stamped" body="flush" label="Managers" count={String(list.length)} className="frmgr">
+    <Card frame="stamped" body="flush" label="Managers" labelAs="h3" count={String(list.length)} className="frmgr">
       <Table frame="bare" label="Managers, newest first" className="frl__grid frmgr__grid">
         <thead>
           <tr>
@@ -32,7 +33,7 @@ export function Managers({ rows, best }) {
                 {m.partial && (
                   <>
                     <span aria-hidden="true"> †</span>
-                    <span className="sr-only"> (a shared season has no split on file)</span>
+                    <span className="sr-only"> (a season with no split on file)</span>
                   </>
                 )}
                 {m.best && <span className="frl__tag">Most wins</span>}
@@ -44,7 +45,15 @@ export function Managers({ rows, best }) {
           ))}
         </tbody>
       </Table>
-      {list.some((m) => m.partial) && <p className="frl__foot">† A season he shared has no split on file, so his W-L leaves it out.</p>}
+      {list.some((m) => m.partial) && (
+        <p className="hint frl__hint infopop-row">
+          † a season with no split on file{' '}
+          <InfoPopover label="About the dagger" className="infopop--paper">
+            A season he shared with another manager, or this season before the offseason ledger run, has
+            no W-L split on file, so his W-L leaves it out.
+          </InfoPopover>
+        </p>
+      )}
     </Card>
   )
 }

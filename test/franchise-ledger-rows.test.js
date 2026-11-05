@@ -106,8 +106,9 @@ test('liveRow: a finished season that ended in a World Series win, no tag', () =
   assert.deepEqual([r.season, r.w, r.l, r.gb, r.divisionRank, r.rs, r.ra], [2026, 103, 59, 0, 1, 832, 618])
   assert.deepEqual(r.postseason, { round: 'World Series', won: true })
   assert.equal(r.inProgress, false)
-  // #2784: the one manager on file is credited the season, as a stored single-manager season is.
-  assert.deepEqual(r.managers, [{ id: 580268, name: 'Pat Murphy', w: 103, l: 59 }])
+  // #2784 review: fetchManager names one manager (an interim first), never who managed which
+  // games, so the live row credits no W-L. The page shows it with the † until the ledger run splits it.
+  assert.deepEqual(r.managers, [{ id: 580268, name: 'Pat Murphy' }])
 })
 
 test('liveRow: a game left to play tags the row in progress; a series not yet decided reads as neither won nor lost', () => {
