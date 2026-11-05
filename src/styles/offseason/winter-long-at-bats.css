@@ -342,6 +342,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
+  white-space: nowrap; /* a row is one fixed height: the date and result never wrap */
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   color: var(--text-caption);
@@ -403,9 +404,11 @@ button.seasonnote__barrow[aria-pressed='true'] {
   letter-spacing: var(--ls-caps);
   line-height: var(--lh-solid);
 }
-/* The list scrolls in its own box, five rows tall. */
+/* The list scrolls in its own box, five rows tall. Every row is one height,
+   --census-row-h: LongAtBats.jsx draws only the rows in view and pads the rest. */
 .seasonnote__longest .seasonnote__bars {
-  max-height: calc(5 * 55px); /* raw-value-exempt: five list rows */
+  --census-row-h: max(3.5rem, 56px); /* raw-value-exempt: the row's content is px, so the row never gets shorter than it */
+  max-height: calc(5 * var(--census-row-h));
   overflow-y: auto;
   overscroll-behavior: contain;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
@@ -417,6 +420,8 @@ button.seasonnote__barrow[aria-pressed='true'] {
 }
 .seasonnote__longest .seasonnote__bars::-webkit-scrollbar { display: none; }
 #root button.seasonnote__barrow { grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: var(--space-2); }
+.seasonnote__longest .seasonnote__bars > li[aria-posinset] { height: var(--census-row-h); }
+#root .seasonnote__longest button.seasonnote__barrow { height: 100%; overflow: hidden; }
 #root button.seasonnote__barrow .seasonnote__barn { text-align: left; font-size: var(--fs-small); }
 /* The club filter: a strip of marks across the card's head, scrolling sideways. */
 /* layout-exempt: one sideways strip of club marks */
