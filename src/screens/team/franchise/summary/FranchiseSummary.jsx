@@ -16,8 +16,8 @@ export function FranchiseSummary({ summary }) {
       <div className="frsum__tiles">
         <StatTile tone="ink" label="Record" value={v.record} caption={`${v.pct} · ${v.span}`} className="frsum__lead" />
         <StatTile tone="tint" label="Postseasons" value={v.postseasons} caption={v.lastPostseason ? `Last ${v.lastPostseason}` : null} />
-        <StatTile label="Pennants" value={v.pennants} caption={v.pennantCaption} />
-        <StatTile label="World Series" value={v.titles} caption={v.titleCaption} />
+        <StatTile label="Pennants" value={v.pennants} caption={v.pennant.caption} />
+        <StatTile label="World Series" value={v.titles} caption={v.title.caption} />
       </div>
       <dl className="frsum__facts">
         <dt className="t-label">Names</dt>
@@ -28,16 +28,16 @@ export function FranchiseSummary({ summary }) {
             </span>
           ))}
         </dd>
-        {v.pennantRuns && (
+        {v.pennant.runs && (
           <>
             <dt className="t-label">Pennants</dt>
-            <dd>{v.pennantRuns}</dd>
+            <dd>{v.pennant.runs}</dd>
           </>
         )}
-        {v.titleRuns && (
+        {v.title.runs && (
           <>
             <dt className="t-label">World Series</dt>
-            <dd>{v.titleRuns}</dd>
+            <dd>{v.title.runs}</dd>
           </>
         )}
         {v.postseasonYears && (
