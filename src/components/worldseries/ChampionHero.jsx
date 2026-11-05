@@ -32,8 +32,9 @@ export function ChampionHero({ bracket }) {
   if (!mode) return null
   const mvp = award?.recipients?.[0] ?? null
   const pick = MVP_PHOTOS[season]
-  // Keep the photo's side while the award loads and once it names an MVP; drop it on a settled miss.
-  const photoClub = pick && (mvp || loading) ? pick.club : null
+  const ids = mode.series.slots.map((x) => x.club.id)
+  // Keep the photo's side while the award loads and once it names an MVP we can place; else the marks.
+  const photoClub = pick && ids.includes(pick.club) && (loading || ids.includes(mvp?.teamId)) ? pick.club : null
   return (
     <div className="ww-champhero">
       <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? photoUrl(pick.id) : null} photoSrcSet={photoClub ? photoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
