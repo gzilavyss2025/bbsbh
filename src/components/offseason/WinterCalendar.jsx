@@ -130,7 +130,7 @@ export function WinterCalendar({ winter }) {
 // there is no honest version of it without the day.
 // A spring training photo across the top of the card, picked by hand (an
 // image id on img.mlbstatic.com, its 5x2 cut).
-const SPRING_PHOTO = 'https://img.mlbstatic.com/mlb-images/image/private/t_5x2/t_w1080/mlb/rqr0tlmzxa0bntwmdvxu.jpg'
+const springPhoto = (w) => `https://img.mlbstatic.com/mlb-images/image/private/t_5x2/t_w${w}/mlb/rqr0tlmzxa0bntwmdvxu.jpg`
 // The two spring leagues' own marks on MLB's logo CDN: 114 is the Cactus
 // League (Arizona), 115 the Grapefruit League (Florida).
 const SPRING_LEAGUES = [
@@ -155,7 +155,7 @@ export function WinterCountdown({ winter }) {
     >
       {spring && (
         <span className="springcount__photo">
-          <img src={SPRING_PHOTO} alt="" loading="lazy" decoding="async" />
+          <img src={springPhoto(1080)} srcSet={`${springPhoto(1080)} 1080w, ${springPhoto(2208)} 2208w`} sizes="(min-width: 740px) 740px, 100vw" alt="" loading="lazy" decoding="async" />
         </span>
       )}
       {spring && (

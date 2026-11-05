@@ -277,7 +277,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
 const SIDES = ['away', 'home']
 
 // `washBehind` (the home slate): the action photo sits behind the MVP's cut-out, not across the stage.
-// `photo`: a Series photo URL that takes the MVP's side in place of the cut-out; `stripe`, two
+// `photo` (+ `photoSrcSet`, `photoTeamId`): a Series photo that takes the MVP's side in place of the cut-out; `stripe`, two
 // colours [outer, inner], edges it with a three-band club stripe.
 export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, photoSrcSet = undefined, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
   // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
@@ -290,9 +290,11 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
   const slotOf = Object.fromEntries(series.slots.map((s) => [s.club.id, s]))
   const dates = series.games.map((g) => g.date).filter(Boolean)
   const mark = seriesMark({ season: Number(dates[0]?.slice(0, 4)), round: 'worldseries' })
-  // `photoTeamId`: the club whose side the static photo takes, so the slab draws before `mvp` lands.
+  // `photoTeamId`: the club whose side the static photo takes. It draws before `mvp` lands and stays put
+  // if the award names another club. Pass it null once the award settles empty: the marks return.
   const mvpAt = hero.players.findIndex(Boolean)
-  const slabAt = mvpAt >= 0 ? mvpAt : photo ? ids.indexOf(photoTeamId) : -1
+  const photoAt = photo ? ids.indexOf(photoTeamId) : -1
+  const slabAt = photoAt >= 0 ? photoAt : mvpAt
   return (
     <Card frame="stamped" label="Overview" className={`ww-hero ww-hero--decided${slabAt >= 0 ? ' ww-hero--mvp' : ''}`}>
       <Stack gap="base">
@@ -337,7 +339,7 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
             </Stack>
           </div>
           {mvpAt >= 0 && (
-            <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - mvpAt]}`} aria-label="Series MVP">
+            <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - slabAt]}`} aria-label="Series MVP">
               <span className="ww-hero__mvptag">Series MVP</span>
               <Cluster gap="snug" align="baseline">
                 <PlayerLink id={mvp.playerId} className="ww-hero__mvpname">{mvp.name}</PlayerLink>
