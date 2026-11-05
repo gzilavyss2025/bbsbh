@@ -430,7 +430,7 @@ export function GameSelect({
   // bracket is the whole page there), and this lookup would otherwise ask
   // fetchNextGameDate a question the bracket already answers.
   const needsResumeLookup =
-    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark && !bracketCoversPage
+    isEmptyDay && !isDerbyDay && !allStarPending && !winterPending && !offseason && !winterDark && !bracketCoversPage
   const resumeLookup = useAsync(
     (signal) =>
       needsResumeLookup
@@ -541,7 +541,7 @@ export function GameSelect({
     <div
       className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
         docked ? ' screen--wiredock' : ''
-      }${railed && !winter ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
+      }${railed && !winter && !holdForWinter ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
     >
       {/* The D1 masthead: the brand bar, the ladder card (level + day) and,
           on a phone, the compact bar that replaces the card on scroll. Every
@@ -629,7 +629,7 @@ export function GameSelect({
             // (below) — briefly while either lookup is still in flight too, so
             // neither flashes "No games scheduled." before the fetch resolves.
             emptyMessage={
-              seasonMeta.loading || breakWindow || resumeLookupPending ||
+              seasonMeta.loading || winterPending || breakWindow || resumeLookupPending ||
               showOffDayBanner || offseason || bracketCoversPage
                 ? null
                 : 'No games scheduled.'
@@ -734,7 +734,7 @@ export function GameSelect({
             reports which back so the shell can give the reserved width up.
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
-        {wireOn && wide && !winter && (
+        {wireOn && wide && !winter && !holdForWinter && (
           <WireRail
             endDate={dateStr}
             sportId={sportId}
@@ -782,7 +782,7 @@ export function GameSelect({
           />
         </LazyPanel>
       )}
-      {wireOn && !wide && !winter && (
+      {wireOn && !wide && !winter && !holdForWinter && (
         <WireDock
           endDate={dateStr}
           sportId={sportId}

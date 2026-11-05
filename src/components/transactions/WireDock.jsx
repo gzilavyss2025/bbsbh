@@ -31,6 +31,8 @@ export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
 
   useEffect(() => {
     onPresence?.(present)
+    // Unmounting (the winter page took the dock's place) must not leave the slate padded for it.
+    return () => onPresence?.(false)
   }, [onPresence, present])
 
   // Renders nothing while loading, on a failed fetch, and on a genuinely quiet

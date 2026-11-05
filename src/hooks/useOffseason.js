@@ -66,7 +66,9 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const pick = (fresh, id) =>
     fresh === undefined ? load(id, year) : rowFitsYear(fresh, year) ? fresh : null
   const seasonRow = pick(net.season, SPORT_IDS.MLB)
-  const levelRows = isLevel ? pick(net.level, sportId) : null
+  // A settled-null MLB row is the network saying there is no winter to read: on a level tab
+  // that beats saved level rows too, which are only used while the MLB row is unanswered.
+  const levelRows = isLevel ? (net.season === null ? null : pick(net.level, sportId)) : null
   const phase = isLevel
     ? levelOffseasonPhase(dateStr, levelRows)
     : sportId === SPORT_IDS.MLB
@@ -74,22 +76,29 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
       : null
   // Is a winter to be expected (to hold room for it)? Only on a tab that can have one.
   // Yes when the rows say so. With no rows at all (a first visit, or storage blocked) the
-  // calendar guesses: between mid-October and the end of February. No when rows are in
-  // hand and say it is the season: that day keeps its ordinary empty-day page.
+  // calendar guesses, per sport: MLB's winter starts when the World Series window ends (every
+  // measured offseasonStartDate is November 1 or 2) and runs to the end of February; the levels are out from the end of September to
+  // their early-April openers. No when rows are in hand and say it is the season: that day keeps its ordinary empty-day page.
   const canHaveWinter = isLevel || sportId === SPORT_IDS.MLB
   const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
   const md = dateStr?.slice(5)
-  const winterMonths = md >= '10-15' || md < '03-01'
+  const winterMonths = isLevel ? md >= '09-29' || md < '04-01' : md >= '11-02' || md < '03-01'
   return { phase, seasonRow, expectWinter: canHaveWinter && (Boolean(phase) || (!known && winterMonths)) }
 }
+
+// Has a useAsync fetch settled for this key? A rejection settles it too, so `pending` cannot hold
+// the slate's reserve forever (useAsync clears a previous key's error, #2930).
+export const answered = (fetch, id, year) =>
+  Boolean(fetch.error) || (fetch.data?.sportId === id && fetch.data?.year === year)
 
 export function winterOf(dateStr, sportId, base, nextRow, load = readSeasonRow) {
   const { phase, seasonRow } = base
   if (!phase) return null
   // The network's answer (even null) beats a saved row; `undefined` is "not answered yet".
+  const nextYear = phase.springFromNextSeason ?? phase.openerFromNextSeason
   const forward =
     nextRow !== undefined
-      ? nextRow
+      ? rowFitsYear(nextRow, nextYear) ? nextRow : null
       : phase.springFromNextSeason
         ? load(SPORT_IDS.MLB, phase.springFromNextSeason)
         : phase.openerFromNextSeason
@@ -210,10 +219,9 @@ export function useOffseason(dateStr, sportId, seasonRow) {
   // the date it counts to has landed yet. `winter` is what the page draws from.
   // `pending`: rows are still on their way (a level's, or the next season's), so
   // the slate must not draw a stand-in it would throw away a beat later.
-  const answered = (d, id, year) => d?.sportId === id && d?.year === year
   const pending =
-    (Boolean(levelSeason) && !answered(levelFetch.data, sportId, levelSeason)) ||
-    (Boolean(nextYear) && !answered(nextFetch.data, nextId, nextYear))
+    (Boolean(levelSeason) && !answered(levelFetch, sportId, levelSeason)) ||
+    (Boolean(nextYear) && !answered(nextFetch, nextId, nextYear))
   return { phase, winter, pending, expectWinter: base.expectWinter }
 }
 
