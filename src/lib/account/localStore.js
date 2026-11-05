@@ -27,22 +27,22 @@ export function notifyStorage(key) {
 
 // Subscribe to `storage` AND to a back/forward-cache restore (#2937). A page frozen
 // in the bfcache misses every `storage` event another tab fires meanwhile, so on a
-// persisted `pageshow` this replays `handler` once per watched key, with the event
-// shape a hook already reads: `{ key, newValue }` (the key's current value). The
-// handler keeps its own key filter and merge rules. Returns the unsubscribe.
+// persisted `pageshow` this replays `handler` with the event shape a hook already
+// reads: `{ key, newValue }` (the key's current value). The handler keeps its own key
+// filter and merge rules. Returns the unsubscribe.
 // useRevealProgress.js has its own restore path (#2917) and does not use this.
-export function onStorageOrRestore(keys, handler) {
+export function onStorageOrRestore(key, handler) {
   function onPageShow(e) {
     if (!e.persisted) return
-    for (const key of keys) {
-      let newValue = null
-      try {
-        newValue = window.localStorage.getItem(key)
-      } catch {
-        // Storage refused: replay as "nothing stored", which every parser handles.
-      }
-      handler({ key, newValue })
+    let newValue
+    try {
+      newValue = window.localStorage.getItem(key)
+    } catch {
+      // Storage refused: no other tab could have written, and the hook's in-memory
+      // session is the only copy, so replaying "nothing stored" would wipe it.
+      return
     }
+    handler({ key, newValue })
   }
   window.addEventListener('storage', handler)
   window.addEventListener('pageshow', onPageShow)

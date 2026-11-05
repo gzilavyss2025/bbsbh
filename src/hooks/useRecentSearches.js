@@ -44,7 +44,7 @@ export function useRecentSearches() {
       listRef.current = stored
       setRecent(stored)
     }
-    return onStorageOrRestore([RECENT_SEARCHES_KEY], onStorage)
+    return onStorageOrRestore(RECENT_SEARCHES_KEY, onStorage)
   }, [])
 
   const remember = useCallback(

@@ -22,7 +22,7 @@ export function writePitchMode(gamePk, on) {
 // ponytail: storage-backed only; where storage is refused the switch stays in at-bat mode.
 // onStorageOrRestore: a change another tab made while this page sat in the bfcache shows on Back (#2937).
 export function usePitchMode(gamePk) {
-  const subscribe = useCallback((fn) => onStorageOrRestore([pitchModeKey(gamePk)], fn), [gamePk])
+  const subscribe = useCallback((fn) => onStorageOrRestore(pitchModeKey(gamePk), fn), [gamePk])
   const on = useSyncExternalStore(subscribe, () => readPitchMode(gamePk), () => false)
   return [on, useCallback((v) => writePitchMode(gamePk, v), [gamePk])]
 }

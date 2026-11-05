@@ -29,27 +29,42 @@ function stubWindow(initial = {}) {
 const pageshow = (win, persisted) =>
   win.dispatchEvent(Object.assign(new Event('pageshow'), { persisted }))
 
-test('a persisted pageshow replays each watched key with its current value', () => {
+test('a persisted pageshow replays the watched key with its current value', (t) => {
   const { win, store } = stubWindow({ a: '1' })
+  t.after(() => delete globalThis.window)
   const seen = []
-  const off = onStorageOrRestore(['a', 'b'], (e) => seen.push([e.key, e.newValue]))
+  const off = onStorageOrRestore('a', (e) => seen.push([e.key, e.newValue]))
   win.dispatchEvent(Object.assign(new Event('storage'), { key: 'a', newValue: '1' }))
   assert.deepEqual(seen, [['a', '1']]) // a live `storage` event passes straight through
   store.a = '2' // another tab, while this page sat in the cache
-  store.b = 'x'
   pageshow(win, false) // an ordinary load: nothing was missed
   assert.equal(seen.length, 1)
   pageshow(win, true)
-  assert.deepEqual(seen.slice(1), [['a', '2'], ['b', 'x']])
+  assert.deepEqual(seen.slice(1), [['a', '2']])
   off()
   pageshow(win, true)
   win.dispatchEvent(Object.assign(new Event('storage'), { key: 'a' }))
-  assert.equal(seen.length, 3) // both listeners are gone
-  delete globalThis.window
+  assert.equal(seen.length, 2) // both listeners are gone
 })
 
-test('a mounted hook picks up a change made while the page sat in the cache', async () => {
+// Refused storage (Safari private mode): the hooks keep the session in memory, so a
+// restore must leave them alone rather than replay "nothing stored" over it.
+test('a restore with refused storage replays nothing', (t) => {
+  const { win } = stubWindow()
+  t.after(() => delete globalThis.window)
+  win.localStorage.getItem = () => {
+    throw new Error('SecurityError')
+  }
+  const seen = []
+  const off = onStorageOrRestore('a', (e) => seen.push(e.key))
+  pageshow(win, true)
+  assert.deepEqual(seen, [])
+  off()
+})
+
+test('a mounted hook picks up a change made while the page sat in the cache', async (t) => {
   const { win, store } = stubWindow()
+  t.after(() => delete globalThis.window)
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
   const doc = { nodeType: 9, nodeName: '#document', addEventListener() {}, removeEventListener() {} }
   const container = {
@@ -74,5 +89,4 @@ test('a mounted hook picks up a change made while the page sat in the cache', as
   assert.equal(seen.recent.length, 1)
   assert.equal(seen.recent[0].id, 7)
   await act(async () => root.unmount())
-  delete globalThis.window
 })

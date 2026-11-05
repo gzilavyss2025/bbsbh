@@ -138,7 +138,7 @@ export function useStamps() {
       latest.current = next
       setStamps(next)
     }
-    return onStorageOrRestore([STAMPS_KEY], onStorage)
+    return onStorageOrRestore(STAMPS_KEY, onStorage)
   }, [])
 
   // Put a stamp on a page of the passport book, or move one already there.

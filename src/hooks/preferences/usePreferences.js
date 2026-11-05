@@ -126,7 +126,7 @@ export function usePreferences() {
       // write, where it belongs.
       setPrefs(() => readPreferences())
     }
-    return onStorageOrRestore([PREFS_KEY], onStorage)
+    return onStorageOrRestore(PREFS_KEY, onStorage)
   }, [])
 
   // `has` is what tells a first visit from a deliberate choice: the document

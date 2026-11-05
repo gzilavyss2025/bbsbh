@@ -221,7 +221,7 @@ export function useBooks() {
       latest.current = next
       setBooks(next)
     }
-    return onStorageOrRestore([BOOKS_KEY], onStorage)
+    return onStorageOrRestore(BOOKS_KEY, onStorage)
   }, [])
 
   // Every live book, newest-created first — the shelf's own reading order.

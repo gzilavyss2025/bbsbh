@@ -35,7 +35,7 @@ export function useScorecardNotes(gamePk) {
       if (e.key !== storageKey) return
       setNotes(parseSheetNotes(e.newValue))
     }
-    return onStorageOrRestore([storageKey], onStorage)
+    return onStorageOrRestore(storageKey, onStorage)
   }, [storageKey])
 
   const setCell = useCallback((atBatIndex, patch) => {
