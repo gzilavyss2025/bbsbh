@@ -69,7 +69,7 @@ import { listSheets } from './lib/walk.mjs'
 // 103 -> 102: the percentile strip's sheet went with its unimported component.
 // 102 -> 101: a rule for a class no component draws went in the PurgeCSS sweep.
 // 99 -> 98: the intro chain went (#2856).
-// 99 -> 98: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
+// 98 -> 97: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
 const BUDGET = 96
 
 const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw }))

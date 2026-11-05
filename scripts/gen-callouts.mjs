@@ -94,8 +94,8 @@
 //
 //  11. Game Notes corroboration — not a family and not a note: a personId ->
 //      [callout kind] map of which families above a club's OWN press notes
-//      also wrote about, from the manual scan in
-//      scripts/scan-game-notes-insights.mjs. It only nudges that note's
+//      also wrote about, from the manual scan (its harness was deleted in
+//      #2837). It only nudges that note's
 //      worthiness score (issue #774); nothing from the notes is rendered.
 //
 // MiLB (sportIds 11–14) gets a TRIMMED family set: leaders, streaks, homer

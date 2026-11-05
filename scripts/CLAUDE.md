@@ -75,7 +75,7 @@ are rules rather than reference:
   of its own (#1116). The client owns one retry policy (3 tries, 2000 ms x
   attempt; network errors, 429 and 5xx), an opt-in `timeoutMs`, and the clear
   DNS error for the Claude Code sandbox. `check-statsapi-client.mjs` fails lint
-  otherwise. `cachedGetJson` is a `.scratch` research cache: never in `scripts/`.
+  otherwise.
   Detail: `docs/scripts/generators.md`.
 
 - **A generator that reads an open dataset (Retrosheet, the Chadwick register) takes the
