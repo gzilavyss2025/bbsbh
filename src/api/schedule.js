@@ -130,6 +130,7 @@ export async function fetchSchedule(
   sportId = 1,
   hydrate = `team,venue(timezone),lineups,officials,probablePitcher,${BROADCAST_HYDRATE}`,
   leagueId = null,
+  { signal } = {},
 ) {
   // A missing date is a caller bug, not a question for statsapi. Without this
   // guard `${dateStr}` spells null as the four characters "null", and the 400
@@ -139,6 +140,7 @@ export async function fetchSchedule(
   const league = leagueId ? `&leagueId=${leagueId}` : ''
   const data = await getJson(
     `/api/v1/schedule?sportId=${sportId}${league}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
+    { signal },
   )
   const dates = data.dates ?? []
   const games = dates.flatMap((d) => d.games ?? [])
@@ -314,17 +316,18 @@ export async function fetchAllStarGame(season) {
 // by day (bounded) rather than a range query since statsapi has no "next date
 // with games" endpoint; sequential so the common one-day-off case (a Monday
 // MiLB off day) resolves on the first hop instead of firing the whole window.
-// Returns null if nothing turns up within the window (e.g. off-season), or once
-// `signal` aborts: a scan its caller dropped stops before the next hop (#2914).
-export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10, leagueId = null, signal = null) {
+// Returns null if nothing turns up within the window (e.g. off-season). A scan its
+// caller dropped (`signal` aborts) cancels the hop in flight and throws, so it never
+// reads as "no game within ten days" (#2914, ADR-0074).
+export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10, leagueId = null, { signal } = {}) {
   const [y, m, d] = fromDateStr.split('-').map(Number)
   const from = new Date(y, m - 1, d)
   for (let i = 1; i <= maxDays; i++) {
-    if (signal?.aborted) return null
+    signal?.throwIfAborted()
     const copy = new Date(from)
     copy.setDate(copy.getDate() + i)
     const dateStr = `${copy.getFullYear()}-${String(copy.getMonth() + 1).padStart(2, '0')}-${String(copy.getDate()).padStart(2, '0')}`
-    const games = await fetchSchedule(dateStr, sportId, 'team', leagueId)
+    const games = await fetchSchedule(dateStr, sportId, 'team', leagueId, { signal })
     if (games.length > 0) return dateStr
   }
   return null

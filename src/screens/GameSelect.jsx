@@ -414,7 +414,7 @@ export function GameSelect({
   const resumeLookup = useAsync(
     (signal) =>
       needsResumeLookup
-        ? fetchNextGameDate(sportId, dateStr, 10, activeLeagueId, signal)
+        ? fetchNextGameDate(sportId, dateStr, 10, activeLeagueId, { signal })
         : Promise.resolve(null),
     [needsResumeLookup, sportId, dateStr, activeLeagueId],
   )
