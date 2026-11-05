@@ -63,12 +63,6 @@
   flex: 1 1 7rem;
   min-width: 7rem;
   max-width: 12.5rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
 }
 /* A badge that flips (#2779): the face is a button, front and back. The back face adds the
    door to that club's season under it, an anchor of its own, never inside the button. */
@@ -91,14 +85,25 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+/* Both faces stay mounted and share the grid cell (FlipCard keepBack), so each fills the taller
+   one: the front's face stretches, the back holds its face and the door under it. */
+/* layout-exempt: a face fills its FlipCard cell, so the badge keeps one height through the turn */
+.teamhist__badge .flipcard__face {
+  display: flex;
+  flex-direction: column;
+}
+/* layout-exempt: the face button and the back's face-and-door column fill the face */
+.teamhist__badge .teamhist__flip,
+.teamhist__back {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.teamhist__flip > .teamhist__face {
+  flex: 1;
+}
 .teamhist__door {
-  display: block;
-  padding: var(--space-1h) var(--space-2) var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  align-self: flex-start;
 }
 /* layout-exempt: the mark beside the name and its line */
 .teamhist__face {

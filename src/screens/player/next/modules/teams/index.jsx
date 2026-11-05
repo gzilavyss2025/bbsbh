@@ -17,8 +17,8 @@ import { FlipCard } from '../../../../../components/ui/FlipCard.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
 import { useRouteLink } from '../../../../../lib/nav.js'
-import { teamPath } from '../../../../../lib/route.js'
-import { yearAsOf } from '../../../../../lib/dates.js'
+import { teamSeasonPath } from '../../../../../lib/route.js'
+import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { FamilyBand } from './FamilyBand.jsx'
 import { PennantBand } from './PennantBand.jsx'
 import { playerPennants } from './pennantsView.js'
@@ -75,10 +75,11 @@ function Face({ teamId, name, sub, cur, flips }) {
 }
 
 // A badge flips on the first tap (#2779; Gary, 2026-11-05). An MLB badge's back face is the club in
-// full; a farm badge's is its parent club, as before. The back face carries "Open {year} {club} →"
-// to that club's season page (the row's last season). The flip is a button and the link is its own
-// anchor beside it on the back face, so no control sits inside another.
-function Badge({ b, season }) {
+// full; a farm badge's is its parent club, as before. The back face carries a door, "Open {year}
+// {club} ›", to that club's season page (the row's last season; the page's own as-of season keeps
+// its `?d=`). The flip is a button and the door its own anchor, so no control sits inside another.
+// Both faces stay mounted (FlipCard `keepBack`), so the badge keeps one height through the turn.
+function Badge({ b, season, asOf }) {
   const [flipped, setFlipped] = useState(false)
   const link = useRouteLink()
   // The face that just turned away is hidden, so a keyboard reader's focus follows the flip.
@@ -102,25 +103,26 @@ function Badge({ b, season }) {
       </div>
     )
   }
-  const back = b.flip ?? { teamId: b.teamId, name: b.full, sub: b.sub, cur: b.cur }
-  const href = teamPath(door.teamId, { name: door.full ?? undefined, d: yearAsOf(String(door.season)) })
+  const back = b.flip ?? { teamId: b.teamId, name: b.full, sub: b.sub }
+  const href = teamSeasonPath(door.teamId, door.season, { name: door.name, asOf })
   return (
     <div className="teamhist__badge">
       <FlipCard
+        keepBack
         flipped={flipped}
         renderFront={() => (
-          <button ref={front} type="button" className="teamhist__flip" aria-pressed={false} aria-label={`${label}. ${b.flip ? 'Flip to show the parent club.' : 'Flip for the season link.'}`} onClick={() => flip(true)}>
+          <button ref={front} type="button" className="teamhist__flip" aria-label={`${label}. ${b.flip ? 'Flip to show the parent club.' : 'Flip for the season link.'}`} onClick={() => flip(true)}>
             <Face {...b} flips />
           </button>
         )}
         renderBack={() => (
           <div className="teamhist__back">
-            <button ref={backBtn} type="button" className="teamhist__flip" aria-pressed aria-label={`${b.flip ? `Showing the parent club: ${b.flip.name}` : b.full}. Flip back.`} onClick={() => flip(false)}>
+            <button ref={backBtn} type="button" className="teamhist__flip" aria-label={`${b.flip ? `Showing the parent club: ${b.flip.name}` : b.full}. Flip back.`} onClick={() => flip(false)}>
               <Face {...back} flips />
             </button>
-            <a className="plink teamhist__door" {...link(href)}>
-              Open {door.season} {door.name} →
-            </a>
+            <Door className="teamhist__door" {...link(href)}>
+              Open {door.season} {door.name}
+            </Door>
           </div>
         )}
       />
@@ -128,7 +130,7 @@ function Badge({ b, season }) {
   )
 }
 
-function Row({ r }) {
+function Row({ r, asOf }) {
   return (
     <li className="teamhist__season">
       <span className="teamhist__yr mono">
@@ -143,7 +145,7 @@ function Row({ r }) {
               Traded to <TeamLogo teamId={x.to} size={16} /> {teamAbbr({ id: x.to })} {x.date}
             </span>
           ) : (
-            <Badge key={x.teamId} b={x} season={r.to} />
+            <Badge key={x.teamId} b={x} season={r.to} asOf={asOf} />
           ),
         )}
       </div>
@@ -181,7 +183,7 @@ export default function TeamsModule({ bio, asOf, season, onEmpty, onCount }) {
     <div className="teamhist">
       <ol className="teamhist__ledger">
         {view.rows.map((r) => (
-          <Row key={r.years} r={r} />
+          <Row key={r.years} r={r} asOf={asOf} />
         ))}
       </ol>
       <PennantBand pennants={playerPennants(data.pennants, data.mlbSplits, asOf ? Number(asOf.slice(0, 4)) : undefined)} />

@@ -937,6 +937,12 @@ export function teamLeadersPath(id, opts = {}) {
 // 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'. An old tab segment
 // parses to the one-scroll page on that band. Goes through linkQuery like every other team
 // link, so a dated page keeps `?d=`/`?s=`.
+// One club season's page (#2779): the page's own as-of season keeps that date (`?d=`), any other
+// past season is `?y=`, and the current season is the bare page. `now` is for tests.
+export function teamSeasonPath(id, season, { name, asOf, now = new Date() } = {}) {
+  const d = asOf && Number(asOf.slice(0, 4)) === season ? asOf : yearAsOf(String(season), now)
+  return teamPath(id, { name, d })
+}
 export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview'
     ? teamPath(id, opts)
