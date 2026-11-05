@@ -279,7 +279,7 @@ const SIDES = ['away', 'home']
 // `washBehind` (the home slate): the action photo sits behind the MVP's cut-out, not across the stage.
 // `photo`: a Series photo URL that takes the MVP's side in place of the cut-out; `stripe`, two
 // colours [outer, inner], edges it with a three-band club stripe.
-export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
+export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, photoSrcSet = undefined, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
   // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
   // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
   const [noPhoto, setNoPhoto] = useState(false)
@@ -310,7 +310,7 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
                     {i === slabAt ? (
                       photo ? (
                         <>
-                          <img src={photo} alt="" className="ww-hero__photo" decoding="async" fetchPriority="high" />
+                          <img src={photo} srcSet={photoSrcSet} sizes="(max-width: 739px) 100vw, 450px" alt="" className="ww-hero__photo" decoding="async" fetchPriority="high" />
                           {stripe && <span className="ww-hero__stripe" aria-hidden="true" style={{ '--stripe-out': stripe[0], '--stripe-in': stripe[1] }} />}
                         </>
                       ) : <>
