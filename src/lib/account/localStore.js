@@ -25,6 +25,46 @@ export function notifyStorage(key) {
   }
 }
 
+// Subscribe to `storage` AND to a back/forward-cache restore (#2937). A page frozen
+// in the bfcache misses every `storage` event another tab fires meanwhile, so on a
+// persisted `pageshow` this replays `handler` with the event shape a hook already
+// reads, `{ key, newValue }`, but only when the stored value differs from the last
+// one this subscription saw. That last value is read at subscribe time and after
+// every live event on the key (the same-tab echo carries no newValue). The rule
+// protects the in-memory session when storage refuses writes or reads, because
+// there the stale stored value is not news. It also spares an unchanged Back a
+// re-render. The handler keeps its own key filter and merge rules. Returns the
+// unsubscribe. useRevealProgress.js keeps its own copy of this restore path (#2917).
+const READ_FAILED = Symbol('read failed')
+function rawRead(key) {
+  try {
+    return window.localStorage.getItem(key)
+  } catch {
+    return READ_FAILED
+  }
+}
+
+export function onStorageOrRestore(key, handler) {
+  let last = rawRead(key)
+  function onStorage(e) {
+    if (e.key === key || e.key === null) last = rawRead(key)
+    handler(e)
+  }
+  function onPageShow(e) {
+    if (!e.persisted) return
+    const newValue = rawRead(key)
+    if (newValue === READ_FAILED || newValue === last) return
+    last = newValue
+    handler({ key, newValue })
+  }
+  window.addEventListener('storage', onStorage)
+  window.addEventListener('pageshow', onPageShow)
+  return () => {
+    window.removeEventListener('storage', onStorage)
+    window.removeEventListener('pageshow', onPageShow)
+  }
+}
+
 export function localStore(key, parse, serialize) {
   return {
     read() {

@@ -4,7 +4,8 @@
 // /seasons and /league rows; the dates are modelled on 2026/2027, not read live.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { answered, phaseOf, winterOf } from '../src/hooks/useOffseason.js'
+import { LEVEL_WINTER_GUESS, answered, levelFetchYear, phaseOf, winterOf } from '../src/hooks/useOffseason.js'
+import { LEVELS, SPORT_IDS } from '../src/lib/teams.js'
 import { readSeasonRow, saveSeasonRow, taggedRows } from '../src/lib/time/seasonRows.js'
 
 const MLB_2026 = {
@@ -114,20 +115,37 @@ test('a saved in-season row says season, not winter: no reserve, the old empty-d
   assert.equal(resolveOffseason('2026-11-04', 1, NONE, store({ '1:2026': MLB_2026 })).expectWinter, true)
 })
 
-test('the network wins once it has answered, even degraded; saved rows only while it is pending', () => {
+// A real answer wins; a failed read (null: the fetchers answer null on any error) is no answer,
+// and the saved row decides, for all three reads (#2936).
+test('a real answer beats a saved row; a failed read (null) falls back to it', () => {
   const load = store({ '1:2026': MLB_2026, '1:2027': MLB_2027 })
-  // pending (undefined): the saved row decides
+  // pending (undefined) or failed (null): the saved row decides
   assert.equal(resolveOffseason('2026-11-04', 1, { season: undefined }, load).phase.seasonEnded, 2026)
-  // answered with nothing, or with a row that is not this year's: phase null, as without saved rows
-  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, load).phase, null)
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, load).phase.seasonEnded, 2026)
+  assert.equal(resolveOffseason('2026-11-04', 1, { season: null }, store({})).phase, null)
+  // answered with a row that is not this year's: phase null, whatever is saved
   assert.equal(resolveOffseason('2026-11-04', 1, { season: MLB_2027 }, load).phase, null)
   // a level: league rows answered but missing dates (a league without them) is not rescued by a saved row
   const loadLevel = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
   const bad = [{ leagueId: 117, name: 'no dates' }]
   assert.equal(resolveOffseason('2026-11-04', 13, { level: bad }, loadLevel).phase, null)
   assert.equal(resolveOffseason('2026-11-04', 13, { level: undefined }, loadLevel).phase.seasonEnded, 2026)
-  // the next row too: a settled miss means no countdown date
-  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, load).winter, null)
+  // the next row too: a failed read counts down to the saved row's date, and without one there is no date
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, load).winter.springStartDate, '2027-02-18')
+  assert.equal(resolveOffseason('2026-11-04', 1, { next: null }, store({ '1:2026': MLB_2026 })).winter, null)
+})
+
+// The parent's review of #2954: offline on a level tab in November, with this year's and next
+// year's rows saved, every read fails. The phase came from the saved rows but the countdown did
+// not, so the slate drew neither the winter page nor its empty-day copy.
+test('offline on a level tab, the saved rows draw the whole winter, countdown included (#2936)', () => {
+  const load = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
+  const offline = { season: null, level: null, next: null }
+  const { phase, winter } = resolveOffseason('2026-11-04', 13, offline, load)
+  assert.equal(phase.seasonEnded, 2026)
+  assert.equal(winter.openingDay, '2027-04-02')
+  // nothing saved for next year: no countdown date, and no phase-without-winter surprise past it
+  assert.equal(resolveOffseason('2026-11-04', 13, offline, store({ '13:2026': LEVEL_2026 })).winter, null)
 })
 
 test('nothing saved: expect a winter only when the calendar allows one', () => {
@@ -140,19 +158,73 @@ test('nothing saved: expect a winter only when the calendar allows one', () => {
   assert.equal(expect('2026-11-04'), true)
   assert.equal(expect('2027-02-28'), true)
   assert.equal(expect('2027-03-01'), false)
-  assert.equal(expect('2026-07-14', 13), false) // a Triple-A Monday off
-  assert.equal(expect('2026-09-20', 13), false)
+  assert.equal(expect('2026-07-14', 13), false) // an A+ Monday off
   assert.equal(expect('2026-10-05', 13), true) // the levels are out well before MLB (#2928)
   assert.equal(expect('2026-11-04', 13), true)
   assert.equal(expect('2027-03-20', 13), true) // and stay out until their April opener
   assert.equal(expect('2027-04-05', 13), false)
 })
 
-test('a settled-null MLB row means no level winter, whatever is saved (#2928)', () => {
+// Issue #2936: each level guesses off its own measured dates. statsapi's /league rows,
+// 2023-2027, the last league out to the first league back:
+//   AAA (11) out Sep 28 - Oct 1, back Mar 26 - Mar 31
+//   AA  (12) out Sep 24 - Sep 28, back Apr 2 - Apr 6
+//   A+  (13) out Sep 16 - Sep 21, back Apr 2 - Apr 6
+//   A   (14) out Sep 17 - Sep 21, back Apr 2 - Apr 6
+// The guess opens on the EARLIEST measured winter (a level's last week is all games, so a
+// winter guessed a few days early costs an empty day nothing it would show), and closes on
+// the EARLIEST measured opener (after it, an empty day is most likely an off day).
+test('nothing saved: each level guesses its winter off its own dates (#2936)', () => {
+  const none = store({})
+  const expect = (d, id) => resolveOffseason(d, id, NONE, none).expectWinter
+  // A+ 2026 went dark Sep 16: Sep 20 is a winter, so the club list and rail must wait.
+  assert.equal(expect('2026-09-15', 13), false)
+  assert.equal(expect('2026-09-16', 13), true)
+  assert.equal(expect('2026-09-20', 13), true)
+  assert.equal(expect('2026-09-17', 14), true)
+  assert.equal(expect('2026-09-23', 12), false)
+  assert.equal(expect('2026-09-24', 12), true)
+  assert.equal(expect('2026-09-27', 11), false) // Triple-A is still playing
+  assert.equal(expect('2026-09-28', 11), true)
+  // A Triple-A off day after a Mar 27 opener is the season, not a winter: no reserve.
+  assert.equal(expect('2027-03-25', 11), true)
+  assert.equal(expect('2027-03-26', 11), false)
+  assert.equal(expect('2027-03-29', 11), false)
+  // The lower levels open in April.
+  assert.equal(expect('2027-04-01', 12), true)
+  assert.equal(expect('2027-04-02', 12), false)
+  assert.equal(expect('2027-04-01', 14), true)
+  assert.equal(expect('2027-04-02', 14), false)
+})
+
+// Reverses #2928's rule (issue #2936): a failed MLB read (fetchSeasonMeta answers null on a
+// network failure) says nothing about a minor level, whose winter is read off its own rows.
+test('a failed MLB season read leaves a level tab to its own rows (#2936)', () => {
   const load = store({ '13:2026': LEVEL_2026, '13:2027': LEVEL_2027 })
-  assert.equal(resolveOffseason('2026-11-04', 13, { season: null }, load).phase, null)
-  // not answered yet: the saved rows still decide
+  // the level's own read not answered yet: the saved level rows decide
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: null }, load).phase.seasonEnded, 2026)
   assert.equal(resolveOffseason('2026-11-04', 13, { season: undefined }, load).phase.seasonEnded, 2026)
+  // the level's own read answered: it decides, as on any other day
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: null, level: LEVEL_2026 }, store({})).phase.seasonEnded, 2026)
+  // offline: the level's own read fails too (null), and the saved rows still decide
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: null, level: null }, load).phase.seasonEnded, 2026)
+  assert.equal(resolveOffseason('2026-11-04', 13, { season: null, level: null }, store({})).phase, null)
+})
+
+// The level's /league rows are asked for once the slate's MLB read has ANSWERED (the empty-day
+// signal), even when it answered null: before #2936 a failed MLB read meant /league was never asked.
+test('a level tab asks for its rows once the MLB read answers, even with null (#2936)', () => {
+  assert.equal(levelFetchYear(2026, 13, MLB_2026), 2026)
+  assert.equal(levelFetchYear(2026, 13, null), 2026)
+  assert.equal(levelFetchYear(2026, 13, undefined), null) // not an empty day, or not answered
+  assert.equal(levelFetchYear(2026, 1, MLB_2026), null) // MLB reads no level rows
+  assert.equal(levelFetchYear(null, 13, MLB_2026), null)
+})
+
+test('every level tab on the rail has its own winter guess (#2936)', () => {
+  for (const { sportId } of LEVELS.filter((l) => l.sportId !== SPORT_IDS.MLB)) {
+    assert.ok(LEVEL_WINTER_GUESS[sportId], `sportId ${sportId} has no LEVEL_WINTER_GUESS entry`)
+  }
 })
 
 test('a next-season answer for another year supplies no countdown dates (#2928)', () => {
