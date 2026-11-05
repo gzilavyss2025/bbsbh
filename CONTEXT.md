@@ -176,6 +176,12 @@ line and the pitch mix (#1851, ADR-0110, retired by ADR-0117). The stamp Game Lo
 stamped; the pitcher Game Log is the games that HE pitched. The code name is `pitchlog`.
 _Avoid_: Start by start
 
+**Nugget**:
+A minted, dated fact: a player met a named season threshold on a date, with how many players
+had met it by then and the well-known number it is compared with (ADR-0129). An internal name
+for prompts and code; it never renders. The sentence a reader sees is the note.
+_Avoid_: feat (a no-hitter or cycle), milestone (a career total), note (the sentence, not the record)
+
 **Box Lines**:
 The drilldown behind a summary stat line: tap the line and see the game-by-game rows that
 add up to it. An internal name for prompts and code; it never renders. The page says

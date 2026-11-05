@@ -123,6 +123,7 @@ saturation is worth changed. The column below names that saturation point, so
 | starterRec | 40 | a spotless record |
 | bullpenThin | 40 | 4 relievers down |
 | vsTeam | 40 | angle strength 2 |
+| nugget | 38 | a count of 1 (none at 20 or more) |
 | leader (hits/SB) | 35 | a count of 60 |
 | leader (pitcher K) | 35 | a count of 180 |
 | sbStreak | 35 | a run of 14 |
@@ -566,6 +567,13 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   season+career baselines (`hitterLines`); the strictest family — see the
   long comment on `buildVsTeamNote`. Roll-up caps the family at
   `VS_TEAM_ROLLUP_MAX` (3) by score.
+- **nugget** — a season count with a well-known number (#2809, ADR-0129): "One of 11
+  pitchers with a shutout, fewer than the 12 people who have walked on the moon." From the
+  nugget store (`src/api/nuggets/nuggets.js`, nightly `gen-nuggets.mjs`), built by
+  `callout-notes/nugget.js`. Between Innings only, for the two announced starters and the
+  hitters due up next half. Gate: dated strictly before the game, within 7 days. Only the
+  top-ranked nugget on the card gets its anchor; the rest are plain counts, shown only at or
+  under the threshold's `plainMax`. MLB only, regular-season counting stats.
 - **milestone** — staging-pill only ("4 H shy of 2,000"), `milestones`.
   MLB only (career-based).
 

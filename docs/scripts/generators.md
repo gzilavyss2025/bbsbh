@@ -114,6 +114,13 @@ don't run these by hand.
   `src/api/rehab-policy.js` — the one stint rule (start, end, same-day tie, 30-day
   cap) that `person.js`'s `detectRehabAssignment` also calls (#1362). Then each is
   verified against his game log + club's schedule; that 7-club-games rule stays here.
+- `gen-nuggets.mjs` → `public/data/nuggets/{season}.json` + `nuggets/index.json` — the nugget store (#2809,
+  ADR-0129): the first day each player's regular-season total met a threshold (`src/lib/nuggets/thresholds.js`),
+  with the count that day and the anchor `src/lib/anchors/pick.js` chose, frozen. Two season-totals calls, then one
+  game log per new crosser; append-only, so a second run adds nothing and a backfill is the same code on a missing
+  file (about 5 s for 2026). Pure half `scripts/lib/nuggets/nuggets.mjs`, tested in `test/nuggets-pure.test.js`.
+  `index.json` carries the stamp. A crossing dated today (US Pacific) waits for the next run; a failed game log
+  holds its threshold and exits non-zero. Gated on `finals`. App reads it via `src/api/nuggets/nuggets.js`.
 - `gen-tensest.mjs` → `public/data/tensest.json` + `scripts/data/tensest-state.json` — the season's tensest
   at-bats by MLB's own leverage index (`leverageIndex` on each `winProbability` play): the league's top 50 and each
   club's top 25 batting and 25 pitching, postseason included. One feed per game, 2,400+ games a season, so it is
