@@ -12,8 +12,10 @@ const num = (x) => {
   return Number.isFinite(n) ? n : 0
 }
 
-// statsapi season splits -> Map(playerId -> summed stats). A player traded in-season has
-// one split per club; summing counts him once.
+// statsapi season splits -> Map(playerId -> summed stats). The season-totals call answers
+// one row per player, a traded player included (checked 2026-11-05: 751 hitting and 868
+// pitching rows for 2026, no player twice). Summing keeps one person counted once if a
+// response ever splits him by club.
 export function sumByPlayer(splits) {
   const by = new Map()
   for (const s of splits ?? []) {
@@ -41,12 +43,16 @@ export function crossingDate(games, t) {
 // Players whose season totals meet `t` and who have no nugget for it yet.
 export function newCrossers(totals, t, have) {
   const known = new Set((have ?? []).map((n) => n.player))
-  const out = []
-  for (const [id, sum] of totals) {
-    if (known.has(id)) continue
-    if (meets(t, sum)) out.push(id)
-  }
-  return out.sort((a, b) => a - b)
+  return [...totals].filter(([id, sum]) => !known.has(id) && meets(t, sum)).map(([id]) => id).sort((a, b) => a - b)
+}
+
+// One threshold's run: `dated` holds one entry per new crosser, null where his game log
+// failed to load. A failed log might date him before the others and leave their frozen
+// counts one short, so the whole threshold waits for the next run. A log that loaded but
+// never reaches the line (a stat correction) holds nothing back: that player has no date.
+export function mintOrHold(have, dated, opts) {
+  if ((dated ?? []).some((c) => c == null)) return { list: have ?? [], held: true }
+  return { list: mintNuggets(have, dated, opts), held: false }
 }
 
 const byDate = (a, b) => a.date.localeCompare(b.date) || a.player - b.player

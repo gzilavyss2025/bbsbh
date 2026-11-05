@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { THRESHOLDS, meets, thresholdById } from '../src/lib/nuggets/thresholds.js'
-import { sumByPlayer, crossingDate, mintNuggets, newCrossers } from '../scripts/lib/nuggets/nuggets.mjs'
+import { sumByPlayer, crossingDate, mintNuggets, mintOrHold, newCrossers } from '../scripts/lib/nuggets/nuggets.mjs'
 
 const RBI = thresholdById('rbi100')
 const BOTH = thresholdById('rbi100-r100')
@@ -63,6 +63,18 @@ test('mintNuggets never rewrites an old entry and a second run adds nothing', ()
   assert.equal(once.find((n) => n.player === 2).count, 1)
   const twice = mintNuggets(once, [{ player: 2, date: '2026-04-01' }], { pickAnchor: pickNone })
   assert.deepEqual(twice, once)
+})
+
+// Review (#2949): a crosser whose game log could not be read might be dated before the
+// others, and their frozen counts would then be one short. So the threshold waits a night.
+test('mintOrHold holds a threshold for the night when any game log failed to load', () => {
+  const have = [{ player: 1, date: '2026-05-01', count: 1, anchor: null, relation: null }]
+  const held = mintOrHold(have, [{ player: 2, date: '2026-05-10' }, null], { pickAnchor: pickNone })
+  assert.equal(held.held, true)
+  assert.deepEqual(held.list, have)
+  const ok = mintOrHold(have, [{ player: 2, date: '2026-05-10' }, { player: 3, date: null }], { pickAnchor: pickNone })
+  assert.equal(ok.held, false, 'a log that loaded but never reaches the line does not hold the rest')
+  assert.deepEqual(ok.list.map((n) => n.player), [1, 2])
 })
 
 test('mintNuggets freezes the anchor pick with the count', () => {

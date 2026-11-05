@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { nuggetsForGame, CARD_WINDOW_DAYS } from '../src/api/nuggets/nuggets.js'
-import { buildNuggetNotes, nuggetText, agedLead } from '../src/api/callout-notes/nugget.js'
+import { buildNuggetNotes, nuggetText } from '../src/api/callout-notes/nugget.js'
 import { buildBetweenInnings } from '../src/api/between-innings.js'
 import { buildFeed } from './fixtures/mini-game.js'
 
@@ -51,14 +51,6 @@ test('the note text: count, group, label, and the anchor comparison', () => {
   assert.equal(nuggetText({ ...n, count: 1, anchor: null, relation: null }, { anchored: false }), 'The only pitcher with a shutout')
 })
 
-test('aging: no date on the next day, a month name later that season, the year after it', () => {
-  assert.equal(agedLead('2026-05-03', '2026-05-04'), '')
-  assert.equal(agedLead('2026-05-03', '2026-09-01'), 'In May, ')
-  assert.equal(agedLead('2026-05-03', '2027-04-01'), 'In 2026, ')
-  const n = { threshold: 'rbi100', player: 1, date: '2026-05-03', count: 9, anchor: null, relation: null }
-  assert.equal(nuggetText(n, { anchored: false, viewDate: '2026-09-01' }), 'In May, one of 9 hitters with 100 RBI')
-})
-
 test('only the top-ranked nugget gets the anchor; the rest are plain, and a plain count past plainMax is cut', () => {
   const list = [
     { threshold: 'k200', player: 200, date: '2026-07-06', count: 11, anchor: 'moon-walked', relation: 'fewer' },
@@ -73,6 +65,31 @@ test('only the top-ranked nugget gets the anchor; the rest are plain, and a plai
   assert.ok(notes.every((n) => n.kind === 'nugget' && n.personId != null && n.dedupeKey))
   assert.equal(notes[0].side, 'away')
   assert.ok(notes[0].score > notes[1].score, 'a smaller count scores higher')
+})
+
+// Review (#2949): the anchor belongs to the top nugget on the card, or to none.
+test('a lower nugget never takes the anchor the top one lacks', () => {
+  const list = [
+    { threshold: 'sho1', player: 300, date: '2026-06-30', count: 3, anchor: null, relation: null },
+    { threshold: 'k200', player: 200, date: '2026-07-06', count: 12, anchor: 'moon-walked', relation: 'equal' },
+  ]
+  assert.deepEqual(buildNuggetNotes(list).map((n) => n.text), ['One of 3 pitchers with a shutout', 'One of 12 pitchers with 200 strikeouts'])
+  // A top nugget with no anchor and a count past plainMax makes no note, so the next one is the top.
+  const cut = [{ threshold: 'cg1', player: 300, date: '2026-06-30', count: 11, anchor: null, relation: null }, list[1]]
+  assert.deepEqual(buildNuggetNotes(cut).map((n) => n.text), ['One of 12 pitchers with 200 strikeouts, as many as the 12 people who have walked on the moon'])
+})
+
+// Review (#2949): a crossing made in this game before a suspension must not pass the cut. A
+// real resumed feed (824912, 2026-06-16, resumed 06-17) keeps officialDate on the original day;
+// this pins the cut to the earlier date if a feed ever moves officialDate to the resume day.
+test('a resumed game cuts at its ORIGINAL date', () => {
+  const feed = buildFeed()
+  feed.gameData.probablePitchers = { away: { id: 300 }, home: { id: 200 } }
+  feed.gameData.datetime = { ...(feed.gameData.datetime ?? {}), officialDate: '2026-07-08', originalDate: '2026-07-07', resumeDate: '2026-07-08' }
+  const bundle = { away: { teamId: 158, name: 'Away Club' }, home: { teamId: 138, name: 'Home Club' } }
+  const crossedInThisGame = { season: 2026, nuggets: { sho1: [{ player: 300, date: '2026-07-07', count: 5, anchor: 'great-lakes', relation: 'equal' }] } }
+  const cards = buildBetweenInnings({ feed, bundle, inning: 1, half: 'top', revealedThrough: 0, gameDate: '2026-07-08', nuggets: crossedInThisGame })
+  assert.equal(cards.filter((n) => n.kind === 'nugget').length, 0)
 })
 
 // Done means (#2809): a nugget dated on a game's own date never reaches a scoring surface.

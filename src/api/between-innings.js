@@ -130,13 +130,15 @@ export function buildBetweenInnings({
   }))
 
   // Nuggets for the two starters and the hitters due up next half, dated before tonight.
+  // The cut is the game's EARLIEST date: a resumed game's crossing before the suspension is tonight's.
   if (nuggets) {
-    const sideOf = new Map([[away, 'away'], [home, 'home']])
-    const battingSide = nHalf === 'top' ? 'away' : 'home'
-    for (const b of selectDueUpNow(feed, nInning, nHalf, revealedThrough)?.batters ?? []) sideOf.set(b.id, battingSide)
-    sideOf.delete(undefined)
-    sideOf.delete(null)
-    const nuggetDate = feed?.gameData?.datetime?.officialDate ?? gameDate
+    const sideOf = new Map()
+    if (away != null) sideOf.set(away, 'away')
+    if (home != null) sideOf.set(home, 'home')
+    const due = selectDueUpNow(feed, nInning, nHalf, revealedThrough)
+    for (const b of due?.batters ?? []) if (b.id != null) sideOf.set(b.id, due.battingSide)
+    const dt = feed?.gameData?.datetime
+    const nuggetDate = [dt?.officialDate, dt?.originalDate, gameDate].filter(Boolean).sort()[0]
     const list = nuggetsForGame(nuggets, { gameDate: nuggetDate, players: [...sideOf.keys()] })
     pool.push(...buildNuggetNotes(list, { sideOf: (id) => sideOf.get(id) ?? null }))
   }

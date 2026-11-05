@@ -8,7 +8,8 @@
 //   1. Two season-totals calls (hitting, pitching), regular season, MLB only.
 //   2. Players who meet a threshold and have no entry yet are the new crossers.
 //   3. Each new crosser's game log dates the crossing, so a late run loses nothing.
-//   4. Append them with their count and anchor. Old entries are never rewritten.
+//   4. Append them with their count and anchor. Old entries are never rewritten. If a game
+//      log fails to load, that threshold waits a night (mintOrHold), so no count is short.
 // A second run adds nothing. A backfill is the same code on a missing file.
 //
 // Also writes public/data/nuggets/index.json: the seasons on file and the run's
@@ -24,7 +25,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
-import { sumByPlayer, crossingDate, newCrossers, mintNuggets } from './lib/nuggets/nuggets.mjs'
+import { sumByPlayer, crossingDate, newCrossers, mintOrHold } from './lib/nuggets/nuggets.mjs'
 import { THRESHOLDS } from '../src/lib/nuggets/thresholds.js'
 import { pick } from '../src/lib/anchors/pick.js'
 
@@ -65,10 +66,11 @@ for (const t of THRESHOLDS) {
   const have = nuggets[t.id] ?? []
   const ids = newCrossers(totals[t.group], t, have)
   const dated = await mapConcurrent(ids, CONCURRENCY, async (player) => ({ player, date: crossingDate(await gameLog(player, t.group), t) }))
-  const crossers = dated.filter((c) => c?.date)
-  const undated = ids.length - crossers.length
-  if (undated) console.warn(`nuggets: ${t.id}: ${undated} crosser(s) the game log could not date; the next run tries again`)
-  nuggets[t.id] = mintNuggets(have, crossers, { pickAnchor: (count, o) => pick(count, { unit: 'people', ...o }) })
+  const { list, held } = mintOrHold(have, dated, { pickAnchor: (count, o) => pick(count, { unit: 'people', ...o }) })
+  if (held) console.warn(`nuggets: ${t.id}: a game log failed to load; this threshold waits for the next run`)
+  const undated = dated.filter((c) => c && !c.date).length
+  if (undated) console.warn(`nuggets: ${t.id}: ${undated} crosser(s) whose game log never reaches the line`)
+  nuggets[t.id] = list
   added += nuggets[t.id].length - have.length
 }
 

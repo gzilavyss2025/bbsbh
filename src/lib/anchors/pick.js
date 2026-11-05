@@ -7,7 +7,8 @@
 //      as the Great Lakes"); `teams` anchors pair only with club counts.
 //   2. A `volatile` anchor is skipped VOLATILE_DAYS after its newest `checked` date. A
 //      `static` one never expires here. The registry test lists the late ones; nothing fails.
-//   3. Closest count wins. A gap past max(1, round(0.2 * n)) is no fit. A tier-3 (niche)
+//   3. Closest count wins. A gap past max(1, round(0.2 * n)), n being the ANCHOR's count,
+//      is no fit. A tier-3 (niche)
 //      anchor is picked only when no tier 1 or 2 anchor fits at all.
 //   4. Ties: the lower tier, then the anchor ABOVE the count ("fewer than" reads as rarity),
 //      then a stable hash of `seed` (player id and date), so one player does not always
@@ -60,4 +61,4 @@ export function pick(count, { unit, date, seed = '', anchors = registry.anchors 
   return { anchor, relation: relationOf(count, anchor.count) }
 }
 
-export const anchorById = (id, anchors = registry.anchors) => anchors.find((a) => a.id === id) ?? null
+export const anchorById = (id) => registry.anchors.find((a) => a.id === id) ?? null
