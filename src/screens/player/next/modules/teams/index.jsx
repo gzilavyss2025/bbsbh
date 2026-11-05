@@ -2,7 +2,7 @@
 // club's badge flips to its parent org for that season. A band under the ledger shows a pennant for
 // each season he played for a club that won its league (pennantsView.js). Replaces the tbd module's timeline card.
 // Open surface (ADR-0034): no seal, no gate. A pre-debut player has no card (his Path card leads).
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../../../../styles/player-next/history/teams.css'
 import { teamSeasonsView } from '../../../../../api/person.js'
 import { fetchPersonStats, fetchPositions, fetchTransactions } from '../../../../../api/person-fetch.js'
@@ -81,6 +81,18 @@ function Face({ teamId, name, sub, cur, flips }) {
 function Badge({ b, season }) {
   const [flipped, setFlipped] = useState(false)
   const link = useRouteLink()
+  // The face that just turned away is hidden, so a keyboard reader's focus follows the flip.
+  const front = useRef(null)
+  const backBtn = useRef(null)
+  const turned = useRef(false)
+  useEffect(() => {
+    if (!turned.current) return
+    ;(flipped ? backBtn : front).current?.focus()
+  }, [flipped])
+  const flip = (to) => {
+    turned.current = true
+    setFlipped(to)
+  }
   const label = `${b.full}, ${b.sub.replace(' G', ' games')}${b.cur ? ', current club' : ''}`
   const door = badgeDoor(b, season)
   if (!door) {
@@ -90,20 +102,20 @@ function Badge({ b, season }) {
       </div>
     )
   }
-  const back = b.flip ?? { teamId: b.teamId, name: b.full, sub: `${season} · ${b.sub}`, cur: b.cur }
+  const back = b.flip ?? { teamId: b.teamId, name: b.full, sub: b.sub, cur: b.cur }
   const href = teamPath(door.teamId, { name: door.full ?? undefined, d: yearAsOf(String(door.season)) })
   return (
     <div className="teamhist__badge">
       <FlipCard
         flipped={flipped}
         renderFront={() => (
-          <button type="button" className="teamhist__flip" aria-pressed={false} aria-label={`${label}. ${b.flip ? 'Flip to show the parent club.' : 'Flip for the season link.'}`} onClick={() => setFlipped(true)}>
+          <button ref={front} type="button" className="teamhist__flip" aria-pressed={false} aria-label={`${label}. ${b.flip ? 'Flip to show the parent club.' : 'Flip for the season link.'}`} onClick={() => flip(true)}>
             <Face {...b} flips />
           </button>
         )}
         renderBack={() => (
           <div className="teamhist__back">
-            <button type="button" className="teamhist__flip" aria-pressed aria-label={`${b.flip ? `Showing the parent club: ${b.flip.name}` : b.full}. Flip back.`} onClick={() => setFlipped(false)}>
+            <button ref={backBtn} type="button" className="teamhist__flip" aria-pressed aria-label={`${b.flip ? `Showing the parent club: ${b.flip.name}` : b.full}. Flip back.`} onClick={() => flip(false)}>
               <Face {...back} flips />
             </button>
             <a className="plink teamhist__door" {...link(href)}>
