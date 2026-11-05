@@ -53,6 +53,7 @@ you push (`docs/development.md`, "Long runs").
 
 ## Preview comments
 
+`claude/**` branches have no preview, so this applies only to a PR whose branch has one.
 Gary can pin a comment to a spot on the PR's preview deployment from his phone
 (the Vercel toolbar). It reaches the PR as a vercel[bot] comment, and
 `mcp__Vercel__list_toolbar_threads` has the thread with the page and element it
