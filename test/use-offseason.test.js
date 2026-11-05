@@ -135,8 +135,8 @@ test('nothing saved: expect a winter only when the calendar allows one', () => {
   const expect = (d, id = 1) => resolveOffseason(d, id, NONE, none).expectWinter
   assert.equal(expect('2026-07-14'), false) // the All-Star break
   assert.equal(expect('2026-10-20'), false) // a postseason off day (#2928)
-  assert.equal(expect('2026-11-01'), false) // the World Series window
-  assert.equal(expect('2026-11-02'), true)
+  assert.equal(expect('2026-10-31'), false) // the World Series window
+  assert.equal(expect('2026-11-01'), true)
   assert.equal(expect('2026-11-04'), true)
   assert.equal(expect('2027-02-28'), true)
   assert.equal(expect('2027-03-01'), false)

@@ -152,6 +152,8 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
     if (loading) return
     onPresence?.(total > 0)
   }, [loading, onPresence, total])
+  // Unmounting (the winter page took the rail's place) gives the reserved room back to its default.
+  useEffect(() => () => onPresence?.(true), [onPresence])
 
   if (total === 0) return null
 

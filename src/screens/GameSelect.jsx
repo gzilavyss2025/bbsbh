@@ -401,11 +401,12 @@ export function GameSelect({
   const slotShown = Boolean(winterRows) && isEmptyDay
   // Everything else that gives way to the winter (the wire rail, the club list) waits for the same signal.
   const winter = slotShown ? winterRows : null
-  const holdForWinter =
-    !slotShown &&
-    expectWinter &&
-    (loading || winterPending || seasonMeta.loading) &&
-    (offseason ? loading || isEmptyDay : isEmptyDay)
+  // A winter may still turn up: the rail and dock wait for this, so a first visit with nothing saved
+  // does not mount them while the slate loads and drop them when the winter lands.
+  const winterMaybe = !slotShown && expectWinter && (loading || winterPending || seasonMeta.loading)
+  const holdForWinter = winterMaybe && (offseason ? loading || isEmptyDay : isEmptyDay)
+  // Pending rows only matter where a winter is plausible; an in-season MiLB off day keeps its banner fast.
+  const winterWait = winterPending && expectWinter
   useEffect(() => {
     if (offseason) loadOffseasonSlot()
   }, [offseason])
@@ -430,7 +431,7 @@ export function GameSelect({
   // bracket is the whole page there), and this lookup would otherwise ask
   // fetchNextGameDate a question the bracket already answers.
   const needsResumeLookup =
-    isEmptyDay && !isDerbyDay && !allStarPending && !winterPending && !offseason && !winterDark && !bracketCoversPage
+    isEmptyDay && !isDerbyDay && !allStarPending && !winterWait && !offseason && !winterDark && !bracketCoversPage
   const resumeLookup = useAsync(
     (signal) =>
       needsResumeLookup
@@ -541,7 +542,7 @@ export function GameSelect({
     <div
       className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
         docked ? ' screen--wiredock' : ''
-      }${railed && !winter && !holdForWinter ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
+      }${railed && !winter && !winterMaybe ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
     >
       {/* The D1 masthead: the brand bar, the ladder card (level + day) and,
           on a phone, the compact bar that replaces the card on scroll. Every
@@ -629,7 +630,7 @@ export function GameSelect({
             // (below) — briefly while either lookup is still in flight too, so
             // neither flashes "No games scheduled." before the fetch resolves.
             emptyMessage={
-              seasonMeta.loading || winterPending || breakWindow || resumeLookupPending ||
+              seasonMeta.loading || winterWait || breakWindow || resumeLookupPending ||
               showOffDayBanner || offseason || bracketCoversPage
                 ? null
                 : 'No games scheduled.'
@@ -734,7 +735,7 @@ export function GameSelect({
             reports which back so the shell can give the reserved width up.
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
-        {wireOn && wide && !winter && !holdForWinter && (
+        {wireOn && wide && !winter && !winterMaybe && (
           <WireRail
             endDate={dateStr}
             sportId={sportId}
@@ -782,7 +783,7 @@ export function GameSelect({
           />
         </LazyPanel>
       )}
-      {wireOn && !wide && !winter && !holdForWinter && (
+      {wireOn && !wide && !winter && !winterMaybe && (
         <WireDock
           endDate={dateStr}
           sportId={sportId}

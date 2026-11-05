@@ -82,7 +82,7 @@ export function phaseOf(dateStr, sportId, net, load = readSeasonRow) {
   const canHaveWinter = isLevel || sportId === SPORT_IDS.MLB
   const known = isLevel ? Boolean(levelRows) : Boolean(seasonRow)
   const md = dateStr?.slice(5)
-  const winterMonths = isLevel ? md >= '09-29' || md < '04-01' : md >= '11-02' || md < '03-01'
+  const winterMonths = isLevel ? md >= '09-29' || md < '04-01' : md >= '11-01' || md < '03-01'
   return { phase, seasonRow, expectWinter: canHaveWinter && (Boolean(phase) || (!known && winterMonths)) }
 }
 
