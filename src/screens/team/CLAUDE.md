@@ -12,7 +12,9 @@ The franchise page (`franchise/`, #2586) is history: one table of every season, 
 from the stored ledger plus a live row per season the ledger has not reached; it reads no `?d=`.
 The summary (`franchise/summary/`) reads those same rows, live ones too, and People and places
 (`franchise/people/`) the HOF, retired-number and leaders stores; from 1200px the screen widens to
-1272px and the summary takes a side column (`styles/history/franchise.css`, #2784).
+1272px and the summary takes a side column (`styles/history/franchise.css`, #2784). The all-time
+leaders card (`franchise/leaders/`, #2785) sits under the ledger: nine headline lists, Career or
+Season, and a door that opens all 26 in place.
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared
 mega-fetch. One exception: Ranks also draws `standings/StandingsRankCards.jsx`, which reads

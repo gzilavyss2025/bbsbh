@@ -21,12 +21,14 @@ import { FranchiseSummary } from './summary/FranchiseSummary.jsx'
 import { HallOfFame } from './people/HallOfFame.jsx'
 import { RetiredNumbers } from './people/RetiredNumbers.jsx'
 import { Managers } from './people/Managers.jsx'
+import { LeadersCard } from './leaders/LeadersCard.jsx'
 
 // THE FRANCHISE PAGE (#2586, U1 #2763): one club across all its seasons, newest first, each row
 // a door into that season's team page (`?y=`). The wireframe Gary picked is Phone B (one table
 // that scrolls sideways in its own box, the year pinned) and a full-width table on a wide screen.
 // U2 (#2784, wireframe approved 2026-11-05) adds the summary, first on a phone and in a side
-// column at the widest step, and People and places under the ledger. History, an open surface
+// column at the widest step, and People and places under the ledger. U3 (#2785) puts the
+// all-time leaders card between them. History, an open surface
 // (ADR-0034): nothing is sealed, and the page reads no cutoff.
 
 const COLUMNS = 10
@@ -67,6 +69,7 @@ export function TeamFranchisePage({ id }) {
           </aside>
           <div className="frpage__main">
             <Ledger team={team} rows={rows} />
+            <LeadersCard leaders={leaders} />
             <section className="frpage__people" aria-labelledby="frpage-people">
               <SectionHead look="band" house as="h2" titleId="frpage-people">
                 People and places
