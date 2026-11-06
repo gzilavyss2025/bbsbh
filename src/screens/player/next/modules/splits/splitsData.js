@@ -67,5 +67,5 @@ export async function loadGameLines(id, group, pick, scope) {
     scope === 'R' ? null : total('P'),
   ])
   const base = scope === 'A' ? (regular ? mergeCareerSplits(regular, post, group) : null) : scope === 'P' ? post : regular
-  return { rows, labels, base }
+  return { rows, labels, base, only: { season, scope } }
 }

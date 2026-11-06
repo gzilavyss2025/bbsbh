@@ -10,7 +10,7 @@ import { Cells, Chevron, Flag, Head, Part, Row } from './LineRows.jsx'
 // Game lines (the board's fourth part): a line under each facet for the bar's season and scope, from the doors of
 // cardFacets.js, each opening the games behind it. The facet list is the registry's; this file
 // only draws it. `view` is gameLinesView's and `labels` the door labels it was built from.
-export function GameLines({ view, tag = 'Career', labels, group, asOf, bio, surname }) {
+export function GameLines({ view, tag = 'Career', only = null, labels, group, asOf, bio, surname }) {
   const layout = group === 'pitching' ? 'era' : 'slash'
   const [all, setAll] = useState(false)
   // The months open at first, the weekdays closed, as the board draws them.
@@ -29,6 +29,7 @@ export function GameLines({ view, tag = 'Career', labels, group, asOf, bio, surn
     title: row.title(surname),
     footNote: row.footNote ?? null,
     cutoff: asOf ?? null,
+    only,
     band: bandFor(bio.team?.id),
   })
 

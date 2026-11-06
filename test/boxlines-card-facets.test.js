@@ -736,3 +736,23 @@ test('door labels follow a season and scope: season splits, October merged in', 
     globalThis.fetch = real
   }
 })
+
+test('a door opened under the Splits bar lists only that season and scope', async () => {
+  const { onlyRows, facetFor } = await import('../src/api/boxlines/facets.js')
+  const rows = [
+    { season: 2025, gameType: 'R' },
+    { season: 2026, gameType: 'R' },
+    { season: 2026, gameType: 'D' },
+  ]
+  assert.equal(onlyRows(rows, null).length, 3)
+  assert.equal(onlyRows(rows, { season: '2026', scope: 'A' }).length, 2)
+  assert.equal(onlyRows(rows, { season: '2026', scope: 'R' }).length, 1)
+  assert.equal(onlyRows(rows, { season: null, scope: 'P' })[0].gameType, 'D')
+  assert.equal(facetFor({ kind: 'side', home: true }, 'A').postseason, true)
+  assert.equal(facetFor({ kind: 'side', home: true }, 'R').postseason, undefined)
+})
+
+test('any facet asked with postseason reads October', () => {
+  assert.ok(facetPlan({ kind: 'side', home: true, postseason: true }).gameTypes.includes('D'))
+  assert.equal(facetPlan({ kind: 'side', home: true }).gameTypes, null)
+})

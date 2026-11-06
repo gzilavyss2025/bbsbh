@@ -132,7 +132,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
         </Part>
       )}
       {(pick === 'v' || pick === 'all') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
-      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} tag={text.base} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} tag={text.base} only={lines.data.only} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
     </div>
   )
 
