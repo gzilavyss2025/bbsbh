@@ -4,7 +4,8 @@
 // the census counts them as `ofHits` on each qualifier.
 //
 // WHAT IT STORES. For each qualifier: gamePk, date, the batting club's id, the
-// opponent's id and the OF-hit count. Per season: the near-miss count (exactly
+// opponent's id and the OF-hit count, plus home/away, the game number and both
+// abbreviations as that date's schedule spelled them (the page builds game links from them). Per season: the near-miss count (exactly
 // one OF out), the team-game total, and the excluded counts. It stores NO score,
 // NO winner and NO inning, the same stance as gen-long-at-bats.mjs.
 //
@@ -71,7 +72,7 @@ async function regularGames(season) {
   const data = await getJson(
     `/api/v1/schedule?sportId=1&season=${season}&gameType=R&hydrate=team` +
       `&fields=dates,games,gamePk,gameType,officialDate,status,abstractGameState,` +
-      `teams,away,home,team,id`,
+      `gameNumber,teams,away,home,team,id,abbreviation`,
   )
   const seen = new Map()
   for (const day of data.dates ?? []) {
@@ -118,17 +119,28 @@ function seasonDoc(season, games, scanGames, generatedAt) {
       continue
     }
     const sides = [
-      { t: entry.away, team: game.teams?.away?.team?.id ?? null, opp: game.teams?.home?.team?.id ?? null },
-      { t: entry.home, team: game.teams?.home?.team?.id ?? null, opp: game.teams?.away?.team?.id ?? null },
+      { t: entry.away, home: false, team: game.teams?.away?.team?.id ?? null, opp: game.teams?.home?.team?.id ?? null },
+      { t: entry.home, home: true, team: game.teams?.home?.team?.id ?? null, opp: game.teams?.away?.team?.id ?? null },
     ]
-    for (const { t, team, opp } of sides) {
+    for (const { t, home, team, opp } of sides) {
       teamGames += 1
       if (!coverageOk({ balls: t.balls, fielded: t.fielded })) {
         excludedTeamGames += 1
         continue
       }
       if (t.ofOuts === 0) {
-        qualifiers.push({ gamePk: game.gamePk, date: game.officialDate, teamId: team, oppId: opp, ofHits: t.ofHits })
+        qualifiers.push({
+          gamePk: game.gamePk,
+          date: game.officialDate,
+          gameNumber: game.gameNumber ?? 1,
+          home,
+          // The game's own abbreviations, so a link builds the URL that date's slate knows (OAK, not ATH, in 2023).
+          awayAbbr: game.teams?.away?.team?.abbreviation ?? null,
+          homeAbbr: game.teams?.home?.team?.abbreviation ?? null,
+          teamId: team,
+          oppId: opp,
+          ofHits: t.ofHits,
+        })
       } else if (t.ofOuts === 1) {
         nearMiss += 1
       }

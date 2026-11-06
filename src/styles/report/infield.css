@@ -1,0 +1,23 @@
+/* ---------------------------------------------------------------- kept it in the infield
+   One table per season (InfieldPage). Cells and rules are the Table's; this block
+   left-aligns the club columns and tints the favorite club's rows. */
+.infield__census {
+  border-block: var(--bw-heavy) solid var(--border-stamped);
+  padding-block: var(--space-2);
+  margin-block: var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+.infield__section {
+  margin-block-end: var(--space-3);
+}
+.infield .club {
+  text-align: left;
+}
+.infield__club {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.infield__fav td {
+  background: var(--surface-mine);
+}

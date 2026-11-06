@@ -36,6 +36,7 @@ const PATHS_BEFORE_GROUPING = [
   '/leaders',
   '/situational-records',
   '/tensest',
+  '/infield',
   '/salaries',
   // Added with the page itself (#1410): one pitcher against one hitter.
   '/scout',

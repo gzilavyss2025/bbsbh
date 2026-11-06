@@ -68,6 +68,8 @@ export const PAGE_GROUPS = [
       // The season's tensest at-bats by MLB's pressure score, a club's and the league's.
       // Beside Situational Records: the same season-to-date board gesture.
       { label: 'Tensest Moments', path: '/tensest' },
+      // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
+      { label: 'Kept It in the Infield', path: '/infield' },
       // Money, read across the league: who is paid the most, what each club
       // spends, where the spend goes by position. Here rather than under
       // "Around the game" because it is a season-to-date board over the whole
