@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { teamLogoUrl } from '../../lib/teams.js'
 import { seasonMark } from '../../lib/identity/seasonMarks.js'
+import { useDarkTheme } from '../../hooks/preferences/useDarkTheme.js'
 
 // Decorative team logo, keyed by the team id we already carry throughout the
 // app. The label next to it always names the team in text, so the image is
@@ -24,8 +25,10 @@ export function TeamLogo({
   name,
   size = 26,
   bw = false,
-  variant = 'base',
+  variant: variantProp = 'base',
   className = '',
+  // The mark sits on a fill that stays light at night (a --marker chip): keep the full-colour art.
+  onLight = false,
   // `crop={true}` is the square "vibe" treatment below. `crop="bar"` is the
   // SectionMasthead treatment: the mark stretches to the full height of its
   // band (`.sectionhead`), cancelling that bar's own vertical padding to bleed edge to
@@ -61,6 +64,10 @@ export function TeamLogo({
   // re-picked mark — or a freshly re-uploaded override — starts fresh
   // instead of inheriting a prior failure.
   const era = seasonMark(teamId, season)
+  // Night mode (ADR-0130 item 5): a plain mark on a dark surface wears the one-colour knockout
+  // (ADR-0031), the same art the navy bars use. An era mark or a named variant is left as asked.
+  const dark = useDarkTheme()
+  const variant = dark && !onLight && variantProp === 'base' && !era ? 'mono' : variantProp
   // A bar asks for the `mono` variant: one ink on the band (ADR-0031). No era
   // art has a knockout, and full-colour art on a navy bar does not read, so a
   // bar draws the era's serif abbreviation in the bar's ink instead (#1626).
