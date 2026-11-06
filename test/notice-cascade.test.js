@@ -91,7 +91,7 @@ test('four tones, each setting the edge and the wash; only error changes the ink
   const css = read(CSS)
   const want = {
     info: { edge: 'var(--border-hairline)', wash: 'color-mix(in srgb, var(--navy) 7%, var(--surface-card))' },
-    event: { edge: undefined, wash: 'color-mix(in srgb, var(--marker) 16%, var(--surface-card))' },
+    event: { edge: undefined, wash: 'var(--surface-event-wash)' },
     caution: { edge: 'var(--clay)', wash: 'var(--clay-soft)' },
     error: { edge: 'var(--clay)', wash: 'var(--clay-soft)' },
   }

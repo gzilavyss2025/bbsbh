@@ -176,8 +176,9 @@
 .seasonseries__round {
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--navy);
-  color: var(--text-on-ink);
+  background: var(--surface-band);
+  outline: var(--bw-hair) solid var(--band-hairline);
+  color: var(--text-on-band);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -260,8 +261,8 @@
   min-height: 24px;
   padding: 0 var(--space-2h);
   border-radius: var(--radius-square);
-  border: var(--bw-hair) solid #FFFFFF;
-  background: #FFFFFF;
+  border: var(--bw-hair) solid var(--winprob-line);
+  background: var(--winprob-line);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

@@ -13,6 +13,7 @@ import {
   FIELD_NAMES,
   LEGACY_KEYS,
   LEVEL_SPORT_IDS,
+  APPEARANCE_MODES,
   MAX_CLOCK_SKEW_MS,
   PREFS_KEY,
   applyRemotePreferences,
@@ -36,8 +37,8 @@ const at = (n) => n
 // The closed field set
 // --------------------------------------------------------------------------
 
-test('the field set is exactly the four documented preferences', () => {
-  assert.deepEqual([...FIELD_NAMES].sort(), ['club', 'keepAwake', 'level', 'motion'])
+test('the field set is exactly the five documented preferences', () => {
+  assert.deepEqual([...FIELD_NAMES].sort(), ['appearance', 'club', 'keepAwake', 'level', 'motion'])
 })
 
 test('nothing score-bearing can be named as a field', () => {
@@ -73,6 +74,19 @@ test('each field validates only its own vocabulary', () => {
   assert.equal(isValidValue('motion', 'reduced'), true)
   assert.equal(isValidValue('motion', 'full'), true)
   assert.equal(isValidValue('motion', 'none'), false)
+
+  assert.deepEqual([...APPEARANCE_MODES], ['system', 'light', 'dark'])
+  for (const mode of APPEARANCE_MODES) assert.equal(isValidValue('appearance', mode), true)
+  for (const bad of ['night', 'Dark', '', null, true, 1]) {
+    assert.equal(isValidValue('appearance', bad), false, `${bad} is not an appearance`)
+  }
+})
+
+test('appearance falls back to system when absent or garbled', () => {
+  assert.equal(preferenceValue({}, 'appearance'), 'system')
+  assert.equal(preferenceValue({ appearance: { value: 'night', updatedAt: 1 } }, 'appearance'), 'system')
+  assert.equal(preferenceValue({ appearance: { value: 'dark', updatedAt: 1 } }, 'appearance'), 'dark')
+  assert.deepEqual(parsePreferences('{"appearance":{"value":"night","updatedAt":1}}'), {})
 })
 
 // --------------------------------------------------------------------------

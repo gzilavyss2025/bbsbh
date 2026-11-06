@@ -263,7 +263,7 @@ export function PassportBook({
 
   return (
     <Stack
-      className="passportbook"
+      className="passportbook theme-paper"
       role="group"
       aria-label="Passport book"
       tabIndex={0}

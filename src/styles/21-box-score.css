@@ -187,7 +187,7 @@
   .gamestory__link:hover {
     background: var(--team-color, var(--surface-inset));
     border-color: var(--team-color, var(--border-rule));
-    color: #fff;
+    color: var(--winprob-line);
   }
   .gamestory__link:hover .gamestory__logo {
     filter: brightness(0) invert(1);

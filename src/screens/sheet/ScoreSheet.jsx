@@ -28,7 +28,7 @@ const SUMMARY = ['AB', 'H', 'R', 'RBI']
 
 export function ScoreSheet({ model }) {
   return (
-    <article className="printsheet">
+    <article className="printsheet theme-paper">
       <SheetHead model={model} />
       {model.clubs.map((club) => (
         <ClubBlock key={club.side} club={club} />

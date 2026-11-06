@@ -1,4 +1,4 @@
-import { MOTION_MODES } from '../../../lib/account/preferences.js'
+import { APPEARANCE_MODES, MOTION_MODES } from '../../../lib/account/preferences.js'
 import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // Scorebook experience — how this app behaves while you are scoring.
@@ -18,11 +18,15 @@ const MOTION_COPY = {
   full: { label: 'Full', note: 'Keep the animations, unless this device’s own accessibility settings ask for less.' },
 }
 
+const APPEARANCE_LABEL = { system: 'Follow my system', light: 'Light', dark: 'Dark' }
+
 export function DeviceSection({
   keepAwake,
   onKeepAwake,
   motion,
   onMotion,
+  appearance,
+  onAppearance,
 }) {
   return (
     <section className="mytally__section">
@@ -63,6 +67,23 @@ export function DeviceSection({
           ))}
         </Cluster>
         <p className="mytally__fieldnote caps-exempt">{MOTION_COPY[motion]?.note ?? ''}</p>
+      </div>
+
+      <div className="mytally__field">
+        <p className="t-label mytally__fieldlabel">Appearance</p>
+        <Cluster className="mytally__choices" role="group" aria-label="Appearance">
+          {APPEARANCE_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              className={`mytally__choice${mode === appearance ? ' is-active' : ''}`}
+              aria-pressed={mode === appearance}
+              onClick={() => onAppearance(mode)}
+            >
+              {APPEARANCE_LABEL[mode]}
+            </button>
+          ))}
+        </Cluster>
       </div>
 
     </section>

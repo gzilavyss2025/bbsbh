@@ -105,7 +105,7 @@ body:has(.screen.awardhistory) {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: #fff;
+  color: var(--winprob-line);
   border-radius: var(--radius-sm);
   padding: var(--space-1h) var(--space-2h);
 }

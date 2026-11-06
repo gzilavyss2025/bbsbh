@@ -254,7 +254,7 @@
 }
 .rvrow--lead .rvrow__rank {
   background: var(--marker);
-  color: var(--text-heading);
+  color: var(--text-on-bright);
   font-weight: var(--w-bold);
 }
 .rvrow__frame {

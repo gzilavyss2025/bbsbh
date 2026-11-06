@@ -203,7 +203,7 @@
 .pill--marker {
   --pill-fill: var(--marker);
   --pill-edge: var(--border-stamped);
-  --pill-text: var(--text-heading);
+  --pill-text: var(--text-on-bright);
 }
 
 .pill--mark {

@@ -378,7 +378,7 @@
   color: var(--text-caption);
 }
 
-.ww-cal__day--today { background: var(--marker); color: var(--text-heading); }
+.ww-cal__day--today { background: var(--marker); color: var(--text-on-bright); }
 .ww-cal__day--next { background: var(--surface-stamped-ink); color: var(--text-on-ink-cream); }
 .ww-cal__day--today .ww-cal__flag,
 .ww-cal__day--next .ww-cal__flag { border-top: var(--bw-hair) solid currentColor; }

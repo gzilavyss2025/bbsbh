@@ -55,7 +55,7 @@
 /* layout-exempt: the band over its status strip */
 .gdnext__band { grid-area: band; min-width: 0; display: flex; flex-direction: column; }
 .gdnext__band > :first-child { flex: 0 0 var(--gd-band-h); min-height: 0; }
-.gdnext__notice { margin: 0; padding: var(--space-1) var(--space-3); background: var(--marker); color: var(--text-heading); }
+.gdnext__notice { margin: 0; padding: var(--space-1) var(--space-3); background: var(--marker); color: var(--text-on-bright); }
 .gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
   border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
 .gdnext__slot--navigator { --gd-area: navigator; }
@@ -78,7 +78,7 @@
    rules) in one ink row: away tile and runs, the plate, home runs and tile, then the pitcher. */
 /* layout-exempt: one row of five cells, the pitcher at the end */
 .gdnext-band { flex: 1; min-width: 0; display: flex; align-items: center;
-  gap: var(--space-3); padding: 0 var(--space-3); background: var(--ink-0); border: var(--bw-heavy) solid var(--border-stamped); }
+  gap: var(--space-3); padding: 0 var(--space-3); background: var(--surface-band-deep); outline: var(--bw-hair) solid var(--band-hairline); color: var(--text-on-band); border: var(--bw-heavy) solid var(--border-stamped); }
 /* layout-exempt: a tile beside its runs */
 .gdnext-band__club { display: flex; align-items: center; gap: var(--space-2); }
 .gdnext-band__club--home { flex-direction: row-reverse; }

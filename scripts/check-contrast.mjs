@@ -33,6 +33,7 @@ import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json'
 // ---- Load every custom property defined under src/tokens/ ----
 const tokensDir = resolve('src/tokens')
 const tokens = new Map()
+const dark = new Map() // night mode (ADR-0130): the dark block's own declarations, resolved over `tokens`
 for (const file of readdirSync(tokensDir)) {
   if (!file.endsWith('.css')) continue
   const css = readFileSync(resolve(tokensDir, file), 'utf8')
@@ -40,18 +41,21 @@ for (const file of readdirSync(tokensDir)) {
   for (const m of css.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)) {
     if (!tokens.has(m[1])) tokens.set(m[1], m[2].trim())
   }
+  // The dark block repeats under the media query (test/dark-theme-tokens.test.js pins that); read the attribute copy.
+  const block = css.match(/:root\[data-theme="dark"\]\s*\{([^}]*)\}/)
+  for (const m of block?.[1].matchAll(/--([\w-]+)\s*:\s*([^;]+);/g) ?? []) dark.set(m[1], m[2].trim())
 }
 
 // ---- Resolve a token (or literal hex) to a #rrggbb string ----
-function resolveColor(ref, seen = new Set()) {
+function resolveColor(ref, seen = new Set(), theme = tokens) {
   if (ref.startsWith('#')) return ref
   const varMatch = ref.match(/^var\(\s*--([\w-]+)\s*(?:,[^)]*)?\)$/)
   const name = varMatch ? varMatch[1] : ref.replace(/^--/, '')
   if (seen.has(name)) throw new Error(`token cycle at --${name}`)
   seen.add(name)
-  if (!tokens.has(name)) throw new Error(`unknown color token --${name}`)
-  const value = tokens.get(name)
-  if (value.startsWith('#') || value.startsWith('var(')) return resolveColor(value, seen)
+  if (!theme.has(name)) throw new Error(`unknown color token --${name}`)
+  const value = theme.get(name)
+  if (value.startsWith('#') || value.startsWith('var(')) return resolveColor(value, seen, theme)
   throw new Error(`--${name} is not a solid color (got "${value}")`)
 }
 
@@ -61,7 +65,7 @@ function resolveColor(ref, seen = new Set()) {
 // one list instead of two that drift. This file keeps the enforcement: it
 // resolves each token to a hex against the shipped tokens/*.css and fails the
 // build on a miss. Add or retune a pairing THERE.
-import { TEXT, UI, PAIRINGS, ratio } from '../src/lib/design/contrastPairings.js'
+import { TEXT, UI, PAIRINGS, DARK_COMPOSITES, ratio } from '../src/lib/design/contrastPairings.js'
 
 
 const failures = []
@@ -76,6 +80,22 @@ for (const p of PAIRINGS) {
       `  [${p.fg} on ${p.bg}]`,
   )
   if (!pass) failures.push(p.note)
+}
+
+// ---- Night mode: the same pairings again, resolved against the dark block (ADR-0130) ----
+// A literal hex in a pairing is a hand-made composite of LIGHT tokens, so it has no dark meaning;
+// a pairing that needs one carries `dark: { fg?, bg? }` with the composite worked out over the dark tokens.
+const night = new Map([...tokens, ...dark])
+const nightFailures = []
+const nightRows = []
+for (const p of PAIRINGS) {
+  const side = (k) => resolveColor(p.dark?.[k] ?? DARK_COMPOSITES[p[k]] ?? p[k], new Set(), night)
+  const fgHex = side('fg')
+  const bgHex = side('bg')
+  const r = ratio(fgHex, bgHex)
+  if (r >= p.min) continue
+  nightRows.push(`  ✗ ${r.toFixed(2).padStart(5)}:1 (need ${p.min}:1)  night: ${p.note}  [${p.fg} on ${p.bg}]`)
+  nightFailures.push(`night: ${p.note}`)
 }
 
 // ---- Every per-club header triad in the hand-tuned stores ----
@@ -224,13 +244,15 @@ for (const file of CLAIM_SCAN) {
   }
 }
 
-const allFailures = [...failures, ...headerFailures, ...claimFailures]
+const allFailures = [...failures, ...nightFailures, ...headerFailures, ...claimFailures]
 console.log(
   allFailures.length
     ? '\n✗ CONTRAST invariant violated:\n'
     : '✓ CONTRAST invariant holds — all known token pairings meet WCAG AA.',
 )
 for (const row of rows) console.log(row)
+for (const row of nightRows) console.log(row)
+if (!nightFailures.length) console.log('  ✓ night mode — every pairing above holds again against the dark block.')
 for (const row of headerRows) console.log(row)
 if (!headerFailures.length) {
   console.log(`  ✓ ${headerCount} club header triads — every onBar clears ${TEXT}:1 against its bar.`)
@@ -242,7 +264,7 @@ if (claimFailures.length) {
   console.log(`  ✓ ${claimsChecked} ratio claims written in comments — every one matches its pair.`)
 }
 if (allFailures.length) {
-  if (failures.length || headerFailures.length) {
+  if (failures.length || nightFailures.length || headerFailures.length) {
     console.error('\nRetune the offending color until it clears the threshold — do not lower the threshold.')
   }
   if (claimFailures.length) {

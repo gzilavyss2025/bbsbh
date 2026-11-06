@@ -126,7 +126,7 @@
 .hitchart__chip--on-marker {
   background: var(--marker);
   border-color: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
-  color: var(--text-heading);
+  color: var(--text-on-bright);
 }
 
 /* Held just off full strength: on the highlighter chip this figure sits on
