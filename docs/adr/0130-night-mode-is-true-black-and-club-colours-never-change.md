@@ -109,3 +109,4 @@ with exact values, and the build only follows this record.
 - The five large bands keep the light values for their whole subtree (the light block's selector list),
   not only their own fill, so their inner ink rows and `--text-on-ink*` text do not invert.
 - A club band with no triad falls back to `--surface-band` and `--text-on-band`.
+- **`--surface-band-deep`** (the darkest ink in light, `#1C1C1C` at night) is the fill of `.inhead` and `.gdnext-band`, which were the darkest ink before night mode; the other three bands read `--surface-band`. All five take a 1px `--band-hairline` outline at night.
