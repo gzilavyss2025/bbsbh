@@ -55,7 +55,7 @@
   font-size: var(--fs-num-lg);
   line-height: var(--lh-solid);
   font-variant-numeric: tabular-nums;
-  color: var(--text-heading);
+  color: var(--text-on-bright);
   background: var(--tier);
   transform: skewX(var(--ovr-slant));
 }

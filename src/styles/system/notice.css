@@ -48,7 +48,7 @@
   --notice-wash: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
 }
 .notice--event {
-  --notice-wash: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  --notice-wash: var(--surface-event-wash);
 }
 .notice--caution {
   --notice-edge: var(--clay);

@@ -143,7 +143,7 @@
   letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
   font-size: var(--fs-label);
-  color: var(--text-heading);
+  color: var(--text-on-bright);
 }
 .game-status-banner__reason {
   font-weight: var(--w-semibold);

@@ -24,23 +24,27 @@ export const ratio = contrastRatio
 export const TEXT = 4.5 // normal-size body text
 export const UI = 3.0 // large text / non-text UI affordance
 
+// Night mode (ADR-0130): a literal hex below is a composite of LIGHT tokens. This is the same composite
+// worked out over the dark tokens, which scripts/check-contrast.mjs swaps in for its dark pass. A
+// pairing may also carry `dark: { fg?, bg? }` for a pair whose dark meaning is not a token.
+export const DARK_COMPOSITES = {
+  '#FAEED0': '#2C230E', // --surface-event-wash (--marker 18% over black)
+  '#EBE8DD': '#222222', // --navy 7% over --surface-card
+  '#3F4B56': '#CBCBCB', // --text-on-ink 16% over --accent-primary
+}
+
 // The enforced pairings. `fg`/`bg` are token names or literal hex.
 export const PAIRINGS = [
   // Kraft seal cover: the sealed-cover ink over BOTH stripes of --seal-texture.
   { fg: 'seal-ink', bg: 'seal', min: TEXT, note: 'seal ink on kraft base stripe' },
   { fg: 'seal-ink', bg: 'seal-hatch', min: TEXT, note: 'seal ink on kraft hatch stripe' },
   // Injured-list tape: white banner text over BOTH stripes of --il-texture.
-  { fg: '#FFFFFF', bg: 'clay', min: TEXT, note: 'white on IL clay base stripe' },
-  { fg: '#FFFFFF', bg: 'clay-deep', min: TEXT, note: 'white on IL clay hatch stripe' },
+  { fg: '#FFFFFF', bg: 'clay', min: TEXT, note: 'white on IL clay base stripe', dark: { bg: '#B4453A' } },
+  { fg: '#FFFFFF', bg: 'clay-deep', min: TEXT, note: 'white on IL clay hatch stripe', dark: { bg: '#8E332B' } },
   // Last 10 Games win stamp: knockout text/W-L letter over BOTH stripes of
   // --win-texture. The loss stamp reuses --il-texture, already asserted above.
   { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'knockout text on win stamp base stripe' },
   { fg: 'text-on-ink', bg: 'field-deep', min: TEXT, note: 'knockout text on win stamp hatch stripe' },
-  // Last 10 Games home-game stub: seal-ink over the composite color
-  // `color-mix(in srgb, var(--seal) 80%, transparent)` renders as against
-  // --surface-card (the literal hex is that composite, precomputed by hand
-  // since this checker doesn't parse color-mix()).
-  { fg: 'seal-ink', bg: '#C3996A', min: TEXT, note: 'seal ink on Last 10 Games home-game stub' },
   // The three Game Log book boards a league-mark cover prints on, each carrying
   // the same paper foil (PassportCover.jsx stamps every line on the board in
   // --cover-foil). Held to the FULL 4.5:1 text bar rather than the 3:1 large-text
@@ -65,7 +69,7 @@ export const PAIRINGS = [
   // chip, the tier ribbon). The frame is the Legend tile's non-text ring.
   ...['bench', 'starter', 'regular', 'allstar', 'mvp', 'legend'].flatMap((t) => [
     { fg: `ovr-${t}`, bg: 'album-board', min: TEXT, note: `${t} tier colour as text on the album board` },
-    { fg: 'text-heading', bg: `ovr-${t}`, min: TEXT, note: `ink on a ${t} number chip` },
+    { fg: 'text-on-bright', bg: `ovr-${t}`, min: TEXT, note: `ink on a ${t} number chip` },
   ]),
   { fg: 'ovr-frame', bg: 'album-board', min: UI, note: 'Legend tile frame on the album board' },
   // Core semantic text roles on their intended surfaces.
@@ -100,7 +104,7 @@ export const PAIRINGS = [
   { fg: 'clay-deep', bg: 'clay-soft', min: TEXT, note: 'pill tint: clay (wrong call, Top 100 rank, out, down arm)' },
   { fg: 'field', bg: 'field-soft', min: TEXT, note: 'pill tint: the right call' },
   { fg: 'award-ink', bg: 'award-soft', min: TEXT, note: 'pill tint: award (standout night, limited arm)' },
-  { fg: 'ink-0', bg: 'marker', min: TEXT, note: 'pill tint: --marker as a FILL (outlier night)' },
+  { fg: 'text-on-bright', bg: 'marker', min: TEXT, note: 'pill tint: --marker as a FILL (outlier night)' },
   { fg: 'text-muted', bg: 'surface-inset', min: TEXT, note: 'inset pill: a level tag' },
   { fg: 'text-caption', bg: 'surface-inset', min: TEXT, note: 'inset pill: routine night, rehab tag, a reason' },
   { fg: 'accent-primary', bg: 'surface-inset', min: TEXT, note: 'inset pill: the row-share reason' },
@@ -112,7 +116,7 @@ export const PAIRINGS = [
   // season record taped to the page. Its base stripe is --marker, asserted on
   // the line above; only the hatch stripe is new here. ADR-0083 moved that tape
   // off the kraft weave, so this pair replaces the seal-ink one that covered it.
-  { fg: 'text-heading', bg: 'marker-deep', min: TEXT, note: 'on-hold tape text on the hatch stripe' },
+  { fg: 'text-on-bright', bg: 'marker-deep', min: TEXT, note: 'on-hold tape text on the hatch stripe' },
   // Stamp In's row action, in both states (ADR-0042): a soft neutral until you
   // press it, field green once you hold that stamp. The green pair is the same
   // one the win stamp already asserts above; the neutral pair is asserted here
@@ -262,7 +266,7 @@ export const PAIRINGS = [
   { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'scout: hitter-side tag, strike call' },
   { fg: 'allstar-blue', bg: 'surface-card', min: TEXT, note: 'scout: pitcher-side tag, in-play call' },
   { fg: 'award-ink', bg: 'surface-card', min: TEXT, note: 'scout: hitter-side push value' },
-  { fg: 'text-heading', bg: 'award-line', min: TEXT, note: 'scout: hitter-side name tag' },
+  { fg: 'text-on-bright', bg: 'award-line', min: TEXT, note: 'scout: hitter-side name tag' },
   { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'scout: pitcher-side name tag' },
   { fg: 'text-on-ink', bg: 'surface-stamped-ink', min: TEXT, note: 'scout: verdict card text' },
   { fg: 'text-heading', bg: 'text-on-ink-cream', min: TEXT, note: 'scout: verdict scale marker label' },
@@ -272,7 +276,7 @@ export const PAIRINGS = [
   { fg: 'award-ink', bg: 'surface-card', min: TEXT, note: 'scout: hitter-side word on the pitch rows' },
   { fg: 'award-ink', bg: 'surface-inset', min: TEXT, note: 'scout: hitter-side word on a selected pitch row' },
   { fg: 'allstar-blue', bg: 'surface-inset', min: TEXT, note: 'scout: pitcher-side word on a selected pitch row' },
-  { fg: 'text-heading', bg: 'award-line', min: UI, note: 'scout: ink edge that holds the hitter-side bar on the pull track' },
+  { fg: 'text-on-bright', bg: 'award-line', min: UI, note: 'scout: ink edge that holds the hitter-side bar on the pull track' },
   { fg: 'allstar-blue', bg: 'surface-inset', min: UI, note: 'scout: pitcher-side bar on the pull track' },
   { fg: 'allstar-blue', bg: 'surface-card', min: UI, note: 'scout: pitcher-side bar under his name on the pair card' },
   // THE TEXT-ON-INK RUNGS (#1156): paper text on the dark fills it sits on.

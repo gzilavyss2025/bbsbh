@@ -134,8 +134,8 @@
   padding: var(--space-3);
   display: grid;
   gap: var(--space-2h);
-  background: var(--navy);
-  color: var(--text-on-ink);
+  background: var(--surface-band);
+  color: var(--text-on-band);
   border-radius: var(--radius-sm);
 }
 .psboard__head {

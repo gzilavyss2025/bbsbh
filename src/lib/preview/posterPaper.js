@@ -56,7 +56,10 @@ const TOKEN_OF = {
   seal: '--seal',
 }
 
-export function posterPalette(root = typeof document === 'undefined' ? null : document.documentElement) {
+// The poster is paper in both themes, so it reads the `.theme-paper` sheet it is painted for (ADR-0130).
+export function posterPalette(
+  root = typeof document === 'undefined' ? null : (document.querySelector('.posterstudio__sheet') ?? document.documentElement),
+) {
   const cs = root && typeof getComputedStyle === 'function' ? getComputedStyle(root) : null
   const raw = {}
   for (const [key, token] of Object.entries(TOKEN_OF)) {

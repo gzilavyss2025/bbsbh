@@ -154,7 +154,7 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
   return (
     <svg
       viewBox={`0 0 ${STAMP_SIZE} ${STAMP_SIZE}`}
-      className={`gamestamp ${className}`.trim()}
+      className={`gamestamp theme-paper ${className}`.trim()}
       role="img"
       {...(ink ? { style: { '--stamp-ink': ink } } : null)}
     >

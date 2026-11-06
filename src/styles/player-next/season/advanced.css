@@ -64,7 +64,7 @@
 }
 .pnext-adv__tile--missing {
   background: var(--hold-texture);
-  color: var(--text-heading);
+  color: var(--text-on-bright);
 }
 .pnext-adv__tile--open {
   outline: 3px solid var(--text-heading);

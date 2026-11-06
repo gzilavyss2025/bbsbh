@@ -150,7 +150,7 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
 
   return (
     <div className="posterstudio">
-      <div className="posterstudio__sheet">
+      <div className="posterstudio__sheet theme-paper">
         {/* Fixed 1200×1600 backing store, scaled DOWN by CSS to fit the page —
             the export's pixel size is part of the deliverable, not a function
             of the screen it was painted on. */}

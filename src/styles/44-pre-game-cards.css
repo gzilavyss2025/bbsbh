@@ -176,8 +176,8 @@
 .seasonseries__round {
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--navy);
-  color: var(--text-on-ink);
+  background: var(--surface-band);
+  color: var(--text-on-band);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);

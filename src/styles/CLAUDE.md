@@ -48,6 +48,16 @@ Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`
 `--ring-band` (`check-focus-ring.mjs`). Text-on-background pairings hold WCAG AA
 (`check-contrast.mjs`) — ADR-0023.
 
+## Night mode (ADR-0130)
+
+The dark block sits at the end of `tokens/colors.css`, written twice (the `data-theme` attribute and the
+media query); `test/dark-theme-tokens.test.js` pins that the copies match. It sets base tokens, so a rule
+that reads `--ink-*`, `--navy` or a paper needs nothing. Three rules: a fill that stays bright in both
+themes (marker, award gold, an OVR chip) carries `--text-on-bright`, never `--text-heading`; a band that
+does not invert reads `--surface-band` and `--text-on-band` (the five big bands also keep the light values
+for their subtree, through the selector list on the light block); a subtree that stays paper takes
+`.theme-paper`. `check-contrast.mjs` runs every pairing again against the dark block.
+
 ## The Gameday bar tap target
 
 The advance's **tap target is the dead space around it**: `.gdnext__bar .gdnext__advance::after`

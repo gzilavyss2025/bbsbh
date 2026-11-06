@@ -16,7 +16,8 @@
   overflow: hidden;
   margin: var(--space-1) 0 var(--space-4);
   border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--ink-0);
+  background: var(--surface-band);
+  color: var(--text-on-band);
   box-shadow: var(--shadow-stamped);
 }
 

@@ -503,7 +503,7 @@
   /* A faint highlighter wash rather than a full fill, edged with a dashed
      rule (pencilled in: the game did not happen) — reads as "held" without shouting. The 16% marker wash is the app's
      own highlighter recipe (12-sealbox.css, 14-strike-zone.css). */
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  background: var(--surface-event-wash);
   border: var(--bw-hair) dashed var(--border-rule);
   /* Rare, first-load-only event (a slate has few postponements) — so a small
      entrance is warranted (see .agents/skills/review-animations): the strip

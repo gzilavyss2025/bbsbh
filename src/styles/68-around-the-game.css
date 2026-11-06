@@ -32,8 +32,8 @@
   position: relative;
   display: flex;
   margin: var(--space-4) 0 var(--space-6);
-  background: var(--navy);
-  color: var(--text-on-ink);
+  background: var(--surface-band);
+  color: var(--text-on-band);
   border-radius: var(--radius-sm);
   overflow: hidden;
   box-shadow: var(--shadow-raised);

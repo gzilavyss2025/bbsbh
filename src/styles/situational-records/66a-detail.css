@@ -154,7 +154,7 @@
   color: var(--text-on-ink);
 }
 .trrank__tablewrap .trrank tbody tr:first-child td {
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  background: var(--surface-event-wash);
 }
 .trrank__tablewrap .trrank td {
   height: 44px;
