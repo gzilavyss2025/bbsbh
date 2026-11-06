@@ -9,6 +9,7 @@ import { Notice } from './components/ui/state/Notice.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import { LazyPlayerHoverCard } from './components/player/LazyPlayerHoverCard.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
+import { useAppearancePreference } from './hooks/preferences/useAppearancePreference.js'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import { placeKey } from './lib/from/route.js'
 import {
@@ -362,6 +363,8 @@ const ID_ROUTES = {
 export default function App() {
   // Applies the saved motion preference to <html>. One mount, app-wide.
   useMotionPreference()
+  // Applies the saved appearance (night mode, ADR-0130) to <html>.
+  useAppearancePreference()
   // Repaint when a club's identity overrides change — the hydrating fetch, or a
   // save from the team hub's gear. Subscribed HERE rather than on the team hub
   // because tuned identity paints everywhere (the slate's cards, the in-game

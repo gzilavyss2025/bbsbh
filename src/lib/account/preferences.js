@@ -13,7 +13,7 @@
 // thing about the user, never a thing about a ballpark — and it is why this
 // module has no idea what a gamePk is.
 //
-// Four fields, deliberately. The closed set below is the whole vocabulary; an
+// Five fields, deliberately. The closed set below is the whole vocabulary; an
 // unknown key is dropped on the way in and on the way out, in storage and on
 // the wire, on both sides. Growing it is a product decision, not a convenience.
 //
@@ -91,6 +91,10 @@ export const LEVEL_SPORT_IDS = Object.freeze([1, 11, 12, 13, 14])
 // behaviour — so shipping this field changes nothing until someone touches it.
 export const MOTION_MODES = Object.freeze(['system', 'reduced', 'full'])
 
+// Night mode (ADR-0130). 'system' follows the phone's prefers-color-scheme;
+// 'light' / 'dark' force a theme. Applied by useAppearancePreference.js.
+export const APPEARANCE_MODES = Object.freeze(['system', 'light', 'dark'])
+
 // A statsapi team id. Deliberately a RANGE and not a membership test against
 // the real club list: validating a club would mean importing teams.js into the
 // serverless bundle (see above), and the cost of a well-formed-but-wrong id is
@@ -125,6 +129,10 @@ const FIELDS = Object.freeze({
   },
   motion: {
     validate: (v) => typeof v === 'string' && MOTION_MODES.includes(v),
+    fallback: 'system',
+  },
+  appearance: {
+    validate: (v) => typeof v === 'string' && APPEARANCE_MODES.includes(v),
     fallback: 'system',
   },
 })

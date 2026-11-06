@@ -144,5 +144,6 @@ export function usePreferences() {
     level: preferenceValue(prefs, 'level'),
     keepAwake: preferenceValue(prefs, 'keepAwake'),
     motion: preferenceValue(prefs, 'motion'),
+    appearance: preferenceValue(prefs, 'appearance'),
   }
 }
