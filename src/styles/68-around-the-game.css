@@ -33,6 +33,7 @@
   display: flex;
   margin: var(--space-4) 0 var(--space-6);
   background: var(--surface-band);
+  outline: var(--bw-hair) solid var(--band-hairline);
   color: var(--text-on-band);
   border-radius: var(--radius-sm);
   overflow: hidden;

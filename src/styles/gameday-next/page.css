@@ -78,7 +78,7 @@
    rules) in one ink row: away tile and runs, the plate, home runs and tile, then the pitcher. */
 /* layout-exempt: one row of five cells, the pitcher at the end */
 .gdnext-band { flex: 1; min-width: 0; display: flex; align-items: center;
-  gap: var(--space-3); padding: 0 var(--space-3); background: var(--surface-band); color: var(--text-on-band); border: var(--bw-heavy) solid var(--border-stamped); }
+  gap: var(--space-3); padding: 0 var(--space-3); background: var(--surface-band-deep); outline: var(--bw-hair) solid var(--band-hairline); color: var(--text-on-band); border: var(--bw-heavy) solid var(--border-stamped); }
 /* layout-exempt: a tile beside its runs */
 .gdnext-band__club { display: flex; align-items: center; gap: var(--space-2); }
 .gdnext-band__club--home { flex-direction: row-reverse; }

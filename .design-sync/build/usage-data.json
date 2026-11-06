@@ -57,6 +57,8 @@
   "surface-stamped-event": "Fill of the event tone: the one yellow of every notification card (ADR-0113).",
   "surface-event-wash": "Wash of an event Notice: the marker at 16% over the card; the dark tint at night (ADR-0130).",
   "surface-band": "Fill of the five large bands: navy, and #1C1C1C at night (ADR-0130).",
+  "surface-band-deep": "Fill of the score bug and the Gameday band: the darkest ink, and #1C1C1C at night (ADR-0130).",
+  "band-hairline": "The 1px edge a band takes at night; transparent in light (ADR-0130).",
   "text-on-band": "Text on a band: light in both themes (ADR-0130).",
   "text-on-bright": "Ink on a fill that stays bright in both themes: the marker, the award gold, an OVR tier chip (ADR-0130).",
   "accent-primary": "The app own primary. Jump bars and tab bars stay on the app colours, never a club colour (ADR-0030).",

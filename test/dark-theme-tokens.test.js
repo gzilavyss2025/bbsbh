@@ -13,3 +13,9 @@ test('the media-query dark block repeats the data-theme dark block exactly', () 
   assert.ok(attr && media, 'both dark blocks exist')
   assert.deepEqual(decls(media), decls(attr))
 })
+
+// The seal reads the same in both themes (ADR-0130 item 4, ADR-0083): kraft and its ink are never redefined at night.
+test('the dark block leaves the seal and its ink alone', () => {
+  const attr = css.match(/:root\[data-theme="dark"\]\s*\{([^}]*)\}/)[1]
+  assert.doesNotMatch(attr, /--(seal|text-on-seal)/)
+})

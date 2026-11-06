@@ -135,6 +135,7 @@
   display: grid;
   gap: var(--space-2h);
   background: var(--surface-band);
+  outline: var(--bw-hair) solid var(--band-hairline);
   color: var(--text-on-band);
   border-radius: var(--radius-sm);
 }

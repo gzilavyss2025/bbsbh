@@ -276,7 +276,7 @@
   height: 21px;
   margin-left: 6px;
   border-radius: 999px;
-  color: var(--text-heading);
+  color: var(--text-on-bright);
   background: var(--marker);
   vertical-align: middle;
 }

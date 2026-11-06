@@ -27,7 +27,7 @@
 /* The selected club tab wears that club's bar (--bar-fill / --bar-text, set per tab from the
    Identity Lab triad). A club with no triad keeps the ink fill. */
 .ww-roster .ww-roster__clubs .segmented__btn[aria-pressed='true'] {
-  background: var(--bar-fill, var(--surface-band));
+  background: var(--bar-fill, var(--surface-band-deep));
   border-color: var(--bar-fill, var(--border-stamped));
   color: var(--bar-text, var(--text-on-band));
 }

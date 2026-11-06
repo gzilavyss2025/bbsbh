@@ -348,6 +348,10 @@
    light in both themes (the paper-2 value), so it is one literal and the dark block leaves it. */
 :root {
   --surface-band: var(--navy);
+  /* The deeper band of the score bug and the Gameday band: the darkest ink, as they were before night mode. */
+  --surface-band-deep: var(--ink-0);
+  /* The edge a band takes at night so it shows on black; nothing in light. */
+  --band-hairline: transparent;
   --text-on-band: #FBF6E9;
   /* Ink on a fill the ADR keeps bright in both themes (--marker, --award-line, the OVR tier
      colours). --text-heading turns light at night, and light text does not read on yellow. The ink
@@ -399,6 +403,8 @@
   --accent-tint: #1C3729;
   --text-on-ink: #000000;
   --surface-band: #1C1C1C;
+  --surface-band-deep: #1C1C1C;
+  --band-hairline: var(--border-rule);
   --album-foil: #FBF6E9;
   --book-board-red: #8E332B;
   --book-board-blue: #163A6B;
@@ -445,6 +451,8 @@
     --accent-tint: #1C3729;
     --text-on-ink: #000000;
     --surface-band: #1C1C1C;
+    --surface-band-deep: #1C1C1C;
+    --band-hairline: var(--border-rule);
     --album-foil: #FBF6E9;
     --book-board-red: #8E332B;
     --book-board-blue: #163A6B;
