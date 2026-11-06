@@ -756,3 +756,28 @@ test('any facet asked with postseason reads October', () => {
   assert.ok(facetPlan({ kind: 'side', home: true, postseason: true }).gameTypes.includes('D'))
   assert.equal(facetPlan({ kind: 'side', home: true }).gameTypes, null)
 })
+
+test('a merged pitching line merges again: outs and earned runs survive', () => {
+  const g = (outs, er) => ({ gamesPlayed: 1, outs, earnedRuns: er })
+  const two = mergeCareerSplits(g(6, 0), g(3, 1), 'pitching')
+  const three = mergeCareerSplits(two, g(3, 1), 'pitching')
+  assert.equal(three.inningsPitched, '4.0')
+  assert.equal(three.era, '4.50')
+})
+
+test('one career total asked from three places at once is one request', async () => {
+  const { fetchCareerTotal } = await import('../src/api/boxlines/careerSplits.js')
+  let calls = 0
+  const real = globalThis.fetch
+  globalThis.fetch = async () => {
+    calls++
+    return new Response(JSON.stringify({ stats: [{ splits: [{ stat: { gamesPlayed: 9 } }] }] }), { status: 200 })
+  }
+  try {
+    const all = await Promise.all([1, 2, 3].map(() => fetchCareerTotal(99, 'hitting', 'R', '2026')))
+    assert.equal(calls, 1)
+    assert.equal(all[2].gamesPlayed, 9)
+  } finally {
+    globalThis.fetch = real
+  }
+})

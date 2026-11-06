@@ -85,7 +85,7 @@ export function VsTeam({ vs, group, career, tag = 'Career', only = null, season,
         <BoxLinesDoor
           key={team.id}
           className="splitsmod__door"
-          label={vsTeamDoorLabel(entry.car, group, team.abbr)}
+          label={vsTeamDoorLabel(entry.car, group, team.abbr, tag)}
           face={
             <span className={`splitsmod__grid splitsmod__grid--${layout} is-dr`}>
               <Cells quiet line={line} layout={layout} i={1} />
@@ -100,11 +100,12 @@ export function VsTeam({ vs, group, career, tag = 'Career', only = null, season,
             opponentName: teamClubName(team.id) ?? team.name,
             cutoff: asOf ?? null,
             only,
+            ...(only && { note: `Game lines · ${{ R: 'regular season', P: 'postseason', A: 'regular season + postseason' }[only.scope]}` }),
             band: bandFor(bio.team?.id),
           }}
         />
       ) : (
-        <p className="splitsmod__none">{group === 'pitching' ? `Has not faced the ${teamClubName(team?.id) ?? 'club'} in the majors.` : `No ${only ? 'meetings' : 'career meetings'} vs the ${teamClubName(team?.id) ?? 'club'}${only?.season ? ` in ${only.season}` : ''}.`}</p>
+        <p className="splitsmod__none">{group === 'pitching' ? `Has not faced the ${teamClubName(team?.id) ?? 'club'} ${only?.season ? `in ${only.scope === 'P' ? `the ${only.season} postseason` : only.season}` : 'in the majors'}.` : `No ${only ? 'meetings' : 'career meetings'} vs the ${teamClubName(team?.id) ?? 'club'}${only?.season ? ` in ${only.scope === 'P' ? `the ${only.season} postseason` : only.season}` : ''}.`}</p>
       )}
       {open && last && (
         <div className="splitsmod__last">

@@ -52,13 +52,14 @@ export async function loadVsTeam(id, group) {
 // Splits vs team for a season pick (the nightly shard is the career, regular season only): the
 // season's game log, summed per opponent into the shard's own `car` shape so the strip and the
 // row read it unchanged. statsapi: R 1, P 1, A 2.
-export async function loadVsTeamSeason(id, group, season, scope) {
+// A dated page (`asOf`) counts only the games before its day, as the door's sheet does.
+export async function loadVsTeamSeason(id, group, season, scope, asOf = null) {
   const log = (gameType) => fetchPersonStats(id, { type: 'gameLog', group, season, gameType })
   const [regular, post] = await Promise.all([
     scope === 'P' ? [] : log('R'),
     scope === 'R' ? [] : log('F,D,L,W'),
   ])
-  return vsByOpp([...regular, ...post], group)
+  return vsByOpp([...regular, ...post].filter((r) => !asOf || String(r.date) < asOf), group)
 }
 
 // Game-log rows -> { [oppId]: { car } }. Rates are divided once from the summed counts.
@@ -67,11 +68,7 @@ export function vsByOpp(rows, group) {
   for (const r of rows ?? []) {
     const opp = r?.opponent?.id
     if (!opp || !r.stat) continue
-    const prior = sums.get(opp)
-    // A merged line drops `outs` and `earnedRuns`, which the next merge needs: carry them along.
-    const merged = mergeCareerSplits(prior, r.stat, group)
-    const add = (k) => (Number(prior?.[k]) || 0) + (Number(r.stat[k]) || 0)
-    sums.set(opp, prior ? { ...merged, outs: add('outs'), earnedRuns: add('earnedRuns') } : r.stat)
+    sums.set(opp, mergeCareerSplits(sums.get(opp), r.stat, group))
   }
   const out = {}
   for (const [opp, t] of sums) {

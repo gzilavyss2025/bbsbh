@@ -117,6 +117,9 @@ export function mergeCareerSplits(a, b, group) {
   const outs = sum('outs')
   return {
     ...merged,
+    // Kept on the line so a merged line can be merged again (a season's game log, game by game).
+    outs,
+    earnedRuns: sum('earnedRuns'),
     inningsPitched: outsToIp(outs),
     era: eraOf(sum('earnedRuns'), outs)?.toFixed(2) ?? '-.--',
   }
@@ -208,7 +211,19 @@ const mostGames = (splits) =>
 // the postseason door; `gameType` is statsapi's own parameter and 'P' is its
 // own spelling of the postseason.
 // With a `season` it is that season's total instead (`stats=season`): the Splits bar's pick.
-export async function fetchCareerTotal(personId, group, gameType, season = null) {
+// Calls in flight are shared: the Splits module asks for the same total from up to three places
+// at once (the vs-team base, the Game lines base, the lineup doors' games). Dropped once settled,
+// so a later ask reads fresh.
+const totalsInFlight = new Map()
+export function fetchCareerTotal(personId, group, gameType, season = null) {
+  const k = `${personId}|${group}|${gameType}|${season}`
+  if (!totalsInFlight.has(k)) {
+    totalsInFlight.set(k, readTotal(personId, group, gameType, season).finally(() => totalsInFlight.delete(k)))
+  }
+  return totalsInFlight.get(k)
+}
+
+async function readTotal(personId, group, gameType, season) {
   if (!personId || !gameType) return null
   try {
     const data = await getJson(
@@ -339,12 +354,10 @@ export async function fetchCareerSplits(personId, group, sitCodes, gameType = 'R
   // the failure it prevents — a door labelled with one club's half of a
   // career — is silent. Largest gamesPlayed per code wins, which is the
   // combined row whenever one exists.
-  const best = new Map()
+  const byCode = new Map()
   for (const s of splits) {
     const code = s?.split?.code
-    if (!code || !s.stat) continue
-    const prior = best.get(code)
-    if (!prior || Number(s.stat.gamesPlayed) > Number(prior.gamesPlayed)) best.set(code, s.stat)
+    if (code && s.stat) byCode.set(code, [...(byCode.get(code) ?? []), s])
   }
-  return best
+  return new Map([...byCode].map(([code, rows]) => [code, mostGames(rows)]))
 }
