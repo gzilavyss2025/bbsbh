@@ -126,7 +126,7 @@ export function TeamFilterStrip({
                 // merely filter ignore it exactly as they did before.
                 onClick={() => onSelect(t.id, t)}
               >
-                <TeamLogo teamId={t.id} name={t.name} size={36} />
+                <TeamLogo teamId={t.id} name={t.name} size={36} onLight={t.id === markedTeamId} />
               </button>
             )
           })}

@@ -1138,7 +1138,7 @@ test('T8: the club table keeps its name cell, its tones and the board\'s column 
   assert.equal(decl(cell, 'font-family'), 'var(--font-body)', 'a club name is words, not a mono figure')
   assert.equal(decl(cell, 'text-transform'), 'uppercase')
   assert.equal(decl(t8Rule(core, '.clubtable td.team > *'), 'display'), 'flex', 'the logo and the name sit in a row')
-  assert.equal(decl(t8Rule(core, '.clubtable tr.is-me .team'), 'color'), 'var(--fav-accent, var(--accent-fallback-deep))')
+  assert.equal(decl(t8Rule(core, '.clubtable tr.is-me .team'), 'color'), 'color-mix(in srgb, var(--fav-accent, var(--accent-fallback-deep)) var(--fav-ink-mix), var(--text-heading))')
   assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--positive'), 'color'), 'var(--accent-positive)')
   assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--negative'), 'color'), 'var(--accent-negative)')
   assert.equal(decl(t8Rule(core, '.clubtable td.is-clinched'), 'font-weight'), 'var(--w-semibold)')

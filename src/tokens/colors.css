@@ -8,8 +8,10 @@
 /* THE LIGHT THEME (ADR-0130). `.theme-paper` puts these values back on its subtree in night mode,
    and the five large bands (`.inhead`, `.psboard`, `.bcast`, `.seasonseries__round`,
    `.gdnext-band`) do not invert: they carry light text on a band that is dark in both themes, so
-   their subtree keeps the light values too. Their own fill reads --surface-band, below. */
-:root, .theme-paper, .inhead, .psboard, .bcast, .seasonseries__round, .gdnext-band {
+   their subtree keeps the light values too. Their own fill reads --surface-band, below.
+   Two ink stages do the same, because their white knockout marks and light ink text need a dark
+   ground: the World Series hero (`.ww-hero__stage`) and the Gameday Scout verdict (`.gdverdict`). */
+:root, .theme-paper, .inhead, .psboard, .bcast, .seasonseries__round, .gdnext-band, .ww-hero__stage, .gdverdict {
   /* ---- Base neutrals: paper & ink ---- */
   --paper-0:  #F6EFDC;   /* deepest manila — app canvas */
   /* FOLDED INTO --paper-0 (#1128). At CIE76 dE 1.2 — and 0.76 under the more
@@ -196,6 +198,10 @@
   /* The reader's own club on a ranked board (ADR-0112): an ink tint on the card
      paper. One token, where three pages each mixed their own from --fav-accent. */
   --surface-mine:         color-mix(in srgb, var(--accent-primary) 8%, var(--surface-card));
+  /* How much of a club's own accent its text keeps on the reader's own row (.is-me). The accent
+     is identity and never changes (ADR-0130), but navy text on black cannot be read, so night
+     mode mixes the rest from --text-heading. 100% in light mode is the accent exactly. */
+  --fav-ink-mix:          100%;
 
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
@@ -401,6 +407,7 @@
   --surface-stamped-event: #2C230E;
   --surface-event-wash: #2C230E;
   --accent-tint: #1C3729;
+  --fav-ink-mix: 45%;
   --text-on-ink: #000000;
   --surface-band: #1C1C1C;
   --surface-band-deep: #1C1C1C;
@@ -449,6 +456,7 @@
     --surface-stamped-event: #2C230E;
     --surface-event-wash: #2C230E;
     --accent-tint: #1C3729;
+    --fav-ink-mix: 45%;
     --text-on-ink: #000000;
     --surface-band: #1C1C1C;
     --surface-band-deep: #1C1C1C;
