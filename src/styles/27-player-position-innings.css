@@ -112,7 +112,7 @@
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
   font-size: var(--fs-body);
-  color: #fff;
+  color: var(--winprob-line);
 }
 .break-banner__detail,
 .offday-banner__detail {
