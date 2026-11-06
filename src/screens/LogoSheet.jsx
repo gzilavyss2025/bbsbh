@@ -42,7 +42,7 @@ export function LogoSheet({ onBack }) {
         emptyMessage="No teams found."
       />
 
-      <Grid as="ul" min={140} gap="base" className="logogrid">
+      <Grid as="ul" min={140} gap="base" className="logogrid theme-paper">
         {teams.map((t) => (
           <li key={t.id} className="logotile">
             <button

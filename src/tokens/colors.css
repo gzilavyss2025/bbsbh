@@ -5,7 +5,11 @@
    and a kraft-tape "sealed" amber used for spoiler covers.
    ============================================================ */
 
-:root {
+/* THE LIGHT THEME (ADR-0130). `.theme-paper` puts these values back on its subtree in night mode,
+   and the five large bands (`.inhead`, `.psboard`, `.bcast`, `.seasonseries__round`,
+   `.gdnext-band`) do not invert: they carry light text on a band that is dark in both themes, so
+   their subtree keeps the light values too. Their own fill reads --surface-band, below. */
+:root, .theme-paper, .inhead, .psboard, .bcast, .seasonseries__round, .gdnext-band {
   /* ---- Base neutrals: paper & ink ---- */
   --paper-0:  #F6EFDC;   /* deepest manila — app canvas */
   /* FOLDED INTO --paper-0 (#1128). At CIE76 dE 1.2 — and 0.76 under the more
@@ -186,6 +190,9 @@
      parse color-mix() (the same precedent as the #FAEED0 pair in
      src/lib/design/contrastPairings.js). One yellow for every card; no tier colours. */
   --surface-stamped-event: #F8E3B3;
+  /* The wash of a Notice that announces something (.notice--event): --marker at 16% over the card.
+     A role, so night mode can give it the dark tint (the mix would sit lighter over #121212). */
+  --surface-event-wash: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
   /* The reader's own club on a ranked board (ADR-0112): an ink tint on the card
      paper. One token, where three pages each mixed their own from --fav-accent. */
   --surface-mine:         color-mix(in srgb, var(--accent-primary) 8%, var(--surface-card));
@@ -334,4 +341,129 @@
   --stage-overhead-cloth: #e8dfc8; --stage-overhead-cloth-shade: #b5b5a3;
   --stage-overhead-equipment: #10253e; --stage-overhead-leather: #88542d;
   --stage-frame: var(--stage-outline);
+}
+
+/* THE BAND ROLES (ADR-0130 item 11). Outside the light block above on purpose: a band's own
+   fill must read the theme's value, not the light one its subtree is pinned to. The text is
+   light in both themes (the paper-2 value), so it is one literal and the dark block leaves it. */
+:root {
+  --surface-band: var(--navy);
+  /* The deeper band of the score bug and the Gameday band: the darkest ink, as they were before night mode. */
+  --surface-band-deep: var(--ink-0);
+  /* The edge a band takes at night so it shows on black; nothing in light. */
+  --band-hairline: transparent;
+  --text-on-band: #FBF6E9;
+  /* Ink on a fill the ADR keeps bright in both themes (--marker, --award-line, the OVR tier
+     colours). --text-heading turns light at night, and light text does not read on yellow. The ink
+     is --ink-0's light value: 10.7:1 (--text-on-bright on --marker). */
+  --text-on-bright: #0F1822;
+}
+
+/* ============================================================
+   NIGHT MODE (ADR-0130) — true black, club colours never change.
+   Every value is the ADR's, or worked out from its rule once:
+   - the injured-list tape keeps its clay stripes (a status tape, like the kraft seal: its white text needs them);
+   - tints: the hue at 18% over black, as a literal (the checker reads no color-mix());
+   - "lightened to at least 4.5:1 on black": the lightest step that still clears the card
+     (#121212), the inset (#1C1C1C) and the dark tint it sits on.
+   Only the BASE tier and the roles whose alias must point elsewhere are set here; the roles
+   that alias a base (--bg-canvas, --text-body, --accent-primary, ...) follow on their own.
+   THE TWO BLOCKS BELOW ARE IDENTICAL: CSS cannot put a media query and an attribute in one
+   selector list. test/dark-theme-tokens.test.js pins that they match.
+   ============================================================ */
+:root[data-theme="dark"] {
+  --paper-0: #000000;
+  --paper-1: #000000;
+  --paper-2: #121212;
+  --paper-3: #1C1C1C;
+  --paper-cream: #121212;
+  --paper-4: #161616;
+  --paper-5: #1C1C1C;
+  --ink-0: #F2F2F2;
+  --ink-1: #E3E3E3;
+  --ink-2: #B3B3B3;
+  --graphite: #8C8C8C;
+  --rule: #3D3D3D;
+  --rule-soft: #2A2A2A;
+  --rule-grid: #1C1C1C;
+  --field: #5DB88A;
+  --field-deep: #4AA377;
+  --field-soft: #112119;
+  --field-wash: #0D1D15;
+  --clay: #EB7A6C;
+  --clay-deep: #E0675A;
+  --clay-soft: #2A1613;
+  --navy: #F2F2F2;
+  --allstar-blue: #6FA8E8;
+  --allstar-blue-deep: #5B95DB;
+  --award-ink: #E0A95A;
+  --award-soft: #241C0B;
+  --surface-stamped-event: #2C230E;
+  --surface-event-wash: #2C230E;
+  --accent-tint: #1C3729;
+  --text-on-ink: #000000;
+  --surface-band: #1C1C1C;
+  --surface-band-deep: #1C1C1C;
+  --band-hairline: var(--border-rule);
+  --album-foil: #FBF6E9;
+  --book-board-red: #8E332B;
+  --book-board-blue: #163A6B;
+  --book-board-foil: #FBF6E9;
+  --heat-fastball: #5DB88A;
+  --heat-breaking: #7FA6D8;
+  --heat-offspeed: #EB7A6C;
+  --il-texture: repeating-linear-gradient(-45deg, #B4453A 0px, #B4453A 6px, #8E332B 6px, #8E332B 8px);
+  --shadow-card: 0 0 0 1px var(--border-hairline);
+  --shadow-raised: 0 0 0 1px var(--border-hairline);
+  --inset-cell: inset 0 0 0 1px var(--border-hairline);
+  --shadow-drop-raised: 0 0 0 transparent;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper-0: #000000;
+    --paper-1: #000000;
+    --paper-2: #121212;
+    --paper-3: #1C1C1C;
+    --paper-cream: #121212;
+    --paper-4: #161616;
+    --paper-5: #1C1C1C;
+    --ink-0: #F2F2F2;
+    --ink-1: #E3E3E3;
+    --ink-2: #B3B3B3;
+    --graphite: #8C8C8C;
+    --rule: #3D3D3D;
+    --rule-soft: #2A2A2A;
+    --rule-grid: #1C1C1C;
+    --field: #5DB88A;
+    --field-deep: #4AA377;
+    --field-soft: #112119;
+    --field-wash: #0D1D15;
+    --clay: #EB7A6C;
+    --clay-deep: #E0675A;
+    --clay-soft: #2A1613;
+    --navy: #F2F2F2;
+    --allstar-blue: #6FA8E8;
+    --allstar-blue-deep: #5B95DB;
+    --award-ink: #E0A95A;
+    --award-soft: #241C0B;
+    --surface-stamped-event: #2C230E;
+    --surface-event-wash: #2C230E;
+    --accent-tint: #1C3729;
+    --text-on-ink: #000000;
+    --surface-band: #1C1C1C;
+    --surface-band-deep: #1C1C1C;
+    --band-hairline: var(--border-rule);
+    --album-foil: #FBF6E9;
+    --book-board-red: #8E332B;
+    --book-board-blue: #163A6B;
+    --book-board-foil: #FBF6E9;
+    --heat-fastball: #5DB88A;
+    --heat-breaking: #7FA6D8;
+    --heat-offspeed: #EB7A6C;
+    --il-texture: repeating-linear-gradient(-45deg, #B4453A 0px, #B4453A 6px, #8E332B 6px, #8E332B 8px);
+    --shadow-card: 0 0 0 1px var(--border-hairline);
+    --shadow-raised: 0 0 0 1px var(--border-hairline);
+    --inset-cell: inset 0 0 0 1px var(--border-hairline);
+    --shadow-drop-raised: 0 0 0 transparent;
+  }
 }

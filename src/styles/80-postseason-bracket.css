@@ -68,7 +68,7 @@
 .pbkt-ws--bold .pbkt-box__note {
   display: inline-block;
   background: var(--marker);
-  color: var(--text-heading);
+  color: var(--text-on-bright);
   padding: 0 var(--space-1);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
@@ -336,7 +336,7 @@
 }
 .pbkt-marker {
   background: var(--marker);
-  color: var(--text-heading);
+  color: var(--text-on-bright);
   padding: 0 var(--space-1);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);

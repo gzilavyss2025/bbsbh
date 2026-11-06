@@ -1,7 +1,18 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   font-family: var(--font-body);
   -webkit-text-size-adjust: 100%;
+}
+
+/* Native chrome (scrollbars, form controls) follows the theme (ADR-0130 item 12). */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+.theme-paper {
+  color-scheme: light;
 }
 
 * {

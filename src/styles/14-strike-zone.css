@@ -141,7 +141,7 @@
 .pitchlist__row--decisive > .pitchlist__meta,
 .pitchlist__row--decisive > .pitchlist__challenge,
 .pitchlist__row--decisive > span:empty {
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  background: var(--surface-event-wash);
   padding-block: 1px;
 }
 .pitchlist__row--decisive .pitchlist__num {

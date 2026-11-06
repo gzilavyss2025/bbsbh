@@ -4,7 +4,7 @@
    the page. Sealed covers carry a kraft diagonal hatch.
    ============================================================ */
 
-:root {
+:root, .theme-paper { /* .theme-paper: the light shadows back on a paper subtree (ADR-0130) */
   /* Elevation — soft, warm, low */
   --shadow-card:   0 1px 2px rgba(22,34,47,0.08), 0 4px 12px rgba(22,34,47,0.06);
   /* RAISED MUST LOOK RAISED (#1128). This was 0 2px 4px .10 / 0 8px 24px .10

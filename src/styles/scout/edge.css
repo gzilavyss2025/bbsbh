@@ -223,7 +223,7 @@
   letter-spacing: var(--ls-label);
 }
 .scout__tag--pitcher { background: var(--allstar-blue); color: var(--text-on-ink); }
-.scout__tag--hitter { background: var(--award-line); color: var(--text-heading); }
+.scout__tag--hitter { background: var(--award-line); color: var(--text-on-bright); }
 .scout__watchtext {
   margin: var(--space-1) 0 0;
   font-size: var(--fs-small);

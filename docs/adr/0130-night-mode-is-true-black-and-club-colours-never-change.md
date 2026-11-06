@@ -1,6 +1,6 @@
 # Night mode is true black, and club colours never change
 
-**Status:** Accepted (Gary, 2026-11-06 interview). Not yet built: #2507.
+**Status:** Accepted (Gary, 2026-11-06 interview). The colour layer is built (#2507); the Appearance setting and the hex cleanup are separate parts.
 **Date:** 2026-11-06
 
 ## Context
@@ -99,3 +99,14 @@ with exact values, and the build only follows this record.
   Gary's.
 - `check-contrast.mjs` must test every pair in both themes.
 - This replaces the "auto-lift club colours" line in the 2026-11-06 comment on #2507.
+
+## Amendment, 2026-11-06 (the colour layer's build)
+
+- **`--text-on-bright`** (`#0F1822`, both themes). Items 2 and 11 keep `--marker`, `--award-line` and the
+  OVR tier colours unchanged while ink inverts, so ink text on those fills turned light (1.5:1 on
+  `--marker`). Rules that put text on one of them read this role, and the contrast pairings name it.
+- **`--surface-event-wash`** is the event Notice's marker-at-16% wash as a role, with the dark tint at night.
+- The five large bands keep the light values for their whole subtree (the light block's selector list),
+  not only their own fill, so their inner ink rows and `--text-on-ink*` text do not invert.
+- A club band with no triad falls back to `--surface-band` and `--text-on-band`.
+- **`--surface-band-deep`** (the darkest ink in light, `#1C1C1C` at night) is the fill of `.inhead` and `.gdnext-band`, which were the darkest ink before night mode; the other three bands read `--surface-band`. All five take a 1px `--band-hairline` outline at night.
