@@ -15,13 +15,18 @@ import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 
 const n = (x) => x.toLocaleString('en-US')
 
-// The file carries the game's own abbreviations; today's are only a fallback.
-function rowPath(r) {
+// The file carries the game's own abbreviations (OAK in 2023, not ATH); today's are only a fallback.
+function abbrs(r) {
   const [awayId, homeId] = r.home ? [r.oppId, r.teamId] : [r.teamId, r.oppId]
-  const away = r.awayAbbr || teamAbbr({ id: awayId })
-  const home = r.homeAbbr || teamAbbr({ id: homeId })
+  return { away: r.awayAbbr || teamAbbr({ id: awayId }), home: r.homeAbbr || teamAbbr({ id: homeId }) }
+}
+
+function rowPath(r) {
+  const { away, home } = abbrs(r)
   return gamePath(r.date, away, home, 'boxscore', r.gameNumber)
 }
+
+const oppAbbr = (r) => (r.home ? abbrs(r).away : abbrs(r).home)
 
 function SeasonTable({ season, favoriteTeamId }) {
   return (
@@ -47,7 +52,7 @@ function SeasonTable({ season, favoriteTeamId }) {
               </span>
             </td>
             <td className="club">
-              {r.home ? 'vs' : 'at'} <abbr title={teamFullName(r.oppId)}>{teamAbbr({ id: r.oppId })}</abbr>
+              {r.home ? 'vs' : 'at'} <abbr title={teamFullName(r.oppId)}>{oppAbbr(r)}</abbr>
             </td>
             <td>{r.ofHits}</td>
           </tr>
