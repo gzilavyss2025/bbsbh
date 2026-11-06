@@ -351,7 +351,7 @@
   border-radius: 999px;
   border: 2px solid transparent;
   cursor: pointer;
-  color: #fff;
+  color: var(--winprob-line);
 }
 .umptier__glyph--elite {
   background: var(--accent-positive-deep);
@@ -370,7 +370,7 @@
   box-shadow: 0 0 0 1px var(--border-rule);
 }
 .umptier__glyph--open {
-  border-color: #fff;
+  border-color: var(--winprob-line);
 }
 .umptier__glyph:focus-visible {
   outline: 2px solid var(--focus-ring);
