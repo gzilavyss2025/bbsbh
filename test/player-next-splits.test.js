@@ -191,3 +191,13 @@ test('doorFigure finds a door by its key, and shows a dash when the door has no 
   const noHome = gameLinesView({ rows, labels: new Map([['road', p(12, '62.2', '4.60')]]) }, base, 'pitching')
   assert.deepEqual([doorFigure(noHome, 'home', 'pitching'), doorFigure(noHome, 'road', 'pitching')], ['—', '4.60'])
 })
+
+test('vsByOpp sums a season log per opponent, rates divided once', async () => {
+  const { vsByOpp } = await import('../src/screens/player/next/modules/splits/splitsData.js')
+  const g = (opp, outs, er, k) => ({ opponent: { id: opp }, stat: { gamesPlayed: 1, outs, earnedRuns: er, strikeOuts: k, baseOnBalls: 0 } })
+  const out = vsByOpp([g(139, 6, 0, 3), g(139, 3, 1, 1), g(139, 0, 0, 0), g(135, 3, 0, 1)], 'pitching')
+  assert.equal(out['139'].car.g, 3)
+  assert.equal(out['139'].car.ip, '3.0')
+  assert.equal(out['139'].car.era, '3.00')
+  assert.equal(out['135'].car.k, 1)
+})

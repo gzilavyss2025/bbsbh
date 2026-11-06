@@ -9,7 +9,7 @@ import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { Flag, Head, Part, Row } from './LineRows.jsx'
 import { GameLines } from './GameLines.jsx'
 import { VsTeam } from './VsTeam.jsx'
-import { loadCareer, loadGameLines, loadSplits, loadVsTeam } from './splitsData.js'
+import { loadCareer, loadGameLines, loadSplits, loadVsTeam, loadVsTeamSeason } from './splitsData.js'
 import { gameLinesView, handTable, scopeText, seasonChoices, sitTable, splitsMenu } from './splitsView.js'
 import '../../../../../styles/player-next/both/splits.css'
 import './parts.css'
@@ -18,7 +18,7 @@ const SCOPES = [['R', 'Regular'], ['P', 'Postseason'], ['A', 'All']]
 
 // The Splits module (#1886; boards Splits and PitcherSplits): a season and scope bar over four
 // parts — by handedness, situational, splits vs team, game lines. The first two follow the bar;
-// Splits vs team is the career (its nightly file has no seasons); Game lines follow the bar. Both roles open on a menu of the four, on By handedness, and show the ones picked.
+// Splits vs team and Game lines follow it too; a career pick's vs team stays the nightly regular season. Both roles open on a menu of the four, on By handedness, and show the ones picked.
 export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount }) {
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const pitching = group === 'pitching'
@@ -59,6 +59,21 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
     const hand = handTable(splits.data.rows, group, text.base)
     return { hand, sit: sitTable(splits.data.rows, group, text.base, hand?.baseSide, scope === 'P' ? 1 : 4) }
   }, [splits.data, group, text.base, scope])
+  // A season's vs team, from its game log; the career keeps the nightly shard (regular season).
+  const seasonPick = shownKey && shownKey !== 'career' ? shownKey : null
+  const vsSeason = useAsync(() => (seasonPick ? loadVsTeamSeason(bio.id, group, seasonPick, scope) : null), [bio.id, group, seasonPick, scope])
+  const vsView = useMemo(() => {
+    if (!vs.data) return null
+    if (!seasonPick) return { vs: vs.data, base: career.data, tag: scope === 'R' ? 'Career' : 'Career, regular season', only: null }
+    const byOpp = vsSeason.data
+    if (!byOpp || !lines.data?.base) return null
+    return {
+      vs: { ...vs.data, byOpp, teams: vs.data.teams.map((t) => ({ ...t, has: Boolean(byOpp[String(t.id)]) })) },
+      base: lines.data.base,
+      tag: text.base,
+      only: lines.data.only,
+    }
+  }, [vs.data, career.data, seasonPick, vsSeason.data, lines.data, text.base])
   const glView = useMemo(
     () => (lines.data?.base ? gameLinesView(lines.data, lines.data.base, group, text.base) : null),
     [lines.data, group, text.base],
@@ -131,7 +146,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
           ) : splits.loading ? <p className="hint">Loading…</p> : empties}
         </Part>
       )}
-      {(pick === 'v' || pick === 'all') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'v' || pick === 'all') && vsView && <VsTeam vs={vsView.vs} group={group} career={vsView.base} tag={vsView.tag} only={vsView.only} season={season} asOf={asOf} bio={bio} surname={surname} />}
       {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} tag={text.base} only={lines.data.only} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
     </div>
   )

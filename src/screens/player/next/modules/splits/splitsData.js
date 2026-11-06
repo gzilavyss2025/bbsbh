@@ -49,6 +49,41 @@ export async function loadVsTeam(id, group) {
   return vs?.group === group ? vs : null
 }
 
+// Splits vs team for a season pick (the nightly shard is the career, regular season only): the
+// season's game log, summed per opponent into the shard's own `car` shape so the strip and the
+// row read it unchanged. statsapi: R 1, P 1, A 2.
+export async function loadVsTeamSeason(id, group, season, scope) {
+  const log = (gameType) => fetchPersonStats(id, { type: 'gameLog', group, season, gameType })
+  const [regular, post] = await Promise.all([
+    scope === 'P' ? [] : log('R'),
+    scope === 'R' ? [] : log('F,D,L,W'),
+  ])
+  return vsByOpp([...regular, ...post], group)
+}
+
+// Game-log rows -> { [oppId]: { car } }. Rates are divided once from the summed counts.
+export function vsByOpp(rows, group) {
+  const sums = new Map()
+  for (const r of rows ?? []) {
+    const opp = r?.opponent?.id
+    if (!opp || !r.stat) continue
+    const prior = sums.get(opp)
+    // A merged line drops `outs` and `earnedRuns`, which the next merge needs: carry them along.
+    const merged = mergeCareerSplits(prior, r.stat, group)
+    const add = (k) => (Number(prior?.[k]) || 0) + (Number(r.stat[k]) || 0)
+    sums.set(opp, prior ? { ...merged, outs: add('outs'), earnedRuns: add('earnedRuns') } : r.stat)
+  }
+  const out = {}
+  for (const [opp, t] of sums) {
+    out[String(opp)] = {
+      car: group === 'pitching'
+        ? { g: t.gamesPlayed, ip: t.inningsPitched, era: t.era, k: t.strikeOuts, bb: t.baseOnBalls }
+        : { g: t.gamesPlayed, pa: t.plateAppearances, avg: t.avg, obp: t.obp, slg: t.slg, ops: t.ops, hr: t.homeRuns, so: t.strikeOuts, bb: t.baseOnBalls },
+    }
+  }
+  return out
+}
+
 // The career regular-season line the vs-team and Game lines rows read against (1 request).
 export const loadCareer = (id, group) => fetchCareerTotal(id, group, 'R')
 
@@ -57,7 +92,12 @@ export const loadCareer = (id, group) => fetchCareerTotal(id, group, 'R')
 // said). statsapi: 2 requests, +1 for scope A's October, +1 per game-type door, +2 for a bat's
 // Started and Substitution.
 export async function loadGameLines(id, group, pick, scope) {
-  const rows = cardFacetsFor(group)
+  // The rows that cannot answer this scope go: the Postseason row under R (it is not regular) and
+  // under P (it is the base row again); a bat's Started / Came in under P or A (MLB counts starts
+  // for the regular season only).
+  const rows = cardFacetsFor(group).filter(
+    (r) => !(r.careerGameType === 'P' && scope !== 'A') && !(r.fielding && scope !== 'R'),
+  )
   if (!rows.length) return null
   const season = pick === 'career' ? null : pick
   const total = (t) => fetchCareerTotal(id, group, t, season)
