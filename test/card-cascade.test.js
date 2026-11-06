@@ -113,9 +113,9 @@ test('the band is drawn once: only system/section-head.css reads --bar-fill for 
 
 test('with no club, the band is the house navy with a pencil-rule line, not kraft (#1151)', () => {
   const band = ruleBody(read('system/section-head.css'), '.sectionhead--band')
-  assert.equal(decl(band, '--band-fill'), 'var(--bar-fill, var(--navy))')
+  assert.equal(decl(band, '--band-fill'), 'var(--bar-fill, var(--surface-band))')
   assert.equal(decl(band, '--band-accent'), 'var(--bar-accent, var(--band-rule))')
-  assert.equal(decl(band, '--band-text'), 'var(--bar-text, var(--text-on-ink))')
+  assert.equal(decl(band, '--band-text'), 'var(--bar-text, var(--text-on-band))')
   assert.equal(decl(band, 'background'), 'var(--band-fill)')
   assert.equal(decl(band, 'border-bottom'), '3px solid var(--band-accent)')
   assert.equal(decl(band, 'color'), 'var(--band-text)')
@@ -125,9 +125,9 @@ test('the house band is navy and the pencil rule whatever club the page wears', 
   // Two classes, so it beats the band's own --band-* defaults in any order.
   const house = ruleBody(read('system/section-head.css'), '.sectionhead--band.sectionhead--house')
   assert.ok(house, 'a .sectionhead--band.sectionhead--house rule')
-  assert.equal(decl(house, '--band-fill'), 'var(--navy)')
+  assert.equal(decl(house, '--band-fill'), 'var(--surface-band)')
   assert.equal(decl(house, '--band-accent'), 'var(--band-rule)')
-  assert.equal(decl(house, '--band-text'), 'var(--text-on-ink)')
+  assert.equal(decl(house, '--band-text'), 'var(--text-on-band)')
   assert.doesNotMatch(house, /--bar-/, 'the house band reads no club colour (ADR-0030)')
 })
 
