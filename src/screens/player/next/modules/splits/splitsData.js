@@ -52,9 +52,20 @@ export async function loadVsTeam(id, group) {
 // The career regular-season line the vs-team and Game lines rows read against (1 request).
 export const loadCareer = (id, group) => fetchCareerTotal(id, group, 'R')
 
-// The Game lines doors' career labels (statsapi: 1 request, +1 for the postseason door, +1 for the
-// calendar doors, +1 for a bat's Started and Substitution).
-export async function loadGameLines(id, group) {
+// The Game lines doors and the line they read against, for the bar's pick: a season ('2026') or
+// 'career', in scope R, P or A (#1886 follow-up: the doors used to be the career whatever the bar
+// said). statsapi: 2 requests, +1 for scope A's October, +1 per game-type door, +2 for a bat's
+// Started and Substitution.
+export async function loadGameLines(id, group, pick, scope) {
   const rows = cardFacetsFor(group)
-  return rows.length ? { rows, labels: await fetchDoorLabels(id, group, rows) } : null
+  if (!rows.length) return null
+  const season = pick === 'career' ? null : pick
+  const total = (t) => fetchCareerTotal(id, group, t, season)
+  const [labels, regular, post] = await Promise.all([
+    fetchDoorLabels(id, group, rows, { season, scope }),
+    scope === 'P' ? null : total('R'),
+    scope === 'R' ? null : total('P'),
+  ])
+  const base = scope === 'A' ? (regular ? mergeCareerSplits(regular, post, group) : null) : scope === 'P' ? post : regular
+  return { rows, labels, base }
 }

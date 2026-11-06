@@ -713,3 +713,26 @@ test('a list door asks for the same game types listing as it does for one group'
     }
   }
 })
+
+// The Splits bar's pick reaches the Game lines doors (Ashby 2026: the doors printed his career
+// 87 home / 85 road under "2026 · All"; the season was 40 + 6 home, 35 + 3 road, 84 games).
+test('door labels follow a season and scope: season splits, October merged in', async () => {
+  const urls = []
+  const real = globalThis.fetch
+  globalThis.fetch = async (url) => {
+    urls.push(String(url))
+    const post = String(url).includes('gameType=P')
+    const row = (code, g) => ({ split: { code }, stat: { gamesPlayed: g, outs: g * 3, earnedRuns: 1 } })
+    const splits = post ? [row('h', 6), row('a', 3)] : [row('h', 40), row('a', 35)]
+    return new Response(JSON.stringify({ stats: [{ splits }] }), { status: 200 })
+  }
+  try {
+    const rows = [{ key: 'home', sitCode: 'h' }, { key: 'road', sitCode: 'a' }]
+    const labels = await fetchDoorLabels(676879, 'pitching', rows, { season: '2026', scope: 'A' })
+    assert.equal(labels.get('home').gamesPlayed, 46)
+    assert.equal(labels.get('road').gamesPlayed, 38)
+    assert.ok(urls.every((u) => u.includes('stats=statSplits&season=2026')))
+  } finally {
+    globalThis.fetch = real
+  }
+})

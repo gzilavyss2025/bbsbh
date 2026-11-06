@@ -18,7 +18,7 @@ const SCOPES = [['R', 'Regular'], ['P', 'Postseason'], ['A', 'All']]
 
 // The Splits module (#1886; boards Splits and PitcherSplits): a season and scope bar over four
 // parts — by handedness, situational, splits vs team, game lines. The first two follow the bar;
-// the last two are the career. Both roles open on a menu of the four, on By handedness, and show the ones picked.
+// Splits vs team is the career (its nightly file has no seasons); Game lines follow the bar. Both roles open on a menu of the four, on By handedness, and show the ones picked.
 export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount }) {
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const pitching = group === 'pitching'
@@ -47,7 +47,9 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
     return { rows, key: shown }
   }, [bio.id, group, key, scope, picked])
   const vs = useAsync(() => loadVsTeam(bio.id, group), [bio.id, group])
-  const lines = useAsync(() => loadGameLines(bio.id, group), [bio.id, group])
+  // Game lines follow the bar too, at the season the other parts show (their fallback included).
+  const shownKey = splits.data?.key
+  const lines = useAsync(() => (shownKey ? loadGameLines(bio.id, group, shownKey, scope) : null), [bio.id, group, shownKey, scope])
   const career = useAsync(() => loadCareer(bio.id, group), [bio.id, group])
 
   const shown = splits.data?.key ?? key
@@ -58,8 +60,8 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
     return { hand, sit: sitTable(splits.data.rows, group, text.base, hand?.baseSide, scope === 'P' ? 1 : 4) }
   }, [splits.data, group, text.base, scope])
   const glView = useMemo(
-    () => (lines.data && career.data ? gameLinesView(lines.data, career.data, group) : null),
-    [lines.data, career.data, group],
+    () => (lines.data?.base ? gameLinesView(lines.data, lines.data.base, group, text.base) : null),
+    [lines.data, group, text.base],
   )
 
   // Nothing at all: no splits even for the career, no vs-team shard, no game lines.
@@ -130,7 +132,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
         </Part>
       )}
       {(pick === 'v' || pick === 'all') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
-      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} tag={text.base} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
     </div>
   )
 
