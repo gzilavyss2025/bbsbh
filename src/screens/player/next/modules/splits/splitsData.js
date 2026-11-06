@@ -49,12 +49,60 @@ export async function loadVsTeam(id, group) {
   return vs?.group === group ? vs : null
 }
 
+// Splits vs team for a season pick (the nightly shard is the career, regular season only): the
+// season's game log, summed per opponent into the shard's own `car` shape so the strip and the
+// row read it unchanged. statsapi: R 1, P 1, A 2.
+// A dated page (`asOf`) counts only the games before its day, as the door's sheet does.
+export async function loadVsTeamSeason(id, group, season, scope, asOf = null) {
+  const log = (gameType) => fetchPersonStats(id, { type: 'gameLog', group, season, gameType })
+  const [regular, post] = await Promise.all([
+    scope === 'P' ? [] : log('R'),
+    scope === 'R' ? [] : log('F,D,L,W'),
+  ])
+  return vsByOpp([...regular, ...post].filter((r) => !asOf || String(r.date) < asOf), group)
+}
+
+// Game-log rows -> { [oppId]: { car } }. Rates are divided once from the summed counts.
+export function vsByOpp(rows, group) {
+  const sums = new Map()
+  for (const r of rows ?? []) {
+    const opp = r?.opponent?.id
+    if (!opp || !r.stat) continue
+    sums.set(opp, mergeCareerSplits(sums.get(opp), r.stat, group))
+  }
+  const out = {}
+  for (const [opp, t] of sums) {
+    out[String(opp)] = {
+      car: group === 'pitching'
+        ? { g: t.gamesPlayed, ip: t.inningsPitched, era: t.era, k: t.strikeOuts, bb: t.baseOnBalls }
+        : { g: t.gamesPlayed, pa: t.plateAppearances, avg: t.avg, obp: t.obp, slg: t.slg, ops: t.ops, hr: t.homeRuns, so: t.strikeOuts, bb: t.baseOnBalls },
+    }
+  }
+  return out
+}
+
 // The career regular-season line the vs-team and Game lines rows read against (1 request).
 export const loadCareer = (id, group) => fetchCareerTotal(id, group, 'R')
 
-// The Game lines doors' career labels (statsapi: 1 request, +1 for the postseason door, +1 for the
-// calendar doors, +1 for a bat's Started and Substitution).
-export async function loadGameLines(id, group) {
-  const rows = cardFacetsFor(group)
-  return rows.length ? { rows, labels: await fetchDoorLabels(id, group, rows) } : null
+// The Game lines doors and the line they read against, for the bar's pick: a season ('2026') or
+// 'career', in scope R, P or A (#1886 follow-up: the doors used to be the career whatever the bar
+// said). statsapi: 2 requests, +1 for scope A's October, +1 per game-type door, +2 for a bat's
+// Started and Substitution.
+export async function loadGameLines(id, group, pick, scope) {
+  // The rows that cannot answer this scope go: the Postseason row under R (it is not regular) and
+  // under P (it is the base row again); a bat's Started / Came in under P or A (MLB counts starts
+  // for the regular season only).
+  const rows = cardFacetsFor(group).filter(
+    (r) => !(r.careerGameType === 'P' && scope !== 'A') && !(r.fielding && scope !== 'R'),
+  )
+  if (!rows.length) return null
+  const season = pick === 'career' ? null : pick
+  const total = (t) => fetchCareerTotal(id, group, t, season)
+  const [labels, regular, post] = await Promise.all([
+    fetchDoorLabels(id, group, rows, { season, scope }),
+    scope === 'P' ? null : total('R'),
+    scope === 'R' ? null : total('P'),
+  ])
+  const base = scope === 'A' ? (regular ? mergeCareerSplits(regular, post, group) : null) : scope === 'P' ? post : regular
+  return { rows, labels, base, only: { season, scope } }
 }

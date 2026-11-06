@@ -216,12 +216,12 @@ export function clubChip(team, entry, group) {
 // figure. Doors sit in their SECTION and a family long enough folds. Best and weak rank inside a
 // section's loose doors and inside each folded family. Null without a career line to read against,
 // or with no figure door at all (`baseStat` is the career total).
-export function gameLinesView({ rows, labels }, baseStat, group) {
+export function gameLinesView({ rows, labels }, baseStat, group, baseLabel = 'Career') {
   const doors = rows
     .map((row) => ({ row, stat: labels.get(row.key) }))
     .filter(({ row, stat }) => row.list || (stat && Number(stat.gamesPlayed) > 0))
   if (!doors.some(({ row }) => !row.list)) return null
-  const baseLine = figLine('career', 'Career', baseStat, group)
+  const baseLine = figLine('career', baseLabel, baseStat, group)
   if (!baseLine) return null
   const base = asBase(baseLine)
   const toLine = ({ row, stat }) => (row.list ? { key: row.key, label: row.label, list: true, row } : { ...figLine(row.key, row.label, stat, group, row), row })

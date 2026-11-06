@@ -90,3 +90,11 @@ Series is both leagues' and stays WS.
 with no league on it (the postseason ledger in `postseason/records.js`) asks `roundTag(gameType,
 clubId, season)`, which finds the league from the club and the year. Never add a table of
 `{ F: 'WC', D: 'DS', … }` beside it: six surfaces did, and drifted.
+
+## The Splits bar
+
+`fetchDoorLabels(…, { season, scope })` answers for one season (`statSplits`/`season`) and a
+strict scope R/P/A; with no options it is the career default above. A sheet takes `only`
+(`onlyRows`) to cut its rows to the same pick, and `facetPlan` reads October for any facet
+asked with `postseason`. Splits does not cut at a dated page's day: MLB's split endpoints
+ignore `startDate`/`endDate` (verified 2026-11-06).

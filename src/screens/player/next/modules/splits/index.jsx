@@ -9,7 +9,7 @@ import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { Flag, Head, Part, Row } from './LineRows.jsx'
 import { GameLines } from './GameLines.jsx'
 import { VsTeam } from './VsTeam.jsx'
-import { loadCareer, loadGameLines, loadSplits, loadVsTeam } from './splitsData.js'
+import { loadCareer, loadGameLines, loadSplits, loadVsTeam, loadVsTeamSeason } from './splitsData.js'
 import { gameLinesView, handTable, scopeText, seasonChoices, sitTable, splitsMenu } from './splitsView.js'
 import '../../../../../styles/player-next/both/splits.css'
 import './parts.css'
@@ -18,7 +18,7 @@ const SCOPES = [['R', 'Regular'], ['P', 'Postseason'], ['A', 'All']]
 
 // The Splits module (#1886; boards Splits and PitcherSplits): a season and scope bar over four
 // parts — by handedness, situational, splits vs team, game lines. The first two follow the bar;
-// the last two are the career. Both roles open on a menu of the four, on By handedness, and show the ones picked.
+// Splits vs team and Game lines follow it too; a career pick's vs team stays the nightly regular season. Both roles open on a menu of the four, on By handedness, and show the ones picked.
 export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount }) {
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const pitching = group === 'pitching'
@@ -35,36 +35,65 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   const postOk = !asOf || (key !== 'career' && Number(key) < Number(season))
   const scope = postOk ? wanted : 'R'
 
-  // The season he never played has no splits: until he picks, open the career instead.
+  // Everything the bar governs, in one load so the parts never disagree: the hand and situational
+  // rows, the Game lines doors and the season's vs team, fetched side by side (no waterfall). The
+  // season he never played has no splits: until he picks, open the career instead.
   const splits = useAsync(async () => {
-    let rows = await loadSplits(bio.id, group, key, scope)
+    const run = (k) =>
+      Promise.all([
+        loadSplits(bio.id, group, k, scope),
+        loadGameLines(bio.id, group, k, scope),
+        k === 'career' ? null : loadVsTeamSeason(bio.id, group, k, scope, asOf),
+      ])
+    let [rows, lines, vsSeason] = await run(key)
     let shown = key
     if (!rows.length && picked === null && scope === 'R') {
-      rows = await loadSplits(bio.id, group, 'career', 'R')
+      ;[rows, lines, vsSeason] = await run('career')
       shown = 'career'
     }
     setReady(true)
-    return { rows, key: shown }
-  }, [bio.id, group, key, scope, picked])
+    return { id: bio.id, group, rows, key: shown, scope, lines, vsSeason }
+  }, [bio.id, group, key, scope, picked, asOf])
+  // While a new pick loads, the last pick stays up (labelled as itself), so no part unmounts or
+  // flashes another pick's figures.
+  const [last, setLast] = useState(null)
+  if (splits.data && splits.data !== last) setLast(splits.data)
+  const data = splits.data ?? (last?.id === bio.id && last?.group === group ? last : null)
   const vs = useAsync(() => loadVsTeam(bio.id, group), [bio.id, group])
-  const lines = useAsync(() => loadGameLines(bio.id, group), [bio.id, group])
   const career = useAsync(() => loadCareer(bio.id, group), [bio.id, group])
 
-  const shown = splits.data?.key ?? key
-  const text = scopeText(shown, scope)
+  const shown = data?.key ?? key
+  const shownScope = data?.scope ?? scope
+  const text = scopeText(shown, shownScope)
   const tables = useMemo(() => {
-    if (!splits.data) return null
-    const hand = handTable(splits.data.rows, group, text.base)
-    return { hand, sit: sitTable(splits.data.rows, group, text.base, hand?.baseSide, scope === 'P' ? 1 : 4) }
-  }, [splits.data, group, text.base, scope])
+    if (!data) return null
+    const hand = handTable(data.rows, group, text.base)
+    return { hand, sit: sitTable(data.rows, group, text.base, hand?.baseSide, shownScope === 'P' ? 1 : 4) }
+  }, [data, group, text.base, shownScope])
+  const lines = data?.lines ?? null
+  // A season's vs team, from its game log; the career keeps the nightly shard (regular season).
+  const vsView = useMemo(() => {
+    if (!vs.data || !data) return null
+    if (data.key === 'career') {
+      return { vs: vs.data, base: career.data, tag: shownScope === 'R' ? 'Career' : 'Career, regular season', only: null }
+    }
+    const byOpp = data.vsSeason
+    if (!byOpp || !lines?.base) return null
+    return {
+      vs: { ...vs.data, byOpp, teams: vs.data.teams.map((t) => ({ ...t, has: Boolean(byOpp[String(t.id)]) })) },
+      base: lines.base,
+      tag: text.base,
+      only: lines.only,
+    }
+  }, [vs.data, career.data, data, lines, shownScope, text.base])
   const glView = useMemo(
-    () => (lines.data && career.data ? gameLinesView(lines.data, career.data, group) : null),
-    [lines.data, career.data, group],
+    () => (lines?.base ? gameLinesView(lines, lines.base, group, text.base) : null),
+    [lines, group, text.base],
   )
 
   // Nothing at all: no splits even for the career, no vs-team shard, no game lines.
   const none = !splits.loading && (Boolean(splits.error) || Boolean(tables && !tables.hand && !tables.sit))
-  const settled = !vs.loading && !lines.loading && !career.loading
+  const settled = !vs.loading && !career.loading
   const empty = none && scope === 'R' && shown === 'career' && settled && !vs.data && !glView
   useEffect(() => {
     if (empty) onEmpty()
@@ -129,8 +158,8 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
           ) : splits.loading ? <p className="hint">Loading…</p> : empties}
         </Part>
       )}
-      {(pick === 'v' || pick === 'all') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
-      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'v' || pick === 'all') && vsView && <VsTeam vs={vsView.vs} group={group} career={vsView.base} tag={vsView.tag} only={vsView.only} season={season} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} tag={text.base} only={lines.only} labels={lines.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
     </div>
   )
 

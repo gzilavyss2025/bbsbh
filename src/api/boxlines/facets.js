@@ -67,6 +67,12 @@ function widenedTypes(facet) {
 }
 
 export function facetPlan(facet) {
+  const plan = planOf(facet)
+  // Any facet asked with `postseason` (the Splits bar's P or A) reads October too.
+  return facet?.postseason && !plan.gameTypes ? { ...plan, gameTypes: widenedTypes(facet) } : plan
+}
+
+function planOf(facet) {
   const plan = { opponentId: null, gameTypes: null, keep: null, narrowsSplits: false, needsLineups: false }
   if (!facet) return plan
   switch (facet.kind) {
@@ -256,3 +262,18 @@ export function facetPlan(facet) {
       return { ...plan, keep: () => false }
   }
 }
+
+// The Splits bar's cut of a sheet's rows (#1886 follow-up): `season` (a year, or null for every
+// season) and `scope` — 'R' regular season, 'P' postseason, 'A' both. No `only`: every row.
+export function onlyRows(rows, only) {
+  if (!rows || !only) return rows
+  const { season = null, scope = 'A' } = only
+  return rows.filter((r) => {
+    if (season && Number(r.season) !== Number(season)) return false
+    const post = POSTSEASON.includes(r.gameType)
+    return scope === 'P' ? post : scope === 'R' ? !post : true
+  })
+}
+
+// The facet a door asks under that cut: October joins the log when the scope wants it.
+export const facetFor = (facet, scope) => (facet && scope && scope !== 'R' ? { ...facet, postseason: true } : facet)

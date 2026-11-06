@@ -14,7 +14,7 @@ import { asBase, clubChip, figLine, meetingDate, readFigs, vsTeamLine } from './
 // Splits vs team (the board's third part): a career line against one club, from the nightly
 // shard. A strip of every club picks the opponent; the door under the figures opens the games.
 // `career` is the career regular-season stat the row is read against.
-export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
+export function VsTeam({ vs, group, career, tag = 'Career', only = null, season, asOf, bio, surname }) {
   const layout = group === 'pitching' ? 'era' : 'slash'
   const [pick, setPick] = useState(vs.preselectId)
   const [open, setOpen] = useState(false)
@@ -35,9 +35,9 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
   const team = vs.teams.find((t) => t.id === pick) ?? vs.teams[0]
   const entry = team ? vs.byOpp[String(team.id)] : null
   const baseLine = useMemo(() => {
-    const line = career && figLine('career', 'Career', career, group)
+    const line = career && figLine('career', tag, career, group)
     return line ? asBase(line) : null
-  }, [career, group])
+  }, [career, group, tag])
   const raw = entry?.car && vsTeamLine(entry.car, `vs ${team.abbr}`, group)
   const line = raw ? readFigs(baseLine, [raw], group)[0] : null
   // The last meeting is a game result: a dated page holds back one on or after its day.
@@ -46,7 +46,7 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
 
   return (
     <Part once={viewKey(bio.id, `splits-${group}:v`)} wide label="Splits vs team">
-      <SectionHead look="rule" note={`Career vs ${team?.abbr ?? ''}`}>Splits vs team</SectionHead>
+      <SectionHead look="rule" note={`${tag} vs ${team?.abbr ?? ''}`}>Splits vs team</SectionHead>
       {/* No scrollbar (Gary, 2026-10-30): ‹ › step the strip by most of its width, as the slate's club
           strip does. A touchscreen swipes it. */}
       <div className="splitsmod__stripwrap">
@@ -79,13 +79,13 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
         <TeamLogo teamId={team?.id} name={clubName} size={30} />
         <span className="splitsmod__clubname">{clubName}</span>
       </div>
-      <Head dr layout={layout} title="Career" group={group} vs="Career" />
+      <Head dr layout={layout} title={tag} group={group} vs={tag} />
       {open && baseLine && <Row dr base line={baseLine} layout={layout} />}
       {line ? (
         <BoxLinesDoor
           key={team.id}
           className="splitsmod__door"
-          label={vsTeamDoorLabel(entry.car, group, team.abbr)}
+          label={vsTeamDoorLabel(entry.car, group, team.abbr, tag)}
           face={
             <span className={`splitsmod__grid splitsmod__grid--${layout} is-dr`}>
               <Cells quiet line={line} layout={layout} i={1} />
@@ -99,11 +99,13 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
             opponentId: team.id,
             opponentName: teamClubName(team.id) ?? team.name,
             cutoff: asOf ?? null,
+            only,
+            ...(only && { note: `Game lines · ${{ R: 'regular season', P: 'postseason', A: 'regular season + postseason' }[only.scope]}` }),
             band: bandFor(bio.team?.id),
           }}
         />
       ) : (
-        <p className="splitsmod__none">{group === 'pitching' ? `Has not faced the ${teamClubName(team?.id) ?? 'club'} in the majors.` : `No career meetings vs the ${teamClubName(team?.id) ?? 'club'}.`}</p>
+        <p className="splitsmod__none">{group === 'pitching' ? `Has not faced the ${teamClubName(team?.id) ?? 'club'} ${only?.season ? `in ${only.scope === 'P' ? `the ${only.season} postseason` : only.season}` : 'in the majors'}.` : `No ${only ? 'meetings' : 'career meetings'} vs the ${teamClubName(team?.id) ?? 'club'}${only?.season ? ` in ${only.scope === 'P' ? `the ${only.season} postseason` : only.season}` : ''}.`}</p>
       )}
       {open && last && (
         <div className="splitsmod__last">

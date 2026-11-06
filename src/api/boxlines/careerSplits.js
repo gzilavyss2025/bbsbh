@@ -117,6 +117,9 @@ export function mergeCareerSplits(a, b, group) {
   const outs = sum('outs')
   return {
     ...merged,
+    // Kept on the line so a merged line can be merged again (a season's game log, game by game).
+    outs,
+    earnedRuns: sum('earnedRuns'),
     inningsPitched: outsToIp(outs),
     era: eraOf(sum('earnedRuns'), outs)?.toFixed(2) ?? '-.--',
   }
@@ -196,21 +199,40 @@ export const DOOR_EMPHASIS = {
   pitching: [null, null, 'key', null, null],
 }
 
+// The career stat type, or with a season the season one and its year.
+const statsFor = (career, seasonal, season) => (season ? `stats=${seasonal}&season=${season}` : `stats=${career}`)
+const mostGames = (splits) =>
+  splits.reduce((best, s) => (s?.stat && (!best || num(s.stat.gamesPlayed) > num(best.gamesPlayed)) ? s.stat : best), null)
+
 // The career split rows for a set of situation codes, as a Map code -> stat.
 // Returns an empty Map on any failure: a missing label is one missing door,
 // not a broken card.
 // The career total under one game type, as a single stat, or null. Used for
 // the postseason door; `gameType` is statsapi's own parameter and 'P' is its
 // own spelling of the postseason.
-export async function fetchCareerTotal(personId, group, gameType) {
+// With a `season` it is that season's total instead (`stats=season`): the Splits bar's pick.
+// Calls in flight are shared: the Splits module asks for the same total from up to three places
+// at once (the vs-team base, the Game lines base, the lineup doors' games). Dropped once settled,
+// so a later ask reads fresh.
+const totalsInFlight = new Map()
+export function fetchCareerTotal(personId, group, gameType, season = null) {
+  const k = `${personId}|${group}|${gameType}|${season}`
+  if (!totalsInFlight.has(k)) {
+    totalsInFlight.set(k, readTotal(personId, group, gameType, season).finally(() => totalsInFlight.delete(k)))
+  }
+  return totalsInFlight.get(k)
+}
+
+async function readTotal(personId, group, gameType, season) {
   if (!personId || !gameType) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=career&group=${group}&sportId=1` +
+      `/api/v1/people/${personId}/stats?${statsFor('career', 'season', season)}&group=${group}&sportId=1` +
         `&gameType=${gameType}&${FIELDS}`,
     )
-    // One split, no `split.code` — this is a total, not a situation.
-    return data.stats?.[0]?.splits?.[0]?.stat ?? null
+    // No `split.code` — this is a total, not a situation. A traded player's season comes back
+    // one row per club plus a combined row; the most games wins, the combined one.
+    return mostGames(data.stats?.[0]?.splits ?? [])
   } catch {
     return null
   }
@@ -234,14 +256,21 @@ export async function fetchCareerTotal(personId, group, gameType) {
 // and no rule that reconciles them. It is not a bug to be closed by loosening
 // the gate or by counting the rows instead — the rows stop at the page's
 // cutoff and the door states a whole career.
-async function fetchFieldingStarts(personId) {
+async function fetchFieldingStarts(personId, season = null) {
   if (!personId) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=career&group=fielding&sportId=1&gameType=R` +
-        `&fields=stats,splits,stat,gamesStarted`,
+      `/api/v1/people/${personId}/stats?${statsFor('career', 'season', season)}&group=fielding&sportId=1&gameType=R` +
+        `&fields=stats,splits,stat,gamesStarted,position,abbreviation`,
     )
-    const splits = data.stats?.[0]?.splits ?? []
+    // A traded player's season can carry a row per club beside a combined one for the same
+    // position: the largest row per position counts, so no start is counted twice.
+    const byPos = new Map()
+    for (const s of data.stats?.[0]?.splits ?? []) {
+      const pos = s.position?.abbreviation ?? byPos.size
+      if (!byPos.has(pos) || num(s.stat?.gamesStarted) > num(byPos.get(pos).stat?.gamesStarted)) byPos.set(pos, s)
+    }
+    const splits = [...byPos.values()]
     if (!splits.length) return null
     return splits.reduce((a, s) => a + (Number(s.stat?.gamesStarted) || 0), 0)
   } catch {
@@ -254,28 +283,33 @@ async function fetchFieldingStarts(personId) {
 // share ONE careerStatSplits call, whatever the count) or `careerGameType`
 // for a career under a game type (one call each). A source that fails leaves
 // its door out; the rest of the card is unaffected.
-export async function fetchDoorLabels(personId, group, entries) {
+//
+// `opts` is the Splits bar (#1886): `season` ('2026', or null for the career) and `scope` — 'R'
+// regular season, 'P' postseason, 'A' both, every door alike. With no scope, the career default
+// above: situations in the regular season, the calendar doors spanning October.
+export async function fetchDoorLabels(personId, group, entries, { season = null, scope = null } = {}) {
   const list = entries ?? []
   if (!personId || !list.length) return new Map()
   const codes = list.map((e) => e.sitCode).filter(Boolean)
+  const spans = (e) => (scope ? scope === 'A' : e.spansPostseason)
   // THE CALENDAR DOORS COUNT OCTOBER TWICE OVER. A month or a weekday is a
   // fact about the DATE, and a date does not stop being a Sunday because the
   // game was a division series — so those doors span both, and MLB answers for
   // one game type at a time. One extra request for the whole family, and only
   // for a card that has one.
-  const spanCodes = list.filter((e) => e.spansPostseason && e.sitCode).map((e) => e.sitCode)
+  const spanCodes = list.filter((e) => spans(e) && e.sitCode).map((e) => e.sitCode)
   const types = [...new Set(list.map((e) => e.careerGameType).filter(Boolean))]
   // The two lineup doors share ONE pair of calls — his starts and his career
   // games — and a card without them asks neither.
   const wantsLineup = list.some((e) => e.fielding)
   const [bySitCode, byPostseason, starts, whole, ...totals] = await Promise.all([
-    fetchCareerSplits(personId, group, codes),
+    fetchCareerSplits(personId, group, codes, scope === 'P' ? 'P' : 'R', season),
     spanCodes.length
-      ? fetchCareerSplits(personId, group, spanCodes, 'P')
+      ? fetchCareerSplits(personId, group, spanCodes, 'P', season)
       : Promise.resolve(new Map()),
-    wantsLineup ? fetchFieldingStarts(personId) : Promise.resolve(null),
-    wantsLineup ? fetchCareerTotal(personId, group, 'R') : Promise.resolve(null),
-    ...types.map((t) => fetchCareerTotal(personId, group, t)),
+    wantsLineup ? fetchFieldingStarts(personId, season) : Promise.resolve(null),
+    wantsLineup ? fetchCareerTotal(personId, group, 'R', season) : Promise.resolve(null),
+    ...types.map((t) => fetchCareerTotal(personId, group, t, season)),
   ])
   const byGameType = new Map(types.map((t, i) => [t, totals[i]]))
   const games = Number(whole?.gamesPlayed)
@@ -292,7 +326,7 @@ export async function fetchDoorLabels(personId, group, entries) {
       ? byFielding.get(e.fielding)
       : e.careerGameType
         ? byGameType.get(e.careerGameType)
-        : e.spansPostseason
+        : spans(e)
           ? mergeCareerSplits(bySitCode.get(e.sitCode), byPostseason.get(e.sitCode), group)
           : bySitCode.get(e.sitCode)
     if (stat) out.set(e.key, stat)
@@ -300,13 +334,14 @@ export async function fetchDoorLabels(personId, group, entries) {
   return out
 }
 
-export async function fetchCareerSplits(personId, group, sitCodes, gameType = 'R') {
+// With a `season`, that season's splits (`stats=statSplits`) instead of the career's.
+export async function fetchCareerSplits(personId, group, sitCodes, gameType = 'R', season = null) {
   const codes = [...new Set(sitCodes ?? [])].filter(Boolean)
   if (!personId || !codes.length) return new Map()
   let splits = []
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=careerStatSplits&group=${group}&sportId=1` +
+      `/api/v1/people/${personId}/stats?${statsFor('careerStatSplits', 'statSplits', season)}&group=${group}&sportId=1` +
         `&gameType=${gameType}&sitCodes=${codes.join(',')}&${FIELDS}`,
     )
     splits = data.stats?.[0]?.splits ?? []
@@ -319,12 +354,10 @@ export async function fetchCareerSplits(personId, group, sitCodes, gameType = 'R
   // the failure it prevents — a door labelled with one club's half of a
   // career — is silent. Largest gamesPlayed per code wins, which is the
   // combined row whenever one exists.
-  const best = new Map()
+  const byCode = new Map()
   for (const s of splits) {
     const code = s?.split?.code
-    if (!code || !s.stat) continue
-    const prior = best.get(code)
-    if (!prior || Number(s.stat.gamesPlayed) > Number(prior.gamesPlayed)) best.set(code, s.stat)
+    if (code && s.stat) byCode.set(code, [...(byCode.get(code) ?? []), s])
   }
-  return best
+  return new Map([...byCode].map(([code, rows]) => [code, mostGames(rows)]))
 }

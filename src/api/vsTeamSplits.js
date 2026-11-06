@@ -97,12 +97,13 @@ export async function fetchVsTeamSplitsForPlayer(personId) {
 // number is. The batting average carries no key of its own — a leading-dot
 // figure in a career line is read as an average everywhere in baseball, and
 // the grid above the door on the player page labels it AVG.
-export function vsTeamDoorLabel(car, group, oppAbbr) {
+// `span` names what the line covers: the nightly shard's 'Career', or the Splits bar's pick.
+export function vsTeamDoorLabel(car, group, oppAbbr, span = 'Career') {
   const stat =
     group === 'pitching'
       ? `${car.g} G, ${car.ip} IP, ${car.era} ERA, ${car.k} K, ${car.bb} BB`
       : `${car.g} G, ${car.pa} PA, ${car.avg}, ${car.hr} HR, ${car.ops} OPS`
-  return `Career vs ${oppAbbr}: ${stat}`
+  return `${span} vs ${oppAbbr}: ${stat}`
 }
 
 export function vsTeamSplitsFor(data, personId) {

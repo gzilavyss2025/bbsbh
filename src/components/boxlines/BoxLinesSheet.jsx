@@ -2,6 +2,7 @@ import '../../styles/boxlines/boxlines.css'
 import '../../styles/boxlines/listdoor.css'
 import { useMemo, useRef, useState } from 'react'
 import { fetchBoxLines } from '../../api/boxlines/fetch.js'
+import { facetFor, onlyRows } from '../../api/boxlines/facets.js'
 import { foldGroups, foldStats, LIST_COLUMNS } from '../../api/boxlines/fold.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
@@ -91,6 +92,7 @@ export function BoxLinesSheet({
   band = null,
   cells = null,
   cutoff = null,
+  only = null,
   onClose,
 }) {
   // WHICH GROUP OF A LIST the reader has picked, or null while the list itself
@@ -103,11 +105,12 @@ export function BoxLinesSheet({
   // question first — every row that has a group — and then the picked group's.
   // Serialised for the dependency list because an object literal is a new
   // identity on every render, and useAsync would refetch each one.
-  const question = picked
+  const asked = picked
     ? picked.facet
     : list
       ? list.facet(null)
       : (facet ?? (opponentId ? { kind: 'club', opponentId } : null))
+  const question = facetFor(asked, only?.scope)
   const facetKey = JSON.stringify(question)
   const query = useAsync(
     () => fetchBoxLines({ personId, group, cutoff, facet: question }),
@@ -119,7 +122,8 @@ export function BoxLinesSheet({
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
 
-  const rows = query.data
+  // The Splits bar's season and scope, when the door was opened under one.
+  const rows = useMemo(() => onlyRows(query.data, only), [query.data, only])
   const failed = !query.loading && rows === null
   // The groups, folded from the rows the gate approved. A group with no rows
   // cannot exist, because the groups are built FROM the rows: a hitter who has

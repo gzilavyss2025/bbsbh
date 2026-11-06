@@ -7,10 +7,10 @@ import { doorLine } from '../../../../../api/boxlines/careerSplits.js'
 import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { Cells, Chevron, Flag, Head, Part, Row } from './LineRows.jsx'
 
-// Game lines (the board's fourth part): a career line under each facet, from the doors of
+// Game lines (the board's fourth part): a line under each facet for the bar's season and scope, from the doors of
 // cardFacets.js, each opening the games behind it. The facet list is the registry's; this file
 // only draws it. `view` is gameLinesView's and `labels` the door labels it was built from.
-export function GameLines({ view, labels, group, asOf, bio, surname }) {
+export function GameLines({ view, tag = 'Career', only = null, labels, group, asOf, bio, surname }) {
   const layout = group === 'pitching' ? 'era' : 'slash'
   const [all, setAll] = useState(false)
   // The months open at first, the weekdays closed, as the board draws them.
@@ -29,6 +29,7 @@ export function GameLines({ view, labels, group, asOf, bio, surname }) {
     title: row.title(surname),
     footNote: row.footNote ?? null,
     cutoff: asOf ?? null,
+    only,
     band: bandFor(bio.team?.id),
   })
 
@@ -67,11 +68,11 @@ export function GameLines({ view, labels, group, asOf, bio, surname }) {
   const sections = all ? view.sections : view.sections.slice(0, 1)
   return (
     <Part once={viewKey(bio.id, `splits-${group}:g`)} wide label="Game lines">
-      <SectionHead look="rule" note="Career">Game lines</SectionHead>
+      <SectionHead look="rule" note={tag}>Game lines</SectionHead>
       <Row dr base line={view.base} layout={layout} />
       {sections.map((s) => (
         <div className="splitsmod__sec" key={s.key}>
-          <Head dr as="h4" layout={layout} title={s.title} group={group} vs="Career" />
+          <Head dr as="h4" layout={layout} title={s.title} group={group} vs={tag} />
           {s.items.map((item, n) =>
             item.fold ? (
               <div key={item.fold.key}>
