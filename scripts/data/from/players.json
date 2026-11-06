@@ -16854,7 +16854,7 @@
 "456744":{"birth":{"city":"Okarche","state":"OK","country":"USA"},"col":["Oklahoma City"],"debut":2006,"firstSeason":2006,"hs":[{"name":"Okarche","state":"OK"}],"name":"Chris Schroder","pos":"P"},
 "456762":{"birth":{"city":"Bellevue","state":"WA","country":"USA"},"debut":2007,"firstSeason":2007,"hs":[{"name":"Coeur d'Alene","state":"ID"}],"name":"Matthew Brown","pos":"3B"},
 "456776":{"birth":{"city":"Valencia","country":"Venezuela"},"debut":2011,"firstSeason":2011,"hs":[{"name":"UE Privado Bello Monte","state":"VEN"}],"name":"Alex Torres","pos":"P"},
-"456781":{"birth":{"city":"Barranquilla","country":"Colombia"},"debut":2012,"firstSeason":2012,"name":"Donovan Solano","pos":"1B"},
+"456781":{"birth":{"city":"Barranquilla","country":"Colombia"},"debut":2012,"firstSeason":2012,"name":"Donovan Solano","pos":"2B"},
 "456899":{"birth":{"city":"Columbus","state":"OH","country":"USA"},"col":["Bluefield College"],"debut":2010,"firstSeason":2010,"hs":[{"name":"Chantilly","state":"VA"}],"name":"Jon Link","pos":"P"},
 "457117":{"birth":{"city":"Bolivar","country":"Colombia"},"debut":2009,"firstSeason":2009,"name":"Ernesto Frieri","pos":"P"},
 "457122":{"birth":{"city":"Dallas","state":"TX","country":"USA"},"col":["Oklahoma"],"debut":2007,"firstSeason":2007,"hs":[{"name":"Coppell","state":"TX"}],"name":"Rocky Cherry","pos":"P"},

@@ -146,13 +146,6 @@
       "St. Lucie Mets"
     ]
   },
-  "cocacolapark": {
-    "venue": "Coca-Cola Park",
-    "venueId": 3230,
-    "teams": [
-      "Lehigh Valley IronPigs"
-    ]
-  },
   "constellationfield": {
     "venue": "Constellation Field",
     "venueId": 5421,
@@ -424,6 +417,13 @@
     "venueId": 2822,
     "teams": [
       "Lansing Lugnuts"
+    ]
+  },
+  "cocacolapark": {
+    "venue": "Jefferson Park",
+    "venueId": 3230,
+    "teams": [
+      "Lehigh Valley IronPigs"
     ]
   },
   "josephprileyjrballpark": {
