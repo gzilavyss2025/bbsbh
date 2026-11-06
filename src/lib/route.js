@@ -18,6 +18,7 @@
 //   '/prospects'                        -> { name: 'prospects' }
 //   '/rehab'                            -> { name: 'rehab' }
 //   '/tensest'                          -> { name: 'tensest' }  (the season's tensest at-bats by MLB's pressure score)
+//   '/infield'                          -> { name: 'infield' }  (team-games with no out to an outfielder, #2976)
 //   '/free-agents'                      -> { name: 'free-agents', season: null }  (the latest class)
 //   '/free-agents/{year}'               -> { name: 'free-agents', season: year }
 //   '/milestones'                       -> { name: 'milestones' }
@@ -346,6 +347,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
   if (parts.length === 1 && parts[0] === 'tensest') return { name: 'tensest' }
+  if (parts.length === 1 && parts[0] === 'infield') return { name: 'infield' }
   if (parts[0] === 'free-agents' && parts.length <= 2) {
     const year = parts.length === 2 && /^\d{4}$/.test(parts[1]) ? Number(parts[1]) : null
     return { name: 'free-agents', season: year }
