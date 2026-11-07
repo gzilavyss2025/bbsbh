@@ -175,10 +175,10 @@ function TeamPhotosSeason({ team, season, games, allGames, onBack }) {
       </header>
 
       <Notice tone="caution" label="Unsealed" role="note" className="gamephotos__notice">
-        Every professional photo MLB’s content package carries for the {season} season
-        {allGames ? ` from every ${team.name} game, both clubs,` : ''}, newest
+        Every professional photo MLB’s content package carries for the {season} season, newest
         first — including tonight’s game, if one’s in progress. Personal use only — photos are
         copyrighted (AP/Getty/USA Today Sports via MLB).
+        {allGames && ` Both clubs, from every ${team.name} game.`}
       </Notice>
 
       <p className="hint">
