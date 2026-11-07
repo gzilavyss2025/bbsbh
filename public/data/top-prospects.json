@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T07:56:08.866Z",
+  "generatedAt": "2026-11-07T07:55:16.856Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1159,18 +1159,6 @@
   ],
   "orgProspects": [
     {
-      "orgRank": 28,
-      "playerId": 694214,
-      "name": "Samuel Zavala",
-      "teamId": 11,
-      "team": "",
-      "position": "CF",
-      "levelRaw": "AA",
-      "statLine": ".235, 14 HR, 44 RBI",
-      "age": 22,
-      "topRank": null
-    },
-    {
       "orgRank": 1,
       "playerId": 805796,
       "name": "Arjun Nimmala",
@@ -1299,7 +1287,7 @@
       "position": "3B",
       "levelRaw": "A",
       "statLine": ".245, 13 HR, 60 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": null
     },
     {
@@ -2211,7 +2199,7 @@
       "position": "SS",
       "levelRaw": "ALL (3)",
       "statLine": ".291, 15 HR, 35 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -9783,6 +9771,18 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".273, 6 HR, 45 RBI",
+      "age": 22,
+      "topRank": null
+    },
+    {
+      "orgRank": 28,
+      "playerId": 694214,
+      "name": "Samuel Zavala",
+      "teamId": 145,
+      "team": "cws",
+      "position": "CF",
+      "levelRaw": "AA",
+      "statLine": ".235, 14 HR, 44 RBI",
       "age": 22,
       "topRank": null
     },
