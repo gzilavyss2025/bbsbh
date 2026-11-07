@@ -89,6 +89,7 @@
 //                                          (a club's played season, every result showing, one
 //                                           stamp per game you watched — ADR-0042. NOT a tab.)
 //   '/team/{id}/photos'                 -> { name: 'team-photos', id, asOf, sportId }
+//   '/team/{id}/photos/games'           -> same, allGames: true (both clubs' photos)
 //                                          (professional photos across the season's decided games,
 //                                           unsealed like '/photos'. NOT a tab — the Photos rail's own door.)
 //   '/team/{id}/transactions'           -> { name: 'team-transactions', id, asOf, sportId }
@@ -606,6 +607,9 @@ export function parseRoute(url) {
   // sixth tab, same reasoning and same placement as stamp-in just above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'photos')
     return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId }
+  // The same page with both clubs' photos from every game this club played.
+  if (parts.length === 4 && parts[0] === 'team' && parts[2] === 'photos' && parts[3] === 'games')
+    return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId, allGames: true }
   // A club's roster moves, the whole season, one day under another. Reached
   // from the club's own Transactions deck and — the reason it exists — from
   // every row of the home slate's wire, which used to land a reader on the
@@ -963,6 +967,10 @@ export function teamStampInPath(id, opts = {}) {
 // every other team link.
 export function teamPhotosPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/photos${linkQuery(opts)}`
+}
+// Every photo from the club's games, both clubs (TeamPhotosPage's other mode).
+export function teamGamePhotosPath(id, opts = {}) {
+  return `/team/${teamSegment(id, opts.name)}/photos/games${linkQuery(opts)}`
 }
 // A club's roster moves for the whole season (a move carries no score). Built
 // in two places: the club's own Transactions deck, and every club chip on the
