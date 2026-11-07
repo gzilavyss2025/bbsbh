@@ -318,7 +318,8 @@ export function onlyPhotographer(photos) {
 // surface that grows a professional-photo window game-by-game from the
 // newest played game backward (TeamPhotosRail's rail, TeamPhotosPage's
 // season grid). Slices `batchSize` games ending `consumed` games from the
-// end, fetches+filters each (photographer stills of `teamId` only) and
+// end, fetches+filters each (photographer stills of `teamId` only, or of both
+// clubs when `teamId` is null) and
 // tags each photo with the game it came from, using `cache` (gamePk ->
 // filtered photos) so a game already walked is never re-fetched — callers
 // own the cache's lifetime (one per mount) so two rails on the same page
@@ -331,7 +332,7 @@ export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, ca
     batch.map(async (game) => {
       if (cache.has(game.gamePk)) return cache.get(game.gamePk)
       const raw = await fetchGamePhotos(game.gamePk)
-      const filtered = onlyPhotographer(photosForTeam(raw, teamId)).map((photo) => ({
+      const filtered = onlyPhotographer(teamId == null ? raw : photosForTeam(raw, teamId)).map((photo) => ({
         ...photo,
         gamePk: game.gamePk,
         apiDate: game.apiDate,

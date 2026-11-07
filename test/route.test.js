@@ -40,6 +40,7 @@ import {
   teamLeadersPath,
   teamStampInPath,
   teamPhotosPath,
+  teamGamePhotosPath,
   situationalRecordsPath,
   umpirePath,
   umpireRankingsPath,
@@ -1344,4 +1345,15 @@ test('isYearView is a Dec 31 as-of in a past year', () => {
 test('isSlateUrl is true for every slate URL and false for other screens', () => {
   for (const url of ['/', '/aaa', '/11042026', '/milb', '/?nointro']) assert.equal(isSlateUrl(url), true, url)
   assert.equal(isSlateUrl('/logos'), false)
+})
+
+test('the all-games photos page parses and builds', () => {
+  assert.deepEqual(parseRoute('/team/158/photos/games?d=2026-07-05'), {
+    name: 'team-photos',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: null,
+    allGames: true,
+  })
+  assert.equal(teamGamePhotosPath(158), '/team/milwaukee-brewers-158/photos/games')
 })

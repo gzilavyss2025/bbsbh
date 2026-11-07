@@ -9,6 +9,9 @@ import { Notice } from '../../components/ui/state/Notice.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { loadTeamPhotos } from './data/loadTeamPhotos.js'
+import { teamGamePhotosPath, teamPhotosPath } from '../../lib/route.js'
+import { useNav } from '../../lib/nav.js'
+import { Door } from '../../components/ui/control/Door.jsx'
 
 const PHOTO_BATCH_GAMES = 8
 const PHOTO_INITIAL_TARGET = 20
@@ -36,7 +39,9 @@ const PHOTO_GROW_STEP = 20
 // a deliberate product call (there's no expectation of spoiler coverage on
 // a photo-browsing page reached by its own explicit door), not an oversight
 // of the usual `won != null` invariant the rest of the app holds to.
-export function TeamPhotosPage({ id, asOf, sportId: _sportId }) {
+// `allGames` (`/team/{id}/photos/games`) drops the this-club filter: both
+// clubs' stills from every game this club played.
+export function TeamPhotosPage({ id, asOf, sportId: _sportId, allGames = false }) {
   const teamId = Number(id)
   const data = useAsync(() => loadTeamPhotos(teamId, asOf), [teamId, asOf])
   const back = () => window.history.back()
@@ -55,7 +60,8 @@ export function TeamPhotosPage({ id, asOf, sportId: _sportId }) {
 
   return (
     <TeamPhotosSeason
-      key={`${team.id}-${season}`}
+      key={`${team.id}-${season}-${allGames}`}
+      allGames={allGames}
       team={team}
       season={season}
       games={seasonGames}
@@ -69,8 +75,11 @@ export function TeamPhotosPage({ id, asOf, sportId: _sportId }) {
 // walk-back's refs can close over, the same split the Games band uses between
 // itself and TeamPhotosRail.
 // ---------------------------------------------------------------------------
-function TeamPhotosSeason({ team, season, games, onBack }) {
-  useDocumentTitle(`${team.name} Photos`)
+function TeamPhotosSeason({ team, season, games, allGames, onBack }) {
+  const title = allGames ? `${team.name} Game Photos` : `${team.name} Photos`
+  useDocumentTitle(title)
+  const filterTeamId = allGames ? null : team.id
+  const navigate = useNav()
 
   const consumedRef = useRef(0)
   const photosRef = useRef([])
@@ -105,7 +114,7 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
       ) {
         const { photos: batchPhotos, consumed } = await fetchTeamPhotoBatch(
           games,
-          team.id,
+          filterTeamId,
           consumedRef.current,
           PHOTO_BATCH_GAMES,
           cacheRef.current,
@@ -129,7 +138,7 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
       }
       inFlightRef.current = false
     },
-    [games, team.id],
+    [games, filterTeamId],
   )
 
   useEffect(() => {
@@ -161,7 +170,7 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
       <header className="topbar">
         <h1 className="topbar__title">
           <TeamLogo teamId={team.id} name={team.name} size={32} />
-          {team.name} Photos
+          {title}
         </h1>
       </header>
 
@@ -169,7 +178,14 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
         Every professional photo MLB’s content package carries for the {season} season, newest
         first — including tonight’s game, if one’s in progress. Personal use only — photos are
         copyrighted (AP/Getty/USA Today Sports via MLB).
+        {allGames && ` Both clubs, from every ${team.name} game.`}
       </Notice>
+
+      <p className="hint">
+        <Door onClick={() => navigate(allGames ? teamPhotosPath(team.id) : teamGamePhotosPath(team.id))}>
+          {allGames ? `Only ${team.name} players` : 'Both clubs, every game'}
+        </Door>
+      </p>
 
       <section className="gamephotos__section gamephotos__gallery">
         <AsyncStatus
