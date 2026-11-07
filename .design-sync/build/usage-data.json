@@ -299,6 +299,7 @@
   "app-width": "Phone-column width every screen is capped to.",
   "control-min": "Height of a control inside a card (34px).",
   "surface-mine": "The reader's own club on a ranked board (leader row, state mine): an ink tint on the card paper, with an ink bar on the left.",
+  "fav-ink-mix": "How much of a club's own accent its text keeps on the reader's own row (100% in light mode; less at night, mixed toward the heading ink so it stays readable).",
   "mark-md": "Round dismiss mark of an icon button (32px).",
   "mark-sm": "Round (i) mark of an icon button (18px), and the corner badge on a photo.",
   "mark-lg": "The leader row's mark slot (36px): a club logo or a headshot in an ink-edged box.",

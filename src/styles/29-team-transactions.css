@@ -180,7 +180,7 @@
   background: var(--table-pin);
 }
 .clubtable tr.is-me .team {
-  color: var(--fav-accent, var(--accent-fallback-deep));
+  color: color-mix(in srgb, var(--fav-accent, var(--accent-fallback-deep)) var(--fav-ink-mix), var(--text-heading));
 }
 .clubtable td.standings__diff--positive {
   color: var(--accent-positive);

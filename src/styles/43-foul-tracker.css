@@ -191,7 +191,7 @@
   background: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, transparent);
 }
 .foulboard tr.is-me .team {
-  color: var(--fav-accent, var(--accent-fallback-deep));
+  color: color-mix(in srgb, var(--fav-accent, var(--accent-fallback-deep)) var(--fav-ink-mix), var(--text-heading));
 }
 .foulboard__team {
   font-family: var(--font-mono);
@@ -537,7 +537,7 @@
   background: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, transparent);
 }
 .sgh-row.is-me .sgh-name {
-  color: var(--fav-accent, var(--accent-fallback-deep));
+  color: color-mix(in srgb, var(--fav-accent, var(--accent-fallback-deep)) var(--fav-ink-mix), var(--text-heading));
 }
 .shot.sgh-shot {
   width: var(--shot-sm-w);
