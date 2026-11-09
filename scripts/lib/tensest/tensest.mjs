@@ -10,14 +10,9 @@
 // The generator is a top-level script (importing it runs it), so everything worth a
 // unit test lives here (scripts/CLAUDE.md).
 
-// How many ranks each list keeps (ties may run a list a little past it).
-export const LEAGUE_SIZE = 50
-export const TEAM_SIZE = 25
-
-// A play below this never reaches a list: the 25th tensest at-bat of any club's
-// season sits far above it (about 6 for a club's 5,400 at-bats; the league's 50th
-// is 9.99). Keeping the floor low lets the generator hold only a few hundred
-// plays in memory, and `assertFloorHolds` fails the run if a list ever reaches it.
+// The file keeps every play at or above this (about 2,700 a season): far below what
+// the page's ranked lists need (a club's 25th tensest sits near 6), and the set the
+// sliced board (#2981) filters.
 export const LI_FLOOR = 4
 
 const POS = {
@@ -129,6 +124,9 @@ export function playRows(game, plays) {
       pid: p.matchup.pitcher.id,
       pn: p.matchup.pitcher.fullName,
       what: describePlay(p),
+      // The park, from the schedule game: not the home club's, because of neutral sites.
+      vid: game.venue?.id ?? null,
+      vn: game.venue?.name ?? null,
     })
   })
   return rows
@@ -142,79 +140,22 @@ export function gameRowsOrThrow(game, plays) {
   return playRows(game, plays)
 }
 
+const keyOf = (r) => `${r.pk}:${r.i}`
 // Highest first; the game and play order only make the output stable.
 const byTense = (a, b) => b.li - a.li || a.pk - b.pk || a.i - b.i
 
-// Rank a list and keep every row whose rank is at most `size`. Rows that share a
-// leverage index share a rank (1, 1, 3), the way a leaderboard counts.
-export function rankTop(rows, size) {
-  const sorted = [...rows].sort(byTense)
-  const out = []
-  let rank = 0
-  let prev = null
-  for (let k = 0; k < sorted.length; k += 1) {
-    if (sorted[k].li !== prev) {
-      rank = k + 1
-      prev = sorted[k].li
-    }
-    if (rank > size) break
-    out.push({ ...sorted[k], rank })
-  }
-  return out
-}
-
-const keyOf = (r) => `${r.pk}:${r.i}`
-
-// Fold new rows into a ranked list. A row already in the list (same game and play)
-// is replaced, never doubled, so a game that is read twice is harmless.
-export function mergeTop(existing, incoming, size) {
-  const byKey = new Map()
-  for (const r of existing ?? []) byKey.set(keyOf(r), r)
-  for (const r of incoming) byKey.set(keyOf(r), r)
-  return rankTop([...byKey.values()], size)
-}
-
-// The empty store, and one batch of rows folded into it. Each play lands in three
-// lists: the whole league, the club that was batting, and the club that was pitching.
 // A game with plays to read: Final, and neither postponed ('D') nor cancelled ('C').
 // A cancelled game also reports abstractGameCode 'F' but has no winProbability.
 export const isPlayedFinal = (g) =>
   g.status?.abstractGameCode === 'F' && g.status?.codedGameState !== 'D' && g.status?.codedGameState !== 'C'
 
-export const emptyStore = () => ({ league: [], teams: {} })
-
-export function addRows(store, rows) {
-  const incoming = { league: [], teams: {} }
-  for (const r of rows) {
-    const batting = r.top ? r.aw : r.hm
-    const pitching = r.top ? r.hm : r.aw
-    incoming.league.push(r)
-    for (const [id, side] of [[batting, 'bat'], [pitching, 'pit']]) {
-      const t = (incoming.teams[id] ??= { bat: [], pit: [] })
-      t[side].push(r)
-    }
-  }
-  const league = mergeTop(store.league, incoming.league, LEAGUE_SIZE)
-  const teams = { ...store.teams }
-  for (const [id, t] of Object.entries(incoming.teams)) {
-    const had = teams[id] ?? { bat: [], pit: [] }
-    teams[id] = { bat: mergeTop(had.bat, t.bat, TEAM_SIZE), pit: mergeTop(had.pit, t.pit, TEAM_SIZE) }
-  }
-  return { league, teams }
-}
-
-// A full list whose last row sits at the floor may have lost rows beneath it. Fail
-// loudly rather than publish a table that is short. A list that is not yet full
-// (early in a season) holds every play at or above the floor, so it is complete.
-export function assertFloorHolds(store) {
-  const lists = [
-    ['league', store.league, LEAGUE_SIZE],
-    ...Object.entries(store.teams).flatMap(([id, t]) => [[`${id} bat`, t.bat, TEAM_SIZE], [`${id} pit`, t.pit, TEAM_SIZE]]),
-  ]
-  for (const [name, rows, size] of lists) {
-    const last = rows.at(-1)
-    if (last && last.rank >= size && last.li <= LI_FLOOR) {
-      throw new Error(`tensest list "${name}" reaches the ${LI_FLOOR} floor; lower LI_FLOOR`)
-    }
-  }
+// The season's flat list of tense plays (#2981), tensest first: every play at or
+// above LI_FLOOR, kept whole so the page can slice it by batter, pitcher, park and
+// club. A play already in the list (same game and play) is replaced, never doubled,
+// so a game read twice is harmless.
+export function mergePlays(existing, incoming) {
+  const byKey = new Map()
+  for (const r of existing ?? []) byKey.set(keyOf(r), r)
+  for (const r of incoming) byKey.set(keyOf(r), r)
+  return [...byKey.values()].sort(byTense)
 }

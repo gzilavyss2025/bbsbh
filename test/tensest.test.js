@@ -1,7 +1,10 @@
-// The pure half of gen-tensest.mjs: wording a play, and keeping the tensest rows.
+// The pure half of gen-tensest.mjs: wording a play and finding the tense ones; and the
+// ranking the page applies (src/api/tensest/rank.js). Merging, filing by club and
+// slicing the flat list are in test/tensest-slices.test.js (#2981).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { addRows, assertFloorHolds, describePlay, emptyStore, gameRowsOrThrow, isPlayedFinal, mergeTop, playRows, rankTop } from '../scripts/lib/tensest/tensest.mjs'
+import { describePlay, gameRowsOrThrow, isPlayedFinal, playRows } from '../scripts/lib/tensest/tensest.mjs'
+import { rankTop } from '../src/api/tensest/rank.js'
 import { isPostseason, rankLabel } from '../src/api/tensest/tensest.js'
 
 const play = (event, description, extra = {}) => ({
@@ -43,25 +46,6 @@ test('rankTop shares a rank across a tie and keeps the whole tie group', () => {
   assert.deepEqual(out.map((x) => [x.pk, x.rank]), [[1, 1], [2, 1], [3, 3]])
   const wider = rankTop([r(1, 9), r(2, 8), r(3, 7), r(4, 7), r(5, 6)], 3)
   assert.deepEqual(wider.map((x) => x.rank), [1, 2, 3, 3])
-})
-
-test('mergeTop replaces a row it has already seen instead of doubling it', () => {
-  const once = mergeTop([], [r(1, 9)], 5)
-  assert.equal(mergeTop(once, [r(1, 9)], 5).length, 1)
-})
-
-test('addRows files a play under the league, the club batting and the club pitching', () => {
-  const store = addRows(emptyStore(), [{ ...r(1, 9), top: 0 }])
-  assert.equal(store.league.length, 1)
-  assert.equal(store.teams[158].bat.length, 1) // home team bats in the bottom half
-  assert.equal(store.teams[112].pit.length, 1)
-  assert.deepEqual(store.teams[158].pit, [])
-})
-
-test('assertFloorHolds throws when a full list has run down to the floor', () => {
-  const full = Array.from({ length: 25 }, (_, k) => ({ ...r(k, 4), rank: 25 }))
-  assert.throws(() => assertFloorHolds({ league: [], teams: { 1: { bat: full, pit: [] } } }), /floor/)
-  assert.doesNotThrow(() => assertFloorHolds({ league: [], teams: { 1: { bat: [{ ...r(1, 4), rank: 1 }], pit: [] } } }))
 })
 
 test('describePlay counts a runner whose name ends in Jr.', () => {
