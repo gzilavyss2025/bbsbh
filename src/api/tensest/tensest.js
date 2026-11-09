@@ -1,10 +1,10 @@
-// The Tensest Moments page's data: the season's tensest at-bats by MLB's own pressure
+// The Pressure Moments page's (/pressure-moments) data: the season's tensest at-bats by MLB's own pressure
 // score (leverage index), read from a static same-origin file
 // (public/data/tensest.json) that scripts/gen-tensest.mjs keeps on the nightly cron.
 //
 // Cost-driven: the pressure of every at-bat lives in one winProbability feed per game,
 // more than 2,400 games a season, so the generator reads each game once and keeps only
-// the league's top 50 and each club's top 25 batting and pitching. Spoiler-free in the
+// every play at LI 4 or more, which the page ranks and slices (slices.js). Spoiler-free in the
 // sense the rule means it: this page is not one of the four scoring surfaces, and a
 // stat line is not a score (ADR-0034).
 //
@@ -13,15 +13,15 @@
 
 import { staticJson } from '../staticJson.js'
 
-const EMPTY = { season: null, generatedAt: null, through: null, league: [], teams: {} }
+const EMPTY = { season: null, generatedAt: null, through: null, plays: [] }
 
 export const loadTensest = staticJson('/data/tensest.json', {
   shape: (d) => ({
     season: d.season ?? null,
     generatedAt: d.generatedAt ?? null,
     through: d.through ?? null,
-    league: d.league ?? [],
-    teams: d.teams ?? {},
+    // Every play at LI >= 4, tensest first; the page ranks and slices it (slices.js).
+    plays: d.plays ?? [],
   }),
   fallback: EMPTY,
 })

@@ -67,7 +67,7 @@ export const PAGE_GROUPS = [
       { label: 'Situational Records', path: '/situational-records' },
       // The season's tensest at-bats by MLB's pressure score, a club's and the league's.
       // Beside Situational Records: the same season-to-date board gesture.
-      { label: 'Tensest Moments', path: '/tensest' },
+      { label: 'Pressure Moments', path: '/pressure-moments' },
       // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
       { label: 'Kept It in the Infield', path: '/infield' },
       // Money, read across the league: who is paid the most, what each club

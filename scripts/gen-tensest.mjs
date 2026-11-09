@@ -1,10 +1,10 @@
-// Regenerates public/data/tensest.json — the tensest at-bats of the season in play,
-// by MLB's own leverage index: the league's top 50, and for every club its top 25
-// batting and top 25 pitching. The Tensest Moments page (src/api/tensest.js reads it).
+// Regenerates public/data/tensest.json — the tense at-bats of the season in play, by
+// MLB's own leverage index: every play at or above LI_FLOOR, as one flat list with its
+// park, which the Tensest Moments page ranks and slices itself (src/api/tensest/, #2981).
 //
 // WHY A GENERATOR: the leverage of every at-bat lives in one winProbability feed
 // per game, 2,400+ games a season. The page cannot make that many calls, so this
-// reads each game once and keeps only the tensest plays (scripts/lib/tensest.mjs).
+// reads each game once and keeps only the tense plays (scripts/lib/tensest.mjs).
 //
 // It also writes public/data/tensest-cutoffs.json: the season's leverage edges for
 // the Pressure meter's 10 bars (scripts/lib/tensest/cutoffs.mjs), from a histogram
@@ -12,8 +12,8 @@
 //
 // INCREMENTAL: scripts/data/tensest-state.json lists the games already read, and
 // holds that histogram. A state file with no histogram is rebuilt from scratch. A run
-// reads only Final games not on that list, folds their tense plays into the lists
-// in the output file, and adds them to the list. The first run of a season reads
+// reads only Final games not on that list, folds their tense plays into the flat
+// list in the output file, and adds them to the list. The first run of a season reads
 // every game so far (about ten minutes); a nightly run reads the day's games.
 // A game that errors, or whose feed has no plays yet, is left off the list, so the next
 // run tries it again. Two things this does NOT do, on purpose: re-read a game MLB later
@@ -29,7 +29,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
-import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow, isPlayedFinal } from './lib/tensest/tensest.mjs'
+import { gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
 import { cutoffsFromHist, emptyHist, foldHist, histOrNull } from './lib/tensest/cutoffs.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
 
@@ -50,10 +50,12 @@ const finals = sched.dates.flatMap((d) => d.games).filter(isPlayedFinal)
 
 const prev = await readJsonOr(OUT, null)
 const state = await readJsonOr(STATE, null)
-const carried = prev?.season === season && state?.season === season && histOrNull(state.hist) !== null
+// `plays` is the flat list (#2981); a file from before it has the old ranked lists,
+// so it is rebuilt from scratch.
+const carried = prev?.season === season && state?.season === season && histOrNull(state.hist) !== null && Array.isArray(prev.plays)
 const done = new Set(carried ? state.done : [])
 let hist = carried ? state.hist : emptyHist()
-let store = carried ? { league: prev.league ?? [], teams: prev.teams ?? {} } : emptyStore()
+let plays = carried ? prev.plays : []
 
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
@@ -83,13 +85,12 @@ const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
 const ok = read.filter(Boolean)
 if (ok.length === 0) throw new Error('tensest: every winProbability read failed')
 
-store = addRows(store, ok.flatMap((r) => r.rows))
-assertFloorHolds(store)
+plays = mergePlays(plays, ok.flatMap((r) => r.rows))
 for (const r of ok) done.add(r.g.gamePk)
 const cutoffs = cutoffsFromHist(hist)
 
 const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
-await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, ...store })
+await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, plays })
 await writeCutoffs(cutoffs)
 await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
-console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; league top ${store.league.length}; bar edges ${cutoffs?.li.join(' ')}`)
+console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; ${plays.length} tense plays; bar edges ${cutoffs?.li.join(' ')}`)

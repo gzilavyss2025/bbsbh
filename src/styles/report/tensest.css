@@ -2,9 +2,9 @@
    Three ranked tables (TensestMomentsPage): a club batting, a club pitching, and the
    league. The cells, head row and row rules are the Table's (system/table.css); this
    block keeps the text columns left-aligned and the rank number readable. */
-.tensest__section {
-  margin-block-end: var(--space-3);
-}
+/* No margin on the cards: they stack in a Stack (TensestMomentsPage), which owns the gap
+   between them. Sibling margins collapsed with the name tab's own margin and left the
+   cards touching (ADR-0132). */
 .tensest .what,
 .tensest .game,
 .tensest .batter {
@@ -33,4 +33,27 @@
 }
 .tensest__picker {
   margin-block-end: var(--space-4);
+}
+
+/* The league list's filters (#2981): five pickers that wrap (a Cluster), then a chip
+   per filter that is on. Square and ink-edged, like the cards. Stack and Cluster own
+   the spacing; this block owns the frame and the pickers' look. */
+.tensest__filters {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.tensest__field {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.tensest__field select {
+  min-height: var(--space-10);
+  padding: 0 var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  min-width: 0;
 }

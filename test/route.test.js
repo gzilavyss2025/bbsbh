@@ -208,7 +208,8 @@ test('single-segment named routes resolve to their route name', () => {
     '/about': 'about',
     '/prospects': 'prospects',
     '/rehab': 'rehab',
-    '/tensest': 'tensest',
+    '/pressure-moments': 'tensest',
+    '/tensest': 'tensest', // the page's first address; old links still land
     '/infield': 'infield',
     '/milestones': 'milestones',
     '/awards': 'awards-history',

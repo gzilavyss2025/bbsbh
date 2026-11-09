@@ -121,13 +121,14 @@ don't run these by hand.
   file (about 5 s for 2026). Pure half `scripts/lib/nuggets/nuggets.mjs`, tested in `test/nuggets-pure.test.js`.
   `index.json` carries the stamp. A crossing dated today (US Pacific) waits for the next run; a failed game log
   holds its threshold and exits non-zero. Gated on `finals`. App reads it via `src/api/nuggets/nuggets.js`.
-- `gen-tensest.mjs` → `public/data/tensest.json` + `scripts/data/tensest-state.json` — the season's tensest
-  at-bats by MLB's own leverage index (`leverageIndex` on each `winProbability` play): the league's top 50 and each
-  club's top 25 batting and 25 pitching, postseason included. One feed per game, 2,400+ games a season, so it is
-  incremental: the state file lists the games already read, a nightly run reads only new Final games and folds their
-  plays at or above `LI_FLOOR` into the lists (`scripts/lib/tensest/tensest.mjs`, tested in `test/tensest.test.js`). A game
-  that errors stays off the list and is retried. The first run of a season reads every game (about ten minutes). A tie
-  keeps the whole tie group, so a list can run a few rows past its size. App reads it via `src/api/tensest/tensest.js`.
+- `gen-tensest.mjs` → `public/data/tensest.json` + `scripts/data/tensest-state.json` — the season's tense
+  at-bats by MLB's own leverage index (`leverageIndex` on each `winProbability` play): every play at or above `LI_FLOOR`
+  (4) as one flat list, `plays`, each with its park from the schedule game (`vid`, `vn`; not the home club's, because
+  of neutral sites), postseason included (#2981). One feed per game, 2,400+ games a season, so it is incremental: the
+  state file lists the games already read, a nightly run reads only new Final games and merges their tense plays in
+  (`scripts/lib/tensest/tensest.mjs` `mergePlays`, tested in `test/tensest-slices.test.js`). A file without `plays`
+  rebuilds the season (about 90 seconds in a container). A game that errors stays off the list and is retried. The
+  page ranks and slices the list itself (`src/api/tensest/slices.js`). App reads it via `src/api/tensest/tensest.js`.
   It also writes `public/data/tensest-cutoffs.json`: the season's leverage edges for the Pressure meter's 10 bars
   (bands 20/40/55/70/80/88/93/97/99, #2939), from a histogram of every play's LI (0.01 buckets, 0–9.99) that the state
   file carries as `hist` (`scripts/lib/tensest/cutoffs.mjs`, tested in `test/tensest-cutoffs.test.js`). A state file
