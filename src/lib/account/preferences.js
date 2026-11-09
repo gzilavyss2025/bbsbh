@@ -91,7 +91,7 @@ export const LEVEL_SPORT_IDS = Object.freeze([1, 11, 12, 13, 14])
 // behaviour — so shipping this field changes nothing until someone touches it.
 export const MOTION_MODES = Object.freeze(['system', 'reduced', 'full'])
 
-// Night mode (ADR-0130). 'system' follows the phone's prefers-color-scheme;
+// Night mode (ADR-0130, ADR-0131). The default is 'light'; 'system' follows the phone's prefers-color-scheme;
 // 'light' / 'dark' force a theme. Applied by useAppearancePreference.js.
 export const APPEARANCE_MODES = Object.freeze(['system', 'light', 'dark'])
 
@@ -133,7 +133,9 @@ const FIELDS = Object.freeze({
   },
   appearance: {
     validate: (v) => typeof v === 'string' && APPEARANCE_MODES.includes(v),
-    fallback: 'system',
+    // Light, not 'system': a dark device does not switch the app dark until the
+    // person answers the night-mode bar (ADR-0131).
+    fallback: 'light',
   },
 })
 

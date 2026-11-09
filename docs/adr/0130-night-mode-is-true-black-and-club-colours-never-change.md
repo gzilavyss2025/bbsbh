@@ -2,6 +2,7 @@
 
 **Status:** Accepted (Gary, 2026-11-06 interview). The colour layer is built (#2507); the Appearance setting and the hex cleanup are separate parts.
 **Date:** 2026-11-06
+**Amended:** 2026-11-09 by ADR-0131. A dark device no longer turns night mode on by itself; a bar offers it.
 
 ## Context
 

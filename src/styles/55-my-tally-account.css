@@ -299,3 +299,26 @@
 .erasesheet__btn {
   flex: 1 1 auto;
 }
+
+/* ----------------------------------------------------- night-mode bar (ADR-0131)
+   Offers the Appearance choice, so it lives with My Tally's rules. The row and
+   its wrap are a Cluster; this only frames it. */
+#root .nightbar__msg {
+  text-transform: none; /* caps-exempt: the night-mode offer reads as a natural sentence */
+}
+
+.nightbar {
+  justify-content: center;
+  padding: var(--space-2) var(--app-gutter);
+  background: var(--surface-inset);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.nightbar__msg {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}

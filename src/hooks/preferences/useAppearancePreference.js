@@ -6,7 +6,8 @@ import { effectiveTheme, themeAttribute } from './effectiveTheme.js'
 // useMotionPreference. Mounted once, in App.jsx. index.html's inline script does
 // the same before first paint; this keeps it live after a change on My Tally.
 //
-// 'system' removes the attribute (CSS follows prefers-color-scheme). The phone
+// No saved choice reads as 'light' (ADR-0131). 'system' removes the attribute
+// (CSS follows prefers-color-scheme). The phone
 // chrome follows too: every theme-color meta gets the resolved theme's canvas
 // colour (paper or true black), and re-resolves if the system flips live. The
 // media-scoped meta in index.html covers the moment before this runs.
