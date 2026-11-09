@@ -262,6 +262,8 @@ export const METRICS = {
   },
 }
 
+const OPTIONAL_COLUMNS = new Set(['arm_strength', 'oaa'])
+
 export async function fetchPercentiles(type, season) {
   const url =
     `https://baseballsavant.mlb.com/leaderboard/percentile-rankings` +
@@ -278,6 +280,11 @@ export async function fetchPercentiles(type, season) {
 
   const wanted = METRICS[type === 'batter' ? 'bat' : 'pit']
   for (const col of ['player_id', ...Object.keys(wanted)]) {
+    // The Glove columns (#2972) are extras: a missing one drops that row, not the run.
+    if (!(col in colIndex) && OPTIONAL_COLUMNS.has(col)) {
+      console.warn(`Savant percentile-rankings CSV: no '${col}' column — that row drops for every player`)
+      continue
+    }
     if (!(col in colIndex)) {
       throw new Error(
         `Savant percentile-rankings CSV: expected column '${col}' not found — layout may have changed`,

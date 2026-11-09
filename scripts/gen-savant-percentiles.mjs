@@ -212,9 +212,20 @@ const RANKED_BOARDS = [
   },
 ]
 
+// Two boards read the same pop-time CSV (pop and the catcher arm): fetch each URL once,
+// checking every column any board reads from it.
+const csvByUrl = new Map()
+function boardCsv(key, url) {
+  if (!csvByUrl.has(url)) {
+    const columns = [...new Set(RANKED_BOARDS.filter((b) => b.url === url).flatMap((b) => [b.idCol, b.valueCol]))]
+    csvByUrl.set(url, fetchSavantCsv(`Savant ${key}`, url, { columns }))
+  }
+  return csvByUrl.get(url)
+}
+
 async function fetchRankedBoard({ key, idCol, valueCol, url, lowerIsBetter, fillOnly }) {
   try {
-    const rows = await fetchSavantCsv(`Savant ${key}`, url, { columns: [idCol, valueCol] })
+    const rows = await boardCsv(key, url)
     const raw = {}
     for (const r of rows) {
       const id = String(r[idCol] ?? '').trim()

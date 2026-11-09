@@ -744,7 +744,7 @@ export function GameSelect({
           <WireRail
             endDate={dateStr}
             sportId={sportId}
-            onPresence={setRailPresent}
+            onPresence={setRailPresent} reserved={railPresent}
             fitTo={gamesColRef}
             singleDay={!isToday}
           />

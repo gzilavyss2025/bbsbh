@@ -147,7 +147,8 @@ export const BATTER_METRICS = [
   },
   // Glove (#2972). Arm and OAA are Savant's own percentiles (a catcher's arm is
   // ranked among catchers off the pop-time board); pop time and framing are
-  // ranked by the generator. Arm and OAA carry no raw value, so only the rank shows.
+  // ranked by the generator. OAA carries no raw value, so only its rank shows; arm
+  // shows a raw mph only for a catcher, whose arm comes from the pop-time board.
   {
     key: 'arm',
     group: 'Glove',

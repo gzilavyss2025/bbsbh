@@ -61,3 +61,12 @@ test('different games never share', async () => {
   assert.notEqual(a, b)
   assert.equal(calls, 2)
 })
+
+test('a read from before the game ended is not reused as the final answer', async () => {
+  const live = await fetchWinProbability(7, { maxAgeMs: 0 }) // the meter, bottom of the 9th
+  const final = await fetchWinProbability(7, { final: true }) // the sheet, after the walk-off
+  assert.notEqual(final, live)
+  assert.equal(calls, 2)
+  assert.equal(await fetchWinProbability(7, { final: true }), final) // that one is kept
+  assert.equal(calls, 2)
+})
