@@ -42,7 +42,7 @@ function Sheet({ title, onClose, children }) {
 }
 
 // The reader's reach and the at-bat cut that bounds every value here.
-function reachOf(ctx) {
+export function reachOf(ctx) {
   const here = halfIndex(ctx.inning, ctx.half)
   if (here > (ctx.mark ?? -1) + 1) return null
   return { here, cut: stepCutAtBatIndex(ctx.feed, ctx.inning, ctx.half, safeStep(ctx.step, here, ctx.mark)) }

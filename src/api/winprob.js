@@ -158,3 +158,12 @@ export function selectTensePlays(points, { limit = 3, max = 5 } = {}) {
   }
   return out
 }
+
+// Gameday's Pressure meter (#3006): the leverage index of the last play the
+// reader has revealed. Takes `points` from selectWinProbPath, already clamped
+// to the reveal and the step, so it can never read past them. Null before the
+// first reveal and on a game's first play (the feed sends it no LI).
+export function selectLastLi(points) {
+  if (!Array.isArray(points) || points.length === 0) return null
+  return points[points.length - 1].li ?? null
+}

@@ -38,3 +38,65 @@
 .pressure__bar:nth-child(9) { height: 90%; --led: var(--led-9); }
 .pressure__bar:nth-child(10) { height: 100%; --led: var(--led-10); }
 .pressure__bar.is-lit { background: var(--led); }
+
+/* The big meter (Gameday, #3006): the broadcast frame over a caption plate.
+   The bar heights and LED colours are the rules above. */
+/* layout-exempt: the frame over its caption plate */
+.pressure--big {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  background: none;
+  clip-path: none;
+}
+/* layout-exempt: a fixed count of ten bars, bottom-aligned */
+.pressure__track {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: end;
+  height: var(--space-10);
+  padding: var(--space-1) var(--space-1h) var(--space-1);
+  background: var(--led-panel);
+  /* The broadcast frame's rising top edge. */
+  clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
+}
+/* layout-exempt: the caption's two words on one line */
+.pressure__cap {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1);
+  background: var(--led-panel);
+  border-top: var(--bw-hair) solid var(--led-dim);
+  color: var(--led-text);
+}
+.pressure__name {
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-display);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.pressure__rank {
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-body);
+  color: var(--led-muted);
+  font-variant-numeric: tabular-nums;
+}
+.pressure--big .pressure__bar.is-peak { filter: drop-shadow(0 0 3px var(--led)); }
+
+/* Motion (kept here, not in styles/motion/, which is at its file cap: the
+   precedent is styles/worldseries/fit.css). On a reveal the bars fill or drain
+   one at a time, filling upward and draining from the top down; the top lit bar then breathes, quicker at 9–10.
+   Keyed to the play the reader revealed, never to the clock. Off under the
+   system's reduced motion and the app's own Motion: Reduced. */
+@media (prefers-reduced-motion: no-preference) {
+  .pressure--big .pressure__bar { transition: background-color var(--dur-fast) linear calc(var(--i) * 45ms); }
+  /* A bar going dark drains from the top down, so the last lit bar goes first. */
+  .pressure--big .pressure__bar:not(.is-lit) { transition-delay: calc((9 - var(--i)) * 45ms); }
+  .pressure--big .pressure__bar.is-peak { animation: pressure-breathe 1.8s var(--ease-standard) infinite; }
+  .pressure--big[data-high] .pressure__bar.is-peak { animation-duration: 0.9s; }
+}
+:root[data-motion='reduced'] .pressure--big .pressure__bar { transition: none; animation: none; }
+@keyframes pressure-breathe { 50% { opacity: 0.55; } }

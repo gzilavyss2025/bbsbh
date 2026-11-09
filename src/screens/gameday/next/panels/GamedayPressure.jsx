@@ -1,0 +1,54 @@
+import { useEffect, useState } from 'react'
+import { SealBox } from '../../../../components/SealBox.jsx'
+import { PressureMeter } from '../../../../components/charts/PressureMeter.jsx'
+import { useAsync } from '../../../../hooks/useAsync.js'
+import { fetchWinProbability } from '../../../../api/game.js'
+import { selectLastLi, selectWinProbPath } from '../../../../api/winprob.js'
+import { loadCutoffs, pressureLabel, tenseBars } from '../../../../api/tensest/tenseBars.js'
+import { reachOf } from './GamedaySheets.jsx'
+
+// Gameday's Pressure meter (#3006): how tense the last play the reader revealed
+// was, against the whole season. Phone: a row on the hero's floor, over the trail.
+// Tablet: its own row over the stage. Desktop (L, D): its own card above the
+// pitcher's. The play's leverage is score-revealing (a full meter in the 9th says
+// the game is close), so it is read only inside a SealBox reveal function, through
+// selectWinProbPath's step clamp: the same `at` the Win % sheet uses
+// (GamedaySheets.jsx). Nothing revealed: a dark, empty meter, and nothing fetched.
+export function GamedayPressure({ ctx }) {
+  const pk = ctx.feed?.gamePk
+  const reach = reachOf(ctx)
+  // Fetched only once a play can show (never fetched-then-hidden). A final game's
+  // feed is read once; a live one again as the reveal moves, so its newest plays
+  // are there (useAsync keeps the last answer on screen while the next loads).
+  const live = ctx.feed?.gameData?.status?.abstractGameState !== 'Final'
+  const step = reach && live ? `${ctx.mark}:${reach.here}:${reach.cut}` : null
+  const { data: wp } = useAsync(() => (pk && reach ? fetchWinProbability(pk) : Promise.resolve(null)), [pk, !!reach, step])
+  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
+  // One live region for the whole page visit, so each new reading is announced.
+  const [said, setSaid] = useState('')
+  return (
+    <>
+      {!reach || !wp || !cutoffs ? <PressureMeter big bars={null} /> : (
+        <SealBox key={`${ctx.inning}-${ctx.half}`} forceRevealed coverless>
+          {() => {
+            const at = { throughHalf: ctx.mark ?? -1, stepHalfIndex: reach.here, throughAtBatIndex: reach.cut }
+            const bars = tenseBars(selectLastLi(selectWinProbPath(wp, at)), cutoffs)
+            return (
+              <>
+                <PressureMeter big bars={bars} cutoffs={cutoffs} />
+                <Announce say={setSaid} text={bars ? `${pressureLabel(bars, cutoffs)}, last play.` : ''} />
+              </>
+            )
+          }}
+        </SealBox>
+      )}
+      <p className="sr-only" role="status">{reach ? said : ''}</p>
+    </>
+  )
+}
+
+// Hands the words up to the page's one status line after a reveal renders.
+function Announce({ say, text }) {
+  useEffect(() => { say(text) }, [say, text])
+  return null
+}
