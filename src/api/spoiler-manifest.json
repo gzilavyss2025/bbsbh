@@ -1123,7 +1123,7 @@
     },
     "tensest/tenseBars.js": {
       "class": "spoiler-free",
-      "why": "Pure: maps a leverage index to the tension meter's 1–10 bars against the season-wide cutoffs in tensest.json. Fetches nothing and holds no score; an LI is score-revealing, so a caller passes only one its reveal already let through (ADR-0001)."
+      "why": "Maps a leverage index to the Pressure meter's 1–10 bars and its spoken label, against the season-wide cutoffs; loadCutoffs reads them from static tensest-cutoffs.json (spoiler-free, ADR-0034). Holds no score; an LI is score-revealing, so a caller passes only one its reveal already let through (ADR-0001)."
     },
     "tensest/tensest.js": {
       "class": "spoiler-free",
@@ -1384,7 +1384,7 @@
     },
     "winprob.js": {
       "class": "reveal-only",
-      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",
+      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp. Each point also carries the play's leverage index (`li`, #2978) for the swing rows' Pressure meter; it is as score-revealing as the win %, so it exists only inside the same clamp.",
       "importers": [
         "screens/gameday/next/panels/GamedaySheets.jsx",
         "api/gameday/moments/moments.js",

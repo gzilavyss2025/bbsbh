@@ -112,6 +112,11 @@ for each generator; the reader modules:
   leverage of every at-bat sits in one `winProbability` feed per game, so `gen-tensest.mjs` (nightly, incremental)
   keeps only the league's top 50 and each club's top 25 batting and pitching. Spoiler-free: not one of the four
   scoring surfaces, and a stat line is not a score (ADR-0034).
+- `tensest/tenseBars.js` — the Pressure meter's numbers. `loadCutoffs` reads `public/data/tensest-cutoffs.json` (9 LI
+  edges and their season bands, from `gen-tensest.mjs`); `tenseBars(li, cutoffs)` turns a play's LI into 1–10 bars and
+  `pressureLabel` into the words a screen reader hears. The cutoffs are spoiler-free; the LI is not, so callers pass
+  only an LI that `winprob.js` has already clamped to the reveal (ADR-0001). The swing rows under the win-probability
+  chart are the caller (#2978).
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,

@@ -88,6 +88,10 @@ export function selectWinProbPath(
       playId: (e.playEvents ?? []).filter((ev) => ev?.isPitch).at(-1)?.playId ?? null,
       // Verified against gamePk 823738: the outs after the play.
       outs: Number.isInteger(e.count?.outs) ? e.count.outs : null,
+      // MLB's leverage index for the play (the Pressure meter, #2978). Null on a
+      // game's first play, which the feed sends without one. Score-revealing like
+      // the rest of the point, so it exists only inside this clamp.
+      li: typeof e.leverageIndex === 'number' && Number.isFinite(e.leverageIndex) ? e.leverageIndex : null,
       // The step the chart's line draws for this play (the first from even),
       // not the feed's recorded homeTeamWinProbabilityAdded: that one measures
       // the first play from the pre-game odds, so the readout and the ledger
@@ -124,7 +128,7 @@ export function selectWinProbBigPlays(
   for (let idx = 0; idx < points.length; idx++) {
     const p = points[idx]
     if (Math.abs(p.delta) >= minSwing) {
-      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId })
+      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId, li: p.li })
     }
   }
   return plays

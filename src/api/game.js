@@ -173,6 +173,8 @@ export const PAST_GAME_FEED_FIELDS = [
 export const WIN_PROB_FIELDS = [
   'homeTeamWinProbability',
   'homeTeamWinProbabilityAdded',
+  // The play's leverage index: the swing rows' Pressure meter (winprob.js `li`).
+  'leverageIndex',
   'count',
   'outs',
   'atBatIndex',

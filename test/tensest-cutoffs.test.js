@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { BAR_PCTS, cutoffsFromHist, emptyHist, foldHist, histOrNull, quantile } from '../scripts/lib/tensest/cutoffs.mjs'
-import { tenseBars } from '../src/api/tensest/tenseBars.js'
+import { pressureLabel, tenseBars } from '../src/api/tensest/tenseBars.js'
 
 const plays = (...lis) => lis.map((leverageIndex) => ({ leverageIndex }))
 
@@ -74,4 +74,15 @@ test('tenseBars is null with no LI or no cutoffs', () => {
   assert.equal(tenseBars(NaN, cutoffs), null)
   assert.equal(tenseBars(2, null), null)
   assert.equal(tenseBars(2, { li: [] }), null)
+})
+
+test('pressureLabel reads the rank from the published bands, not a fixed table', () => {
+  const c = { pcts: [20, 40, 55, 70, 80, 88, 93, 97, 99], li: cutoffs.li }
+  assert.equal(pressureLabel(4, c), 'Pressure 4 of 10')
+  assert.equal(pressureLabel(5, c), 'Pressure 5 of 10, top 30% of the season')
+  assert.equal(pressureLabel(8, c), 'Pressure 8 of 10, top 7% of the season')
+  assert.equal(pressureLabel(10, c), 'Pressure 10 of 10, top 1% of the season')
+  // A different band set changes the words with it.
+  assert.equal(pressureLabel(10, { pcts: [20, 40, 55, 70, 80, 88, 93, 97, 99.5] }), 'Pressure 10 of 10, top 0.5% of the season')
+  assert.equal(pressureLabel(null, c), '')
 })

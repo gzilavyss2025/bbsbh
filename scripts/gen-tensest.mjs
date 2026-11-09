@@ -6,8 +6,9 @@
 // per game, 2,400+ games a season. The page cannot make that many calls, so this
 // reads each game once and keeps only the tensest plays (scripts/lib/tensest.mjs).
 //
-// It also writes `cutoffs`: the season's leverage edges for the tension meter's 10
-// bars (scripts/lib/tensest/cutoffs.mjs), from a histogram of every play read.
+// It also writes public/data/tensest-cutoffs.json: the season's leverage edges for
+// the Pressure meter's 10 bars (scripts/lib/tensest/cutoffs.mjs), from a histogram
+// of every play read.
 //
 // INCREMENTAL: scripts/data/tensest-state.json lists the games already read, and
 // holds that histogram. A state file with no histogram is rebuilt from scratch. A run
@@ -34,6 +35,7 @@ import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
+const CUTOFFS = join(here, '..', 'public', 'data', 'tensest-cutoffs.json')
 const STATE = join(here, 'data', 'tensest-state.json')
 const CONCURRENCY = 8
 const GAME_TYPES = 'R,F,D,L,W'
@@ -56,8 +58,19 @@ let store = carried ? { league: prev.league ?? [], teams: prev.teams ?? {} } : e
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
 if (todo.length === 0) {
+  // Still write the small cutoffs file if it is missing or stale (a quiet night).
+  if (carried) await writeCutoffs(cutoffsFromHist(hist))
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
+}
+
+// The cutoffs alone, for the Pressure meter: 9 numbers, not the whole board.
+// Written only when they change, so a quiet night commits nothing and
+// generatedAt says when the cutoffs last moved.
+async function writeCutoffs(cutoffs) {
+  const had = await readJsonOr(CUTOFFS, null)
+  if (had?.season === season && JSON.stringify(had.cutoffs) === JSON.stringify(cutoffs)) return
+  await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs })
 }
 
 const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
@@ -76,6 +89,7 @@ for (const r of ok) done.add(r.g.gamePk)
 const cutoffs = cutoffsFromHist(hist)
 
 const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
-await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, cutoffs, ...store })
+await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, ...store })
+await writeCutoffs(cutoffs)
 await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
 console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; league top ${store.league.length}; bar edges ${cutoffs?.li.join(' ')}`)
