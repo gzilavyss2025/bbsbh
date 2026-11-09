@@ -1,4 +1,5 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
+import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { usePreferences } from '../../hooks/preferences/usePreferences.js'
 import { NIGHT_SNOOZE_MS, offerNightMode } from '../../hooks/preferences/effectiveTheme.js'
 import { Button } from '../ui/control/Button.jsx'
@@ -12,12 +13,6 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // above every route, in App.jsx. It tracks the device's setting live, so a
 // sunset switch shows or hides it without a reload.
 const SNOOZE_KEY = 'bbsbh:nightbar:snoozedUntil'
-const mq = typeof window !== 'undefined' ? window.matchMedia?.('(prefers-color-scheme: dark)') : null
-const subscribe = (notify) => {
-  mq?.addEventListener?.('change', notify)
-  return () => mq?.removeEventListener?.('change', notify)
-}
-const readDark = () => mq?.matches === true
 
 const readSnooze = () => {
   try {
@@ -29,7 +24,7 @@ const readSnooze = () => {
 
 export function NightModeBar() {
   const { has, set } = usePreferences()
-  const systemDark = useSyncExternalStore(subscribe, readDark, () => false)
+  const systemDark = useMediaQuery('(prefers-color-scheme: dark)')
   const [snoozedUntil, setSnoozedUntil] = useState(readSnooze)
   const [now] = useState(() => Date.now())
 

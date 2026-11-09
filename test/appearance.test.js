@@ -25,12 +25,6 @@ test('only a forced theme writes data-theme; system writes nothing', () => {
 // the person picks a theme, the page is forced light and the bar offers night mode.
 import { NIGHT_SNOOZE_MS, offerNightMode } from '../src/hooks/preferences/effectiveTheme.js'
 
-test('no theme chosen yet forces light, even on a dark device', () => {
-  assert.equal(themeAttribute('system', false), 'light')
-  assert.equal(effectiveTheme('system', true, false), 'light')
-  assert.equal(themeAttribute('system', true), null)
-})
-
 test('the bar shows only on a dark device with no theme chosen and no live snooze', () => {
   const now = 1_000_000
   assert.equal(offerNightMode({ chosen: false, systemDark: true, snoozedUntil: 0, now }), true)

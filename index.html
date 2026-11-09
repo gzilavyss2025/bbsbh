@@ -36,7 +36,12 @@
         var v = JSON.parse(localStorage.getItem('bbsbh:prefs')).appearance.value
         if (v === 'light' || v === 'dark' || v === 'system') a = v
       } catch (e) {}
-      if (a !== 'system') document.documentElement.dataset.theme = a
+      if (a !== 'system') {
+        document.documentElement.dataset.theme = a
+        var c = a === 'dark' ? '#000000' : '#F6EFDC'
+        var m = document.querySelectorAll('meta[name="theme-color"]')
+        for (var i = 0; i < m.length; i++) m[i].content = c
+      }
     </script>
     <!-- The standardized tag (for Chrome/Android, which warns on the Apple-
          only one); apple-mobile-web-app-capable stays too since iOS Safari

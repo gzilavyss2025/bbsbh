@@ -82,9 +82,10 @@ test('each field validates only its own vocabulary', () => {
   }
 })
 
-test('appearance falls back to system when absent or garbled', () => {
-  assert.equal(preferenceValue({}, 'appearance'), 'system')
-  assert.equal(preferenceValue({ appearance: { value: 'night', updatedAt: 1 } }, 'appearance'), 'system')
+// ADR-0131: no choice means light, so a dark device does not switch the app dark by itself.
+test('appearance falls back to light when absent or garbled', () => {
+  assert.equal(preferenceValue({}, 'appearance'), 'light')
+  assert.equal(preferenceValue({ appearance: { value: 'night', updatedAt: 1 } }, 'appearance'), 'light')
   assert.equal(preferenceValue({ appearance: { value: 'dark', updatedAt: 1 } }, 'appearance'), 'dark')
   assert.deepEqual(parsePreferences('{"appearance":{"value":"night","updatedAt":1}}'), {})
 })
