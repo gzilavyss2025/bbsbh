@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { fetchGameFeed, fetchWinProbability, PAST_GAME_FEED_FIELDS } from '../api/game.js'
+import { fetchGameFeed, PAST_GAME_FEED_FIELDS } from '../api/game.js'
+import { fetchWinProbability } from '../api/winprob/feed.js'
 
 // A past, Final game's result never changes, so once its feed and win
 // probability are fetched they're cached for the tab's lifetime, so two

@@ -7,7 +7,7 @@ import { IconButton } from '../../../../components/ui/control/IconButton.jsx'
 import { useDialogFocus } from '../../../../hooks/dialog/useDialogFocus.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { WinProbChart } from '../../../../components/charts/WinProbChart.jsx'
-import { fetchWinProbability } from '../../../../api/game.js'
+import { fetchWinProbability } from '../../../../api/winprob/feed.js'
 import { selectWinProbPath, selectWinProbBigPlays, winProbSplit } from '../../../../api/winprob.js'
 import { batterDayLine } from '../../../../api/gameday/dayLine.js'
 import { safeStep, stepCutAtBatIndex } from '../../../../api/gameday/stepCut.js'
@@ -196,7 +196,10 @@ export function ScoringSheet({ ctx, onClose, closing = false, onClosed }) {
 // the stepped half up to the last at-bat shown), which refuses any half past the next one.
 export function WinProbSheet({ ctx, onClose }) {
   const pk = ctx.feed?.gamePk
-  const { data: wp, loading } = useAsync(() => (pk ? fetchWinProbability(pk) : Promise.resolve(null)), [pk])
+  // Shared with the Pressure meter and the game page (api/winprob/feed.js): opening the sheet
+  // reuses a final game's feed, or a live one read in the last 30s.
+  const final = ctx.feed?.gameData?.status?.abstractGameState === 'Final'
+  const { data: wp, loading } = useAsync(() => (pk ? fetchWinProbability(pk, { final }) : Promise.resolve(null)), [pk])
   const reach = reachOf(ctx)
   const away = ctx.meta?.away ?? {}
   const home = ctx.meta?.home ?? {}
