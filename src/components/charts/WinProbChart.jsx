@@ -8,6 +8,8 @@ import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
 import { SwingLedger } from './winprob/SwingLedger.jsx'
 import { TenseList } from './winprob/TenseList.jsx'
+import { PressureStrip, STRIP_H } from './winprob/PressureStrip.jsx'
+import { pressureStrip } from './winprob/strip.js'
 import { WinProbBands } from './winprob/WinProbBands.jsx'
 import { W, H, PLOT_L, PLOT_T, PLOT_B, PLOT_W, PLOT_H } from './winprob/plot.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
@@ -106,14 +108,18 @@ export function WinProbChart({
   const patternUid = useId()
   // The latest play until the user picks one (winprob/useWinProbSelection.js).
   // A click near a numbered marker snaps to it.
+  // The Pressure meter's season cutoffs (spoiler-free). The pressure strip is
+  // the SVG's bottom band, so the viewBox grows by its height when it draws.
+  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
+  const strip = pressureStrip(points, cutoffs, { left: PLOT_L, width: PLOT_W })
+  const VH = strip.length ? H + STRIP_H : H
   const { activeIdx, select, svgHandlers, used, input } = useWinProbSelection(
-    points?.length ?? 0, { W, H, left: PLOT_L, width: PLOT_W }, bigPlays.map((p) => p.idx),
+    points?.length ?? 0, { W, H: VH, left: PLOT_L, width: PLOT_W }, bigPlays.map((p) => p.idx),
   )
   // A swing row's Watch button opens that play's clip (winprob/useSwingClip.js).
   const clip = useSwingClip({ highlights, filmEligible })
-  // The Pressure meter's season cutoffs (spoiler-free), and the Tensest moments
-  // list from the points this chart was handed, already clamped to the reveal.
-  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
+  // The Tensest moments list, from the points this chart was handed, already
+  // clamped to the reveal.
   // Not memoized: Gameday's sheet builds `points` fresh each render, and it is ~80 rows.
   const tensePlays = selectTensePlays(points)
   // A host may follow the scrub (Gameday's sheet sets its scoreboard to the play under the cursor).
@@ -314,7 +320,7 @@ export function WinProbChart({
         ref={svgRef}
         className="winprob__svg"
         data-input={input}
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`0 0 ${W} ${VH}`}
         role="slider"
         tabIndex={0}
         aria-label="Explore win probability by completed play"
@@ -374,11 +380,15 @@ export function WinProbChart({
           r={3}
         />
 
+        {/* Each play's pressure, in the Pressure meter's colours (#2980). */}
+        <PressureStrip segs={strip} />
+
         {/* The selection cursor sits under the numbered markers, so a
             marker stays readable when the cursor passes over it. */}
         <g className="winprob__cursor" aria-hidden="true">
-          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
-          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
+          {/* Through the pressure strip too, so the selected play's segment is marked. */}
+          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${strip.length ? VH : PLOT_B}`} />
+          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${strip.length ? VH : PLOT_B}`} />
           <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={4} />
         </g>
 
@@ -394,6 +404,7 @@ export function WinProbChart({
           )
         })}
       </svg>
+
 
       <p id={`winprob-help-${patternUid}`} className="sr-only">Hover, tap or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
 

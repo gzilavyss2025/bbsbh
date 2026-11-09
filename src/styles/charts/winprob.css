@@ -289,3 +289,10 @@
   padding: var(--space-2) 0 var(--space-1);
   color: var(--text-heading);
 }
+
+/* The pressure strip (#2980): the bottom band of the plot's own SVG, the
+   Pressure meter on its side, one segment per revealed play, on the meter's
+   dark panel. A little room below it, so the first swing row does not sit on it. */
+.winprob__svg:has(.winprob__strip) { margin-bottom: var(--space-1h); }
+.winprob__strip-panel { fill: var(--led-panel); }
+.winprob__strip-seg.is-low { fill: var(--led-dim); }
