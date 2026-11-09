@@ -1,10 +1,13 @@
 import { useId, useMemo, useRef, useEffect } from 'react'
-import { winProbSplit } from '../../api/winprob.js'
+import { selectTensePlays, winProbSplit } from '../../api/winprob.js'
+import { loadCutoffs } from '../../api/tensest/tenseBars.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import { winProbChangeLabel, winProbReadout, wholeSwing } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
 import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
 import { SwingLedger } from './winprob/SwingLedger.jsx'
+import { TenseList } from './winprob/TenseList.jsx'
 import { WinProbBands } from './winprob/WinProbBands.jsx'
 import { W, H, PLOT_L, PLOT_T, PLOT_B, PLOT_W, PLOT_H } from './winprob/plot.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
@@ -108,6 +111,10 @@ export function WinProbChart({
   )
   // A swing row's Watch button opens that play's clip (winprob/useSwingClip.js).
   const clip = useSwingClip({ highlights, filmEligible })
+  // The Pressure meter's season cutoffs (spoiler-free), and the Tensest moments
+  // list from the points this chart was handed, already clamped to the reveal.
+  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
+  const tensePlays = useMemo(() => selectTensePlays(points), [points])
   // A host may follow the scrub (Gameday's sheet sets its scoreboard to the play under the cursor).
   useEffect(() => { onActive?.(activeIdx) }, [onActive, activeIdx])
   const svgRef = useRef(null)
@@ -396,6 +403,15 @@ export function WinProbChart({
         away={away}
         keys={keys}
         stepAt={stepAt}
+        cutoffs={cutoffs}
+        clip={clip}
+        onPick={pickSwing}
+        onWatch={select}
+      />
+      <TenseList
+        plays={tensePlays}
+        activeIdx={activeIdx}
+        cutoffs={cutoffs}
         clip={clip}
         onPick={pickSwing}
         onWatch={select}

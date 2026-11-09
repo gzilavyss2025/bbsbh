@@ -277,3 +277,15 @@
   text-transform: none; /* caps-exempt: feed-sourced play description reads as a natural sentence, same idiom as .pbp__desc */
 }
 
+
+/* The Tensest moments list (#2979) sits under the swing ledger with its own
+   heading, since unlike the ledger its rows have no numbered marker on the plot. */
+.winprob__tense {
+  margin-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.winprob__tense-head {
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  color: var(--text-heading);
+}
