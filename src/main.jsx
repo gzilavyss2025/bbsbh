@@ -8,6 +8,7 @@ import { hydrateIdentityFromCache, refreshIdentityOverrides } from './lib/identi
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import { installCrashReporter, reportCrash } from './lib/crash/report.js'
 import { installVitalsReporter } from './lib/crash/vitals.js'
+import { WIDE_QUERY } from './hooks/useMediaQuery.js'
 import { parseRoute } from './lib/route.js'
 import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
 import { recoverOnce, clearRecoveryFlag } from './lib/crash/recover.js'
@@ -23,7 +24,12 @@ const reportContext = () => {
 installCrashReporter(reportContext)
 // Field vitals: one `bbsbh-vitals` log line a page load, with an installed-app flag
 // (lib/crash/vitals.js). Production only, so the dev server stays quiet.
-if (import.meta.env.PROD) installVitalsReporter(reportContext)
+if (import.meta.env.PROD) {
+  installVitalsReporter(() => ({
+    ...reportContext(),
+    device: window.matchMedia(WIDE_QUERY).matches ? 'wide' : 'phone',
+  }))
+}
 
 // A deploy that changes code renames the content-hashed chunks it touches (a
 // data-only one renames none, #2873; see App.jsx's per-route `lazy()` imports),
