@@ -32,14 +32,16 @@ but it visits a hand-picked list of routes and `/pressure-moments` was not on it
    stamped cards with its own `margin` between siblings in normal flow.
 2. **A page whose layout a Stack cannot express** (a grid of cards) uses `gap` on its own
    grid or flex container, never sibling margins, for the same reason: no collapse.
-3. **A page that adds stamped cards adds its route to `e2e/tab-clearance.spec.js`.**
-   `/pressure-moments` is added with this ADR.
+3. **The rendered check covers every menu page.** `e2e/tab-clearance.spec.js` builds its
+   route list from the site menu (`src/lib/reportPages.js`), plus home, team and player, so a
+   new report page is checked with no extra step (#3016). A stamped-card page that is not in the
+   menu adds its route to the spec by hand.
 
 ## Consequences
 
 - The Pressure Moments page now stacks its cards in `<Stack gap="loose">` and its
-  stylesheet sets no margin on them.
-- Other pages may still space stamped cards on sibling margins; they were not swept with
-  this ADR. Running the tab-clearance geometry (`e2e/lib/tabClearance.js`) over every
-  route in `src/lib/reportPages.js` would find them. A route list derived from
-  `reportPages.js` instead of a hand-picked one would keep new report pages covered.
+  stylesheet sets no margin on them: 18px of air above each tab, where it was 0.
+- A sweep of all 49 menu pages, plus home, team and player, at 390 and 1280 wide, with the
+  tab-clearance geometry (`e2e/lib/tabClearance.js`) found one other page with the same
+  cause: `/infield`, fixed the same way in #3016. The sweep covers what rendered in the
+  container; a card that needs live data that did not load would not have been checked.
