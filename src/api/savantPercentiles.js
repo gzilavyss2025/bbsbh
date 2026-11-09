@@ -86,6 +86,11 @@ export function similarHittersFor(data, personId, opts) {
 const pct1 = (n) => `${n.toFixed(1)}%`
 const dec2 = (n) => n.toFixed(2)
 const dec1 = (n) => n.toFixed(1)
+// Runs above average: signed, and a value that rounds to zero is "0.0", never "-0.0".
+const runs1 = (n) => {
+  const r = Math.round(n * 10) / 10
+  return r > 0 ? `+${r.toFixed(1)}` : r < 0 ? r.toFixed(1) : '0.0'
+}
 // ".415" — a rate stat below 1 is written without its leading zero in a
 // scorebook, same as an batting average.
 const rate3 = (n) => n.toFixed(3).replace(/^0/, '')
@@ -123,12 +128,6 @@ export const BATTER_METRICS = [
     def: 'How well he lays off pitches outside the strike zone — a higher percentile means better plate discipline.',
   },
   {
-    key: 'sprintSpeed',
-    label: 'Sprint speed',
-    fmt: dec1,
-    def: 'How fast he runs at full sprint.',
-  },
-  {
     key: 'batSpeed',
     label: 'Bat speed',
     fmt: dec1,
@@ -145,6 +144,54 @@ export const BATTER_METRICS = [
     label: 'Squared-up %',
     fmt: pct1,
     def: 'How often he times his swing to hit the ball on the sweet spot of the bat.',
+  },
+  // Glove (#2972). Arm and OAA are Savant's own percentiles (a catcher's arm is
+  // ranked among catchers off the pop-time board); pop time and framing are
+  // ranked by the generator. OAA carries no raw value, so only its rank shows; arm
+  // shows a raw mph only for a catcher, whose arm comes from the pop-time board.
+  {
+    key: 'arm',
+    group: 'Glove',
+    label: 'Arm strength',
+    fmt: dec1,
+    def: 'How hard he throws the ball from his position.',
+  },
+  {
+    key: 'oaa',
+    group: 'Glove',
+    label: 'Outs above avg',
+    fmt: dec1,
+    def: 'How many more outs he turns on balls hit his way than an average fielder would.',
+  },
+  {
+    key: 'pop',
+    group: 'Glove',
+    label: 'Pop time',
+    fmt: dec2,
+    lowerIsBetter: true,
+    def: 'Seconds from the pitch hitting his mitt to his throw reaching second base on a steal try — a higher percentile means quicker.',
+  },
+  {
+    key: 'framing',
+    group: 'Glove',
+    label: 'Framing',
+    fmt: runs1,
+    def: 'Runs he saves by catching borderline pitches so they get called strikes.',
+  },
+  // Legs.
+  {
+    key: 'sprintSpeed',
+    group: 'Legs',
+    label: 'Sprint speed',
+    fmt: dec1,
+    def: 'How fast he runs at full sprint.',
+  },
+  {
+    key: 'bsr',
+    group: 'Legs',
+    label: 'Baserunning',
+    fmt: runs1,
+    def: 'Runs he adds on the bases by taking extra bases and stealing, compared with an average runner.',
   },
 ]
 
@@ -241,6 +288,8 @@ export function percentileRows(savant, raw, group, median) {
       return {
         key: m.key,
         label: m.label,
+        // Bat / Glove / Legs (#2972): every metric without its own group is a bat row.
+        group: m.group ?? 'Bat',
         percentile: savant[m.key],
         value: Number.isFinite(rawValue) && m.fmt ? m.fmt(rawValue) : null,
         baseline,

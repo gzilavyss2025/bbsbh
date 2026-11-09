@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { PressureMeter } from '../../../../components/charts/PressureMeter.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
-import { fetchWinProbability } from '../../../../api/game.js'
+import { fetchWinProbability } from '../../../../api/winprob/feed.js'
 import { selectLastLi, selectWinProbPath } from '../../../../api/winprob.js'
 import { loadCutoffs, pressureLabel, tenseBars } from '../../../../api/tensest/tenseBars.js'
 import { reachOf } from './GamedaySheets.jsx'
@@ -23,7 +23,10 @@ export function GamedayPressure({ ctx }) {
   // on screen while the next loads; a deps change would blank the meter (#2925).
   const live = ctx.feed?.gameData?.status?.abstractGameState !== 'Final'
   const step = reach && live ? `${ctx.mark}:${reach.here}:${reach.cut}` : null
-  const { data: wp, reload } = useAsync(() => (pk && reach ? fetchWinProbability(pk) : Promise.resolve(null)), [pk, !!reach])
+  // The read is shared (api/winprob/feed.js): a final game's feed once for the visit; a live one
+  // fresh on every step (maxAgeMs 0), which the Win % sheet then reuses.
+  const opts = live ? { maxAgeMs: 0 } : { final: true }
+  const { data: wp, reload } = useAsync(() => (pk && reach ? fetchWinProbability(pk, opts) : Promise.resolve(null)), [pk, !!reach])
   const firstStep = useRef(step)
   useEffect(() => {
     if (step == null || step === firstStep.current) return

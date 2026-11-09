@@ -123,8 +123,8 @@ function useFitToColumn(listRef, fitTo, ready) {
 
 // ---------------------------------------------------------------------------
 
-// PRESENCE, and why the caller needs telling. The rail renders nothing while
-// loading, on a failed fetch, and on a genuinely quiet window — and only IT
+// PRESENCE, and why the caller needs telling. The rail holds its column with an
+// empty shell while loading (when the slate reserved it), and renders nothing on a failed fetch, and on a genuinely quiet window — and only IT
 // knows which, because the answer arrives with the fetch. The slate has to
 // widen its shell to make room for a rail (see .screen--wirerail in
 // 25-wide-layout.css), and it cannot wait for the fetch to do it: reserving the
@@ -134,7 +134,7 @@ function useFitToColumn(listRef, fitTo, ready) {
 // again, which in season is the rare case. Reporting is deliberately held until
 // the fetch settles for exactly that reason — an eager "nothing yet" would
 // cause the very jump the arrangement exists to avoid.
-export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = false }) {
+export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = false, reserved = true }) {
   const { data, loading } = useAsync(
     (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay }),
     [endDate, sportId, singleDay],
@@ -155,6 +155,12 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
   // Unmounting (the winter page took the rail's place) gives the reserved room back to its default.
   useEffect(() => () => onPresence?.(true), [onPresence])
 
+  // While the fetch is in flight, hold the rail's 288px column with an empty shell. The slate
+  // already widened for a rail (see PRESENCE); with nothing in that room the games grid took it
+  // and lost a column the moment the rows landed (#3008, a 0.35 layout shift at 1280px).
+  // Only while the slate holds that room (`reserved`): after a quiet window gave it back, an
+  // empty shell would squeeze the grid until the next answer.
+  if (loading && !data) return reserved ? <div className="wirerail" aria-hidden="true" /> : null
   if (total === 0) return null
 
   // `rows === null` is the probe frame (and the no-column fallback): render

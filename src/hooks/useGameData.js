@@ -5,8 +5,8 @@ import {
   fetchPitcherSeasonLine,
   fetchPitcherLastGame,
   fetchPitcherSeasonVsOpponent,
-  fetchWinProbability,
 } from '../api/game.js'
+import { fetchWinProbability } from '../api/winprob/feed.js'
 import { fetchHighlights } from '../api/highlights.js'
 import { fetchGameUniforms, uniformSummary, liveJerseyTreatment } from '../api/uniforms.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
@@ -220,7 +220,8 @@ export function useGameData(game, activeStep = null) {
   // re-pull it once fetched. Resolves null off-MLB, hiding the card.
   const winProbActive = useEverActive(activeStep === 3, game.gamePk)
   const winProb = useAsync(
-    () => (feed && winProbActive ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
+    // A final game's feed is shared for the visit (api/winprob/feed.js); a live one is re-read after 30s.
+    () => (feed && winProbActive ? fetchWinProbability(game.gamePk, { final: feed.gameData?.status?.abstractGameState === 'Final' }) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), winProbActive],
   )
 

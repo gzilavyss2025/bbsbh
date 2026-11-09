@@ -201,16 +201,8 @@ export const WIN_PROB_FIELDS = [
   'playId',
 ]
 
-export async function fetchWinProbability(gamePk) {
-  try {
-    const data = await getJson(
-      `/api/v1/game/${gamePk}/winProbability?fields=${WIN_PROB_FIELDS.join(',')}`,
-    )
-    return Array.isArray(data) ? data : null
-  } catch {
-    return null
-  }
-}
+// fetchWinProbability (the /winProbability read, shared per game) lives in winprob/feed.js.
+
 
 // A venue with its coordinates and field info hydrated. The live feed's
 // gameData.venue is usually enough (it carries location + fieldInfo), but on

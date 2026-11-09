@@ -16,7 +16,7 @@
 // Run by hand: node scripts/gen-savant-percentiles.mjs
 import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
-import { METRICS, fetchPercentiles, parseCsv, medianRates } from './lib/savant.mjs'
+import { METRICS, fetchPercentiles, fetchSavantCsv, num, parseCsv, medianRates, rankPercentiles } from './lib/savant.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = import.meta.dirname
@@ -175,13 +175,88 @@ async function fetchBatTracking() {
   }
 }
 
-const [bat, pit, rawBat, rawPit, batTracking] = await Promise.all([
+// Glove and Legs rows with no Savant percentile (#2972): baserunning run value,
+// catcher pop time and framing. Each board has its OWN id column (player_id,
+// entity_id, id — verified live 2026-11-09) and is pinned via `columns`, so a
+// rename throws inside fetchSavantCsv. Never fatal: a failure drops only that row.
+// The generator ranks each within the board's qualified rows (rankPercentiles).
+const RANKED_BOARDS = [
+  {
+    key: 'bsr',
+    idCol: 'player_id',
+    valueCol: 'runner_runs_tot',
+    url: `https://baseballsavant.mlb.com/leaderboard/baserunning-run-value?game_type=Regular&season_start=${season}&season_end=${season}&split=no&n=q&team=&type=Run&with_team_only=1&csv=true`,
+  },
+  {
+    key: 'pop',
+    idCol: 'entity_id',
+    valueCol: 'pop_2b_sba',
+    lowerIsBetter: true,
+    url: `https://baseballsavant.mlb.com/leaderboard/poptime?year=${season}&team=&min2b=5&min3b=0&csv=true`,
+  },
+  // Savant's percentile board leaves arm_strength BLANK for catchers (verified
+  // 2026-11-09: Realmuto, Kirk, Smith). The pop-time board's catcher arm (mph)
+  // fills it, ranked among catchers only; `fillOnly` never overwrites Savant's own.
+  {
+    key: 'arm',
+    idCol: 'entity_id',
+    valueCol: 'maxeff_arm_2b_3b_sba',
+    fillOnly: true,
+    url: `https://baseballsavant.mlb.com/leaderboard/poptime?year=${season}&team=&min2b=5&min3b=0&csv=true`,
+  },
+  {
+    key: 'framing',
+    idCol: 'id',
+    valueCol: 'rv_tot',
+    url: `https://baseballsavant.mlb.com/leaderboard/catcher-framing?type=catcher&seasonStart=${season}&seasonEnd=${season}&team=&min=q&csv=true`,
+  },
+]
+
+// Two boards read the same pop-time CSV (pop and the catcher arm): fetch each URL once,
+// checking every column any board reads from it.
+const csvByUrl = new Map()
+function boardCsv(key, url) {
+  if (!csvByUrl.has(url)) {
+    const columns = [...new Set(RANKED_BOARDS.filter((b) => b.url === url).flatMap((b) => [b.idCol, b.valueCol]))]
+    csvByUrl.set(url, fetchSavantCsv(`Savant ${key}`, url, { columns }))
+  }
+  return csvByUrl.get(url)
+}
+
+async function fetchRankedBoard({ key, idCol, valueCol, url, lowerIsBetter, fillOnly }) {
+  try {
+    const rows = await boardCsv(key, url)
+    const raw = {}
+    for (const r of rows) {
+      const id = String(r[idCol] ?? '').trim()
+      const v = num(r[valueCol])
+      if (id && v != null) raw[id] = v
+    }
+    return { key, fillOnly, raw, pct: rankPercentiles(raw, { lowerIsBetter }) }
+  } catch (err) {
+    console.error(`Savant ${key}: ${err.message} — that row drops for every player`)
+    return { key, raw: {}, pct: {} }
+  }
+}
+
+const [bat, pit, rawBat, rawPit, batTracking, ...ranked] = await Promise.all([
   fetchPercentiles('batter', season),
   fetchPercentiles('pitcher', season),
   fetchRawRates('batter'),
   fetchRawRates('pitcher'),
   fetchBatTracking(),
+  ...RANKED_BOARDS.map(fetchRankedBoard),
 ])
+
+// Merge the ranked boards into bat (percentile) and rawBat (raw value). A
+// catcher missing from the percentile board still gets an entry here.
+for (const { key, fillOnly, raw, pct } of ranked) {
+  for (const [id, p] of Object.entries(pct)) {
+    if (fillOnly && bat[id]?.[key] != null) continue
+    bat[id] = { ...(bat[id] ?? {}), [key]: p }
+    rawBat[id] = { ...(rawBat[id] ?? {}), [key]: raw[id] }
+  }
+}
 
 // Merge the bat-tracking raw rates into rawBat under the same id namespace
 // RAW_METRICS.bat already uses, so savantRawFor()/percentileRows() need no
@@ -234,7 +309,10 @@ if (thinPit.length) {
 // practice it only bites if a metric's own coverage collapses, the same
 // signal the WARNING block above already watches for.
 const MEDIAN_FLOOR = 30
-const midBat = medianRates(bat, rawBat, Object.values(METRICS.bat), MEDIAN_FLOOR)
+// arm stays out: its raw value exists for catchers only, so a median of it would
+// sit beside every outfielder's arm row. The ranked boards' keys go in.
+const MEDIAN_BAT_KEYS = [...Object.values(METRICS.bat), 'bsr', 'pop', 'framing'].filter((k) => k !== 'arm')
+const midBat = medianRates(bat, rawBat, MEDIAN_BAT_KEYS, MEDIAN_FLOOR)
 const midPit = medianRates(pit, rawPit, Object.values(METRICS.pit), MEDIAN_FLOOR)
 
 await writeJsonAtomic(out, {
@@ -250,6 +328,6 @@ await writeJsonAtomic(out, {
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers; ` +
   `raw rates for ${Object.keys(rawBat).length}/${Object.keys(rawPit).length}; ` +
-  `medians for ${Object.keys(midBat).length}/${Object.values(METRICS.bat).length} bat metrics, ` +
+  `medians for ${Object.keys(midBat).length}/${MEDIAN_BAT_KEYS.length} bat metrics, ` +
   `${Object.keys(midPit).length}/${Object.values(METRICS.pit).length} pit metrics, floor ${MEDIAN_FLOOR})`,
 )

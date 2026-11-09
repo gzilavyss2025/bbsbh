@@ -10,7 +10,7 @@
 // Never call it at render top-level or in an eager useMemo over the whole feed.
 //
 // Source: the separate /api/v1/game/{gamePk}/winProbability endpoint
-// (fetchWinProbability in api/game.js) — one entry per completed play, carrying
+// (fetchWinProbability in api/winprob/feed.js, shared per game) — one entry per completed play, carrying
 // the cumulative `homeTeamWinProbability` (0–100; the away share is 100 − that),
 // its `about` (inning / isTopInning / isScoringPlay) and the play description.
 // Absent at most MiLB parks, where the endpoint resolves null — this then

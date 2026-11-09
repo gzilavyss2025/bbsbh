@@ -104,6 +104,10 @@
   color: var(--text-on-ink);
 }
 /* Keep the last-good standings on screen, dimmed, while a new date loads. */
+.standings-body.is-loading {
+  min-height: 100svh;
+}
+
 .standings-body.is-refreshing {
   opacity: 0.5;
   transition: opacity 0.15s ease;

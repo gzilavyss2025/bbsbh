@@ -32,9 +32,9 @@ test('thirds: top third mint with a triangle up, bottom third clay with a triang
   assert.deepEqual(tierOf(8), { tier: 'low', mark: '▼' })
 })
 
-test('Turang: the nine rows, in the app order, with the checked numbers', () => {
+test('Turang: the nine rows, in the app order (Bat, then Legs), with the checked numbers', () => {
   const v = percentileView(data, 668930, 'hitting', 2026)
-  assert.deepEqual(v.rows.map((r) => r.key), ['xwoba', 'ev', 'hardHit', 'brl', 'chase', 'sprintSpeed', 'batSpeed', 'swingLength', 'squaredUp'])
+  assert.deepEqual(v.rows.map((r) => r.key), ['xwoba', 'ev', 'hardHit', 'brl', 'chase', 'batSpeed', 'swingLength', 'squaredUp', 'sprintSpeed'])
   assert.equal(v.pool, '612 hitters')
   assert.equal(v.tag, 'vs 612 hitters')
   assert.equal(v.season, 2026)
