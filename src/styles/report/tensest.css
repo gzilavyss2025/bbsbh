@@ -57,3 +57,9 @@
   font-size: var(--fs-ui);
   min-width: 0;
 }
+
+/* The Pressure cell: the meter, then the LI that ranks the row. */
+.tensest .tensest__pressure {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

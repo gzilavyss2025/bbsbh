@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react'
+import { useId } from 'react'
 import { ordinal } from '../../../lib/format.js'
 import { pressureLabel, tenseBars } from '../../../api/tensest/tenseBars.js'
 import { LedgerRow } from './LedgerRow.jsx'
@@ -11,7 +11,8 @@ import { LedgerRow } from './LedgerRow.jsx'
 export function TenseList({ plays, activeIdx, cutoffs, clip, onPick, onWatch }) {
   const headId = useId()
   const { hasClip } = clip
-  const watchable = useMemo(() => plays.map((p) => hasClip(p.playId)), [plays, hasClip])
+  // Three to five rows, rebuilt with the chart's points each render: no memo to keep.
+  const watchable = plays.map((p) => hasClip(p.playId))
   if (plays.length === 0) return null
   return (
     <div className="winprob__ledger winprob__tense">

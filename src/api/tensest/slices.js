@@ -5,8 +5,8 @@ import { rankTop } from './rank.js'
 // club's top 25 batting and pitching, and the league list filtered by batter,
 // pitcher, park and club. Pure. The page is not a scoring surface (ADR-0034).
 
-export const LEAGUE_SIZE = 50
-export const CLUB_SIZE = 25
+const LEAGUE_SIZE = 50
+const CLUB_SIZE = 25
 
 // Which club batted and which pitched: the away club bats in the top half.
 const batting = (r) => (r.top ? r.aw : r.hm)

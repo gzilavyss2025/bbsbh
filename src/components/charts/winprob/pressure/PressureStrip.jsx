@@ -1,4 +1,4 @@
-import { W, H } from './plot.js'
+import { W, H } from '../plot.js'
 
 // The pressure strip (strip.js has the rule), drawn as the bottom band of the
 // chart's own SVG so it shares the plot's x-scale, its scrub surface and its
@@ -7,8 +7,9 @@ import { W, H } from './plot.js'
 export const STRIP_H = 14
 const RISE = { low: 4, mid: 7, high: 10 }
 
-export function PressureStrip({ segs }) {
-  if (segs.length === 0) return null
+// `show` holds the dark panel even before any segment can draw (no cutoffs yet).
+export function PressureStrip({ segs, show }) {
+  if (!show) return null
   return (
     <g className="winprob__strip" transform={`translate(0 ${H})`} aria-hidden="true">
       <rect className="winprob__strip-panel" x={0} y={0} width={W} height={STRIP_H} />

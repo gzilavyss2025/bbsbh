@@ -56,8 +56,9 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
         {rows.map((r) => (
           <tr key={`${r.pk}:${r.i}`}>
             <td className="rank">{rankLabel(r, rows)}</td>
-            {/* The Pressure meter (#2939); the bare number until the cutoffs load. */}
-            <td>{cutoffs ? <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} /> : r.li.toFixed(2)}</td>
+            {/* The meter and the number beside it: every play here is in the season's top 1%,
+                so the meter is nearly always full and the number tells the rows apart (Gary). */}
+            <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
             <td>{monthDayName(r.d) || DASH}</td>
             <td className="game">
               {gameLabel(r, teamId)}
@@ -161,7 +162,7 @@ export function TensestMomentsPage() {
             {league.length ? (
               <TensestTable rows={league} teamId={null} cutoffs={cutoffs} label="All of baseball, tensest at-bats" />
             ) : (
-              <p className="hint">No tense at-bats yet.</p>
+              <p className="hint">{filtering ? 'No tense at-bats match these filters.' : 'No tense at-bats yet.'}</p>
             )}
           </Card>
           </Stack>

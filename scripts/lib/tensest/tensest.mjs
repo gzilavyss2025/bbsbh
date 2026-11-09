@@ -10,6 +10,9 @@
 // The generator is a top-level script (importing it runs it), so everything worth a
 // unit test lives here (scripts/CLAUDE.md).
 
+// The page's own order (src/api/tensest/rank.js), so the file and the page agree.
+import { byTense } from '../../../src/api/tensest/rank.js'
+
 // The file keeps every play at or above this (about 2,700 a season): far below what
 // the page's ranked lists need (a club's 25th tensest sits near 6), and the set the
 // sliced board (#2981) filters.
@@ -141,8 +144,6 @@ export function gameRowsOrThrow(game, plays) {
 }
 
 const keyOf = (r) => `${r.pk}:${r.i}`
-// Highest first; the game and play order only make the output stable.
-const byTense = (a, b) => b.li - a.li || a.pk - b.pk || a.i - b.i
 
 // A game with plays to read: Final, and neither postponed ('D') nor cancelled ('C').
 // A cancelled game also reports abstractGameCode 'F' but has no winProbability.

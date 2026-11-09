@@ -8,8 +8,8 @@ import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
 import { SwingLedger } from './winprob/SwingLedger.jsx'
 import { TenseList } from './winprob/TenseList.jsx'
-import { PressureStrip, STRIP_H } from './winprob/PressureStrip.jsx'
-import { pressureStrip } from './winprob/strip.js'
+import { PressureStrip, STRIP_H } from './winprob/pressure/PressureStrip.jsx'
+import { pressureStrip } from './winprob/pressure/strip.js'
 import { WinProbBands } from './winprob/WinProbBands.jsx'
 import { W, H, PLOT_L, PLOT_T, PLOT_B, PLOT_W, PLOT_H } from './winprob/plot.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
@@ -112,7 +112,10 @@ export function WinProbChart({
   // the SVG's bottom band, so the viewBox grows by its height when it draws.
   const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
   const strip = pressureStrip(points, cutoffs, { left: PLOT_L, width: PLOT_W })
-  const VH = strip.length ? H + STRIP_H : H
+  // The strip's room is held from the first paint whenever there are plays, so the chart
+  // does not grow (and push the lists down) when the cutoffs arrive.
+  const hasStrip = (points?.length ?? 0) > 0
+  const VH = hasStrip ? H + STRIP_H : H
   const { activeIdx, select, svgHandlers, used, input } = useWinProbSelection(
     points?.length ?? 0, { W, H: VH, left: PLOT_L, width: PLOT_W }, bigPlays.map((p) => p.idx),
   )
@@ -381,14 +384,14 @@ export function WinProbChart({
         />
 
         {/* Each play's pressure, in the Pressure meter's colours (#2980). */}
-        <PressureStrip segs={strip} />
+        <PressureStrip segs={strip} show={hasStrip} />
 
         {/* The selection cursor sits under the numbered markers, so a
             marker stays readable when the cursor passes over it. */}
         <g className="winprob__cursor" aria-hidden="true">
           {/* Through the pressure strip too, so the selected play's segment is marked. */}
-          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${strip.length ? VH : PLOT_B}`} />
-          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${strip.length ? VH : PLOT_B}`} />
+          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${hasStrip ? VH : PLOT_B}`} />
+          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${hasStrip ? VH : PLOT_B}`} />
           <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={4} />
         </g>
 

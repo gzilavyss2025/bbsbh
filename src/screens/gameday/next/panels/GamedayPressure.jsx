@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { PressureMeter } from '../../../../components/charts/PressureMeter.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
@@ -18,11 +18,18 @@ export function GamedayPressure({ ctx }) {
   const pk = ctx.feed?.gamePk
   const reach = reachOf(ctx)
   // Fetched only once a play can show (never fetched-then-hidden). A final game's
-  // feed is read once; a live one again as the reveal moves, so its newest plays
-  // are there (useAsync keeps the last answer on screen while the next loads).
+  // feed is read once; a live one is read again as the reveal moves, so its newest
+  // plays are there. That re-read is useAsync's `reload`, which keeps the last answer
+  // on screen while the next loads; a deps change would blank the meter (#2925).
   const live = ctx.feed?.gameData?.status?.abstractGameState !== 'Final'
   const step = reach && live ? `${ctx.mark}:${reach.here}:${reach.cut}` : null
-  const { data: wp } = useAsync(() => (pk && reach ? fetchWinProbability(pk) : Promise.resolve(null)), [pk, !!reach, step])
+  const { data: wp, reload } = useAsync(() => (pk && reach ? fetchWinProbability(pk) : Promise.resolve(null)), [pk, !!reach])
+  const firstStep = useRef(step)
+  useEffect(() => {
+    if (step == null || step === firstStep.current) return
+    firstStep.current = step
+    reload()
+  }, [step, reload])
   const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
   // One live region for the whole page visit, so each new reading is announced.
   const [said, setSaid] = useState('')
@@ -42,7 +49,8 @@ export function GamedayPressure({ ctx }) {
           }}
         </SealBox>
       )}
-      <p className="sr-only" role="status">{reach ? said : ''}</p>
+      {/* Only while a reading is on screen: never a reading from another position. */}
+      <p className="sr-only" role="status">{reach && wp && cutoffs ? said : ''}</p>
     </>
   )
 }

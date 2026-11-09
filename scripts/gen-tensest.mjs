@@ -86,6 +86,14 @@ const ok = read.filter(Boolean)
 if (ok.length === 0) throw new Error('tensest: every winProbability read failed')
 
 plays = mergePlays(plays, ok.flatMap((r) => r.rows))
+// The page cuts each club's top 25 batting and pitching from this list, which stops at
+// LI_FLOOR. A club side with fewer than 25 plays here shows a short list; say so, so a
+// season where that happens late (not just early) is noticed and the floor lowered.
+const sides = new Map()
+const bump = (k) => sides.set(k, (sides.get(k) ?? 0) + 1)
+for (const r of plays) { bump(`${r.top ? r.aw : r.hm} batting`); bump(`${r.top ? r.hm : r.aw} pitching`) }
+const short = [...sides].filter(([, n]) => n < 25).map(([k]) => k)
+if (short.length) console.warn(`tensest: under 25 plays at LI >= 4 for ${short.join(', ')}; their lists are short (lower LI_FLOOR if this is late in a season)`)
 for (const r of ok) done.add(r.g.gamePk)
 const cutoffs = cutoffsFromHist(hist)
 

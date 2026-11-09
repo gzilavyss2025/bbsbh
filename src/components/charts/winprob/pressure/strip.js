@@ -1,4 +1,4 @@
-import { tenseBars } from '../../../api/tensest/tenseBars.js'
+import { tenseBars } from '../../../../api/tensest/tenseBars.js'
 
 // The pressure strip under the win-probability plot (#2980, Gary's option C):
 // the Pressure meter laid on its side, one segment per play. A segment spans

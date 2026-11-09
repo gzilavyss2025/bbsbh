@@ -2,7 +2,7 @@
 // revealed play, sized by its Pressure meter bars, aligned to the plot's x.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { pressureStrip, stripLevel } from '../src/components/charts/winprob/strip.js'
+import { pressureStrip, stripLevel } from '../src/components/charts/winprob/pressure/strip.js'
 
 const cutoffs = { li: [0.33, 0.64, 0.9, 1.2, 1.49, 1.88, 2.32, 3.17, 4.56] }
 const pt = (li) => ({ li, home: 50 })

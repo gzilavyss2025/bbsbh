@@ -1,9 +1,9 @@
 // Rank a list of tense plays and keep every row whose rank is at most `size`. Rows
 // that share a leverage index share a rank (1, 1, 3), the way a leaderboard counts,
-// so a list can run a few rows past its size rather than cut a tie in half. Used by
-// the page (slices.js) and the generator (scripts/lib/tensest/tensest.mjs).
+// so a list can run a few rows past its size rather than cut a tie in half. The page
+// ranks with it (slices.js); the generator sorts its flat list with `byTense`.
 // Highest first; the game and play order only make the output stable.
-const byTense = (a, b) => b.li - a.li || a.pk - b.pk || a.i - b.i
+export const byTense = (a, b) => b.li - a.li || a.pk - b.pk || a.i - b.i
 
 export function rankTop(rows, size) {
   const sorted = [...rows].sort(byTense)
