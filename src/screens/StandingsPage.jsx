@@ -397,7 +397,8 @@ export function StandingsPage({ seasonYear }) {
         emptyMessage="No standings available for this date."
       />
 
-      <div className={refreshing ? 'standings-body is-refreshing' : 'standings-body'}>
+      {/* First load: hold the page's height so the footer doesn't jump when the tables land (#2987). */}
+      <div className={`standings-body${refreshing ? ' is-refreshing' : ''}${loading && !shown.length ? ' is-loading' : ''}`}>
         {board === 'wildcard'
           ? leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
