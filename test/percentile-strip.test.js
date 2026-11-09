@@ -174,3 +174,25 @@ test('swing length prints its raw median baseline without a lower-is-better flag
   assert.equal(swingLength.lowerIsBetter, false)
   assert.equal(swingLength.baseline, '7.3')
 })
+
+// ------------------------------------------------------- Bat / Glove / Legs (#2972)
+
+const CATCHER = { xwoba: 44, ev: 54, hardHit: 46, sprintSpeed: 69, arm: 92, oaa: 40, bsr: 59, pop: 98, framing: 45 }
+
+test('a catcher gets Glove rows for arm, OAA, pop time and framing; groups run Bat, Glove, Legs', () => {
+  const rows = percentileRows(CATCHER, { pop: 1.85, framing: -0.004, bsr: 0.8 }, 'hitting')
+  assert.deepEqual(rows.filter((r) => r.group === 'Glove').map((r) => r.key), ['arm', 'oaa', 'pop', 'framing'])
+  assert.deepEqual([...new Set(rows.map((r) => r.group))], ['Bat', 'Glove', 'Legs'])
+  assert.deepEqual(rows.filter((r) => r.group === 'Legs').map((r) => r.key), ['sprintSpeed', 'bsr'])
+  const pop = rows.find((r) => r.key === 'pop')
+  assert.equal(pop.value, '1.85')
+  assert.equal(pop.lowerIsBetter, true)
+  assert.equal(rows.find((r) => r.key === 'framing').value, '0.0')
+  assert.equal(rows.find((r) => r.key === 'bsr').value, '+0.8')
+})
+
+test('a DH gets no Glove rows', () => {
+  const rows = percentileRows({ xwoba: 90, ev: 90, hardHit: 90, sprintSpeed: 20, bsr: 30 }, null, 'hitting')
+  assert.equal(rows.some((r) => r.group === 'Glove'), false)
+  assert.deepEqual([...new Set(rows.map((r) => r.group))], ['Bat', 'Legs'])
+})

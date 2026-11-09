@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/season/percentile.css'
 import { fetchSavantPercentiles } from '../../../../../api/savantPercentiles.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { percentileView } from './percentileView.js'
 
-// Rows a role draws at most: the loading box holds one line per metric (9 batter, 7 pitcher).
-const ROWS = { hitting: 9, pitching: 7 }
+// Rows a role draws at most: the loading box holds one line per metric (a typical hitter, 7 pitcher).
+const ROWS = { hitting: 12, pitching: 7 }
 
 // Percentile rank (#2011): a rank-strip ledger, best at the right edge. Open surface (ADR-0034):
 // season Statcast ranks off a nightly file, no seal. The file holds one season; another season has no card.
@@ -39,8 +39,13 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
         <span className="pctl__axis-pct">Pctl</span>
       </div>
       <ul className="pctl__list">
-        {view.rows.map((r) => (
-          <Row key={r.key} r={r} open={openKey === r.key} onToggle={() => setOpenKey(openKey === r.key ? null : r.key)} />
+        {view.rows.map((r, i) => (
+          <Fragment key={r.key}>
+            {role !== 'pitching' && r.group !== view.rows[i - 1]?.group && (
+              <li className="pctl__group mono" aria-hidden="true">{r.group}</li>
+            )}
+            <Row r={r} open={openKey === r.key} onToggle={() => setOpenKey(openKey === r.key ? null : r.key)} />
+          </Fragment>
         ))}
       </ul>
       <p className="pctl__key" aria-hidden="true">

@@ -44,6 +44,7 @@ export function percentileView(data, id, role, season) {
     return {
       key: r.key,
       label: r.label,
+      group: r.group,
       percentile: r.percentile,
       ord,
       value,
