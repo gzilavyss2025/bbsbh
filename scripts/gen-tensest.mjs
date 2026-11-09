@@ -6,7 +6,11 @@
 // per game, 2,400+ games a season. The page cannot make that many calls, so this
 // reads each game once and keeps only the tensest plays (scripts/lib/tensest.mjs).
 //
-// INCREMENTAL: scripts/data/tensest-state.json lists the games already read. A run
+// It also writes `cutoffs`: the season's leverage edges for the tension meter's 10
+// bars (scripts/lib/tensest/cutoffs.mjs), from a histogram of every play read.
+//
+// INCREMENTAL: scripts/data/tensest-state.json lists the games already read, and
+// holds that histogram. A state file with no histogram is rebuilt from scratch. A run
 // reads only Final games not on that list, folds their tense plays into the lists
 // in the output file, and adds them to the list. The first run of a season reads
 // every game so far (about ten minutes); a nightly run reads the day's games.
@@ -25,6 +29,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow, isPlayedFinal } from './lib/tensest/tensest.mjs'
+import { cutoffsFromHist, emptyHist, foldHist, histOrNull } from './lib/tensest/cutoffs.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
@@ -43,11 +48,13 @@ const finals = sched.dates.flatMap((d) => d.games).filter(isPlayedFinal)
 
 const prev = await readJsonOr(OUT, null)
 const state = await readJsonOr(STATE, null)
-const carried = prev?.season === season && state?.season === season
+const carried = prev?.season === season && state?.season === season && histOrNull(state.hist) !== null
 const done = new Set(carried ? state.done : [])
+let hist = carried ? state.hist : emptyHist()
 let store = carried ? { league: prev.league ?? [], teams: prev.teams ?? {} } : emptyStore()
 
-const todo = finals.filter((g) => !done.has(g.gamePk))
+// A suspended game is listed on both dates; read it once, or its plays count twice.
+const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
 if (todo.length === 0) {
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
@@ -55,7 +62,10 @@ if (todo.length === 0) {
 
 const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
   const plays = await getJson(`/api/v1/game/${g.gamePk}/winProbability`)
-  return { g, rows: gameRowsOrThrow(g, plays) }
+  const rows = gameRowsOrThrow(g, plays)
+  // Folded here, not after: holding every game's whole feed runs out of memory.
+  hist = foldHist(hist, plays)
+  return { g, rows }
 })
 const ok = read.filter(Boolean)
 if (ok.length === 0) throw new Error('tensest: every winProbability read failed')
@@ -63,8 +73,9 @@ if (ok.length === 0) throw new Error('tensest: every winProbability read failed'
 store = addRows(store, ok.flatMap((r) => r.rows))
 assertFloorHolds(store)
 for (const r of ok) done.add(r.g.gamePk)
+const cutoffs = cutoffsFromHist(hist)
 
 const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
-await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, ...store })
-await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b) })
-console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; league top ${store.league.length}`)
+await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, cutoffs, ...store })
+await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
+console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; league top ${store.league.length}; bar edges ${cutoffs?.li.join(' ')}`)

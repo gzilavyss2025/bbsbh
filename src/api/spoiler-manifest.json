@@ -1121,6 +1121,10 @@
       "class": "spoiler-free",
       "why": "Static outfield-outs/{season}.json: team-games with no out to an outfielder. Holds no scores or winners, and the page is a standalone report outside the four scoring surfaces (ADR-0034)."
     },
+    "tensest/tenseBars.js": {
+      "class": "spoiler-free",
+      "why": "Pure: maps a leverage index to the tension meter's 1–10 bars against the season-wide cutoffs in tensest.json. Fetches nothing and holds no score; an LI is score-revealing, so a caller passes only one its reveal already let through (ADR-0001)."
+    },
     "tensest/tensest.js": {
       "class": "spoiler-free",
       "why": "Static tensest.json: the season's tensest at-bats by MLB leverage index. A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
