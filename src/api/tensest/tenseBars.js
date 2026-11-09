@@ -11,6 +11,17 @@ export function tenseBars(li, cutoffs) {
   return 1 + edges.filter((e) => li >= e).length
 }
 
+// The words a screen reader hears for a meter: "Pressure 8 of 10, top 7% of the
+// season". The rank comes from the bands the generator published (`cutoffs.pcts`,
+// bar n starts at pcts[n-2]), so a change to the bands changes the words with it.
+// Bars 1–4 name no rank: below the top 30% it says nothing worth hearing.
+export function pressureLabel(bars, cutoffs) {
+  if (!Number.isInteger(bars) || bars < 1 || bars > 10) return ''
+  const start = bars >= 5 ? cutoffs?.pcts?.[bars - 2] : null
+  const top = typeof start === 'number' ? Math.round((100 - start) * 10) / 10 : null
+  return `Pressure ${bars} of 10${top != null ? `, top ${top}% of the season` : ''}`
+}
+
 // The season's cutoffs, from the small file gen-tensest.mjs writes beside
 // tensest.json so a box score need not fetch the whole tensest board. Null
 // before the file exists or on any failure: the caller then draws no meter.

@@ -46,6 +46,8 @@ test('the reveal clamp keeps a sealed half\'s LI out', () => {
   const through = halfIndex(1, 'bottom')
   const pts = selectWinProbPath(game(), { throughHalf: through })
   assert.deepEqual(pts.map((p) => p.li), [null, 1.4])
+  // Unclamped, the sealed half's two plays rank first (deltas 30 and 20).
+  assert.deepEqual(selectWinProbBigPlays(game(), { minSwing: 1 }).map((b) => [b.idx, b.li]), [[2, 3.2], [3, 5.1], [1, 1.4], [0, null]])
   const big = selectWinProbBigPlays(game(), { throughHalf: through, minSwing: 1 })
-  assert.ok(big.every((b) => b.li !== 3.2 && b.li !== 5.1))
+  assert.deepEqual(big.map((b) => [b.idx, b.li]), [[1, 1.4], [0, null]])
 })

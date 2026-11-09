@@ -8,10 +8,10 @@
   grid-template-columns: repeat(10, 1fr);
   align-items: end;
   width: var(--space-16);
-  height: 20px;
+  height: var(--space-5);
   padding: var(--space-1);
   box-sizing: border-box;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: var(--led-panel);
   vertical-align: middle;
   /* The rising top edge of the broadcast frame. */
@@ -19,12 +19,12 @@
 }
 .pressure__bar {
   display: block;
-  border-radius: 1px 1px 0 0;
   background: var(--led-off);
   /* The dark gutter between bars, in place of a gap (ten bars in 56px). */
   border-inline: var(--bw-hair) solid var(--led-panel);
   box-sizing: border-box;
-  /* The dot-matrix LED cells. */
+  /* The dot-matrix LED cells: a 3px cell, the one size no token holds (kept with
+     Gary, 2026-11-09, #3007 review). */
   mask: radial-gradient(circle, var(--led-panel) 58%, transparent 64%) 0 100% / 3px 3px;
 }
 .pressure__bar:nth-child(1) { height: 30%; --led: var(--led-1); }

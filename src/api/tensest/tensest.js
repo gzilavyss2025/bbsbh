@@ -13,14 +13,13 @@
 
 import { staticJson } from '../staticJson.js'
 
-const EMPTY = { season: null, generatedAt: null, through: null, cutoffs: null, league: [], teams: {} }
+const EMPTY = { season: null, generatedAt: null, through: null, league: [], teams: {} }
 
 export const loadTensest = staticJson('/data/tensest.json', {
   shape: (d) => ({
     season: d.season ?? null,
     generatedAt: d.generatedAt ?? null,
     through: d.through ?? null,
-    cutoffs: d.cutoffs ?? null,
     league: d.league ?? [],
     teams: d.teams ?? {},
   }),

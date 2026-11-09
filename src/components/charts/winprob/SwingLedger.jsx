@@ -3,7 +3,7 @@ import { ordinal } from '../../../lib/format.js'
 import { winProbChangeLabel } from './explore.js'
 import { winProbKeyPill } from './keyColors.js'
 import { useAsync } from '../../../hooks/useAsync.js'
-import { loadCutoffs, tenseBars } from '../../../api/tensest/tenseBars.js'
+import { loadCutoffs, pressureLabel, tenseBars } from '../../../api/tensest/tenseBars.js'
 import { PressureMeter } from '../PressureMeter.jsx'
 
 // The biggest revealed swings under the win-probability plot, numbered 1 =
@@ -34,13 +34,15 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
           const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
           const isActive = activeIdx === p.idx
           const halfWords = `${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`
+          const bars = tenseBars(p.li, cutoffs)
+          const pressure = pressureLabel(bars, cutoffs)
           return (
             <li className={`winprob__ledger-row${isActive ? ' is-active' : ''}`} key={`bp-${p.idx}`}>
               <button
                 type="button"
                 className="winprob__ledger-pick"
                 aria-pressed={isActive}
-                aria-label={`Swing ${index + 1}: ${chipText}, ${halfWords}. Show on the chart`}
+                aria-label={`Swing ${index + 1}: ${chipText}, ${halfWords}.${pressure ? ` ${pressure}.` : ''} Show on the chart`}
                 onClick={() => onPick(p.idx)}
               >
                 <span className="winprob__ledger-meta">
@@ -52,7 +54,7 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
                     {chipText}
                   </span>
                   <span className="t-label">{tag}</span>
-                  <PressureMeter bars={tenseBars(p.li, cutoffs)} />
+                  <PressureMeter bars={bars} decorative />
                 </span>
                 <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
               </button>
