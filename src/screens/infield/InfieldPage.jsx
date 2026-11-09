@@ -10,6 +10,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 
@@ -96,6 +97,9 @@ export function InfieldPage() {
             <strong>{n(data.qualifiers)}</strong> of {n(data.teamGames)} team-games, {data.first}–{data.last}.{' '}
             {n(data.nearMiss)} more made just one outfield out.
           </p>
+          {/* Stamped cards stack in a Stack, never on sibling margins: margins collapse and
+              leave each name tab touching the card above. */}
+          <Stack gap="loose">
           {data.seasons.map((s) => (
             <Card
               key={s.season}
@@ -112,6 +116,7 @@ export function InfieldPage() {
               )}
             </Card>
           ))}
+          </Stack>
         </>
       )}
 
