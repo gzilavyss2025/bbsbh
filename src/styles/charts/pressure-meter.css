@@ -1,0 +1,102 @@
+/* The Pressure meter (components/charts/PressureMeter.jsx, #2939): ten LED
+   bars on a dark panel, each taller than the last, lit green to red. The panel
+   stays dark in both themes; the ramp is --led-1…--led-10 (tokens/colors.css).
+   Inline size only, for the swing rows. */
+/* layout-exempt: a fixed count of ten bars, bottom-aligned, which the layout parts cannot say. */
+.pressure {
+  display: inline-grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: end;
+  width: var(--space-16);
+  height: var(--space-5);
+  padding: var(--space-1);
+  box-sizing: border-box;
+  border-radius: var(--radius-xs);
+  background: var(--led-panel);
+  vertical-align: middle;
+  /* The rising top edge of the broadcast frame. */
+  clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 100%);
+}
+.pressure__bar {
+  display: block;
+  background: var(--led-off);
+  /* The dark gutter between bars, in place of a gap (ten bars in 56px). */
+  border-inline: var(--bw-hair) solid var(--led-panel);
+  box-sizing: border-box;
+  /* The dot-matrix LED cells: a 3px cell, the one size no token holds (kept with
+     Gary, 2026-11-09, #3007 review). */
+  mask: radial-gradient(circle, var(--led-panel) 58%, transparent 64%) 0 100% / 3px 3px;
+}
+.pressure__bar:nth-child(1) { height: 30%; --led: var(--led-1); }
+.pressure__bar:nth-child(2) { height: 36%; --led: var(--led-2); }
+.pressure__bar:nth-child(3) { height: 42%; --led: var(--led-3); }
+.pressure__bar:nth-child(4) { height: 49%; --led: var(--led-4); }
+.pressure__bar:nth-child(5) { height: 56%; --led: var(--led-5); }
+.pressure__bar:nth-child(6) { height: 64%; --led: var(--led-6); }
+.pressure__bar:nth-child(7) { height: 72%; --led: var(--led-7); }
+.pressure__bar:nth-child(8) { height: 81%; --led: var(--led-8); }
+.pressure__bar:nth-child(9) { height: 90%; --led: var(--led-9); }
+.pressure__bar:nth-child(10) { height: 100%; --led: var(--led-10); }
+.pressure__bar.is-lit { background: var(--led); }
+
+/* The big meter (Gameday, #3006): the broadcast frame over a caption plate.
+   The bar heights and LED colours are the rules above. */
+/* layout-exempt: the frame over its caption plate */
+.pressure--big {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  background: none;
+  clip-path: none;
+}
+/* layout-exempt: a fixed count of ten bars, bottom-aligned */
+.pressure__track {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: end;
+  height: var(--space-10);
+  padding: var(--space-1) var(--space-1h) var(--space-1);
+  background: var(--led-panel);
+  /* The broadcast frame's rising top edge. */
+  clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
+}
+/* layout-exempt: the caption's two words on one line */
+.pressure__cap {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1);
+  background: var(--led-panel);
+  border-top: var(--bw-hair) solid var(--led-dim);
+  color: var(--led-text);
+}
+.pressure__name {
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-display);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.pressure__rank {
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-body);
+  color: var(--led-muted);
+  font-variant-numeric: tabular-nums;
+}
+.pressure--big .pressure__bar.is-peak { filter: drop-shadow(0 0 3px var(--led)); }
+
+/* Motion (kept here, not in styles/motion/, which is at its file cap: the
+   precedent is styles/worldseries/fit.css). On a reveal the bars fill or drain
+   one at a time, filling upward and draining from the top down; the top lit bar then breathes, quicker at 9–10.
+   Keyed to the play the reader revealed, never to the clock. Off under the
+   system's reduced motion and the app's own Motion: Reduced. */
+@media (prefers-reduced-motion: no-preference) {
+  .pressure--big .pressure__bar { transition: background-color var(--dur-fast) linear calc(var(--i) * 45ms); }
+  /* A bar going dark drains from the top down, so the last lit bar goes first. */
+  .pressure--big .pressure__bar:not(.is-lit) { transition-delay: calc((9 - var(--i)) * 45ms); }
+  .pressure--big .pressure__bar.is-peak { animation: pressure-breathe 1.8s var(--ease-standard) infinite; }
+  .pressure--big[data-high] .pressure__bar.is-peak { animation-duration: 0.9s; }
+}
+:root[data-motion='reduced'] .pressure--big .pressure__bar { transition: none; animation: none; }
+@keyframes pressure-breathe { 50% { opacity: 0.55; } }

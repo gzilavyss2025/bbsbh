@@ -49,6 +49,7 @@ const forClub = (days, id) =>
 // more. When the window runs out, the door reaches back one more window of
 // days, so a reader can keep going through the winter.
 const STEP = 10
+const MAX_BACKFILL = 6
 
 export function OffseasonLead({ endDate, sportId, winter, children }) {
   const [pages, setPages] = useState(1)
@@ -99,6 +100,15 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
     setCap(null)
   }
   const total = items.filter((item) => item.kind === 'story').length
+  // A quiet window (one move on a Monday in November) left the card a single
+  // row tall on a phone. Reach back, a window at a time, until the first ten
+  // are in hand — capped so a club with no winter news stops looking.
+  // Once per landed fetch, so a render before the next fetch starts cannot skip ahead.
+  const [filled, setFilled] = useState(null)
+  if (data && data !== filled && !loading && total < visible && pages < MAX_BACKFILL) {
+    setFilled(data)
+    setPages((n) => n + 1)
+  }
   const shown = takeStories(items, visible)
   // The card keeps the height its first ten moves gave it; more moves scroll
   // inside it, and each press scrolls to the first of the new ones.

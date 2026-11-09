@@ -7,9 +7,8 @@
   margin-block: var(--space-3);
   font-variant-numeric: tabular-nums;
 }
-.infield__section {
-  margin-block-end: var(--space-3);
-}
+/* No margin on the season cards: they stack in a Stack (InfieldPage), which owns the gap.
+   A sibling margin collapsed with each card's name-tab margin and left the tabs touching. */
 .infield .club {
   text-align: left;
 }

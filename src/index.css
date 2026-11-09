@@ -145,6 +145,7 @@
    cap (ADR-0038). A subdirectory, not a numbered sibling, for the reason
    motion/ is: src/styles is a flat directory at its own ratchet. */
 @import './styles/charts/winprob.css';
+@import './styles/charts/pressure-meter.css';
 @import './styles/21-box-score.css';
 @import './styles/21a-box-score-stars.css';
 @import './styles/box-score/scoring-summary.css';

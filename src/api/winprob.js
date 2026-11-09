@@ -88,6 +88,10 @@ export function selectWinProbPath(
       playId: (e.playEvents ?? []).filter((ev) => ev?.isPitch).at(-1)?.playId ?? null,
       // Verified against gamePk 823738: the outs after the play.
       outs: Number.isInteger(e.count?.outs) ? e.count.outs : null,
+      // MLB's leverage index for the play (the Pressure meter, #2978). Null on a
+      // game's first play, which the feed sends without one. Score-revealing like
+      // the rest of the point, so it exists only inside this clamp.
+      li: typeof e.leverageIndex === 'number' && Number.isFinite(e.leverageIndex) ? e.leverageIndex : null,
       // The step the chart's line draws for this play (the first from even),
       // not the feed's recorded homeTeamWinProbabilityAdded: that one measures
       // the first play from the pre-game odds, so the readout and the ledger
@@ -124,10 +128,42 @@ export function selectWinProbBigPlays(
   for (let idx = 0; idx < points.length; idx++) {
     const p = points[idx]
     if (Math.abs(p.delta) >= minSwing) {
-      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId })
+      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId, li: p.li })
     }
   }
   return plays
     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.idx - b.idx)
     .slice(0, limit)
+}
+
+// The Tensest moments list under the chart (#2979): the plays with the highest
+// leverage index, highest first, top `limit` by rank. A tie at the cut keeps
+// every tied play, then game order, the way scripts/lib/tensest/tensest.mjs
+// ranks the season board, but never past `max` rows: LI is a lookup of the
+// situation and ties often. A play with no `li` (a game's first) is skipped.
+// Takes `points` from selectWinProbPath, already clamped to the reveal: it
+// reads nothing else, so it can list no play the reader has not revealed.
+export function selectTensePlays(points, { limit = 3, max = 5 } = {}) {
+  if (!Array.isArray(points)) return []
+  const ranked = points
+    .map((p, idx) => ({ idx, li: p.li, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId }))
+    .filter((p) => typeof p.li === 'number')
+    .sort((a, b) => b.li - a.li || a.idx - b.idx)
+  const out = []
+  let rank = 0
+  for (let k = 0; k < ranked.length; k++) {
+    if (k === 0 || ranked[k].li !== ranked[k - 1].li) rank = k + 1
+    if (rank > limit || out.length >= max) break
+    out.push(ranked[k])
+  }
+  return out
+}
+
+// Gameday's Pressure meter (#3006): the leverage index of the last play the
+// reader has revealed. Takes `points` from selectWinProbPath, already clamped
+// to the reveal and the step, so it can never read past them. Null before the
+// first reveal and on a game's first play (the feed sends it no LI).
+export function selectLastLi(points) {
+  if (!Array.isArray(points) || points.length === 0) return null
+  return points[points.length - 1].li ?? null
 }

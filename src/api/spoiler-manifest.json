@@ -1121,6 +1121,18 @@
       "class": "spoiler-free",
       "why": "Static outfield-outs/{season}.json: team-games with no out to an outfielder. Holds no scores or winners, and the page is a standalone report outside the four scoring surfaces (ADR-0034)."
     },
+    "tensest/tenseBars.js": {
+      "class": "spoiler-free",
+      "why": "Maps a leverage index to the Pressure meter's 1–10 bars and its spoken label, against the season-wide cutoffs; loadCutoffs reads them from static tensest-cutoffs.json (spoiler-free, ADR-0034). Holds no score; an LI is score-revealing, so a caller passes only one its reveal already let through (ADR-0001)."
+    },
+    "tensest/rank.js": {
+      "class": "spoiler-free",
+      "why": "Pure: ranks tense plays by leverage index with shared ranks for ties. Fed only the season board's static rows (tensest.json), a standalone page outside the four scoring surfaces (ADR-0034); the generator uses it too."
+    },
+    "tensest/slices.js": {
+      "class": "spoiler-free",
+      "why": "Pure: the Pressure Moments page's (/pressure-moments) league, club and filtered lists from tensest.json's flat list of tense plays (#2981). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
+    },
     "tensest/tensest.js": {
       "class": "spoiler-free",
       "why": "Static tensest.json: the season's tensest at-bats by MLB leverage index. A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
@@ -1380,9 +1392,10 @@
     },
     "winprob.js": {
       "class": "reveal-only",
-      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",
+      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp. Each point also carries the play's leverage index (`li`, #2978) for the swing rows' Pressure meter; it is as score-revealing as the win %, so it exists only inside the same clamp. Gameday's Pressure meter (GamedayPressure.jsx, #3006) reads the last revealed play's `li` inside a SealBox reveal function with the Win % sheet's own step clamp, so it can show nothing past the reveal.",
       "importers": [
         "screens/gameday/next/panels/GamedaySheets.jsx",
+        "screens/gameday/next/panels/GamedayPressure.jsx",
         "api/gameday/moments/moments.js",
         "components/charts/WinProbChart.jsx",
         "screens/boxscore/revealBoxScore.js"

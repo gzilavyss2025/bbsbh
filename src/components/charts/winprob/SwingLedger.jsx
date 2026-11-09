@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { ordinal } from '../../../lib/format.js'
 import { winProbChangeLabel } from './explore.js'
 import { winProbKeyPill } from './keyColors.js'
+import { pressureLabel, tenseBars } from '../../../api/tensest/tenseBars.js'
+import { LedgerRow } from './LedgerRow.jsx'
 
 // The biggest revealed swings under the win-probability plot, numbered 1 =
 // biggest to match the plot's markers (api/winprob.js orders them). A row
@@ -9,8 +11,10 @@ import { winProbKeyPill } from './keyColors.js'
 // and opens the play's film (`clip`, useSwingClip.js). `keys` are the two
 // clubs' key colours (keyColors.js). `stepAt(idx)` is a play's whole-percent
 // change in the header's own numbers (explore.js wholeSwing); the ranking
-// stays on the raw delta.
-export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, clip, onPick, onWatch }) {
+// stays on the raw delta. Each row also draws the play's Pressure meter
+// (`li` against the season `cutoffs`, which WinProbChart fetches eagerly: spoiler-free);
+// a play with no `li`, or no cutoffs yet, draws none.
+export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cutoffs, clip, onPick, onWatch }) {
   const { hasClip } = clip
   // One film lookup per row when the plays or the film list change, not on every render.
   const watchable = useMemo(() => bigPlays.map((p) => hasClip(p.playId)), [bigPlays, hasClip])
@@ -28,41 +32,31 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
           const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
           const isActive = activeIdx === p.idx
           const halfWords = `${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`
+          const bars = tenseBars(p.li, cutoffs)
+          const pressure = pressureLabel(bars, cutoffs)
           return (
-            <li className={`winprob__ledger-row${isActive ? ' is-active' : ''}`} key={`bp-${p.idx}`}>
-              <button
-                type="button"
-                className="winprob__ledger-pick"
-                aria-pressed={isActive}
-                aria-label={`Swing ${index + 1}: ${chipText}, ${halfWords}. Show on the chart`}
-                onClick={() => onPick(p.idx)}
-              >
-                <span className="winprob__ledger-meta">
-                  <span className="winprob__moment-number">{index + 1}</span>
-                  <span
-                    className="pill pill--ink pill--figure winprob__ledger-chip"
-                    style={winProbKeyPill(toHome ? keys.home : keys.away)}
-                  >
-                    {chipText}
-                  </span>
-                  <span className="t-label">{tag}</span>
+            <LedgerRow
+              key={`bp-${p.idx}`}
+              play={p}
+              active={isActive}
+              lead={<>
+                <span className="winprob__moment-number">{index + 1}</span>
+                <span className="pill pill--ink pill--figure winprob__ledger-chip" style={winProbKeyPill(toHome ? keys.home : keys.away)}>
+                  {chipText}
                 </span>
-                <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
-              </button>
-              {watchable[index] && (
-                <button
-                  type="button"
-                  className="winprob__ledger-watch"
-                  aria-label={`Watch swing ${index + 1}, ${halfWords}`}
-                  onClick={() => {
-                    onWatch(p.idx)
-                    clip.openClip(p.playId, `${chipText} · ${tag}`)
-                  }}
-                >
-                  <span aria-hidden="true">▶</span> Watch
-                </button>
-              )}
-            </li>
+              </>}
+              tag={tag}
+              bars={bars}
+              desc={p.desc || `${abbr} rally`}
+              label={`Swing ${index + 1}: ${chipText}, ${halfWords}.${pressure ? ` ${pressure}.` : ''} Show on the chart`}
+              watchLabel={`Watch swing ${index + 1}, ${halfWords}`}
+              watchable={watchable[index]}
+              onPick={onPick}
+              onWatch={() => {
+                onWatch(p.idx)
+                clip.openClip(p.playId, `${chipText} · ${tag}`)
+              }}
+            />
           )
         })}
       </ol>

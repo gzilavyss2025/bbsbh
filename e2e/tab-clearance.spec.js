@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js'
 import { collectBoxes, tabCollisions } from './lib/tabClearance.js'
+import { MENU_GROUPS } from '../src/lib/reportPages.js'
 
 // A named stamped card's tab must not sit on the card above it. The tab hangs 14px over the
 // card's top edge, and the card above throws a shadow below its own, so a card that overruns its
@@ -13,7 +14,10 @@ import { collectBoxes, tabCollisions } from './lib/tabClearance.js'
 // test/tab-clearance.test.js. A route with no named card is skipped, so a page that loses its
 // cards says so rather than passing empty.
 
-const ROUTES = ['/', '/team/158', '/player/677594', '/standings', '/postseason-leaders', '/awards']
+// Every page in the site menu, plus the pages that are not report pages. Derived, not
+// hand-picked: the touching tabs on /tensest and /infield (2026-11-09) were on pages this
+// list had never named, so a page added to the menu is now checked without a second step.
+const ROUTES = [...new Set(['/', '/team/158', '/player/677594', ...MENU_GROUPS.flatMap((g) => g.pages.map((p) => p.path))])]
 
 for (const route of ROUTES) {
   test(`${route} clears every name tab from the card above`, async ({ page }) => {

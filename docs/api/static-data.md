@@ -108,10 +108,17 @@ for each generator; the reader modules:
   `nugget` notes. Cost-driven: dating a crossing needs a game log per player. Cutoff-gated: `nuggetsForGame`
   returns only nuggets dated strictly before the game's own date and within 7 days of it, because a nugget's date
   is a game date.
-- `tensest/tensest.js` — the Tensest Moments page (`/tensest`), from `public/data/tensest.json`. Cost-driven: the
+- `tensest/tensest.js` — the Pressure Moments page (`/pressure-moments`; `/tensest` still lands), from `public/data/tensest.json`. Cost-driven: the
   leverage of every at-bat sits in one `winProbability` feed per game, so `gen-tensest.mjs` (nightly, incremental)
-  keeps only the league's top 50 and each club's top 25 batting and pitching. Spoiler-free: not one of the four
-  scoring surfaces, and a stat line is not a score (ADR-0034).
+  keeps every play at LI 4 or more as one flat list with its park (`plays`, about 2,800 rows, 675 KB raw / 116 KB
+  gzipped in 2026, #2981). `tensest/slices.js` ranks and slices it on the page: the league's top 50, a club's top 25
+  batting and pitching (`rank.js`, ties share a rank), and the league list filtered by batter, pitcher, park and
+  batting or pitching club. Spoiler-free: not one of the four scoring surfaces, and a stat line is not a score (ADR-0034).
+- `tensest/tenseBars.js` — the Pressure meter's numbers. `loadCutoffs` reads `public/data/tensest-cutoffs.json` (9 LI
+  edges and their season bands, from `gen-tensest.mjs`); `tenseBars(li, cutoffs)` turns a play's LI into 1–10 bars and
+  `pressureLabel` into the words a screen reader hears. The cutoffs are spoiler-free; the LI is not, so callers pass
+  only an LI that `winprob.js` has already clamped to the reveal (ADR-0001). The swing rows under the win-probability
+  chart are the caller (#2978).
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,

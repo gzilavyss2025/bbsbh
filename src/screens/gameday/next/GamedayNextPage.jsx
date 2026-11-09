@@ -7,6 +7,7 @@ import { Door } from '../../../components/ui/control/Door.jsx'
 import { blocksFor, menuFor } from '../../../lib/gameday/ladder.js'
 import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
+import { GamedayPressure } from './panels/GamedayPressure.jsx'
 import { useTier } from './useTier.js'
 import { ScrollCue } from './ScrollCue.jsx'
 
@@ -199,11 +200,17 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
           <p className="gdnext__notice t-label t-label--bold" role="status">{notices.join(' · ')}</p>
         )}
       </div>
+      {tier !== 'P' && (
+        <section className="gdnext__slot gdnext__slot--pressure" aria-label="Pressure">
+          <GamedayPressure ctx={panels} />
+        </section>
+      )}
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
           {b === 'stage' && pregame && !drawer ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && tier === 'P' ? (
             // On the phone the hero's open floor carries the trail, so a tap moves between at-bats (Gary, 2026-10-28).
-            <>{hero}<HeroTrail><GamedayPanel block="trail" ctx={trailPanels ?? panels} /></HeroTrail></>
+            // The Pressure meter has its own row on that floor, over the trail, clear of the hero's words (#3006).
+            <>{hero}<div className="gdnext__herofloor"><GamedayPressure ctx={panels} /><HeroTrail><GamedayPanel block="trail" ctx={trailPanels ?? panels} /></HeroTrail></div></>
           ) : b === 'hero' && hero ? hero : b === 'trail' ? (
             <HeroTrail className="gdnext__trailscroll"><GamedayPanel block="trail" ctx={trailPanels ?? panels} /></HeroTrail>
           ) : (
