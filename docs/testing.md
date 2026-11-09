@@ -292,6 +292,9 @@ each tagged `first load` or `lazy`.
   from the library's built chunk (`grep` `dist/assets/` to confirm it is there).
 - *"… more than 6% under its budget"*: the build shrank. Run
   `npm run check:bundle -- --write` and commit the lower numbers.
+- *"… less than half its budget"*: the build broke; it did not shrink. Files fell out
+  of `dist/` (a dependency override once emptied the service-worker precache). Find
+  the cause; never `--write` this one.
 
 **Changing a budget.** Fix the growth first. A budget goes up only as a deliberate
 decision, edited by hand in the JSON with the reason in the PR description, never as a
