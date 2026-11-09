@@ -8,7 +8,7 @@
 //
 // Flags: --runs N (5) | --storage empty|warm (empty) | --sw (let the service worker run;
 // adds install bytes/count and a second visit) | --sources (list the elements behind
-// each layout shift) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
+// each layout shift) | --wide (1280x800 desktop, no touch) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
@@ -24,6 +24,7 @@ const { values: o, positionals } = parseArgs({
     storage: { type: 'string', default: 'empty' },
     sw: { type: 'boolean', default: false },
     sources: { type: 'boolean', default: false },
+    wide: { type: 'boolean', default: false },
     date: { type: 'string' },
     wait: { type: 'string', default: '6' },
   },
@@ -133,7 +134,9 @@ async function throttle(ctx, page) {
 
 async function run(browser) {
   const ctx = await browser.newContext({
-    viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true,
+    ...(o.wide
+      ? { viewport: { width: 1280, height: 800 } }
+      : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }),
     serviceWorkers: o.sw ? 'allow' : 'block',
   })
   await ctx.addInitScript(observe)
@@ -185,7 +188,7 @@ try {
   }
   const col = (f) => results.map(f)
   const mode = o.sw ? 'service worker on, 2nd visit (warm; requests the worker serves are NOT throttled)' : `${o.storage} storage`
-  console.log(`**${route}** · 390×844, CPU 4×, 6 Mbps / 150 ms · ${mode} · ${runs} run(s), median (min–max)\n`)
+  console.log(`**${route}** · ${o.wide ? '1280×800' : '390×844'}, CPU 4×, 6 Mbps / 150 ms · ${mode} · ${runs} run(s), median (min–max)\n`)
   console.log('| Metric | Value |\n| --- | --- |')
   const rows = [
     ['FCP', fmt(col((r) => r.fcp), 0, ' ms')],

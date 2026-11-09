@@ -40,6 +40,7 @@ import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 import {
   reorderLiveGames,
   reorderNationalBroadcasts,
@@ -270,7 +271,9 @@ export function GameSelect({
   // wedge a screen-tall gap above the Off Day grid. useAsync keeps the last-good
   // `data` across a reload and nulls it on a deps change, which is exactly the
   // line wanted here — a date or level switch is a cold load again.
-  const coldLoad = loading && !data
+  // In October the page's arrangement waits on the bracket, so the loader does too (#3008).
+  const bracketPending = inPostseasonWindow && postseasonBracket.loading
+  const coldLoad = (loading && !data) || bracketPending
 
   const favoriteAffiliateIds = useMemo(
     () => new Set((affiliates.data ?? []).map((a) => a.id)),
@@ -641,6 +644,7 @@ export function GameSelect({
             }
           />
 
+          {bracketPending && !loading && <Loader />}
           {inPostseasonWindow && wsMode && (
             <LazyPanel reserve="ws">
               <WorldSeriesHome
@@ -707,14 +711,14 @@ export function GameSelect({
                   <DerbyCard />
                 </li>
               )}
-              {listGames.map((g, idx) => renderCard(g, idx))}
+              {!bracketPending && listGames.map((g, idx) => renderCard(g, idx))}
             </ul>
 
             {/* Any idle club, the whole-league All-Star case included. Not in the
                 winter: every club is idle then, and the logo rail above already
                 links all of them (2026-11-02). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
-            {october && !wsMode && (
+            {october && !wsMode && !bracketPending && (
               <LazyPanel reserve="primer">
                 <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />
               </LazyPanel>
@@ -731,12 +735,9 @@ export function GameSelect({
           </div>
         </div>
 
-        {/* The league's roster moves, live off the wire (issue #772). On
-            today's slate a rolling three-day window; paged back to a past
-            day, `singleDay` narrows it to that day's own moves — a window
-            running past the date on screen would read as a bug, not news.
-            Renders null while loading, on failure, and on a quiet window, and
-            reports which back so the shell can give the reserved width up.
+        {/* The league's roster moves (issue #772): today a rolling three-day window; a past day,
+            `singleDay` narrows it to that day's own moves, never a window past the date on screen.
+            Holds its column while loading; null on failure or a quiet window, reported back.
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
         {wireOn && wide && !winter && !winterMaybe && (

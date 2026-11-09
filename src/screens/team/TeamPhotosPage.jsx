@@ -89,7 +89,9 @@ function TeamPhotosSeason({ team, season, games, allGames, onBack }) {
   const sentinelRef = useRef(null)
 
   const [photos, setPhotos] = useState([])
-  const [loading, setLoading] = useState(false)
+  // True from the first render when there is a batch to fetch: the effect below starts one at once,
+  // and a false first frame drew the empty state, then swapped it for the loader (#3009).
+  const [loading, setLoading] = useState(games.length > 0)
   const [exhausted, setExhausted] = useState(false)
 
   useEffect(() => {

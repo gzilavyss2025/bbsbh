@@ -155,6 +155,10 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
   // Unmounting (the winter page took the rail's place) gives the reserved room back to its default.
   useEffect(() => () => onPresence?.(true), [onPresence])
 
+  // While the fetch is in flight, hold the rail's 288px column with an empty shell. The slate
+  // already widened for a rail (see PRESENCE); with nothing in that room the games grid took it
+  // and lost a column the moment the rows landed (#3008, a 0.35 layout shift at 1280px).
+  if (loading && !data) return <div className="wirerail" aria-hidden="true" />
   if (total === 0) return null
 
   // `rows === null` is the probe frame (and the no-column fallback): render
