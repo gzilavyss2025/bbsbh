@@ -114,7 +114,8 @@ export function WinProbChart({
   // The Pressure meter's season cutoffs (spoiler-free), and the Tensest moments
   // list from the points this chart was handed, already clamped to the reveal.
   const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
-  const tensePlays = useMemo(() => selectTensePlays(points), [points])
+  // Not memoized: Gameday's sheet builds `points` fresh each render, and it is ~80 rows.
+  const tensePlays = selectTensePlays(points)
   // A host may follow the scrub (Gameday's sheet sets its scoreboard to the play under the cursor).
   useEffect(() => { onActive?.(activeIdx) }, [onActive, activeIdx])
   const svgRef = useRef(null)

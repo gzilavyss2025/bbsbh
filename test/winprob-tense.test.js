@@ -35,3 +35,9 @@ test('fed clamped points, a sealed half never reaches the list', () => {
   const points = selectWinProbPath(feed, { throughHalf: halfIndex(1, 'bottom') })
   assert.deepEqual(selectTensePlays(points).map((p) => p.li), [1.4, 1.0])
 })
+
+test('ties never grow the list past 5 rows', () => {
+  const got = selectTensePlays([pt(9), pt(2), pt(2), pt(2), pt(2), pt(2), pt(2), pt(5)])
+  assert.equal(got.length, 5)
+  assert.deepEqual(got.map((p) => p.idx), [0, 7, 1, 2, 3])
+})

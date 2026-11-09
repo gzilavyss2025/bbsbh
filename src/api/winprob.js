@@ -139,10 +139,11 @@ export function selectWinProbBigPlays(
 // The Tensest moments list under the chart (#2979): the plays with the highest
 // leverage index, highest first, top `limit` by rank. A tie at the cut keeps
 // every tied play, then game order, the way scripts/lib/tensest/tensest.mjs
-// ranks the season board. A play with no `li` (a game's first) is skipped.
+// ranks the season board, but never past `max` rows: LI is a lookup of the
+// situation and ties often. A play with no `li` (a game's first) is skipped.
 // Takes `points` from selectWinProbPath, already clamped to the reveal: it
 // reads nothing else, so it can list no play the reader has not revealed.
-export function selectTensePlays(points, { limit = 3 } = {}) {
+export function selectTensePlays(points, { limit = 3, max = 5 } = {}) {
   if (!Array.isArray(points)) return []
   const ranked = points
     .map((p, idx) => ({ idx, li: p.li, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId }))
@@ -152,7 +153,7 @@ export function selectTensePlays(points, { limit = 3 } = {}) {
   let rank = 0
   for (let k = 0; k < ranked.length; k++) {
     if (k === 0 || ranked[k].li !== ranked[k - 1].li) rank = k + 1
-    if (rank > limit) break
+    if (rank > limit || out.length >= max) break
     out.push(ranked[k])
   }
   return out

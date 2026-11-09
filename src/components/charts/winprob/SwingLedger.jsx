@@ -3,7 +3,7 @@ import { ordinal } from '../../../lib/format.js'
 import { winProbChangeLabel } from './explore.js'
 import { winProbKeyPill } from './keyColors.js'
 import { pressureLabel, tenseBars } from '../../../api/tensest/tenseBars.js'
-import { PressureMeter } from '../PressureMeter.jsx'
+import { LedgerRow } from './LedgerRow.jsx'
 
 // The biggest revealed swings under the win-probability plot, numbered 1 =
 // biggest to match the plot's markers (api/winprob.js orders them). A row
@@ -35,41 +35,28 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cut
           const bars = tenseBars(p.li, cutoffs)
           const pressure = pressureLabel(bars, cutoffs)
           return (
-            <li className={`winprob__ledger-row${isActive ? ' is-active' : ''}`} key={`bp-${p.idx}`}>
-              <button
-                type="button"
-                className="winprob__ledger-pick"
-                aria-pressed={isActive}
-                aria-label={`Swing ${index + 1}: ${chipText}, ${halfWords}.${pressure ? ` ${pressure}.` : ''} Show on the chart`}
-                onClick={() => onPick(p.idx)}
-              >
-                <span className="winprob__ledger-meta">
-                  <span className="winprob__moment-number">{index + 1}</span>
-                  <span
-                    className="pill pill--ink pill--figure winprob__ledger-chip"
-                    style={winProbKeyPill(toHome ? keys.home : keys.away)}
-                  >
-                    {chipText}
-                  </span>
-                  <span className="t-label">{tag}</span>
-                  <PressureMeter bars={bars} decorative />
+            <LedgerRow
+              key={`bp-${p.idx}`}
+              play={p}
+              active={isActive}
+              lead={<>
+                <span className="winprob__moment-number">{index + 1}</span>
+                <span className="pill pill--ink pill--figure winprob__ledger-chip" style={winProbKeyPill(toHome ? keys.home : keys.away)}>
+                  {chipText}
                 </span>
-                <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
-              </button>
-              {watchable[index] && (
-                <button
-                  type="button"
-                  className="winprob__ledger-watch"
-                  aria-label={`Watch swing ${index + 1}, ${halfWords}`}
-                  onClick={() => {
-                    onWatch(p.idx)
-                    clip.openClip(p.playId, `${chipText} · ${tag}`)
-                  }}
-                >
-                  <span aria-hidden="true">▶</span> Watch
-                </button>
-              )}
-            </li>
+              </>}
+              tag={tag}
+              bars={bars}
+              desc={p.desc || `${abbr} rally`}
+              label={`Swing ${index + 1}: ${chipText}, ${halfWords}.${pressure ? ` ${pressure}.` : ''} Show on the chart`}
+              watchLabel={`Watch swing ${index + 1}, ${halfWords}`}
+              watchable={watchable[index]}
+              onPick={onPick}
+              onWatch={() => {
+                onWatch(p.idx)
+                clip.openClip(p.playId, `${chipText} · ${tag}`)
+              }}
+            />
           )
         })}
       </ol>
