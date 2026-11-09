@@ -48,6 +48,10 @@ Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`
 `--ring-band` (`check-focus-ring.mjs`). Text-on-background pairings hold WCAG AA
 (`check-contrast.mjs`) — ADR-0023.
 
+**Stamped cards stack in a `Stack`, never on sibling margins (ADR-0132).** A named card's
+margin only just clears its tab, and block margins collapse; a Stack's gap does not. A page
+that adds stamped cards adds its route to `e2e/tab-clearance.spec.js`.
+
 ## Night mode (ADR-0130)
 
 The dark block sits at the end of `tokens/colors.css`, written twice (the `data-theme` attribute and the

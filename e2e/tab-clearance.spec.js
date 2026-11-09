@@ -13,7 +13,8 @@ import { collectBoxes, tabCollisions } from './lib/tabClearance.js'
 // test/tab-clearance.test.js. A route with no named card is skipped, so a page that loses its
 // cards says so rather than passing empty.
 
-const ROUTES = ['/', '/team/158', '/player/677594', '/standings', '/postseason-leaders', '/awards']
+// /pressure-moments joined after its cards were found touching there (ADR-0132).
+const ROUTES = ['/', '/team/158', '/player/677594', '/standings', '/postseason-leaders', '/awards', '/pressure-moments']
 
 for (const route of ROUTES) {
   test(`${route} clears every name tab from the card above`, async ({ page }) => {

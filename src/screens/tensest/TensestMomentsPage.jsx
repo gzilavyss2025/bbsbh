@@ -5,6 +5,7 @@ import { clubTop, filterOptions, filterPlays, leagueTop } from '../../api/tenses
 import { loadCutoffs, tenseBars } from '../../api/tensest/tenseBars.js'
 import { PressureMeter } from '../../components/charts/PressureMeter.jsx'
 import { TensestFilters } from './TensestFilters.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -82,7 +83,7 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
 // games are included and marked. The page opens on the favorite club; the strip picks
 // another. Not a scoring surface, so it opens live with no seal (ADR-0034).
 export function TensestMomentsPage() {
-  useDocumentTitle('Tensest Moments')
+  useDocumentTitle('Pressure Moments')
   const { loading, error, data } = useAsync(() => loadTensest(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
@@ -109,7 +110,7 @@ export function TensestMomentsPage() {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Tensest Moments{data?.season ? `, ${data.season}` : ''}</h1>
+        <h1 className="topbar__title">Pressure Moments{data?.season ? `, ${data.season}` : ''}</h1>
       </header>
 
       <p className="hint">
@@ -124,8 +125,8 @@ export function TensestMomentsPage() {
         loading={loading}
         error={error}
         hasData={hasData}
-        errorMessage="Couldn’t load tensest moments. Try again."
-        emptyMessage="No tensest moments yet."
+        errorMessage="Couldn’t load pressure moments. Try again."
+        emptyMessage="No pressure moments yet."
       />
 
       {hasData && (
@@ -138,6 +139,9 @@ export function TensestMomentsPage() {
               ariaLabel="Pick a club for its batting and pitching tables"
             />
           </div>
+          {/* Stamped cards stack in a Stack, never on sibling margins: margins collapse and
+              leave the name tab no air (ADR-0132). */}
+          <Stack gap="loose">
           <Card frame="stamped" body="flush" label={`${name} batting`} count={countOf(mine?.bat)} className="tensest__section">
             {mine?.bat?.length ? (
               <TensestTable rows={mine.bat} teamId={teamId} cutoffs={cutoffs} label={`${name} batting, tensest at-bats`} />
@@ -160,6 +164,7 @@ export function TensestMomentsPage() {
               <p className="hint">No tense at-bats yet.</p>
             )}
           </Card>
+          </Stack>
           {updated && <p className="hint">Games through {updated}.</p>}
         </>
       )}

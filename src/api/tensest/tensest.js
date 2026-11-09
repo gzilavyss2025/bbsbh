@@ -1,4 +1,4 @@
-// The Tensest Moments page's data: the season's tensest at-bats by MLB's own pressure
+// The Pressure Moments page's (/pressure-moments) data: the season's tensest at-bats by MLB's own pressure
 // score (leverage index), read from a static same-origin file
 // (public/data/tensest.json) that scripts/gen-tensest.mjs keeps on the nightly cron.
 //

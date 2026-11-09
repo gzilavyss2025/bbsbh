@@ -2,11 +2,9 @@
    Three ranked tables (TensestMomentsPage): a club batting, a club pitching, and the
    league. The cells, head row and row rules are the Table's (system/table.css); this
    block keeps the text columns left-aligned and the rank number readable. */
-.tensest__section {
-  /* Room for the next card's name tab, which rises above its frame, and this card's
-     hard shadow: at 12px the two cards read as touching (Gary, 2026-11-09). */
-  margin-block-end: var(--space-8);
-}
+/* No margin on the cards: they stack in a Stack (TensestMomentsPage), which owns the gap
+   between them. Sibling margins collapsed with the name tab's own margin and left the
+   cards touching (ADR-0132). */
 .tensest .what,
 .tensest .game,
 .tensest .batter {

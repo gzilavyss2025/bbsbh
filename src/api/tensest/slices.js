@@ -1,6 +1,6 @@
 import { rankTop } from './rank.js'
 
-// The season Tensest Moments page's lists, from the flat list of tense plays
+// The season Pressure Moments page's lists (/pressure-moments), from the flat list of tense plays
 // (tensest.json `plays`, every play at LI >= 4, #2981): the league's top 50, a
 // club's top 25 batting and pitching, and the league list filtered by batter,
 // pitcher, park and club. Pure. The page is not a scoring surface (ADR-0034).

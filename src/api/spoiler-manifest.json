@@ -1131,7 +1131,7 @@
     },
     "tensest/slices.js": {
       "class": "spoiler-free",
-      "why": "Pure: the Tensest Moments page's league, club and filtered lists from tensest.json's flat list of tense plays (#2981). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
+      "why": "Pure: the Pressure Moments page's (/pressure-moments) league, club and filtered lists from tensest.json's flat list of tense plays (#2981). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
     },
     "tensest/tensest.js": {
       "class": "spoiler-free",

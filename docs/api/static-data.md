@@ -108,7 +108,7 @@ for each generator; the reader modules:
   `nugget` notes. Cost-driven: dating a crossing needs a game log per player. Cutoff-gated: `nuggetsForGame`
   returns only nuggets dated strictly before the game's own date and within 7 days of it, because a nugget's date
   is a game date.
-- `tensest/tensest.js` — the Tensest Moments page (`/tensest`), from `public/data/tensest.json`. Cost-driven: the
+- `tensest/tensest.js` — the Pressure Moments page (`/pressure-moments`; `/tensest` still lands), from `public/data/tensest.json`. Cost-driven: the
   leverage of every at-bat sits in one `winProbability` feed per game, so `gen-tensest.mjs` (nightly, incremental)
   keeps every play at LI 4 or more as one flat list with its park (`plays`, about 2,800 rows, 675 KB raw / 116 KB
   gzipped in 2026, #2981). `tensest/slices.js` ranks and slices it on the page: the league's top 50, a club's top 25
