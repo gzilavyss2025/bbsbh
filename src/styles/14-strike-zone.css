@@ -747,6 +747,14 @@
   color: var(--text-caption);
 }
 
+/* A cold load holds a screen of room under its loader (the slate's .screen--coldload does the
+   same), so the footer does not paint at the fold and get shoved off it when the photos land
+   (#3009, a 0.17 to 0.26 layout shift on the footer alone). */
+.gamephotos .loader--page {
+  align-items: flex-start;
+  min-height: 100svh;
+}
+
 .gamephotos__grid {
   list-style: none;
   margin: 0;
