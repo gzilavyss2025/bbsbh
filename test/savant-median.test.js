@@ -4,7 +4,7 @@
 // than eyeballed against a live Savant response.
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { median, medianRates } from '../scripts/lib/savant.mjs'
+import { median, medianRates, rankPercentiles } from '../scripts/lib/savant.mjs'
 
 // -------------------------------------------------------------------- median
 
@@ -76,4 +76,20 @@ test('a null value in either map excludes that id, not just a missing key', () =
   // wildly-off raw value of 999 must never enter the average) — median of
   // 90 and 80.
   assert.equal(out.ev, 85)
+})
+
+// rankPercentiles (#2972): the generator's own rank for boards with no percentile.
+test('rankPercentiles: higher is better by default, ends at 0 and 100', () => {
+  assert.deepEqual(rankPercentiles({ a: 1, b: 2, c: 3 }), { a: 0, b: 50, c: 100 })
+})
+
+test('rankPercentiles: lower pop time gives a higher percentile', () => {
+  const p = rankPercentiles({ fast: 1.85, mid: 1.95, slow: 2.05 }, { lowerIsBetter: true })
+  assert.ok(p.fast > p.mid && p.mid > p.slow)
+  assert.equal(p.fast, 100)
+})
+
+test('rankPercentiles: ties split, a lone value gets no rank', () => {
+  assert.deepEqual(rankPercentiles({ a: 1, b: 1 }), { a: 50, b: 50 })
+  assert.deepEqual(rankPercentiles({ a: 1 }), {})
 })

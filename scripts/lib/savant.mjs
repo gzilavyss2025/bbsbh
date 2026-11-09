@@ -247,6 +247,9 @@ export const METRICS = {
     bat_speed: 'batSpeed',
     squared_up_rate: 'squaredUp',
     swing_length: 'swingLength',
+    // Glove rows (#2972): Savant's own percentiles, on the same board.
+    arm_strength: 'arm',
+    oaa: 'oaa',
   },
   pit: {
     xera: 'xera',
@@ -297,4 +300,27 @@ export async function fetchPercentiles(type, season) {
     if (hasAny) map[id] = entry
   }
   return map
+}
+
+// Savant's raw-value boards (baserunning run value, pop time, framing) carry no
+// percentile, so the generator ranks each player within the board's own
+// qualified rows (#2972). `values` is { id: number }; returns { id: 0-100 }.
+// Percentile = share of OTHER players he beats (ties count half), rounded.
+// `lowerIsBetter` flips it (pop time), so a high percentile is always good.
+export function rankPercentiles(values, { lowerIsBetter = false } = {}) {
+  const ids = Object.keys(values).filter((id) => Number.isFinite(values[id]))
+  const out = {}
+  if (ids.length < 2) return out
+  for (const id of ids) {
+    const v = values[id]
+    let beats = 0
+    for (const other of ids) {
+      if (other === id) continue
+      const w = values[other]
+      if (lowerIsBetter ? v < w : v > w) beats += 1
+      else if (v === w) beats += 0.5
+    }
+    out[id] = Math.round((beats / (ids.length - 1)) * 100)
+  }
+  return out
 }
