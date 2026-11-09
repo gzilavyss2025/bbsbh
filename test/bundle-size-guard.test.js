@@ -108,6 +108,15 @@ test('a budget more than 6% above the build is stale and fails; one within the b
   assert.match(problems[0], /first-load JS.*100 kB.*budget of 115 kB.*--write/)
 })
 
+// A collapse is a broken build, not a win to lock in: a minimatch override once took
+// the precache from 2177 KiB to 102 KiB and every other check stayed green.
+test('a metric under half its budget says the build broke, and does not offer --write', () => {
+  const problems = looseBudgets({ firstLoadJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 102 }, { firstLoadJsGzipKB: 103, entryCssGzipKB: 53, precacheKiB: 2177 })
+  assert.equal(problems.length, 1)
+  assert.match(problems[0], /precache is 102 KiB.*less than half/)
+  assert.doesNotMatch(problems[0], /--write/)
+})
+
 test('--write sets each budget 3% over today, rounded up, and never raises one', () => {
   assert.deepEqual(
     lowered({ firstLoadJsGzipKB: 80, entryCssGzipKB: 49, precacheKiB: 900 }, budget),

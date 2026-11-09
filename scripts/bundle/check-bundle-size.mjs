@@ -116,10 +116,15 @@ export function overBudget(measured, budget) {
 }
 
 // A budget well above the build is stale: the shrink that opened the gap tightens it
-// in the same PR, as every other ratchet here does.
+// in the same PR, as every other ratchet here does. Under half the budget is not a
+// shrink but a broken build (a minimatch override once emptied the precache), so that
+// message withholds --write: running it would lock the breakage in as the new budget.
 export function looseBudgets(measured, budget) {
   return METRICS.filter(({ key }) => key in budget && budget[key] > measured[key] * LOOSE).map(
-    ({ key, label, unit }) => `${label} is ${measured[key]} ${unit}, more than 6% under its budget of ${budget[key]} ${unit}. Tighten it with: npm run check:bundle -- --write`,
+    ({ key, label, unit }) =>
+      measured[key] < budget[key] / 2
+        ? `${label} is ${measured[key]} ${unit}, less than half its budget of ${budget[key]} ${unit}. That is a broken build, not a shrink: find what dropped out of dist/ before you touch the budget.`
+        : `${label} is ${measured[key]} ${unit}, more than 6% under its budget of ${budget[key]} ${unit}. Tighten it with: npm run check:bundle -- --write`,
   )
 }
 
