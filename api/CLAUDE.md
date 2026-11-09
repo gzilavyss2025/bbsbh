@@ -29,7 +29,10 @@ three phrases `scripts/check-claude-md-facts.mjs` checks, so change both togethe
   values (kind, route name, status, build) becomes one `bbsbh-crash` line in the runtime logs.
   The same builder re-checks it server-side; no score, id or URL is ever logged. The same
   sink takes field vitals (`src/lib/crash/vitals.js`): a `{ vitals }` beacon of rounded
-  timings and flags, including an installed-app flag, becomes one `bbsbh-vitals` line.
+  timings and flags, including an installed-app flag, becomes one `bbsbh-vitals` line. Its `bot`
+  hint is decided here from the User-Agent header (`withBotHint`), so the crawler list changes
+  without a client deploy; the string itself is never logged. A metric the browser cannot
+  observe is `null`, never 0.
 - `cron/nightly-dispatch.js` — the nightly data trigger. A Vercel cron at 08:17 UTC asks GitHub to run
   `update-nightly-data.yml` (`trigger: cron`); the job stays in Actions (ADR-0125).
 - **The fifteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,

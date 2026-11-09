@@ -16,7 +16,32 @@ const NAV_TYPES = ['navigate', 'reload', 'back_forward', 'prerender']
 const DEVICES = ['phone', 'wide']
 const ROUTE_NAME = /^[a-z][a-z-]{0,31}$/
 const BUILD = /^[0-9a-f]{7,40}$/
-const WIDE_PX = 740 // the app's one wide step (ADR-0108)
+// Known crawlers and test runners, matched by name, not by substring: a bare /bot/ also
+// matches a real phone ("CUBOT P80"). Real browsers never put "+http" in their agent; crawlers
+// nearly always do ("; +http://www.google.com/bot.html").
+const AUTOMATED_UA = new RegExp(
+  [
+    'googlebot|bingbot|applebot|duckduckbot|yandexbot|petalbot|semrushbot|ahrefsbot|mj12bot',
+    'slackbot|twitterbot|linkedinbot|facebookexternalhit',
+    '\\b(?:crawler|spider|baiduspider|slurp)\\b',
+    'headlesschrome|lighthouse|pagespeed',
+    '\\+https?:\\/\\/',
+  ].join('|'),
+  'i',
+)
+
+// A coarse hint, so the log can separate crawlers from real visits. The server computes it
+// from the User-Agent header (api/crash.js), so a fix to the list reaches every client at once,
+// installed apps on an old build included. The client contributes only `navigator.webdriver`.
+// Only the yes/no is ever logged, never the string. A crawler that hides its agent reads as a visit.
+export function looksAutomated({ userAgent, webdriver } = {}) {
+  return webdriver === true || (typeof userAgent === 'string' && AUTOMATED_UA.test(userAgent))
+}
+
+// The server's step: keep a client-set flag, add the header's verdict. Returns a new object.
+export function withBotHint(payload, userAgent) {
+  return { ...payload, bot: payload.bot === true || looksAutomated({ userAgent }) }
+}
 
 const ms = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 600000 ? Math.round(v) : null)
 const shift = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 10 ? Math.round(v * 1000) / 1000 : null)
@@ -28,6 +53,7 @@ export function buildVitalsPayload(input) {
     build: typeof input.build === 'string' && BUILD.test(input.build) ? input.build : '',
     standalone: input.standalone === true,
     sw: input.sw === true,
+    bot: input.bot === true,
     nav: NAV_TYPES.includes(input.nav) ? input.nav : '',
     device: DEVICES.includes(input.device) ? input.device : '',
     fcp: ms(input.fcp),
@@ -51,12 +77,19 @@ export function createVitals() {
   let cur = 0
   let first = 0 // startTime of the window's first shift
   let last = 0
+  // Paints from a page that was hidden before it painted (a background tab, a restore) carry
+  // the time it sat unseen, not a load time. The web-vitals rule: ignore a paint at or after
+  // the first moment the page was hidden. The first hide wins; a later one never moves it.
+  let hiddenAt = Infinity
   return {
+    hide: (at) => {
+      hiddenAt = Math.min(hiddenAt, at)
+    },
     paint: (entry) => {
-      if (entry.name === 'first-contentful-paint') fcp = entry.startTime
+      if (entry.name === 'first-contentful-paint' && entry.startTime < hiddenAt) fcp = entry.startTime
     },
     lcp: (entry) => {
-      lcp = entry.startTime
+      if (entry.startTime < hiddenAt) lcp = entry.startTime
     },
     shift: (entry) => {
       if (entry.hadRecentInput) return
@@ -80,20 +113,27 @@ export function createVitals() {
 
 // The browser's reporter: one beacon a page load, sent the first time the page is hidden
 // (backgrounded, closed, or switched away from). An installed app that stays alive across
-// many foregroundings reports once. Inert outside a browser (node tests, SSR).
+// many foregroundings reports once. `context()` supplies route, build and device (the caller
+// owns the width rule, WIDE_QUERY). Inert outside a browser (node tests, SSR).
 export function installVitalsReporter(context) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return
   if (typeof PerformanceObserver === 'undefined' || !navigator.sendBeacon) return
   const v = createVitals()
+  if (document.visibilityState === 'hidden') v.hide(0) // opened in the background
+  // Whether the browser knows this entry type. A metric it cannot observe must read null,
+  // not 0: iOS Safari (before 26) has no layout-shift, and its first field reports said
+  // "CLS 0" for pages nobody measured.
   const watch = (type, onEntry, extra) => {
     try {
       new PerformanceObserver((list) => list.getEntries().forEach(onEntry)).observe({ type, buffered: true, ...extra })
+      return true
     } catch { /* this browser does not know this entry type */ }
+    return false
   }
   watch('paint', v.paint)
-  watch('largest-contentful-paint', v.lcp)
-  watch('layout-shift', v.shift)
-  watch('event', v.event, { durationThreshold: 40 })
+  const seesLcp = watch('largest-contentful-paint', v.lcp)
+  const seesShifts = watch('layout-shift', v.shift)
+  const seesInput = watch('event', v.event, { durationThreshold: 40 })
 
   let sent = false
   const send = () => {
@@ -101,21 +141,30 @@ export function installVitalsReporter(context) {
     sent = true
     try {
       const nav = performance.getEntriesByType('navigation')[0]
-      const standalone = Boolean(window.matchMedia?.('(display-mode: standalone)').matches) || navigator.standalone === true
+      const standalone = Boolean(window.matchMedia?.('(display-mode: standalone)')?.matches) || navigator.standalone === true
+      const m = v.snapshot()
       const payload = buildVitalsPayload({
         ...context(),
-        ...v.snapshot(),
+        fcp: m.fcp,
+        lcp: seesLcp ? m.lcp : null,
+        inp: seesInput ? m.inp : null,
+        // A page that never painted (opened in a hidden tab) has no load to score a shift against.
+        cls: seesShifts && m.fcp !== null ? m.cls : null,
         standalone,
         sw: Boolean(navigator.serviceWorker?.controller),
+        bot: navigator.webdriver === true,
         nav: nav?.type,
-        device: window.innerWidth >= WIDE_PX ? 'wide' : 'phone',
         ttfb: nav?.responseStart,
       })
       if (payload) navigator.sendBeacon('/api/crash', new Blob([JSON.stringify({ vitals: payload })], { type: 'application/json' }))
     } catch { /* a report must never throw */ }
   }
+  const leave = () => {
+    v.hide(performance.now())
+    send()
+  }
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') send()
+    if (document.visibilityState === 'hidden') leave()
   })
-  window.addEventListener('pagehide', send)
+  window.addEventListener('pagehide', leave)
 }
