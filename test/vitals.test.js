@@ -3,16 +3,16 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildVitalsPayload, createVitals } from '../src/lib/crash/vitals.js'
+import { buildVitalsPayload, createVitals, looksAutomated } from '../src/lib/crash/vitals.js'
 
 test('the builder keeps the allowed keys and drops everything else', () => {
   const out = buildVitalsPayload({
-    route: 'home', build: 'abc1234', standalone: true, sw: true, nav: 'navigate', device: 'phone',
+    route: 'home', build: 'abc1234', standalone: true, sw: true, bot: true, nav: 'navigate', device: 'phone',
     fcp: 1043.7, lcp: 2044.2, inp: 88.4, ttfb: 12.9, cls: 0.0083,
-    url: '/07052026/milari/box', message: 'Brewers 5, Cubs 3', gamePk: 823035,
+    url: '/07052026/milari/box', message: 'Brewers 5, Cubs 3', gamePk: 823035, userAgent: 'Googlebot/2.1',
   })
   assert.deepEqual(out, {
-    route: 'home', build: 'abc1234', standalone: true, sw: true, nav: 'navigate', device: 'phone',
+    route: 'home', build: 'abc1234', standalone: true, sw: true, bot: true, nav: 'navigate', device: 'phone',
     fcp: 1044, lcp: 2044, inp: 88, ttfb: 13, cls: 0.008,
   })
 })
@@ -25,9 +25,23 @@ test('the builder rejects a value outside its enum, range or shape', () => {
   assert.equal(out, null) // no valid metric is left, so there is nothing to log
   const part = buildVitalsPayload({ route: '/x', nav: 'x', device: 'x', fcp: 900, lcp: 'slow' })
   assert.deepEqual(part, {
-    route: '', build: '', standalone: false, sw: false, nav: '', device: '',
+    route: '', build: '', standalone: false, sw: false, bot: false, nav: '', device: '',
     fcp: 900, lcp: null, inp: null, ttfb: null, cls: null,
   })
+  assert.equal(buildVitalsPayload({ fcp: 900, bot: 'yes' }).bot, false) // only a real boolean counts
+})
+
+test('the automation hint is a boolean from the webdriver flag or a crawler-like user agent', () => {
+  const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
+  const DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+  assert.equal(looksAutomated({ userAgent: IPHONE }), false)
+  assert.equal(looksAutomated({ userAgent: DESKTOP, webdriver: false }), false)
+  assert.equal(looksAutomated({ userAgent: DESKTOP, webdriver: true }), true)
+  assert.equal(looksAutomated({ userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' }), true)
+  assert.equal(looksAutomated({ userAgent: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/130.0.0.0 Safari/537.36' }), true)
+  assert.equal(looksAutomated({ userAgent: 'Mozilla/5.0 (Linux; Android 11) Chrome-Lighthouse' }), true)
+  assert.equal(looksAutomated({}), false)
+  assert.equal(looksAutomated(undefined), false)
 })
 
 test('the builder needs at least one metric, and a non-object is null', () => {

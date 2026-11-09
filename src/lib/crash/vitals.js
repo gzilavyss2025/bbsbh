@@ -17,6 +17,15 @@ const DEVICES = ['phone', 'wide']
 const ROUTE_NAME = /^[a-z][a-z-]{0,31}$/
 const BUILD = /^[0-9a-f]{7,40}$/
 const WIDE_PX = 740 // the app's one wide step (ADR-0108)
+// A crawler or test runner, not a person. Only the yes/no leaves the device, never the string.
+const AUTOMATED_UA = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview/i
+
+// The first-load field logs held a group of slow, cold reports that looked like crawlers
+// (cold, apex domain, FCP past 10 s, near-identical CLS). This flag lets the log separate them
+// from real visits. It is a coarse hint: a crawler that hides its agent still reads as a visit.
+export function looksAutomated({ userAgent, webdriver } = {}) {
+  return webdriver === true || (typeof userAgent === 'string' && AUTOMATED_UA.test(userAgent))
+}
 
 const ms = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 600000 ? Math.round(v) : null)
 const shift = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 10 ? Math.round(v * 1000) / 1000 : null)
@@ -28,6 +37,7 @@ export function buildVitalsPayload(input) {
     build: typeof input.build === 'string' && BUILD.test(input.build) ? input.build : '',
     standalone: input.standalone === true,
     sw: input.sw === true,
+    bot: input.bot === true,
     nav: NAV_TYPES.includes(input.nav) ? input.nav : '',
     device: DEVICES.includes(input.device) ? input.device : '',
     fcp: ms(input.fcp),
@@ -107,6 +117,7 @@ export function installVitalsReporter(context) {
         ...v.snapshot(),
         standalone,
         sw: Boolean(navigator.serviceWorker?.controller),
+        bot: looksAutomated({ userAgent: navigator.userAgent, webdriver: navigator.webdriver }),
         nav: nav?.type,
         device: window.innerWidth >= WIDE_PX ? 'wide' : 'phone',
         ttfb: nav?.responseStart,
