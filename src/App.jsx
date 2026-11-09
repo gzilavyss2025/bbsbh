@@ -10,6 +10,7 @@ import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import { LazyPlayerHoverCard } from './components/player/LazyPlayerHoverCard.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import { useAppearancePreference } from './hooks/preferences/useAppearancePreference.js'
+import { NightModeBar } from './components/account/NightModeBar.jsx'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import { placeKey } from './lib/from/route.js'
 import {
@@ -582,6 +583,8 @@ export default function App() {
           below, not Context: a page can carry dozens of PlayerLinks, and only
           the card and this gate subscribe to it. */}
       <LazyPlayerHoverCard />
+      {/* The night-mode offer (ADR-0131), above every route. */}
+      <NightModeBar />
       {HeadshotLogPanel && (
         <Suspense fallback={null}>
           <HeadshotLogPanel />

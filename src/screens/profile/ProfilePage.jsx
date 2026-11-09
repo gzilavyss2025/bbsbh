@@ -69,7 +69,7 @@ const ProfileAccount = isClerkEnabled
 export function ProfilePage() {
   useDocumentTitle('My Tally')
 
-  const { club, keepAwake, motion, appearance, set } = usePreferences()
+  const { club, keepAwake, motion, appearance, has, set } = usePreferences()
   const { stamps } = useStamps()
   const { recent, clear: clearRecent } = useRecentSearches()
   const rawStatus = useSyncStatusState()
@@ -122,7 +122,7 @@ export function ProfilePage() {
           onKeepAwake={(value) => set('keepAwake', value)}
           motion={motion}
           onMotion={(value) => set('motion', value)}
-          appearance={appearance}
+          appearance={has('appearance') ? appearance : 'light'}
           onAppearance={(value) => set('appearance', value)}
         />
 

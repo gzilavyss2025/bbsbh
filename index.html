@@ -26,14 +26,17 @@
     <meta name="theme-color" content="#F6EFDC" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <!-- Night mode (ADR-0130): set data-theme from the saved Appearance
-         preference before first paint, so there is no light flash. A bad or
-         missing value leaves the attribute off, which is 'system'. Keep in step
+         preference before first paint, so there is no light flash. A saved
+         'system' leaves the attribute off; no saved choice (or a bad one) forces
+         light until the person answers the night-mode bar (ADR-0131). Keep in step
          with hooks/preferences/useAppearancePreference.js. -->
     <script>
+      var a = 'light'
       try {
-        var a = JSON.parse(localStorage.getItem('bbsbh:prefs')).appearance.value
-        if (a === 'light' || a === 'dark') document.documentElement.dataset.theme = a
+        var v = JSON.parse(localStorage.getItem('bbsbh:prefs')).appearance.value
+        if (v === 'light' || v === 'dark' || v === 'system') a = v
       } catch (e) {}
+      if (a !== 'system') document.documentElement.dataset.theme = a
     </script>
     <!-- The standardized tag (for Chrome/Android, which warns on the Apple-
          only one); apple-mobile-web-app-capable stays too since iOS Safari
