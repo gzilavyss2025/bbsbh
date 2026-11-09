@@ -70,6 +70,7 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
+  'src/api/tensest/tenseBars.js#tenseBars': 'Staged by #2977 (leverage part 1, data only, no UI); its first caller is the swing-row tension meter in #2978. Drop this entry when that lands.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',
