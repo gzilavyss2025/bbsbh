@@ -2,6 +2,9 @@ import { useMemo } from 'react'
 import { ordinal } from '../../../lib/format.js'
 import { winProbChangeLabel } from './explore.js'
 import { winProbKeyPill } from './keyColors.js'
+import { useAsync } from '../../../hooks/useAsync.js'
+import { loadCutoffs, tenseBars } from '../../../api/tensest/tenseBars.js'
+import { PressureMeter } from '../PressureMeter.jsx'
 
 // The biggest revealed swings under the win-probability plot, numbered 1 =
 // biggest to match the plot's markers (api/winprob.js orders them). A row
@@ -9,9 +12,12 @@ import { winProbKeyPill } from './keyColors.js'
 // and opens the play's film (`clip`, useSwingClip.js). `keys` are the two
 // clubs' key colours (keyColors.js). `stepAt(idx)` is a play's whole-percent
 // change in the header's own numbers (explore.js wholeSwing); the ranking
-// stays on the raw delta.
+// stays on the raw delta. Each row also draws the play's Pressure meter
+// (`li` against the season cutoffs, which are spoiler-free and fetched eagerly);
+// a play with no `li`, or no cutoffs yet, draws none.
 export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, clip, onPick, onWatch }) {
   const { hasClip } = clip
+  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
   // One film lookup per row when the plays or the film list change, not on every render.
   const watchable = useMemo(() => bigPlays.map((p) => hasClip(p.playId)), [bigPlays, hasClip])
   if (bigPlays.length === 0) return null
@@ -46,6 +52,7 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
                     {chipText}
                   </span>
                   <span className="t-label">{tag}</span>
+                  <PressureMeter bars={tenseBars(p.li, cutoffs)} />
                 </span>
                 <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
               </button>

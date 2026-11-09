@@ -1,0 +1,40 @@
+/* The Pressure meter (components/charts/PressureMeter.jsx, #2939): ten LED
+   bars on a dark panel, each taller than the last, lit green to red. The panel
+   stays dark in both themes; the ramp is --led-1…--led-10 (tokens/colors.css).
+   Inline size only, for the swing rows. */
+/* layout-exempt: a fixed count of ten bars, bottom-aligned, which the layout parts cannot say. */
+.pressure {
+  display: inline-grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: end;
+  width: var(--space-16);
+  height: 20px;
+  padding: var(--space-1);
+  box-sizing: border-box;
+  border-radius: 2px;
+  background: var(--led-panel);
+  vertical-align: middle;
+  /* The rising top edge of the broadcast frame. */
+  clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 100%);
+}
+.pressure__bar {
+  display: block;
+  border-radius: 1px 1px 0 0;
+  background: var(--led-off);
+  /* The dark gutter between bars, in place of a gap (ten bars in 56px). */
+  border-inline: var(--bw-hair) solid var(--led-panel);
+  box-sizing: border-box;
+  /* The dot-matrix LED cells. */
+  mask: radial-gradient(circle, var(--led-panel) 58%, transparent 64%) 0 100% / 3px 3px;
+}
+.pressure__bar:nth-child(1) { height: 30%; --led: var(--led-1); }
+.pressure__bar:nth-child(2) { height: 36%; --led: var(--led-2); }
+.pressure__bar:nth-child(3) { height: 42%; --led: var(--led-3); }
+.pressure__bar:nth-child(4) { height: 49%; --led: var(--led-4); }
+.pressure__bar:nth-child(5) { height: 56%; --led: var(--led-5); }
+.pressure__bar:nth-child(6) { height: 64%; --led: var(--led-6); }
+.pressure__bar:nth-child(7) { height: 72%; --led: var(--led-7); }
+.pressure__bar:nth-child(8) { height: 81%; --led: var(--led-8); }
+.pressure__bar:nth-child(9) { height: 90%; --led: var(--led-9); }
+.pressure__bar:nth-child(10) { height: 100%; --led: var(--led-10); }
+.pressure__bar.is-lit { background: var(--led); }

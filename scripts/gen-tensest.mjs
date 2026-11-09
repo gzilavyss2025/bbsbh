@@ -34,6 +34,7 @@ import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
+const CUTOFFS = join(here, '..', 'public', 'data', 'tensest-cutoffs.json')
 const STATE = join(here, 'data', 'tensest-state.json')
 const CONCURRENCY = 8
 const GAME_TYPES = 'R,F,D,L,W'
@@ -56,6 +57,8 @@ let store = carried ? { league: prev.league ?? [], teams: prev.teams ?? {} } : e
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
 if (todo.length === 0) {
+  // Still refresh the small cutoffs file, so it exists after a quiet night too.
+  if (carried) await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs: cutoffsFromHist(hist) })
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
 }
@@ -77,5 +80,7 @@ const cutoffs = cutoffsFromHist(hist)
 
 const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
 await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, cutoffs, ...store })
+// The cutoffs alone, for the swing rows' Pressure meter: 9 numbers, not the whole file.
+await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs })
 await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
 console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; league top ${store.league.length}; bar edges ${cutoffs?.li.join(' ')}`)

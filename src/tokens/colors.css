@@ -125,6 +125,12 @@
 
   /* ---- Highlight / marker ---- */
   --marker:   #F2C14E;   /* highlighter yellow — "watch" flag */
+  /* The Pressure meter's LED ramp (#2939), bar 1 green to bar 10 red, on its own dark
+     panel in both themes: a broadcast insert, so night mode leaves it alone. */
+  --led-1: #50D68B; --led-2: #64D979; --led-3: #86DB63; --led-4: #AED954; --led-5: #D4D94F;
+  --led-6: #F0CC4D; --led-7: #FFB44C; --led-8: #FF9348; --led-9: #FF704C; --led-10: #FF5054;
+  --led-panel: #121212;
+  --led-off: #2E2E2E;
   /* The hatch stripe of --hold-texture (tokens/effects.css), which is the
      "on hold" member of the status-tape family. Kraft used to weave that tape
      and no longer may (ADR-0083): a rehab banner wearing the cover's own
