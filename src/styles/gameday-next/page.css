@@ -28,7 +28,8 @@
   grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
   --gd-band-h: 72px;
   --gd-bar-h: 64px;
-  grid-template-rows: auto auto 44px minmax(0, 1fr) 268px 66px var(--gd-bar-h);
+  /* The line score's row takes its own height (header and both clubs); a fixed 44px cut it off. */
+  grid-template-rows: auto auto auto minmax(0, 1fr) 268px 66px var(--gd-bar-h);
   grid-template-areas: 'chrome chrome' 'band band' 'navigator navigator' 'stage stage' 'hero hero' 'trail trail' 'bar bar';
 }
 .gdnext[data-tier='L'] {
