@@ -131,6 +131,7 @@
   --led-6: #F0CC4D; --led-7: #FFB44C; --led-8: #FF9348; --led-9: #FF704C; --led-10: #FF5054;
   --led-panel: #121212;
   --led-off: #2E2E2E;
+  --led-dim: #4A4A4A; /* a calm play on the chart's pressure strip (bars 1–4) */
   /* The hatch stripe of --hold-texture (tokens/effects.css), which is the
      "on hold" member of the status-tape family. Kraft used to weave that tape
      and no longer may (ADR-0083): a rehab banner wearing the cover's own

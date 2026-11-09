@@ -8,6 +8,7 @@ import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
 import { SwingLedger } from './winprob/SwingLedger.jsx'
 import { TenseList } from './winprob/TenseList.jsx'
+import { PressureStrip } from './winprob/PressureStrip.jsx'
 import { WinProbBands } from './winprob/WinProbBands.jsx'
 import { W, H, PLOT_L, PLOT_T, PLOT_B, PLOT_W, PLOT_H } from './winprob/plot.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
@@ -394,6 +395,9 @@ export function WinProbChart({
           )
         })}
       </svg>
+
+      {/* Each play's pressure, in the Pressure meter's colours (#2980). */}
+      <PressureStrip points={points} cutoffs={cutoffs} />
 
       <p id={`winprob-help-${patternUid}`} className="sr-only">Hover, tap or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
 
