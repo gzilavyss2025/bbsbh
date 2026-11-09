@@ -35,9 +35,10 @@
   grid-template-columns: minmax(270px, 1fr) repeat(2, minmax(0, calc(max(720px, 40vw) / 2))) minmax(270px, 1fr);
   --gd-band-h: 92px;
   --gd-bar-h: 76px;
-  grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
-  /* the Due up card and the pitcher's card both run down past the trail's row (nine rows and the Scout line fit; the arm card matches, Gary 2026-10-29) */
-  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
+  grid-template-rows: auto auto minmax(0, 1fr) 168px 58px 76px;
+  /* the Due up card and the pitcher's card both run down past the trail's row (nine rows and the Scout line fit; the arm card matches, Gary 2026-10-29).
+     The Pressure meter is its own card in its own row above the pitcher's (Gary, 2026-11-09, #3006). */
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage pressure' 'battingOrder stage stage arm'
     'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 .gdnext[data-tier='D'] {
@@ -45,8 +46,8 @@
   grid-template-columns: minmax(300px, 1fr) minmax(0, calc(max(672px, 40vw) - 324px)) 324px minmax(300px, 1fr);
   --gd-band-h: 92px;
   --gd-bar-h: 68px;
-  grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
-  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
+  grid-template-rows: auto auto minmax(0, 1fr) 164px 66px 68px;
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage pressure' 'battingOrder stage stage arm'
     'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 
@@ -71,6 +72,10 @@
 .gdnext__slot--reference { --gd-area: reference; }
 .gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */
 .gdnext__slot--eventLog { --gd-area: eventLog; }
+/* The Pressure meter (#3006). Desktop: its own card above the pitcher's. Phone: in the
+   hero's open floor beside the scorebook box (104px tall and 1.45 wide), clear of the trail. */
+.gdnext__slot--pressure { --gd-area: pressure; border-right: 0; padding: var(--space-2); }
+.gdnext__pressure-hero { position: absolute; z-index: 1; top: var(--space-8); right: 0; left: calc(104px * 1.45 + var(--space-3)); }
 .gdnext__slotname { position: absolute; top: 0; right: 0; padding: var(--space-1) var(--space-1h);
   font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 

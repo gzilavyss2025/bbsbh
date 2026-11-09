@@ -17,9 +17,15 @@ export function tenseBars(li, cutoffs) {
 // Bars 1–4 name no rank: below the top 30% it says nothing worth hearing.
 export function pressureLabel(bars, cutoffs) {
   if (!Number.isInteger(bars) || bars < 1 || bars > 10) return ''
-  const start = bars >= 5 ? cutoffs?.pcts?.[bars - 2] : null
-  const top = typeof start === 'number' ? Math.round((100 - start) * 10) / 10 : null
+  const top = pressureTop(bars, cutoffs)
   return `Pressure ${bars} of 10${top != null ? `, top ${top}% of the season` : ''}`
+}
+
+// The share of the season at or above this many bars, as the meter's caption
+// shows it ("Top 7%"); null below bar 5 or without the bands.
+export function pressureTop(bars, cutoffs) {
+  const start = Number.isInteger(bars) && bars >= 5 && bars <= 10 ? cutoffs?.pcts?.[bars - 2] : null
+  return typeof start === 'number' ? Math.round((100 - start) * 10) / 10 : null
 }
 
 // The season's cutoffs, from the small file gen-tensest.mjs writes beside

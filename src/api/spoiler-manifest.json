@@ -1384,9 +1384,10 @@
     },
     "winprob.js": {
       "class": "reveal-only",
-      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp. Each point also carries the play's leverage index (`li`, #2978) for the swing rows' Pressure meter; it is as score-revealing as the win %, so it exists only inside the same clamp.",
+      "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp. Each point also carries the play's leverage index (`li`, #2978) for the swing rows' Pressure meter; it is as score-revealing as the win %, so it exists only inside the same clamp. Gameday's Pressure meter (GamedayPressure.jsx, #3006) reads the last revealed play's `li` inside a SealBox reveal function with the Win % sheet's own step clamp, so it can show nothing past the reveal.",
       "importers": [
         "screens/gameday/next/panels/GamedaySheets.jsx",
+        "screens/gameday/next/panels/GamedayPressure.jsx",
         "api/gameday/moments/moments.js",
         "components/charts/WinProbChart.jsx",
         "screens/boxscore/revealBoxScore.js"
