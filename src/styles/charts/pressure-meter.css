@@ -88,11 +88,13 @@
 
 /* Motion (kept here, not in styles/motion/, which is at its file cap: the
    precedent is styles/worldseries/fit.css). On a reveal the bars fill or drain
-   one at a time, left to right; the top lit bar then breathes, quicker at 9–10.
+   one at a time, filling upward and draining from the top down; the top lit bar then breathes, quicker at 9–10.
    Keyed to the play the reader revealed, never to the clock. Off under the
    system's reduced motion and the app's own Motion: Reduced. */
 @media (prefers-reduced-motion: no-preference) {
   .pressure--big .pressure__bar { transition: background-color var(--dur-fast) linear calc(var(--i) * 45ms); }
+  /* A bar going dark drains from the top down, so the last lit bar goes first. */
+  .pressure--big .pressure__bar:not(.is-lit) { transition-delay: calc((9 - var(--i)) * 45ms); }
   .pressure--big .pressure__bar.is-peak { animation: pressure-breathe 1.8s var(--ease-standard) infinite; }
   .pressure--big[data-high] .pressure__bar.is-peak { animation-duration: 0.9s; }
 }
