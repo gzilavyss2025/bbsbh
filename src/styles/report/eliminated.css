@@ -1,0 +1,97 @@
+/* ---------------------------------------------------------------- games after elimination
+   EliminatedPage: the club ranking, and a picked club's games beside it (wide) or
+   in its place (phone). Cells and rules are the Table's. */
+.elim__controls {
+  margin-block: var(--space-3);
+}
+.elim__controls label {
+  flex: 1 1 6rem;
+}
+.elim__controls select {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-1);
+}
+.elim__controls .elim__team {
+  flex: 1 1 100%;
+}
+.elim__controls select {
+  min-height: 44px;
+  font: inherit;
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  padding-inline: var(--space-2);
+}
+/* layout-exempt: a fixed two-pane split (ranking | club), one pane on a phone */
+.elim__body {
+  display: grid;
+  gap: var(--space-4);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  padding-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+.elim__body--club .elim__list {
+  display: none;
+}
+.elim__rank .club,
+.elim__games .club {
+  text-align: left;
+}
+.elim__club {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border-rule);
+}
+.elim__num {
+  font-weight: var(--w-semibold);
+}
+.elim__picked td {
+  background: var(--surface-mine);
+}
+.elim__total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-block: 0 var(--space-2);
+}
+.elim__total strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-xl);
+  line-height: var(--lh-solid);
+}
+.elim__back {
+  min-height: 44px;
+  font: inherit;
+  color: var(--text-body);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+@media (min-width: 900px) {
+  .elim__controls .elim__team {
+    flex: 0 1 16rem;
+  }
+  /* layout-exempt: the two panes side by side */
+  .elim__body--club {
+    grid-template-columns: minmax(18rem, 26rem) 1fr;
+    gap: var(--space-6);
+  }
+  .elim__body--club .elim__list {
+    display: block;
+  }
+  .elim__back {
+    display: none;
+  }
+}
