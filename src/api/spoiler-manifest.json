@@ -1125,6 +1125,10 @@
       "class": "spoiler-free",
       "why": "Static outfield-outs/{season}.json: team-games with no out to an outfielder. Holds no scores or winners, and the page is a standalone report outside the four scoring surfaces (ADR-0034)."
     },
+    "streaks/streaks.js": {
+      "class": "spoiler-free",
+      "why": "Live team game logs summed over N games in a row for the Streak Finder (/streaks). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
+    },
     "tensest/tenseBars.js": {
       "class": "spoiler-free",
       "why": "Maps a leverage index to the Pressure meter's 1–10 bars and its spoken label, against the season-wide cutoffs; loadCutoffs reads them from static tensest-cutoffs.json (spoiler-free, ADR-0034). Holds no score; an LI is score-revealing, so a caller passes only one its reveal already let through (ADR-0001)."

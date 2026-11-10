@@ -70,6 +70,8 @@ export const PAGE_GROUPS = [
       { label: 'Pressure Moments', path: '/pressure-moments' },
       // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
       { label: 'Kept It in the Infield', path: '/infield' },
+      // Any club, any counting stat, N games in a row at a total, back to the franchise's first season.
+      { label: 'Streak Finder', path: '/streaks' },
       // Money, read across the league: who is paid the most, what each club
       // spends, where the spend goes by position. Here rather than under
       // "Around the game" because it is a season-to-date board over the whole

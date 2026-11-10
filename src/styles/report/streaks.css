@@ -1,0 +1,30 @@
+/* ---------------------------------------------------------------- streak finder
+   The picker form and the result table (StreakFinderPage). */
+.streaks__form {
+  margin-block: var(--space-3);
+}
+.streaks__field input[type='number'] {
+  inline-size: 6em;
+}
+.streaks__total {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.streaks__checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.streaks__sort {
+  padding: var(--space-2);
+}
+.streaks {
+  font-variant-numeric: tabular-nums;
+}
+.streaks .dates,
+.streaks .games {
+  text-align: left;
+}
+.streaks__post {
+  color: var(--text-muted);
+}
