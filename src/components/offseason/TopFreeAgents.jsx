@@ -34,7 +34,7 @@ export function TopFreeAgents({ season }) {
         <Door href="/free-agents" {...linkProps}>All free agents</Door>
       </div>
       <ol className="ofa__list">
-        {data.map((r, i) => (
+        {data.map((r) => (
           <li key={r.id} className="ofa__card">
             <ActionWash personId={r.id} />
             <div className="phcard__band sectionhead--band">
@@ -44,7 +44,7 @@ export function TopFreeAgents({ season }) {
               <div className="phcard__id">
                 {first(r.name) && <div className="phcard__first">{first(r.name)}</div>}
                 <PlayerLink id={r.id} className="phcard__last ofa__name">{last(r.name)}</PlayerLink>
-                <div className="phcard__meta">{[r.pos, `No. ${i + 1}`].filter(Boolean).join(' · ')}</div>
+                <div className="phcard__meta">{r.pos || '—'}</div>
               </div>
             </div>
             <table className="phcard__table">
