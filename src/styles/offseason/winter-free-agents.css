@@ -10,6 +10,10 @@
   align-items: baseline;
   gap: var(--space-3);
 }
+
+.ofa__chips {
+  margin-top: var(--space-3);
+}
 /* layout-exempt: a swipe row on a phone, a grid when wide */
 .ofa__list {
   list-style: none;
@@ -47,14 +51,16 @@
   }
 }
 /* The hover card's name is a div; here it is the link to the player. */
-.ofa__name {
+.ofa__name,
+.ofa__name > span {
   display: block;
   color: inherit;
   text-decoration: none;
 }
 
 /* The action photo fills the card; the band and the table sit over it,
-   the band solid behind the name and thinning to the right, the table a
+   the band solid under the whole name column (contrast holds without the
+   photo's help) and clearing over its last quarter, the table a
    paper scrim, so every figure keeps its contrast. */
 .ofa__wash {
   position: absolute;
@@ -66,7 +72,7 @@
   filter: grayscale(1);
 }
 .ofa__card .phcard__band {
-  background: linear-gradient(90deg, var(--band-fill) 0 30%, color-mix(in srgb, var(--band-fill) 45%, transparent) 60%, transparent 100%);
+  background: linear-gradient(90deg, var(--band-fill) 0 72%, transparent 100%);
 }
 .ofa__card .phcard__table {
   position: relative;

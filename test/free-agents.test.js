@@ -8,6 +8,8 @@ import {
   filterFreeAgents,
   sortFreeAgents,
   topUnsigned,
+  topCard,
+  topByGroup,
   statLine,
   statsByPerson,
   cleanNote,
@@ -167,4 +169,41 @@ test('topUnsigned keeps unsigned major leaguers only, best WAR first, capped', (
   ]
   assert.deepEqual(topUnsigned(rows, 2).map((r) => r.name), ['High', 'Low'])
   assert.deepEqual(topUnsigned(rows).map((r) => r.name), ['High', 'Low', 'A', 'B', 'C', 'D'])
+})
+
+test('topUnsigned hides the list when no row has WAR (no alphabetical "top")', () => {
+  const rows = [{ name: 'Abner', war: null, signed: false, minor: false }, { name: 'Zed', war: null, signed: false, minor: false }]
+  assert.deepEqual(topUnsigned(rows), [])
+})
+
+test('topCard: the person record names the two lines, suffix on the last', () => {
+  const row = { id: 1, name: 'Carl Edwards Jr.', isPitcher: true }
+  const card = topCard(row, { first: 'Carl', last: 'Edwards', suffix: 'Jr.', pitching: { wins: 3, losses: 2, era: '3.10', strikeOuts: 40, whip: '1.20', gamesStarted: 0, saves: 1 } })
+  assert.equal(card.first, 'Carl')
+  assert.equal(card.last, 'Edwards Jr.')
+  assert.deepEqual(card.fields.map((f) => f.k), ['W–L', 'ERA', 'K', 'WHIP'])
+  assert.equal(card.fields[1].v, '3.10')
+})
+
+test('topCard: a hitter gets hitter fields, and no stats is all dashes', () => {
+  const hit = topCard({ id: 2, name: 'Randy Arozarena', isPitcher: false }, { hitting: { avg: '.281', homeRuns: 26, rbi: 79, ops: '.865' } })
+  assert.deepEqual(hit.fields.map((f) => f.v), ['.281', '26', '79', '.865'])
+  assert.equal(hit.first, 'Randy')
+  assert.equal(hit.last, 'Arozarena')
+  const none = topCard({ id: 3, name: 'Solo', isPitcher: false }, undefined)
+  assert.deepEqual(none.fields.map((f) => f.v), ['—', '—', '—', '—'])
+  assert.equal(none.first, '')
+  assert.equal(none.last, 'Solo')
+})
+
+test('topByGroup: six per position group plus all, each from unsigned only', () => {
+  const rows = []
+  for (let i = 0; i < 8; i++) rows.push({ id: i, name: `P${i}`, group: 'P', war: i, signed: false, minor: false })
+  rows.push({ id: 100, name: 'C0', group: 'C', war: 3.5, signed: false, minor: false })
+  rows.push({ id: 101, name: 'C1', group: 'C', war: 9, signed: true, minor: false })
+  const g = topByGroup(rows)
+  assert.deepEqual(g.all.map((r) => r.id), [7, 6, 5, 4, 100, 3])
+  assert.deepEqual(g.P.map((r) => r.id), [7, 6, 5, 4, 3, 2])
+  assert.deepEqual(g.C.map((r) => r.id), [100])
+  assert.deepEqual(g.OF, [])
 })

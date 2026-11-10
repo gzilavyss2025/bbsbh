@@ -1,21 +1,21 @@
 import { useState } from 'react'
-import { loadTopFreeAgents } from '../../api/free-agents/freeAgents.js'
+import { fetchTopFreeAgents, POSITION_GROUPS } from '../../api/free-agents/freeAgents.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Door } from '../ui/control/Door.jsx'
+import { Chips } from '../ui/control/Chips.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 
-// The hover card's two-line name: everything before the last word, then it.
-const first = (n) => n.split(' ').slice(0, -1).join(' ')
-const last = (n) => n.split(' ').at(-1)
 
 // TOP FREE AGENTS — the MLB offseason page's block between the winter
 // calendar and the wire (wireframe approved by Gary, 2026-11-10). The best
-// six unsigned major leaguers by WAR, each drawn as the player hover card
+// six unsigned major leaguers by WAR, filtered by position group (All, P, C,
+// IF, OF, DH), read from a nightly file (scripts/gen-top-free-agents.mjs) so a
+// signing is replaced by the next best the next morning; each drawn as the player hover card
 // (PlayerHoverCard.jsx: navy band, photo, two-line name, four-stat table,
 // no crest since no club holds him), and his action photo washed behind the whole
 // card (lib/headshot/actionPhoto.js); WAR orders the cards and is not printed. A phone swipes a row; wide,
@@ -23,9 +23,16 @@ const last = (n) => n.split(' ').at(-1)
 // Open surface (ADR-0034): season stats, no game result. Loading or a failed
 // read shows nothing, and the calendar meets the wire as before.
 export function TopFreeAgents({ season }) {
-  const { data } = useAsync((signal) => loadTopFreeAgents(season, { signal }), [season])
+  const { data: file } = useAsync(() => fetchTopFreeAgents(), [])
   const linkProps = useRouteLink()
-  if (!data?.length) return null
+  const [group, setGroup] = useState('all')
+  // A file for another class is not this winter's list.
+  const groups = Number(file?.season) === Number(season) ? file.groups : null
+  if (!groups?.all?.length) return null
+  const options = ['all', ...POSITION_GROUPS]
+    .filter((g) => groups[g]?.length)
+    .map((g) => ({ value: g, label: g === 'all' ? 'All' : g }))
+  const data = groups[group] ?? groups.all
 
   return (
     <section className="ofa" aria-label="Top free agents">
@@ -33,6 +40,7 @@ export function TopFreeAgents({ season }) {
         <SectionHead as="h2" className="ofa__title">Top free agents</SectionHead>
         <Door href="/free-agents" {...linkProps}>All free agents</Door>
       </div>
+      <Chips label="Position" options={options} value={group} onChange={setGroup} className="ofa__chips" />
       <ol className="ofa__list">
         {data.map((r) => (
           <li key={r.id} className="ofa__card">
@@ -42,8 +50,10 @@ export function TopFreeAgents({ season }) {
                 <Headshot personId={r.id} name={r.name} teamId={r.teamId} />
               </span>
               <div className="phcard__id">
-                {first(r.name) && <div className="phcard__first">{first(r.name)}</div>}
-                <PlayerLink id={r.id} className="phcard__last ofa__name">{last(r.name)}</PlayerLink>
+                <PlayerLink id={r.id} className="ofa__name" ariaLabel={r.name}>
+                  {r.first && <span className="phcard__first">{r.first}</span>}
+                  <span className="phcard__last">{r.last}</span>
+                </PlayerLink>
                 <div className="phcard__meta">{r.pos || '—'}</div>
               </div>
             </div>

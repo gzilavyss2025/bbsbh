@@ -295,6 +295,14 @@ jobs:
         if: steps.war.outcome == 'success' && steps.affiliates.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-milb-alumni.mjs
+      # The home page's top free agents (six per position group), ranked on the
+      # war.json the WAR step just wrote: gated on it for the same reason as
+      # MiLB alumni above. A signing drops out and the next best moves up.
+      - name: Top free agents
+        id: top-free-agents
+        if: steps.war.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/gen-top-free-agents.mjs
       - name: Rehab assignments
         id: rehab
         continue-on-error: true
