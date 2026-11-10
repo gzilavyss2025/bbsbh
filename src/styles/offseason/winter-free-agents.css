@@ -1,0 +1,98 @@
+/* Top free agents on the MLB offseason page (TopFreeAgents.jsx). A phone
+   swipes one row of cards; from 740px they sit four to a row. */
+.ofa {
+  margin-bottom: var(--space-6);
+}
+/* layout-exempt: heading left, door right, one baseline */
+.ofa__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.ofa__title {
+  flex: 1;
+}
+/* layout-exempt: a swipe row on a phone, a grid when wide */
+.ofa__list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0 0 var(--space-2);
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+/* layout-exempt: a card that also snaps in the swipe row */
+.ofa__card {
+  position: relative;
+  flex: 0 0 72%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+@media (min-width: 740px) {
+  /* layout-exempt: wide, the swipe row becomes a grid */
+  .ofa__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    overflow: visible;
+  }
+}
+.ofa__rank {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+/* layout-exempt: headshot beside the name */
+.ofa__who {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+.ofa__face {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: 0;
+  flex: none;
+}
+.ofa__name {
+  font-size: var(--fs-field);
+  color: var(--text-heading);
+}
+/* layout-exempt: logo and position on one line */
+.ofa__meta {
+  margin: var(--space-1) 0 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+/* layout-exempt: four stat columns, like the hover card */
+.ofa__stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ofa__stats dt {
+  color: var(--text-caption);
+}
+.ofa__num {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}

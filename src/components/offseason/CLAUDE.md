@@ -11,5 +11,6 @@ scorebug), youngest regulars at a level — and the season record, the one door 
 results: a label, never a seal, inward at MLB and out to MiLB.com below it. MLB's row also
 carries the postseason champion for the whole offseason, off slice 3's live bracket, with
 the full bracket one tap away (ADR-0081's addendum). MLB's page is one column, no right rail:
-a hero row (season record + countdown), the winter calendar, the wire two-up, then the
+a hero row (season record + countdown), the winter calendar, the top eight unsigned free
+agents (`TopFreeAgents.jsx`, hover-card stats, WAR order), the wire two-up, then the
 notebook as three stamped cards. The logo rail links every club, so no club grid.

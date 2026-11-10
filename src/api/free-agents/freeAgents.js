@@ -1,6 +1,7 @@
 import { getJson } from '../statsapi.js'
 import { fetchWarData } from '../war.js'
 import { fetchPlayerContract, fetchContractsSeason } from '../person/contracts.js'
+import { hitterHoverFields, pitcherHoverFields } from '../playerHoverCard.js'
 
 // The free-agent class (#2509): everyone who filed for free agency after a
 // season, where he played last, and where he signed. One live read of
@@ -180,4 +181,28 @@ export async function loadLastDeals(ids, season) {
     if (terms) out[id] = terms
   })
   return out
+}
+
+// The home page's top free agents (OffseasonLead): the best unsigned major
+// leaguers by WAR, nothing else. Pure, so the cut is testable.
+export function topUnsigned(rows, n = 8) {
+  return sortFreeAgents(rows.filter((r) => !r.signed && !r.minor)).slice(0, n)
+}
+
+// The same class read, but stats for the top few only — the full page reads
+// stats for the whole class, too much for a block on the home page. Each row
+// carries the player hover card's four stats (`fields`).
+export async function loadTopFreeAgents(season, { signal, n = 8 } = {}) {
+  const [json, war] = await Promise.all([
+    getJson(`/api/v1/people/freeAgents?season=${season}`, { signal }),
+    fetchWarData(),
+  ])
+  const seasonWar = Number(war?.season) === Number(season) ? war : null
+  const rows = (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
+  const top = topUnsigned(rows, n)
+  const stats = top.length ? await fetchSeasonStats(top.map((r) => r.id), season, signal) : {}
+  return top.map((r) => ({
+    ...r,
+    fields: r.isPitcher ? pitcherHoverFields(stats[r.id]?.pitching ?? null) : hitterHoverFields(stats[r.id]?.hitting ?? null),
+  }))
 }

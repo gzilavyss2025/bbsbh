@@ -7,6 +7,7 @@ import {
   mapFreeAgent,
   filterFreeAgents,
   sortFreeAgents,
+  topUnsigned,
   statLine,
   statsByPerson,
   cleanNote,
@@ -153,4 +154,16 @@ test('a last deal shows only when the contract file is the class season', () => 
   assert.equal(dealFor(c, 2025), null)
   assert.equal(dealFor({ terms: 'x', source: { season: 2026 } }, 2026), 'x')
   assert.equal(dealFor(null, 2026), null)
+})
+
+test('topUnsigned keeps unsigned major leaguers only, best WAR first, capped', () => {
+  const rows = [
+    { name: 'Signed', war: 9, signed: true, minor: false },
+    { name: 'Minor', war: 8, signed: false, minor: true },
+    { name: 'Low', war: 1, signed: false, minor: false },
+    { name: 'High', war: 5, signed: false, minor: false },
+    { name: 'NoWar', war: null, signed: false, minor: false },
+  ]
+  assert.deepEqual(topUnsigned(rows, 2).map((r) => r.name), ['High', 'Low'])
+  assert.deepEqual(topUnsigned(rows).map((r) => r.name), ['High', 'Low', 'NoWar'])
 })
