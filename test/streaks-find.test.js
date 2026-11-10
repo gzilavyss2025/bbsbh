@@ -2,7 +2,7 @@
 // season or the regular/postseason line, overlapping windows collapsed to the best.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { findStretches, gameRow } from '../src/api/streaks/streaks.js'
+import { findStretches, gameRow, labelRanks, rankStretches } from '../src/api/streaks/streaks.js'
 
 const g = (season, day, value, post = false) => ({ season, date: `${season}-07-${String(day).padStart(2, '0')}`, value, post, gameNumber: 1 })
 const seq = (season, values, post = false) => values.map((v, i) => g(season, i + 1, v, post))
@@ -45,4 +45,34 @@ test('gameRow reads the split and marks a missing stat null', () => {
   const r = gameRow({ season: '2025', date: '2025-10-04', isHome: true, opponent: { id: 112 }, game: { gamePk: 813047, gameNumber: 1 }, stat: { stolenBases: 2 } }, 'stolenBases', true)
   assert.deepEqual(r, { date: '2025-10-04', season: 2025, post: true, value: 2, gamePk: 813047, gameNumber: 1, isHome: true, oppId: 112 })
   assert.equal(gameRow({ season: '1969', stat: {} }, 'caughtStealing', false).value, null)
+})
+
+test('rankStretches takes the best windows that share no game, top or bottom', () => {
+  const games = seq(2010, [5, 5, 0, 1, 4, 4])
+  assert.deepEqual(rankStretches(games, { n: 2, limit: 2 }).map((w) => w.total), [10, 8])
+  assert.deepEqual(rankStretches(games, { n: 2, dir: 'bottom', limit: 2 }).map((w) => w.total), [1, 8])
+})
+
+test('rankStretches stops at the limit', () => {
+  assert.equal(rankStretches(seq(2011, [1, 2, 3, 4, 5, 6]), { n: 1, limit: 3 }).length, 3)
+})
+
+test('rankStretches keeps windows that tie the last one taken', () => {
+  const out = rankStretches(seq(2012, [9, 3, 3, 3, 1]), { n: 1, limit: 2 })
+  assert.deepEqual(out.map((w) => w.total), [9, 3, 3, 3])
+})
+
+test('rankStretches with firstOnly ranks each season\'s opening window only', () => {
+  const games = [...seq(2013, [1, 1, 9, 9]), ...seq(2014, [3, 3, 0])]
+  assert.deepEqual(rankStretches(games, { n: 2, firstOnly: true }).map((w) => [w.season, w.total]), [[2014, 6], [2013, 2]])
+})
+
+test('labelRanks: 1 is the most, ties share a T rank', () => {
+  const r = labelRanks([{ total: 5 }, { total: 9 }, { total: 5 }, { total: 2 }], false)
+  assert.deepEqual(r.map((w) => w.rank), ['T2', '1', 'T2', '4'])
+})
+
+test('labelRanks lowFirst ("at most", "bottom") ranks the lowest first', () => {
+  const r = labelRanks([{ total: 5 }, { total: 0 }, { total: 0 }], true)
+  assert.deepEqual(r.map((w) => w.rank), ['3', 'T1', 'T1'])
 })

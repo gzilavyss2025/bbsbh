@@ -57,69 +57,76 @@ export function gameRow(split, field, post) {
   }
 }
 
-// Qualifying windows of n games in a row. Regular season and postseason are separate
-// sequences per season, and a window never crosses either line. Overlapping
-// qualifying windows collapse to the best of their run (ties: the earliest).
-// `firstOnly` keeps only each sequence's opening window.
-export function findStretches(games, { n, op = 'min', threshold, firstOnly = false }) {
+// Every n-game window, in order: regular season and postseason are separate
+// sequences per season, and a window never crosses either line. `firstOnly` keeps
+// only each sequence's opening window. A window holding a game with no record of
+// the stat is skipped. `k` names the sequence and `start` the window's place in it.
+function windows(games, n, firstOnly) {
   const buckets = new Map()
   for (const g of [...games].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.gameNumber - b.gameNumber))) {
     const k = `${g.season}:${g.post ? 'P' : 'R'}`
     if (!buckets.has(k)) buckets.set(k, [])
     buckets.get(k).push(g)
   }
-  const meets = (t) => (op === 'max' ? t <= threshold : t >= threshold)
-  const better = (a, b) => (op === 'max' ? a.total < b.total : a.total > b.total)
   const out = []
-  for (const seq of buckets.values()) {
-    let run = null
-    const last = firstOnly ? Math.min(1, seq.length - n + 1) : seq.length - n + 1
-    for (let i = 0; i < last; i++) {
-      const slice = seq.slice(i, i + n)
-      const ok = slice.every((g) => g.value != null)
-      const total = ok ? slice.reduce((t, g) => t + g.value, 0) : null
-      if (ok && meets(total)) {
-        const w = { start: i, total, games: slice, season: seq[0].season, post: seq[0].post }
-        if (run && i - run.lastStart < n) {
-          if (better(w, run.best)) run.best = w
-          run.lastStart = i
-        } else {
-          if (run) out.push(run.best)
-          run = { best: w, lastStart: i }
-        }
-      }
-    }
-    if (run) out.push(run.best)
-  }
-  return out.map(({ start: _start, ...w }) => w)
-}
-
-// The `limit` best (top) or worst (bottom) windows of n games, none sharing a game:
-// every window is ranked, then taken best first, skipping any that overlaps one
-// already taken (ties: the earliest). The "Top 10" / "Bottom 10" picks (Gary).
-export function rankStretches(games, { n, dir = 'top', limit = 10, firstOnly = false }) {
-  const buckets = new Map()
-  for (const g of [...games].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.gameNumber - b.gameNumber))) {
-    const k = `${g.season}:${g.post ? 'P' : 'R'}`
-    if (!buckets.has(k)) buckets.set(k, [])
-    buckets.get(k).push(g)
-  }
-  const all = []
   for (const [k, seq] of buckets) {
     const last = firstOnly ? Math.min(1, seq.length - n + 1) : seq.length - n + 1
     for (let i = 0; i < last; i++) {
       const slice = seq.slice(i, i + n)
       if (slice.some((g) => g.value == null)) continue
-      all.push({ k, start: i, total: slice.reduce((t, g) => t + g.value, 0), games: slice, season: seq[0].season, post: seq[0].post })
+      out.push({ k, start: i, total: slice.reduce((t, g) => t + g.value, 0), games: slice, season: seq[0].season, post: seq[0].post })
     }
   }
+  return out
+}
+
+const strip = ({ k: _k, start: _start, ...w }) => w
+
+// Qualifying windows of n games in a row. Overlapping qualifying windows collapse
+// to the best of their run (ties: the earliest).
+export function findStretches(games, { n, op = 'min', threshold, firstOnly = false }) {
+  const meets = (t) => (op === 'max' ? t <= threshold : t >= threshold)
+  const better = (a, b) => (op === 'max' ? a.total < b.total : a.total > b.total)
+  const out = []
+  let run = null
+  for (const w of windows(games, n, firstOnly)) {
+    if (!meets(w.total)) continue
+    if (run && run.best.k === w.k && w.start - run.lastStart < n) {
+      if (better(w, run.best)) run.best = w
+      run.lastStart = w.start
+    } else {
+      if (run) out.push(run.best)
+      run = { best: w, lastStart: w.start }
+    }
+  }
+  if (run) out.push(run.best)
+  return out.map(strip)
+}
+
+// The `limit` best (top) or worst (bottom) windows of n games, none sharing a game:
+// every window is ranked, then taken best first, skipping any that overlaps one
+// already taken (ties: the earliest). Windows that tie the last one taken are kept
+// too, so a tie at the cutoff is never cut. The "Top 10" / "Bottom 10" picks (Gary).
+export function rankStretches(games, { n, dir = 'top', limit = 10, firstOnly = false }) {
+  const all = windows(games, n, firstOnly)
   all.sort((a, b) => (dir === 'bottom' ? a.total - b.total : b.total - a.total) || (a.games[0].date < b.games[0].date ? -1 : 1))
   const taken = []
   for (const w of all) {
-    if (taken.length >= limit) break
+    if (taken.length >= limit && w.total !== taken[limit - 1].total) break
     if (!taken.some((t) => t.k === w.k && Math.abs(t.start - w.start) < n)) taken.push(w)
   }
-  return taken.map(({ k: _k, start: _start, ...w }) => w)
+  return taken.map(strip)
+}
+
+// Rank labels by total, whatever the table's sort: 1 is the most, or the fewest
+// when `lowFirst` ("at most", "bottom 10"). Tied totals share a rank, shown "T13"
+// (Gary). Returns new windows with a `rank` string.
+export function labelRanks(found, lowFirst) {
+  const totals = found.map((w) => w.total).sort((a, b) => (lowFirst ? a - b : b - a))
+  return found.map((w) => {
+    const rank = totals.indexOf(w.total) + 1
+    return { ...w, rank: totals.lastIndexOf(w.total) + 1 > rank ? `T${rank}` : String(rank) }
+  })
 }
 
 async function seasonLog(teamId, group, season, gameType, signal) {
@@ -132,26 +139,47 @@ export async function firstSeason(teamId, signal) {
   return Number(d?.teams?.[0]?.firstYearOfPlay) || 1901
 }
 
-// Every game in the season range, as rows for one stat. Six requests at a time.
-export async function loadGames(teamId, stat, side, from, to, withPost, signal) {
-  const [group, field] = stat[side]
+// Raw splits per (team, log, season, game type) for the session: every stat on one
+// side reads the same log, so a stat switch needs no new request.
+const logCache = new Map()
+
+// Every game log in the season range for one group, six requests at a time. A
+// season that fails is retried once, then reported in `failed` (e.g. "1987" or
+// "1987 postseason") rather than dropped silently. Returns `{ logs, failed }`,
+// `logs` as `{ splits, post }`; turn them into rows with `toGames`.
+export async function loadLogs(teamId, group, from, to, withPost, signal) {
   const jobs = []
   for (let y = from; y <= to; y++) {
     jobs.push([y, 'R'])
     if (withPost) jobs.push([y, 'P'])
   }
-  const rows = []
+  const logs = []
+  const failed = []
   let next = 0
   const worker = async () => {
     while (next < jobs.length) {
       const [y, type] = jobs[next++]
-      const splits = await seasonLog(teamId, group, y, type, signal).catch((e) => {
-        if (signal?.aborted) throw e
-        return []
-      })
-      for (const s of splits) rows.push(gameRow(s, field, type === 'P'))
+      const key = `${teamId}:${group}:${y}:${type}`
+      let splits = logCache.get(key)
+      if (!splits) {
+        for (let attempt = 0; attempt < 2 && !splits; attempt++) {
+          try {
+            splits = await seasonLog(teamId, group, y, type, signal)
+          } catch (e) {
+            if (signal?.aborted) throw e
+            // A 404 is a season the club has no log for (the Brewers' 1968, a
+            // franchise year before play), not a failure.
+            if (/MLB API 404/.test(e?.message)) splits = []
+          }
+        }
+        if (splits) logCache.set(key, splits)
+        else failed.push(type === 'P' ? `${y} postseason` : String(y))
+      }
+      if (splits) logs.push({ splits, post: type === 'P' })
     }
   }
   await Promise.all(Array.from({ length: 6 }, worker))
-  return rows
+  return { logs, failed: failed.sort() }
 }
+
+export const toGames = (logs, field) => logs.flatMap(({ splits, post }) => splits.map((s) => gameRow(s, field, post)))

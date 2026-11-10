@@ -1,6 +1,6 @@
 import '../../styles/report/streaks.css'
 import { useId, useMemo, useState } from 'react'
-import { statsFor, statByKey, findStretches, rankStretches, firstSeason, loadGames } from '../../api/streaks/streaks.js'
+import { statsFor, statByKey, findStretches, rankStretches, labelRanks, firstSeason, loadLogs, toGames } from '../../api/streaks/streaks.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -11,6 +11,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
@@ -61,15 +62,23 @@ function gameHref(teamId, g) {
   return g.isHome ? gamePath(g.date, them, me, 'boxscore', g.gameNumber) : gamePath(g.date, me, them, 'boxscore', g.gameNumber)
 }
 
-function Field({ label, wide = false, children }) {
+// One control: a <label htmlFor>. A `group` field (several controls, or one that can
+// unmount) gets a plain caption the group points at with aria-labelledby instead.
+function Field({ label, wide = false, group = false, children }) {
   const id = useId()
+  const labelId = `${id}-label`
   return (
     <Stack gap="tight" className={`streaks__field${wide ? ' streaks__field--wide' : ''}`}>
-      <label className="t-label" htmlFor={id}>{label}</label>
-      {children(id)}
+      {group
+        ? <span className="t-label" id={labelId}>{label}</span>
+        : <label className="t-label" htmlFor={id}>{label}</label>}
+      {children(id, labelId)}
     </Stack>
   )
 }
+
+// A typed season, kept inside [lo, hi]; empty stays null (the default).
+const season = (v, lo, hi) => (v === '' ? null : int(v, lo, hi, null))
 
 // Any MLB club, any counting stat: every run of N games in a row at (or under) a total,
 // read live from the club's game logs back to its first season. Overlapping windows
@@ -86,29 +95,30 @@ export function StreakFinderPage() {
   // Switching sides keeps the stat when that side's log carries it, else falls back.
   const setSide = (side) => setDraft((d) => ({ ...d, side, stat: statByKey(d.stat, side).key }))
 
-  const { data: first } = useAsync(() => firstSeason(applied.team), [applied.team])
-  const from = Math.max(applied.from ?? first ?? THIS_YEAR, first ?? 0)
-  const to = applied.to ?? THIS_YEAR
-  const { loading, error, data: games } = useAsync(
-    () => (first ? loadGames(applied.team, stat, applied.side, from, to, applied.post) : Promise.resolve(null)),
-    [applied.team, stat.key, applied.side, from, to, applied.post, first],
+  const { data: firstData, error: firstError, reload: reloadFirst } = useAsync((signal) => firstSeason(applied.team, signal), [applied.team])
+  // If the first-season lookup fails, fall back to 1871 rather than spin; an empty
+  // early season costs one small request each.
+  const first = firstData ?? (firstError ? 1871 : null)
+  const [lo, hi] = [applied.from, applied.to].map((y) => (y == null ? null : int(y, first ?? 1871, THIS_YEAR, null)))
+  const from = Math.min(lo ?? first ?? THIS_YEAR, hi ?? THIS_YEAR)
+  const to = Math.max(lo ?? first ?? THIS_YEAR, hi ?? THIS_YEAR)
+  const [group, field] = stat[applied.side]
+  // Keyed on the log, not the stat: a stat switch on the same side reuses it.
+  const { loading, error, data: loaded, reload } = useAsync(
+    (signal) => (first ? loadLogs(applied.team, group, from, to, applied.post, signal) : Promise.resolve(null)),
+    [applied.team, group, from, to, applied.post, first],
   )
+  const games = useMemo(() => (loaded ? toGames(loaded.logs, field) : null), [loaded, field])
 
   const rows = useMemo(() => {
     if (!games) return []
     const ranked = applied.op === 'top' || applied.op === 'bottom'
-    const found = ranked
+    const found = labelRanks(ranked
       ? rankStretches(games, { n: applied.n, dir: applied.op, firstOnly: applied.first })
-      : findStretches(games, { n: applied.n, op: applied.op, threshold: applied.v, firstOnly: applied.first })
+      : findStretches(games, { n: applied.n, op: applied.op, threshold: applied.v, firstOnly: applied.first }),
+    applied.op === 'max' || applied.op === 'bottom')
     const byDate = (a, b) => (a.games[0].date < b.games[0].date ? -1 : 1)
-    // Rank by total whatever the sort: 1 is the most (the fewest for "at most"), and
-    // tied totals share a rank, shown "T13" (Gary).
     const better = (a, b) => (applied.op === 'max' || applied.op === 'bottom' ? a - b : b - a)
-    const totals = found.map((w) => w.total).sort(better)
-    for (const w of found) {
-      const rank = totals.indexOf(w.total) + 1
-      w.rank = totals.lastIndexOf(w.total) + 1 > rank ? `T${rank}` : String(rank)
-    }
     const sign = sort.desc ? -1 : 1
     if (sort.key === 'date') return found.sort((a, b) => sign * byDate(a, b))
     // Total sorts by rank: the first tap puts rank 1 on top, the lowest for "at most" and "bottom 10".
@@ -125,8 +135,12 @@ export function StreakFinderPage() {
   )
   const find = (e) => {
     e.preventDefault()
-    setApplied(draft)
-    writeQuery(draft)
+    const from = season(draft.from ?? '', 1871, THIS_YEAR)
+    const to = season(draft.to ?? '', 1871, THIS_YEAR)
+    const next = from != null && to != null && from > to ? { ...draft, from: to, to: from } : { ...draft, from, to }
+    setDraft(next)
+    setApplied(next)
+    writeQuery(next)
   }
   const name = applied.side === 'against' ? `Against the ${teamFullName(applied.team)}` : teamFullName(applied.team)
   const games_ = `${applied.n} game${applied.n === 1 ? '' : 's'}`
@@ -152,7 +166,7 @@ export function StreakFinderPage() {
                 </select>
               )}
             </Field>
-            <Field label="Side" wide>
+            <Field label="Side" wide group>
               {() => (
                 <Segmented label="By the club or against it" value={draft.side} onChange={setSide}
                   options={[{ value: 'by', label: `By the ${teamClub(draft.team)}` }, { value: 'against', label: `Against them` }]} />
@@ -172,21 +186,21 @@ export function StreakFinderPage() {
             <Field label="Games in a row">
               {(id) => <input id={id} type="number" inputMode="numeric" min="1" max="20" value={draft.n} onChange={(e) => set('n', int(e.target.value, 1, 20, 1))} />}
             </Field>
-            <Field label="Total" wide>
-              {(id) => (
-                <span className="streaks__total">
+            <Field label="Total" wide group>
+              {(id, labelId) => (
+                <span className="streaks__total streaks__total--wrap" role="group" aria-labelledby={labelId}>
                   <Segmented label="Which streaks" value={draft.op} onChange={(v) => set('op', v)}
                     options={[{ value: 'min', label: 'At least' }, { value: 'max', label: 'At most' }, { value: 'top', label: 'Top 10' }, { value: 'bottom', label: 'Bottom 10' }]} />
-                  {draft.op !== 'top' && draft.op !== 'bottom' && <input id={id} type="number" inputMode="numeric" min="0" aria-label="Total" value={draft.v} onChange={(e) => set('v', int(e.target.value, 0, 999, 0))} />}
+                  {draft.op !== 'top' && draft.op !== 'bottom' && <input type="number" inputMode="numeric" min="0" aria-label="Total" value={draft.v} onChange={(e) => set('v', int(e.target.value, 0, 999, 0))} />}
                 </span>
               )}
             </Field>
-            <Field label="Seasons" wide>
-              {(id) => (
-                <span className="streaks__total">
-                  <input id={id} aria-label="From season" type="number" inputMode="numeric" placeholder="First" value={draft.from ?? ''} onChange={(e) => set('from', e.target.value ? Number(e.target.value) : null)} />
+            <Field label="Seasons" wide group>
+              {(_id, labelId) => (
+                <span className="streaks__total" role="group" aria-labelledby={labelId}>
+                  <input aria-label="From season" type="number" inputMode="numeric" placeholder="First" value={draft.from ?? ''} min="1871" max={THIS_YEAR} onChange={(e) => set('from', e.target.value ? Number(e.target.value) : null)} onBlur={(e) => set('from', season(e.target.value, 1871, THIS_YEAR))} />
                   <span className="streaks__to">to</span>
-                  <input aria-label="To season" type="number" inputMode="numeric" placeholder={String(THIS_YEAR)} value={draft.to ?? ''} onChange={(e) => set('to', e.target.value ? Number(e.target.value) : null)} />
+                  <input aria-label="To season" type="number" inputMode="numeric" placeholder={String(THIS_YEAR)} value={draft.to ?? ''} min="1871" max={THIS_YEAR} onChange={(e) => set('to', e.target.value ? Number(e.target.value) : null)} onBlur={(e) => set('to', season(e.target.value, 1871, THIS_YEAR))} />
                 </span>
               )}
             </Field>
@@ -204,10 +218,21 @@ export function StreakFinderPage() {
         loading={loading || !first}
         error={error}
         hasData={!!games}
+        onRetry={reload}
         errorMessage="Couldn’t load the game logs. Try again."
         emptyMessage="No games found for these seasons."
       />
 
+      {firstError && !firstData && (
+        <Notice tone="error" role="status" action={<Button onClick={reloadFirst}>Retry</Button>}>
+          Couldn’t find the club’s first season, so this searches from 1871.
+        </Notice>
+      )}
+      {loaded?.failed.length > 0 && !loading && (
+        <Notice tone="error" role="status" action={<Button onClick={reload}>Retry</Button>}>
+          {loaded.failed.length} {loaded.failed.length === 1 ? 'season' : 'seasons'} couldn’t load ({loaded.failed.join(', ')}), so these ranks leave {loaded.failed.length === 1 ? 'it' : 'them'} out.
+        </Notice>
+      )}
       {games && !loading && (
         <Card frame="stamped" body="flush" label={what} count={`${rows.length} ${rows.length === 1 ? 'streak' : 'streaks'}`}>
           {rows.length ? (

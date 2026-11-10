@@ -27,6 +27,14 @@
   align-items: center;
   gap: var(--space-2);
 }
+/* layout-exempt: the Total input drops under the four-way picker on a phone */
+.streaks__total--wrap {
+  flex-wrap: wrap;
+}
+.streaks__total--wrap input[type='number'] {
+  flex: 1 1 5rem;
+  inline-size: auto;
+}
 .streaks__total .segmented {
   flex: none;
 }
@@ -52,7 +60,7 @@
   gap: var(--space-1);
 }
 .streaks__sorthead:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
 }
 .streaks__arrow {
   font-size: var(--fs-cell);
