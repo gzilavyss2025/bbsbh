@@ -1,22 +1,61 @@
 /* ---------------------------------------------------------------- streak finder
-   The picker form and the result table (StreakFinderPage). */
-.streaks__form {
-  margin-block: var(--space-3);
+   The search card and the result table (StreakFinderPage). Square, ink-edged
+   pickers like Pressure Moments' filters; Stack and Cluster own the spacing. */
+.streaks__field {
+  flex: 1 1 10rem;
+  min-width: 0;
 }
+.streaks__field select,
 .streaks__field input[type='number'] {
-  inline-size: 6em;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  min-width: 0;
+  inline-size: 100%;
 }
+.streaks__field--wide {
+  flex: 2 1 16rem;
+}
+/* layout-exempt: two controls side by side inside one field, never wrapping */
 .streaks__total {
-  display: inline-flex;
-  gap: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.streaks__total .segmented {
+  flex: none;
+}
+.streaks__to {
+  color: var(--text-caption);
 }
 .streaks__checks label {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  min-height: var(--tap-min);
 }
-.streaks__sort {
-  padding: var(--space-2);
+.streaks__checks input {
+  accent-color: var(--text-heading);
+  inline-size: var(--space-4);
+  block-size: var(--space-4);
+}
+.streaks__sorthead {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.streaks__sorthead:focus-visible {
+  outline: var(--focus-ring);
+}
+.streaks__arrow {
+  font-size: var(--fs-cell);
 }
 .streaks {
   font-variant-numeric: tabular-nums;
@@ -25,6 +64,48 @@
 .streaks .games {
   text-align: left;
 }
+.streaks .dates a {
+  color: var(--text-body);
+}
+.streaks .games {
+  white-space: nowrap;
+}
+.streaks__game + .streaks__game {
+  margin-inline-start: var(--space-2);
+}
+.streaks__unit {
+  margin-inline-start: 0.2em;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
 .streaks__post {
   color: var(--text-muted);
 }
+
+.streaks .opp {
+  display: none;
+  text-align: left;
+  white-space: nowrap;
+}
+.streaks .opp > * + * {
+  margin-inline-start: var(--space-1);
+}
+/* Opponent logos on desktop only (Gary): a phone row has no room for five marks. */
+@media (min-width: 740px) {
+  .streaks .opp {
+    display: table-cell;
+  }
+}
+/* The table fills the card in proportion: each column gets a share of the width
+   sized to what it holds, every cell starts at its left edge, and nothing wraps. */
+.streaks th,
+.streaks td {
+  white-space: nowrap;
+  text-align: left;
+}
+.streaks .rank { width: 7%; }
+.streaks .dates { width: 18%; }
+.streaks .season { width: 10%; }
+.streaks .opp { width: 22%; }
+.streaks .total { width: 10%; }
+.streaks .games { width: 33%; }

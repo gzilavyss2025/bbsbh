@@ -6,31 +6,40 @@
 import { getJson } from '../statsapi.js'
 
 // Counting stats only (Gary, 2026-11-10); rate stats wait for a later pass.
+// Two groups, batting and pitching, as the picker shows them. Each stat reads one
+// game log per side: `by` is the club's own line, `against` is its opponents' line
+// in the same games, so a streak "against" a club can run across any mix of
+// opponents (Gary). The club's pitching log holds its opponents' batting and the
+// other way round. [log, field]; null where that log does not carry the stat.
+const H = 'hitting'
+const P = 'pitching'
 export const STATS = [
-  { key: 'r', group: 'hitting', field: 'runs', label: 'Runs' },
-  { key: 'h', group: 'hitting', field: 'hits', label: 'Hits' },
-  { key: '2b', group: 'hitting', field: 'doubles', label: 'Doubles' },
-  { key: '3b', group: 'hitting', field: 'triples', label: 'Triples' },
-  { key: 'hr', group: 'hitting', field: 'homeRuns', label: 'Home runs' },
-  { key: 'rbi', group: 'hitting', field: 'rbi', label: 'RBI' },
-  { key: 'bb', group: 'hitting', field: 'baseOnBalls', label: 'Walks' },
-  { key: 'so', group: 'hitting', field: 'strikeOuts', label: 'Strikeouts' },
-  { key: 'sb', group: 'hitting', field: 'stolenBases', label: 'Stolen bases' },
-  { key: 'cs', group: 'hitting', field: 'caughtStealing', label: 'Caught stealing' },
-  { key: 'hbp', group: 'hitting', field: 'hitByPitch', label: 'Hit by pitch' },
-  { key: 'tb', group: 'hitting', field: 'totalBases', label: 'Total bases' },
-  { key: 'lob', group: 'hitting', field: 'leftOnBase', label: 'Left on base' },
-  { key: 'p-so', group: 'pitching', field: 'strikeOuts', label: 'Strikeouts' },
-  { key: 'p-bb', group: 'pitching', field: 'baseOnBalls', label: 'Walks allowed' },
-  { key: 'p-h', group: 'pitching', field: 'hits', label: 'Hits allowed' },
-  { key: 'p-r', group: 'pitching', field: 'runs', label: 'Runs allowed' },
-  { key: 'p-er', group: 'pitching', field: 'earnedRuns', label: 'Earned runs allowed' },
-  { key: 'p-hr', group: 'pitching', field: 'homeRuns', label: 'Home runs allowed' },
-  { key: 'p-hbp', group: 'pitching', field: 'hitBatsmen', label: 'Hit batters' },
-  { key: 'p-wp', group: 'pitching', field: 'wildPitches', label: 'Wild pitches' },
+  { key: 'r', group: 'batting', unit: 'R', label: 'Runs', by: [H, 'runs'], against: [P, 'runs'] },
+  { key: 'h', group: 'batting', unit: 'H', label: 'Hits', by: [H, 'hits'], against: [P, 'hits'] },
+  { key: '2b', group: 'batting', unit: '2B', label: 'Doubles', by: [H, 'doubles'], against: [P, 'doubles'] },
+  { key: '3b', group: 'batting', unit: '3B', label: 'Triples', by: [H, 'triples'], against: [P, 'triples'] },
+  { key: 'hr', group: 'batting', unit: 'HR', label: 'Home runs', by: [H, 'homeRuns'], against: [P, 'homeRuns'] },
+  { key: 'rbi', group: 'batting', unit: 'RBI', label: 'RBI', by: [H, 'rbi'], against: null },
+  { key: 'bb', group: 'batting', unit: 'BB', label: 'Walks', by: [H, 'baseOnBalls'], against: [P, 'baseOnBalls'] },
+  { key: 'so', group: 'batting', unit: 'SO', label: 'Strikeouts', by: [H, 'strikeOuts'], against: [P, 'strikeOuts'] },
+  { key: 'sb', group: 'batting', unit: 'SB', label: 'Stolen bases', by: [H, 'stolenBases'], against: [P, 'stolenBases'] },
+  { key: 'cs', group: 'batting', unit: 'CS', label: 'Caught stealing', by: [H, 'caughtStealing'], against: [P, 'caughtStealing'] },
+  { key: 'hbp', group: 'batting', unit: 'HBP', label: 'Hit by pitch', by: [H, 'hitByPitch'], against: [P, 'hitBatsmen'] },
+  { key: 'tb', group: 'batting', unit: 'TB', label: 'Total bases', by: [H, 'totalBases'], against: [P, 'totalBases'] },
+  { key: 'lob', group: 'batting', unit: 'LOB', label: 'Left on base', by: [H, 'leftOnBase'], against: null },
+  { key: 'p-so', group: 'pitching', unit: 'K', label: 'Strikeouts', by: [P, 'strikeOuts'], against: [H, 'strikeOuts'] },
+  { key: 'p-bb', group: 'pitching', unit: 'BB', label: 'Walks allowed', by: [P, 'baseOnBalls'], against: [H, 'baseOnBalls'] },
+  { key: 'p-h', group: 'pitching', unit: 'H', label: 'Hits allowed', by: [P, 'hits'], against: [H, 'hits'] },
+  { key: 'p-r', group: 'pitching', unit: 'R', label: 'Runs allowed', by: [P, 'runs'], against: [H, 'runs'] },
+  { key: 'p-er', group: 'pitching', unit: 'ER', label: 'Earned runs allowed', by: [P, 'earnedRuns'], against: null },
+  { key: 'p-hr', group: 'pitching', unit: 'HR', label: 'Home runs allowed', by: [P, 'homeRuns'], against: [H, 'homeRuns'] },
+  { key: 'p-hbp', group: 'pitching', unit: 'HBP', label: 'Hit batters', by: [P, 'hitBatsmen'], against: [H, 'hitByPitch'] },
+  { key: 'p-wp', group: 'pitching', unit: 'WP', label: 'Wild pitches', by: [P, 'wildPitches'], against: null },
 ]
 
-export const statByKey = (key) => STATS.find((s) => s.key === key) ?? STATS.find((s) => s.key === 'sb')
+export const statsFor = (side) => STATS.filter((s) => s[side] != null)
+
+export const statByKey = (key, side = 'by') => statsFor(side).find((s) => s.key === key) ?? STATS.find((s) => s.key === 'sb')
 
 // One game log split -> the flat row the finder reads. A missing stat is null, not 0,
 // so an old season with no record of it cannot qualify an "at most" search.
@@ -85,6 +94,34 @@ export function findStretches(games, { n, op = 'min', threshold, firstOnly = fal
   return out.map(({ start: _start, ...w }) => w)
 }
 
+// The `limit` best (top) or worst (bottom) windows of n games, none sharing a game:
+// every window is ranked, then taken best first, skipping any that overlaps one
+// already taken (ties: the earliest). The "Top 10" / "Bottom 10" picks (Gary).
+export function rankStretches(games, { n, dir = 'top', limit = 10, firstOnly = false }) {
+  const buckets = new Map()
+  for (const g of [...games].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.gameNumber - b.gameNumber))) {
+    const k = `${g.season}:${g.post ? 'P' : 'R'}`
+    if (!buckets.has(k)) buckets.set(k, [])
+    buckets.get(k).push(g)
+  }
+  const all = []
+  for (const [k, seq] of buckets) {
+    const last = firstOnly ? Math.min(1, seq.length - n + 1) : seq.length - n + 1
+    for (let i = 0; i < last; i++) {
+      const slice = seq.slice(i, i + n)
+      if (slice.some((g) => g.value == null)) continue
+      all.push({ k, start: i, total: slice.reduce((t, g) => t + g.value, 0), games: slice, season: seq[0].season, post: seq[0].post })
+    }
+  }
+  all.sort((a, b) => (dir === 'bottom' ? a.total - b.total : b.total - a.total) || (a.games[0].date < b.games[0].date ? -1 : 1))
+  const taken = []
+  for (const w of all) {
+    if (taken.length >= limit) break
+    if (!taken.some((t) => t.k === w.k && Math.abs(t.start - w.start) < n)) taken.push(w)
+  }
+  return taken.map(({ k: _k, start: _start, ...w }) => w)
+}
+
 async function seasonLog(teamId, group, season, gameType, signal) {
   const d = await getJson(`/api/v1/teams/${teamId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=${gameType}`, { signal })
   return d?.stats?.[0]?.splits ?? []
@@ -96,7 +133,8 @@ export async function firstSeason(teamId, signal) {
 }
 
 // Every game in the season range, as rows for one stat. Six requests at a time.
-export async function loadGames(teamId, stat, from, to, withPost, signal) {
+export async function loadGames(teamId, stat, side, from, to, withPost, signal) {
+  const [group, field] = stat[side]
   const jobs = []
   for (let y = from; y <= to; y++) {
     jobs.push([y, 'R'])
@@ -107,11 +145,11 @@ export async function loadGames(teamId, stat, from, to, withPost, signal) {
   const worker = async () => {
     while (next < jobs.length) {
       const [y, type] = jobs[next++]
-      const splits = await seasonLog(teamId, stat.group, y, type, signal).catch((e) => {
+      const splits = await seasonLog(teamId, group, y, type, signal).catch((e) => {
         if (signal?.aborted) throw e
         return []
       })
-      for (const s of splits) rows.push(gameRow(s, stat.field, type === 'P'))
+      for (const s of splits) rows.push(gameRow(s, field, type === 'P'))
     }
   }
   await Promise.all(Array.from({ length: 6 }, worker))

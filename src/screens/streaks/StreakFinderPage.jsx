@@ -1,21 +1,25 @@
 import '../../styles/report/streaks.css'
 import { useId, useMemo, useState } from 'react'
-import { STATS, statByKey, findStretches, firstSeason, loadGames } from '../../api/streaks/streaks.js'
+import { statsFor, statByKey, findStretches, rankStretches, firstSeason, loadGames } from '../../api/streaks/streaks.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
-import { ALL_MLB_TEAM_IDS, PINNED_TEAM_ID, teamAbbr, teamFullName } from '../../lib/teams.js'
-import { monthDayName } from '../../lib/dates.js'
+import { ALL_MLB_TEAM_IDS, PINNED_TEAM_ID, teamAbbr, teamClubName, teamFullName } from '../../lib/teams.js'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { gamePath } from '../../lib/route.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 
+// 7/26: month and day only; the season has its own column.
+const shortDate = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`
+const teamClub = (id) => teamClubName(id) || 'them'
 const THIS_YEAR = new Date().getFullYear()
 const CLUBS = [...ALL_MLB_TEAM_IDS].sort((a, b) => teamFullName(a).localeCompare(teamFullName(b)))
 const int = (v, lo, hi, dflt) => {
@@ -29,9 +33,10 @@ function readQuery(favorite) {
   const team = int(q.get('team'), 1, 9999, favorite)
   return {
     team: ALL_MLB_TEAM_IDS.includes(team) ? team : PINNED_TEAM_ID,
-    stat: statByKey(q.get('stat')).key,
+    side: q.get('side') === 'against' ? 'against' : 'by',
+    stat: statByKey(q.get('stat'), q.get('side') === 'against' ? 'against' : 'by').key,
     n: int(q.get('n'), 1, 20, 5),
-    op: q.get('op') === 'max' ? 'max' : 'min',
+    op: ['max', 'top', 'bottom'].includes(q.get('op')) ? q.get('op') : 'min',
     v: int(q.get('v'), 0, 999, 10),
     from: q.get('from') ? int(q.get('from'), 1871, THIS_YEAR, null) : null,
     to: q.get('to') ? int(q.get('to'), 1871, THIS_YEAR, null) : null,
@@ -46,6 +51,7 @@ function writeQuery(p) {
   if (p.to) q.set('to', p.to)
   if (p.first) q.set('first', '1')
   if (p.post) q.set('post', '1')
+  if (p.side === 'against') q.set('side', 'against')
   window.history.replaceState(window.history.state, '', `${window.location.pathname}?${q}`)
 }
 
@@ -55,10 +61,10 @@ function gameHref(teamId, g) {
   return g.isHome ? gamePath(g.date, them, me, 'boxscore', g.gameNumber) : gamePath(g.date, me, them, 'boxscore', g.gameNumber)
 }
 
-function Field({ label, children }) {
+function Field({ label, wide = false, children }) {
   const id = useId()
   return (
-    <Stack gap="tight" className="streaks__field">
+    <Stack gap="tight" className={`streaks__field${wide ? ' streaks__field--wide' : ''}`}>
       <label className="t-label" htmlFor={id}>{label}</label>
       {children(id)}
     </Stack>
@@ -74,34 +80,59 @@ export function StreakFinderPage() {
   const fav = ALL_MLB_TEAM_IDS.includes(favoriteTeamId) ? favoriteTeamId : PINNED_TEAM_ID
   const [draft, setDraft] = useState(() => readQuery(fav))
   const [applied, setApplied] = useState(draft)
-  const [sort, setSort] = useState('total')
+  const [sort, setSort] = useState({ key: 'total', desc: true })
   const set = (k, val) => setDraft((d) => ({ ...d, [k]: val }))
-  const stat = statByKey(applied.stat)
+  const stat = statByKey(applied.stat, applied.side)
+  // Switching sides keeps the stat when that side's log carries it, else falls back.
+  const setSide = (side) => setDraft((d) => ({ ...d, side, stat: statByKey(d.stat, side).key }))
 
   const { data: first } = useAsync(() => firstSeason(applied.team), [applied.team])
   const from = Math.max(applied.from ?? first ?? THIS_YEAR, first ?? 0)
   const to = applied.to ?? THIS_YEAR
   const { loading, error, data: games } = useAsync(
-    () => (first ? loadGames(applied.team, stat, from, to, applied.post) : Promise.resolve(null)),
-    [applied.team, stat.key, from, to, applied.post, first],
+    () => (first ? loadGames(applied.team, stat, applied.side, from, to, applied.post) : Promise.resolve(null)),
+    [applied.team, stat.key, applied.side, from, to, applied.post, first],
   )
 
   const rows = useMemo(() => {
     if (!games) return []
-    const found = findStretches(games, { n: applied.n, op: applied.op, threshold: applied.v, firstOnly: applied.first })
+    const ranked = applied.op === 'top' || applied.op === 'bottom'
+    const found = ranked
+      ? rankStretches(games, { n: applied.n, dir: applied.op, firstOnly: applied.first })
+      : findStretches(games, { n: applied.n, op: applied.op, threshold: applied.v, firstOnly: applied.first })
     const byDate = (a, b) => (a.games[0].date < b.games[0].date ? -1 : 1)
-    if (sort === 'date') return found.sort(byDate)
-    return found.sort((a, b) => (applied.op === 'max' ? a.total - b.total : b.total - a.total) || byDate(a, b))
+    // Rank by total whatever the sort: 1 is the most (the fewest for "at most"), and
+    // tied totals share a rank, shown "T13" (Gary).
+    const better = (a, b) => (applied.op === 'max' || applied.op === 'bottom' ? a - b : b - a)
+    const totals = found.map((w) => w.total).sort(better)
+    for (const w of found) {
+      const rank = totals.indexOf(w.total) + 1
+      w.rank = totals.lastIndexOf(w.total) + 1 > rank ? `T${rank}` : String(rank)
+    }
+    const sign = sort.desc ? -1 : 1
+    if (sort.key === 'date') return found.sort((a, b) => sign * byDate(a, b))
+    // Total sorts by rank: the first tap puts rank 1 on top, the lowest for "at most" and "bottom 10".
+    return found.sort((a, b) => -sign * better(a.total, b.total) || byDate(a, b))
   }, [games, applied, sort])
 
+  // A header tap sorts by that column, largest first; a second tap flips it (Gary).
+  const sortHead = (key, label) => (
+    <th className={key === 'date' ? 'season' : 'total'} aria-sort={sort.key === key ? (sort.desc ? 'descending' : 'ascending') : undefined}>
+      <button type="button" className="streaks__sorthead" onClick={() => setSort((p) => ({ key, desc: p.key === key ? !p.desc : true }))}>
+        {label}<span aria-hidden="true" className="streaks__arrow">{sort.key === key ? (sort.desc ? '▼' : '▲') : ''}</span>
+      </button>
+    </th>
+  )
   const find = (e) => {
     e.preventDefault()
     setApplied(draft)
     writeQuery(draft)
   }
-  const name = teamFullName(applied.team)
-  const what = `${applied.op === 'max' ? 'at most' : 'at least'} ${applied.v} ${stat.label} in ${applied.n} game${applied.n === 1 ? '' : 's'}`
-  const span = games?.length ? `${Math.min(...games.map((g) => g.season))}–${Math.max(...games.map((g) => g.season))}` : ''
+  const name = applied.side === 'against' ? `Against the ${teamFullName(applied.team)}` : teamFullName(applied.team)
+  const games_ = `${applied.n} game${applied.n === 1 ? '' : 's'}`
+  const what = applied.op === 'top' || applied.op === 'bottom'
+    ? `${applied.op === 'top' ? 'Most' : 'Fewest'} ${stat.label}, ${games_}`
+    : `${applied.v}${applied.op === 'max' ? ' or fewer' : '+'} ${stat.label}, ${games_}`
 
   return (
     <div className="screen">
@@ -109,13 +140,9 @@ export function StreakFinderPage() {
       <header className="topbar">
         <h1 className="topbar__title">Streak Finder</h1>
       </header>
-      <p className="hint">
-        Pick a club, a stat and a number of games in a row. The table lists every stretch that reached your total,
-        back to the club’s first season. Stretches never cross from one season into the next. When stretches share
-        games, only the best one shows.
-      </p>
-
-      <form onSubmit={find} className="streaks__form">
+      <Stack gap="loose">
+      <Card frame="stamped" label="Find a streak" className="streaks__search">
+      <form onSubmit={find}>
         <Stack gap="snug">
           <Cluster className="streaks__fields">
             <Field label="Club">
@@ -125,12 +152,18 @@ export function StreakFinderPage() {
                 </select>
               )}
             </Field>
+            <Field label="Side" wide>
+              {() => (
+                <Segmented label="By the club or against it" value={draft.side} onChange={setSide}
+                  options={[{ value: 'by', label: `By the ${teamClub(draft.team)}` }, { value: 'against', label: `Against them` }]} />
+              )}
+            </Field>
             <Field label="Stat">
               {(id) => (
                 <select id={id} value={draft.stat} onChange={(e) => set('stat', e.target.value)}>
-                  {['hitting', 'pitching'].map((grp) => (
-                    <optgroup key={grp} label={grp === 'hitting' ? 'Hitting' : 'Pitching'}>
-                      {STATS.filter((s) => s.group === grp).map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+                  {['batting', 'pitching'].map((grp) => (
+                    <optgroup key={grp} label={grp === 'batting' ? 'Batting' : 'Pitching'}>
+                      {statsFor(draft.side).filter((s) => s.group === grp).map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
                     </optgroup>
                   ))}
                 </select>
@@ -139,31 +172,33 @@ export function StreakFinderPage() {
             <Field label="Games in a row">
               {(id) => <input id={id} type="number" inputMode="numeric" min="1" max="20" value={draft.n} onChange={(e) => set('n', int(e.target.value, 1, 20, 1))} />}
             </Field>
-            <Field label="Total">
+            <Field label="Total" wide>
               {(id) => (
                 <span className="streaks__total">
-                  <select aria-label="At least or at most" value={draft.op} onChange={(e) => set('op', e.target.value)}>
-                    <option value="min">At least</option>
-                    <option value="max">At most</option>
-                  </select>
-                  <input id={id} type="number" inputMode="numeric" min="0" value={draft.v} onChange={(e) => set('v', int(e.target.value, 0, 999, 0))} />
+                  <Segmented label="Which streaks" value={draft.op} onChange={(v) => set('op', v)}
+                    options={[{ value: 'min', label: 'At least' }, { value: 'max', label: 'At most' }, { value: 'top', label: 'Top 10' }, { value: 'bottom', label: 'Bottom 10' }]} />
+                  {draft.op !== 'top' && draft.op !== 'bottom' && <input id={id} type="number" inputMode="numeric" min="0" aria-label="Total" value={draft.v} onChange={(e) => set('v', int(e.target.value, 0, 999, 0))} />}
                 </span>
               )}
             </Field>
-            <Field label="From season">
-              {(id) => <input id={id} type="number" inputMode="numeric" placeholder="First" value={draft.from ?? ''} onChange={(e) => set('from', e.target.value ? Number(e.target.value) : null)} />}
-            </Field>
-            <Field label="To season">
-              {(id) => <input id={id} type="number" inputMode="numeric" placeholder={String(THIS_YEAR)} value={draft.to ?? ''} onChange={(e) => set('to', e.target.value ? Number(e.target.value) : null)} />}
+            <Field label="Seasons" wide>
+              {(id) => (
+                <span className="streaks__total">
+                  <input id={id} aria-label="From season" type="number" inputMode="numeric" placeholder="First" value={draft.from ?? ''} onChange={(e) => set('from', e.target.value ? Number(e.target.value) : null)} />
+                  <span className="streaks__to">to</span>
+                  <input aria-label="To season" type="number" inputMode="numeric" placeholder={String(THIS_YEAR)} value={draft.to ?? ''} onChange={(e) => set('to', e.target.value ? Number(e.target.value) : null)} />
+                </span>
+              )}
             </Field>
           </Cluster>
           <Cluster className="streaks__checks">
-            <label><input type="checkbox" checked={draft.first} onChange={(e) => set('first', e.target.checked)} /> Only the first games of each season</label>
-            <label><input type="checkbox" checked={draft.post} onChange={(e) => set('post', e.target.checked)} /> Add postseason games</label>
+            <label className="t-label t-label--nocaps"><input type="checkbox" checked={draft.first} onChange={(e) => set('first', e.target.checked)} /> First games of each season only</label>
+            <label className="t-label t-label--nocaps"><input type="checkbox" checked={draft.post} onChange={(e) => set('post', e.target.checked)} /> Add postseason games</label>
           </Cluster>
           <div><Button type="submit" skin="ink">Find streaks</Button></div>
         </Stack>
       </form>
+      </Card>
 
       <AsyncStatus
         loading={loading || !first}
@@ -174,19 +209,17 @@ export function StreakFinderPage() {
       />
 
       {games && !loading && (
-        <Card frame="stamped" body="flush" label={`${name}: ${what}`} count={`${rows.length} ${rows.length === 1 ? 'streak' : 'streaks'}${span ? `, ${span}` : ''}`}>
+        <Card frame="stamped" body="flush" label={what} count={`${rows.length} ${rows.length === 1 ? 'streak' : 'streaks'}`}>
           {rows.length ? (
             <>
-              <Cluster gap="tight" className="streaks__sort" role="group" aria-label="Sort">
-                <Button size="control" aria-pressed={sort === 'total'} onClick={() => setSort('total')}>Best first</Button>
-                <Button size="control" aria-pressed={sort === 'date'} onClick={() => setSort('date')}>By date</Button>
-              </Cluster>
               <Table frame="bare" label={`${name} streaks`} className="streaks">
                 <thead>
                   <tr>
-                    <th>Season</th>
+                    <th className="rank">Rank</th>
                     <th className="dates">Dates</th>
-                    <th>Total</th>
+                    {sortHead('date', 'Season')}
+                    <th className="opp">Opponents</th>
+                    {sortHead('total', 'Total')}
                     <th className="games">Game by game</th>
                   </tr>
                 </thead>
@@ -196,13 +229,21 @@ export function StreakFinderPage() {
                     const z = w.games[w.games.length - 1]
                     return (
                       <tr key={`${a.date}:${a.gameNumber}:${w.post}`}>
-                        <td>{w.season}{w.post && <span className="streaks__post"> · postseason</span>}</td>
+                        <td className="rank">{w.rank}</td>
                         <td className="dates">
-                          <a href={gameHref(applied.team, a)}>{monthDayName(a.date)}</a>
-                          {w.games.length > 1 && <> – <a href={gameHref(applied.team, z)}>{monthDayName(z.date)}</a></>}
+                          <a href={gameHref(applied.team, a)}>{shortDate(a.date)}</a>
+                          {w.games.length > 1 && <> – <a href={gameHref(applied.team, z)}>{shortDate(z.date)}</a></>}
                         </td>
-                        <td className="total">{w.total}</td>
-                        <td className="games">{w.games.map((g) => g.value).join(', ')}</td>
+                        <td className="season">{w.season}{w.post && <span className="streaks__post"> · postseason</span>}</td>
+                        <td className="opp">
+                          {[...new Set(w.games.map((g) => g.oppId))].map((id) => (
+                            <TeamLogo key={id} teamId={id} name={teamFullName(id)} size={20} />
+                          ))}
+                        </td>
+                        <td className="total">{w.total}<span className="streaks__unit">{stat.unit}</span></td>
+                        <td className="games">
+                          {w.games.map((g, i) => <span key={i} className="streaks__game">{g.value}<span className="streaks__unit">{stat.unit}</span></span>)}
+                        </td>
                       </tr>
                     )
                   })}
@@ -214,6 +255,7 @@ export function StreakFinderPage() {
           )}
         </Card>
       )}
+      </Stack>
 
       <ReportFooter />
     </div>
