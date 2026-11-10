@@ -1592,6 +1592,14 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `gen-eliminated.mjs` → `public/data/eliminated.json` — for each MLB club and regular
+  season since 2017, the date it was mathematically eliminated from the postseason and
+  every game it played from then on (date, opponent, home/away, record entering). The
+  rule (both elimination numbers `E`, or every berth in the league clinched by others,
+  which catches tiebreakers) is `scripts/lib/elimination/rule.mjs`. Reads standings from
+  August 1 on, one call per league per game date. Run after a season ends:
+  `node scripts/gen-eliminated.mjs --to=<season>`. App reads it via
+  `src/api/eliminated/eliminated.js` (`/eliminated`).
 - `gen-season-checkpoints.mjs` → `public/data/season-checkpoints/tails.json` (shipped)
   and `scripts/data/season-checkpoints/{season}.json` (raw, not shipped) — the player
   page's hot and cold callouts (#1855). The raw store keeps each MLB player-season's

@@ -105,6 +105,7 @@ const MorePage = lazyNamed(() => import('./screens/MorePage.jsx'), 'MorePage')
 const ProspectsPage = lazyNamed(() => import('./screens/ProspectsPage.jsx'), 'ProspectsPage')
 const RehabPage = lazyNamed(() => import('./screens/RehabPage.jsx'), 'RehabPage')
 const TensestMomentsPage = lazyNamed(() => import('./screens/tensest/TensestMomentsPage.jsx'), 'TensestMomentsPage')
+const EliminatedPage = lazyNamed(() => import('./screens/eliminated/EliminatedPage.jsx'), 'EliminatedPage')
 const InfieldPage = lazyNamed(() => import('./screens/infield/InfieldPage.jsx'), 'InfieldPage')
 const FreeAgentsPage = lazyNamed(() => import('./screens/free-agents/FreeAgentsPage.jsx'), 'FreeAgentsPage')
 const MilestoneWatchPage = lazyNamed(
@@ -309,6 +310,7 @@ const BARE_ROUTES = {
   tensest: TensestMomentsPage,
   infield: InfieldPage,
   streaks: lazyNamed(() => import('./screens/streaks/StreakFinderPage.jsx'), 'StreakFinderPage'),
+  eliminated: EliminatedPage,
   milestones: MilestoneWatchPage,
   'awards-history': AwardsHistoryPage,
   'postseason-history': PostseasonHistoryPage,
