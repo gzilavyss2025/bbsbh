@@ -163,7 +163,8 @@ test('topUnsigned keeps unsigned major leaguers only, best WAR first, capped', (
     { name: 'Low', war: 1, signed: false, minor: false },
     { name: 'High', war: 5, signed: false, minor: false },
     { name: 'NoWar', war: null, signed: false, minor: false },
+    ...['A', 'B', 'C', 'D'].map((name) => ({ name, war: 0.5, signed: false, minor: false })),
   ]
   assert.deepEqual(topUnsigned(rows, 2).map((r) => r.name), ['High', 'Low'])
-  assert.deepEqual(topUnsigned(rows).map((r) => r.name), ['High', 'Low', 'NoWar'])
+  assert.deepEqual(topUnsigned(rows).map((r) => r.name), ['High', 'Low', 'A', 'B', 'C', 'D'])
 })
