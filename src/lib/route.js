@@ -21,6 +21,7 @@
 //                                          '/tensest', its first address, still lands here)
 //   '/eliminated'                       -> { name: 'eliminated' }  (games played after elimination)
 //   '/infield'                          -> { name: 'infield' }  (team-games with no out to an outfielder, #2976)
+//   '/streaks'                          -> { name: 'streaks' }  (N games in a row at a stat total; picks ride the query)
 //   '/free-agents'                      -> { name: 'free-agents', season: null }  (the latest class)
 //   '/free-agents/{year}'               -> { name: 'free-agents', season: year }
 //   '/milestones'                       -> { name: 'milestones' }
@@ -351,6 +352,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
   if (parts.length === 1 && (parts[0] === 'pressure-moments' || parts[0] === 'tensest')) return { name: 'tensest' }
   if (parts.length === 1 && parts[0] === 'infield') return { name: 'infield' }
+  if (parts.length === 1 && parts[0] === 'streaks') return { name: 'streaks' }
   if (parts.length === 1 && parts[0] === 'eliminated') return { name: 'eliminated' }
   if (parts[0] === 'free-agents' && parts.length <= 2) {
     const year = parts.length === 2 && /^\d{4}$/.test(parts[1]) ? Number(parts[1]) : null

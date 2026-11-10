@@ -33,6 +33,7 @@ const PATHS_BEFORE_GROUPING = [
   '/pace-of-play',
   '/doubleheaders',
   '/standings',
+  '/streaks',
   '/leaders',
   '/situational-records',
   '/pressure-moments',

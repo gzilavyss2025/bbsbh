@@ -300,16 +300,16 @@ function currentUrl() {
   return window.location.pathname + window.location.search
 }
 
-// Routes whose screen takes no props. `profile` is deliberately NOT gated on
-// isClerkEnabled or on being signed in: settings are settings, and every one of
-// them works on this device with no account at all. The account section is the
-// only part that appears or disappears.
+// Routes whose screen takes no props. `profile` is deliberately NOT gated on isClerkEnabled
+// or on being signed in: settings are settings, and every one of them works on this device
+// with no account at all. The account section is the only part that appears or disappears.
 const BARE_ROUTES = {
   more: MorePage,
   prospects: ProspectsPage,
   rehab: RehabPage,
   tensest: TensestMomentsPage,
   infield: InfieldPage,
+  streaks: lazyNamed(() => import('./screens/streaks/StreakFinderPage.jsx'), 'StreakFinderPage'),
   eliminated: EliminatedPage,
   milestones: MilestoneWatchPage,
   'awards-history': AwardsHistoryPage,

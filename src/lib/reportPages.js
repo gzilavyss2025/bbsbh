@@ -70,6 +70,8 @@ export const PAGE_GROUPS = [
       { label: 'Pressure Moments', path: '/pressure-moments' },
       // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
       { label: 'Kept It in the Infield', path: '/infield' },
+      // Any club, any counting stat, N games in a row at a total, back to the franchise's first season.
+      { label: 'Streak Finder', path: '/streaks' },
       // Games each club played after it was mathematically out, by season span.
       { label: 'Games After Elimination', path: '/eliminated' },
       // Money, read across the league: who is paid the most, what each club
