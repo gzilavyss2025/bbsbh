@@ -7,6 +7,11 @@ import {
   mapFreeAgent,
   filterFreeAgents,
   sortFreeAgents,
+  topUnsigned,
+  topCard,
+  topByGroup,
+  freeAgentRole,
+  TOP_GROUPS,
   statLine,
   statsByPerson,
   cleanNote,
@@ -153,4 +158,84 @@ test('a last deal shows only when the contract file is the class season', () => 
   assert.equal(dealFor(c, 2025), null)
   assert.equal(dealFor({ terms: 'x', source: { season: 2026 } }, 2026), 'x')
   assert.equal(dealFor(null, 2026), null)
+})
+
+test('topUnsigned keeps unsigned major leaguers only, best WAR first, capped', () => {
+  const rows = [
+    { name: 'Signed', war: 9, signed: true, minor: false },
+    { name: 'Minor', war: 8, signed: false, minor: true },
+    { name: 'Low', war: 1, signed: false, minor: false },
+    { name: 'High', war: 5, signed: false, minor: false },
+    { name: 'NoWar', war: null, signed: false, minor: false },
+    ...['A', 'B', 'C', 'D'].map((name) => ({ name, war: 0.5, signed: false, minor: false })),
+  ]
+  assert.deepEqual(topUnsigned(rows, 2).map((r) => r.name), ['High', 'Low'])
+  assert.deepEqual(topUnsigned(rows).map((r) => r.name), ['High', 'Low', 'A', 'B', 'C', 'D'])
+})
+
+test('topUnsigned hides the list when no row has WAR (no alphabetical "top")', () => {
+  const rows = [{ name: 'Abner', war: null, signed: false, minor: false }, { name: 'Zed', war: null, signed: false, minor: false }]
+  assert.deepEqual(topUnsigned(rows), [])
+})
+
+test('topCard: the person record names the two lines, suffix on the last', () => {
+  const row = { id: 1, name: 'Carl Edwards Jr.', isPitcher: true }
+  const card = topCard(row, { first: 'Carl', last: 'Edwards', suffix: 'Jr.', pitching: { wins: 3, losses: 2, era: '3.10', strikeOuts: 40, whip: '1.20', gamesStarted: 0, saves: 1 } })
+  assert.equal(card.first, 'Carl')
+  assert.equal(card.last, 'Edwards Jr.')
+  assert.deepEqual(card.fields.map((f) => f.k), ['W–L', 'ERA', 'K', 'WHIP'])
+  assert.equal(card.fields[1].v, '3.10')
+})
+
+test('topCard: a hitter gets hitter fields, and no stats is all dashes', () => {
+  const hit = topCard({ id: 2, name: 'Randy Arozarena', isPitcher: false }, { hitting: { avg: '.281', homeRuns: 26, rbi: 79, ops: '.865' } })
+  assert.deepEqual(hit.fields.map((f) => f.v), ['.281', '26', '79', '.865'])
+  assert.equal(hit.first, 'Randy')
+  assert.equal(hit.last, 'Arozarena')
+  const none = topCard({ id: 3, name: 'Solo', isPitcher: false }, undefined)
+  assert.deepEqual(none.fields.map((f) => f.v), ['—', '—', '—', '—'])
+  assert.equal(none.first, '')
+  assert.equal(none.last, 'Solo')
+})
+
+test('topByGroup: six per group plus all, each from unsigned only', () => {
+  const rows = []
+  for (let i = 0; i < 8; i++) rows.push({ id: i, name: `S${i}`, group: 'SP', war: i, signed: false, minor: false })
+  rows.push({ id: 100, name: 'C0', group: 'C', war: 3.5, signed: false, minor: false })
+  rows.push({ id: 101, name: 'C1', group: 'C', war: 9, signed: true, minor: false })
+  const g = topByGroup(rows)
+  assert.deepEqual(Object.keys(g), ['all', ...TOP_GROUPS])
+  assert.deepEqual(g.all.map((r) => r.id), [7, 6, 5, 4, 100, 3])
+  assert.deepEqual(g.SP.map((r) => r.id), [7, 6, 5, 4, 3, 2])
+  assert.deepEqual(g.C.map((r) => r.id), [100])
+  assert.deepEqual(g.CL, [])
+})
+
+test('freeAgentRole: SP by starts, CL by 5 season or 25 career saves, else RP', () => {
+  assert.equal(freeAgentRole({ gamesPitched: 30, gamesStarted: 30, saves: 0 }, { saves: 40 }), 'SP')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 5 }, { saves: 5 }), 'CL')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 1 }, { saves: 25 }), 'CL')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 4 }, { saves: 24 }), 'RP')
+  // No 2026 games (hurt all year): the career line decides, else a reliever.
+  assert.equal(freeAgentRole(null, { saves: 300 }), 'CL')
+  assert.equal(freeAgentRole(null, null), 'RP')
+})
+
+test('topCard: a CL card leads with SV even under 5 season saves', () => {
+  const card = topCard({ id: 4, name: 'José Alvarado', isPitcher: true, group: 'CL' }, { pitching: { gamesPitched: 40, gamesStarted: 0, saves: 3, wins: 5, losses: 4, era: '3.50', strikeOuts: 50, whip: '1.30' } })
+  assert.deepEqual(card.fields[0], { k: 'SV', v: '3' })
+})
+
+test('statsByPerson keeps the season line and files the career line beside it', () => {
+  const s = statsByPerson([
+    {
+      id: 9,
+      stats: [
+        { type: { displayName: 'career' }, group: { displayName: 'pitching' }, splits: [{ stat: { saves: 120, era: '3.01' } }] },
+        { type: { displayName: 'season' }, group: { displayName: 'pitching' }, splits: [{ stat: { saves: 2, era: '4.10' } }] },
+      ],
+    },
+  ])
+  assert.equal(s[9].pitching.era, '4.10')
+  assert.equal(s[9].pitchingCareer.saves, 120)
 })

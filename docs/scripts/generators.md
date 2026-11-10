@@ -85,6 +85,15 @@ don't run these by hand.
 > in the PR body so the committed data is reviewable rather than just present. A
 > generator merged with an empty surface waiting for its first cron is a feature
 > that ships broken and looks finished.
+- `gen-top-free-agents.mjs` → `public/data/top-free-agents.json` — the MLB offseason
+  home page's "Top free agents" block: six unsigned major leaguers per group (SP, RP,
+  CL by `freeAgentRole`, C, IF, OF, DH, and across all), by WAR, each with the player hover card's four season stats.
+  **Runs directly after `gen-war.mjs` and is gated on it**: it ranks on that `war.json`
+  and takes the class season from it, so a mismatch writes empty groups and the block
+  hides. A signing drops out of the pool and the next night's run moves the next best
+  up. Ranking and card logic are imported from `src/api/free-agents/freeAgents.js`.
+  It reads season and career stats for the whole unsigned pool, since a pitcher's role
+  must be known before he is ranked in it. First run (2026-11-10): ~2 s, 9 KB, 42 players.
 - `gen-milb-alumni.mjs` → `public/data/milb-alumni/{teamId}.json` — for each of the
   ~120 current farm clubs, the six big-league players who came through it, ranked
   by career WAR ("Made The Show", the last card on a MiLB team's Overview).

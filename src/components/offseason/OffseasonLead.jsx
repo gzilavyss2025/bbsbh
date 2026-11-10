@@ -5,6 +5,7 @@ import { MoveItems, flattenDays, takeStories } from '../transactions/MoveRow.jsx
 import { LongAtBats } from './LongAtBats.jsx'
 import { RecordDoors, SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
+import { TopFreeAgents } from './TopFreeAgents.jsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
@@ -146,6 +147,8 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
       </div>
 
       <WinterCalendar winter={winter} />
+
+      <TopFreeAgents season={winter.seasonEnded} />
 
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}

@@ -1,0 +1,83 @@
+/* Top free agents on the MLB offseason page (TopFreeAgents.jsx). A phone
+   swipes one row of cards; from 740px, a grid. */
+.ofa {
+  margin-bottom: var(--space-6);
+}
+/* layout-exempt: heading left, door right, one baseline */
+.ofa__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.ofa__chips {
+  margin-top: var(--space-3);
+}
+/* layout-exempt: a swipe row on a phone, a grid when wide */
+.ofa__list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0 0 var(--space-2);
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.ofa__card {
+  flex: 0 0 85%;
+  scroll-snap-align: start;
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  /* The band's pattern bleeds unless its card clips it (section-head.css). */
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+/* A narrower year column than the hover card's, so W-L stays on one line. */
+.ofa__card .phcard__table tr > :first-child {
+  width: 56px;
+}
+.ofa__card .phcard__rowv {
+  white-space: nowrap;
+}
+@media (min-width: 740px) {
+  /* layout-exempt: wide, the swipe row becomes a grid */
+  .ofa__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    overflow: visible;
+  }
+}
+/* The hover card's name is a div; here it is the link to the player. */
+.ofa__name,
+.ofa__name > span {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The action photo sits in the navy band only, clear of the stats. The band
+   is isolated (section-head.css), so z-index -1 keeps the photo above the
+   band's fill and below its text.
+   The photo is a full-body 2:3 portrait (lib/headshot/actionPhoto.js); the
+   face sits in its top fifth and the swing or the delivery in its top half.
+   So it is a box at the band's right end, 6:5, filled across its width, which
+   shows that top half (head, hands, bat or glove) and never a thin middle
+   slice of a stretched photo. The left edge fades into the navy. */
+.ofa__wash {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  height: 100%;
+  aspect-ratio: 6 / 5;
+  object-fit: cover;
+  object-position: 50% 6%;
+  filter: grayscale(1);
+  mask-image: linear-gradient(90deg, transparent, var(--ink-0) 45%);
+}
+/* A long name can run onto the photo: a navy halo keeps it readable. */
+.ofa__card .phcard__id {
+  text-shadow: 0 0 6px var(--band-fill), 0 0 12px var(--band-fill);
+}

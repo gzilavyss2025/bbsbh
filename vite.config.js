@@ -602,7 +602,7 @@ export default defineConfig({
               networkTimeoutSeconds: 3,
               expiration: {
                 // Room for one copy of every whole-file dataset with headroom
-                // (27 exist today) — an undersized cap here silently evicts
+                // (52 exist on 2026-11-10; raised 48 -> 64 then) — an undersized cap here silently evicts
                 // one page's data to admit another's.
                 //
                 // WHOLE-FILE SNAPSHOTS ONLY, and that is what makes the cap
@@ -612,7 +612,7 @@ export default defineConfig({
                 // them at a counted cache means browsing a handful of player
                 // pages quietly evicts the standings' data — the exact failure
                 // this comment warns about, arriving through the back door.
-                maxEntries: 48,
+                maxEntries: 64,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },

@@ -1,6 +1,7 @@
 import { getJson } from '../statsapi.js'
 import { fetchWarData } from '../war.js'
 import { fetchPlayerContract, fetchContractsSeason } from '../person/contracts.js'
+import { hitterHoverFields, pitcherHoverFields } from '../playerHoverCard.js'
 
 // The free-agent class (#2509): everyone who filed for free agency after a
 // season, where he played last, and where he signed. One live read of
@@ -119,9 +120,19 @@ export function statsByPerson(people) {
     for (const s of p?.stats ?? []) {
       const name = s?.group?.displayName
       const stat = s?.splits?.[0]?.stat
-      if (name && stat) groups[name] = stat
+      if (!name || !stat) continue
+      // A career line (asked for by the nightly top-free-agents run) rides
+      // beside the season one, never over it.
+      if (s?.type?.displayName === 'career') groups[`${name}Career`] = stat
+      else groups[name] = stat
     }
-    out[p.id] = { age: p?.currentAge ?? null, ...groups }
+    out[p.id] = {
+      age: p?.currentAge ?? null,
+      first: p?.firstName ?? '',
+      last: p?.lastName ?? '',
+      suffix: p?.nameSuffix ?? '',
+      ...groups,
+    }
   }
   return out
 }
@@ -140,16 +151,22 @@ async function fetchSeasonStats(ids, season, signal) {
   return statsByPerson(pages.flatMap((p) => p?.people ?? []))
 }
 
-// The class, sorted, with each row's age and stat line. A failed stats read
-// leaves the lines blank; a failed class read throws (the page shows a retry).
-export async function loadFreeAgents(season, { signal } = {}) {
+// The class, mapped and joined to WAR: the /free-agents page reads it live;
+// scripts/gen-top-free-agents.mjs reads it nightly for the home page.
+export async function readClass(season, { signal, get = getJson, war: warData } = {}) {
   const [json, war] = await Promise.all([
-    getJson(`/api/v1/people/freeAgents?season=${season}`, { signal }),
-    fetchWarData(),
+    get(`/api/v1/people/freeAgents?season=${season}`, { signal }),
+    warData ?? fetchWarData(),
   ])
   // war.json holds one season; a past class gets no WAR rather than the wrong year's.
   const seasonWar = Number(war?.season) === Number(season) ? war : null
-  const rows = (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
+  return (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
+}
+
+// The class, sorted, with each row's age and stat line. A failed stats read
+// leaves the lines blank; a failed class read throws (the page shows a retry).
+export async function loadFreeAgents(season, { signal } = {}) {
+  const rows = await readClass(season, { signal })
   const stats = rows.length ? await fetchSeasonStats(rows.filter((r) => !r.minor).map((r) => r.id), season, signal) : {}
   return sortFreeAgents(
     rows.map((r) => ({ ...r, age: stats[r.id]?.age ?? null, stats: statLine(stats[r.id], r.isPitcher) })),
@@ -180,4 +197,68 @@ export async function loadLastDeals(ids, season) {
     if (terms) out[id] = terms
   })
   return out
+}
+
+// The home page's top free agents (OffseasonLead): the best unsigned major
+// leaguers by WAR, nothing else. Pure, so the cut is testable.
+// No WAR at all (war.json for another season) means no ranking: the sort
+// would fall back to names, so the block hides rather than call A-names "top".
+export function topUnsigned(rows, n = 6) {
+  const pool = rows.filter((r) => !r.signed && !r.minor)
+  if (!pool.some((r) => r.war != null)) return []
+  return sortFreeAgents(pool).slice(0, n)
+}
+
+// One card: the hover card's two name lines, from the person record (so a
+// suffix rides the last name: "Edwards Jr.", never "Jr." alone), falling back
+// to the feed's full name, and its four stats. A closer always leads with SV,
+// so one in the CL group on career saves alone reads like the rest.
+export function topCard(row, person) {
+  const words = row.name.split(' ')
+  const last = person?.last ? [person.last, person.suffix].filter(Boolean).join(' ') : words.at(-1)
+  const first = person?.last ? person.first : words.slice(0, -1).join(' ')
+  return {
+    ...row,
+    first,
+    last,
+    fields: row.isPitcher
+      ? pitcherHoverFields(person?.pitching ?? null, row.group === 'CL' ? 'SV' : null)
+      : hitterHoverFields(person?.hitting ?? null),
+  }
+}
+
+// Six per position group (and across all of them) for the home page block.
+// A signing drops a player out of the pool, so the next night's run moves the
+// next best up into his slot.
+export const TOP_GROUPS = ['SP', 'RP', 'CL', 'C', 'IF', 'OF', 'DH']
+
+export function topByGroup(rows) {
+  const out = { all: topUnsigned(rows) }
+  for (const g of TOP_GROUPS) out[g] = topUnsigned(rows.filter((r) => r.group === g))
+  return out
+}
+
+// A free agent pitcher's role for the home block (Gary, 2026-11-10): mostly
+// starts is SP; otherwise 5+ saves last season or 25+ in his career is CL;
+// anyone else is RP. Its own cut, not identity.js's pitcherRole (8 season
+// saves, no career), because a closer coming off a hurt year is still the
+// closer a club is shopping for.
+export function freeAgentRole(season, career) {
+  const g = Number(season?.gamesPitched ?? season?.gamesPlayed ?? 0)
+  if (g > 0 && Number(season?.gamesStarted ?? 0) / g >= 0.5) return 'SP'
+  if (Number(season?.saves ?? 0) >= 5 || Number(career?.saves ?? 0) >= 25) return 'CL'
+  return 'RP'
+}
+
+// The home page block's file (scripts/gen-top-free-agents.mjs, nightly):
+// `{ generatedAt, season, groups: { all, SP, RP, CL, C, IF, OF, DH } }`, each a list of
+// topCard rows. The whole class is ~250 KB live; this is a few KB. Not a
+// staticJson reader: that memoizes for the page's life, and the block re-reads
+// it each time the app comes back to the foreground, so an installed app left
+// open for days drops last night's signings (Gary, 2026-11-10). The service
+// worker's NetworkFirst rule for /data/*.json still covers offline.
+export async function fetchTopFreeAgents() {
+  const res = await fetch('/data/top-free-agents.json')
+  if (!res.ok) throw new Error(`top-free-agents.json ${res.status}`)
+  return res.json()
 }
