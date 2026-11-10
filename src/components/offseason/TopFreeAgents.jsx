@@ -17,8 +17,8 @@ import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 // IF, OF, DH), read from a nightly file (scripts/gen-top-free-agents.mjs) so a
 // signing is replaced by the next best the next morning; each drawn as the player hover card
 // (PlayerHoverCard.jsx: navy band, photo, two-line name, four-stat table,
-// no crest since no club holds him), and his action photo washed behind the whole
-// card (lib/headshot/actionPhoto.js); WAR orders the cards and is not printed. A phone swipes a row; wide,
+// no crest since no club holds him), and his action photo washed into the band
+// behind the name (lib/headshot/actionPhoto.js); WAR orders the cards and is not printed. A phone swipes a row; wide,
 // a grid. The one door opens the full class at /free-agents.
 // Open surface (ADR-0034): season stats, no game result. Loading or a failed
 // read shows nothing, and the calendar meets the wire as before.
@@ -44,8 +44,8 @@ export function TopFreeAgents({ season }) {
       <ol className="ofa__list">
         {data.map((r) => (
           <li key={r.id} className="ofa__card">
-            <ActionWash personId={r.id} />
             <div className="phcard__band sectionhead--band">
+              <ActionWash personId={r.id} />
               <span className="phcard__photo">
                 <Headshot personId={r.id} name={r.name} teamId={r.teamId} />
               </span>
@@ -82,7 +82,7 @@ export function TopFreeAgents({ season }) {
   )
 }
 
-// His action photo behind the whole card. Decorative (alt ""), and removed on
+// His action photo in the band, fading in from behind the name. Decorative (alt ""), and removed on
 // a 404 (MiLB, retired, photos off) so the card keeps its plain look.
 function ActionWash({ personId }) {
   const [gone, setGone] = useState(false)
