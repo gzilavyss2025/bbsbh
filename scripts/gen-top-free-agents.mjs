@@ -25,14 +25,23 @@ const season = Number(war.season)
 const rows = await readClass(season, { get: getJson, war })
 // Stats for the whole unsigned pool, season and career: a pitcher's role
 // (SP/RP/CL) has to be known before he can be ranked inside it.
-const pool = rows.filter((r) => !r.signed && !r.minor).map((r) => r.id)
-const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=[season,career],season=${season})`)
-const people = statsByPerson(await getPeople(pool, { hydrate }))
+const unsigned = rows.filter((r) => !r.signed && !r.minor)
+const season_ = encodeURIComponent(`stats(group=[hitting,pitching],type=season,season=${season})`)
+// Career for pitchers only, read for career saves and nothing else. A second
+// call: the API answers 400 to two stats() hydrates on one request.
+const career = encodeURIComponent('stats(group=pitching,type=career)')
+const [seasonRows, careerRows] = await Promise.all([
+  getPeople(unsigned.map((r) => r.id), { hydrate: season_ }),
+  getPeople(unsigned.filter((r) => r.isPitcher).map((r) => r.id), { hydrate: career }),
+])
+const people = statsByPerson(seasonRows)
+for (const [id, c] of Object.entries(statsByPerson(careerRows))) {
+  if (people[id] && c.pitchingCareer) people[id].pitchingCareer = c.pitchingCareer
+}
 const ranked = rows.map((r) =>
   r.isPitcher ? { ...r, group: freeAgentRole(people[r.id]?.pitching, people[r.id]?.pitchingCareer) } : r,
 )
 const top = topByGroup(ranked)
-const ids = [...new Set(Object.values(top).flat().map((r) => r.id))]
 
 // Only what a card draws: no notes, deals or WAR (WAR orders, never shows).
 const card = (r) => {
@@ -42,4 +51,4 @@ const card = (r) => {
 const groups = Object.fromEntries(Object.entries(top).map(([g, list]) => [g, list.map(card)]))
 
 await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, groups })
-console.log(`top-free-agents: ${season}, ${ids.length} players across ${Object.keys(groups).length} groups`)
+console.log(`top-free-agents: ${season}, ${new Set(Object.values(groups).flat().map((c) => c.id)).size} players across ${Object.keys(groups).length} groups`)

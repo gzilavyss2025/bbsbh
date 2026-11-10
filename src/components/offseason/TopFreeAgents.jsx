@@ -23,7 +23,7 @@ import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 // Open surface (ADR-0034): season stats, no game result. Loading or a failed
 // read shows nothing, and the calendar meets the wire as before.
 export function TopFreeAgents({ season }) {
-  const { data: file } = useAsync(() => fetchTopFreeAgents(), [])
+  const { data: file } = useAsync(() => fetchTopFreeAgents(), [], { refetchOnForeground: true })
   const linkProps = useRouteLink()
   const [group, setGroup] = useState('all')
   // A file for another class is not this winter's list.

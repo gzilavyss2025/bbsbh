@@ -58,14 +58,10 @@
   text-decoration: none;
 }
 
-/* The action photo sits in the navy band only, under the band's text and
-   clear of the stats. The band is
-   isolated (section-head.css), so z-index -1 keeps the photo above the
-   band's fill and below its text. */
-.ofa__card {
-  isolation: isolate;
-}
-/* The photo is a full-body 2:3 portrait (lib/headshot/actionPhoto.js); the
+/* The action photo sits in the navy band only, clear of the stats. The band
+   is isolated (section-head.css), so z-index -1 keeps the photo above the
+   band's fill and below its text.
+   The photo is a full-body 2:3 portrait (lib/headshot/actionPhoto.js); the
    face sits in its top fifth and the swing or the delivery in its top half.
    So it is a box at the band's right end, 6:5, filled across its width, which
    shows that top half (head, hands, bat or glove) and never a thin middle

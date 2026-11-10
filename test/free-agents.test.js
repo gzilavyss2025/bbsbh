@@ -220,3 +220,22 @@ test('freeAgentRole: SP by starts, CL by 5 season or 25 career saves, else RP', 
   assert.equal(freeAgentRole(null, { saves: 300 }), 'CL')
   assert.equal(freeAgentRole(null, null), 'RP')
 })
+
+test('topCard: a CL card leads with SV even under 5 season saves', () => {
+  const card = topCard({ id: 4, name: 'José Alvarado', isPitcher: true, group: 'CL' }, { pitching: { gamesPitched: 40, gamesStarted: 0, saves: 3, wins: 5, losses: 4, era: '3.50', strikeOuts: 50, whip: '1.30' } })
+  assert.deepEqual(card.fields[0], { k: 'SV', v: '3' })
+})
+
+test('statsByPerson keeps the season line and files the career line beside it', () => {
+  const s = statsByPerson([
+    {
+      id: 9,
+      stats: [
+        { type: { displayName: 'career' }, group: { displayName: 'pitching' }, splits: [{ stat: { saves: 120, era: '3.01' } }] },
+        { type: { displayName: 'season' }, group: { displayName: 'pitching' }, splits: [{ stat: { saves: 2, era: '4.10' } }] },
+      ],
+    },
+  ])
+  assert.equal(s[9].pitching.era, '4.10')
+  assert.equal(s[9].pitchingCareer.saves, 120)
+})

@@ -1,6 +1,5 @@
 import { getJson } from '../statsapi.js'
 import { fetchWarData } from '../war.js'
-import { staticJson } from '../staticJson.js'
 import { fetchPlayerContract, fetchContractsSeason } from '../person/contracts.js'
 import { hitterHoverFields, pitcherHoverFields } from '../playerHoverCard.js'
 
@@ -212,7 +211,8 @@ export function topUnsigned(rows, n = 6) {
 
 // One card: the hover card's two name lines, from the person record (so a
 // suffix rides the last name: "Edwards Jr.", never "Jr." alone), falling back
-// to the feed's full name, and its four stats.
+// to the feed's full name, and its four stats. A closer always leads with SV,
+// so one in the CL group on career saves alone reads like the rest.
 export function topCard(row, person) {
   const words = row.name.split(' ')
   const last = person?.last ? [person.last, person.suffix].filter(Boolean).join(' ') : words.at(-1)
@@ -221,7 +221,9 @@ export function topCard(row, person) {
     ...row,
     first,
     last,
-    fields: row.isPitcher ? pitcherHoverFields(person?.pitching ?? null) : hitterHoverFields(person?.hitting ?? null),
+    fields: row.isPitcher
+      ? pitcherHoverFields(person?.pitching ?? null, row.group === 'CL' ? 'SV' : null)
+      : hitterHoverFields(person?.hitting ?? null),
   }
 }
 
@@ -250,5 +252,13 @@ export function freeAgentRole(season, career) {
 
 // The home page block's file (scripts/gen-top-free-agents.mjs, nightly):
 // `{ generatedAt, season, groups: { all, SP, RP, CL, C, IF, OF, DH } }`, each a list of
-// topCard rows. The whole class is ~250 KB live; this is a few KB.
-export const fetchTopFreeAgents = staticJson('/data/top-free-agents.json')
+// topCard rows. The whole class is ~250 KB live; this is a few KB. Not a
+// staticJson reader: that memoizes for the page's life, and the block re-reads
+// it each time the app comes back to the foreground, so an installed app left
+// open for days drops last night's signings (Gary, 2026-11-10). The service
+// worker's NetworkFirst rule for /data/*.json still covers offline.
+export async function fetchTopFreeAgents() {
+  const res = await fetch('/data/top-free-agents.json')
+  if (!res.ok) throw new Error(`top-free-agents.json ${res.status}`)
+  return res.json()
+}
