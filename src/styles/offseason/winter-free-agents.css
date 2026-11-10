@@ -59,23 +59,27 @@
 }
 
 /* The action photo sits in the navy band only, under the band's text and
-   clear of the stats. It fades in from the left, so the name and position
-   stay on solid navy (contrast holds without the photo's help). The band is
+   clear of the stats. The band is
    isolated (section-head.css), so z-index -1 keeps the photo above the
    band's fill and below its text. */
 .ofa__card {
   isolation: isolate;
 }
+/* The photo is a full-body 2:3 portrait (lib/headshot/actionPhoto.js); the
+   face sits in its top fifth and the swing or the delivery in its top half.
+   So it is a box at the band's right end, 6:5, filled across its width, which
+   shows that top half (head, hands, bat or glove) and never a thin middle
+   slice of a stretched photo. The left edge fades into the navy. */
 .ofa__wash {
   position: absolute;
-  inset: 0;
+  inset: 0 0 0 auto;
   z-index: -1;
-  width: 100%;
   height: 100%;
+  aspect-ratio: 6 / 5;
   object-fit: cover;
-  object-position: 70% 20%;
+  object-position: 50% 6%;
   filter: grayscale(1);
-  mask-image: linear-gradient(90deg, transparent 0 40%, var(--ink-0) 85%);
+  mask-image: linear-gradient(90deg, transparent, var(--ink-0) 45%);
 }
 /* A long name can run onto the photo: a navy halo keeps it readable. */
 .ofa__card .phcard__id {
