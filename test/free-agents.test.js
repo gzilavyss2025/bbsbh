@@ -10,6 +10,8 @@ import {
   topUnsigned,
   topCard,
   topByGroup,
+  freeAgentRole,
+  TOP_GROUPS,
   statLine,
   statsByPerson,
   cleanNote,
@@ -196,14 +198,25 @@ test('topCard: a hitter gets hitter fields, and no stats is all dashes', () => {
   assert.equal(none.last, 'Solo')
 })
 
-test('topByGroup: six per position group plus all, each from unsigned only', () => {
+test('topByGroup: six per group plus all, each from unsigned only', () => {
   const rows = []
-  for (let i = 0; i < 8; i++) rows.push({ id: i, name: `P${i}`, group: 'P', war: i, signed: false, minor: false })
+  for (let i = 0; i < 8; i++) rows.push({ id: i, name: `S${i}`, group: 'SP', war: i, signed: false, minor: false })
   rows.push({ id: 100, name: 'C0', group: 'C', war: 3.5, signed: false, minor: false })
   rows.push({ id: 101, name: 'C1', group: 'C', war: 9, signed: true, minor: false })
   const g = topByGroup(rows)
+  assert.deepEqual(Object.keys(g), ['all', ...TOP_GROUPS])
   assert.deepEqual(g.all.map((r) => r.id), [7, 6, 5, 4, 100, 3])
-  assert.deepEqual(g.P.map((r) => r.id), [7, 6, 5, 4, 3, 2])
+  assert.deepEqual(g.SP.map((r) => r.id), [7, 6, 5, 4, 3, 2])
   assert.deepEqual(g.C.map((r) => r.id), [100])
-  assert.deepEqual(g.OF, [])
+  assert.deepEqual(g.CL, [])
+})
+
+test('freeAgentRole: SP by starts, CL by 5 season or 25 career saves, else RP', () => {
+  assert.equal(freeAgentRole({ gamesPitched: 30, gamesStarted: 30, saves: 0 }, { saves: 40 }), 'SP')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 5 }, { saves: 5 }), 'CL')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 1 }, { saves: 25 }), 'CL')
+  assert.equal(freeAgentRole({ gamesPitched: 60, gamesStarted: 0, saves: 4 }, { saves: 24 }), 'RP')
+  // No 2026 games (hurt all year): the career line decides, else a reliever.
+  assert.equal(freeAgentRole(null, { saves: 300 }), 'CL')
+  assert.equal(freeAgentRole(null, null), 'RP')
 })

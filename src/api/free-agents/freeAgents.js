@@ -121,7 +121,11 @@ export function statsByPerson(people) {
     for (const s of p?.stats ?? []) {
       const name = s?.group?.displayName
       const stat = s?.splits?.[0]?.stat
-      if (name && stat) groups[name] = stat
+      if (!name || !stat) continue
+      // A career line (asked for by the nightly top-free-agents run) rides
+      // beside the season one, never over it.
+      if (s?.type?.displayName === 'career') groups[`${name}Career`] = stat
+      else groups[name] = stat
     }
     out[p.id] = {
       age: p?.currentAge ?? null,
@@ -224,13 +228,27 @@ export function topCard(row, person) {
 // Six per position group (and across all of them) for the home page block.
 // A signing drops a player out of the pool, so the next night's run moves the
 // next best up into his slot.
+export const TOP_GROUPS = ['SP', 'RP', 'CL', 'C', 'IF', 'OF', 'DH']
+
 export function topByGroup(rows) {
   const out = { all: topUnsigned(rows) }
-  for (const g of POSITION_GROUPS) out[g] = topUnsigned(rows.filter((r) => r.group === g))
+  for (const g of TOP_GROUPS) out[g] = topUnsigned(rows.filter((r) => r.group === g))
   return out
 }
 
+// A free agent pitcher's role for the home block (Gary, 2026-11-10): mostly
+// starts is SP; otherwise 5+ saves last season or 25+ in his career is CL;
+// anyone else is RP. Its own cut, not identity.js's pitcherRole (8 season
+// saves, no career), because a closer coming off a hurt year is still the
+// closer a club is shopping for.
+export function freeAgentRole(season, career) {
+  const g = Number(season?.gamesPitched ?? season?.gamesPlayed ?? 0)
+  if (g > 0 && Number(season?.gamesStarted ?? 0) / g >= 0.5) return 'SP'
+  if (Number(season?.saves ?? 0) >= 5 || Number(career?.saves ?? 0) >= 25) return 'CL'
+  return 'RP'
+}
+
 // The home page block's file (scripts/gen-top-free-agents.mjs, nightly):
-// `{ generatedAt, season, groups: { all, P, C, IF, OF, DH } }`, each a list of
+// `{ generatedAt, season, groups: { all, SP, RP, CL, C, IF, OF, DH } }`, each a list of
 // topCard rows. The whole class is ~250 KB live; this is a few KB.
 export const fetchTopFreeAgents = staticJson('/data/top-free-agents.json')

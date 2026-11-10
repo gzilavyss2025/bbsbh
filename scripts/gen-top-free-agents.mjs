@@ -1,7 +1,7 @@
 // Regenerates public/data/top-free-agents.json — the MLB offseason home page's
 // "Top free agents" block (src/components/offseason/TopFreeAgents.jsx): six
-// unsigned major leaguers per position group (P, C, IF, OF, DH) and across all
-// of them, by WAR, each with the player hover card's four season stats.
+// unsigned major leaguers per group (SP, RP, CL, C, IF, OF, DH; the pitcher
+// roles from freeAgentRole) and across all of them, by WAR, each with the player hover card's four season stats.
 //
 // Nightly, after WAR (it reads the war.json that step wrote). A player who
 // signed since the last run drops out of the pool, so the next best moves up
@@ -15,7 +15,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson, getPeople } from './lib/statsapi.mjs'
-import { readClass, statsByPerson, topByGroup, topCard } from '../src/api/free-agents/freeAgents.js'
+import { freeAgentRole, readClass, statsByPerson, topByGroup, topCard } from '../src/api/free-agents/freeAgents.js'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'top-free-agents.json')
@@ -23,15 +23,21 @@ const war = JSON.parse(await readFile(join(here, '..', 'public', 'data', 'war.js
 const season = Number(war.season)
 
 const rows = await readClass(season, { get: getJson, war })
-const top = topByGroup(rows)
+// Stats for the whole unsigned pool, season and career: a pitcher's role
+// (SP/RP/CL) has to be known before he can be ranked inside it.
+const pool = rows.filter((r) => !r.signed && !r.minor).map((r) => r.id)
+const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=[season,career],season=${season})`)
+const people = statsByPerson(await getPeople(pool, { hydrate }))
+const ranked = rows.map((r) =>
+  r.isPitcher ? { ...r, group: freeAgentRole(people[r.id]?.pitching, people[r.id]?.pitchingCareer) } : r,
+)
+const top = topByGroup(ranked)
 const ids = [...new Set(Object.values(top).flat().map((r) => r.id))]
-const hydrate = encodeURIComponent(`stats(group=[hitting,pitching],type=season,season=${season})`)
-const people = statsByPerson(await getPeople(ids, { hydrate }))
 
 // Only what a card draws: no notes, deals or WAR (WAR orders, never shows).
 const card = (r) => {
   const c = topCard(r, people[r.id])
-  return { id: c.id, name: c.name, first: c.first, last: c.last, pos: c.pos, teamId: c.teamId, fields: c.fields }
+  return { id: c.id, name: c.name, first: c.first, last: c.last, pos: r.isPitcher ? r.group : c.pos, teamId: c.teamId, fields: c.fields }
 }
 const groups = Object.fromEntries(Object.entries(top).map(([g, list]) => [g, list.map(card)]))
 

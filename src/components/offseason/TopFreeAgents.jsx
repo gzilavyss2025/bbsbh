@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchTopFreeAgents, POSITION_GROUPS } from '../../api/free-agents/freeAgents.js'
+import { fetchTopFreeAgents, TOP_GROUPS } from '../../api/free-agents/freeAgents.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
@@ -13,7 +13,7 @@ import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 
 // TOP FREE AGENTS — the MLB offseason page's block between the winter
 // calendar and the wire (wireframe approved by Gary, 2026-11-10). The best
-// six unsigned major leaguers by WAR, filtered by position group (All, P, C,
+// six unsigned major leaguers by WAR, filtered by group (All, SP, RP, CL, C,
 // IF, OF, DH), read from a nightly file (scripts/gen-top-free-agents.mjs) so a
 // signing is replaced by the next best the next morning; each drawn as the player hover card
 // (PlayerHoverCard.jsx: navy band, photo, two-line name, four-stat table,
@@ -29,7 +29,7 @@ export function TopFreeAgents({ season }) {
   // A file for another class is not this winter's list.
   const groups = Number(file?.season) === Number(season) ? file.groups : null
   if (!groups?.all?.length) return null
-  const options = ['all', ...POSITION_GROUPS]
+  const options = ['all', ...TOP_GROUPS]
     .filter((g) => groups[g]?.length)
     .map((g) => ({ value: g, label: g === 'all' ? 'All' : g }))
   const data = groups[group] ?? groups.all

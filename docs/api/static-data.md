@@ -79,7 +79,7 @@ for each generator; the reader modules:
   so MiLB rows fall back to a dash. The same shard also carries `fld` (fielding runs) and
   `pa` (plate appearances) maps for 2023 on, read straight off the history shard (`history.fld[personId]` / `history.pa[personId]`). No UI reads them yet.
 - `free-agents/freeAgents.js`'s `fetchTopFreeAgents()` — the home page's top free agents,
-  six per position group, from `public/data/top-free-agents.json`
+  six per group (SP, RP, CL, C, IF, OF, DH), from `public/data/top-free-agents.json`
   (`scripts/gen-top-free-agents.mjs`, nightly). Not its own module: the ranking and card
   logic it was built from live beside it, and the /free-agents page reads the same class live.
 - `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
