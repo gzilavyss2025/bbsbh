@@ -211,6 +211,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/pressure-moments': 'tensest',
     '/tensest': 'tensest', // the page's first address; old links still land
     '/infield': 'infield',
+    '/eliminated': 'eliminated',
     '/milestones': 'milestones',
     '/awards': 'awards-history',
     '/postseason-history': 'postseason-history',

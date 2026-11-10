@@ -1121,6 +1121,10 @@
       "class": "spoiler-free",
       "why": "Static rehab.json — league-wide rehab assignments. Roster state, no score."
     },
+    "eliminated/eliminated.js": {
+      "class": "spoiler-free",
+      "why": "Static eliminated.json: elimination dates and the games after them, records and dates only. A standalone report outside the four scoring surfaces (ADR-0034)."
+    },
     "infield/infield.js": {
       "class": "spoiler-free",
       "why": "Static outfield-outs/{season}.json: team-games with no out to an outfielder. Holds no scores or winners, and the page is a standalone report outside the four scoring surfaces (ADR-0034)."
