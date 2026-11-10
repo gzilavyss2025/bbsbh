@@ -1593,7 +1593,7 @@ don't run these by hand.
 Re-run only to fold in a new season.
 
 - `gen-eliminated.mjs` → `public/data/eliminated.json` — for each MLB club and regular
-  season since 2017, the date it was mathematically eliminated from the postseason and
+  season since 1995 (the wild-card era), the date it was mathematically eliminated from the postseason and
   every game it played from then on (date, opponent, home/away, record entering). The
   rule (both elimination numbers `E`, or every berth in the league clinched by others,
   which catches tiebreakers) is `scripts/lib/elimination/rule.mjs`. Reads standings from
