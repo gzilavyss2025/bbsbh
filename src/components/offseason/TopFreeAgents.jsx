@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { loadTopFreeAgents } from '../../api/free-agents/freeAgents.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -5,7 +6,8 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
-import { leagueLogoUrl } from '../../lib/teams.js'
+import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
+import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 
 // The hover card's two-line name: everything before the last word, then it.
 const first = (n) => n.split(' ').slice(0, -1).join(' ')
@@ -15,7 +17,8 @@ const last = (n) => n.split(' ').at(-1)
 // calendar and the wire (wireframe approved by Gary, 2026-11-10). The best
 // six unsigned major leaguers by WAR, each drawn as the player hover card
 // (PlayerHoverCard.jsx: navy band, photo, two-line name, crest, four-stat
-// table) with the MLB mark in the crest, since no club holds him; WAR orders the cards and is not printed. A phone swipes a row; wide,
+// table) no crest (no club holds him), and his action photo washed behind the whole
+// card (lib/headshot/actionPhoto.js); WAR orders the cards and is not printed. A phone swipes a row; wide,
 // a grid. The one door opens the full class at /free-agents.
 // Open surface (ADR-0034): season stats, no game result. Loading or a failed
 // read shows nothing, and the calendar meets the wire as before.
@@ -33,6 +36,7 @@ export function TopFreeAgents({ season }) {
       <ol className="ofa__list">
         {data.map((r, i) => (
           <li key={r.id} className="ofa__card">
+            <ActionWash personId={r.id} />
             <div className="phcard__band sectionhead--band">
               <span className="phcard__photo">
                 <Headshot personId={r.id} name={r.name} teamId={r.teamId} />
@@ -42,9 +46,6 @@ export function TopFreeAgents({ season }) {
                 <PlayerLink id={r.id} className="phcard__last ofa__name">{last(r.name)}</PlayerLink>
                 <div className="phcard__meta">{[r.pos, `No. ${i + 1}`].filter(Boolean).join(' · ')}</div>
               </div>
-              <span className="phcard__crest">
-                <img src={leagueLogoUrl()} alt="MLB" width="32" height="32" loading="lazy" decoding="async" />
-              </span>
             </div>
             <table className="phcard__table">
               <thead>
@@ -68,5 +69,25 @@ export function TopFreeAgents({ season }) {
         ))}
       </ol>
     </section>
+  )
+}
+
+// His action photo behind the whole card. Decorative (alt ""), and removed on
+// a 404 (MiLB, retired, photos off) so the card keeps its plain look.
+function ActionWash({ personId }) {
+  const [gone, setGone] = useState(false)
+  const src = actionPhotoUrl(personId)
+  if (!src || gone) return null
+  return (
+    <img
+      className="ofa__wash"
+      src={src}
+      alt=""
+      aria-hidden="true"
+      crossOrigin={HEADSHOT_CROSS_ORIGIN}
+      loading="lazy"
+      decoding="async"
+      onError={() => setGone(true)}
+    />
   )
 }
