@@ -16,8 +16,8 @@ const last = (n) => n.split(' ').at(-1)
 // TOP FREE AGENTS — the MLB offseason page's block between the winter
 // calendar and the wire (wireframe approved by Gary, 2026-11-10). The best
 // six unsigned major leaguers by WAR, each drawn as the player hover card
-// (PlayerHoverCard.jsx: navy band, photo, two-line name, crest, four-stat
-// table) no crest (no club holds him), and his action photo washed behind the whole
+// (PlayerHoverCard.jsx: navy band, photo, two-line name, four-stat table,
+// no crest since no club holds him), and his action photo washed behind the whole
 // card (lib/headshot/actionPhoto.js); WAR orders the cards and is not printed. A phone swipes a row; wide,
 // a grid. The one door opens the full class at /free-agents.
 // Open surface (ADR-0034): season stats, no game result. Loading or a failed
@@ -83,7 +83,6 @@ function ActionWash({ personId }) {
       className="ofa__wash"
       src={src}
       alt=""
-      aria-hidden="true"
       crossOrigin={HEADSHOT_CROSS_ORIGIN}
       loading="lazy"
       decoding="async"

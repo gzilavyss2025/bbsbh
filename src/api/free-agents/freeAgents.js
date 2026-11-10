@@ -143,14 +143,19 @@ async function fetchSeasonStats(ids, season, signal) {
 
 // The class, sorted, with each row's age and stat line. A failed stats read
 // leaves the lines blank; a failed class read throws (the page shows a retry).
-export async function loadFreeAgents(season, { signal } = {}) {
+// The class, mapped and joined to WAR; both loaders start here.
+async function readClass(season, signal) {
   const [json, war] = await Promise.all([
     getJson(`/api/v1/people/freeAgents?season=${season}`, { signal }),
     fetchWarData(),
   ])
   // war.json holds one season; a past class gets no WAR rather than the wrong year's.
   const seasonWar = Number(war?.season) === Number(season) ? war : null
-  const rows = (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
+  return (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
+}
+
+export async function loadFreeAgents(season, { signal } = {}) {
+  const rows = await readClass(season, signal)
   const stats = rows.length ? await fetchSeasonStats(rows.filter((r) => !r.minor).map((r) => r.id), season, signal) : {}
   return sortFreeAgents(
     rows.map((r) => ({ ...r, age: stats[r.id]?.age ?? null, stats: statLine(stats[r.id], r.isPitcher) })),
@@ -192,14 +197,8 @@ export function topUnsigned(rows, n = 6) {
 // The same class read, but stats for the top few only — the full page reads
 // stats for the whole class, too much for a block on the home page. Each row
 // carries the player hover card's four stats (`fields`).
-export async function loadTopFreeAgents(season, { signal, n = 6 } = {}) {
-  const [json, war] = await Promise.all([
-    getJson(`/api/v1/people/freeAgents?season=${season}`, { signal }),
-    fetchWarData(),
-  ])
-  const seasonWar = Number(war?.season) === Number(season) ? war : null
-  const rows = (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
-  const top = topUnsigned(rows, n)
+export async function loadTopFreeAgents(season, { signal } = {}) {
+  const top = topUnsigned(await readClass(season, signal))
   const stats = top.length ? await fetchSeasonStats(top.map((r) => r.id), season, signal) : {}
   return top.map((r) => ({
     ...r,
