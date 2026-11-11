@@ -5,6 +5,7 @@ import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
 // AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
@@ -54,7 +55,15 @@ export function SiteMenuButton({ className = '' }) {
       >
         <MenuGlyph />
       </button>
-      {open && <SiteMenuModal onClose={() => setOpen(false)} />}
+      {/* Portalled to <body>. Declared inside the slate's masthead, iOS Safari
+          sized the fixed scrim to a header ancestor instead of the viewport:
+          the sheet docked to the masthead's bottom edge and only its
+          "Everything" footer showed under the status bar. */}
+      {open && (
+        <ModalPortal>
+          <SiteMenuModal onClose={() => setOpen(false)} />
+        </ModalPortal>
+      )}
     </>
   )
 }
