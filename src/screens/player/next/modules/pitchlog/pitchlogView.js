@@ -1,7 +1,7 @@
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { fetchFinalScores } from '../../../../../api/boxlines/fetch.js'
 import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
-import { fetchPitchMixFor } from '../../../../../api/pitchArsenal.js'
+import { fetchPitchMixFor } from '../../../../../api/pitcher/arsenal.js'
 import { gameLogView, loggedSplits } from '../../../../../api/person/gameLog.js'
 import { DASH, eraOf, num } from '../../../../../api/person/shared.js'
 import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'

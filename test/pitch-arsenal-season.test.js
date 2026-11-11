@@ -3,7 +3,7 @@
 // combined, comes from the pitch-arsenal store's shard instead.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { arsenalLevelOf } from '../src/api/pitchArsenal.js'
+import { arsenalLevelOf } from '../src/api/pitcher/arsenal.js'
 
 const shard = {
   pit: {

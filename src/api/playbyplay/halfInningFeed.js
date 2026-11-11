@@ -171,7 +171,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // The pregame/mid-game "Game Advisory" placeholder (GAME_ADVISORY_EVENT_TYPE)
     // is excluded the same way — it carries the NEXT batter's matchup instead of
     // a stale one, but is just as much not a real plate appearance. Same guard
-    // `pitchers.js` uses for batters-faced counts.
+    // `pitcher/lines.js` uses for batters-faced counts.
     //
     // Resolved BEFORE the playEvents scan below, not after it, because the scan
     // needs to know whether this play will get a card: a baserunning note that
@@ -627,7 +627,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       //  2. The interrupted at-bat itself. The play's pitch events are the
       //     pitches thrown to the batter who was up — they are NOT re-listed
       //     when his at-bat restarts from scratch next inning (same feed fact
-      //     derive.js/pitchers.js lean on to count these pitches; see
+      //     derive.js and pitcher/lines.js lean on to count these pitches; see
       //     NON_PA_EVENT_TYPES' doc). Verified against the same game: Luis
       //     Lara saw 4 pitches (1-2) on the caught_stealing_2b play, then led
       //     off the 8th with a fresh count. Without a card those pitches

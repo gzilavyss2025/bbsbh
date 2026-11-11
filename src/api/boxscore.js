@@ -26,7 +26,7 @@ import { contextNeutralPoints } from './performanceScore.js'
 // too instead of this module re-deriving the same liveData fields a second
 // way. See revealTotals/revealInning and computePitcherLines below.
 import { revealTotals, revealInning } from './linescore.js'
-import { computePitcherLines } from './pitchers.js'
+import { computePitcherLines } from './pitcher/lines.js'
 
 // The info block — the label/value rows under the tables, and the rule that
 // files each one under a club. Its own module because it is one self-contained
@@ -488,7 +488,7 @@ export function selectBoxscore(feed) {
   const gameInfo = infoRows.filter((r) => r.label && r.value)
   const gameNotes = splitGameNotes(feed)
   // The same per-pitcher accumulator PitchersSection reads mid-game
-  // (src/api/pitchers.js), computed once here at full reveal — Infinity as
+  // (src/api/pitcher/lines.js), computed once here at full reveal — Infinity as
   // "the whole game", same sentinel defenseEntering uses for the box score's
   // whole-game defensive alignment — and shared by both sides' pitchingRows
   // instead of each re-deriving its own numbers from the boxscore stats.

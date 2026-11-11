@@ -54,7 +54,7 @@ export function medianRatesFor(data, group) {
 // savant-percentiles.json is SHAPED, flattening its `bat` map into the flat
 // pool that module ranks.
 //
-// No level split, unlike pitchArsenal.js's similarPitchersFor: Savant has no
+// No level split, unlike pitcher/arsenal.js's similarPitchersFor: Savant has no
 // minor-league board, so `bat` is one MLB pool and there is no second peer
 // group to keep it away from.
 //

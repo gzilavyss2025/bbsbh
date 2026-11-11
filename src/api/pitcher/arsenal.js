@@ -1,7 +1,7 @@
-import { similarPitchers } from '../lib/pitcherSimilarity.js'
-import { shardKey100 } from '../lib/shardKey.js'
-import { readSeasonShard, seasonFolderOf, staticJsonBy } from './staticJson.js'
-import { combineArsenalEntries } from '../lib/seasons/combine.js'
+import { similarPitchers } from '../../lib/pitcherSimilarity.js'
+import { shardKey100 } from '../../lib/shardKey.js'
+import { readSeasonShard, seasonFolderOf, staticJsonBy } from '../staticJson.js'
+import { combineArsenalEntries } from '../../lib/seasons/combine.js'
 
 // Season pitch-type mix per pitcher, read from static same-origin files
 // precomputed nightly by
@@ -116,7 +116,7 @@ export const PHYS_FIELDS = ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime'
 export const physOf = (type) => Object.fromEntries(PHYS_FIELDS.map((f, i) => [f, type?.phys?.[i] ?? null]))
 
 // The two velocity bars the "century club" / veloVariety / veloPeak callout
-// families (src/api/pitcherHealth.js, pitcher-callouts.js,
+// families (src/api/pitcher/health.js, pitcher/callouts.js,
 // callout-notes/liveAtBat.js, scripts/gen-pitch-arsenal.mjs) all share, so
 // the numbers live once. CENTURY_MPH is the floor a pitch has to clear to
 // count at all; ELITE_VELO_MPH is the higher bar a single pitch has to clear
@@ -128,7 +128,7 @@ export const ELITE_VELO_MPH = 102
 
 // How many CENTURY_MPH+ pitches a season has to hold before either surface
 // says anything about it: the Margin Notes `centuryClub` callout
-// (pitcher-callouts.js, which owned this number privately until the player
+// (pitcher/callouts.js, which owned this number privately until the player
 // page's heat band wanted the same floor) (heatView, deleted in #2845, read it too). A one-off 100
 // mph touch is unremarkable for a real flamethrower, and a band reading "1
 // pitch at 100+" is noise rather than a fact worth a gold bar.

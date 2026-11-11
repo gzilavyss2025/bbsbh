@@ -8,7 +8,7 @@
 import { getJson } from './statsapi.js'
 import { startingPositionAbbr } from './select.js'
 import { isTwoWay } from './person.js'
-import { splitPitchingStaff } from './pitcherSplit.js'
+import { splitPitchingStaff } from './pitcher/split.js'
 
 async function fetchGameBoxscore(gamePk) {
   try {

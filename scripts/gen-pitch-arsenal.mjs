@@ -41,7 +41,7 @@ import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
-import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
+import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitcher/arsenal.js'
 import { commandLeague } from '../src/api/commandMap.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
@@ -58,7 +58,7 @@ import { GAP_CAP, collectPending, runSweep } from './lib/sweep/retry.mjs'
 export { centuryRankMap, exportCommandMap } // moved to lib/ to hold this file's size budget; tests import them from here
 
 const here = import.meta.dirname
-// TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
+// TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitcher/arsenal.js.
 // Per-pitcher buckets for the opposing-starter card, one slim per-level pool for
 // the player page's similarity ranking. Nothing reads the league in full, so
 // nothing is written in full. Each folder is a season store (ADR-0086).

@@ -101,7 +101,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   seal as the pre-scoring reference (above it while sealed, below the play-by-play
   once revealed), gated to `revealed || isNextToReveal` (ADR-0010). The data comes
   from the caller-gated pre-pitch selectors in `src/api/` (see `src/api/CLAUDE.md`).
-- **Pitcher lines** (`src/api/pitchers.js` → `computePitcherLines`) are gated by the same
+- **Pitcher lines** (`src/api/pitcher/lines.js` → `computePitcherLines`) are gated by the same
   `revealedThrough` high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009):
   Gameday's day lines (`api/gameday/dayLine.js`), the box score and the scorecard read them
   under that clamp. The season-context/health prose is **Margin Notes**

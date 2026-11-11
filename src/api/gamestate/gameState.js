@@ -221,7 +221,7 @@ export function selectDelays(feed) {
 }
 
 // "today" for a day game, "tonight" for a night game — the word the callout
-// notes (api/callout-notes.js, api/pitcher-callouts.js) use in place of a
+// notes (api/callout-notes.js, api/pitcher/callouts.js) use in place of a
 // hard-coded "tonight". `dayWordFor` takes the raw 'day'|'night' string
 // directly (the callouts bundle carries its own copy — see gen-callouts.mjs —
 // so those builders don't need the whole feed); `dayWord` reads it off

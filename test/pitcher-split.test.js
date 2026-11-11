@@ -1,10 +1,10 @@
-// Coverage for src/api/pitcherSplit.js's splitPitchingStaff — the shared
+// Coverage for src/api/pitcher/split.js's splitPitchingStaff — the shared
 // Starting Pitchers / Bullpen partition used by loadRoster.js (season) and
 // recentForm.js (last-10-games). Pins the bug it replaced: two independently
 // capped top-N lists could both reject the same pitcher.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { splitPitchingStaff } from '../src/api/pitcherSplit.js'
+import { splitPitchingStaff } from '../src/api/pitcher/split.js'
 
 const compareStarters = (a, b) => b.starts - a.starts
 const compareRelievers = (a, b) => b.appearances - a.appearances

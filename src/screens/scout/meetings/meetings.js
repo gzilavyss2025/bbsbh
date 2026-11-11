@@ -1,4 +1,4 @@
-import { pitchLabel } from '../../../api/pitchArsenal.js'
+import { pitchLabel } from '../../../api/pitcher/arsenal.js'
 import { totalsOf } from '../../../api/scout/headToHead.js'
 import { ordinal as withSuffix } from '../../../lib/format.js'
 import { resultShort } from '../../../lib/scout/format.js'

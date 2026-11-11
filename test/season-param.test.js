@@ -84,7 +84,7 @@ test('a year before the first on file reads nothing, never another season', asyn
   // print 2026's figures under the 2025 game, so the card has nothing to show.
   const { fetchFoulsFor, fetchFouls } = await import('../src/api/fouls.js')
   const { fetchSprayFor } = await import('../src/api/spray.js')
-  const { fetchPitchArsenalFor } = await import('../src/api/pitchArsenal.js')
+  const { fetchPitchArsenalFor } = await import('../src/api/pitcher/arsenal.js')
   for (const call of [
     () => fetchFoulsFor(303, { seasonYear: 2025 }),
     () => fetchFouls({ seasonYear: 2025 }),
@@ -105,7 +105,7 @@ test("a leader board's 'all' reads the all/ file, and a missing one is the fallb
   assert.equal(value, null)
   assert.equal((await fetchFouls({ seasonYear: 2026 })).season, 2026)
 
-  const { fetchPitchArsenalPool } = await import('../src/api/pitchArsenal.js')
+  const { fetchPitchArsenalPool } = await import('../src/api/pitcher/arsenal.js')
   const pool = await urlsOf(() => fetchPitchArsenalPool(true, { seasonYear: 'all' }))
   assert.deepEqual(pool.urls, ['/data/pitch-arsenal-pool/all/mlb.json'])
   assert.deepEqual(pool.value.seasons, [2026, 2027])
@@ -131,7 +131,7 @@ test("one player's 'all' reads every season's shard and adds them", async () => 
   assert.equal(fouls.batters[303].maxGamePk, 2)
   assert.equal(batterFoulLine(fouls, 303).maxGameFouls, 6) // the card's own line reads the sum
 
-  const { fetchPitchArsenalFor } = await import('../src/api/pitchArsenal.js')
+  const { fetchPitchArsenalFor } = await import('../src/api/pitcher/arsenal.js')
   const arsenal = await fetchPitchArsenalFor(404, { seasonYear: 'all' })
   assert.equal(arsenal.pit[404].mlb[0].pitches, 40)
   assert.equal(arsenal.pit[404].mlb[0].avgVelo, 91) // (30 × 90 + 10 × 94) / 40

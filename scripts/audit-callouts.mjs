@@ -56,7 +56,7 @@ import { cumulativeInnings } from '../src/api/callout-notes/checkpoints.js'
 import { buildCallouts, computeCalloutProgress, computeGameCalloutNotes } from '../src/api/callout-notes.js'
 import { buildPreHalfCallouts } from '../src/api/prehalf-callouts.js'
 import { buildBetweenInnings } from '../src/api/between-innings.js'
-import { buildMarginNotes } from '../src/api/pitcher-callouts.js'
+import { buildMarginNotes } from '../src/api/pitcher/callouts.js'
 // Reveal-only in the app's sense (ADR-0001) — a rule about render top-level,
 // and this is a terminal script with no DOM. Used only to rebuild the pitch
 // call codes a play card's marathonAb note reads.

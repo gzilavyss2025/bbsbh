@@ -200,7 +200,7 @@ const SHEET_FILES = readdirSync(SHEET_DIR).filter((f) => /\.jsx?$/.test(f))
 const FORBIDDEN = [
   ['linescore.js', 'reveal-only: per-inning runs and the R/H/E line'],
   ['derive.js', 'reveal-only: per-inning pitch/whiff derivations'],
-  ['pitchers.js', 'reveal-gated: a pitcher’s IP/ER line'],
+  ['pitcher/lines.js', 'reveal-gated: a pitcher’s IP/ER line'],
   ['boxscore.js', 'the finished box score'],
   [
     'scorecardGame.js',

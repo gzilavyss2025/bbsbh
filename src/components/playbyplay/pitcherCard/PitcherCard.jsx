@@ -1,6 +1,6 @@
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.js'
 import { fetchPitcherPostseasonCareer } from '../../../api/postseason/pitcherCareer.js'
-import { fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitchArsenal.js'
+import { fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitcher/arsenal.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { keyedCache } from '../../../lib/pitcherCard/cardData.js'
 import {

@@ -2,16 +2,16 @@
 // velocity-decay flag (P4) from .scratch/metric-engines/pitching-health.md,
 // plus the century-club variety check (`computeVeloVariety`, docs/callouts.md).
 //
-// SPOILER NOTE — same footing as pitchers.js (ADR-0009): everything here is
+// SPOILER NOTE — same footing as pitcher/lines.js (ADR-0009): everything here is
 // driven by the reveal high-water mark. `computeVeloDecay`/`computeVeloVariety`
 // walk only plays in revealed half-innings; `laboringFor` reads a pitcher row
 // that computePitcherLines already clamped to `revealedThrough`. None is
 // wrapped in a SealBox — a still-active pitcher needs partial-outing
 // granularity.
 //
-import { halfIndex } from './select.js'
-import { CENTURY_MPH } from './pitchArsenal.js'
-import { ipToOuts } from '../lib/math/innings.js'
+import { halfIndex } from '../select.js'
+import { CENTURY_MPH } from './arsenal.js'
+import { ipToOuts } from '../../lib/math/innings.js'
 
 // The laboring index deliberately compares raw volume against the pitcher's
 // OWN season norm (pitches per inning) rather than weighting pitches by
@@ -128,7 +128,7 @@ export function computeVeloDecay(feed, revealedThrough) {
 // computeVeloDecay this walks every pitch type, not just the fastball family
 // — the whole point is catching a breaking ball or changeup at triple digits,
 // not just a hot heater. Threshold-free like computeVeloDecay: this just
-// reports what happened, and pitcher-callouts.js decides what's noteworthy
+// reports what happened, and pitcher/callouts.js decides what's noteworthy
 // (2+ types). Returns a plain object, same shape/convention as
 // computeVeloDecay's own return (bracket access, `health?.variety?.[id]`):
 // pitcherId -> { types: [{code, description, maxVelo}], count } — `types`

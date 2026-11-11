@@ -1,6 +1,6 @@
 import { rate3 } from '../../api/person/shared.js'
 import { Table } from '../../components/ui/table/Table.jsx'
-import { pitchLabel } from '../../api/pitchArsenal.js'
+import { pitchLabel } from '../../api/pitcher/arsenal.js'
 import { boardRow } from './board.js'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'

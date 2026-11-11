@@ -927,7 +927,7 @@ don't run these by hand.
   hitter half: `--clear-hitters=<season> --since=<its first day>`. Each pitch type also
   sums release point, movement, extension, flight time and spin (a sum and a count per
   field, `scripts/lib/pitch/arsenal-physics.mjs`, table `pitch_arsenal_physics`) and exports the means as `phys`, seven
-  numbers in `PHYS_FIELDS` order (`src/api/pitchArsenal.js`, `physOf`; null when no pitch
+  numbers in `PHYS_FIELDS` order (`src/api/pitcher/arsenal.js`, `physOf`; null when no pitch
   had the field; #1908). A game ingested before the columns holds none, so the arsenal
   half is re-walked with `--clear-arsenal=<season> --since=<its first day>`: it wipes that
   season's arsenal totals and ledger at the levels in the run (the command and hitter
@@ -952,7 +952,7 @@ don't run these by hand.
   never guessed). `--export-only` rebuilds the JSON view from rows already on
   disk with no sweep: the mode for whenever a derived, non-per-game field like
   this one changes and re-fetching every ingested feed would change nothing in
-  the database. App reads it via `src/api/pitchArsenal.js` (the opposing-starter
+  the database. App reads it via `src/api/pitcher/arsenal.js` (the opposing-starter
   card's pitch-mix bar (its `PitchArsenalMix.jsx` is deleted), and the player page's
   `SimilarPitchers`). Each type row also tallies `century_pitches` (count at
   `CENTURY_MPH`+, summed like `pitches`) and `max_velo` (that type's fastest
@@ -2173,7 +2173,7 @@ Re-run only to fold in a new season.
   spaced games that have stored rows (a game with no pitch types in the feed is check 1's, not this one's), 95% of the pitcher pairs are within 3 pitches of the box score and the grand total is within 1%,
   (3) unknown pitch codes are 2% of all pitches or fewer, and (4) every shard is under 60 KB and in its
   `personId % 100` bucket. Only when all four pass does it add the season to `seasons.json`. Reader:
-  `fetchPitchMixFor` in `src/api/pitchArsenal.js`.
+  `fetchPitchMixFor` in `src/api/pitcher/arsenal.js`.
 
 - `gen-world-series.mjs` → `public/data/world-series/series.json` — every World Series game
   from 1903 (121 Series, 707 games, 3 ties): both clubs, final runs, innings, venue and a

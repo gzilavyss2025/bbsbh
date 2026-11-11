@@ -1,4 +1,4 @@
-import { fetchPitchArsenalFor } from '../pitchArsenal.js'
+import { fetchPitchArsenalFor } from '../pitcher/arsenal.js'
 import { fetchHitterGridFor, fetchHitterLeague } from './hitterGrid.js'
 import { projectFromLiveLogs } from '../rotation/liveStarters.js'
 import { fetchWorkload } from '../workload.js'

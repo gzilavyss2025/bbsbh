@@ -16,7 +16,7 @@ import {
   computeGameSuperlatives,
 } from '../src/api/derive.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
-import { computePitcherLines } from '../src/api/pitchers.js'
+import { computePitcherLines } from '../src/api/pitcher/lines.js'
 
 // --------------------------------------------------------------------------
 // derive.js — per-inning pitches / whiffs / first-pitch strikes / PA
@@ -194,7 +194,7 @@ test('revealTotals reads the full-game team line', () => {
 })
 
 // --------------------------------------------------------------------------
-// pitchers.js — the reveal-gated running pitching lines (ADR-0009)
+// pitcher/lines.js — the reveal-gated running pitching lines (ADR-0009)
 // --------------------------------------------------------------------------
 test('computePitcherLines reveals nothing when the mark is -1', () => {
   const lines = computePitcherLines(buildFeed(), -1)

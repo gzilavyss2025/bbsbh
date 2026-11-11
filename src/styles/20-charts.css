@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —
    one block per team, each led by the team name and its own header row (gated
-   in api/pitchers.js — not sealed). Sized to fit a phone with NO horizontal
+   in api/pitcher/lines.js — not sealed). Sized to fit a phone with NO horizontal
    scroll: the Pitcher column absorbs the slack and wraps; the numeric columns
    stay tight. A flush Card (PitchersSection.jsx, #1113 slice C4):
    system/card.css draws the frame. The reveal gate is the caller's

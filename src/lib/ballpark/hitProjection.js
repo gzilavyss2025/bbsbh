@@ -7,7 +7,7 @@
 // opposite sides of the spoiler line. The per-game hit chart is reveal-only
 // (a dot in the left-field seats is a home run — ADR-0001), while the player
 // page's season spray map is a completed-game aggregate on an open surface
-// (ADR-0034's footing, the same one war.js and pitchArsenal.js stand on). A
+// (ADR-0034's footing, the same one war.js and pitcher/arsenal.js stand on). A
 // spray map that imported the projection from hitchart.js would put a
 // reveal-only module in an open surface's import graph for four constants,
 // which the spoiler manifest forbids outright and should. api/hitchart.js

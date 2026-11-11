@@ -808,35 +808,35 @@
       "class": "spoiler-free",
       "why": "The transaction timeline. Roster moves and dates carry no score."
     },
-    "pitchArsenal.js": {
+    "pitcher/arsenal.js": {
       "class": "spoiler-free",
       "why": "Static pitch-arsenal.json — completed-game season aggregates, same footing as fouls.js. No SealBox. fetchPitchMixFor (#1915) reads one pitcher's pitch count by code for ONE finished game: open surfaces only (the player page), never a scoring surface for a game being watched, where a starter's pitch count shows how early he left."
     },
-    "pitcher-callouts.js": {
+    "pitcher/callouts.js": {
       "class": "reveal-gated",
-      "why": "Margin Notes — the ranked in-progress digest across both teams' pitchers. Built on computePitcherLines and pitcherHealth, so it carries their revealedThrough clamp (ADR-0009), not a seal.",
+      "why": "Margin Notes — the ranked in-progress digest across both teams' pitchers. Built on computePitcherLines and pitcher/health.js, so it carries their revealedThrough clamp (ADR-0009), not a seal.",
       "importers": [
         "screens/InningViewer.jsx"
       ]
     },
-    "pitcherHealth.js": {
+    "pitcher/health.js": {
       "class": "reveal-gated",
       "why": "The laboring index and velo-decay flag. Walks only plays in revealed half-innings; deliberately not sealed, because a still-active pitcher needs partial-outing granularity (ADR-0009).",
       "importers": [
-        "api/pitcher-callouts.js"
+        "api/pitcher/callouts.js"
       ]
     },
-    "pitcherSplit.js": {
+    "pitcher/split.js": {
       "class": "spoiler-free",
       "why": "Pure Starting Pitchers/Bullpen partition shared by loadRoster.js and recentForm.js. Roster role, no score."
     },
-    "pitchers.js": {
+    "pitcher/lines.js": {
       "class": "reveal-gated",
       "why": "Running pitching lines (IP/R/ER/H). Accumulated ONLY from plays in revealed half-innings, so nothing from a sealed inning reaches the DOM — the ADR-0009 pattern this class is named for.",
       "importers": [
         "api/boxscore.js",
         "api/gameday/dayLine.js",
-        "api/pitcher-callouts.js",
+        "api/pitcher/callouts.js",
         "api/scorecardGame.js",
         "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
@@ -859,7 +859,7 @@
         "api/gameday/engine/halfReport.js",
         "api/gameday/stepCut.js",
         "api/gameday/subSteps.js",
-        "api/pitchers.js",
+        "api/pitcher/lines.js",
         "api/scorecardGame.js",
         "lib/scorecard/arm.js",
         "screens/gameday/next/panels/panelData.js",
@@ -887,7 +887,7 @@
     },
     "playbyplay/eventTypes.js": {
       "class": "spoiler-free",
-      "why": "Event-type classification SETS only — no feed access. Deliberately the one spoiler-free file in this directory, because derive.js, pitchers.js, callout-notes and gen-fouls.mjs all read these constants."
+      "why": "Event-type classification SETS only — no feed access. Deliberately the one spoiler-free file in this directory, because derive.js, pitcher/lines.js, callout-notes and gen-fouls.mjs all read these constants."
     },
     "playbyplay/firstPitch.js": {
       "class": "spoiler-free",
@@ -1199,7 +1199,7 @@
     },
     "scorecardGame.js": {
       "class": "reveal-gated",
-      "why": "The scorecard's inked grid, P/WH/FO row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the DEV-only Lab passes Infinity from behind the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
+      "why": "The scorecard's inked grid, P/WH/FO row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitcher/lines.js): the live scorecard page passes the user's own revealedThrough, the DEV-only Lab passes Infinity from behind the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
       "importers": [
         "screens/ScorecardLab.jsx",
         "screens/scorecard/ScorecardPage.jsx"
@@ -1279,7 +1279,7 @@
     },
     "spray.js": {
       "class": "spoiler-free",
-      "why": "Static public/data/spray/{NN}.json — every batter's season balls in play and where they landed, swept by scripts/gen-spray.mjs from games that were already DECIDED (Final, and never today's). Same footing as war.js, fouls.js and pitchArsenal.js: a completed-game season aggregate on an open surface, no SealBox (ADR-0034). Worth stating because the same COORDINATES are reveal-only one file over — hitchart.js plots ONE game's batted balls, where a dot in the left-field seats is tonight's home run. The difference is the sweep, not the mark, which is why the shared projection was moved to lib/ballpark/hitProjection.js: an open surface may not import a reveal-only module, not even for four constants. The contact store (#1912) is the same sweep's sibling file, public/data/spray/{season}/{NN}.contact.json: launch angle, distance, the ball's xBA and the gamePk of each run of balls, for the Contact card. Same footing: decided games only, written by the same gen-spray.mjs run from Final games before today, read by fetchSprayFor({ contact: true }) and aligned by withContact."
+      "why": "Static public/data/spray/{NN}.json — every batter's season balls in play and where they landed, swept by scripts/gen-spray.mjs from games that were already DECIDED (Final, and never today's). Same footing as war.js, fouls.js and pitcher/arsenal.js: a completed-game season aggregate on an open surface, no SealBox (ADR-0034). Worth stating because the same COORDINATES are reveal-only one file over — hitchart.js plots ONE game's batted balls, where a dot in the left-field seats is tonight's home run. The difference is the sweep, not the mark, which is why the shared projection was moved to lib/ballpark/hitProjection.js: an open surface may not import a reveal-only module, not even for four constants. The contact store (#1912) is the same sweep's sibling file, public/data/spray/{season}/{NN}.contact.json: launch angle, distance, the ball's xBA and the gamePk of each run of balls, for the Contact card. Same footing: decided games only, written by the same gen-spray.mjs run from Final games before today, read by fetchSprayFor({ contact: true }) and aligned by withContact."
     },
     "standings.js": {
       "class": "cutoff-gated",

@@ -140,7 +140,7 @@ export function combineFoulShards(shards, personId) {
   }
 }
 
-// --- pitch arsenal (src/api/pitchArsenal.js) --------------------------------
+// --- pitch arsenal (src/api/pitcher/arsenal.js) --------------------------------
 // The shard keeps a mean beside its count (`avgVelo` beside `pitches`, and
 // `[pitches, avgVelo]` pairs in `tto` and `vs`), not the velocity sums. So the
 // combined mean is weighted by the pitches. It is the exact mean to within the

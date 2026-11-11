@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildPitcherNotes, buildMarginNotes } from '../src/api/pitcher-callouts.js'
+import { buildPitcherNotes, buildMarginNotes } from '../src/api/pitcher/callouts.js'
 import { selectHalfStartingPitcher } from '../src/api/select.js'
 import { buildFeed } from './fixtures/mini-game.js'
 

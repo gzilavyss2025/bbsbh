@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { MIN_LOOK_SHIFT } from '../../../../api/pitchArsenal.js'
+import { MIN_LOOK_SHIFT } from '../../../../api/pitcher/arsenal.js'
 import { MixSheet } from '../sheets/MixSheet.jsx'
 import { PitchScene } from '../../../../components/playbyplay/pitcherCard/PitchScene.jsx'
 import { useMediaQuery, WIDE_QUERY } from '../../../../hooks/useMediaQuery.js'

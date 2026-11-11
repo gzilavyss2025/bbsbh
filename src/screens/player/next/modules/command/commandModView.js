@@ -2,7 +2,7 @@
 // and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells from the
 // catcher's side, the pitch marks and the readout out. No React, no fetch.
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank, commandTypes, commandView } from '../../../../../api/commandMap.js'
-import { pitchLabel } from '../../../../../api/pitchArsenal.js'
+import { pitchLabel } from '../../../../../api/pitcher/arsenal.js'
 import { ordinal } from '../../../../../lib/format.js'
 import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
 import { sum } from '../../../../../lib/math/number.js'

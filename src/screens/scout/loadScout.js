@@ -1,5 +1,5 @@
 import { fetchPerson } from '../../api/person-fetch.js'
-import { fetchPitchArsenalFor } from '../../api/pitchArsenal.js'
+import { fetchPitchArsenalFor } from '../../api/pitcher/arsenal.js'
 import { fetchCommandShard } from '../../api/commandMap.js'
 import { shardKey100 } from '../../lib/shardKey.js'
 import { currentSeasonOf } from '../../api/staticJson.js'

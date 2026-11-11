@@ -1,6 +1,6 @@
 // Event-type classification sets shared across the reveal-only modules and
 // the playbyplay/ split itself — NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE,
-// and BASERUNNING_NOTE_EVENT_TYPES are read by derive.js, pitchers.js,
+// and BASERUNNING_NOTE_EVENT_TYPES are read by derive.js, pitcher/lines.js,
 // callout-notes.js, and gen-fouls.mjs (see ../playbyplay.js's barrel and
 // src/api/CLAUDE.md), so this file's exports must not drift from what those
 // callers expect. Split (ADR-0038, check-file-size.mjs) out of
@@ -8,7 +8,7 @@
 
 // Top-level plays that are baserunning events, not plate appearances: the
 // batter's at-bat continues (or restarts next inning) as its own later play.
-// Shared with derive.js and pitchers.js, whose PA / batters-faced counts must
+// Shared with derive.js and pitcher/lines.js, whose PA / batters-faced counts must
 // skip these or an inning-ending caught stealing mid-count double-counts the
 // batter (both files still accumulate the play's PITCHES — those were
 // genuinely thrown and are not re-listed in the resumed at-bat).
@@ -33,7 +33,7 @@ export const GAME_ADVISORY_EVENT_TYPE = 'game_advisory'
 
 // Two more local-only, NON_PA_EVENT_TYPES-adjacent classifications — kept out
 // of the shared set above (also used for PA/BF counting in this file and in
-// pitchers.js/derive.js, where neither belongs) but named here rather than
+// pitcher/lines.js and derive.js, where neither belongs) but named here rather than
 // spelled out inline at each call site, so the two lists below can't drift
 // apart from each other without a reader noticing why they differ.
 //

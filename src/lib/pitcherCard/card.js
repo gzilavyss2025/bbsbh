@@ -1,4 +1,4 @@
-import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { pitchFamily, pitchLabel } from '../../api/pitcher/arsenal.js'
 import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../headerTheme.js'
 import { gamePath } from '../route.js'
 import { SPORT_LABEL } from '../teams.js'

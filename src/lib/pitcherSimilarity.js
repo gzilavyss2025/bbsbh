@@ -1,7 +1,7 @@
 // "Pitches like" — nearest neighbours in ARSENAL space: which other pitchers
 // throw the same mix of pitches, at the same speeds. Pure and self-contained
 // (no fetch, no DOM), driven entirely by the season pitch-type mix that
-// public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json already carries — see src/api/pitchArsenal.js
+// public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json already carries — see src/api/pitcher/arsenal.js
 // for the reader and scripts/gen-pitch-arsenal.mjs for the sweep behind it.
 //
 // WHY RUNTIME, NOT A PRECOMPUTE. The pool is ~500 MLB arms with ~4 pitch types
@@ -19,7 +19,7 @@
 // like") is scoped in the same doc and is deliberately NOT what this is.
 
 // Pitch codes that are the SAME PITCH under different labels, grouped so a
-// relabeling doesn't read as a total mismatch. This is NOT api/pitchArsenal.js's
+// relabeling doesn't read as a total mismatch. This is NOT api/pitcher/arsenal.js's
 // `pitchFamily`, and the two must not be merged: that one groups by what a pitch
 // is FOR (four-seam and sinker are both 'fastball') to pick a bar color, which is
 // far too coarse here — a 97 mph four-seam and a 94 mph sinker are the two most
@@ -189,7 +189,7 @@ export function matchScore(distance) {
 // The card itself: the `limit` closest arms to `personId` in the pool.
 //
 // `pool` is a list of {personId, types, throws, name, teamId} — the caller
-// (src/api/pitchArsenal.js) is what knows how to flatten pitch-arsenal.json's
+// (src/api/pitcher/arsenal.js) is what knows how to flatten pitch-arsenal.json's
 // per-level shape into that, so this stays a pure ranking over whatever pool
 // it's handed and can be tested with three hand-written pitchers.
 //

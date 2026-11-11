@@ -12,7 +12,7 @@ import { buildWsLastTimeNotes } from './worldSeries/events.js'
 // The league-rank clause the scoring-first cards append (rank.js). Additive —
 // no rank in the bundle leaves the sentence exactly as it reads today.
 import { withRank } from './rank.js'
-import { ELITE_VELO_MPH } from '../pitchArsenal.js'
+import { ELITE_VELO_MPH } from '../pitcher/arsenal.js'
 
 // Fouls in one at-bat, from its ordered pitch call codes alone. The strike
 // count is re-simulated from the codes (called/whiff/foul all add a strike, a

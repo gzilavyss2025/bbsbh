@@ -26,7 +26,7 @@
 //    runner's own (a pinch runner's, a placed runner's), from the plays on
 //    screen.
 //  - The live, still-open plate appearance counts for nothing until it ends.
-//  - The pitcher's line is computePitcherLines' own step clamp (../pitchers.js,
+//  - The pitcher's line is computePitcherLines' own step clamp (../pitcher/lines.js,
 //    via its `throughAtBatIndex`), cut at the last plate appearance on screen.
 //    A pitcher who enters mid-half starts his line at his first batter, and an
 //    inherited runner's run stays charged to the pitcher who put him on. A
@@ -37,7 +37,7 @@
 // MiLB and thin feeds: every field reads with a fallback, and a missing
 // player returns null rather than a line of zeros.
 
-import { computePitcherLines } from '../pitchers.js'
+import { computePitcherLines } from '../pitcher/lines.js'
 import { halfIndex } from '../select.js'
 import { NON_AB_EVENTS } from '../scorecard/notation.js'
 import { visibleAtBatCards, stepCutAtBatIndex, safeStep } from './stepCut.js'

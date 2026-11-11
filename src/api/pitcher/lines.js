@@ -22,9 +22,9 @@
 // consumes it, so ADR-0001 still holds. Leaving both at their null default
 // reproduces the old whole-halves-only behavior exactly.
 
-import { halfIndex, personNameParts } from './select.js'
-import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './playbyplay.js'
-import { outsToIp } from '../lib/math/innings.js'
+import { halfIndex, personNameParts } from '../select.js'
+import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from '../playbyplay.js'
+import { outsToIp } from '../../lib/math/innings.js'
 
 // Per-team pitching lines for every pitcher who has appeared in a revealed
 // half-inning, or in the currently-stepped half up through `throughAtBatIndex`.

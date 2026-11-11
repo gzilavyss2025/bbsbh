@@ -49,7 +49,7 @@ export const CORROBORATION_SIGNALS = {
   // "the club is 18-4 when X homers" — bundle.homerRecords[id].
   homerRec: ['homerRec'],
   // "X is unscored upon in his last 11 games" — bundle.starterRecords[id]
-  // .scorelessStreak, told by Margin Notes (src/api/pitcher-callouts.js). The
+  // .scorelessStreak, told by Margin Notes (src/api/pitcher/callouts.js). The
   // one signal whose family lives outside callout-notes/: a club's notes write
   // about a reliever's scoreless run more often than about anything else on
   // this list, so leaving it out would have made the scan's own best material

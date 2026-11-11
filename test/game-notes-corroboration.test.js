@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildCallouts } from '../src/api/callout-notes.js'
-import { buildPitcherNotes } from '../src/api/pitcher-callouts.js'
+import { buildPitcherNotes } from '../src/api/pitcher/callouts.js'
 import {
   CORROBORATION_BONUS,
   corroborationBonus,
