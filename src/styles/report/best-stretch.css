@@ -1,0 +1,27 @@
+/* ---------------------------------------------------------------- best stretch
+   The "his best 162 games" card (BestStretchPage): a big name, a 3x2 stat grid of
+   mono numbers, and a short list of the rest. Stack owns the spacing. */
+.stretch__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+}
+/* layout-exempt: a fixed three-across stat grid, as the card it echoes */
+.stretch__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.stretch__name a {
+  color: var(--text-heading, inherit);
+}
+.stretch__grid dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+}
+.stretch__notes {
+  padding-inline-start: var(--space-4);
+}
