@@ -7,7 +7,7 @@ import { Door } from '../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { FILLS } from '../../lib/design/pillClass.js'
-import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
+import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/colors/headerTheme.js'
 import { leagueLogoUrl } from '../../lib/teams.js'
 
 const PATH = 'src/components/ui/control/Pill.jsx'

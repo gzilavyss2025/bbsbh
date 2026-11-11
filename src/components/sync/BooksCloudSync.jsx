@@ -15,7 +15,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // What it syncs: a book's COVER — id, title, subtitle, cover club, and what is
 // stamped on it (`coverMark`/`coverColor`, the league-mark presets) (ADR-0036).
 // Never the stamps filed inside it. Which stamps belong to which book lives on
-// the STAMP record's own `placement.bookId` (src/lib/stamps.js) and travels
+// the STAMP record's own `placement.bookId` (src/lib/stamp/stamps.js) and travels
 // with StampsCloudSync, not here.
 //
 // Sync model uses `known`/`seen` refs (the shape the since-removed spoiled-day

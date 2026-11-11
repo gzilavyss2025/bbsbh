@@ -1,5 +1,5 @@
 // A club's franchise summary (#2600), derived from its season ledger (#2595) and its pennants.
-// No file of its own. The franchise page (screens/team/franchise/loadFranchise.js) passes the ledger
+// No file of its own. The franchise page (api/history/franchise.js) passes the ledger
 // rows plus its live rows (the ledger stops the season before today's); `pennants` is pennantsFor
 // as it stands, so it can hold the current season's pennant.
 //

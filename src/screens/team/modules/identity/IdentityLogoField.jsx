@@ -7,7 +7,7 @@ import {
   describeLogoRejection,
   LOGO_MAX_BYTES,
   LOGO_SIZE,
-} from '../../../../lib/logoArt.js'
+} from '../../../../lib/logo/logoArt.js'
 import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The drawer's Logo art group for one (club, treatment): the tile as it renders
@@ -27,7 +27,7 @@ import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 // isClerkEnabled, under the ClerkProvider main.jsx mounts on such a deploy.
 // The drawer's whole chunk is lazy, so none of this reaches a visitor's bundle.
 //
-// The file is checked HERE first, against the same src/lib/logoArt.js rules the
+// The file is checked HERE first, against the same src/lib/logo/logoArt.js rules the
 // endpoint enforces (512x512 PNG under the cap), purely so a rejection is
 // instant and specific — the server re-checks every byte and is what decides.
 

@@ -1,6 +1,6 @@
 // Regenerates public/data/logos/mono/{teamId}.svg — a ONE-COLOR knockout
 // version of every club's mlbstatic mark, for the navy section mastheads on the
-// lineup / innings / box score pages (see src/lib/logoMono.js for what
+// lineup / innings / box score pages (see src/lib/logo/logoMono.js for what
 // "knockout" means here and ADR-0031 for why the app precomputes this art
 // instead of whitening the CDN mark with a CSS filter at render time).
 //
@@ -49,8 +49,8 @@
 // gives you (see namespaceDecls in logoMono.js).
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { logoCdnUrl } from '../src/lib/logoCdn.js'
-import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logoMono.js'
+import { logoCdnUrl } from '../src/lib/logo/logoCdn.js'
+import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logo/logoMono.js'
 import {
   MONO_LOGO_MANIFEST_PATH,
   monoLogoHash,
@@ -127,7 +127,7 @@ async function convert(team, inkStore) {
     return { ...team, skipped: `fetch failed (${err.message})` }
   }
   // The hand-picked corrections to the automatic pass, when this club has any
-  // and they were picked against THIS art (src/lib/monoInk.js). A pin set the
+  // and they were picked against THIS art (src/lib/logo/monoInk.js). A pin set the
   // fingerprint rejects is reported below rather than silently ignored — it
   // means a club rebranded and its mark wants another look in the lab.
   const saved = inkStore[String(team.id)]?.parts

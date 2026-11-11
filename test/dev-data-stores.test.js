@@ -271,7 +271,7 @@ test('a store with non-numeric keys keeps the order it was posted in', () => {
 
 // --------------------------------------------------------------------------
 // mono-ink — which SHAPES of a club's logo art are the mark and which are the
-// paper (src/lib/monoInk.js). The keys are shape ordinals and the values a
+// paper (src/lib/logo/monoInk.js). The keys are shape ordinals and the values a
 // closed two-word set, so a typo here would silently do nothing at generation
 // time rather than fail — which is exactly why the validator catches it.
 // --------------------------------------------------------------------------
@@ -332,7 +332,7 @@ test('a color-swatch store rejects a prototype-poisoning key at either level', (
 
 // --------------------------------------------------------------------------
 // stamp-logo-tuning — where a club's knockout mark sits inside a Logbook
-// stamp's mark slot (src/lib/stampLogoTuning.js). The strictest validator in
+// stamp's mark slot (src/lib/stamp/stampLogoTuning.js). The strictest validator in
 // this file, because it is the only store read at RENDER time by art that is
 // redrawn from scratch every view: a bad value here doesn't sit in a lab
 // preview, it reshapes that club's stamps in every user's Logbook.

@@ -26,7 +26,11 @@
     "standings) and are correctly spoiler-free. A 'spoiler-free' entry below is a",
     "positive statement that the module was examined and carries no per-game result —",
     "not an omission, and not a gate waiting to be added. Adding a gate on an open",
-    "surface is a regression, not a hardening (ADR-0034)."
+    "surface is a regression, not a hardening (ADR-0034).",
+    "",
+    "WHY SPOILER-FREE MODULES ARE LISTED TOO. Listing only the hazards was measured and",
+    "rejected: an unlisted module that gets the feed as an argument escapes every check",
+    "(ADR-0133)."
   ],
   "$classes": {
     "reveal-only": [
@@ -380,6 +384,10 @@
       "class": "spoiler-free",
       "why": "Derived from the franchise ledger and league pennants: a club's names, seasons, all-time record, postseasons, titles, pennants and winningest manager. Finished seasons, no game."
     },
+    "history/franchise.js": {
+      "class": "spoiler-free",
+      "why": "The franchise page's loader: the stored ledger plus a live standings-and-schedule row per season after it, and the people and parks. History surface (ADR-0034), no cutoff, never on a scoring surface."
+    },
     "history/franchiseHof.js": {
       "class": "spoiler-free",
       "why": "Static franchise-hof shards: a club's Hall of Famers, inducted as the club and also played there, with the seasons. History, no game."
@@ -390,7 +398,13 @@
     },
     "winprob/feed.js": {
       "class": "spoiler-free",
-      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface."
+      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface. The raw feed reaches past any reveal clamp, so its importers are listed (#3038): each one either feeds selectWinProbPath's clamp, hands the whole game to the box score inside its seal, or reads Final games off the scoring surfaces (usePastGameSignals, called from a reveal).",
+      "importers": [
+        "hooks/useGameData.js",
+        "hooks/usePastGameSignals.js",
+        "screens/gameday/next/panels/GamedayPressure.jsx",
+        "screens/gameday/next/panels/GamedaySheets.jsx"
+      ]
     },
     "game.js": {
       "class": "spoiler-free",

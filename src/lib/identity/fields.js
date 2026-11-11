@@ -31,7 +31,7 @@
 // which vocabulary it is in, the same way the store files do.
 
 import { contrastRatio } from '../contrast.js'
-import { LOGO_VARIANTS } from '../logoCdn.js'
+import { LOGO_VARIANTS } from '../logo/logoCdn.js'
 
 // The one prefix, so a stray key in a Redis hash can never be mistaken for a
 // field id and vice versa.
@@ -442,7 +442,7 @@ export const IDENTITY_DIMENSIONS = {
 
   // The hand-picked correction to a club's knockout (one-color) mark — which
   // SHAPES of its art are the mark and which are the paper it's drawn against
-  // (src/lib/logoMono.js, ADR-0031). Team-level, like `wpa`/`colors`: a club has
+  // (src/lib/logo/logoMono.js, ADR-0031). Team-level, like `wpa`/`colors`: a club has
   // one mark, not one per treatment.
   //
   // UNLIKE every other dimension here, this one does not change what a visitor
@@ -459,7 +459,7 @@ export const IDENTITY_DIMENSIONS = {
   // base art converts worse than an alternate); `art` is that art's
   // fingerprint, carried so the generator can drop pins picked against art a
   // club has since rebranded out of — the same staleness rule
-  // src/lib/monoInk.js already applies to the file-authored pin set.
+  // src/lib/logo/monoInk.js already applies to the file-authored pin set.
   mono: {
     store: () => 'mono-ink',
     teamLevel: true,

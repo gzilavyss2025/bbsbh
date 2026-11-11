@@ -10,11 +10,11 @@
 //
 // Picked by eye in /identity-lab's Stamp ink editor, which writes this file
 // through the dev-only save endpoint (ADR-0029). Still walked through
-// deepenToContrast (src/lib/stampInk.js) before it ever reaches the art — a
+// deepenToContrast (src/lib/stamp/stampInk.js) before it ever reaches the art — a
 // club's own pick is not exempt from the contrast floor ADR-0036 argued for,
 // only from the "darkest of what the club owns" part of the pick.
 
-import store from './data/stamp-ink.json' with { type: 'json' }
+import store from '../data/stamp-ink.json' with { type: 'json' }
 
 // The raw hex on file for a club, or null — untouched by contrast math, so the
 // lab can show a pick exactly as typed alongside what it will actually print.

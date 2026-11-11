@@ -69,7 +69,7 @@ const STAMP_DATE = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 })
 
-// 'YYYY-MM-DD' — the one date shape the app shares (lib/stamps.js's
+// 'YYYY-MM-DD' — the one date shape the app shares (lib/stamp/stamps.js's
 // isDayString) — read as a LOCAL calendar day. `new Date('2026-08-04')` would
 // parse as UTC midnight and render as the day before west of Greenwich.
 function stampDate(date) {

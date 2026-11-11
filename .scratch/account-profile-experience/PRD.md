@@ -200,7 +200,7 @@ Record this in the ADR.
 ### 3.1 What is in it
 
 `src/lib/account/preferences.js` — pure, React-free, dependency-free, imported
-verbatim by `api/preferences.js`, exactly as `src/lib/stamps.js` is imported by
+verbatim by `api/preferences.js`, exactly as `src/lib/stamp/stamps.js` is imported by
 `api/stamps.js`. The client and the server must not be able to disagree about
 what a valid preference is.
 
@@ -230,7 +230,7 @@ unknown key on the wire or in storage is dropped, never stored, never echoed.
 >
 > `club` is validated as a **bounded integer**, not as membership of the real
 > club list. Checking membership would mean importing the 1,100-line
-> `teams.js` into the serverless bundle — the same reason `src/lib/stamps.js`
+> `teams.js` into the serverless bundle — the same reason `src/lib/stamp/stamps.js`
 > restates the passport bounds rather than importing `passportLayout.js`. The
 > cost of a well-formed-but-wrong id is a fallback logo, not a security hole.
 
@@ -270,7 +270,7 @@ Wire and Redis: the identical shape, one hash field per preference,
 **Why per-field `updatedAt` and not one document clock.** Two devices editing two
 different preferences must both win. A document-level clock makes that a coin
 flip, which is precisely Option A's defect. `stampedAt`/`updatedAt` in
-`src/lib/stamps.js` splits for a related reason and its header is the precedent.
+`src/lib/stamp/stamps.js` splits for a related reason and its header is the precedent.
 
 **Absence means "no opinion", never "reset to default".** This is the same rule
 `api/spoiled-days.js` states in its header and for the same reason: a fresh

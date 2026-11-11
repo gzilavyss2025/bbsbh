@@ -23,7 +23,7 @@ import PARK_WASH_TUNING from '../data/park-wash-tuning.json' with { type: 'json'
 import { registerIdentityStore } from '../identity/overlay.js'
 import { byTeam } from '../tuningStore.js'
 import { isMlbTeamId, treatmentTile } from '../teams.js'
-import { milbTreatmentTile } from '../milbColors.js'
+import { milbTreatmentTile } from '../colors/milbColors.js'
 
 // The one solid colour a team's tile actually wears — the same MLB/MiLB
 // branch TeamTreatmentMark resolves its tile from, collapsed to a single

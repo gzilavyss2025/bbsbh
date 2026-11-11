@@ -12,7 +12,7 @@
 // rather than merged — "save as a new name" is the whole contract the editor
 // offers — and an assignment never touches the curated file a treatment
 // already has: it records a pointer that teams.js reads first, so clearing it
-// restores the original mark instantly (src/lib/customMarks.js).
+// restores the original mark instantly (src/lib/logo/customMarks.js).
 //
 // Same security boundary as its neighbours: a request supplies a numeric team
 // id, a treatment KEY, and a display NAME. The name is slugified to
@@ -23,9 +23,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { LOGO_TREATMENT_DIRS } from '../../src/lib/logoArt.js'
+import { LOGO_TREATMENT_DIRS } from '../../src/lib/logo/logoArt.js'
 import { MASTHEAD_MARK_ASSIGN_KEYS } from '../../src/lib/teams.js'
-import { markSlug } from '../../src/lib/logoRecolor.js'
+import { markSlug } from '../../src/lib/logo/logoRecolor.js'
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 

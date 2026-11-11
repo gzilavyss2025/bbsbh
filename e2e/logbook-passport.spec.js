@@ -25,7 +25,7 @@ import { test, expect, openStampCard } from './fixtures.js'
 // so it earns the ipad/desktop projects too: the two-page spread is a genuinely
 // different layout and the placement flow has to work on it.
 
-// One stamp, unplaced, in the shape src/lib/stamps.js validates. `stampedAt`
+// One stamp, unplaced, in the shape src/lib/stamp/stamps.js validates. `stampedAt`
 // and `updatedAt` are the only clocks the record carries and both must be
 // positive integers or normalizeStamp drops the entry.
 const SEEDED = {

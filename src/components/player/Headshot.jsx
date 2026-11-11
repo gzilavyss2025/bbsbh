@@ -9,7 +9,7 @@ import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep
 // default-image transform so a personId with no photo on file 404s (rather
 // than silently rendering the CDN's own gray silhouette) and the miss can
 // degrade to the next rung. The ordered PHOTO rungs come from
-// `headshotSources` (lib/teams.js — see its header for the full policy):
+// `headshotSources` (lib/teams/headshots.js — see its comments for the full policy):
 //   • players (default): silo, then milb ONLY for a MiLB/unknown club. The
 //       silo is the 1:1 transparent studio cutout the floating-cutout
 //       treatment is drawn for; milb is a real, recent minor-league face for a

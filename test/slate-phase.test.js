@@ -4,9 +4,9 @@
 // /seasons and /league rows; the dates are modelled on 2026/2027, not read live.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { LEVEL_WINTER_GUESS, answered, levelFetchYear, phaseOf, winterOf } from '../src/hooks/useOffseason.js'
+import { LEVEL_WINTER_GUESS, levelFetchYear, phaseOf, winterOf } from '../src/lib/slate/phase.js'
 import { LEVELS, SPORT_IDS } from '../src/lib/teams.js'
-import { readSeasonRow, saveSeasonRow, taggedRows } from '../src/lib/time/seasonRows.js'
+import { readSeasonRow, saveSeasonRow } from '../src/lib/time/seasonRows.js'
 
 const MLB_2026 = {
   seasonId: '2026',
@@ -235,28 +235,14 @@ test('a next-season answer for another year supplies no countdown dates (#2928)'
   assert.equal(resolveOffseason('2026-11-04', 13, { next: LEVEL_2026 }, loadL).winter, null)
 })
 
-test('a rejected fetch settles pending; a stale one does not (#2928)', () => {
-  const ok = { sportId: 13, year: 2026, rows: [] }
-  assert.equal(answered({ data: ok }, 13, 2026), true)
-  assert.equal(answered({ data: ok }, 13, 2027), false)
-  assert.equal(answered({ data: null, error: new Error('x') }, 13, 2026), true)
-  assert.equal(answered({ data: null, error: null }, 13, 2026), false)
-})
+// 'A rejected fetch settles pending' (#2928) is pinned on the loader now: test/slate-day.test.js.
 
 test('a tab that can never have an offseason page never expects one', () => {
   assert.equal(resolveOffseason('2026-11-04', 999, NONE, store({})).expectWinter, false)
   assert.equal(resolveOffseason('2026-11-04', 51, NONE, store({})).expectWinter, false)
 })
 
-test('fetched rows carry the key they were fetched for (AAA to AA never saves AAA under 12)', () => {
-  const aaa = { sportId: 13, year: 2026, rows: LEVEL_2026 }
-  assert.equal(taggedRows(aaa, 13, 2026), LEVEL_2026)
-  // undefined = still pending (another key's data, or none); a settled miss is null
-  assert.equal(taggedRows(aaa, 12, 2026), undefined)
-  assert.equal(taggedRows(aaa, 13, 2027), undefined)
-  assert.equal(taggedRows(null, 13, 2026), undefined)
-  assert.equal(taggedRows({ sportId: 13, year: 2026, rows: null }, 13, 2026), null)
-})
+// The tagged-rows guard went with useOffseason (#3035): one loader run serves one key, and cancel() voids it.
 
 test('save and read check a row against its key', () => {
   const mem = {}

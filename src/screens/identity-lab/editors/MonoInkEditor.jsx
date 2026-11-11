@@ -5,8 +5,8 @@ import {
   monoLogoParts,
   monoLogoPickerSvg,
   monoLogoSvg,
-} from '../../../lib/logoMono.js'
-import { monoInkFor, monoInkStore } from '../../../lib/monoInk.js'
+} from '../../../lib/logo/logoMono.js'
+import { monoInkFor, monoInkStore } from '../../../lib/logo/monoInk.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
@@ -113,7 +113,7 @@ export function MonoInkEditor({ teamId, name }) {
   const picker = useMemo(() => (safe ? monoLogoPickerSvg(safe) : null), [safe])
 
   // Saved pins are only adopted when they were picked against THIS art — the
-  // same fingerprint rule the generator applies (src/lib/monoInk.js). A club
+  // same fingerprint rule the generator applies (src/lib/logo/monoInk.js). A club
   // whose art moved (a rebrand, or just switching the source picker above)
   // starts from automatic here rather than from answers that now point at
   // different shapes.

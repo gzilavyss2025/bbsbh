@@ -88,7 +88,7 @@ of every chunk name, 11.7 kB, plus the import statements for the 97 static chunk
 | 10 | `src/api/transactions/cutline.js` | 5.5 | 2.0 | GameSelect → WireDock → … → teamTransactions |
 | 11 | `src/components/ui/dock/SheetDock.jsx` | 5.3 | 2.1 | GameSelect → BracketDock |
 | 12 | `src/components/worldseries/cards/scouting/FilmMeeting.jsx` | 5.3 | 1.7 | GameSelect → WorldSeriesHome |
-| 13 | `src/lib/stamps.js` | 5.0 | 1.8 | … PickedGame → useRevealProgress → derive → linescore |
+| 13 | `src/lib/stamp/stamps.js` | 5.0 | 1.8 | … PickedGame → useRevealProgress → derive → linescore |
 | 14 | `src/components/transactions/MoveRow.jsx` | 5.0 | 2.0 | GameSelect → WireDock |
 | 15 | `src/components/chrome/HubTabBar.jsx` | 4.9 | 1.8 | GameSelect → WorldSeriesHome → ScoutingReport |
 | 16 | `src/components/offseason/LongAtBats.jsx` | 4.8 | 1.8 | GameSelect → OffseasonSlot → OffseasonLead |

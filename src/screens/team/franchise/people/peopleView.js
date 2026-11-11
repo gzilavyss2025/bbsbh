@@ -59,7 +59,7 @@ export function clubPeople(hof, leaders) {
 
 // The club's home parks (#2788), newest first. `history` is franchiseFor's file ({ spans, mates,
 // through }); `live` is [{ season, venue: { id, name } | null }] for each season after `through`
-// (loadFranchise reads them), so a club that moved this year (the Rays, back at Tropicana in 2026)
+// (api/history/franchise.js reads them), so a club that moved this year (the Rays, back at Tropicana in 2026)
 // is not "on" at last year's park. A season with no venue read is left out. A park's name is the one
 // its newest span gives it (the venue's current name); any other is "also named". A run that
 // reaches the newest season reads "2001 on". `clubs` are the club's own names there; `mates` the

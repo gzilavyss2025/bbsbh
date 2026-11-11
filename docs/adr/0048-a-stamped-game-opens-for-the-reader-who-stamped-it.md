@@ -10,7 +10,7 @@ reader it does not describe: the one who was at the game.
 
 A stamp is the Game Log's keepsake. You mint it from inside a revealed box
 score, on a game that is already Final, and it records "I watched this" — the
-mode is literally `watched` or `followed` (`src/lib/stamps.js`). Minting one
+mode is literally `watched` or `followed` (`src/lib/stamp/stamps.js`). Minting one
 requires having seen the result.
 
 So the sequence that shipped was this. You watch a game. You open its box score,

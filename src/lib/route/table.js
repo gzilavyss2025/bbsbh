@@ -19,6 +19,10 @@
 // their own parse/build in route/patterns.js (#3034); that file's header lists
 // the shapes still parsed by hand in route.js, and why.
 //
+// It must import NOTHING: api/_lib/crawl.js reads pathOf from here, and
+// test/crawl-body.test.js pins this file as an import-free leaf of the crawl
+// layer's spoiler-safe graph (ADR-0059, #3040).
+//
 // Pure data, no React: lib/route.js is imported by ~100 modules and the node
 // unit suite. The screens live in App.jsx, keyed by `name`.
 

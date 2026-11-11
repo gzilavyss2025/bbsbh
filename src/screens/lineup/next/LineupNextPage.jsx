@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { batterFigureUrls } from '../../../api/uniforms.js'
 import { selectGameInfo, selectOfficials } from '../../../api/select.js'
-import { headerThemeClass, headerThemeStyle } from '../../../lib/headerTheme.js'
+import { headerThemeClass, headerThemeStyle } from '../../../lib/colors/headerTheme.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 import { LineupDock } from './LineupDock.jsx'
 import { LineupFacts } from './LineupFacts.jsx'

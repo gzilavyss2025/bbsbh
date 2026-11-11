@@ -21,8 +21,8 @@
 // word — see `stampLabel` below for why it's gone rather than treat the doc
 // as still current.
 
-import { extraInningsOf } from '../api/select.js'
-import { LEAGUE_BY_ID } from './postseason/seriesMarks.js'
+import { extraInningsOf } from '../../api/select.js'
+import { LEAGUE_BY_ID } from '../postseason/seriesMarks.js'
 
 // The canvas. viewBox-only in the component — nothing here sets width/height, so
 // CSS sizes a stamp in a grid and nothing fights its container.
@@ -64,7 +64,7 @@ export const BAND_INNER_R = INNER_RING_R - 0.75
 
 // Whether a game's ring band inverts. The rule is simply "not MLB": sportId 1
 // is the majors and every other level this app lists (AAA 11, AA 12, A+ 13,
-// A 14, ROK 16 — see SPORT_IDS in src/lib/teams.js) is a minor-league game.
+// A 14, ROK 16 — see SPORT_IDS in src/lib/teams/levels.js) is a minor-league game.
 // Stated as `!== 1` rather than as a membership test on purpose — a stamp for
 // some level not yet on the slate should still read as "not the majors"
 // instead of quietly drawing as one. A fact blob with no sportId at all is the
@@ -93,7 +93,7 @@ export const MARK_BOX = { size: 150, y: 44, awayX: -18, homeX: 162 }
 // a wide wordmark lands short and bleeds hard off the clipped edge. So a club
 // may carry a hand-tuned nudge — a scale, an x/y offset, a rotation — picked by
 // eye in /identity-lab's Stamp placement editor and stored in
-// src/lib/data/stamp-logo-tuning.json (src/lib/stampLogoTuning.js reads it).
+// src/lib/data/stamp-logo-tuning.json (src/lib/stamp/stampLogoTuning.js reads it).
 //
 // This does NOT unlock the art. The slot, the clip circle, the ring and the
 // numerals stay locked; what a club tunes is where inside that fixed slot its

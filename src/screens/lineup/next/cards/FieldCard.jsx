@@ -3,7 +3,7 @@ import { DefenseDiamond } from '../../../../components/scoring/DefenseDiamond.js
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
-import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
+import { headerThemeClass, headerThemeStyle } from '../../../../lib/colors/headerTheme.js'
 import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
 import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { ClubBar } from './ClubBar.jsx'

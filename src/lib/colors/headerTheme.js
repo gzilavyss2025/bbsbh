@@ -1,6 +1,6 @@
-import { treatmentHeaderColorOverride, isMlbTeamId, mastheadBarFor, mastheadMarkUrl } from './teams.js'
+import { treatmentHeaderColorOverride, isMlbTeamId, mastheadBarFor, mastheadMarkUrl } from '../teams.js'
 import { milbHeaderColorOverride } from './milbColors.js'
-import { contrastRatio } from './contrast.js'
+import { contrastRatio } from '../contrast.js'
 
 // Which chrome the lineup page wears for a club — the one resolver between the
 // two hand-tuned header tables and the one surface that reads them

@@ -155,7 +155,7 @@ into a new bundled-empty store (`src/lib/data/logo-url-overrides.json`) and
 consulted by `teamLogoUrl`/`mainOverrideLogoUrl` ahead of every disk/CDN rung
 (`src/lib/identity/logoUrlOverrides.js`). The bytes go exactly where this ADR
 predicted: **`api/identity-logo.js`**, the ballpark-photo pattern applied to a
-club's mark — admin-gated, Vercel Blob, held to `src/lib/logoArt.js`'s same
+club's mark — admin-gated, Vercel Blob, held to `src/lib/logo/logoArt.js`'s same
 512×512-PNG standard, and *uploading is not saving*: the endpoint answers a URL
 and the URL only lands through the drawer's ordinary Save. The recolour
 library, a club's `extras`, and an affiliate's researched pair still live only

@@ -7,8 +7,8 @@
 // posterImages.js.
 import { isMlbTeamId, realHeadshotUrl, teamLogoUrl, treatmentTile } from '../teams.js'
 import { playerPhotosOff } from '../headshot/lockout.js'
-import { milbTreatmentTile } from '../milbColors.js'
-import { headerThemeFor, mastheadMarkFor } from '../headerTheme.js'
+import { milbTreatmentTile } from '../colors/milbColors.js'
+import { headerThemeFor, mastheadMarkFor } from '../colors/headerTheme.js'
 import { parkBackdrop } from '../ballpark/parkBackdrop.js'
 import { loadPosterImages } from './posterImages.js'
 

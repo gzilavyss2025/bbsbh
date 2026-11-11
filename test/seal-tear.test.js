@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { stampSeed } from '../src/lib/stampArt.js'
+import { stampSeed } from '../src/lib/stamp/stampArt.js'
 import {
   TEAR_MIDLINE,
   TEAR_SWING,

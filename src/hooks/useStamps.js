@@ -17,12 +17,12 @@ import {
   stampFor,
   stampsForSeason,
   unplaceStamp,
-} from '../lib/stamps.js'
+} from '../lib/stamp/stamps.js'
 import { localStore, onStorageOrRestore, readOwner, writeOwner } from '../lib/account/localStore.js'
 import { savePhotos } from '../lib/scorecard-photos/store.js'
 
 // The Logbook's React entry point (ADR-0035). Mirrors useRevealProgress.js: the
-// rules are the React-free core in src/lib/stamps.js (unit-tested there, and
+// rules are the React-free core in src/lib/stamp/stamps.js (unit-tested there, and
 // shared verbatim with the serverless function so client and server cannot
 // disagree about what a valid stamp is); this hook owns only the storage I/O and
 // the React wiring.
@@ -57,7 +57,7 @@ export function useStamps() {
   // what `commit` transforms. Every path that changes `stamps` moves it too.
   const latest = useRef(stamps)
 
-  // One writer for every mutation: apply a pure transform from src/lib/stamps.js,
+  // One writer for every mutation: apply a pure transform from src/lib/stamp/stamps.js,
   // persist, then echo so the other mounted instance picks it up. No caller
   // touches localStorage or the map shape directly.
   //
@@ -90,7 +90,7 @@ export function useStamps() {
   )
 
   // Un-stamp. Writes an explicit 'off' tombstone rather than deleting — see
-  // applyRemoteStamps in src/lib/stamps.js for why deleting would resurrect the
+  // applyRemoteStamps in src/lib/stamp/stamps.js for why deleting would resurrect the
   // stamp on the next sync.
   const unstamp = useCallback(
     (gamePk) => {

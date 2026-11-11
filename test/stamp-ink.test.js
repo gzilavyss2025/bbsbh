@@ -1,4 +1,4 @@
-// The ink a Logbook stamp is pressed in (src/lib/stampInk.js, ADR-0036's
+// The ink a Logbook stamp is pressed in (src/lib/stamp/stampInk.js, ADR-0036's
 // addendum): the WINNING club's darkest brand colour, deepened if that colour
 // still doesn't read on the page's cream paper.
 //
@@ -19,9 +19,9 @@ import {
   inkCandidates,
   stampInkFor,
   stampWinnerId,
-} from '../src/lib/stampInk.js'
+} from '../src/lib/stamp/stampInk.js'
 import { contrastRatio, relativeLuminance } from '../src/lib/contrast.js'
-import { MILB_COLORS, MLB_TEAM_COLORS } from '../src/lib/brandColors.js'
+import { MILB_COLORS, MLB_TEAM_COLORS } from '../src/lib/colors/brandColors.js'
 
 const BREWERS = 158 // primary #12284B navy, secondary #FFC52F gold
 const CUBS = 112 // primary #0E3386 royal, secondary #CC3433 red
@@ -120,7 +120,7 @@ test('the winner’s darkest colour is what the stamp is pressed in', () => {
 })
 
 // ---------------------------------------------------------------------------
-// A club's own override (src/lib/stampInkTuning.js) — same floor, different pick
+// A club's own override (src/lib/stamp/stampInkTuning.js) — same floor, different pick
 // ---------------------------------------------------------------------------
 
 test('a valid override wins over the automatic darkest-brand-colour pick', () => {

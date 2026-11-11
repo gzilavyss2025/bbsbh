@@ -51,7 +51,7 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = byTreatment(WPA_TUNING_STORE, 
 
 // Re-exported so this stays the module you import band colors from — the
 // literal lives in the dependency-free lib/wpa/wpaDefaults.js leaf, so a caller who
-// wants only that one string (lib/milbColors.js, on the eager first-paint path)
+// wants only that one string (lib/colors/milbColors.js, on the eager first-paint path)
 // doesn't drag this module — and, through its WPA_TUNING import, the whole of
 // data/wpa-tuning.json — into the entry chunk. Read wpaDefaults.js first.
 export { DEFAULT_PINSTRIPE_COLOR }

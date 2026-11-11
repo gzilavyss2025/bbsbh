@@ -34,7 +34,7 @@
 // the rule is the namespace, not a list: everything this app wrote under
 // `bbsbh:` goes, including the dev lab's scratch state and the admin copy
 // cache. Nothing outside the namespace is touched.
-import { allStamps } from '../stamps.js'
+import { allStamps } from '../stamp/stamps.js'
 
 // Every key this app has ever written is namespaced. That prefix IS the
 // definition of "your Tally data on this device".

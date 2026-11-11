@@ -17,7 +17,7 @@ import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor 
 import { wpaLogoLayout } from '../../lib/wpa/wpaLogo.js'
 import { isMlbTeamId } from '../../lib/teams.js'
 import { identityVersion } from '../../lib/identity/overlay.js'
-import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../../lib/milbColors.js'
+import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../../lib/colors/milbColors.js'
 import { useWpaLogo } from '../../hooks/useWpaLogo.js'
 import { useMilbWpaLogo } from '../../hooks/useMilbWpaLogo.js'
 import { Card } from '../ui/frame/Card.jsx'

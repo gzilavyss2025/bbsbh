@@ -12,7 +12,7 @@ import {
   milbHasLogoArt,
   milbHasArt,
   MILB_LOGO_POS_OVERRIDES,
-} from '../src/lib/milbColors.js'
+} from '../src/lib/colors/milbColors.js'
 import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
 
 test('isMlbTeamId separates the 30 MLB clubs from every MiLB affiliate', () => {

@@ -19,8 +19,8 @@
 // through the overlay below, so a save shows up there before the generator
 // ever runs.
 
-import store from './data/mono-ink.json' with { type: 'json' }
-import { effectiveStore, registerIdentityStore } from './identity/overlay.js'
+import store from '../data/mono-ink.json' with { type: 'json' }
+import { effectiveStore, registerIdentityStore } from '../identity/overlay.js'
 
 const REGISTERED = registerIdentityStore('mono-ink', store)
 

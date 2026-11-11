@@ -15,7 +15,7 @@ shows — each opening the sketch modal) → `LineupNextPage` (×2) → `InningV
 `LogoSheet` is a printable grayscale logo sheet, off the slate header. The **Matchup Scout** (`/scout`, `screens/scout/`) is one pitcher against one hitter: spec `docs/scout-design.md`, its one-scroll redesign with one verdict and one view ADR-0118 (supersedes the view toggle ADR-0093 and the second camera ADR-0099), its Savant cutoff ADR-0095. An empty slate gets a second page state (`src/components/offseason/`): `src/components/offseason/CLAUDE.md`.
 
 The lineup page's club bars are **themed** to the jersey that
-club wears that game (ADR-0030) — five CSS properties from `lib/headerTheme.js`,
+club wears that game (ADR-0030) — five CSS properties from `lib/colors/headerTheme.js`,
 which reads identity only, never game state (`src/lib/CLAUDE.md`). The Starting pitcher card resolves the triad a second time
 against the OTHER club (it shows the opposing starter), scoped to its `<section>`.
 Themed surfaces are picked per ELEMENT, not per page: **a club may colour a card
@@ -226,7 +226,7 @@ knockout mark precomputed per club by `scripts/gen-mono-logos.mjs` into
 whiten a logo — that's what this replaced, and it flattens every mark whose
 interior detail is drawn in a light fill into an unreadable blob. Read ADR-0031
 before changing how any of these render; the conversion itself lives in
-`src/lib/logoMono.js`.
+`src/lib/logo/logoMono.js`.
 
 Type, focus rings, and contrast use token roles: `src/styles/CLAUDE.md`.
 

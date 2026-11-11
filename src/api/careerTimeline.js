@@ -9,7 +9,7 @@
 // the rest of the player-page fetchers.
 
 import { teamLogoUrl } from '../lib/teams.js'
-import { tintFromSvg } from '../lib/logoTint.js'
+import { tintFromSvg } from '../lib/logo/logoTint.js'
 import { careerTimelineView } from './person.js'
 import { fetchPersonStats, fetchMilbYearByYear, fetchMilbCareer } from './person-fetch.js'
 import { fetchTeam } from './team/fetch.js'
@@ -19,7 +19,7 @@ import { ipToOuts } from '../lib/math/innings.js'
 
 // A soft background wash for a team, derived from its own logo colors so the
 // full-color mark reads cleanly on it with no border or drop shadow (see
-// lib/logoTint.js). The mlbstatic logo CDN serves its SVGs cross-origin, so we
+// lib/logo/logoTint.js). The mlbstatic logo CDN serves its SVGs cross-origin, so we
 // read the actual fills out of the markup rather than keeping a per-club color
 // table — statsapi has no color field, and there are hundreds of MiLB clubs.
 // Tries the (clean, two-color) cap mark first, then the full primary. Memoized
