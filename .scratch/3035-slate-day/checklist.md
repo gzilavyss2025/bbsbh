@@ -13,11 +13,15 @@
    components are untouched.
 
 ## Build checklist
-- [ ] Failing node test: #2907 seasonRow gate + `pending` stand-in case, fake fetchers.
+- [x] Failing node test: #2907 seasonRow gate + `pending` stand-in case, fake fetchers.
       Inject the saved-row read (`readSeasonRow`) too: node has no `localStorage`, so
       without it the saved-row path #2907 fixed always reads null and goes untested.
-- [ ] Node test: the slate-day value holds no score (issue #3035's spoiler-rule check)
-- [ ] Loader in src/lib/slate/ (ladder behind it; fetchLevelCounts injected from src/api/slate/)
-- [ ] useSlateDay hook; GameSelect switched over
-- [ ] Before/after 390px screenshots: /, /aaa, /07172026, a postseason date (?nointro)
-- [ ] lint, test, build
+- [x] Node test: the slate-day value holds no score (issue #3035's spoiler-rule check)
+- [x] Loader in src/lib/slate/ (ladder behind it; fetchLevelCounts injected from src/api/slate/)
+- [x] useSlateDay hook; GameSelect switched over
+- [x] Before/after 390px screenshots: /, /aaa, /07172026, a postseason date (?nointro)
+- [x] lint, test, build
+
+## Built (2026-11-11)
+- Gap answered by Gary: the loader reports snapshots through `onUpdate` (not one promise), so the page paints in stages.
+- `taggedRows` and `answered` went with the hooks they guarded; their cases are pinned on the loader in test/slate-day.test.js.

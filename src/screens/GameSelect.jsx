@@ -2,19 +2,19 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
-import { fetchSchedule, allStarInfoFrom, fetchSeasonMeta, fetchNextGameDate, fetchTeams } from '../api/schedule/fetch.js'
-import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team/fetch.js'
+import { allStarInfoFrom, fetchNextGameDate } from '../api/schedule/fetch.js'
+import { fetchRosterIdsForTeams } from '../api/team/fetch.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useSlateDay } from '../hooks/slate/useSlateDay.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { bracketOpensByItself, offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { cardLines } from '../api/postseason/text.js'
-import { SPORT_IDS, LEVELS } from '../lib/teams.js'
+import { SPORT_IDS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
@@ -22,8 +22,6 @@ import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { SlateMasthead } from '../components/slatehead/SlateMasthead.jsx'
-import { fetchLevelCounts } from '../api/slate/levelCounts.js'
-import { ladderStops } from '../lib/slate/ladder.js'
 import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
@@ -34,10 +32,8 @@ import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
-import { useOffseason, useSeasonMeta } from '../hooks/useOffseason.js'
-import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
-import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
+import { isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
@@ -111,23 +107,12 @@ export function GameSelect({
   const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
 
-  // The bracket above the cards (#1224, slice 5), and the cards' series
-  // line (slice 4) off the same one bracket — MLB only, every date in
-  // the postseason window, off days included. Keyed to the SLATE's own
-  // YEAR, not today's: a browsed-to past postseason (`/10092025`) needs
-  // THAT year's season row, not today's. Keyed on the year alone (not the
-  // full date), so paging day to day within one postseason re-fetches
-  // nothing.
-  const bracketSeason = Number(dateStr.slice(0, 4))
-  const bracketSeasonMeta = useAsync(
-    () => (sportId === SPORT_IDS.MLB ? fetchSeasonMeta(bracketSeason) : Promise.resolve(null)),
-    [sportId, bracketSeason],
-  )
-  // The bracket draws the 12-club format (2022 on): two Wild Card series per
-  // league, each feeding one Division Series. An older postseason has a
-  // different shape, so its slate stays the plain one.
-  const inPostseasonWindow =
-    sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
+  // THE SLATE DAY (#3035): the season phase, the day's games, the ladder's stops and what is
+  // still on its way, from one loader that owns the fetch order (lib/slate/day.js). The
+  // bracket's season row is keyed to the SLATE's own year, so a browsed-to past postseason
+  // (`/10092025`) reads that year's; only the 12-club format (2022 on) draws a bracket.
+  const day = useSlateDay({ dateStr, sportId, leagueId, favoriteTeamId })
+  const { inPostseasonWindow, onWinter, winterBall, activeLeagueId, stops, isEmptyDay, seasonMeta } = day
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
   const wsModeInfo = worldSeriesMode(postseasonBracket.bracket)
   if (inPostseasonWindow) import('../components/worldseries/WorldSeriesHome.jsx') // preload, see WorldSeriesHome above
@@ -207,61 +192,8 @@ export function GameSelect({
   // ordinary levels, because one stop covers four leagues (issue #1055).
   const pickLevel = (stop) => goToSlate(dateStr, stop.sportId, stop.leagueId)
 
-  // IS THERE A SIXTH TAB TODAY? Read off each winter league's own published
-  // schedule, never off the clock (hooks/useWinter.js). Fails closed in every
-  // direction: until the calendar lands, and forever if it never does, the rail
-  // is the five levels it has always been.
-  const onWinter = isWinterSport(sportId)
-  const winterBall = useWinter(dateStr, sportId, leagueId)
-  // The URL's own league is used until the calendar can confirm or replace it,
-  // so the first fetch on '/mex/12152025' asks for the Mexican league rather
-  // than for a bare sportId=17 — which would answer with four other leagues'
-  // games, three of which this app does not ship.
-  const activeLeagueId = onWinter ? (winterBall.leagueId ?? leagueId ?? null) : null
-  // The masthead's ladder draws WINTER last, after a dashed divider, off the
-  // farm system's rail (lib/slate/ladder.js; the D1 handoff, 2026-10-18).
-  const levels = useMemo(
-    () =>
-      winterBall.tabVisible
-        ? [...LEVELS, { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId }]
-        : LEVELS,
-    [winterBall.tabVisible, winterBall.defaultLeagueId],
-  )
-  // The favorite team is always an MLB club (the club picker only offers
-  // those), so on a MiLB level its own game never appears — pin its current
-  // affiliate at THIS level instead. Season keys off the slate's own date
-  // (not "now") so paging near a year boundary still asks for the season the
-  // displayed date actually falls in; fetchAffiliates degrades to [] offline.
-  const season = Number(dateStr.slice(0, 4))
-  // AFL and winter-league clubs are affiliates of nothing (an AFL club's parentOrgName is
-  // "Office of the Commissioner"), so there is no club to resolve to: skip the fetch.
-  const affiliates = useAsync(
-    () =>
-      sportId === SPORT_IDS.MLB || onWinter
-        ? Promise.resolve([])
-        : fetchAffiliates(favoriteTeamId, season),
-    [favoriteTeamId, season, sportId, onWinter],
-  )
-  const slate = useAsync(
-    () =>
-      onWinter && !activeLeagueId
-        ? Promise.resolve([])
-        : fetchSchedule(dateStr, sportId, undefined, activeLeagueId),
-    [dateStr, sportId, onWinter, activeLeagueId],
-  )
-  // Hold the cards until affiliates answer too: the pinned card re-sorts to the top (CLS 0.31).
-  const { error } = slate
-  const loading = slate.loading || affiliates.loading
-  const data = affiliates.loading ? null : slate.data
-  // Each level's game count for the ladder: one score-free call for all five
-  // (api/slate/levelCounts.js), and the winter's off the calendar useWinter
-  // already holds. Re-read on foreground, as the slate is, so a makeup added
-  // or a game dropped since the first read moves the count too.
-  const levelCounts = useAsync(() => fetchLevelCounts(dateStr), [dateStr], { refetchOnForeground: true })
-  const stops = useMemo(
-    () => ladderStops({ levels, counts: levelCounts.data, sportId, winterGames: winterBall.games }),
-    [levels, levelCounts.data, sportId, winterBall.games],
-  )
+  // Hold the cards until affiliates answer too (the loader does): the pinned card re-sorts to the top.
+  const { games: data, loading, error } = day.slate
 
   // A COLD load — the first fetch for this date/level, with nothing on the page
   // under the loader yet. Only then does the loader reserve a screen (see
@@ -275,10 +207,7 @@ export function GameSelect({
   const bracketPending = inPostseasonWindow && postseasonBracket.loading
   const coldLoad = (loading && !data) || bracketPending
 
-  const favoriteAffiliateIds = useMemo(
-    () => new Set((affiliates.data ?? []).map((a) => a.id)),
-    [affiliates.data],
-  )
+  const favoriteAffiliateIds = day.affiliateIds
 
   // A back-to-back twin bill collapses to one card until game 1 starts —
   // see stackDoubleHeaders for why game 2's scheduled time is a placeholder
@@ -333,12 +262,8 @@ export function GameSelect({
     return out
   }, [sorted])
 
-  // Every active club at this level (see fetchTeams), independent of the
-  // date — so it barely ever refetches as the user pages day to day.
-  const levelTeams = useAsync(
-    () => fetchTeams(sportId, activeLeagueId),
-    [sportId, activeLeagueId],
-  )
+  // Every active club at this level (see fetchTeams), independent of the date.
+  const levelTeams = { data: day.levelTeams }
 
   // This level's full league minus whoever's on today's slate = the clubs
   // with an off day, favorite (or its affiliate, on a MiLB level — see
@@ -376,11 +301,8 @@ export function GameSelect({
   // The break window is a date range, not an MLB-only concept — every level
   // goes dark the same week — so the lookup is gated on ANY level's slate
   // coming back empty, not just MLB's.
-  const isEmptyDay = !loading && !error && sorted.length === 0
-  // ONE fetch, two questions: this row carries the break bounds AND the dates
-  // that say whether the season is over, so the offseason gate below costs an
-  // empty day nothing it was not already spending.
-  const seasonMeta = useSeasonMeta(isEmptyDay, season)
+  // isEmptyDay and seasonMeta come off the slate day: ONE row, asked only on an empty day,
+  // carries the break bounds AND the dates that say whether the season is over.
   const breakWindow = useMemo(
     () => allStarBreakWindow(allStarInfoFrom(seasonMeta.data), dateStr),
     [seasonMeta.data, dateStr],
@@ -391,14 +313,9 @@ export function GameSelect({
   const isBreakWindow = Boolean(breakWindow) && !isDerbyDay
   const allStarPending = isEmptyDay && seasonMeta.loading
 
-  // Is the slate looking at a winter? Read off the dates statsapi publishes for
-  // the season, never off the games coming back empty (hooks/useOffseason.js).
-  const {
-    phase: offseason,
-    winter: winterRows,
-    pending: winterPending,
-    expectWinter,
-  } = useOffseason(dateStr, sportId, seasonMeta.data)
+  // Is the slate looking at a winter? Read off the dates statsapi publishes for the season,
+  // never off the games coming back empty (lib/slate/phase.js).
+  const { phase: offseason, winter: winterRows, pending: winterPending, expectWinter } = day.offseason
   // Saved rows can name the winter before the slate has loaded, so the winter page itself
   // waits for the slate to say it is empty (it must never draw above game cards), and a
   // reserve of its size holds the room meanwhile. A day the saved rows call in season gets
@@ -630,7 +547,7 @@ export function GameSelect({
             error={error}
             hasData={sorted.length > 0}
             errorMessage="Couldn’t load games. Check your connection and try again."
-            onRetry={slate.reload}
+            onRetry={day.reloadSlate}
             // Suppressed for a day the break window or Off Day banner will claim
             // (below) — briefly while either lookup is still in flight too, so
             // neither flashes "No games scheduled." before the fetch resolves. The winter

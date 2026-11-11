@@ -11,7 +11,7 @@
 // clubs' sport ids and nothing else, so no score, status or linescore reaches
 // the browser. A count says how many games are on, never how one went.
 //
-// The winter tab's count is not asked here: useWinter's calendar already holds
+// The winter tab's count is not asked here: the slate-day loader's winter calendar already holds
 // each winter league's games by date (lib/winter/window.js).
 import { LEVELS } from '../../lib/teams.js'
 import { getJson } from '../statsapi.js'
