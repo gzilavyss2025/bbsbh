@@ -1,11 +1,10 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useNav, useRouteLink } from '../../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
-import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
 // AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
@@ -33,9 +32,12 @@ const AdminMenuLink = isClerkEnabled
 //    (~860 CSS px) overran a phone and the overflow ran off the TOP of the
 //    viewport, where no gesture can reach it. `.sitemenusheet` now caps its
 //    own height and scrolls the list inside it.
-// 2. **Focus is trapped.** This dialog has always claimed `aria-modal="true"`,
-//    which asserts nothing outside it is reachable — and Tab walked straight
-//    out into the page behind the scrim. See the APG modal-dialog pattern.
+// 2. **It is a native modal <dialog>.** showModal() puts it in the top layer,
+//    so no ancestor can clip or resize it (on iOS the old fixed scrim showed
+//    only the "Everything" footer under the status bar), makes the page behind
+//    inert, closes on Escape, and hands focus back to the trigger. It stays
+//    inside #root, so the ALL-CAPS rule still reaches it. Same pattern as
+//    StartDetail.jsx.
 // 3. **Rows are anchors, not buttons.** They were `<button onClick={…}>`, so
 //    middle-click, cmd-click and "open in new tab" all did nothing. See
 //    useRouteLink in lib/nav.js, which keeps a plain click a client-side push.
@@ -55,12 +57,7 @@ export function SiteMenuButton({ className = '' }) {
       >
         <MenuGlyph />
       </button>
-      {/* Portalled: see ModalPortal.jsx (iOS clipped it to the masthead). */}
-      {open && (
-        <ModalPortal>
-          <SiteMenuModal onClose={() => setOpen(false)} />
-        </ModalPortal>
-      )}
+      {open && <SiteMenuModal onClose={() => setOpen(false)} />}
     </>
   )
 }
@@ -75,72 +72,39 @@ function MenuGlyph() {
   )
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
-
 function SiteMenuModal({ onClose }) {
   const navigate = useNav()
   const linkProps = useRouteLink()
   const dialogRef = useRef(null)
-  const closeRef = useRef(null)
-
-  // Escape closes; Tab cycles inside the dialog instead of escaping into the
-  // page behind the scrim. Without the second half, the `aria-modal="true"`
-  // below is a claim this code does not honour.
-  const onKeyDown = useCallback(
-    (event) => {
-      if (event.key === 'Escape') {
-        onClose()
-        return
-      }
-      if (event.key !== 'Tab') return
-      const nodes = dialogRef.current?.querySelectorAll(FOCUSABLE)
-      if (!nodes || nodes.length === 0) return
-      const first = nodes[0]
-      const last = nodes[nodes.length - 1]
-      const active = document.activeElement
-      if (event.shiftKey && (active === first || !dialogRef.current.contains(active))) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    },
-    [onClose]
-  )
 
   useEffect(() => {
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onKeyDown])
-
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
+    dialogRef.current?.showModal()
   }, [])
 
+  // close() hands focus back to the trigger before React unmounts the dialog.
+  const close = () => {
+    dialogRef.current?.close()
+    onClose()
+  }
+
   return (
-    <div
+    <dialog
+      ref={dialogRef}
       className="scrim scrim--site-menu"
-      onClick={(e) => e.target.classList.contains('scrim') && onClose()}
+      aria-label="Site menu"
+      onCancel={(e) => {
+        e.preventDefault()
+        close()
+      }}
+      onClick={(e) => e.target === dialogRef.current && close()}
     >
-      <div
-        ref={dialogRef}
-        className="sheet sitemenusheet"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Site menu"
-      >
+      <div className="sheet sitemenusheet">
         <div className="sitemenusheet__head">
           <div>
             <p className="sitemenusheet__note">Tally Baseball</p>
             <h2 className="sheet__title">Site menu</h2>
           </div>
-          <IconButton ref={closeRef} onClick={onClose} label="Close">
+          <IconButton onClick={close} label="Close">
             ✕
           </IconButton>
         </div>
@@ -161,7 +125,7 @@ function SiteMenuModal({ onClose }) {
                           props.onClick(event)
                           // A guide link is left to the browser, which unmounts
                           // this sheet on its own; close only when we handled it.
-                          if (event.defaultPrevented) onClose()
+                          if (event.defaultPrevented) close()
                         }}
                       >
                         {item.label}
@@ -181,7 +145,7 @@ function SiteMenuModal({ onClose }) {
                     would print /admin for every visitor. See AdminMenuLink. */}
                 {AdminMenuLink && group.id === MENU_GROUPS[MENU_GROUPS.length - 1].id && (
                   <Suspense fallback={null}>
-                    <AdminMenuLink onNavigate={onClose} />
+                    <AdminMenuLink onNavigate={close} />
                   </Suspense>
                 )}
               </ul>
@@ -194,7 +158,7 @@ function SiteMenuModal({ onClose }) {
             type="button"
             className="navdir__everything"
             onClick={() => {
-              onClose()
+              close()
               navigate('/more')
             }}
           >
@@ -202,6 +166,6 @@ function SiteMenuModal({ onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }

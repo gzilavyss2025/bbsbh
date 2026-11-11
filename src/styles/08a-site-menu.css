@@ -220,6 +220,31 @@
    on an iPhone 14. The cap lives on the sheet and the overflow on the list
    inside it, so the title and the "Everything" footer stay put while the
    middle moves. */
+/* The <dialog> IS the scrim (SiteMenu.jsx). Reset the browser's dialog box
+   so .scrim fills the window, and hold the page still behind it. */
+.scrim--site-menu {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+}
+
+.scrim--site-menu:not([open]) {
+  display: none;
+}
+
+.scrim--site-menu::backdrop {
+  background: none;
+}
+
+body:has(.scrim--site-menu[open]) {
+  overflow: hidden;
+}
+
 .sheet.sitemenusheet {
   display: flex;
   flex-direction: column;

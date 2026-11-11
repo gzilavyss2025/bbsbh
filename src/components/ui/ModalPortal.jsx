@@ -22,8 +22,7 @@ import { createPortal } from 'react-dom'
 // travel the React tree, so each dialog's backdrop-tap handler, Escape
 // listener, and focus hand-off keep working exactly as written.
 //
-// SiteMenu wraps itself (iOS clipped its scrim to the slate masthead). Other
-// dialogs outside a half-inning page (BallparkModal, …)
+// Dialogs declared outside a half-inning page (BallparkModal, SiteMenu, …)
 // are already in the root stacking context and don't need this — but wrapping
 // one is harmless if a component ever moves.
 export function ModalPortal({ children }) {
