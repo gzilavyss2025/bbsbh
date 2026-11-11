@@ -133,8 +133,9 @@ matter — that runs through the cutoff-gated modules in
 nothing here has a reader to ask, so a club body prints no record.
 
 **The enforcement is structural and asserted.** Nothing in this layer imports
-`src/api/`; `api/_lib/crawl.js` imports exactly one module, the slug helpers in
-`api/_lib/entity.js`, which import nothing at all. `test/crawl-body.test.js` pins
+`src/api/`; `api/_lib/crawl.js` imports exactly two modules, the slug helpers in
+`api/_lib/entity.js` and the route table in `src/lib/route/table.js` (added for
+#3040), and both import nothing at all. `test/crawl-body.test.js` pins
 that over the import graph, pins that the game builder returns no description,
 and pins that a club body carries no record — the same shape
 `test/landing-pages.test.js` uses for the guides.
@@ -204,7 +205,7 @@ shows as a flash of changed text.
   (`ballparkFor`), for example "Dodger Stadium" where the feed says "UNIQLO Field
   at Dodger Stadium". It keeps the feed name for a park that is not on file.
 
-`crawl.js` still has one import and stays pure. `cards.js` does the I/O and the
+`crawl.js` still has one import and stays pure. (A second, the import-free route table, joined later for #3040.) `cards.js` does the I/O and the
 computing and passes plain values in. The roster-status rule takes its two team
 lookups as arguments, because the edge runtime cannot take `src/lib/teams.js`.
 `entity.js` holds an edge copy of the 30 MLB club ids, and `test/cards.test.js`
