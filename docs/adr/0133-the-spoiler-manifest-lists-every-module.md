@@ -8,27 +8,40 @@
 `src/api/spoiler-manifest.json` classifies every module under `src/api/`, and
 `scripts/check-spoiler-manifest.mjs` fails lint when a module has no entry. About two
 thirds of the entries are `spoiler-free` (192 of 289 on 2026-11-11). File moves change
-manifest keys, so the file churns: 18 commits in the month before 2026-11-11, most of
-them moves (#3031 edited 5 keys for one pure move).
+manifest keys, so the file churns: 21 non-merge commits on `main` between 2026-10-11 and
+2026-11-11, many of them moves (#3031 moved five logbook modules and renamed five keys).
 
 The 2026-11-11 architecture audit (candidate #4) asked whether the manifest should list
-only the hazard classes and treat an unlisted module as spoiler-free. The guard already
-fails when an unlisted module imports a reveal-only, reveal-gated or mixed module
-(containment), so the open question was a new hazard module that imports none of them.
+only the non-free classes and treat an unlisted module as spoiler-free.
 
-We measured a tripwire for that case: fail when an unlisted module reads score-shaped
-feed fields (`linescore`, `liveData`, `allPlays`, `homeScore`, `awayScore`,
-`isScoringPlay`, `scoringPlays`, `currentPlay`, `decisions`, …), comments stripped.
+What the guard would still catch. Containment (`GATED_CLASSES` in the guard) fails an
+importer that is not on the allowlist of a `reveal-only` or `reveal-gated` module, or that
+imports a `revealOnlyExports` name from a `mixed` module. It does **not** police
+`caller-gated`, `cutoff-gated` or `progress-only` modules, or the spoiler-free exports of
+a `mixed` one. So an unlisted hazard module escapes the guard when it imports no
+reveal-only, reveal-gated or sealed-mixed code.
 
-- The narrow pattern trips 11 of the 192 spoiler-free modules, which is workable.
-- It misses about half of today's non-free modules. They get plays or a feed as
-  arguments and never name a feed path.
-- A broad pattern (adding `.result`, `.about`, `rbi`, `boxscore`, `gamePk`, …) trips 53
-  spoiler-free modules and still misses 9 reveal-only, gated or mixed modules, among
-  them `playbyplay.js`, `gameday/stepCut.js`, `performanceScore.js` and `umpireFavor.js`.
+The tripwire we measured for that case: fail when an unlisted module, comments stripped,
+matches
 
-So the field-name check we tried cannot catch a new module shaped like `playbyplay.js`.
-Under "hazards only" that module would default to spoiler-free and lint would pass.
+```
+\b(linescore|liveData|allPlays|scoringPlays|currentPlay|isScoringPlay|homeScore|awayScore|playsByInning|decisions)\b
+```
+
+- It trips 11 of the 192 spoiler-free modules, which is workable.
+- Of the 67 `reveal-only`, `reveal-gated`, `mixed`, `progress-only` and `caller-gated`
+  modules, **13 escape both containment and the tripwire**: `expresslane/runners.js`,
+  `gameStory.js`, `heritage/records.js`, `highlights.js` (mixed), `matchup/forHalf.js`
+  (caller-gated), `notable/notable.js`, `performanceScore.js`,
+  `playbyplay/entriesView.js`, `playbyplay/scorebookCode.js`, `savant/attackAngle.js`,
+  `savant/gameFeed.js`, `scorecard/alignment.js` (caller-gated) and `umpireFavor.js`. The
+  rest are reveal-only. They receive plays or a feed as arguments, or read Savant or
+  static data, and never name a feed path or import gated code.
+- Widening the pattern (`.result`, `.about`, `rbi`, `boxscore`, `gamePk`, …) trips 53
+  spoiler-free modules and still misses most of these.
+
+So a new module shaped like `performanceScore.js` or `umpireFavor.js` would default to
+spoiler-free under "hazards only", and lint would pass.
 
 ## Decision
 
@@ -44,7 +57,8 @@ Under "hazards only" that module would default to spoiler-free and lint would pa
 ## Consequences
 
 - Future audits should not propose "list only the hazards" again unless they bring a
-  check that catches a module which gets the feed as an argument. This ADR records the
-  measurement showing a field-name tripwire does not.
+  check that catches a module like the 13 above. The regex and list here let them
+  re-run this measurement.
 - Module headers keep stating their class in prose. When a header and the manifest
-  disagree, the manifest wins and the header is the bug.
+  disagree, the manifest wins and the header is the bug (also stated in
+  `src/api/CLAUDE.md`).

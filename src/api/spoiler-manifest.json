@@ -26,7 +26,11 @@
     "standings) and are correctly spoiler-free. A 'spoiler-free' entry below is a",
     "positive statement that the module was examined and carries no per-game result —",
     "not an omission, and not a gate waiting to be added. Adding a gate on an open",
-    "surface is a regression, not a hardening (ADR-0034)."
+    "surface is a regression, not a hardening (ADR-0034).",
+    "",
+    "WHY SPOILER-FREE MODULES ARE LISTED TOO. Listing only the hazards was measured and",
+    "rejected: an unlisted module that gets the feed as an argument escapes every check",
+    "(ADR-0133)."
   ],
   "$classes": {
     "reveal-only": [

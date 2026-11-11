@@ -37,7 +37,8 @@ and for the gated classes an `importers` allowlist.
 has no entry, if an entry names a file that no longer exists, or if a gated module
 gains an importer that isn't on its list. **A new module in this directory does not
 lint until it is classified.** Spoiler-free modules stay listed too; "list only the
-hazards" was measured and rejected (ADR-0133). It cannot prove a reveal-only call sits inside a
+hazards" was measured and rejected (ADR-0133). If a module header and the manifest
+disagree, the manifest wins; fix the header. The guard cannot prove a reveal-only call sits inside a
 `SealBox` reveal (ADR-0002's render-function shape does that); it makes an audit a diff
 against that file. Start from the manifest, not from a grep: it answers "what is this
 and who may import it", and `docs/api/` answers "how does it work".
