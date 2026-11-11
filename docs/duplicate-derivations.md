@@ -70,7 +70,7 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 
 | # | Quantity | Homes (file: function) | Where they split | Why it is on purpose |
 | --- | --- | --- | --- | --- |
-| D1 | Expected wins from runs | `src/api/standings.js`: `expectedRecord` (MLB `xWinLoss`, else PythagenPat, exponent ((RS+RA)/G)^0.287); `scripts/gen-season-score.mjs`: `pythagoreanPace` (same, times 162); `src/api/teamScoreFormula.js`: `pythagoreanPct` (fixed 1.83, park-adjusted runs) | Every club, most in an extreme park | Standings show MLB's own figure. Team Score judges a club apart from its park. Only the Team Score side says so. |
+| D1 | Expected wins from runs | `src/api/standings.js`: `expectedRecord` (MLB `xWinLoss`, else PythagenPat, exponent ((RS+RA)/G)^0.287); `scripts/gen-season-score.mjs`: `pythagoreanPace` (same, times 162); `src/api/score/teamFormula.js`: `pythagoreanPct` (fixed 1.83, park-adjusted runs) | Every club, most in an extreme park | Standings show MLB's own figure. Team Score judges a club apart from its park. Only the Team Score side says so. |
 | D2 | Standard deviation | Divide by n: `src/lib/statTiers.js`: `meanAndSd`; `scripts/gen-workload.mjs`: `meanSd`; `scripts/lib/savant.mjs`: `meanSd`. Divide by n−1: `scripts/gen-gate.mjs`: `stdev`; `src/lib/euz.js`: `silverman` | Small pools | A whole league pool is a population. A season in progress, or a bandwidth estimate, is a sample. `savant.mjs` does not say which it uses. |
 | D3 | Home win probability of one game | `scripts/gen-season-score.mjs`: `expectedHomeWinProbability` (club home factor, clamp 0.25–0.75 on wins/162); `scripts/gen-postseason-odds.mjs`: `homeWinProbability` (league `HOME_WIN_PROBABILITY`, clamp 0.05–0.95 on rates) | Every club with a home factor far from 0.54 | Different inputs (wins against rates). The odds file does not say why it uses the league edge and not the club edge. |
 | D4 | Starter or reliever | 0.5 of games: `src/api/person/identity.js`: `pitcherRole`; `scripts/gen-workload.mjs` (role). 0.4 of games: `scripts/lib/salaries.mjs`: `pitcherRole`; `scripts/lib/contract-pay-rank.mjs`: `pitcherGroup` | A pitcher with 40–49% starts | The money pages ask which pay market a swingman is in. The player page picks a tile set. Only the 0.4 side says so. |
@@ -92,7 +92,7 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 | U4 | Base-out state, play by play | `scripts/gen-run-expectancy.mjs`: `accumulateGame`; `scripts/gen-umpire-accuracy.mjs`: `computeGameAccuracy`; `src/api/umpireFavor.js`: `selectUmpireFavor`; `scripts/lib/abs/rows.mjs`: `challengeRowsForGame` | None found | A pure step function in `src/lib/runExpectancy.js` beside the table code. The reveal-only walk in `umpireFavor.js` stays there. |
 | U6 | Quality start | `src/api/person/gameLog.js` (inline); `scripts/lib/team-records.mjs`: `isQualityStart` | None (18 outs, 3 ER) | `isQualityStart`, moved to `src/lib/`. |
 | U7 | Level tenure (first ascent) | `.scratch/level-benchmarks/analyze.mjs`: `reconstruct`; `scripts/gen-level-tenure-benchmark.mjs`: `reconstruct` | None. Both keep debut-year MiLB rows after the debut. | The generator. The spike is its source. |
-| U8 | A club's Team Score at a cutoff | `src/api/teamScore.js`: `leagueSeasonGradesFor`; `scripts/gen-postseason-odds.mjs`: `teamScoreSnapshot` (says it is a deliberate copy) | None | `teamScore.js`. `src/api/CLAUDE.md` says a generator that needs app logic imports it. |
+| U8 | A club's Team Score at a cutoff | `src/api/score/team.js`: `leagueSeasonGradesFor`; `scripts/gen-postseason-odds.mjs`: `teamScoreSnapshot` (says it is a deliberate copy) | None | `score/team.js`. `src/api/CLAUDE.md` says a generator that needs app logic imports it. |
 | U9 | The league's ABS challenge rate | Resolved: `clubRate`, the second copy beside `leagueBaseline`, was deleted with the old team card (#2496). `src/api/around-the-game/absExposure.js`: `leagueBaseline` (per 1,000 pitches, per nine innings caught); `src/api/around-the-game/absClubCard.js`: the league line in `jobModel` (per called strike seen or ball received, where the club file carries them) | The two rates divide by different things, so they are not the same figure. `absClubCard.js`'s header says why: the calls a man could have challenged. | No single home: quote each with its denominator. |
 | U10 | A player's ABS challenge rate | `scripts/lib/abs/exposure.mjs`: `exposureRates` (per 1,000 pitches, per nine innings caught); `src/api/around-the-game/absClubCard.js`: `rowsOf` (`frac`, over called strikes seen or balls received). `clubChallengeBoard`, a third home, was deleted (#2496). | Different denominators, as in U9. | `exposureRates` for the league pages, the shipped per-player field. The card keeps its own basis. |
 | U11 | Median and quantile | `scripts/gen-gate.mjs`: `median` (rounds an even pair); `scripts/lib/salaries.mjs`, `scripts/lib/opencommand.mjs`, `scripts/lib/savant.mjs` (`round1`): `median`; `scripts/gen-level-tenure-benchmark.mjs`: `percentile`; `src/components/scoring/StrikeZone.jsx` and `src/lib/pitcherCard/atBat.js`: `median`; `absExposure.js`: `quantile`; `src/api/workload.js` (upper middle) | Even-length lists and storage precision | Low value. Each precision is stated where it lives. Collapse only if one of them moves. |
@@ -127,7 +127,7 @@ These have one home each, so they are not in the buckets. No issue was opened.
 These land with the collapse work, not here. Each one goes beside the code
 named. The text is exact.
 
-**`src/api/teamScoreFormula.js`, above `PythagoreanExponent` (D1):**
+**`src/api/score/teamFormula.js`, above `PythagoreanExponent` (D1):**
 
 ```js
 // NOT THE STANDINGS' "EXP W-L". standings.js's expectedRecord shows MLB's own
@@ -139,7 +139,7 @@ named. The text is exact.
 **`src/api/standings.js`, above `expectedRecord` (D1):**
 
 ```js
-// Not teamScoreFormula.js's pythagWins, which is park-adjusted with a fixed
+// Not score/teamFormula.js's pythagWins, which is park-adjusted with a fixed
 // 1.83 exponent. This column is MLB's own expected record, raw runs.
 ```
 

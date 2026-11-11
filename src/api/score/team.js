@@ -1,6 +1,6 @@
-import { seasonGradeFor } from './seasonGradeFormula.js'
-import { staticJson } from './staticJson.js'
-import { latestAtOrBefore } from '../lib/math/snapshot.js'
+import { seasonGradeFor } from './seasonGrade.js'
+import { staticJson } from '../staticJson.js'
+import { latestAtOrBefore } from '../../lib/math/snapshot.js'
 
 // Daily MLB team-quality snapshots. Like the season-score reader, this reader selects
 // only the latest snapshot at or before a Team Page's as-of cutoff.

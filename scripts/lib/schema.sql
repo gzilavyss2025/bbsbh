@@ -10,7 +10,7 @@
 --   'current_form' - gen-team-score.mjs's last-10-games diagnostic
 --   'surprise'     - gen-season-score.mjs's Season Surprise Score
 -- `payload_json` carries each generator's existing snapshot shape verbatim
--- (see teamScoreFormula.js / buildSnapshots) rather than exploding every
+-- (see score/teamFormula.js / buildSnapshots) rather than exploding every
 -- field into its own column, so a formula tweak doesn't require a migration.
 CREATE TABLE IF NOT EXISTS team_snapshots (
   season       INTEGER NOT NULL,
@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 
 -- Available for future generation-time features that want a Quality+Surprise
 -- pair without hand-rolling the lookup. Deliberately NOT wired in to replace
--- src/api/teamScore.js's leagueSeasonGradesFor: that function computes the
+-- src/api/score/team.js's leagueSeasonGradesFor: that function computes the
 -- grade at a dynamic, PER-PAGE spoiler-safe cutoff (whichever game a reader
--- is viewing), and seasonGradeFormula.js's seasonGradeFromScores also runs
+-- is viewing), and score/seasonGrade.js's seasonGradeFromScores also runs
 -- live for the Team Page's interactive "how this is calculated" explainer —
 -- both need the raw dated snapshots and the pure formula in the browser, so
 -- a build-time-precomputed grade would either miss historical cutoffs or

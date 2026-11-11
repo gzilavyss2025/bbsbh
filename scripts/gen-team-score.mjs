@@ -3,11 +3,11 @@
 // Pythagorean run quality, centered on .500 and damped for small samples;
 // Quality also folds in a per-game park adjustment to that run differential
 // and a capped strength-of-schedule nudge from opponents' own season winning
-// percentage (Current Form does neither — see teamScoreFormula.js). Season
+// percentage (Current Form does neither — see score/teamFormula.js). Season
 // Surprise remains in season-score.json as the Grade's separate, visible Vs.
 // expectation driver. The composite Season Grade is derived in
-// src/api/seasonGradeFormula.js from same-cutoff snapshots. The formula
-// itself lives in src/api/teamScoreFormula.js (pure, no node imports) so the
+// src/api/score/seasonGrade.js from same-cutoff snapshots. The formula
+// itself lives in src/api/score/teamFormula.js (pure, no node imports) so the
 // team page's "how this is calculated" explainer can run the same math
 // client-side — re-exported here so this script stays the existing import
 // site for test/team-score.test.js. `game.venue.id`/`.name` were verified
@@ -23,7 +23,7 @@ import {
   scheduleStrengthAdjustment,
   venueRunFactor,
   CURRENT_FORM_GAMES,
-} from '../src/api/teamScoreFormula.js'
+} from '../src/api/score/teamFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup, dropTeamSnapshot, previousTeamSnapshot, repeatsPrevious } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -61,7 +61,7 @@ function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}, ext
 }
 
 // Every opponent a team has actually played, so Quality's strength-of-
-// schedule nudge (see teamScoreFormula.js) can compare a team's average
+// schedule nudge (see score/teamFormula.js) can compare a team's average
 // opponent to a .500 club using real season records rather than a preseason
 // projection. `winPctByTeam` is built from the SAME completed-games list
 // summarize() draws from, so it can never look past the snapshot's own
@@ -82,7 +82,7 @@ function avgOpponentWinPct(games, winPctByTeam) {
 }
 
 // Every completed game's own venue, so Quality's park adjustment (see
-// teamScoreFormula.js) can compare a game's actual runs to what a neutral
+// score/teamFormula.js) can compare a game's actual runs to what a neutral
 // park would have produced, from the SAME completed-games list summarize()
 // already draws from — no separate fetch, and it can never look past the
 // snapshot's own cutoff (asOf) because `games` already is.

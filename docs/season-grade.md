@@ -36,7 +36,7 @@ else:
 grade = clamp(quality + adjustment, 0, 10)
 ```
 
-The calculation lives in `src/api/seasonGradeFormula.js`. It runs from the
+The calculation lives in `src/api/score/seasonGrade.js`. It runs from the
 rounded, auditable Quality and Vs. expectation values already shipped to the
 browser. Examples from the July 2026 calibration set:
 

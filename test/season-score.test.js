@@ -11,7 +11,7 @@ import {
   HOME_FIELD_FACTOR_MIN,
   HOME_FIELD_FACTOR_MAX,
   teamHomeFieldFactor,
-} from '../src/api/seasonScoreFormula.js'
+} from '../src/api/score/seasonFormula.js'
 
 // Synthetic prior-season standings rows shaped like fetchPriorRecords'
 // output (and pinned against a live feed in test/standings.test.js): each

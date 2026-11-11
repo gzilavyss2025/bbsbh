@@ -152,7 +152,7 @@ The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
 directory's shared footing. `boxscore/`, `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `notable/` (the feat index: the feat label, the callout and the `/notable` shelf), `player/`, `postseason/`
-(`docs/api/postseason.md`), and `scorecard/` have only their file headers and the
+(`docs/api/postseason.md`), `score/` (Season Score, Season Grade, Team Score; `docs/season-score.md`, `docs/season-grade.md`), and `scorecard/` have only their file headers and the
 manifest.
 
 Related research docs, worth reading before wiring a NEW source:

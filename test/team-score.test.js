@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '../scripts/gen-team-score.mjs'
-import { leagueSeasonGradesFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
-import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
+import { leagueSeasonGradesFor, gradeTiersByTeamId } from '../src/api/score/team.js'
+import { seasonGradeFromScores, seasonGradeFor } from '../src/api/score/seasonGrade.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import {
   scheduleStrengthAdjustment,
@@ -11,7 +11,7 @@ import {
   VENUE_FACTOR_PRIOR_GAMES,
   PARK_FACTOR_MIN,
   PARK_FACTOR_MAX,
-} from '../src/api/teamScoreFormula.js'
+} from '../src/api/score/teamFormula.js'
 
 const round1 = (n) => Math.round(n * 10) / 10
 
@@ -74,7 +74,7 @@ test('venueRunFactor clamps an extreme raw ratio even at a large sample', () => 
 // difference is WHERE each of their 10 games happened. THE TRAP this pins:
 // giving every one of a team's own games the same run ratio would make the
 // park adjustment a no-op in aggregate, for the same scale-invariance reason
-// a team-level multiplier is (see teamScoreFormula.js's header comment on
+// a team-level multiplier is (see score/teamFormula.js's header comment on
 // venueRunFactor) — so X and Y each need two DIFFERENT game shapes (a 9-1
 // blowout win and a 1-2 narrow loss), with venues assigned the OPPOSITE way
 // between them: X's blowouts at HI / narrow losses at LO, Y's blowouts at LO

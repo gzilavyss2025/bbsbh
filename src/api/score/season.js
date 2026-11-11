@@ -3,7 +3,7 @@
 // snapshot AT OR BEFORE the Team Page's standings cutoff, so a historical page
 // never renders a later season result. Missing data is a missing badge.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 export const fetchSeasonScores = staticJson('/data/season-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },

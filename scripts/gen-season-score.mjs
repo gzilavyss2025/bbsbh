@@ -6,7 +6,7 @@
 // home-field edge is also team-specific now — blended from the home team's
 // trailing three prior seasons' standings home/road splits, never the
 // current season's own record (see teamHomeFieldFactor in
-// src/api/seasonScoreFormula.js for why). See docs/season-score.md and
+// src/api/score/seasonFormula.js for why). See docs/season-score.md and
 // ADR-0018.
 //
 // The file stores date-keyed snapshots so a historical Team Page can use its
@@ -20,7 +20,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
 import { clamp, round1 } from '../src/lib/math/number.js'
 import { writeJsonAtomic } from './lib/io.js'
-import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/seasonScoreFormula.js'
+import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/score/seasonFormula.js'
 
 const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'season-score.json')
