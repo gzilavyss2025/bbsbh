@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, measureByKey, obp, slg, toGame } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, era, ip, isStarter, measureByKey, obp, slg, toGame } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -36,4 +36,19 @@ test('OBP counts walks, HBP and sac flies; SLG is total bases over at-bats', () 
   assert.equal(obp(t), 5 / 13)
   assert.equal(slg(t), 0.7)
   assert.equal(obp({ hits: 0, baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, atBats: 0 }), 0)
+})
+
+const outing = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { outs: 18, ...s } }, 'pitching')
+
+test('pitching: ERA is lower-is-better, from summed earned runs over outs', () => {
+  const games = [outing(0, { earnedRuns: 5 }), outing(1, { earnedRuns: 0 }), outing(2, { earnedRuns: 1 }), outing(3, { earnedRuns: 6 })]
+  const b = bestStretch(games, 2, measureByKey('era', 'pitching'), 'pitching')
+  assert.equal(b.first, day(1))
+  assert.equal(era(b), 1 * 27 / 36)
+  assert.equal(ip({ outs: 20 }), '6.2')
+})
+
+test('pitching: a starter is someone with at least half his outings started', () => {
+  assert.equal(isStarter([outing(0, { gamesStarted: 1 }), outing(1, {})]), true)
+  assert.equal(isStarter([outing(0, { gamesStarted: 1 }), outing(1, {}), outing(2, {})]), false)
 })
