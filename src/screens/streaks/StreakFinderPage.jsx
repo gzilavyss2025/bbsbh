@@ -96,8 +96,8 @@ export function StreakFinderPage() {
   const setSide = (side) => setDraft((d) => ({ ...d, side, stat: statByKey(d.stat, side).key }))
 
   const { data: firstData, error: firstError, reload: reloadFirst } = useAsync((signal) => firstSeason(applied.team, signal), [applied.team])
-  // If the first-season lookup fails, fall back to 1871 rather than spin; an empty
-  // early season costs one small request each.
+  // If the first-season lookup fails, fall back to 1871 rather than spin: the game
+  // log comes in 40-season blocks, so the extra empty years cost one small request.
   const first = firstData ?? (firstError ? 1871 : null)
   const [lo, hi] = [applied.from, applied.to].map((y) => (y == null ? null : int(y, first ?? 1871, THIS_YEAR, null)))
   const from = Math.min(lo ?? first ?? THIS_YEAR, hi ?? THIS_YEAR)
@@ -108,7 +108,7 @@ export function StreakFinderPage() {
     (signal) => (first ? loadLogs(applied.team, group, from, to, applied.post, signal) : Promise.resolve(null)),
     [applied.team, group, from, to, applied.post, first],
   )
-  const games = useMemo(() => (loaded ? toGames(loaded.logs, field) : null), [loaded, field])
+  const games = useMemo(() => (loaded ? toGames(loaded, field) : null), [loaded, field])
 
   const rows = useMemo(() => {
     if (!games) return []
@@ -226,11 +226,6 @@ export function StreakFinderPage() {
       {firstError && !firstData && (
         <Notice tone="error" role="status" action={<Button onClick={reloadFirst}>Retry</Button>}>
           Couldn’t find the club’s first season, so this searches from 1871.
-        </Notice>
-      )}
-      {loaded?.failed.length > 0 && !loading && (
-        <Notice tone="error" role="status" action={<Button onClick={reload}>Retry</Button>}>
-          {loaded.failed.length} {loaded.failed.length === 1 ? 'season' : 'seasons'} couldn’t load ({loaded.failed.join(', ')}), so these ranks leave {loaded.failed.length === 1 ? 'it' : 'them'} out.
         </Notice>
       )}
       {games && !loading && (
