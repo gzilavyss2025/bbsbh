@@ -6,25 +6,25 @@
 // HOW. One schedule call per season gives every Final regular-season game. For each
 // game date from August 1 on (2020: August 25), the standings through the PRIOR day
 // say which clubs began that day already out; one call per league serves all 15
-// clubs. A club's elimination date is the first such date. Nobody has been out
-// before August in this span, so earlier dates are not read.
+// clubs. A club's elimination date is the first such date. The run stops if any club
+// is already out on the first date read, so a too-late start cannot pass silently.
 //
 // WHAT IT STORES: per club-season the games played, the elimination date, and each
 // game from that date on: date, opponent, home/away and the record entering it.
 // Records and dates only, no scores (ADR-0034).
 //
 // HAND-RUN. A finished season never changes, so re-run only to add a season:
-//   node scripts/gen-eliminated.mjs                  # 2017 through the last season
+//   node scripts/gen-eliminated.mjs                  # 1995 through the last season
 //   node scripts/gen-eliminated.mjs --to=2026
 import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
-import { eliminatedIds } from './lib/elimination/rule.mjs'
+import { eliminatedIds, isPlayed, FIRST_SEASON } from './lib/elimination/rule.mjs'
 
 const args = parseArgs(process.argv.slice(2))
-const FIRST = Number(strOpt(args, 'from') ?? 2017)
+const FIRST = Number(strOpt(args, 'from') ?? FIRST_SEASON)
 const LAST = Number(strOpt(args, 'to') ?? new Date().getFullYear() - (new Date().getMonth() < 10 ? 1 : 0))
 const OUT = join(import.meta.dirname, '..', 'public', 'data', 'eliminated.json')
 
@@ -34,7 +34,7 @@ async function season(y) {
   const sched = await getJson(`/api/v1/schedule?sportId=1&season=${y}&gameType=R`)
   const byPk = new Map()
   for (const d of sched.dates) {
-    for (const g of d.games) if (g.status.codedGameState === 'F') byPk.set(g.gamePk, { date: g.officialDate ?? d.date, g })
+    for (const g of d.games) if (isPlayed(g)) byPk.set(g.gamePk, { date: g.officialDate ?? d.date, g })
   }
   const games = new Map() // teamId -> [{date, oppId, home}]
   for (const { date, g } of byPk.values()) {
@@ -57,6 +57,8 @@ async function season(y) {
     }
     return { date, out, record }
   }, { strict: true })
+  // A club already out on the first date read was out before it: the sweep started too late.
+  if (days[0]?.out.size) throw new Error(`${y}: clubs already out on ${days[0].date}; start the sweep earlier`)
   const clubs = {}
   for (const [id, list] of games) {
     const outDay = days.find((d) => d.out.has(id))

@@ -1,7 +1,7 @@
 // The games-after-elimination rule (scripts/lib/elimination/rule.mjs).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { eliminatedIds, berthsPerLeague } from '../scripts/lib/elimination/rule.mjs'
+import { eliminatedIds, berthsPerLeague, isPlayed } from '../scripts/lib/elimination/rule.mjs'
 
 const t = (id, elim, wc, clinched = false) => ({
   team: { id },
@@ -29,5 +29,17 @@ test('five clinched clubs leave a 2022 team alive', () => {
 })
 
 test('berths by season', () => {
-  assert.deepEqual([2019, 2020, 2021, 2022].map(berthsPerLeague), [5, 8, 5, 6])
+  assert.deepEqual([1995, 2011, 2012, 2019, 2020, 2021, 2022].map(berthsPerLeague), [4, 4, 5, 5, 8, 5, 6])
+})
+
+test('four clinched clubs fill a 2005 league', () => {
+  const clinchers = [10, 11, 12, 13].map((id) => t(id, '-', '-', true))
+  assert.deepEqual([...eliminatedIds([...clinchers, t(1, 'E', '1')], 2005)], [1])
+})
+
+test('a Final entry with no score was never played; a scored tie was', () => {
+  const g = (state, a, h) => ({ status: { codedGameState: state }, teams: { away: { score: a }, home: { score: h } } })
+  assert.equal(isPlayed(g('F', 3, 3)), true)
+  assert.equal(isPlayed(g('F', undefined, undefined)), false)
+  assert.equal(isPlayed(g('D', 0, 0)), false)
 })
