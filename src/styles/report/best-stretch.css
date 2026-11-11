@@ -46,10 +46,23 @@
   overflow: hidden;
   border: var(--bw-heavy) solid var(--bar-accent, var(--marker));
 }
-.stretch__shot img {
+/* Headshot draws its own rounded, tinted frame; here the gold square IS the
+   frame, so its span fills the square flat and the photo is cut from the top
+   (cap and face), never zoomed into the middle. */
+/* card-fill-exempt: the shot fills a fixed-size photo frame, not a card */
+.stretch__shot .shot {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--surface-band-deep);
+}
+.stretch__shot .shot img {
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  object-position: center top;
 }
 .stretch__who-line {
   flex: 1;
