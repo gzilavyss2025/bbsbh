@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { ROUTE_TABLE, NAME_BY_PATH, pathOf } from '../src/lib/route/table.js'
 import { PATTERN_ROUTES, buildPath } from '../src/lib/route/patterns.js'
-import { parseRoute, parseRouteByHand, LEAGUE_SLUG } from '../src/lib/route.js'
+import { parseRoute, parseRouteByHand, LEAGUE_SLUG, bookPath, bookStatsPath } from '../src/lib/route.js'
 import { canonicalUrl } from '../api/preview.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { PAGE_GROUPS } from '../src/lib/reportPages.js'
@@ -146,15 +146,17 @@ test('every pattern entry has samples, and parse(build(x)) deep-equals x', () =>
   }
 })
 
-// The pattern entries are tried before the hand branches too, so the same
-// rule: with them out of the way, no sample address may parse to their page.
-test('no hand-written branch also claims a pattern address', () => {
-  const names = new Set(PATTERN_ROUTES.map((r) => r.name))
-  for (const entry of PATTERN_ROUTES) {
-    for (const params of PATTERN_SAMPLES[entry.name]) {
-      const url = buildPath(entry.name, params)
+// The pattern entries are tried BEFORE the hand branches, so a pattern head the
+// hand parsers also own ('umpire' for the season views, 'scout', 'from',
+// '/learn/x?edit', a records page) would steal their addresses silently. With
+// the patterns out of the way, every shape under a pattern head must fall to
+// the slate or the generic game route, i.e. no hand branch knows that head.
+test('no hand-written branch owns a pattern head', () => {
+  for (const { head } of PATTERN_ROUTES) {
+    for (const tail of ['', '/x-1', '/x-1/2024', '/x-1/2024/y', '/x-1?edit']) {
+      const url = `/${head}${tail}`
       const { name } = parseRouteByHand(url)
-      assert.ok(!names.has(name), `${url} is also parsed by hand, as '${name}'`)
+      assert.ok(name === 'home' || name === 'game', `${url} is parsed by hand, as '${name}'`)
     }
   }
 })
@@ -165,4 +167,20 @@ test('no pattern head is a table address, a slate date or a league slate', () =>
     assert.ok(!NAME_BY_PATH.has(`/${head}`), head)
     assert.ok(!/^\d{8}$/.test(head) && !leagues.has(head), head)
   }
+})
+
+// A parsed route fed back into its build gives the same clean address: a Logbook
+// with no stamp in hand carries `placing: null`, which must not become '?place=0'.
+test('build(parse(url)) gives back the canonical url', () => {
+  for (const url of ['/logbook', '/logbook/2024', '/logbook/book/b1', '/leaders', '/player/545361', '/team/milwaukee-brewers-158/roster']) {
+    const { name, ...params } = parseRoute(url)
+    assert.equal(buildPath(name, params), url)
+  }
+})
+
+// A book whose id has not loaded must not quietly open the DEFAULT book's
+// addresses: '/logbook/2024' is a different book, '/logbook/stats' the whole shelf.
+test('a book builder with no id never builds a default-book address', () => {
+  assert.notEqual(parseRoute(bookPath(undefined, 2024)).bookId, undefined)
+  assert.notEqual(parseRoute(bookStatsPath(undefined)).bookId, undefined)
 })

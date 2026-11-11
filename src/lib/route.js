@@ -568,7 +568,7 @@ export function logbookStatsPath() {
 // every other Logbook path can: you may start a book in order to put THIS
 // keepsake in it, and the flow must not drop it on the way.
 export function logbookNewPath(gamePk = null) {
-  return buildPath('logbook', { creating: true, placing: gamePk || undefined })
+  return buildPath('logbook', { creating: true, placing: gamePk || null })
 }
 // A specific named book (ADR-0036's shelf), optionally paged to one season —
 // the additive counterpart to logbookPath() for a user with more than one
@@ -585,7 +585,7 @@ export function bookStatsPath(bookId) {
   return buildPath('logbook-stats', { bookId })
 }
 // The book, opened in placement mode for one freshly minted stamp. See the
-// `?place=` note in parseRoute for why this is a query rather than a route.
+// `?place=` note on the logbook entry in route/patterns.js for why this is a query rather than a route.
 export function logbookPlacePath(gamePk) {
   return buildPath('logbook', { placing: gamePk })
 }

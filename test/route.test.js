@@ -374,9 +374,9 @@ test('the old team tab URLs parse to the one-scroll page on a band, carrying the
 
 test('a team tab segment is not mistaken for a date-first game route', () => {
   // The ordering trap route.js's own header warns about: '/team/{id}/roster' is
-  // 3 segments, the same shape as '/{date}/{matchup}/{section}'. The
-  // TEAM_TAB_ROUTES branch must be checked before the generic game branch, or
-  // this parses as a bogus game with date='team', matchup='158', section='roster'.
+  // 3 segments, the same shape as '/{date}/{matchup}/{section}'. The 'team'
+  // pattern entry (route/patterns.js) must claim it before the generic game
+  // branch, or this parses as a bogus game with date='team', matchup='158', section='roster'.
   assert.deepEqual(parseRoute('/team/158/roster'), {
     name: 'team',
     id: '158',

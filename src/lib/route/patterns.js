@@ -11,7 +11,10 @@
 //   build  (route-shaped params) -> the address. `parse(build(r))` deep-equals
 //          `r` (test/route-table.test.js). A `slugName` param is the name a
 //          '{slug}-{id}' segment spells; it changes the spelling only, so parse
-//          does not return it.
+//          does not return it. An id-like param (bookId, gamePk, orgId, a
+//          trade-deadline season) counts as given when its KEY is present, even
+//          if its value is not: a book whose id has not loaded must build a
+//          broken book address, never the default book's (#3052 review).
 //
 // ORDER MATTERS WITHIN A HEAD: the specific '/team/{id}/{page}' entries come
 // before 'team', whose parse takes any other third segment (#1164), and
@@ -30,8 +33,9 @@
 
 import { entitySegment, idFromSlug, linkQuery, teamSegment } from './segments.js'
 
-// Newest SEASONS year in api/tradeDeadline.js (test/route.test.js pins it).
-export const LATEST_TRADE_DEADLINE_SEASON = 2026
+// Newest SEASONS year in api/tradeDeadline.js. test/route.test.js checks that
+// '/trade-deadline' parses to SEASONS' newest year, so a stale value fails there.
+const LATEST_TRADE_DEADLINE_SEASON = 2026
 
 // The old player-hub tab addresses (#1898). The tabs are gone: each opens the one
 // player page, which scrolls to the tab's section, so every shared link still works.
@@ -151,7 +155,7 @@ export const PATTERN_ROUTES = [
       return null
     },
     build: (r) => {
-      if (r.scope === 'org') return `/leaders/org/${teamSegment(r.orgId, r.slugName)}${hints(r)}`
+      if (r.scope === 'org' && 'orgId' in r) return `/leaders/org/${teamSegment(r.orgId, r.slugName)}${hints(r)}`
       return `${!r.scope || r.scope === 'mlb' ? '/leaders' : `/leaders/${r.scope}`}${hints(r)}`
     },
   },
@@ -192,7 +196,7 @@ export const PATTERN_ROUTES = [
       const season = p.length === 2 ? Number(p[1]) : NaN
       return { name: 'trade-deadline-season', season: Number.isFinite(season) ? season : LATEST_TRADE_DEADLINE_SEASON }
     },
-    build: (r) => (r.season === undefined ? '/trade-deadline' : `/trade-deadline/${r.season}`),
+    build: (r) => (!('season' in r) ? '/trade-deadline' : `/trade-deadline/${r.season}`),
   },
   {
     // The Game Notes archive (#1258). `?team=` is one MLB club, 'all' every
@@ -218,7 +222,7 @@ export const PATTERN_ROUTES = [
       const gamePk = Number(p[1])
       return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
     },
-    build: (r) => (r.gamePk === undefined ? '/photos' : `/photos/${r.gamePk}`),
+    build: (r) => (!('gamePk' in r) ? '/photos' : `/photos/${r.gamePk}`),
   },
   {
     // The Logbook retrospective (ADR-0035): '/logbook/stats' for the whole
@@ -231,7 +235,7 @@ export const PATTERN_ROUTES = [
         return { name: 'logbook-stats', bookId: p[2] }
       return null
     },
-    build: (r) => (r.bookId === undefined ? '/logbook/stats' : `/logbook/book/${r.bookId}/stats`),
+    build: (r) => (!('bookId' in r) ? '/logbook/stats' : `/logbook/book/${r.bookId}/stats`),
   },
   {
     // The Logbook (ADR-0035): this user's game stamps, scores plain because a
@@ -256,8 +260,8 @@ export const PATTERN_ROUTES = [
     build: (r) => {
       const base = r.creating
         ? '/logbook/new'
-        : `${r.bookId === undefined ? '/logbook' : `/logbook/book/${r.bookId}`}${r.season ? `/${r.season}` : ''}`
-      return r.placing === undefined ? base : `${base}?place=${Number(r.placing)}`
+        : `${!('bookId' in r) ? '/logbook' : `/logbook/book/${r.bookId}`}${r.season ? `/${r.season}` : ''}`
+      return r.placing == null ? base : `${base}?place=${Number(r.placing)}`
     },
   },
 ]

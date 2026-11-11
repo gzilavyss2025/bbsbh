@@ -54,7 +54,7 @@ export function idFromSlug(segment) {
   return m ? m[1] : s
 }
 
-// The counterpart every path builder below goes through. No name, or an id that
+// The counterpart every path builder goes through. No name, or an id that
 // is not a plain number (an undefined off a half-loaded row): emit the bare id
 // and let the address stay short rather than mint 'undefined-158'.
 export function entitySegment(id, name) {
