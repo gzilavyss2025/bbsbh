@@ -87,7 +87,7 @@ const BUDGETS = {
   // code between generators, so inlining them would copy it into each one.
   'scripts/lib': 42,
   'src/screens': 39,
-  'src/hooks': 25,
+  'src/hooks': 24,
   'src/screens/identity-lab': 15,
   // One file per diary finding. A research diary is append-only
   // (docs/agents/research-diary.md, docs/agents/contender-diary.md), so these

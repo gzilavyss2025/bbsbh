@@ -4,7 +4,7 @@
 //
 // THE ORDER. The farm system reads top to bottom: MLB, AAA, AA, A+, A. Winter
 // is not a rung of that ladder, so it sits last, after a dashed divider, and
-// only while a shipped winter league is in season (useWinter's tabVisible).
+// only while a shipped winter league is in season (the slate day's winterBall.tabVisible, lib/slate/day.js).
 // The old level rail put WINTER second, right after MLB; the D1 design moves
 // it to the end (Gary's handoff, 2026-10-18).
 import { isWinterSport } from '../winter/leagues.js'
