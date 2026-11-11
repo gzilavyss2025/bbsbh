@@ -1,5 +1,5 @@
 // The Series MVP's own stat line, from the per-player series sums
-// (postseasonSeries.js `lines`). One line per player: a pitcher's when his outs recorded
+// (postseason/archive/series.js `lines`). One line per player: a pitcher's when his outs recorded
 // outnumber his at-bats, else his batting line; [] when unknown. Pure arithmetic.
 import { outsToIp } from '../math/innings.js'
 

@@ -17,7 +17,7 @@ import { teamAbbr } from '../../lib/teams.js'
 import { fetchPersonStats } from '../person-fetch.js'
 import { getJson } from '../statsapi.js'
 import { fetchGamePhotos } from '../gamePhotos.js'
-import { fetchGameBoxscore, foldRunsByGame } from '../postseasonSeries.js'
+import { fetchGameBoxscore, foldRunsByGame } from './archive/series.js'
 import { keptGames } from './fetch.js'
 import { dayBefore } from '../../lib/dates.js'
 

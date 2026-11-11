@@ -30,7 +30,7 @@ const EMPTY = {
   pitching: { wins: [], strikeouts: [], saves: [], era: [] },
 }
 
-// Exported so postseasonSeries.js's series-scoped board can share these
+// Exported so postseason/archive/series.js's series-scoped board can share these
 // instead of keeping its own copy — both format the same career/series
 // counting + rate stats.
 export const int = (v) => String(v)

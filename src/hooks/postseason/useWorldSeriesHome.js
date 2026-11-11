@@ -12,7 +12,7 @@
 // date (api/postseason/worldSeriesHome.js). The reel loads separately, from the
 // reel component.
 import { useAsync } from '../useAsync.js'
-import { fetchGameBoxscore } from '../../api/postseasonSeries.js'
+import { fetchGameBoxscore } from '../../api/postseason/archive/series.js'
 import {
   fetchClubBoxscores,
   fetchClubGames,

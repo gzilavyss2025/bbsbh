@@ -22,12 +22,12 @@
 // reason: the files hold Final games only, but `cutoff` defaults to null, so the
 // safety is the date the CALLER asks for. An open surface by rule (ADR-0034).
 
-import { staticJson, staticJsonBy } from '../staticJson.js'
-import { gamePath } from '../../lib/route.js'
-import { roundTag } from '../../lib/postseason/roundTag.js'
-import { fetchStaticTeams } from '../teams-static.js'
-import { RECORD_GROUPS, teamRecordsFor } from '../teamRecords.js'
-import { rankMetric } from '../situationalRecordRankings.js'
+import { staticJson, staticJsonBy } from '../../staticJson.js'
+import { gamePath } from '../../../lib/route.js'
+import { roundTag } from '../../../lib/postseason/roundTag.js'
+import { fetchStaticTeams } from '../../teams-static.js'
+import { RECORD_GROUPS, teamRecordsFor } from '../../teamRecords.js'
+import { rankMetric } from '../../situationalRecordRankings.js'
 
 export const ALL_SEASONS = 'all'
 // The team view's "no club filter" choice: every postseason club's games as one.

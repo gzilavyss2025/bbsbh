@@ -3,7 +3,7 @@ import {
   loadPostseasonLeaders,
   BATTING_CATEGORIES,
   PITCHING_CATEGORIES,
-} from '../api/postseasonLeaders.js'
+} from '../api/postseason/archive/leaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'

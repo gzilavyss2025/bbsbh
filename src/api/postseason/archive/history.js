@@ -14,7 +14,7 @@
 // friendly empty state, not a broken page. Cached in-memory for the session
 // since the file only changes on a hand-run regenerate.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../../staticJson.js'
 
 export const loadPostseasonHistory = staticJson('/data/postseason-history.json', {
   shape: (d) => ({ seasons: d.seasons ?? [], generatedAt: d.generatedAt ?? null }),

@@ -11,7 +11,7 @@
 // feed/live read with WHIFF_FEED_FIELDS plus the venue, and /winProbability.
 // Returns null for a game outside an LCS or the World Series, or when a counted
 // game has no box score: no block is better than a block that is short a game.
-import { foldSeriesStats } from '../../../api/postseasonSeries.js'
+import { foldSeriesStats } from '../../../api/postseason/archive/series.js'
 import { seriesForGame } from '../../../api/postseason/bracket.js'
 import { wpLine } from './wpSpark.js'
 

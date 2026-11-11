@@ -10,7 +10,7 @@
 // outs, K/9 and BB/9 are per 27 outs, strike % is strikes / pitches.
 //
 // Whiffs are not in a box score. The caller counts them from the games' pitch
-// feeds (api/postseasonSeries.js `foldWhiffs`) and passes `{ [clubId]: n }`;
+// feeds (api/postseason/archive/series.js `foldWhiffs`) and passes `{ [clubId]: n }`;
 // a club with no count shows "—" rather than a false zero.
 
 import { outsToIp } from '../math/innings.js'

@@ -676,7 +676,7 @@
     },
     "nineKeys.js": {
       "class": "spoiler-free",
-      "why": "Static nine-keys.json reader. Two halves, both outside the rule's scope. The champion half is finished seasons back to 2000 — immutable history, same footing as postseasonHistory.js. The current-season half is a within-season RANK on nine season-long aggregates (runs per game, staff ERA splits, OBP, WHIP, roster WAR), which is standings and leader-board data — open live since ADR-0034. It carries no game, no inning, no linescore and no per-game score, so there is nothing here a reader could subtract to recover one."
+      "why": "Static nine-keys.json reader. Two halves, both outside the rule's scope. The champion half is finished seasons back to 2000 — immutable history, same footing as postseason/archive/history.js. The current-season half is a within-season RANK on nine season-long aggregates (runs per game, staff ERA splits, OBP, WHIP, roster WAR), which is standings and leader-board data — open live since ADR-0034. It carries no game, no inning, no linescore and no per-game score, so there is nothing here a reader could subtract to recover one."
     },
     "notebook.js": {
       "class": "spoiler-free",
@@ -1069,7 +1069,7 @@
       "class": "spoiler-free",
       "why": "A starter's all-time World Series line and his count of earlier World Series starts: finished prior seasons (yearByYear, gameType=W) plus this Series' games through the day before the game (byDateRange). Never stats=career, which counts a game in progress. ADR-0088."
     },
-    "postseason/records.js": {
+    "postseason/archive/records.js": {
       "class": "cutoff-gated",
       "why": "Reads the per-season postseason ledgers (gen-postseason-records.mjs) and hands them to teamRecordsFor and the situational-record pivot, so it inherits teamRecords.js's footing whole, including the `cutoff = null` default: a bare call tallies every Final postseason game on file, tonight's included once the nightly lands. It computes no value those two do not. Open surface by rule (ADR-0034); nothing here is read on a scoring surface."
     },
@@ -1081,19 +1081,19 @@
       "class": "cutoff-gated",
       "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card', 'Game 3 · ALDS', 'World Series' kept whole; 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
     },
-    "postseasonHistory.js": {
+    "postseason/archive/history.js": {
       "class": "spoiler-free",
       "why": "Static postseason-history.json — completed brackets back to 2000. Immutable history, outside the rule's scope."
     },
-    "postseasonLeaders.js": {
+    "postseason/archive/leaders.js": {
       "class": "spoiler-free",
       "why": "Static since-2000 career postseason boards. Career aggregates."
     },
-    "postseasonOdds.js": {
+    "postseason/odds.js": {
       "class": "cutoff-gated",
       "why": "Selects only the latest snapshot at or before the Team Page's cutoff, so a historical page never renders odds computed with knowledge of games past that date."
     },
-    "postseasonSeries.js": {
+    "postseason/archive/series.js": {
       "class": "spoiler-free",
       "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals. It also folds each counted game's final runs out of those box scores (`runsByGame`) for the series primer's ribbon; the footing is the same, counted games only (ADR-0087)."
     },
@@ -1111,7 +1111,7 @@
     },
     "recentForm.js": {
       "class": "spoiler-free",
-      "why": "The Team Page's Last-10 roster projection. Every game it reads is already Final, same footing as postseasonSeries.js. NOT hitterForm.js — the names differ on purpose."
+      "why": "The Team Page's Last-10 roster projection. Every game it reads is already Final, same footing as postseason/archive/series.js. NOT hitterForm.js — the names differ on purpose."
     },
     "rehab-policy.js": {
       "class": "spoiler-free",

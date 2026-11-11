@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { foldTeamTotals, totalsRows } from '../../src/lib/postseason/seriesTotals.js'
-import { foldWhiffs } from '../../src/api/postseasonSeries.js'
+import { foldWhiffs } from '../../src/api/postseason/archive/series.js'
 
 // teamStats as the real boxscore carries them (checked against gamePk 849845).
 const side = (id, bat, pit) => ({ team: { id }, teamStats: { batting: bat, pitching: pit } })

@@ -331,7 +331,7 @@ the cutoff (null before Game 1 day). Before that, `rosterReadDate` falls back
 to the cutoff: the club's CURRENT roster stands in (Gary, 2026-09-28), and the
 page says the club names its roster by Game 1. `shapeRoster` marks a roster
 `declared` only on a series date with 26 or fewer players. The live series page
-falls back to the box-score roster (`postseasonSeries.js`) when a read fails.
+falls back to the box-score roster (`postseason/archive/series.js`) when a read fails.
 Spoiler-free: a roster move is not a result.
 
 ## The route (`src/lib/route.js`)

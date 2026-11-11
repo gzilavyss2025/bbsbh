@@ -3,7 +3,7 @@
 // history id with no `?d=`, the live page otherwise. A failed history read
 // opens the live page, which reads the bracket and needs no history.
 import { useAsync } from '../../hooks/useAsync.js'
-import { historySeriesIds, loadPostseasonHistory } from '../../api/postseasonHistory.js'
+import { historySeriesIds, loadPostseasonHistory } from '../../api/postseason/archive/history.js'
 import { seriesPageFor } from '../../lib/route.js'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PostseasonSeriesPage } from '../PostseasonSeriesPage.jsx'

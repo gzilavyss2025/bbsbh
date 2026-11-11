@@ -1,4 +1,4 @@
-// The postseason reader (src/api/postseason/records.js) and the three places
+// The postseason reader (src/api/postseason/archive/records.js) and the three places
 // the shared situational-record code learned about a postseason ledger
 // (`data.postseason` in teamRecordsFor and buildRankingIndex). The tally itself
 // is pinned in test/team-records.test.js and the pivot in
@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { entriesFrom, gameRowsFor, gameRowsForAll, combinedEntry, combinedGroups, SHARED_SPLITS, ALL_TEAMS, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
+import { entriesFrom, gameRowsFor, gameRowsForAll, combinedEntry, combinedGroups, SHARED_SPLITS, ALL_TEAMS, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/archive/records.js'
 import { teamRecordsFor } from '../src/api/teamRecords.js'
 import { buildRankingIndex, rankMetric } from '../src/api/situationalRecordRankings.js'
 
