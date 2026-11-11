@@ -117,7 +117,7 @@ const BUDGETS = {
   // trades a real limit for a nominal one.
   'src/screens/BoxScore.jsx': 900, // 824
   'src/lib/teams.js': 820, // 806
-  'src/lib/route.js': 1000, // 970
+  'src/lib/route.js': 700, // 654
   'scripts/gen-fouls.mjs': 1100, // 1057
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one
