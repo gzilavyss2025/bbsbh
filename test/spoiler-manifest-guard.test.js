@@ -50,17 +50,26 @@ test('a spoiler-free module with a list fails on an importer not on it', () => {
     'src/api/spoiler-manifest.json': manifest({ importers: ['hooks/a.js'] }),
     'src/screens/Stray.jsx': "import { fetchWinProbability } from '../api/winprob/feed.js'\nexport const s = fetchWinProbability\n",
   })
-  assert.equal(res.status, 1)
+  assert.equal(res.status, 1, res.stderr)
   assert.match(res.stderr, /screens\/Stray\.jsx imports src\/api\/winprob\/feed\.js/)
 })
 
 test('a stale entry on a spoiler-free list fails', () => {
   const res = run({ 'src/api/spoiler-manifest.json': manifest({ importers: ['hooks/a.js', 'hooks/gone.js'] }) })
-  assert.equal(res.status, 1)
+  assert.equal(res.status, 1, res.stderr)
   assert.match(res.stderr, /lists hooks\/gone\.js/)
 })
 
 test('a spoiler-free module with no list stays open to any importer', () => {
   const res = run({ 'src/api/spoiler-manifest.json': manifest({}) })
   assert.equal(res.status, 0, res.stderr)
+})
+
+test('an importers value that is not an array fails rather than switching containment off', () => {
+  const res = run({
+    'src/api/spoiler-manifest.json': manifest({ importers: 'hooks/a.js' }),
+    'src/screens/Stray.jsx': "import { fetchWinProbability } from '../api/winprob/feed.js'\nexport const s = fetchWinProbability\n",
+  })
+  assert.equal(res.status, 1, res.stderr)
+  assert.match(res.stderr, /"importers" that is not an array/)
 })
