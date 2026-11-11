@@ -563,7 +563,7 @@ export default defineConfig({
         // startup import failed about a second in, and the repair wiped and
         // reloaded the page. The runtime rule FIRST in the list below asks the
         // network for the page instead, and falls back to the precached shell
-        // only offline or after a slow answer. Cost: one round trip for a small
+        // only offline or after 3 s. Cost: one round trip for a small
         // HTML file on each online launch.
         //
         // The guides at /learn stay out of it: the server renders them
@@ -579,9 +579,14 @@ export default defineConfig({
             options: {
               cacheName: 'bbsbh-pages',
               networkTimeoutSeconds: 3,
-              expiration: { maxEntries: 20 },
-              // Offline at a URL this worker has not cached yet: the precached shell.
-              plugins: [{ handlerDidError: async () => (await caches.match('/index.html', { ignoreSearch: true })) ?? Response.error() }],
+              plugins: [{
+                // Store nothing: a page kept per URL would hold an older build's HTML,
+                // whose code the precache has already dropped (blank offline).
+                cacheWillUpdate: async () => null,
+                // So offline or after the timeout, the "cached" page is always the
+                // precached shell, which matches the precached code.
+                cachedResponseWillBeUsed: async () => caches.match('/index.html', { ignoreSearch: true }),
+              }],
             },
           },
           {

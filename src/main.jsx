@@ -37,10 +37,10 @@ if (import.meta.env.PROD) {
 // dynamic import the next time it opens a route it hasn't loaded yet. Vite fires
 // this event for exactly that case. Repair once a session: drop the cached app
 // precache and the service worker (runtime caches stay), then reload from the
-// network (lib/crash/recover.js — localStorage is untouched). A launch after a deploy
-// no longer lands here: the worker asks the network for the page first (#3041). The flag clears a few seconds after a clean load
-// so the NEXT deploy can repair itself too. RootBoundary uses the same repair for
-// a render error.
+// network (lib/crash/recover.js — localStorage is untouched). A launch after a
+// deploy no longer lands here: the worker asks the network for the page first
+// (#3041). The flag clears a few seconds after a clean load so the NEXT deploy can
+// repair itself too. RootBoundary's render-error repair purges every cache instead.
 window.addEventListener('vite:preloadError', () => { recoverOnce(sessionStorage, dropBuildAndReload) })
 window.addEventListener('load', () => {
   setTimeout(() => clearRecoveryFlag(sessionStorage), 10_000)

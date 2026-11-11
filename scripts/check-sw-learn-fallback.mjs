@@ -43,14 +43,15 @@ try {
 // this checks the REGEXES THAT SHIPPED rather than the presence of a string.
 // Since #3041 there is no NavigationRoute at all (one would answer every page
 // from the precache, ahead of any rule): navigations go through a NetworkFirst
-// rule, emitted as `"navigate"===r.mode&&![…].some(…)`. The array is regex
+// rule, emitted as `"navigate"===r.mode&&![…].some(…)`; the match allows either
+// operand order. The array is regex
 // literals and commas only, which is why evaluating it is safe here.
 if (/new \w+\.NavigationRoute\(/.test(source)) {
   console.error('check-sw-learn-fallback: the built worker registers a NavigationRoute again.\n' +
     "Keep `navigateFallback: null` in vite.config.js (#3041).")
   process.exit(1)
 }
-const match = source.match(/"navigate"===\w+\.mode&&!(\[[^\]]*\])\.some/)
+const match = source.match(/"navigate"[^,;]{0,40}?(\[\/[^\]]*\])\.some/)
 if (!match) {
   console.error(
     'check-sw-learn-fallback: the built worker registers its navigation fallback\n' +

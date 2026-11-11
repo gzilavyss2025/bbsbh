@@ -7,9 +7,6 @@ import { mvpStatLine, MVP_PHOTOS, mvpPhotoUrl, mvpPhotoSrcSet } from '../../lib/
 import { seriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { DecidedHero } from './Hero.jsx'
 
-const photoUrl = mvpPhotoUrl
-const photoSrcSet = mvpPhotoSrcSet
-
 // The club's secondary outside, its primary in the middle (the Brewers: gold, navy, gold).
 function stripeFor(teamId) {
   const pair = TEAM_COLOR_PAIRS[teamId]
@@ -33,7 +30,7 @@ export function ChampionHero({ bracket }) {
   const photoClub = pick && ids.includes(pick.club) && (loading || ids.includes(mvp?.teamId)) ? pick.club : null
   return (
     <div className="ww-champhero">
-      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? photoUrl(pick.id) : null} photoSrcSet={photoClub ? photoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
+      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? mvpPhotoUrl(pick.id) : null} photoSrcSet={photoClub ? mvpPhotoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
     </div>
   )
 }

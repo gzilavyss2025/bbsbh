@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { fetchLevelSeasonDates, fetchSeasonMeta } from '../api/schedule.js'
 import { useAsync } from './useAsync.js'
-import { preloadMvpPhoto } from '../lib/postseason/mvpLine.js'
+import { preload } from 'react-dom'
+import { MVP_PHOTOS, MVP_PHOTO_SIZES, mvpPhotoSrcSet, mvpPhotoUrl } from '../lib/postseason/mvpLine.js'
 import {
   levelOffseasonPhase,
   levelOpeningDay,
@@ -203,7 +204,8 @@ export function useOffseason(dateStr, sportId, seasonRow) {
   const { phase } = base
   // The MLB winter opens on the champion hero, whose photo URL is static: start it now, not after
   // the hero's chunk and the postseason schedule land (its LCP, #3042). React dedupes the call.
-  if (sportId === SPORT_IDS.MLB) preloadMvpPhoto(phase?.seasonEnded)
+  const pick = sportId === SPORT_IDS.MLB ? MVP_PHOTOS[phase?.seasonEnded] : null
+  if (pick) preload(mvpPhotoUrl(pick.id), { as: 'image', imageSrcSet: mvpPhotoSrcSet(pick.id), imageSizes: MVP_PHOTO_SIZES, fetchPriority: 'high' })
 
   // November and December read forward one row for the two dates the winter
   // calendar is allowed to state as fact — spring training's first game and
