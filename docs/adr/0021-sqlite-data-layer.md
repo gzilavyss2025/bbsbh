@@ -4,14 +4,14 @@ bbsbh grew from a handful of `gen-*.mjs` generators to 15+, each maintaining
 its own bespoke per-topic JSON file with hand-rolled merge/append logic. That
 strained in one specific, recurring way: a combined view across two files
 means writing another one-off JS merge function. The clearest example already
-in production was `src/api/seasonGradeFormula.js` + `teamScore.js`, which
+in production was `src/api/score/seasonGrade.js` + `score/team.js`, which
 loop over all 30 teams doing a manual nearest-date lookup across
 `team-score.json` and `season-score.json` on every render.
 
 `gen-team-score.mjs` and `gen-season-score.mjs` now write into a shared
 SQLite database (`scripts/lib/schema.sql`, `scripts/lib/db.js`) instead of
 hand-rolling their own JSON read-merge-write cycle, then export the exact
-same reader shapes `teamScore.js` / `seasonScore.js` already expect — this is
+same reader shapes `score/team.js` / `score/season.js` already expect — this is
 purely an authoring-side change; no client code moved. The game-data path
 (root `CLAUDE.md`) is unaffected: everything still happens at generation time
 in GitHub Actions, the client still reads static same-origin JSON, and

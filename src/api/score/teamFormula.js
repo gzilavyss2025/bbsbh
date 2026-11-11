@@ -1,4 +1,4 @@
-import { clamp, round1 } from '../lib/math/number.js'
+import { clamp, round1 } from '../../lib/math/number.js'
 
 // The Team Score formula — 60% actual wins blended with 40% Pythagorean
 // "run-quality" wins, plus a park adjustment to that run differential and a
@@ -24,7 +24,7 @@ const SEASON_TANH_SCALE = 2
 // small wins-equivalent credit or debit, scaled to games played so a half
 // season can't earn a full season's credit. `SOS_WINS_PER_POINT` is a
 // calibrated product coefficient, not an empirical truth (same caveat as
-// SEASON_GRADE_ACHIEVEMENT_WEIGHT in seasonGradeFormula.js): real MLB
+// SEASON_GRADE_ACHIEVEMENT_WEIGHT in score/seasonGrade.js): real MLB
 // schedules rarely deviate more than 2-3 points from a .500 average
 // opponent, so the cap mostly guards against small-sample extremes early in
 // a season rather than binding on a full one.

@@ -1346,7 +1346,7 @@ don't run these by hand.
   date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
   snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
   generator sums schedule-adjusted preseason win expectations (home edge
-  blended from trailing PRIOR seasons, never this one — `seasonScoreFormula.js`)
+  blended from trailing PRIOR seasons, never this one — `score/seasonFormula.js`)
   through the cutoff, stores actual-vs-expected as the headline, and keeps
   earned pace plus last-30 form as diagnostics. Market baselines live in the
   hand-curated `season-expectations-seed.json`; incomplete seasons fall back
@@ -1356,7 +1356,7 @@ don't run these by hand.
   plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
   40% Pythagorean wins off park-adjusted run differential, plus a capped
   strength-of-schedule nudge (Current Form skips both — see
-  `src/api/teamScoreFormula.js`). Combined with Season Surprise into the
+  `src/api/score/teamFormula.js`). Combined with Season Surprise into the
   headroom-aware Season Grade; see `docs/season-grade.md`/ADR-0020. Backed by
   the SQLite layer above (`team_snapshots`, `metric='quality'`/`'current_form'`).
 - `gen-team-transactions.mjs` → `team-transactions/{season}/{teamId}.json` — an

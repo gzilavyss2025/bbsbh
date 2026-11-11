@@ -7,7 +7,7 @@ record is. It is a visible driver of Season Grade and opens its own breakdown on
 the Team Page. See `docs/season-grade.md` for the composite.
 
 The pipeline is `scripts/gen-season-score.mjs` →
-`public/data/season-score.json` → `src/api/seasonScore.js` → the team page.
+`public/data/season-score.json` → `src/api/score/season.js` → the team page.
 It runs in the nightly batch. See ADR-0018 for the unsealed-rendering and
 date-cutoff decision.
 
@@ -32,7 +32,7 @@ actual wins against an expectation set independently of those wins, and a
 team's in-season home/road split is built from the very wins being judged — a
 team on a home hot streak would lower its own bar mid-season. The trailing
 sample gets only about half weight toward its own observed split (see
-`HOME_FIELD_PRIOR_GAMES` in `src/api/seasonScoreFormula.js`), and a team with
+`HOME_FIELD_PRIOR_GAMES` in `src/api/score/seasonFormula.js`), and a team with
 no trailing split at all (an expansion team) falls back to the league
 constant.
 

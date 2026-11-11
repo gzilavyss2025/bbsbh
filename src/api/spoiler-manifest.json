@@ -1249,15 +1249,15 @@
       "class": "spoiler-free",
       "why": "The player/team directory search. Identity fields only."
     },
-    "seasonGradeFormula.js": {
+    "score/seasonGrade.js": {
       "class": "spoiler-free",
       "why": "Pure formula over already-cutoff-selected Quality and Surprise snapshots."
     },
-    "seasonScore.js": {
+    "score/season.js": {
       "class": "cutoff-gated",
       "why": "Selects the latest snapshot at or before the Team Page's standings cutoff. The generator stores snapshots by completed date rather than one mutable current row precisely so this selection is possible."
     },
-    "seasonScoreFormula.js": {
+    "score/seasonFormula.js": {
       "class": "spoiler-free",
       "why": "Pure home-field-factor formula (the league constant and the trailing-prior-seasons blend) over standings splits, no game score involved."
     },
@@ -1313,11 +1313,11 @@
       "class": "cutoff-gated",
       "why": "Reads the `ranks` block the nightly writes into each team-records shard: the club's rank among its level per split, for the season through the last nightly. A dated page cannot be answered from it without looking past its date, so `rankOf` returns null for ANY cutoff and the caller prints a dash. It computes nothing itself. Open surface by rule (ADR-0034); no UI imports it yet."
     },
-    "teamScore.js": {
+    "score/team.js": {
       "class": "cutoff-gated",
-      "why": "Dated Quality and Current Form readers, same snapshot-at-or-before-cutoff selection as seasonScore.js."
+      "why": "Dated Quality and Current Form readers, same snapshot-at-or-before-cutoff selection as score/season.js."
     },
-    "teamScoreFormula.js": {
+    "score/teamFormula.js": {
       "class": "spoiler-free",
       "why": "Pure Quality formula (60% actual wins, 40% Pythagorean) over season totals."
     },

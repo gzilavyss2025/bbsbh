@@ -656,13 +656,13 @@ for each generator; the reader modules:
   latest revealed inning, within one pitch type; null at untracked MiLB
   parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
   see below and `docs/callouts.md`), not rendered directly.
-- `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
+- `score/season.js` — the MLB Team Page's Season Surprise Score, from
   `public/data/season-score.json`. The nightly generator stores snapshots by
   season, team, and completed date rather than one mutable current row;
   the reader selects the latest snapshot at or before the Team Page's
   standings cutoff (`latestAtOrBefore`). The static reader degrades to no badge before the first
   generated file exists. See `docs/season-score.md` and ADR-0018.
-- `teamScore.js` + `seasonGradeFormula.js` — dated Quality/Current Form readers
+- `score/team.js` + `score/seasonGrade.js` — dated Quality/Current Form readers
   and the Team Page's headroom-aware Season Grade. Grade combines Quality with
   the same-cutoff Season Surprise snapshot; both drivers remain visible and a
   club enters the league Grade pool only when both exist. See
@@ -1030,8 +1030,8 @@ for each generator; the reader modules:
   not dated). Never throws. Cutoff-gated; no UI importer yet.
 - `postseason/odds.js` — MLB postseason odds (overall / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
-  Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and
-  `teamScore.js`: `postseasonOddsFor(data, teamId, season, cutoff)` picks the
+  Team hub's odds pill. DATE-KEYED, exactly like `score/season.js` and
+  `score/team.js`: `postseasonOddsFor(data, teamId, season, cutoff)` picks the
   latest snapshot at or before the page's as-of cutoff, so a dated Team Page
   never renders odds computed with knowledge of games past that date. That
   select-the-latest-eligible-snapshot shape is also how the file rots INVISIBLY

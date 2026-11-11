@@ -1,4 +1,4 @@
-import { clamp, round1 } from '../lib/math/number.js'
+import { clamp, round1 } from '../../lib/math/number.js'
 
 // Season Grade turns two deliberately separate measures into one verdict:
 // Quality says how strong the team has played; Surprise says how far it has
