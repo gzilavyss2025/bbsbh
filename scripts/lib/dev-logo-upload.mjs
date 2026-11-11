@@ -1,7 +1,7 @@
 // The filesystem half of the dev-only logo upload — the /__dev/team-logo branch
 // of vite.config.js's devDataSave() middleware (ADR-0029).
 //
-// The rules a file must satisfy live in src/lib/logoArt.js, imported here so the
+// The rules a file must satisfy live in src/lib/logo/logoArt.js, imported here so the
 // browser and the server enforce one implementation rather than two that drift.
 // This module owns only what the browser can't do: resolving an absolute path
 // under public/team-logos/, guarding that resolution, and rebuilding the
@@ -28,7 +28,7 @@ import {
   readPngHeader,
   teamIdForAbbr,
   wpaArtTreatmentKey,
-} from '../../src/lib/logoArt.js'
+} from '../../src/lib/logo/logoArt.js'
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 
@@ -148,12 +148,12 @@ export async function copyLogoUpload({ teamId, from, to }) {
 // all of it and this writes the chosen one in.
 //
 // It is a COPY, not a pointer, unlike a custom-mark assignment
-// (src/lib/customMarks.js). The WPA slot has no "original" to preserve: it is
+// (src/lib/logo/customMarks.js). The WPA slot has no "original" to preserve: it is
 // itself the override, so filling it is the same act as re-uploading, and
 // keeping it a real file means wpaArtUrl stays a plain path with no second
 // resolution layer in the live app.
 
-// `kind:id`, the vocabulary src/lib/markSources.js builds and documents. Parsed
+// `kind:id`, the vocabulary src/lib/logo/markSources.js builds and documents. Parsed
 // here with the same three closed prefixes; anything else is not a source, and
 // no part of the string ever becomes a path — `treatment` is looked up in the
 // LOGO_TREATMENT_DIRS allowlist and `custom` is re-slug-checked below.

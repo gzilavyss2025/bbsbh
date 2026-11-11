@@ -102,9 +102,10 @@ list says what each guard checks.
 - `check-spoiler-manifest.mjs` — guards `src/api/spoiler-manifest.json`, the
   machine-readable spoiler classification of every module in `src/api/`. Four
   assertions: every module has an entry, every entry names a real file, entries are
-  well-formed (known class, non-empty `why`, `importers` on exactly the gated
-  classes), and a `reveal-only`/`reveal-gated` module — or a `mixed` module's named
-  reveal-only EXPORTS — is imported only from its allowlist. Unlike its siblings it
+  well-formed (known class, non-empty `why`, `importers` required on the gated
+  classes, optional on the rest), and a `reveal-only`/`reveal-gated` module — or a `mixed`
+  module's named reveal-only EXPORTS, or any module carrying an `importers` list (the raw
+  win-probability fetcher `winprob/feed.js`) — is imported only from its allowlist. Unlike its siblings it
   RESOLVES import specifiers rather than substring-matching a basename, because
   `highlights.js` is a substring of `gamehighlights.js` and those two carry opposite
   classifications. See `src/api/CLAUDE.md` and the manifest's own header.

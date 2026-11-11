@@ -40,8 +40,8 @@ import {
   milbHeadshotUrl,
   coachHeadshotUrl,
 } from '../src/lib/teams.js'
-import { MLB_TEAM_COLORS } from '../src/lib/brandColors.js'
-import { customMarkAssignment, customMarksFor } from '../src/lib/customMarks.js'
+import { MLB_TEAM_COLORS } from '../src/lib/colors/brandColors.js'
+import { customMarkAssignment, customMarksFor } from '../src/lib/logo/customMarks.js'
 import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
 
 // --------------------------------------------------------------------------

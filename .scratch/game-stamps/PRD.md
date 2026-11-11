@@ -3,7 +3,7 @@
 Status: in progress — build order steps 1–6 and 8 landed; the feature ships
 
 **Landed (2026-08-04):** the ADR (`docs/adr/0035-…`), the pure rules module
-(`src/lib/stamps.js`) and the endpoint (`api/stamps.js`) with the server-side
+(`src/lib/stamp/stamps.js`) and the endpoint (`api/stamps.js`) with the server-side
 reveal gate, covered by `test/stamps.test.js` + the stamps cases in
 `test/api-handlers.test.js`.
 
@@ -34,7 +34,7 @@ feature is now usable end to end, signed in or out.
 - `src/components/StampGameButton.jsx` — inside the box-score `SealBox`'s reveal
   render function, at the FOOT of the page. That `SealBox` still has no
   `onReveal` and still persists nothing.
-- `src/components/GameStamp.jsx` + `src/lib/stampArt.js` — the locked Concept 1
+- `src/components/GameStamp.jsx` + `src/lib/stamp/stampArt.js` — the locked Concept 1
   art, geometry split out as pure math so it can be unit-tested and so the
   component is a tracing with no numbers of its own. Mono marks via the
   `<image>`-in-`<mask>` recipe, per-instance ids, abbreviation fallback.
@@ -473,7 +473,7 @@ this right:
 
 | New file | Mirrors | Role |
 |---|---|---|
-| `src/lib/stamps.js` | `src/lib/spoiledDays.js` | Pure: local store shape, validation, `applyRemoteStates` merge |
+| `src/lib/stamp/stamps.js` | `src/lib/spoiledDays.js` | Pure: local store shape, validation, `applyRemoteStates` merge |
 | `src/hooks/useStamps.js` | `src/hooks/useRevealProgress.js` | Local-first state, `localStorage` under `bbsbh:stamps`, cross-tab `storage` listener |
 | `src/components/StampsCloudSync.jsx` | `src/components/RevealCloudSync.jsx` | Headless Clerk sync, GET-merge on mount, POST on change |
 | `src/components/GameStamp.jsx` | — | Data → one-color SVG, incl. the mono team marks via `teamLogoUrl(teamId, 'mono')` (design scoped separately) |
@@ -515,7 +515,7 @@ bounded by how many humans use this.
 1. **ADR** — the fourth exception, and specifically the "you cannot own a stamp
    for a game you haven't revealed" invariant. Write it before the code; this is
    the decision that will get quietly eroded otherwise.
-2. `api/stamps.js` + `src/lib/stamps.js` + the reveal gate. Unit-test the gate.
+2. `api/stamps.js` + `src/lib/stamp/stamps.js` + the reveal gate. Unit-test the gate.
 3. `useStamps` + `StampsCloudSync` + `StampGameButton` inside the box-score seal.
 4. `GameStamp.jsx` from the chosen design.
 5. `LogbookPage` — the grid. Ship here; the feature is useful with no stats.

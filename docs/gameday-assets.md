@@ -66,7 +66,7 @@ was tried.
 | Field outline per park | `{base}/fields/{venueId}.svg` | MLB and MiLB parks; `generic.svg` is the fallback | PR #1860 (`docs/ballpark-layouts.md`) |
 | Player action photo | `img.mlbstatic.com/mlb-photos/image/upload/w_{w},q_auto:best/v1/people/{personId}/action/{vertical\|pitching}/current` | Not used. Active MLB players only | #1863 |
 | League logo | `www.mlbstatic.com/team-logos/league-on-{theme}/{id}.svg` | In use | `src/lib/teams.js` |
-| Cap logo | `www.mlbstatic.com/team-logos/team-cap-on-{light\|dark}/{teamId}.svg` | In use | `src/lib/logoCdn.js` |
+| Cap logo | `www.mlbstatic.com/team-logos/team-cap-on-{light\|dark}/{teamId}.svg` | In use | `src/lib/logo/logoCdn.js` |
 
 ## Dead ends (checked 2026-10-12)
 
@@ -78,7 +78,7 @@ was tried.
 - `…/people/{personId}/action/hitting/current`: 404 for every player tried.
 - Do not add Gameday's `d_people:generic…` segment to a photo URL. With it, a
   missing photo returns 200 and a generic silhouette, so the app cannot fall
-  back (see the headshot comments in `src/lib/teams.js`).
+  back (see the headshot comments in `src/lib/teams/headshots.js`).
 
 ## Risk
 

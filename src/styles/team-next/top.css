@@ -1,7 +1,7 @@
 /* ==== THE TOP OF THE ONE-SCROLL TEAM PAGE (#1107, row 5; design B, "form line") ====
    TeamNextTop.jsx and its parts import this file. The hero is a stamped Card; the club band
    head is the one club-coloured surface on the page (ADR-0030), its colours read from the shell
-   root (lib/headerTheme.js). The form line is the player Form trend's chart, the record grid the
+   root (lib/colors/headerTheme.js). The form line is the player Form trend's chart, the record grid the
    Plate approach's zone map, the days rail On the mound's, the Runs bar the Pitch arsenal's mix
    bar. Motion hangs off .tnext__top and is off in .tnext__top--still (a return visit) and under
    reduced motion; an opened part rises in (player-rise-in) on every tap, since a tap caused it. */

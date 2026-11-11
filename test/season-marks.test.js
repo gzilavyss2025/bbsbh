@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { seasonMark, seasonMarkIn, seasonTile, seasonTheme, seasonMasthead, eraTheme, PERIOD_THEME } from '../src/lib/identity/seasonMarks.js'
-import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/headerTheme.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/colors/headerTheme.js'
 import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json' }
 
 test('seasonMark: no id or a bad season means "draw the current mark"', () => {

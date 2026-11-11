@@ -5,7 +5,7 @@
 Until now every surface in the app wore the same chrome: navy bars with a
 kraft-gold tape edge, the scorebook metaphor from `src/CLAUDE.md`. Two
 hand-tuned tables — `TREATMENT_HEADER_COLOR_OVERRIDES` (`src/lib/teams.js`) and
-`MILB_HEADER_COLOR_OVERRIDES` (`src/lib/milbColors.js`) — held per-club
+`MILB_HEADER_COLOR_OVERRIDES` (`src/lib/colors/milbColors.js`) — held per-club
 recolorings of that chrome and were commented, accurately, "design-lab preview
 only — no real component reads this table yet."
 
@@ -17,7 +17,7 @@ The **lineup page** (`screens/TeamInfo.jsx` — the per-game away/home staging
 sheet, *not* the club hub) now dresses its club-name bar and that side's section
 mastheads in the header colors of the jersey the club is actually wearing that
 game: `jerseyTreatmentFor` → `defaultTreatmentFor` → the header table, resolved
-by `src/lib/headerTheme.js`.
+by `src/lib/colors/headerTheme.js`.
 
 The payoff is specific. `GameView` pages you through away → home → innings, and
 the two lineup pages were previously distinguishable only by the word "Away" or

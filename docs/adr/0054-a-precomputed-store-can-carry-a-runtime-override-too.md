@@ -48,14 +48,14 @@ shape `dev-data-stores.mjs`'s `isMonoInkStore` already enforces for the file,
 so an override and a lab-authored entry can never disagree about what a pin
 set is allowed to look like. `source` (which CDN mark the pins were picked
 against) and `art` (that art's fingerprint, for the staleness check
-`src/lib/monoInk.js` already applies to file-authored pins) ride along as two
+`src/lib/logo/monoInk.js` already applies to file-authored pins) ride along as two
 sibling fields, the same three values `MonoInkEditor.jsx` already tracks.
 
 The drawer's Knockout mark group (`IdentityMonoField.jsx`) reuses
 `identity-lab/editors/ShapeInkPicker.jsx` outright rather than
 reimplementing the click-a-shape interaction — the component already exists
 *because* a shape must mean the same thing everywhere it's offered, and a
-third consumer is exactly the case it was built for. `src/lib/monoInk.js`'s
+third consumer is exactly the case it was built for. `src/lib/logo/monoInk.js`'s
 `monoInkFor` now reads through `effectiveStore()` (registered with the
 overlay like every other consuming module), so the group's landed pins,
 and the drawer's own live-converted preview, already reflect a

@@ -61,7 +61,7 @@ export function LogbookButton({ className = '' }) {
 //      a card or a note, and one vertical line at the left turns it into a
 //      bound book. It is what the glyph cannot afford to lose.
 //   3. The emblem is the app's diamond — the game stamp's separator diamond
-//      (diamondPath, src/lib/stampArt.js) and a baseball diamond at once.
+//      (diamondPath, src/lib/stamp/stampArt.js) and a baseball diamond at once.
 //      Solid, because at 18px an outlined emblem this small greys out; the
 //      filled mass is what survives, and it is the only fill in the row.
 //

@@ -68,10 +68,9 @@ test('capSlateDate: a missing or loading season row caps a future date (fails cl
 // #3024: before the season row lands, the slate must know whether the bracket
 // may still claim the page, or the cards draw, hide behind the loader, and draw again.
 test('slateWaitsOnSeasonRow holds a Sept–Nov MLB slate until the season row lands', () => {
-  assert.equal(slateWaitsOnSeasonRow('2026-10-09', { loading: true, data: null }), true)
-  assert.equal(slateWaitsOnSeasonRow('2026-09-30', { loading: true, data: null }), true)
-  assert.equal(slateWaitsOnSeasonRow('2026-11-02', { loading: true, data: null }), true)
-  assert.equal(slateWaitsOnSeasonRow('2026-07-04', { loading: true, data: null }), false)
-  assert.equal(slateWaitsOnSeasonRow('2026-10-09', { loading: false, data: SEASON_2026 }), false)
-  assert.equal(slateWaitsOnSeasonRow('2026-10-09', { loading: false, data: null, error: new Error('x') }), false)
+  assert.equal(slateWaitsOnSeasonRow('2026-10-09', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-09-30', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-11-02', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-07-04', true), false)
+  assert.equal(slateWaitsOnSeasonRow('2026-10-09', false), false)
 })

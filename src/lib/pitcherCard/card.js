@@ -1,5 +1,5 @@
 import { pitchFamily, pitchLabel } from '../../api/pitcher/arsenal.js'
-import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../headerTheme.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../colors/headerTheme.js'
 import { gamePath } from '../route.js'
 import { SPORT_LABEL } from '../teams.js'
 import { roundName, roundTag } from '../postseason/roundTag.js'

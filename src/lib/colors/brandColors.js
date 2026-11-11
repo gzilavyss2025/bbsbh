@@ -20,12 +20,12 @@
 // straight to step 2 and never saw the affiliate at all — a Durham Bulls
 // headshot tinted RAYS navy — while the logo tile read step 1 and had no step 2,
 // so the two disagreed by construction. There is now one ordering, and both
-// teams.js's teamTintColor and milbColors.js's milbTreatmentTile read it.
+// teams/clubColors.js's teamTintColor and milbColors.js's milbTreatmentTile read it.
 
-import { byTeam, liveStore } from './tuningStore.js'
-import { registerIdentityStore } from './identity/overlay.js'
-import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
-import MLB_TEAM_COLORS_JSON from './data/mlb-team-colors.json' with { type: 'json' }
+import { byTeam, liveStore } from '../tuningStore.js'
+import { registerIdentityStore } from '../identity/overlay.js'
+import MILB_COLORS from '../data/milb-colors.json' with { type: 'json' }
+import MLB_TEAM_COLORS_JSON from '../data/mlb-team-colors.json' with { type: 'json' }
 
 // A club's brand triad is editable at runtime from that club's own team page
 // (identity/overlay.js), so this store is registered and every read below goes
@@ -33,7 +33,7 @@ import MLB_TEAM_COLORS_JSON from './data/mlb-team-colors.json' with { type: 'jso
 // gear edits identity where it is rendered, and an affiliate's researched pair
 // travels with provenance (`confidence`, `source`, `found: false`) that belongs
 // with the research pass in /identity-lab, not behind a hex box on a team page.
-// Exported as well as used here because teams.js derives TEAM_COLORS from it.
+// Exported as well as used here because teams/clubColors.js derives TEAM_COLORS from it.
 // A derived table must be built from the REGISTERED store, never from the
 // overlaid view below: both refill in place when a save lands, and deriving one
 // live table from another would make the result depend on which of the two
@@ -51,7 +51,7 @@ export { MILB_COLORS }
 export const MLB_TEAM_COLORS = liveStore(MLB_TEAM_COLORS_STORE)
 
 // Each MLB club's REAL primary + secondary brand colors — distinct from
-// teams.js's TEAM_COLORS, which deliberately picks ONE rival-distinguishing
+// teams/clubColors.js's TEAM_COLORS, which deliberately picks ONE rival-distinguishing
 // accent (sometimes skipping a club's actual navy/blue on purpose). This pair
 // is for contexts that want a club's genuine two-tone identity at full
 // brightness (e.g. the box score's favor lean-bar diagonal stripe —
@@ -216,7 +216,7 @@ export const NEUTRAL_FALLBACK_PAIR = ['#6B6558', '#938C7C']
 // Steps 1-2 only: `teamId`'s real brand pair — its own if research resolved
 // one, else its parent MLB org's — or null when neither exists. The null rung
 // is what callers whose contract is "no known colour, render something else
-// entirely" read (teams.js's teamTintColor, teamChipColors);
+// entirely" read (teams/clubColors.js's teamTintColor, teamChipColors);
 // callers that must paint SOMETHING read milbColorPair below instead. One
 // ordering, two endings — not two chains.
 export function milbBrandPair(teamId) {

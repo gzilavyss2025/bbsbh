@@ -1,6 +1,6 @@
 import { chunk } from '../../lib/math/number.js'
 import { getJson } from '../statsapi.js'
-import { recordAfterGame } from '../../lib/stamps.js'
+import { recordAfterGame } from '../../lib/stamp/stamps.js'
 
 // The Logbook's game facts — runs, clubs, venue, innings — for a set of stamped
 // gamePks (ADR-0035).
@@ -23,7 +23,7 @@ import { recordAfterGame } from '../../lib/stamps.js'
 // WHY THE CLIENT RESOLVES THESE AT ALL, given /api/stamps already joins them
 // server-side: the Logbook is local-first. A signed-out user has a real
 // collection on their device and no server to ask, and the local store
-// deliberately holds no score (src/lib/stamps.js) — so the page needs one way to
+// deliberately holds no score (src/lib/stamp/stamps.js) — so the page needs one way to
 // get facts that works signed in or out. This is it, and it means the Logbook
 // renders identically either way instead of having two code paths.
 

@@ -2277,7 +2277,7 @@ Re-run only to fold in a new season.
   order / Starting pitcher / Defense / Due up next) on the lineup, innings, and box
   score pages. Replaces a `filter: brightness(0) invert(1)` that flattened any mark
   with light interior detail into an unreadable blob — see ADR-0031 and
-  `src/lib/logoMono.js`, which holds the pure ink-vs-paper conversion this script
+  `src/lib/logo/logoMono.js`, which holds the pure ink-vs-paper conversion this script
   fetches for (`test/logo-mono.test.js` pins it). Runs in the nightly batch's
   MONDAY-ONLY weekly block right after `gen-teams.mjs`, whose `teams.json` is its team list,
   so coverage can't drift from the club set. Partial coverage is fine by design: a

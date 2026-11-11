@@ -1,6 +1,6 @@
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
-import { MARK_SCALE_LIMITS, barMarkTone } from '../../../lib/headerTheme.js'
+import { MARK_SCALE_LIMITS, barMarkTone } from '../../../lib/colors/headerTheme.js'
 import { shiftStepKeys } from './numberSteps.js'
 import { HexField } from '../HexField.jsx'
 
@@ -13,7 +13,7 @@ import { HexField } from '../HexField.jsx'
 //
 // No longer a sketch: since ADR-0030 these three drive the real
 // club bar and that side's section mastheads (the lineup page,
-// via lib/headerTheme.js). Coverage is partial by design, so the panel states
+// via lib/colors/headerTheme.js). Coverage is partial by design, so the panel states
 // which side of that line a club is on (the Themed / Default chrome chip)
 // rather than leaving a preview that looks identical either way.
 const AA_TEXT = 4.5
@@ -111,7 +111,7 @@ export function HeaderFields({ rawColors, onField }) {
       </label>
       {/* Not a colour, but a fact about the same bar, so it sits with the
           triad rather than in a panel of its own: how big this bar draws its
-          club mark (lib/headerTheme.js's MARK_SCALE_LIMITS).
+          club mark (lib/colors/headerTheme.js's MARK_SCALE_LIMITS).
 
           Shows 1 on an untuned bar rather than sitting blank like the hex
           fields beside it, and the difference is real: a blank hex means "no

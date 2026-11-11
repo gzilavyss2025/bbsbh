@@ -29,7 +29,7 @@ shipped in the same pass; it is noted at the end for completeness.
 `src/lib/books.js` stores `{ id, state, title, subtitle, coverTeamId,
 createdAt, updatedAt }` — a book is metadata about a shelf slot, never the
 stamps filed in it. The stamps themselves stay exactly where ADR-0035 put
-them, in `src/lib/stamps.js`'s per-gamePk records; each stamp's `placement`
+them, in `src/lib/stamp/stamps.js`'s per-gamePk records; each stamp's `placement`
 (page, x, y, tilt) grew one more field, `bookId`, naming which book the stamp
 is filed in. Two consequences follow from keeping these separate:
 
@@ -56,7 +56,7 @@ brand new one. Two things this buys:
   to render a shelf with nothing on it, or ask a first-time visitor to name
   a book before they can use the feature at all.
 - **Every stamp minted before this feature shipped already resolves
-  correctly.** `normalizePlacement` (`src/lib/stamps.js`) defaults a missing
+  correctly.** `normalizePlacement` (`src/lib/stamp/stamps.js`) defaults a missing
   or invalid `bookId` to `DEFAULT_BOOK_ID`, so an old placement round-trips
   straight into the one book that is guaranteed to exist, with no migration
   script and no explicit backfill pass.
@@ -159,7 +159,7 @@ own comment carries the updated arithmetic (cell size vs. stamp size, the
 
 ## Consequences
 
-- **A new file, `src/lib/books.js`, sits beside `src/lib/stamps.js` rather
+- **A new file, `src/lib/books.js`, sits beside `src/lib/stamp/stamps.js` rather
   than folded into it.** They are bundled into different consumers
   (`stamps.js` into `api/stamps.js`; `books.js` would need its own bundling
   if `api/books.js` ever needed the pure layer server-side beyond the

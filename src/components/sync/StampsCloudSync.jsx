@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { readStampsOwner, useStamps, writeStampsOwner } from '../../hooks/useStamps.js'
-import { remoteStampsFromExport, stampsToPublish } from '../../lib/stamps.js'
+import { remoteStampsFromExport, stampsToPublish } from '../../lib/stamp/stamps.js'
 import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
 import { useRefetchOnFocus } from '../../hooks/sync/useRefetchOnFocus.js'

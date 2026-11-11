@@ -161,7 +161,7 @@ export async function fetchScheduleGame(dateStr, gamePk, sportId = 1) {
 // Four calls, run together, and the whole answer is 27.6 KB: the leanest
 // `fields=` leaves only the dates and a gamePk to count, so the AFL's season is
 // under 3 KB and the longest of them is under 10. The caller caches this for
-// the session (hooks/useWinter.js), so a winter day pays for it once.
+// the session (hooks/slate/useSlateDay.js), so a winter day pays for it once.
 //
 // One call per league rather than one bare sportId=17 call for the lot, even
 // though the bare call is a similar size: the schedule row does not carry the

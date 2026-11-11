@@ -1,5 +1,5 @@
 import { useImageMissing } from './images/useImageMissing.js'
-import { milbWpaMarkUrl } from '../lib/milbColors.js'
+import { milbWpaMarkUrl } from '../lib/colors/milbColors.js'
 import { teamLogoUrl } from '../lib/teams.js'
 
 // The MiLB counterpart to useWpaLogo.js — same probe-and-fallback shape (an

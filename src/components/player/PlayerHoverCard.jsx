@@ -5,7 +5,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { usePlayerHoverStats } from '../../hooks/usePlayerHoverStats.js'
 import { subscribeHover, getHoverSnapshot, hideHoverNow } from '../../lib/playerHoverStore.js'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
-import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../lib/colors/headerTheme.js'
 import { Pill } from '../ui/control/Pill.jsx'
 
 const CARD_ID = 'player-hover-card'

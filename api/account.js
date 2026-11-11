@@ -43,7 +43,7 @@
 // Unconfigured degrades like every sibling: no Redis (or no Clerk) and this
 // 501s, which is correct — there is nothing stored to erase.
 
-import { isSeasonNumber } from '../src/lib/stamps.js'
+import { isSeasonNumber } from '../src/lib/stamp/stamps.js'
 import { withUser } from './_lib/auth.js'
 import { privateJson } from './_lib/nodeHandler.js'
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
-import { monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../lib/logoMono.js'
+import { customMarkAssignment, customMarksFor } from '../../../lib/logo/customMarks.js'
+import { monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../lib/logo/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { MASTHEAD_MARK_KEYS } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'

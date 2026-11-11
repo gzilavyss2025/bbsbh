@@ -1,8 +1,8 @@
-// Coverage for the team-mark background wash (src/lib/logoTint.js): picking
+// Coverage for the team-mark background wash (src/lib/logo/logoTint.js): picking
 // the brand color out of raw SVG markup, then mixing it toward a pale tint.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { brandColorFromSvg, tintFromSvg } from '../src/lib/logoTint.js'
+import { brandColorFromSvg, tintFromSvg } from '../src/lib/logo/logoTint.js'
 
 test('brandColorFromSvg picks the darkest reasonably-saturated fill', () => {
   const svg = '<svg><path fill="#12284b"/><path fill="#ffc52f"/><path fill="#eeeeee"/></svg>'

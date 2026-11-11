@@ -116,7 +116,7 @@ export async function assignCustomMark({ teamId, treatment, slug }) {
 }
 
 // Fill this treatment's WPA slot from one of the club's own marks. `source` is
-// a `kind:id` key from src/lib/markSources.js — the client names a SOURCE, and
+// a `kind:id` key from src/lib/logo/markSources.js — the client names a SOURCE, and
 // the server resolves what that means, so no URL or path travels in the
 // request. A COPY, unlike assignCustomMark above: the WPA slot is itself an
 // override with no original to protect (scripts/lib/dev-logo-upload.mjs).

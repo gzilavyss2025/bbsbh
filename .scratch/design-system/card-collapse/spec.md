@@ -80,7 +80,7 @@ budget, so the CSS goes in `src/styles/system/`, which holds 3 files today.
 - The three looks: ground, underline, type (face, size, caps, tracking), padding,
   and the flex row that puts the title left and the note, action and mark right.
 - The band's theme hook. The band reads `--bar-fill`, `--bar-accent` and `--bar-text`
-  from the NEAREST ancestor that sets them (`lib/headerTheme.js`). `SectionHead`
+  from the NEAREST ancestor that sets them (`lib/colors/headerTheme.js`). `SectionHead`
   takes **no** theme prop. A club may colour a card that names the club; it may never
   colour a control (ADR-0030). Theming stays on the card or page root, as it is now.
 - **The one kraft fallback.** The unthemed band's underline is

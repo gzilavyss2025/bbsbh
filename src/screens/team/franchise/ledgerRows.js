@@ -1,6 +1,6 @@
 // The franchise page's season ledger, shaped for the table (#2763). Pure: no fetch, no clock.
-// A row is franchiseLedger's shape (api/history/franchiseLedger.js); the live row liveRow builds
-// for a season the stored ledger has not reached yet has the same shape plus `inProgress`.
+// A row is franchiseLedger's shape (api/history/franchiseLedger.js), or the live row
+// api/history/franchise.js builds, which adds `inProgress`.
 
 import { ordinal } from '../../../lib/format.js'
 
@@ -72,70 +72,4 @@ export function ledgerItems(rows) {
     items.push({ kind: 'season', row: r })
   }
   return items
-}
-
-const POST_ROUND = { F: 1, D: 2, L: 3, W: 4 }
-
-// The club's furthest postseason series in a season, from its own schedule: { round, won } with
-// `won` null while the series is undecided. A series is the games against one opponent in one
-// round; it is decided once a side has more than half of `gamesInSeries`.
-function furthestSeries(games, teamId) {
-  const series = new Map()
-  const seen = new Set()
-  for (const gm of games) {
-    const round = POST_ROUND[gm.gameType]
-    if (!round) continue
-    // A suspended game is listed on its first date and again on the day it resumed: count it once.
-    if (gm.gamePk != null && gm.status?.abstractGameState === 'Final') {
-      if (seen.has(gm.gamePk)) continue
-      seen.add(gm.gamePk)
-    }
-    const mine = gm.teams.home.team.id === teamId ? gm.teams.home : gm.teams.away
-    const other = mine === gm.teams.home ? gm.teams.away : gm.teams.home
-    const key = `${round}-${other.team.id}`
-    const s = series.get(key) ?? { round, name: gm.seriesDescription, need: Math.floor((gm.gamesInSeries ?? 1) / 2) + 1, w: 0, l: 0 }
-    if (gm.status?.abstractGameState === 'Final' && typeof mine.isWinner === 'boolean') mine.isWinner ? s.w++ : s.l++
-    series.set(key, s)
-  }
-  const top = [...series.values()].sort((a, b) => b.round - a.round)[0]
-  if (!top) return null
-  return { round: top.name, won: top.w >= top.need ? true : top.l >= top.need ? false : null }
-}
-
-const games = (v) => (v == null || v === '-' || v === '' ? 0 : Number(v))
-const rank = (v) => (v == null || v === '' ? null : Number(v))
-
-// The club's standings record in `records`, or null when it has played no game yet.
-export function clubRecord(records, teamId) {
-  const t = (records ?? []).flatMap((r) => r.teamRecords ?? []).find((x) => x.team?.id === teamId)
-  return t && t.wins + t.losses > 0 ? t : null
-}
-
-// A season the stored ledger does not hold yet, read live: `records` from standings
-// (regularSeason), `dates` from the club's own schedule for the season (regular season and
-// postseason), `manager` from fetchManager. Null before the club's first game, and null when the
-// schedule could not be read (`dates` null): without it the row cannot say whether the season is
-// over or how far the club went, and a missing row is better than a wrong one. `inProgress` while
-// any game of the club's is not final: once its last game is, the row reads like any other.
-export function liveRow({ teamId, season, name, records, dates, manager }) {
-  const t = clubRecord(records, teamId)
-  if (!t || dates == null) return null
-  const all = dates.flatMap((d) => d.games ?? [])
-  return {
-    season,
-    name,
-    w: t.wins,
-    l: t.losses,
-    gb: games(t.gamesBack),
-    divisionRank: rank(t.divisionRank),
-    leagueRank: rank(t.leagueRank),
-    rs: t.runsScored ?? null,
-    ra: t.runsAllowed ?? null,
-    // No w/l: fetchManager names one manager (an interim first), not who managed which games. The
-    // page marks him † for this season until the offseason ledger run splits it (#2784 review).
-    managers: manager?.personId ? [{ id: manager.personId, name: manager.name }] : [],
-    postseason: furthestSeries(all, teamId),
-    note: null,
-    inProgress: all.some((gm) => gm.status?.abstractGameState !== 'Final'),
-  }
 }

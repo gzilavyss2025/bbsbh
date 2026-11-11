@@ -15,7 +15,7 @@ score's phone order (`48-stamp-strip.css`) is CSS `order`, not a second render.
 
 The collection (`screens/LogbookCollection.jsx`, `/logbook` + `/logbook/{season}` — a user
 may hold more than one book, ADR-0041) and its store
-(`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
+(`hooks/useStamps.js` over the pure `lib/stamp/stamps.js`) are **local-first**: a
 signed-out user has a real Logbook on that device, holding no scores at all —
 the facts are resolved at render time by `api/logbook/stampGames.js`. `StampsCloudSync`
 mirrors the collection across a signed-in user's devices; its header records

@@ -1,4 +1,4 @@
-// The Logbook stamp's pure layer: the locked art's geometry (src/lib/stampArt.js)
+// The Logbook stamp's pure layer: the locked art's geometry (src/lib/stamp/stampArt.js)
 // and the two producers of the game-facts blob it draws from
 // (revealStampFacts in src/api/linescore.js, stampGameFacts in src/api/logbook/stampGames.js).
 //
@@ -46,12 +46,12 @@ import {
   stampLabel,
   stampRingInverted,
   stampSeed,
-} from '../src/lib/stampArt.js'
-import { stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
+} from '../src/lib/stamp/stampArt.js'
+import { stampLogoTuningRecord } from '../src/lib/stamp/stampLogoTuning.js'
 import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
 import { stampGameFacts } from '../src/api/logbook/stampGames.js'
-import { stampBottomText, stampSeriesText } from '../src/lib/stampArt.js'
+import { stampBottomText, stampSeriesText } from '../src/lib/stamp/stampArt.js'
 import { fetchGameFinal } from '../api/stamps.js'
 
 // --------------------------------------------------------------------------

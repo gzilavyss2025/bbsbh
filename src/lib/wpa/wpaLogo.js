@@ -8,7 +8,7 @@
 import { teamLogoUrl } from '../teams.js'
 import { byTreatment, liveStore } from '../tuningStore.js'
 import { registerIdentityStore } from '../identity/overlay.js'
-import { wpaArtUrl } from '../logoArt.js'
+import { wpaArtUrl } from '../logo/logoArt.js'
 import { WPA_LOGO_DEFAULTS } from './wpaDefaults.js'
 import WPA_TUNING_JSON from '../data/wpa-tuning.json' with { type: 'json' }
 
@@ -136,7 +136,7 @@ export const WPA_OWN_ART = byTreatment(WPA_TUNING_STORE, (f) => f.ownArt)
 
 // Which (team, treatment)s tile the club's wordmark instead of their usual
 // mark — the MLB counterpart to MiLB's MILB_WPA_WORDMARK_OVERRIDES
-// (lib/milbColors.js). Absent/false is the default, same convention as
+// (lib/colors/milbColors.js). Absent/false is the default, same convention as
 // WPA_OWN_ART above; every club's CDN wordmark already resolves via
 // teamLogoUrl(teamId, 'wordmark') (teams.js's LOGO_VARIANTS), so this needs
 // no separate art-procurement step the way ownArt does.
@@ -232,7 +232,7 @@ const LOGO_ROW_SHIFT = WPA_LOGO_DEFAULTS.rowShift
 
 // Re-exported so this stays the module you import WPA layout defaults from —
 // the values themselves live in the dependency-free lib/wpa/wpaDefaults.js leaf, so
-// that a caller who wants ONLY these numbers (lib/milbColors.js, which is on the
+// that a caller who wants ONLY these numbers (lib/colors/milbColors.js, which is on the
 // eager first-paint path) doesn't drag this module and data/wpa-tuning.json into
 // the entry chunk with them. Read wpaDefaults.js before moving them back.
 export { WPA_LOGO_DEFAULTS }

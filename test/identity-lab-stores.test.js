@@ -21,7 +21,7 @@ import {
   treatmentOffsetY,
   treatmentOriginY,
 } from '../src/lib/teams.js'
-import { TEAM_COLOR_PAIRS } from '../src/lib/brandColors.js'
+import { TEAM_COLOR_PAIRS } from '../src/lib/colors/brandColors.js'
 import { mergeTeamDraftIntoStore } from '../src/screens/identity-lab/saveStores.js'
 import {
   applyColorsDraft,
@@ -43,7 +43,7 @@ const STORES = {
   'wpa-tuning.json': WPA_TUNING,
   // Keyed by SIDE rather than by jersey treatment (`away`/`home`, the MiLB
   // vocabulary) — the nesting is the same, so every outer-shape guard below
-  // applies unchanged. src/lib/stampLogoTuning.js.
+  // applies unchanged. src/lib/stamp/stampLogoTuning.js.
   'stamp-logo-tuning.json': STAMP_LOGO_TUNING,
 }
 

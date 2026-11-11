@@ -34,7 +34,7 @@ import {
   TREATMENT_HEADER_COLOR_OVERRIDES,
   treatmentTile,
 } from '../src/lib/teams.js'
-import { MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/milbColors.js'
+import { MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/colors/milbColors.js'
 import { stripComments } from './helpers/css.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')

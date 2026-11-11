@@ -1,5 +1,5 @@
 import { selectGameSeason, selectTeamMeta } from '../../../../api/select.js'
-import { headerThemeFor, mastheadMarkFor, themeKeyFor } from '../../../../lib/headerTheme.js'
+import { headerThemeFor, mastheadMarkFor, themeKeyFor } from '../../../../lib/colors/headerTheme.js'
 import { seasonMasthead, seasonTheme } from '../../../../lib/identity/seasonMarks.js'
 
 // A club's identity on one lineup page: the bar colours of the jersey it wears tonight

@@ -11,8 +11,9 @@
 // rewrites, and it reuses their already-resolved payload rather than fetching
 // again. ADR-0059.
 //
-// EVERYTHING HERE IS PURE. No fetch, no Redis, no clock, and one import — the
-// slug helpers in ./entity.js, which fetch nothing either. api/_lib/cards.js
+// EVERYTHING HERE IS PURE. No fetch, no Redis, no clock, and two imports — the
+// slug helpers in ./entity.js and the route table (#3040), which import and
+// fetch nothing either. api/_lib/cards.js
 // does all of the I/O and hands the payload here, the same split
 // src/copy/landing/render.js keeps for /learn, and for the same reason: this
 // HTML is composed COMPLETE and handed to whoever asked, with no SealBox in
@@ -49,6 +50,7 @@
 // exactly what a reader who does would see before the bundle takes over.
 
 import { clean, entitySegment, niceDate } from './entity.js'
+import { pathOf } from '../../src/lib/route/table.js'
 
 // --- what the page says ----------------------------------------------------
 //
@@ -258,9 +260,9 @@ export async function appShell(origin) {
 const SITE_LINKS = [
   { href: '/', text: "Today's games" },
   { href: '/learn', text: 'Scorekeeping guides' },
-  { href: '/standings', text: 'Standings' },
+  { href: pathOf('standings'), text: 'Standings' },
   { href: '/leaders', text: 'League leaders' },
-  { href: '/umpires', text: 'Umpire rankings' },
+  { href: pathOf('umpire-rankings'), text: 'Umpire rankings' },
   { href: '/about', text: 'About Tally Baseball' },
 ]
 

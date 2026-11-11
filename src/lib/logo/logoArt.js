@@ -17,8 +17,8 @@
 // See src/lib/data/CLAUDE.md for the manifest this feeds and docs/identity-lab.md for the
 // upload contract.
 
-import { ALL_MLB_TEAM_IDS, teamAbbr } from './teams.js'
-import LOGO_ART from './data/logo-art.json' with { type: 'json' }
+import { ALL_MLB_TEAM_IDS, teamAbbr } from '../teams.js'
+import LOGO_ART from '../data/logo-art.json' with { type: 'json' }
 
 // ---------------------------------------------------------------------------
 // The standard (PRD 4.1) — derived from the art already on disk, not invented.

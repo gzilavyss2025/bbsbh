@@ -4,7 +4,7 @@ The navy section mastheads on the lineup, innings, and box score pages
 (`SectionMasthead`'s `logo` prop — Batting order, Starting pitcher, Defense,
 Due up next) carry the club's mark in a single ink color against the bar. That
 mark is now a **precomputed knockout SVG** — `public/data/logos/mono/{teamId}.svg`,
-built by `scripts/gen-mono-logos.mjs` from `src/lib/logoMono.js` — served
+built by `scripts/gen-mono-logos.mjs` from `src/lib/logo/logoMono.js` — served
 same-origin and requested through `TeamLogo`'s `mono` variant.
 
 It used to be the full-color mlbstatic mark under
@@ -99,8 +99,8 @@ still reaches every shape nobody pinned. Four decisions worth recording:
 
 The same shape-picking machinery grew a second use immediately: the **Logo art**
 editor beside it repaints shapes in FULL color to build the alternate / City
-Connect art the CDN doesn't carry (`src/lib/logoRecolor.js`,
-`src/lib/customMarks.js`). Both editors index shapes by the same ordinal, so a
+Connect art the CDN doesn't carry (`src/lib/logo/logoRecolor.js`,
+`src/lib/logo/customMarks.js`). Both editors index shapes by the same ordinal, so a
 shape means one thing across the row; only the verdict differs — ink-vs-paper
 for a one-color mask, versus a hex. Wearing a recolored mark is an assignment
 teams.js resolves ahead of disk presence, never a copy over procured art; see
@@ -182,7 +182,7 @@ amendment above:
   source moved, only a different URL to fetch before the same conversion runs.
   Both the nightly generator and the dev regenerate route read it from the
   same store, so they can't disagree about which mark a club wears.
-- **One base URL, in one place.** `src/lib/logoCdn.js` is a dependency-free
+- **One base URL, in one place.** `src/lib/logo/logoCdn.js` is a dependency-free
   leaf module now shared by `teams.js` (the browser) and
   `scripts/lib/mono-logo-art.mjs` (plain Node, run outside Vite) — the two
   paths that must build byte-identical CDN URLs can't drift into building them

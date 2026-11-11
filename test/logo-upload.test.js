@@ -15,7 +15,7 @@ import {
   teamIdForAbbr,
   wpaArtTreatmentKey,
   wpaArtUrl,
-} from '../src/lib/logoArt.js'
+} from '../src/lib/logo/logoArt.js'
 import {
   DEV_LOGO_COPY_ROUTE,
   DEV_LOGO_MAX_BODY_BYTES,

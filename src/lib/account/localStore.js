@@ -10,7 +10,7 @@ import { readOwnerIn, writeOwnerIn } from './deviceOwner.js'
 // what `parse(null)` answers (each parser's "nothing stored" value), a write
 // that fails is dropped, and nothing throws. This module changes no key name
 // and no stored shape; the keys and the parse/serialize pair stay with the
-// rules files that own them (src/lib/stamps.js and friends).
+// rules files that own them (src/lib/stamp/stamps.js and friends).
 
 // A same-tab echo of the `storage` event. The browser fires `storage` only in
 // OTHER tabs, so without this two hook instances mounted at once in this tab

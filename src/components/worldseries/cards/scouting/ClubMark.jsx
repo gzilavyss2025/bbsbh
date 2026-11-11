@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fitTransform, visibleBox } from '../../../../lib/postseason/worldseries/scouting/markFit.js'
-import { mastheadMarkFor } from '../../../../lib/headerTheme.js'
+import { mastheadMarkFor } from '../../../../lib/colors/headerTheme.js'
 import { teamLogoUrl } from '../../../../lib/teams.js'
 import { TeamLogo } from '../../../logo/TeamLogo.jsx'
 

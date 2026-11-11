@@ -12,7 +12,7 @@
 // you want. **Never a score, and never anything derived from one.** The field
 // set is closed and lives in src/lib/account/preferences.js, imported verbatim
 // here so the client and the server cannot disagree about what a valid
-// preference is (the same contract api/stamps.js has with src/lib/stamps.js).
+// preference is (the same contract api/stamps.js has with src/lib/stamp/stamps.js).
 // A field not in that registry does not exist: it is dropped on the way in and
 // on the way out.
 //

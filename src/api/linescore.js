@@ -2,7 +2,7 @@
 // invoke these when the user has tapped to reveal — the returned numbers must
 // never be rendered into the DOM while a box is still sealed.
 
-import { recordAfterGame } from '../lib/stamps.js'
+import { recordAfterGame } from '../lib/stamp/stamps.js'
 
 // Per-inning, per-side R / H / E / LOB straight from the linescore. `side` is
 // 'away' or 'home'; `inningNum` is 1-based.
@@ -43,7 +43,7 @@ export function revealTotals(feed, side) {
 // ADR-0035 before adding a second.
 //
 // `innings` and `homeBattedLast` are the two fields the server's reveal gate
-// turns on (`finalHalfIndex` in src/lib/stamps.js), so they must agree with what
+// turns on (`finalHalfIndex` in src/lib/stamp/stamps.js), so they must agree with what
 // the SERVER derived from the schedule feed. That is why the last inning is
 // found by scanning for the last row anyone actually batted in rather than
 // taking `innings.length`: the schedule's linescore stops at the last played

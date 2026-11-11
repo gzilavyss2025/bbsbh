@@ -21,10 +21,11 @@
 //
 //   1. COMPLETENESS — every .js under src/api/ has a manifest entry.
 //   2. NO STALE ENTRIES — every manifest entry names a file that exists.
-//   3. WELL-FORMED — a known class, a non-empty `why`, `importers` exactly on
-//      the classes that take one, `revealOnlyExports` exactly on `mixed`.
+//   3. WELL-FORMED — a known class, a non-empty `why`, `importers` on every
+//      gated class (optional on the others), `revealOnlyExports` exactly on `mixed`.
 //   4. CONTAINMENT — a `reveal-only`/`reveal-gated` module is imported only by
-//      its allowlist; a `mixed` module's reveal-only EXPORTS likewise. Stale
+//      its allowlist; a `mixed` module's reveal-only EXPORTS likewise; any other
+//      module that carries an `importers` list is held to it the same way. Stale
 //      allowlist entries fail too, the same ratchet rule check-dir-size.mjs
 //      uses: a list that quietly stops meaning anything is worse than none.
 //
@@ -54,11 +55,9 @@ const SRC = join(ROOT, 'src')
 const API = join(SRC, 'api')
 const MANIFEST = join(API, 'spoiler-manifest.json')
 
-// Classes that carry an `importers` allowlist, i.e. the ones the containment
-// assertion applies to. The others are classifications the manifest records
-// but does not police: a caller-gated module's gate lives at its CALLER, and a
-// cutoff-gated one's lives in the date the caller asks for — neither is a fact
-// about who may import what.
+// Classes that MUST carry an `importers` allowlist. Containment runs on every
+// entry that has one. The other classes need none: a caller-gated module's gate
+// lives at its CALLER, and a cutoff-gated one's in the date the caller asks for.
 const GATED_CLASSES = new Set(['reveal-only', 'reveal-gated', 'mixed'])
 const ALL_CLASSES = new Set([
   'reveal-only',
@@ -161,11 +160,11 @@ for (const [file, entry] of Object.entries(entries)) {
   if (gated && !Array.isArray(entry.importers)) {
     problems.push(`src/api/${file} is ${entry.class} but carries no "importers" allowlist.`)
   }
-  if (!gated && entry.importers) {
-    problems.push(
-      `src/api/${file} is ${entry.class}, which takes no "importers" allowlist — ` +
-        `containment is only enforced on ${[...GATED_CLASSES].join('/')}.`,
-    )
+  // Any other class MAY carry one: a fetcher whose raw result is score-bearing
+  // (winprob/feed.js) lists who may reach it, so a new caller cannot read the raw
+  // feed past its selector's reveal clamp without widening the list on purpose.
+  if (!gated && entry.importers !== undefined && !Array.isArray(entry.importers)) {
+    problems.push(`src/api/${file} has an "importers" that is not an array.`)
   }
   if (entry.class === 'mixed' && !entry.revealOnlyExports?.length) {
     problems.push(
@@ -183,9 +182,9 @@ const files = walk(SRC, { exts: ['.js', '.jsx'] })
 const parsed = new Map(files.map((f) => [f, stripComments(readFileSync(f, 'utf8'))]))
 
 for (const [file, entry] of Object.entries(entries)) {
-  if (!onDisk.includes(file) || !GATED_CLASSES.has(entry.class)) continue
+  if (!onDisk.includes(file) || !Array.isArray(entry.importers)) continue
   const target = `api/${file}`
-  const allowed = entry.importers ?? []
+  const allowed = entry.importers
   const seen = new Set()
 
   for (const importer of files) {
@@ -250,5 +249,5 @@ const summary = Object.entries(counts)
   .join(', ')
 console.log(
   `✓ Spoiler manifest holds — ${onDisk.length} src/api modules classified (${summary}), ` +
-    'and every gated module is imported only from its allowlist.',
+    'and every module with an allowlist is imported only from it.',
 )

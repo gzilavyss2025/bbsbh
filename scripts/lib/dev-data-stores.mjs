@@ -11,7 +11,7 @@
 // concatenating anything from the request.
 
 import path from 'node:path'
-import { isHex } from '../../src/lib/stampInk.js'
+import { isHex } from '../../src/lib/stamp/stampInk.js'
 
 // Every store is a few hundred bytes per club at most. This is a generous
 // ceiling against a runaway/malformed POST, not a real-world size — the largest
@@ -200,7 +200,7 @@ function isMlbTeamColorStore(parsed) {
 }
 
 // mono-ink.json: which SHAPES of a club's logo art are the mark and which are
-// the paper, when the automatic classifier is wrong (src/lib/monoInk.js). Keys
+// the paper, when the automatic classifier is wrong (src/lib/logo/monoInk.js). Keys
 // under `parts` are the shape's ordinal in the art, so they're digits like a
 // team id; the verdicts are a closed two-word set, and anything else here would
 // silently do nothing at generation time rather than fail.
@@ -229,7 +229,7 @@ function isMonoInkStore(parsed) {
 }
 
 // stamp-logo-tuning.json: where a club's knockout mark sits inside a Logbook
-// stamp's mark slot, per side (src/lib/stampLogoTuning.js). Deliberately the
+// stamp's mark slot, per side (src/lib/stamp/stampLogoTuning.js). Deliberately the
 // strictest validator here, and the reason is this store's blast radius: unlike
 // every other tuning file, it is read at RENDER time by art that is redrawn
 // from scratch on every view, so a bad value doesn't sit in a lab preview — it
@@ -279,7 +279,7 @@ function isStampLogoTuningStore(parsed) {
 }
 
 // stamp-ink.json: a club's own override of the Logbook stamp ink ADR-0036's
-// addendum computes automatically (src/lib/stampInkTuning.js). A flat
+// addendum computes automatically (src/lib/stamp/stampInkTuning.js). A flat
 // `{ teamId: hex }` map — one ink for the whole club, not per side — and
 // strictly `#rrggbb`, unlike the looser `isColorish` swatch stores below: this
 // value feeds contrast math (deepenToContrast) directly, which needs a real

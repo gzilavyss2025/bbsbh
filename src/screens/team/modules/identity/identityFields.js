@@ -33,16 +33,16 @@ import {
   treatmentHeaderColorOverride,
   treatmentTuning,
 } from '../../../../lib/teams.js'
-import { MLB_TEAM_COLORS } from '../../../../lib/brandColors.js'
+import { MLB_TEAM_COLORS } from '../../../../lib/colors/brandColors.js'
 import {
   MILB_HEADER_COLOR_OVERRIDES,
   MILB_LOGO_POS_OVERRIDES,
   MILB_WPA_BAND_COLOR_OVERRIDES,
   MILB_WPA_LOGO_LAYOUT_OVERRIDES,
   MILB_WPA_WORDMARK_OVERRIDES,
-} from '../../../../lib/milbColors.js'
-import { stampLogoTuningRecord } from '../../../../lib/stampLogoTuning.js'
-import { monoInkFor } from '../../../../lib/monoInk.js'
+} from '../../../../lib/colors/milbColors.js'
+import { stampLogoTuningRecord } from '../../../../lib/stamp/stampLogoTuning.js'
+import { monoInkFor } from '../../../../lib/logo/monoInk.js'
 import { BAND_COLOR_OVERRIDES, WPA_TREATMENT_BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
 import { WPA_LOGO_LAYOUT_OVERRIDES, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES } from '../../../../lib/wpa/wpaLogo.js'
 import { parkWashColorOverride, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
@@ -252,7 +252,7 @@ export function identityGroups(teamId, { isMilb, treatment }) {
 
   // Club-level colours are an MLB store. An affiliate's pair is researched, and
   // carries provenance a hex box cannot hold, so it stays in /identity-lab —
-  // src/lib/brandColors.js says the same thing at the registration site.
+  // src/lib/colors/brandColors.js says the same thing at the registration site.
   if (!isMilb) {
     groups.push({
       key: 'club',

@@ -19,7 +19,7 @@ import { renderToString } from 'react-dom/server'
 import { useStamps, readStampsOwner, writeStampsOwner } from '../src/hooks/useStamps.js'
 import { useBooks, readBooksOwner, writeBooksOwner } from '../src/hooks/useBooks.js'
 import { usePreferences } from '../src/hooks/preferences/usePreferences.js'
-import { STAMPS_KEY, STAMPS_OWNER_KEY, serializeStamps, addStamp } from '../src/lib/stamps.js'
+import { STAMPS_KEY, STAMPS_OWNER_KEY, serializeStamps, addStamp } from '../src/lib/stamp/stamps.js'
 import { BOOKS_KEY, BOOKS_OWNER_KEY, DEFAULT_BOOK_ID, serializeBooks, parseBooks } from '../src/lib/books.js'
 import { PREFS_KEY, serializePreferences } from '../src/lib/account/preferences.js'
 

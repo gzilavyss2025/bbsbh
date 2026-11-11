@@ -19,7 +19,7 @@ import { Table } from '../../components/ui/table/Table.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
-import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
+import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/colors/headerTheme.js'
 
 import { DebutPill } from '../../components/badges/DebutPill.jsx'
 import { InjuredMark } from '../../components/badges/InjuredMark.jsx'

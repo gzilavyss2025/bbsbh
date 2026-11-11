@@ -18,6 +18,10 @@
 // with ids, dates or slugs (game, player, team, …) still parse by hand in
 // route.js; an entry may later carry its own parse/build to join.
 //
+// It must import NOTHING: api/_lib/crawl.js reads pathOf from here, and
+// test/crawl-body.test.js pins this file as an import-free leaf of the crawl
+// layer's spoiler-safe graph (ADR-0059, #3040).
+//
 // Pure data, no React: lib/route.js is imported by ~100 modules and the node
 // unit suite. The screens live in App.jsx, keyed by `name`.
 

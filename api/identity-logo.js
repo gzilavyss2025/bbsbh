@@ -3,7 +3,7 @@
 // line for line).
 //
 //   POST /api/identity-logo?teamId={id}&slot={treatment|home|away}
-//     body:    raw PNG bytes (512x512, under 400 KB — src/lib/logoArt.js's
+//     body:    raw PNG bytes (512x512, under 400 KB — src/lib/logo/logoArt.js's
 //              curated-art standard, the SAME functions the dev lab enforces)
 //     returns: { url, field }                                     (admin only)
 //
@@ -31,7 +31,7 @@
 // UNCONFIGURED DEGRADES GRACEFULLY: no BLOB_READ_WRITE_TOKEN answers 501 and
 // the drawer falls back to its paste-a-URL field, which always works.
 
-import { describeLogoRejection, LOGO_MAX_BYTES } from '../src/lib/logoArt.js'
+import { describeLogoRejection, LOGO_MAX_BYTES } from '../src/lib/logo/logoArt.js'
 import { IDENTITY_DIMENSIONS, identityFieldId } from '../src/lib/identity/fields.js'
 import { uploadImage } from './_lib/blob.js'
 
