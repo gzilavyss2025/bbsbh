@@ -1,6 +1,6 @@
 // A tiny, fully hand-built `feed/live`-shaped object — just enough of the MLB
 // feed's real shape to exercise the reveal-only derivations (derive.js,
-// linescore.js, pitchers.js) and the caller-gated pre-pitch selectors
+// linescore.js, pitcher/lines.js) and the caller-gated pre-pitch selectors
 // (defense.js, battingorder.js) without a multi-megabyte captured feed.
 //
 // It's a 2-inning game (regulation 9) built to the field paths the selectors
@@ -131,7 +131,7 @@ const ALL_PLAYS = [
   },
   {
     // Inning-ending caught stealing: NOT a plate appearance, but its pitch and
-    // its out still count (derive.js / pitchers.js both special-case this).
+    // its out still count (derive.js / pitcher/lines.js both special-case this).
     about: { inning: 1, halfInning: 'bottom' },
     matchup: { pitcher: { id: 300 }, batter: { id: 11 } },
     result: { type: 'atBat', eventType: 'caught_stealing_2b' },

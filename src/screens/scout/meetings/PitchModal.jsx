@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
-import { pitchFamily } from '../../../api/pitchArsenal.js'
+import { pitchFamily } from '../../../api/pitcher/arsenal.js'
 import { fetchPlayIds, playIdFor } from '../../../api/scout/playIds.js'
 import { resolveClipUrl } from '../../../api/expresslane/clipIndex.js'
 import { pitchMark } from '../../../lib/pitch/pitchTypes.js'

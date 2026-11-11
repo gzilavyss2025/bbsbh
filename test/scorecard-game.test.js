@@ -30,7 +30,7 @@ import {
 } from '../src/api/scorecardGame.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, revealDerived } from '../src/api/derive.js'
-import { computePitcherLines } from '../src/api/pitchers.js'
+import { computePitcherLines } from '../src/api/pitcher/lines.js'
 import { computeHalfInningFeed, nextStepBoundary } from '../src/api/playbyplay.js'
 import { halfIndex, selectInningCount, selectRegulationInnings } from '../src/api/select.js'
 import { unlockedInnings } from '../src/hooks/revealProgressCore.js'

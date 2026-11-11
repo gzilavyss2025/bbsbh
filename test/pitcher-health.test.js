@@ -1,12 +1,12 @@
-// Unit coverage for the in-game "laboring" read (src/api/pitcherHealth.js's
+// Unit coverage for the in-game "laboring" read (src/api/pitcher/health.js's
 // laboringFor) — regression pin for the Margin Notes "Laboring" text
-// (pitcher-callouts.js) reading `ip` off this function's return value rather
+// (pitcher/callouts.js) reading `ip` off this function's return value rather
 // than a hardcoded "tonight", which was wrong for a day game and didn't say
 // what the rate was measured through.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { laboringFor, computeVeloVariety } from '../src/api/pitcherHealth.js'
-import { CENTURY_MPH } from '../src/api/pitchArsenal.js'
+import { laboringFor, computeVeloVariety } from '../src/api/pitcher/health.js'
+import { CENTURY_MPH } from '../src/api/pitcher/arsenal.js'
 
 const workload = (seasonPitches, seasonOuts) => ({ season: { pitches: seasonPitches, outs: seasonOuts } })
 

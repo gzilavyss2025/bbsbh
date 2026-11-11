@@ -480,7 +480,7 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- accumulate raw mph rather than a stored average, so the incremental upsert
 -- stays correct (a running mean can't be summed across games; a sum can).
 -- `century_pitches` sums the same way (a count of this type's pitches at
--- CENTURY_MPH+, src/api/pitchArsenal.js); `max_velo` does NOT sum — it's the
+-- CENTURY_MPH+, src/api/pitcher/arsenal.js); `max_velo` does NOT sum — it's the
 -- single fastest of this type on file, so the upsert takes MAX(existing,
 -- new) rather than adding. Both feed the veloVariety/centuryClub/veloPeak
 -- callout families (docs/callouts.md).

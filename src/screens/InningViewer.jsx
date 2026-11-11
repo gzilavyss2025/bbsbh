@@ -11,7 +11,7 @@ import {
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
 import { selectLiveHalf } from '../api/liveEdge.js'
-import { buildMarginNotes } from '../api/pitcher-callouts.js'
+import { buildMarginNotes } from '../api/pitcher/callouts.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from '../components/ui/control/RefreshButton.jsx'
 import { useFocusMode } from '../components/inning/focus/FocusControls.jsx'
@@ -445,11 +445,11 @@ export function InningViewer({
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workload])
 
-  // The Margin Notes digest (api/pitcher-callouts.js): every pitcher who's
+  // The Margin Notes digest (api/pitcher/callouts.js): every pitcher who's
   // appeared so far this game, ranked by worthiness and capped, folding in
   // both the season-aggregate notes (streak, home/away split, workload,
   // leverage) and the in-game health reads (laboring, velo decay —
-  // pitcherHealth.js, ADR-0009 footing, same reveal clamp as pitcherLines).
+  // pitcher/health.js, ADR-0009 footing, same reveal clamp as pitcherLines).
   // Recomputed as the reveal mark advances, same dependency shape as
   // pitcherLines itself.
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no

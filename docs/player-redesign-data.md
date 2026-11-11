@@ -224,14 +224,14 @@ Module issue: #1892. Data issue: #1908.
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Pitch list, usage %, count | `public/data/pitch-arsenal/{season}/{NN}.json`, `pitchArsenalFor` (`src/api/pitchArsenal.js`) | have | Use the store, not Savant usage |
+| Pitch list, usage %, count | `public/data/pitch-arsenal/{season}/{NN}.json`, `pitchArsenalFor` (`src/api/pitcher/arsenal.js`) | have | Use the store, not Savant usage |
 | Avg and max mph | same store | have | — |
 | Usage vs L / vs R | `vs.L`, `vs.R`, `arsenalSidesView` | have | — |
 | Spin rpm | feed `breaks.spinRate` only | missing | Per-type sums in `aggregateGamePitchTypes` (`scripts/gen-pitch-arsenal.mjs`) |
 | Flight time | feed `plateTime` only | missing | Same sweep |
 | Drop / movement, release point | feed `breaks`, `coordinates`, `extension` only | missing | Same sweep |
 | Zone mark per pitch | `public/data/pitch-command/{season}/{NN}.json` (25 cells) | reshape | Cell-centroid helper beside `heatView` |
-| Whiff % per pitch | pitch-command `whiffs` / `swings` | reshape | Sum the cells in `src/api/pitchArsenal.js` |
+| Whiff % per pitch | pitch-command `whiffs` / `swings` | reshape | Sum the cells in `src/api/pitcher/arsenal.js` |
 | xwOBA per pitch | `gen-savant-matchup.mjs` drops `est_woba` | missing | Keep it in `pitcherArsenalMap` |
 
 ## On the mound (`MoundCard`)

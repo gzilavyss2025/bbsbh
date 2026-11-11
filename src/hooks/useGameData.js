@@ -367,7 +367,7 @@ export function useGameData(game, activeStep = null) {
 
   // Rolling pitcher workload (gen-workload.mjs) — completed-
   // appearance aggregates feeding the bullpen availability board (TeamInfo)
-  // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
+  // and the Pitchers table's laboring baseline (pitcher/health.js). MLB-only
   // at source, same deferred tier as rookies.
   const workload = useAsync(
     () =>

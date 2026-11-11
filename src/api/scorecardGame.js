@@ -4,7 +4,7 @@
 // decisions).
 //
 // SPOILER CLASSIFICATION: reveal-gated (ADR-0009's pattern, same as
-// pitchers.js). Every builder here takes a `through` half-index and
+// pitcher/lines.js). Every builder here takes a `through` half-index and
 // accumulates ONLY from half-innings at or under it, so nothing from a sealed
 // half ever reaches the DOM. The live scorecard page (its one product caller)
 // passes the user's own `revealedThrough` high-water mark, render-substituted
@@ -41,7 +41,7 @@ import { scorecardView } from './loadScorecard.js'
 import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary, stepCommitReady } from './playbyplay.js'
 import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
-import { computePitcherLines } from './pitchers.js'
+import { computePitcherLines } from './pitcher/lines.js'
 import { halfAt, scorecardDefense } from './scorecard/alignment.js'
 import { NON_AB_EVENTS, classifyOut, scorecardCenterCode } from './scorecard/notation.js'
 import { battingChangeMarks, pitchingChangeMarks } from './scorecard/handover.js'

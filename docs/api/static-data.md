@@ -464,7 +464,7 @@ for each generator; the reader modules:
   `pitcherFoulLine` carries the pitcher's `byCount` the same way (#1993), `null` when absent;
   `fetchBatterGameFouls` reads a batter's `{NN}.games.json`, `{ gamePk: [pitches, fouls,
   whiffs] }`, for `person/gameLog.js`'s `withGameFouls` (#1914).
-- `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
+- `pitcher/arsenal.js` — each pitcher's season pitch-type mix (share of pitches +
   average velocity per type), from `gen-pitch-arsenal.mjs` in TWO shapes, because
   its two readers want opposite things (each the season its own `seasons.json`
   names, ADR-0086): `public/data/pitch-arsenal/{season}/{NN}.json`
@@ -535,7 +535,7 @@ for each generator; the reader modules:
   `personId % 100`; the season `spray/seasons.json` names, ADR-0086; a sibling
   `NN.contact.json` holds the Contact card's columns, #1912, below). Completed-game season aggregates over games that were
   already DECIDED when the sweep touched them, so spoiler-free with no
-  `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
+  `SealBox` — same footing as `war.js`/`pitcher/arsenal.js` (ADR-0034). Worth
   stating out loud because the same COORDINATES are reveal-only in
   `hitchart.js`: one game's batted balls ARE that game's result, a season of
   them is not. The projection they share therefore lives in
@@ -614,7 +614,7 @@ for each generator; the reader modules:
   five of the metrics and drew a different shape for the same numbers depending
   on the order the spokes were listed in).
   `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
-  "Hits like" card, the batter counterpart of `pitchArsenal.js`'s
+  "Hits like" card, the batter counterpart of `pitcher/arsenal.js`'s
   `similarPitchersFor`: it flattens the `bat` percentile map into a pool and
   ranks it with `src/lib/hitterSimilarity.js` (pure, unit-tested, calibration
   constants documented against the real file's measured distance
@@ -639,7 +639,7 @@ for each generator; the reader modules:
   floors stay regular-season only, so a postseason cameo cannot re-class a
   pitcher or move a league mean. Surfaces: the lineup page's `BullpenCard` (gated to
   slate-current games — the file describes "now"), the player page's
-  `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
+  `PitcherWorkloadCard`, and the laboring baseline for `pitcher/health.js`.
 - `rotation/projectedStarters.js` + `rotation/liveStarters.js` — a LIKELY starter
   when no probable pitcher is announced (ADR-0089). Spoiler-free. The file is
   up to a day old (and was regular-season only before 2026-10-05), so `workload.json` only NAMES the
@@ -647,14 +647,14 @@ for each generator; the reader modules:
   log with every game type and `projectStarters` applies the rest rule. A failed
   read drops that pitcher and never falls back to the file's own `apps`. Surface:
   the Starting pitcher card (`ProjectedStarters.jsx`). MLB only.
-- `pitcherHealth.js` — IN-GAME pitching health, ADR-0009 footing like
-  `pitchers.js` (gated by `revealedThrough`, never SealBox-wrapped):
+- `pitcher/health.js` — IN-GAME pitching health, ADR-0009 footing like
+  `pitcher/lines.js` (gated by `revealedThrough`, never SealBox-wrapped):
   `laboringFor` (tonight's pitches/inning vs. his own season norm from
   workload.json — deliberately raw volume, not situation-weighted; see
   `.scratch/metric-engines/pitching-health.md` for the research trail) and
   `computeVeloDecay` (fastball-family velo, first-two-innings anchor vs.
   latest revealed inning, within one pitch type; null at untracked MiLB
-  parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
+  parks). Folded into Margin Notes (`pitcher/callouts.js`'s `buildMarginNotes`,
   see below and `docs/callouts.md`), not rendered directly.
 - `score/season.js` — the MLB Team Page's Season Surprise Score, from
   `public/data/season-score.json`. The nightly generator stores snapshots by

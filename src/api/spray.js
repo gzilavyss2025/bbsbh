@@ -9,7 +9,7 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 // SPOILER FOOTING: SPOILER-FREE, AND DELIBERATELY SO. Every ball here comes
 // from a game that was already Final when scripts/gen-spray.mjs swept it (the
 // generator never touches today's slate), so this is a completed-game season
-// aggregate on exactly the footing war.js, fouls.js and pitchArsenal.js stand
+// aggregate on exactly the footing war.js, fouls.js and pitcher/arsenal.js stand
 // on — an open surface, no SealBox, no reveal gate (ADR-0034). It is worth
 // saying plainly because the same COORDINATES are reveal-only one file over:
 // api/hitchart.js plots a single game's batted balls, and there a dot in the

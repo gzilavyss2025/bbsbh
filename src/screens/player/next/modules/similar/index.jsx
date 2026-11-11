@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchPitchArsenalPool, similarPitchersFor } from '../../../../../api/pitchArsenal.js'
+import { fetchPitchArsenalPool, similarPitchersFor } from '../../../../../api/pitcher/arsenal.js'
 import { fetchSavantPercentiles, similarHittersFor } from '../../../../../api/savantPercentiles.js'
 import { getJson } from '../../../../../api/statsapi.js'
 import { Headshot } from '../../../../../components/player/Headshot.jsx'

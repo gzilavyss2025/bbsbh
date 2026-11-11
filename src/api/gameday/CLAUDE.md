@@ -13,7 +13,7 @@ Two rules every module here keeps:
   play writing back onto an earlier card, the slice drops the cards past the cursor. No
   uncapped variant. A half past `revealedThrough + 1` answers null.
 - **Fresh start.** Import none of the old visual pieces #2566 lists as reference only. The
-  engine (feed readers, `pitchers.js`, `../expresslane/runners.js`) is fine.
+  engine (feed readers, `pitcher/lines.js`, `../expresslane/runners.js`) is fine.
 
 Tests pin these on trimmed real games (`test/fixtures/game-*.gameday.json`), rebuilt by
 `.scratch/gameday-engine/build-fixture.mjs`.

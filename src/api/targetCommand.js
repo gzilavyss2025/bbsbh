@@ -1,4 +1,4 @@
-import { pitchLabel } from './pitchArsenal.js'
+import { pitchLabel } from './pitcher/arsenal.js'
 import { staticJson } from './staticJson.js'
 
 // TARGET COMMAND — how close a pitcher puts the ball to where his catcher asked

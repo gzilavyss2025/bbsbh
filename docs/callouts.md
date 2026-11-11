@@ -31,7 +31,7 @@ compared with in October.
 | --- | --- | --- |
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`), drawn by the old `PlayByPlay` until it was deleted (#2747) | Entering + revealed plays only ("that's No. 16 this season") |
 | Pre-half strip (no screen draws it since the Gameday swap, #2566; the generators still build it) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`), read by `scripts/gen-callouts.mjs` and `audit-callouts.mjs` | Entering; the leading-after + times-through notes restate already-revealed material |
-| Margin Notes (spans both teams' pitchers; an input to Gameday's checkpoint notes since the swap, #2566) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via InningViewer into the checkpoint | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
+| Margin Notes (spans both teams' pitchers; an input to Gameday's checkpoint notes since the swap, #2566) | `buildMarginNotes` (`src/api/pitcher/callouts.js`) via InningViewer into the checkpoint | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
 | Between Innings (Gameday's checkpoint Notes page, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `checkpoint/Checkpoint.jsx` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
@@ -188,7 +188,7 @@ over one a tier above it.
   reader has not watched. Only `timeless` and `standing` blurbs may reach a
   score, and even then nothing from the notes is rendered.
 
-Margin Notes' own family bases (`src/api/pitcher-callouts.js`'s local
+Margin Notes' own family bases (`src/api/pitcher/callouts.js`'s local
 `SCORE_BASE` — self-contained rather than imported from `callout-notes.js`,
 same precedent the pre-half strip sets):
 
@@ -537,7 +537,7 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   two-strike counts vs .102 otherwise).
 - **veloPeak** — the pitcher throws a single pitch that's either a new
   **season** high for him (any pitch type) or clears the absolute
-  `ELITE_VELO_MPH` bar (102, tunable — `src/api/pitchArsenal.js`) even if it
+  `ELITE_VELO_MPH` bar (102, tunable — `src/api/pitcher/arsenal.js`) even if it
   isn't, read off progress.js's per-play `newPeakVelo` (the pitcher's own
   running game-high, revealed plays only) against
   `starterRecords[pitcherId].centuryClub.seasonMaxVelo` (joined from
@@ -763,7 +763,7 @@ None of the three is in `BETWEEN_INNINGS_ALLOWED_KINDS` or `RECORD_KINDS`.
 ### Margin Notes (entering-tense, spans both teams)
 
 No screen draws Margin Notes as a list since the Gameday swap (#2566); they feed Gameday's
-checkpoint notes. `buildMarginNotes` (`src/api/pitcher-callouts.js`) runs every
+checkpoint notes. `buildMarginNotes` (`src/api/pitcher/callouts.js`) runs every
 pitcher who's appeared so far this game (both sides) through
 `buildPitcherNotes` plus the health builders below, dedupes by `dedupeKey`
 (same latest-wins contract as `callout-notes.js`'s box-score roll-up), and
@@ -799,7 +799,7 @@ velocity-season note that applies to any pitcher, starter or reliever:
   ≥ .060): "Opponents hit .204 off him with the Sounds ahead this season,
   .301 with them trailing."
 - **centuryClub** — his season total of `CENTURY_MPH`+ (100, tunable —
-  `src/api/pitchArsenal.js`) pitches, joined from `gen-pitch-arsenal.mjs`'s
+  `src/api/pitcher/arsenal.js`) pitches, joined from `gen-pitch-arsenal.mjs`'s
   own sweep into `starterRecords[id].centuryClub` (count, per-type
   breakdown, `seasonMaxVelo`) by `gen-callouts.mjs` (`scripts/lib/century-club.mjs`).
   Gate: `count ≥ CENTURY_CLUB_MIN` (5) — a one-off 100 mph touch is
@@ -832,7 +832,7 @@ velocity-season note that applies to any pitcher, starter or reliever:
   Not starter-only — any pitcher on file qualifies.
 
 The in-game health signals join the same ranked list (`healthNotes` in
-`pitcher-callouts.js`, wrapping `pitcherHealth.js`'s reads) and carry the
+`pitcher/callouts.js`, wrapping `pitcher/health.js`'s reads) and carry the
 highest bases in the family — tonight-specific and the most actionable read
 on a pitcher, ahead of every season aggregate above:
 

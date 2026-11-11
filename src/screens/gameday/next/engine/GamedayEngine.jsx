@@ -3,7 +3,7 @@ import { SealBox } from '../../../../components/SealBox.jsx'
 import { EVENT_CODES } from '../../../../components/playbyplay/cardCopy.js'
 import { composeLive, enteringPitchesFor } from '../../../../api/gameday/engine/engineLive.js'
 import { halfReport } from '../../../../api/gameday/engine/halfReport.js'
-import { computePitcherLines } from '../../../../api/pitchers.js'
+import { computePitcherLines } from '../../../../api/pitcher/lines.js'
 import { halfIndex, selectHalfStartingPitcher } from '../../../../api/select.js'
 
 // Gameday's engine (#2747): it draws nothing. It reports what the old half page reported up to

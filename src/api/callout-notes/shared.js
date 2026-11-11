@@ -230,7 +230,7 @@ export const ONCE_PER_GAME_KINDS = new Set([
   // pre-half / between-innings season and calendar facts
   'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'wsSeriesOdds', 'wsStarterStart',
   'nugget', // a season count frozen before tonight (#2809)
-  // Margin Notes' season aggregates (pitcher-callouts.js's buildPitcherNotes)
+  // Margin Notes' season aggregates (pitcher/callouts.js's buildPitcherNotes)
   'homeAway', 'cgShutout', 'scorelessStreak', 'workload', 'backToBack',
   'penFatigue', 'leverage', 'centuryClub', 'sideSplit', 'recentAppearances',
 ])

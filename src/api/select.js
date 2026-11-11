@@ -58,7 +58,7 @@ export function lastName(person) {
 
 // The {last, first} display pair for a gameData player record — the form the
 // pitcher table and play-by-play cards print ("MISIOROWSKI, Jacob"). useName is
-// the player's preferred first name ("A.J.", "Duke"). Shared by pitchers.js and
+// the player's preferred first name ("A.J.", "Duke"). Shared by pitcher/lines.js and
 // playbyplay.js so the two card styles can't drift apart.
 export function personNameParts(person) {
   return {

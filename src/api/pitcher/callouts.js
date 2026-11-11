@@ -26,23 +26,23 @@
 //     the pitch-type velocity variety check — plus the 6+ IP team record and
 //     the double-digit-strikeout count) only fire once his OWN revealed line
 //     tonight actually clears the threshold — computePitcherLines already
-//     keeps `ip`/`k`/`pitches` gated to `revealedThrough`, and pitcherHealth.js
+//     keeps `ip`/`k`/`pitches` gated to `revealedThrough`, and pitcher/health.js
 //     is on the same ADR-0009 footing, so nothing sealed is read here either.
 
-import { dayWordFor } from './select.js'
-import { workloadFor } from './workload.js'
-import { computePitcherLines } from './pitchers.js'
-import { laboringFor, computeVeloDecay, computeVeloVariety } from './pitcherHealth.js'
-import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
+import { dayWordFor } from '../select.js'
+import { workloadFor } from '../workload.js'
+import { computePitcherLines } from './lines.js'
+import { laboringFor, computeVeloDecay, computeVeloVariety } from './health.js'
+import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './arsenal.js'
 // The one magnitude scale every callout family shares (callout-notes/shared.js).
 // The bases below stay local — this family never existed in that table — but a
 // bonus has to mean the same thing here as it does there, or a Margin Note and
 // a pre-half note cannot be merged into one ranked list (ReferencePanel.jsx)
 // without the merge quietly favouring whichever surface capped its bonus higher.
-import { magnitudeOf, corroborationBonus } from './callout-notes.js'
-import { clampScore } from './callout-notes/shared.js'
-import { ipToOuts } from '../lib/math/innings.js'
-import { ordinal } from '../lib/format.js'
+import { magnitudeOf, corroborationBonus } from '../callout-notes.js'
+import { clampScore } from '../callout-notes/shared.js'
+import { ipToOuts } from '../../lib/math/innings.js'
+import { ordinal } from '../../lib/format.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -278,7 +278,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
 
 // The health notes for one pitcher row — same scored shape as buildPitcherNotes,
 // so both feed the same ranked Margin Notes list. Only genuine flags return a
-// note (a normal outing adds nothing); see pitcherHealth.js for the thresholds.
+// note (a normal outing adds nothing); see pitcher/health.js for the thresholds.
 function healthNotes(id, side, health) {
   const notes = []
   const labor = health?.labor?.[id]
@@ -287,7 +287,7 @@ function healthNotes(id, side, health) {
       // Was "... pitches per inning tonight —" — wrong for a day game, and
       // didn't say what the rate was measured through. `labor.ip` is this
       // row's own reveal-clamped innings pitched (see laboringFor,
-      // pitcherHealth.js), so this reads correctly for any start time and
+      // pitcher/health.js), so this reads correctly for any start time and
       // updates on its own as more of his outing is revealed.
       // No "Laboring:" label any more. Naming the verdict and THEN supplying
       // the evidence takes the one job this reader came for — he is keeping
@@ -337,7 +337,7 @@ function healthNotes(id, side, health) {
 // The Margin Notes digest: every pitcher who's appeared so far this game
 // (both sides), deduped and ranked by score — the live counterpart to the
 // pre-half strip. `feed`/`revealedThrough` build the reveal-clamped stat rows
-// (computePitcherLines, ADR-0009) and the health reads (pitcherHealth.js,
+// (computePitcherLines, ADR-0009) and the health reads (pitcher/health.js,
 // same footing); `bundle` is the game's callouts bundle; `teamNames` is
 // `{ away, home }` display names; `extras` is the `{ workload, gameDate }`
 // pair buildPitcherNotes reads for the consecutive-days note.

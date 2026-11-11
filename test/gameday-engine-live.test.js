@@ -14,7 +14,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { selectHalfStartingPitcher, halfIndex } from '../src/api/select.js'
-import { computePitcherLines } from '../src/api/pitchers.js'
+import { computePitcherLines } from '../src/api/pitcher/lines.js'
 import { computeHalfInningFeed, deriveLiveState } from '../src/api/playbyplay.js'
 import { composeLive, enteringPitchesFor } from '../src/api/gameday/engine/engineLive.js'
 

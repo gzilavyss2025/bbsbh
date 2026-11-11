@@ -155,7 +155,7 @@ button.starter__careervs {
 
 /* The mix's own rows, its times-through filter and the card's dark dress live
    in 69-pitch-arsenal.css beside the player page's Pitches card, so both
-   readers of api/pitchArsenal.js are dressed in one file. */
+   readers of api/pitcher/arsenal.js are dressed in one file. */
 
 /* ---------------------------------------------------------- former teammates
    The ORG TIES fallback (OrgTies in FormerTeammates.jsx) tiles its cards in a

@@ -1,5 +1,5 @@
 import { BATTER_METRICS } from '../../../../../api/savantPercentiles.js'
-import { pitchLabel } from '../../../../../api/pitchArsenal.js'
+import { pitchLabel } from '../../../../../api/pitcher/arsenal.js'
 import { PROFILE_KEYS } from '../../../../../lib/hitterSimilarity.js'
 
 // The Similar players board as plain data (#1926): per neighbour, the sections the

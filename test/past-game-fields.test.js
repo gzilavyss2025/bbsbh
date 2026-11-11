@@ -9,7 +9,7 @@
 // ~200 KB per game); this test pins the list against the drift that would
 // quietly undo that.
 //
-// If you add a NEW feed read to boxscore.js / pitchers.js / GameResultFace, add its key names (every level of the path) to
+// If you add a NEW feed read to boxscore.js / pitcher/lines.js / GameResultFace, add its key names (every level of the path) to
 // PAST_GAME_FEED_FIELDS *and* to the read-set below.
 import assert from 'node:assert/strict'
 import test from 'node:test'

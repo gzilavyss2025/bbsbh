@@ -667,7 +667,7 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   ball, and each pitch goes to the pitcher the play's events put on the mound (every
   `pitching_substitution`'s own `player.id`), not to the play's `matchup.pitcher`, which
   names the one who finished the at-bat. That matched the box score for every pitcher in
-  11 games (2026-10-26). `pitchers.js` walks the same events to stretch a pitcher's span
+  11 games (2026-10-26). `pitcher/lines.js` walks the same events to stretch a pitcher's span
   over a half he was pulled from mid-at-bat, so his box-score line waits for that half.
 - `gameday/moments/moments.js` (#2608) — `momentsForPlay(feed, atBatIndex, { inning, half,
   step, revealedThrough, winProb, milestones })` gives the play's moments, highest score

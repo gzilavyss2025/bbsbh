@@ -29,7 +29,7 @@ import {
 import { selectHasFirstPitch } from '../src/api/playbyplay/firstPitch.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, computeGameSuperlatives } from '../src/api/derive.js'
-import { computePitcherLines } from '../src/api/pitchers.js'
+import { computePitcherLines } from '../src/api/pitcher/lines.js'
 import { defenseEntering } from '../src/api/defense.js'
 import { lineupEntering } from '../src/api/battingorder.js'
 import { entrantsBeforeFirstPitch } from '../src/api/enteringHalf.js'

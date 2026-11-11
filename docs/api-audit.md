@@ -421,7 +421,7 @@ worst failure mode. Recommended staged approach, not a one-shot:
 2. Measure the actual unpruned size on a real game — confirm it's the bottleneck before paying the
    risk (it very likely is, but measure).
 3. Build the allowlist mechanically from the read-paths in `select.js`/`linescore.js`/`derive.js`/
-   `playbyplay.js`/`pitchers.js`/`boxscore.js`, and add the §3 coverage guard so a missing path is
+   `playbyplay.js`/`pitcher/lines.js`/`boxscore.js`, and add the §3 coverage guard so a missing path is
    caught in CI, not at the park.
 **Files:** `src/api/game.js:7` plus a shared field-path manifest.
 **Honest note:** if measurement shows the feed is tolerable on 4G, this is churn with a real

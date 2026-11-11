@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildCallouts } from '../src/api/callout-notes.js'
-import { ELITE_VELO_MPH } from '../src/api/pitchArsenal.js'
+import { ELITE_VELO_MPH } from '../src/api/pitcher/arsenal.js'
 
 // veloPeak — the standalone single-pitch spotlight (docs/callouts.md), reading
 // progress.js's per-play `newPeakVelo` (this game's own running max) against

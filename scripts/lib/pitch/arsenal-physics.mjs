@@ -3,7 +3,7 @@
 // were checked on a live MLB game (823035) and a live Triple-A game (815863): all
 // seven are on every pitch of both. A pitch missing one adds to no count of it.
 // Columns are `<snake>_sum` / `<snake>_n` in schema.sql, in PHYS_FIELDS order.
-import { PHYS_FIELDS } from '../../../src/api/pitchArsenal.js'
+import { PHYS_FIELDS } from '../../../src/api/pitcher/arsenal.js'
 
 // field -> [decimals the file keeps, where the feed puts it in pitchData]. The precision
 // is Savant's own (tenths of a foot or inch, whole rpm) and flight time to the hundredth:

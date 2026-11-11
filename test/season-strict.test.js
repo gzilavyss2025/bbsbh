@@ -47,7 +47,7 @@ test('readers: a strict year the store lacks reads no file and gives no figures'
   assert.equal(await fetchSprayFor(101, { seasonYear: 2027, strict: true }), null)
   assert.equal((await fetchSprayFor(101, { seasonYear: 2026, strict: true })).season, 2026)
   const { fetchFoulsFor } = await import('../src/api/fouls.js')
-  const { fetchPitchArsenalFor } = await import('../src/api/pitchArsenal.js')
+  const { fetchPitchArsenalFor } = await import('../src/api/pitcher/arsenal.js')
   assert.equal((await fetchFoulsFor(303, { seasonYear: 2027 })).season, 2026)
   assert.equal(await fetchFoulsFor(303, { seasonYear: 2027, strict: true }), null)
   assert.equal((await fetchPitchArsenalFor(404, { seasonYear: 2027 })).season, 2026)

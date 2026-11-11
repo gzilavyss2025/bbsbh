@@ -1,5 +1,5 @@
 // The starter card's pitch mix as rows, for the side of the plate and the look through the
-// order the reader picked. Pure. `arsenal` is api/pitchArsenal.js's pitchArsenalFor rows;
+// order the reader picked. Pure. `arsenal` is api/pitcher/arsenal.js's pitchArsenalFor rows;
 // `tto` and `sides` are arsenalTtoView and arsenalSidesView (null when the file has no split).
 // `side` is 'L', 'R' or null (both); `look` is 1, 2, 3 or null (the whole season).
 

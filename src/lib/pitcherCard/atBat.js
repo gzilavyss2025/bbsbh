@@ -11,7 +11,7 @@
 // pitch the system lost) is left out; an at-bat with none returns [] and the
 // caller draws nothing.
 
-import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { pitchFamily, pitchLabel } from '../../api/pitcher/arsenal.js'
 import { pitchMark } from '../pitch/pitchTypes.js'
 import { realFlight } from './camera.js'
 import { contactPoint } from './contactTimeline.js'

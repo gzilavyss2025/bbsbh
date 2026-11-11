@@ -201,7 +201,7 @@ export function pitchCardInfo(feed, play) {
 // The pitcher a plate appearance faced (for the strike-zone panel's "vs"
 // header) — his name parts off gameData, same shape as the batter. `hand`
 // ('L'/'R', bio fact not a result) feeds the platoon-split call-out (see
-// api/callout-notes.js), same field pitchers.js already reads. `jersey` comes
+// api/callout-notes.js), same field pitcher/lines.js already reads. `jersey` comes
 // off the PITCHING side's own boxscore roster — the play's `about.halfInning`
 // says which ('top' bats away, so home pitches, and vice versa) — same
 // `jerseyNumber ?? primaryNumber` fallback resolveBatter uses for the batter.
