@@ -1,12 +1,11 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { avg, bestStretch, era, ip, isStarter, loadCareerLog, measureByKey, measuresFor, obp, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
-import { teamFullName } from '../../lib/teams.js'
 import { playerPath } from '../../lib/route.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { SiteSearchModal } from '../../components/chrome/SiteSearch.jsx'
@@ -59,12 +58,13 @@ export function BestStretchPage() {
   const pitching = picks.group === 'pitching'
   const starter = pitching && log ? isStarter(log.games) : false
   // A starter's window counts starts only; a reliever's counts every outing.
-  const games = log ? (starter ? log.games.filter((g) => g.gamesStarted > 0) : log.games) : null
+  const games = useMemo(() => (log ? (starter ? log.games.filter((g) => g.gamesStarted > 0) : log.games) : null), [log, starter])
   const unit = pitching ? (starter ? 'starts' : 'appearances') : 'games'
   const n = picks.n ?? (pitching ? (starter ? 32 : 65) : 162)
-  const name = picks.player?.name || log?.name || ''
+  // The log's own name wins: the query's `name` is only a placeholder until it loads.
+  const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
-  const best = games ? bestStretch(games, n, measure, picks.group) : null
+  const best = useMemo(() => (games?.length ? bestStretch(games, n, measure, picks.group) : null), [games, n, measure, picks.group])
   const setGroup = (group) => { setNDraft(''); update({ group, n: null, by: measureByKey(null, group).key }) }
   const commitN = () => update({ n: nDraft === '' ? null : int(nDraft, 5, 500, null) })
 
@@ -114,11 +114,11 @@ export function BestStretchPage() {
         {!picks.player && <p className="hint">Pick a {pitching ? 'pitcher' : 'hitter'} to find the best {pitching ? 'starts or relief outings' : `${n} games`} of his career.</p>}
 
         {picks.player && (
-          <AsyncStatus loading={loading} error={error} hasData={!!games} onRetry={reload}
+          <AsyncStatus loading={loading} error={error} hasData={!!games?.length} onRetry={reload}
             errorMessage="Couldn’t load his game log. Try again." emptyMessage="No MLB games on file for him." />
         )}
 
-        {games && !loading && !best && (
+        {games?.length > 0 && !loading && !best && (
           <p className="hint">He has {games.length} MLB {unit} on file, fewer than {n}. Try a shorter stretch.</p>
         )}
 
@@ -149,7 +149,7 @@ export function BestStretchPage() {
                     <li>{best.doubles} 2B · {best.triples} 3B · {best.baseOnBalls} BB · {best.strikeOuts} SO in {best.plateAppearances} PA</li>
                   </>
                 )}
-                <li>{best.teamIds.map((id) => teamFullName(id)).join(', ')}</li>
+                {best.teams.length > 0 && <li>{best.teams.join(', ')}</li>}
               </ul>
               <p className="hint">Regular-season MLB {unit}{pitching ? '' : ' he appeared in'}, {best.careerGames} on file. A stretch may run across seasons.</p>
             </Stack>

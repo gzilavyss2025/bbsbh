@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, era, ip, isStarter, measureByKey, obp, slg, toGame } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, era, ip, isStarter, measureByKey, obp, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -51,4 +51,16 @@ test('pitching: ERA is lower-is-better, from summed earned runs over outs', () =
 test('pitching: a starter is someone with at least half his outings started', () => {
   assert.equal(isStarter([outing(0, { gamesStarted: 1 }), outing(1, {})]), true)
   assert.equal(isStarter([outing(0, { gamesStarted: 1 }), outing(1, {}), outing(2, {})]), false)
+})
+
+test('pitching: a window with no outs is the worst ERA and WHIP, not a perfect one', () => {
+  const games = [outing(0, { outs: 0, earnedRuns: 3 }), outing(1, { earnedRuns: 2 })]
+  assert.equal(era({ outs: 0, earnedRuns: 3 }), Infinity)
+  assert.equal(whip({ outs: 0, hits: 1, baseOnBalls: 0 }), Infinity)
+  assert.equal(bestStretch(games, 1, measureByKey('era', 'pitching'), 'pitching').first, day(1))
+})
+
+test('a window keeps the club names the log carries, defunct clubs included', () => {
+  const g = toGame({ date: '1994-07-01', team: { id: 9999, name: 'Montreal Expos' }, stat: {} })
+  assert.deepEqual(bestStretch([g], 1, measureByKey('h')).teams, ['Montreal Expos'])
 })

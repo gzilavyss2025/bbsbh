@@ -35,14 +35,17 @@ const div = (a, b) => (b > 0 ? a / b : 0)
 export const avg = (t) => div(t.hits, t.atBats)
 export const obp = (t) => div(t.hits + t.baseOnBalls + t.hitByPitch, t.atBats + t.baseOnBalls + t.hitByPitch + t.sacFlies)
 export const slg = (t) => div(t.totalBases, t.atBats)
-export const era = (t) => div(t.earnedRuns * 27, t.outs)
-export const whip = (t) => div((t.hits + t.baseOnBalls) * 3, t.outs)
+// No outs is the worst ERA and WHIP, not a perfect one: Infinity ranks last.
+const perOut = (a, outs) => (outs > 0 ? a / outs : a > 0 ? Infinity : 0)
+export const era = (t) => perOut(t.earnedRuns * 27, t.outs)
+export const whip = (t) => perOut((t.hits + t.baseOnBalls) * 3, t.outs)
 export const ip = (t) => `${Math.floor(t.outs / 3)}.${t.outs % 3}`
 
 // One game log split -> a dated row of counting stats (a missing field is 0).
 export function toGame(split, group = 'hitting') {
   const COUNTS = FIELDS[group]
-  const row = { date: split.date, gameNumber: split.game?.gameNumber ?? 1, teamId: split.team?.id ?? null }
+  // The club's name rides along: teamFullName knows only today's 30 clubs.
+  const row = { date: split.date, gameNumber: split.game?.gameNumber ?? 1, teamId: split.team?.id ?? null, teamName: split.team?.name ?? '' }
   for (const k of COUNTS) row[k] = typeof split.stat?.[k] === 'number' ? split.stat[k] : 0
   return row
 }
@@ -73,7 +76,7 @@ export function bestStretch(games, n, measure, group = 'hitting') {
     games: n,
     first: window[0].date,
     last: window[n - 1].date,
-    teamIds: [...new Set(window.map((g) => g.teamId).filter(Boolean))],
+    teams: [...new Set(window.map((g) => g.teamName).filter(Boolean))],
     careerGames: sorted.length,
   }
 }
