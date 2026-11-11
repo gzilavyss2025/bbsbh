@@ -50,6 +50,7 @@ export function percentileView(data, id, role, season) {
     const baseline = withMedian.find((m) => m.key === r.key)?.baseline ?? DASH
     const def = GLOSS[r.key] ?? r.def
     const ord = ordinal(r.percentile)
+    const of = poolOf(r.key)
     return {
       key: r.key,
       label: r.label,
@@ -62,8 +63,8 @@ export function percentileView(data, id, role, season) {
       def,
       ...tierOf(r.percentile),
       // Swing length keeps Savant's order: a high rank is a long swing, not a better one.
-      detail: `His ${value} · MLB median ${baseline} · ${r.key === 'swingLength' ? `${ord} percentile of` : `better than ${r.percentile}% of`} ${poolOf(r.key)}`,
-      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${poolOf(r.key)}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
+      detail: `His ${value} · MLB median ${baseline} · ${r.key === 'swingLength' ? `${ord} percentile of` : `better than ${r.percentile}% of`} ${of}`,
+      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${of}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
     }
   })
   return { rows, pool, tag: `vs ${pool}`, season: Number(data.season) }
