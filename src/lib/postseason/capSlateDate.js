@@ -53,3 +53,13 @@ export function capSlateDate(dateStr, todayStr, seasonMeta) {
   if (seasonMeta && !isPostseasonWindow(todayStr, seasonMeta)) return dateStr
   return todayStr
 }
+
+// Should the slate hold its loader while the season row is still in flight
+// (#3024)? A September-to-November date may sit in the postseason window, and
+// the window decides the page's arrangement; drawing the cards before the row
+// lands lets them draw, hide behind the bracket loader, then draw again.
+// Other months can't be postseason, so they never wait.
+export function slateWaitsOnSeasonRow(dateStr, seasonRowLoading) {
+  const month = dateStr.slice(5, 7)
+  return month >= '09' && month <= '11' && Boolean(seasonRowLoading)
+}

@@ -168,6 +168,8 @@ function view(input, s, load) {
     // The bracket draws the 12-club format (2022 on); an older postseason keeps the plain slate.
     inPostseasonWindow:
       sportId === SPORT_IDS.MLB && year >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta),
+    // Until that row lands the window is unknown; the slate holds its cards on it (#3024).
+    bracketSeasonLoading: sportId === SPORT_IDS.MLB && s.bracketMeta === undefined,
     slate: { games, loading, error: s.slate.error },
     affiliateIds: s.affiliateIds,
     levelTeams: s.teams,

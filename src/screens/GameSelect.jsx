@@ -11,6 +11,7 @@ import { useSlateDay } from '../hooks/slate/useSlateDay.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
+import { slateWaitsOnSeasonRow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { bracketOpensByItself, offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { cardLines } from '../api/postseason/text.js'
@@ -202,9 +203,10 @@ export function GameSelect({
   // poll re-renders the loader every refresh, and a permanent reserve would
   // wedge a screen-tall gap above the Off Day grid. useAsync keeps the last-good
   // `data` across a reload and nulls it on a deps change, which is exactly the
-  // line wanted here — a date or level switch is a cold load again.
-  // In October the page's arrangement waits on the bracket, so the loader does too (#3008).
-  const bracketPending = inPostseasonWindow && postseasonBracket.loading
+  // line wanted here — a date or level switch is a cold load again. October's arrangement
+  // waits on the bracket and its season row, so the loader does too (#3008, #3024).
+  const bracketPending = (inPostseasonWindow && postseasonBracket.loading) ||
+    (sportId === SPORT_IDS.MLB && day.season >= 2022 && slateWaitsOnSeasonRow(dateStr, day.bracketSeasonLoading))
   const coldLoad = (loading && !data) || bracketPending
 
   const favoriteAffiliateIds = day.affiliateIds

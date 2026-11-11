@@ -269,3 +269,13 @@ test('the MLB empty day reuses the bracket\'s season row instead of asking twice
   assert.equal(r.called('fetchSeasonMeta').length, 1)
   assert.equal(r.last().seasonMeta.loading, false)
 })
+
+test('an MLB day reports its bracket season row in flight, so October cards wait on it (#3024)', async () => {
+  const r = run({ dateStr: '2026-10-09', sportId: SPORT_IDS.MLB, favoriteTeamId: null })
+  await flush()
+  assert.equal(r.last().bracketSeasonLoading, true)
+  r.take('fetchSeasonMeta').resolve(null)
+  await flush()
+  assert.equal(r.last().bracketSeasonLoading, false, 'a failed read settles it')
+  assert.equal(run({ ...NOV }).last().bracketSeasonLoading, false, 'a minor level never asks')
+})

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { capSlateDate, isPostseasonWindow } from '../../src/lib/postseason/capSlateDate.js'
+import { capSlateDate, isPostseasonWindow, slateWaitsOnSeasonRow } from '../../src/lib/postseason/capSlateDate.js'
 
 // The 2026 season row, checked live 2026-09-28 (see docs/adr/0087-*): the
 // postseason window runs 2026-09-28 through 2026-10-31, the day before
@@ -63,4 +63,14 @@ test('capSlateDate: outside the window, a future date passes through', () => {
 test('capSlateDate: a missing or loading season row caps a future date (fails closed)', () => {
   assert.equal(capSlateDate('2026-10-15', '2026-09-29', null), '2026-09-29')
   assert.equal(capSlateDate('2026-10-15', '2026-09-29', undefined), '2026-09-29')
+})
+
+// #3024: before the season row lands, the slate must know whether the bracket
+// may still claim the page, or the cards draw, hide behind the loader, and draw again.
+test('slateWaitsOnSeasonRow holds a Sept–Nov MLB slate until the season row lands', () => {
+  assert.equal(slateWaitsOnSeasonRow('2026-10-09', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-09-30', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-11-02', true), true)
+  assert.equal(slateWaitsOnSeasonRow('2026-07-04', true), false)
+  assert.equal(slateWaitsOnSeasonRow('2026-10-09', false), false)
 })
