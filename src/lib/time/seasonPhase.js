@@ -114,7 +114,7 @@ export function milestoneProjectionPaused(dateStr, row) {
 //
 // A minor level is not a season; it is three leagues that each publish their
 // own. So there is no single row to compare a date against, and the sport-wide
-// row is not a stand-in for one (src/api/schedule.js's fetchLevelSeasonDates
+// row is not a stand-in for one (src/api/schedule/fetch.js's fetchLevelSeasonDates
 // records the year it was wrong by a day, in the direction that matters).
 //
 // The level's winter is the span in which NO league at it is playing:

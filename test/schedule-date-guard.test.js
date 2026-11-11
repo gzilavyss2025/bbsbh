@@ -7,7 +7,7 @@
 // no schedule request, ever. The router half is in route.test.js.
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchSchedule, resolveGame } from '../src/api/schedule.js'
+import { fetchSchedule, resolveGame } from '../src/api/schedule/fetch.js'
 
 function withFetchSpy(run) {
   const calls = []

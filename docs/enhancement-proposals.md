@@ -114,7 +114,7 @@ left off."
 **Why it fits.** The app's metaphor is a paper scorebook; a scorer keeps a
 shelf of filled books. This is the only proposal that needs **zero network
 sources** beyond what already exists — pure localStorage plus the existing
-`fetchGamesByPk` (`src/api/schedule.js`) to resolve pks into matchup cards.
+`fetchGamesByPk` (`src/api/schedule/fetch.js`) to resolve pks into matchup cards.
 It also makes the stored reveal marks — currently invisible — into a
 feature.
 

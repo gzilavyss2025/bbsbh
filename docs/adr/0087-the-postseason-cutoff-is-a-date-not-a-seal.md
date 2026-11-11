@@ -52,7 +52,7 @@ reveals the slate's own scores through `fetchSlateScores`, unchanged.
 **5. In the postseason window, the MLB slate never shows a date after
 today.** The window is `postSeasonStartDate` through the day before
 `offseasonStartDate`, read off the season row (`fetchSeasonMeta` in
-`src/api/schedule.js`) — never off the clock, and never inferred from an
+`src/api/schedule/fetch.js`) — never off the clock, and never inferred from an
 empty slate (the same rule `src/hooks/useOffseason.js` already follows for
 the regular-season/offseason line). Inside that window: the forward date
 arrow stops at today, and a future date named directly in the URL

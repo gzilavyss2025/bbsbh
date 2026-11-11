@@ -43,7 +43,7 @@
 //
 // The venue name itself rides in on the slate's existing schedule request —
 // `fields=` is a flat allowlist and `name` was already on it for the team
-// blocks, so api/schedule.js's normalizeGame reads venue.name at no extra cost
+// blocks, so api/schedule/fetch.js's normalizeGame reads venue.name at no extra cost
 // (verified 2026-08-11 against the 2026-08-10 MLB slate).
 
 import { ballparkFor } from './ballparkData.js'

@@ -6,7 +6,7 @@
 // This is the dataset behind questions of the form "the last time they won
 // game 1 of a road trip was July 3rd" — a family the app had no way to answer,
 // because answering it needs the SHAPE of a schedule (which games open a trip,
-// which close a series) across more than one season. src/api/scheduleShape.js
+// which close a series) across more than one season. src/api/schedule/shape.js
 // is the reader; docs/schedule-shape.md is the catalog of what the shape
 // supports, and which candidate stats were measured and rejected.
 //
@@ -22,7 +22,7 @@
 // STORES FACTS, NOT FLAGS. The shipped row is [mmdd, opponentId, site,
 // result] and nothing else; every segment tag — opener, finale, trip length —
 // is recomputed by the reader from the ordered rows. So a changed definition
-// of "road trip" is a change to src/api/scheduleShape.js alone, with no
+// of "road trip" is a change to src/api/schedule/shape.js alone, with no
 // regeneration at all. scripts/lib/team-records.mjs's header makes the long
 // version of this argument; the taggers themselves live in
 // scripts/lib/schedule-shape.mjs so test/schedule-shape.test.js can import

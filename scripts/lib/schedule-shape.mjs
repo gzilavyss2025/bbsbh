@@ -123,7 +123,7 @@ function eachRun(rows, keyOf, onSegment) {
 }
 
 // SERIES: `tagSeries` and the rule under it, `seriesRuns`, live in
-// src/api/scheduleShape.js — the one definition the reader and
+// src/api/schedule/shape.js — the one definition the reader and
 // gen-team-records.mjs share (#1283). A neutral-site game joins the series
 // beside it. The case that proved the neutral rule is real: on 2020-09-25 the
 // Brewers played a designated HOME game against the Cardinals at Busch
@@ -174,7 +174,7 @@ export function tagTrips(rows) {
 // The season prefix comes off the date because the rows already sit under their
 // season's key. Site and result are small integers for the same reason. SITE
 // and RESULT are the only place those integers are named on this side; the
-// reader (src/api/scheduleShape.js) imports nothing from a scripts/ module, so
+// reader (src/api/schedule/shape.js) imports nothing from a scripts/ module, so
 // it carries its own copy and test/schedule-shape.test.js pins the two together.
 export const SITE = { away: 0, home: 1, neutral: 2 }
 export const RESULT = { L: 0, W: 1, T: 2 }

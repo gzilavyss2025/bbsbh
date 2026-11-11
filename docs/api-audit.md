@@ -43,12 +43,12 @@ which sets no default params and no caching.
 | `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager`; `staff/coaches.js` `fetchCoachingStaff` (the whole staff) | no |
 | `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game.js` `fetchPitcherSeasonLine` | aggregate |
 | `person_stats` (yearByYear, postseason) | `/api/v1/people/{personId}/stats` | `stats=yearByYear&group=pitching&gameType=F,D,L,W`; only seasons before the page's season are read (ADR-0088) | `postseason/pitcherCareer.js` `fetchPitcherPostseasonCareer` | aggregate |
-| `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team,venue(timezone),lineups,officials,probablePitcher` | `schedule.js:88` `fetchSchedule` | rows carry scores; **dropped in `normalizeGame`** |
-| `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team` (light) | `schedule.js:132` `resolveGame` | dropped |
-| `schedule` | `/api/v1/schedule` | `gamePks={csv}&hydrate=team` (batched) | `schedule.js:160` `fetchGamesByPk` | dropped |
-| `schedule` | `/api/v1/schedule` | `sportId&teamId&season&gameType=R` | `schedule.js:192` `fetchHeadToHead` | scores present, **not copied** |
-| `schedule` | `/api/v1/schedule` | `sportId&teamId&season&gameType=R&hydrate=team` | `schedule.js:229` `fetchTeamSchedule` | scores present, **not copied** |
-| `teams` | `/api/v1/teams` | `sportId&activeStatus=Y` | `schedule.js:110` (fallback) | no |
+| `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team,venue(timezone),lineups,officials,probablePitcher` | `schedule/fetch.js:88` `fetchSchedule` | rows carry scores; **dropped in `normalizeGame`** |
+| `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team` (light) | `schedule/fetch.js:132` `resolveGame` | dropped |
+| `schedule` | `/api/v1/schedule` | `gamePks={csv}&hydrate=team` (batched) | `schedule/fetch.js:160` `fetchGamesByPk` | dropped |
+| `schedule` | `/api/v1/schedule` | `sportId&teamId&season&gameType=R` | `schedule/fetch.js:192` `fetchHeadToHead` | scores present, **not copied** |
+| `schedule` | `/api/v1/schedule` | `sportId&teamId&season&gameType=R&hydrate=team` | `schedule/fetch.js:229` `fetchTeamSchedule` | scores present, **not copied** |
+| `teams` | `/api/v1/teams` | `sportId&activeStatus=Y` | `schedule/fetch.js:110` (fallback) | no |
 | `game_uniforms` | `/api/v1/uniforms/game` | `gamePks={gamePk}` / `{csv}` (slate batched) | `uniforms.js:16,54` | no |
 | `team` | `/api/v1/teams/{teamId}` | none | `team.js:34` `fetchTeam` (static-first) | no |
 | `team_roster` | `/api/v1/teams/{teamId}/roster` | `rosterType&hydrate=person(stats(type=season,group=[hitting,pitching],sportId,season))` | `team.js:79` `fetchTeamRoster` | aggregates |
@@ -155,7 +155,7 @@ trims to related objects but not scalar fields.
   > Play-by-play (`liveData.plays.allPlays`) is 76–79% of it; within that, `playEvents[].pitchData`
   > is the bulk. So the feed *is* the dominant payload — but see R4: most of `pitchData` can't
   > actually be dropped.
-- **Cheap, clean client win:** `fetchTeamSchedule` (`schedule.js:229`) and `fetchHeadToHead`
+- **Cheap, clean client win:** `fetchTeamSchedule` (`schedule/fetch.js:229`) and `fetchHeadToHead`
   (`:192`) download each schedule row's `score`/`isWinner`/`leagueRecord` and then deliberately
   omit them from the returned shape. A `fields=` allowlist (gamePk, officialDate, gameDate,
   gameNumber, doubleHeader, status, teams.*.team.{id,name,abbreviation,teamName}) would prune the
@@ -169,7 +169,7 @@ trims to related objects but not scalar fields.
 ### 2b. `hydrate` — N+1 fan-outs
 
 The app already uses `hydrate` well in several spots (schedule readiness in one call
-`schedule.js:85`; roster+season-stats in one call `team.js:79`; venue location `game.js:34`).
+`schedule/fetch.js:85`; roster+season-stats in one call `team.js:79`; venue location `game.js:34`).
 Remaining fan-outs:
 
 - **`gen-vs-team-splits.mjs` (worst).** One `gameLog` call **per MLB season per player**
@@ -397,7 +397,7 @@ on mount). Small, contained.
 **Impact: medium (payload) + spoiler win. Risk: low–medium.** These download `score`/`isWinner`/
 `leagueRecord` per row and discard them; a small stable `fields=` allowlist prunes the payload
 and keeps the score out of client memory. Clean, well-scoped, spoiler-relevant.
-**Files:** `src/api/schedule.js:192,229`.
+**Files:** `src/api/schedule/fetch.js:192,229`.
 **What could go wrong:** `fields=` combined with `hydrate=team` can behave unexpectedly on nested
 objects — *(verify against a live game)* that abbreviation/teamName still come through. Keep the
 allowlist minimal and confirmed.

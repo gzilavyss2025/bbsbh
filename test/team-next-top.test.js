@@ -17,7 +17,7 @@ globalThis.fetch = async (url) => {
 const {
   STRETCH, formSeries, formGeometry, stretches, lastTen, daysRail, clubLine, gridCells, rankOf, flagOf, runsCaption,
 } = await import('../src/screens/team/next/top/topData.js')
-const { fetchTeamSchedule } = await import('../src/api/schedule.js')
+const { fetchTeamSchedule } = await import('../src/api/schedule/fetch.js')
 const { BANDS } = await import('../src/screens/team/next/bands.js')
 const { hiddenTeamSections } = await import('../src/screens/team/data/shared.js')
 

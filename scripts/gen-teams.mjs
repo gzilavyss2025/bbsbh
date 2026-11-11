@@ -12,7 +12,7 @@
 // `venue: { id, name, link }` on the plain /teams call.
 //
 // One call per sportId to /api/v1/teams already returns everything BOTH
-// fetchTeams() (src/api/schedule.js) and fetchTeam() (src/api/team.js) need,
+// fetchTeams() (src/api/schedule/fetch.js) and fetchTeam() (src/api/team.js) need,
 // so this single file backs both — no per-team /teams/{id} calls at runtime.
 //
 // The sportId list below must stay in sync with SEARCHABLE_SPORT_IDS in
@@ -41,7 +41,7 @@ const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 //   nothing.
 //
 //   The winter leagues are still WRITTEN here, because the slate's club strip
-//   reads this file (fetchTeams in src/api/schedule.js), and a live call for
+//   reads this file (fetchTeams in src/api/schedule/fetch.js), and a live call for
 //   them cannot be scoped the way the others can: a bare sportId=17 call
 //   answers with all 46 clubs behind that door, four leagues Tally ships and
 //   three it deliberately does not. Fetching per leagueId at BUILD time is how

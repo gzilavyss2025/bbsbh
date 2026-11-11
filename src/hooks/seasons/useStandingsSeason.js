@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { fetchSeasonMeta } from '../../api/schedule.js'
+import { fetchSeasonMeta } from '../../api/schedule/fetch.js'
 import {
   baseballToday,
   resolveStandingsSeason,

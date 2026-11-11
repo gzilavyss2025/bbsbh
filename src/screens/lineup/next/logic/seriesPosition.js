@@ -2,7 +2,7 @@ const DAY = 86400000
 const dayOf = (iso) => Date.parse(`${iso}T00:00:00Z`)
 
 // Which game of a regular-season series a game is: { n, of }, or null for a one-off meeting.
-// `games` are the two clubs' meetings this season (api/schedule.js fetchSeasonSeries rows:
+// `games` are the two clubs' meetings this season (api/schedule/fetch.js fetchSeasonSeries rows:
 // gamePk, apiDate, homeId). A series is the run of meetings at one park on consecutive days
 // (a doubleheader is two on one day). That a later game exists is on the schedule and is not a
 // result; no score is read.

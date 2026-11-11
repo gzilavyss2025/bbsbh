@@ -33,7 +33,7 @@
 import { getJson } from './statsapi.js'
 
 // The hydrate + `fields` projection any caller needs for the two selectors
-// below. Exported so schedule.js can splice them into the slate's own request
+// below. Exported so schedule/fetch.js can splice them into the slate's own request
 // rather than keeping a second copy of the field list.
 export const BROADCAST_HYDRATE = 'broadcasts(all)'
 export const BROADCAST_FIELDS = 'broadcasts,name,type,isNational,homeAway'

@@ -8,8 +8,8 @@
 // season row for a later day is still returned, as it always was.
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchTeamSchedule } from '../src/api/schedule.js'
-import { postseasonThrough } from '../src/api/scheduleGames.js'
+import { fetchTeamSchedule } from '../src/api/schedule/fetch.js'
+import { postseasonThrough } from '../src/api/schedule/games.js'
 
 const side = (id, name, extra = {}) => ({ team: { id, name }, ...extra })
 

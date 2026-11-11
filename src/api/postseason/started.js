@@ -1,4 +1,4 @@
-import { fetchSeasonMeta } from '../schedule.js'
+import { fetchSeasonMeta } from '../schedule/fetch.js'
 import { isoToday } from '../../lib/dates.js'
 
 // Has `season`'s postseason started (or finished)? The gate for any gameType=P

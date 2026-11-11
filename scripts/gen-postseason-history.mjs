@@ -24,7 +24,7 @@
 // mix of home/away games it played. Each game also carries its `gamePk` —
 // same footing as gen-all-star-rosters.mjs's stored gamePk: the app
 // resolves live team-abbreviation/date info from it via
-// `fetchGameCardsByPk` (`src/api/schedule.js`) rather than this file
+// `fetchGameCardsByPk` (`src/api/schedule/fetch.js`) rather than this file
 // storing an abbreviation that could go stale on a rename.
 //
 // Only teamId is stored (mirrors gen-awards-history.mjs) — names/logos

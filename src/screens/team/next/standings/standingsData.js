@@ -1,4 +1,4 @@
-import { droughtsFor } from '../../../../api/scheduleShape.js'
+import { droughtsFor } from '../../../../api/schedule/shape.js'
 import { divisionRecordFor } from '../../data/shared.js'
 import { rankOf } from '../top/topData.js'
 

@@ -1,5 +1,5 @@
 import { fetchTeam } from '../../../api/team.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
+import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
 import { seasonOf, cutoffFor } from './shared.js'
 
 // The Stamp In page's own data, and deliberately the thinnest loader in this

@@ -359,7 +359,7 @@ for each generator; the reader modules:
   ALAS/NLAS selections endpoint, not a boxscore scan (same source
   `fetchAllStarRosterIds` in `person-fetch.js` uses). Stores each season's
   `gamePk` only; the screen resolves live team/date info via `fetchGameCardsByPk`
-  (`schedule.js`). `rosters[season]` is
+  (`schedule/fetch.js`). `rosters[season]` is
   `{ AL, NL }`, each precomputed into `{ starters, bullpen, substitutes }` by the
   generator (one extra boxscore fetch per season resolves who actually started)
   so the page renders the sections directly with no client-side grouping. It
@@ -951,7 +951,7 @@ for each generator; the reader modules:
   `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
   nightly cron writes the file before the day's games. Degrades to null with no
   file, and the card hides.
-- `scheduleShape.js` — the Numbers tab's **Last Time** card, from
+- `schedule/shape.js` — the Numbers tab's **Last Time** card, from
   `public/data/schedule-shape/{teamId}.json` (`gen-schedule-shape.mjs`), MLB
   only. Where `teamRecords.js` above answers a RATE over one season, this
   answers a DROUGHT over twelve: not how often, but how long since, counted in

@@ -71,7 +71,7 @@ const BUDGETS = {
   // written to match; every module the player page's Analytics tab loads is here
   // together. catcherOfRecord.js sits BESIDE defense.js, whose chain it asks a
   // narrower question of and whose spoiler gate it inherits whole.
-  'src/api': 94, // logbook*.js -> src/api/logbook/; postseason*.js -> src/api/postseason/; score formulas -> src/api/score/; pitcher*.js -> src/api/pitcher/ (#3033)
+  'src/api': 91, // logbook*.js -> src/api/logbook/; postseason*.js -> src/api/postseason/; score formulas -> src/api/score/; pitcher*.js -> src/api/pitcher/; schedule*.js -> src/api/schedule/ (#3033)
   // awards.js, split out of transactions.js. Same "nothing here fetches"
   // convention and person-shaping job as its siblings; a subdirectory for one
   // module would hide it from check-spoiler-manifest's flat classification.

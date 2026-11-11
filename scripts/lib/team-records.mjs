@@ -21,7 +21,7 @@
 // import them (the lib/roster.mjs convention).
 
 import { isPlateAppearance } from './long-at-bats.mjs'
-import { tagSeries as tagSharedSeries } from '../../src/api/scheduleShape.js'
+import { tagSeries as tagSharedSeries } from '../../src/api/schedule/shape.js'
 import { ipToOuts } from '../../src/lib/math/innings.js'
 
 // ---------------------------------------------------------------------------
@@ -485,7 +485,7 @@ export function battedAroundHalves(allPlays, minBatters = 10) {
 // middle game leaves them describing a series that never happened, and a
 // makeup game appended to the next trip carries the old series' numbering. A
 // series here is what actually got played. The cut and the tags are `tagSeries`
-// (src/api/scheduleShape.js), the one definition shared with the schedule-shape
+// (src/api/schedule/shape.js), the one definition shared with the schedule-shape
 // generator and the reader (#1283): same opponent, same side of the road, and
 // a neutral-site game joins the series beside it. Both halves of a
 // doubleheader belong to the series they are played inside.

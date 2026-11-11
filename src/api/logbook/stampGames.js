@@ -10,7 +10,7 @@ import { recordAfterGame } from '../../lib/stamps.js'
 // ===========================================================================
 // Every other schedule fetcher in this directory deliberately strips each side's
 // score out of the response with `fields=` — a payload win and a spoiler win
-// (see the block comment above GAMES_BY_PK_FIELDS in schedule.js). This one
+// (see the block comment above GAMES_BY_PK_FIELDS in schedule/fetch.js). This one
 // asks for the score on purpose, which is why it lives here rather than there:
 // putting a score-bearing fetcher next to the spoiler-free ones is exactly how
 // a future caller reaches for the wrong function.

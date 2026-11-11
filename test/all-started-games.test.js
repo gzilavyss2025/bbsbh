@@ -1,12 +1,12 @@
 // Unit coverage for allStartedGames — TeamPhotosPage's own game list, and its
 // deliberate departure from every other consumer's `won != null` gate (see
-// that function's own header in src/api/scheduleGames.js). The one invariant
+// that function's own header in src/api/schedule/games.js). The one invariant
 // worth pinning: it keys on `started`, never on `won` — a live game has no
 // `won` yet but must still be walked, since surfacing that game's photos is
 // the entire reason this export exists instead of reusing allDecidedGames.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allStartedGames } from '../src/api/scheduleGames.js'
+import { allStartedGames } from '../src/api/schedule/games.js'
 
 function game(apiDate, { started = false, won = null } = {}) {
   return { gamePk: apiDate, apiDate, gameNumber: 1, doubleHeader: 'N', isHome: true, started, won }

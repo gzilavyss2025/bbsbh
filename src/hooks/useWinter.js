@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { fetchWinterCalendar } from '../api/schedule.js'
+import { fetchWinterCalendar } from '../api/schedule/fetch.js'
 import { useAsync } from './useAsync.js'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchLastOpponent } from '../../api/schedule.js'
+import { fetchLastOpponent } from '../../api/schedule/fetch.js'
 import { ClubRail } from './ClubRail.jsx'
 import { DugoutRail } from './DugoutRail.jsx'
 import { ClubWorkbench } from './workbench/ClubWorkbench.jsx'

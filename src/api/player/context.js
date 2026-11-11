@@ -38,7 +38,7 @@ import {
   fetchMilbYearByYear,
   fetchTransactions,
 } from '../person-fetch.js'
-import { fetchGamesByPk } from '../schedule.js'
+import { fetchGamesByPk } from '../schedule/fetch.js'
 import {
   aggregateSplits,
   detectInjuredList,

@@ -309,7 +309,7 @@ mounted at once).
 A record holds `mode`, `note`, `date`, `placement`, `stampedAt`, and `updatedAt`.
 **It does not hold the score.** Facts are resolved at render time by
 `src/api/logbook/stampGames.js` — the one fetcher in the app that asks statsapi *for* the
-score, which is why it is its own file rather than a function in `schedule.js`.
+score, which is why it is its own file rather than a function in `schedule/fetch.js`.
 
 `updatedAt` and `stampedAt` are two fields because one cannot do both jobs:
 last-write-wins sync needs a clock that moves on an un-stamp, and `stampedAt`

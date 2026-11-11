@@ -1,7 +1,7 @@
 import '../styles/43-foul-tracker.css'
 import { useMemo, useState } from 'react'
 import { compareFoulsInScope, fetchFouls, foulsInScope, hasPostseason, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
-import { fetchGamesByPk } from '../api/schedule.js'
+import { fetchGamesByPk } from '../api/schedule/fetch.js'
 import { fetchPositions } from '../api/person-fetch.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

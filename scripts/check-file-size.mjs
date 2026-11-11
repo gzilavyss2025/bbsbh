@@ -129,7 +129,7 @@ const BUDGETS = {
   'src/api/transactions/templates.js': 660, // 653 (dated wire notes, 2026-11-04); 607: the wire notes' call templates (27th man, last game, shuttle line)
   'src/api/boxscore.js': 800, // 762
   'src/screens/GameSelect.jsx': 850, // 822
-  // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
+  // src/api/schedule/fetch.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a
   // narrow read of the same row, and now delegates to it), and the whole point
@@ -139,7 +139,7 @@ const BUDGETS = {
   // to spare: fetchWinterCalendar belongs in this module for the same reason
   // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
   // src/api file for one fetcher, bought with that directory's budget.
-  'src/api/schedule.js': 800, // 741
+  'src/api/schedule/fetch.js': 800, // 741
   'src/api/select.js': 700, // 640
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and

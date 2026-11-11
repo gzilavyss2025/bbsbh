@@ -1,6 +1,6 @@
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useNearView } from '../../../../hooks/scroll/useNearView.js'
-import { fetchTeams } from '../../../../api/schedule.js'
+import { fetchTeams } from '../../../../api/schedule/fetch.js'
 import { TeamFilterStrip } from '../../../../components/team/TeamFilterStrip.jsx'
 import { TeamLink } from '../../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'

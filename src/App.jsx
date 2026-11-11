@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { lazyNamed } from './lib/react/lazyNamed.js'
-import { resolveGame } from './api/schedule.js'
+import { resolveGame } from './api/schedule/fetch.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'

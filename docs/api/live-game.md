@@ -195,7 +195,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   dated 2024-08-30 from a window ending 2024-06-30) and lossy (2 of 86 rows
   lost their scores). Asking by gamePk needs no date bound to be safe — the
   only gamePks that exist came from already-gated splits.
-- `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
+- `schedule/fetch.js` — slate/schedule (`hydrate=team` for the abbreviation +
   teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
   `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the
   cross-date sibling of `fetchGamesByPk` — full `normalizeGame`-shaped rows
@@ -586,7 +586,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 - `logbook.js` — the Logbook's game facts for a set of STAMPED gamePks
   (`fetchStampGames`, `stampGameFacts`), ADR-0035. The one fetcher here that
   deliberately asks statsapi FOR the score: every other schedule fetcher prunes
-  it out with `fields=` (see the `GAMES_BY_PK_FIELDS` block in `schedule.js`),
+  it out with `fields=` (see the `GAMES_BY_PK_FIELDS` block in `schedule/fetch.js`),
   which is exactly why this one lives in its own file rather than beside them —
   so nobody reaches for the wrong function. Safe only because its input is the
   user's own stamps, and a stamp cannot exist for a game they have not finished

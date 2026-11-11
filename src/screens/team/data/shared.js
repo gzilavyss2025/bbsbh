@@ -23,7 +23,7 @@ const DASH = '—'
 export const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 // Record by day of week, off the same cutoff-gated `schedule` rows the
 // Schedule section below already renders (fetchTeamSchedule only sets `won`
-// once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
+// once a game is Final AND on/before the asOf cutoff — see api/schedule/fetch.js —
 // so this reads no further ahead than the rest of the page). Days with no
 // decided games yet show DASH rather than "0-0".
 export function dayOfWeekRecord(games) {
