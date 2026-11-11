@@ -55,10 +55,7 @@ export function SiteMenuButton({ className = '' }) {
       >
         <MenuGlyph />
       </button>
-      {/* Portalled to <body>. Declared inside the slate's masthead, iOS Safari
-          sized the fixed scrim to a header ancestor instead of the viewport:
-          the sheet docked to the masthead's bottom edge and only its
-          "Everything" footer showed under the status bar. */}
+      {/* Portalled: see ModalPortal.jsx (iOS clipped it to the masthead). */}
       {open && (
         <ModalPortal>
           <SiteMenuModal onClose={() => setOpen(false)} />
