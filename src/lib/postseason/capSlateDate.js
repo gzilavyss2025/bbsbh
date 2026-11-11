@@ -59,7 +59,10 @@ export function capSlateDate(dateStr, todayStr, seasonMeta) {
 // the window decides the page's arrangement; drawing the cards before the row
 // lands lets them draw, hide behind the bracket loader, then draw again.
 // Other months can't be postseason, so they never wait.
-export function slateWaitsOnSeasonRow(dateStr, seasonMeta) {
+// Unlike the two functions above, the second argument is the useAsync READ of
+// the season row (`{ loading, data }`), not the row itself: passing the row
+// would read `.loading` off it and never wait.
+export function slateWaitsOnSeasonRow(dateStr, seasonRowRead) {
   const month = dateStr.slice(5, 7)
-  return month >= '09' && month <= '11' && Boolean(seasonMeta?.loading)
+  return month >= '09' && month <= '11' && Boolean(seasonRowRead?.loading)
 }

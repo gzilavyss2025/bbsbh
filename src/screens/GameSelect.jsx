@@ -126,8 +126,8 @@ export function GameSelect({
   // The bracket draws the 12-club format (2022 on): two Wild Card series per
   // league, each feeding one Division Series. An older postseason has a
   // different shape, so its slate stays the plain one.
-  const inPostseasonWindow =
-    sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
+  const bracketFormat = sportId === SPORT_IDS.MLB && bracketSeason >= 2022
+  const inPostseasonWindow = bracketFormat && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
   const wsModeInfo = worldSeriesMode(postseasonBracket.bracket)
   if (inPostseasonWindow) import('../components/worldseries/WorldSeriesHome.jsx') // preload, see WorldSeriesHome above
@@ -268,11 +268,11 @@ export function GameSelect({
   // .screen--coldload in 03-slate-header.css). Deliberately not a bare
   // `loading`: on a day with NO games `hasData` never becomes true, so the live
   // poll re-renders the loader every refresh, and a permanent reserve would
-  // wedge a screen-tall gap above the Off Day grid. useAsync nulls `data` on a
-  // deps change, so a date or level switch is a cold load again. October waits
+  // wedge a screen-tall gap above the Off Day grid. useAsync keeps `data` across a
+  // reload and nulls it on a deps change: a date or level switch is a cold load. October waits
   // on the bracket and its season row, so the loader does too (#3008, #3024).
   const bracketPending = (inPostseasonWindow && postseasonBracket.loading) ||
-    (sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && slateWaitsOnSeasonRow(dateStr, bracketSeasonMeta))
+    (bracketFormat && slateWaitsOnSeasonRow(dateStr, bracketSeasonMeta))
   const coldLoad = (loading && !data) || bracketPending
 
   const favoriteAffiliateIds = useMemo(
