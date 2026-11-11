@@ -60,18 +60,20 @@ let plays = carried ? prev.plays : []
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
 if (todo.length === 0) {
-  // Still write the small cutoffs file if it is missing or stale (a quiet night).
-  if (carried) await writeCutoffs(cutoffsFromHist(hist))
+  // Restamp both files anyway: the freshness guard reads the stamp, and the nightly
+  // commit drops a stamp-only change (nightly/drop-stamp-only.mjs), so this commits nothing.
+  if (carried) {
+    await writeJsonAtomic(OUT, { ...prev, generatedAt: new Date().toISOString() })
+    await writeCutoffs(cutoffsFromHist(hist))
+  }
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
 }
 
 // The cutoffs alone, for the Pressure meter: 9 numbers, not the whole board.
-// Written only when they change, so a quiet night commits nothing and
-// generatedAt says when the cutoffs last moved.
+// Written every run; a night they do not move is a stamp-only change the nightly
+// commit drops (nightly/drop-stamp-only.mjs).
 async function writeCutoffs(cutoffs) {
-  const had = await readJsonOr(CUTOFFS, null)
-  if (had?.season === season && JSON.stringify(had.cutoffs) === JSON.stringify(cutoffs)) return
   await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs })
 }
 

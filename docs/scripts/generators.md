@@ -141,7 +141,8 @@ don't run these by hand.
   It also writes `public/data/tensest-cutoffs.json`: the season's leverage edges for the Pressure meter's 10 bars
   (bands 20/40/55/70/80/88/93/97/99, #2939), from a histogram of every play's LI (0.01 buckets, 0–9.99) that the state
   file carries as `hist` (`scripts/lib/tensest/cutoffs.mjs`, tested in `test/tensest-cutoffs.test.js`). A state file
-  with no `hist` rebuilds the season from scratch. The cutoffs file is rewritten only when its numbers change.
+  with no `hist` rebuilds the season from scratch. Both files are restamped every run, even with no new game, so
+  the freshness guard sees the step ran; the nightly commit drops a stamp-only change (#3001).
 - `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
   — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
   the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its

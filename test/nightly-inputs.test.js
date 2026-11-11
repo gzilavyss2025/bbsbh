@@ -63,3 +63,8 @@ test('an AAA-only Final opens only the AAA gate: MLB-only steps stay skipped', (
   // An MLB Final opens both: an AAA step reads MLB games too.
   assert.equal(decideGates({ upcoming: sched(), recent: sched(game('F')), recentAaa: sched() }).finalsAaa, true)
 })
+
+test('a no-finals night skips both files the tensest step writes (#3001)', () => {
+  const skipped = skippedDatasets({ upcoming: true, finals: false, finalsAaa: true })
+  for (const d of ['tensest.json', 'tensest-cutoffs.json']) assert.ok(skipped.includes(d), d)
+})
