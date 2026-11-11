@@ -7,13 +7,13 @@
    across the head of a revealed box score — is 48-stamp-strip.css, loaded next.
    The stamp ARTWORK carries no CSS —
    GameStamp.jsx is a self-contained SVG whose type sizes are user-space
-   coordinates in the locked design, not page typography (src/lib/stampArt.js).
+   coordinates in the locked design, not page typography (src/lib/stamp/stampArt.js).
    All this file does is size it and set its ink; the stamp inherits `color`,
    which is the whole one-colour discipline of the mark.
    ============================================================ */
 
 /* `--stamp-ink` is written inline by GameStamp.jsx: the WINNING club's darkest
-   brand colour, resolved by src/lib/stampInk.js (which owns why darkest, and
+   brand colour, resolved by src/lib/stamp/stampInk.js (which owns why darkest, and
    the contrast floor under it). A game with no winner — a tie, a suspended
    game, facts that never resolved — omits the property, and the book's own
    navy ink is what the fallback answers.

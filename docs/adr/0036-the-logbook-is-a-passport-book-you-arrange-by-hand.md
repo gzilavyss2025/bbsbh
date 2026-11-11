@@ -62,7 +62,7 @@ bugs — the vertical clamp must use the stamp's height *as a fraction of the
 page*, not its width (the page is not square), and the tilt must be a hash of
 the gamePk rather than its low digits, or a whole homestand tilts the same way.
 
-`src/lib/stamps.js` deliberately does **not** import that module. It is bundled
+`src/lib/stamp/stamps.js` deliberately does **not** import that module. It is bundled
 into the serverless function, so it restates only the *bounds* it must validate
 (`MAX_PLACEMENT_PAGE`, `MAX_PLACEMENT_TILT`) — the same reasoning that keeps
 `halfIndexOf` restated there rather than imported from the selector layer.
@@ -201,7 +201,7 @@ outer edge IS that margin, and two dashed rules on one line was one too many.
 ### A stamp is pressed in the winner's ink
 
 Every stamp was navy. They are now drawn in **the winning club's darkest brand
-colour** — `src/lib/stampInk.js`, the one module in `src/lib/` that colours
+colour** — `src/lib/stamp/stampInk.js`, the one module in `src/lib/` that colours
 something from game state.
 
 That is a deliberate, contained exception to the rule at the end of
@@ -242,7 +242,7 @@ now lets a club override it with a hex of its own choosing, picked in
 (`StampPlacementEditor.jsx`; it had a card of its own until the two questions
 were merged onto the one pair of previews they are both judged against) — and
 read at render time by `stampInkFor`'s `overrideHex` option
-(`src/lib/stampInk.js`).
+(`src/lib/stamp/stampInk.js`).
 
 The override does **not** exempt a club from the contrast floor argued for
 above — `deepenToContrast` still runs on it. That floor is a fact about what a
@@ -300,7 +300,7 @@ Three properties this deliberately keeps:
   numerals, same footer, same per-club placement and ink tuning. The level is
   the only thing the inversion says.
 
-The test is `stampRingInverted` (`src/lib/stampArt.js`): sportId 1 is the
+The test is `stampRingInverted` (`src/lib/stamp/stampArt.js`): sportId 1 is the
 majors and everything else inverts, stated as `!== 1` rather than as a
 membership test on the five known MiLB codes, so a level not yet on the slate
 still reads as "not the majors" instead of quietly drawing as one. A blob with

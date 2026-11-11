@@ -36,8 +36,8 @@
 // gets `null`, and the caller leaves the stamp in the book's default navy ink.
 // That is the honest answer, not a failure: there is no winner to be the ink.
 
-import { MILB_COLORS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
-import { contrastRatio, relativeLuminance, toRgb } from './contrast.js'
+import { MILB_COLORS, MLB_TEAM_COLORS, milbBrandPair } from '../colors/brandColors.js'
+import { contrastRatio, relativeLuminance, toRgb } from '../contrast.js'
 
 // The paper a stamp is pressed onto: --surface-card (--paper-2), the raised
 // sheet both the passport page and the Logbook grid cell are drawn on. Mirrored
@@ -148,7 +148,7 @@ export function stampWinnerId(game) {
 // the book's own ink" — no winner, or a club with no colour on file (and no
 // override either).
 //
-// `overrideHex` is the winning club's own pick (src/lib/stampInkTuning.js),
+// `overrideHex` is the winning club's own pick (src/lib/stamp/stampInkTuning.js),
 // resolved by the caller rather than read here — this module stays a pure
 // function of `game` plus whatever ink candidates it's handed, the same
 // discipline stampArt.js's markTransform keeps for stamp-logo-tuning.json.

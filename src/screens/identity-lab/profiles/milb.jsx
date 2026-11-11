@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
-import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
-import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
-import { clubMarkSources } from '../../../lib/markSources.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/colors/headerTheme.js'
+import { customMarkAssignment, customMarksFor } from '../../../lib/logo/customMarks.js'
+import { clubMarkSources } from '../../../lib/logo/markSources.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   MILB_COLOR_LAB_LEVELS,
@@ -24,7 +24,7 @@ import {
   milbWpaWordmark,
   milbHeaderColorOverride,
   milbHeaderColorsFor,
-} from '../../../lib/milbColors.js'
+} from '../../../lib/colors/milbColors.js'
 import { JerseyBench } from '../workbench/JerseyBench.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore } from '../saveStores.js'
@@ -181,7 +181,7 @@ function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
 // Exactly two jerseys per affiliate, but ONE shared header bar — unlike MLB's
 // two-bar Main/City-Connect split (a real jersey-design asymmetry), MiLB's
 // Home and Away have no such asymmetry to justify separate bars, so both wear
-// the same one (milbHeaderColorOverride, src/lib/milbColors.js).
+// the same one (milbHeaderColorOverride, src/lib/colors/milbColors.js).
 function benchItems() {
   return VARIANTS.map((v) => ({ key: v.key, treatment: v.key, label: v.label, shortLabel: v.label, subLabel: null }))
 }

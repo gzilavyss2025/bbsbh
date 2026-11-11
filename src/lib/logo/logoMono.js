@@ -26,7 +26,7 @@
 // scripts/gen-mono-logos.mjs, which precomputes one file per club into
 // public/data/logos/mono/.
 
-import { rgbToHsl, toRgb } from './contrast.js'
+import { rgbToHsl, toRgb } from '../contrast.js'
 
 // A mark drawn as an `<image>` (embedded raster) or `<foreignObject>` carries
 // no fills to classify, so it can't be re-inked at all — those bail to null and

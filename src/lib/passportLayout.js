@@ -17,7 +17,7 @@ import { clamp } from './math/number.js'
 // CENTRE, and tilt is degrees. Fractions are what make the same book render
 // correctly on a 390px phone page and a 520px desktop spread — and, more to
 // the point, what let a placement sync between those two devices and mean the
-// same thing (src/lib/stamps.js carries the field; api/stamps.js round-trips
+// same thing (src/lib/stamp/stamps.js carries the field; api/stamps.js round-trips
 // it). Store a pixel here and the book is wrong on every screen but the one it
 // was placed on.
 //
@@ -393,7 +393,7 @@ export function autoLayout(stamps, { startPage = 1 } = {}) {
 //
 // The order is TOTAL, so two devices arrange the same collection identically
 // and re-ordering twice never shuffles: date, then `stampedAt`, then gamePk —
-// the same settling `allStamps` (src/lib/stamps.js) uses, so the book and the
+// the same settling `allStamps` (src/lib/stamp/stamps.js) uses, so the book and the
 // grid below it never disagree about two games on one date. 'newest' is the
 // exact reverse, tiebreak included. A tombstone is dropped (it would leave a
 // gap); an unreadable date sorts to the oldest end rather than being lost.

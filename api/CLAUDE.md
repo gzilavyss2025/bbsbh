@@ -36,7 +36,7 @@ three phrases `scripts/check-claude-md-facts.mjs` checks, so change both togethe
 - `cron/nightly-dispatch.js` — the nightly data trigger. A Vercel cron at 08:17 UTC asks GitHub to run
   `update-nightly-data.yml` (`trigger: cron`); the job stays in Actions (ADR-0125).
 - **The fifteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
-  `src/lib/stamps.js`). That is safe because of WHERE stamp art may render
+  `src/lib/stamp/stamps.js`). That is safe because of WHERE stamp art may render
   (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
 
 `_lib/` holds the shared handler helpers: `withUser` (the per-user preamble), `readHash`/`writeHash`

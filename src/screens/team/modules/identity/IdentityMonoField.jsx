@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
-import { monoLogoFingerprint, monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../../lib/logoMono.js'
+import { monoLogoFingerprint, monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../../lib/logo/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../../lib/svgSanitize.js'
-import { LOGO_VARIANTS, logoCdnUrl } from '../../../../lib/logoCdn.js'
+import { LOGO_VARIANTS, logoCdnUrl } from '../../../../lib/logo/logoCdn.js'
 import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { ShapeInkPicker, flipVerdict } from '../../../identity-lab/editors/ShapeInkPicker.jsx'
 // The shape picker's own markup carries the identity-lab's `idlab__monoink*`
@@ -71,7 +71,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
 
   // Landed (file, plus any already-saved override — monoInkFor is
   // overlay-aware) pins only apply when they were picked against THIS art —
-  // the same staleness rule src/lib/monoInk.js and the generator both apply.
+  // the same staleness rule src/lib/logo/monoInk.js and the generator both apply.
   const landedStale = Boolean(artField.landed && fingerprint && artField.landed !== fingerprint)
   const landedPins = useMemo(
     () => (landedStale ? {} : parsePins(partsField.landed)),

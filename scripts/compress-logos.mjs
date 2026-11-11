@@ -34,7 +34,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
-import { LOGO_ART_ROOT, readPngHeader } from '../src/lib/logoArt.js'
+import { LOGO_ART_ROOT, readPngHeader } from '../src/lib/logo/logoArt.js'
 
 // Rewrite only when quantization actually pays. 0.9 (10% savings) is the
 // no-op threshold that makes re-running safe: a second quantization pass

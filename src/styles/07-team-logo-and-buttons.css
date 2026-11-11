@@ -41,7 +41,7 @@
   align-items: center;
   overflow: hidden;
 }
-/* `--masthead-mark-scale` is the per-BAR hand tuning (lib/headerTheme.js's
+/* `--masthead-mark-scale` is the per-BAR hand tuning (lib/colors/headerTheme.js's
    MARK_SCALE_LIMITS, set as an inline custom property by TeamInfo and by the
    lab's bar mock). Marks carry wildly different amounts of their own internal
    whitespace — a cap logo drawn tight to its viewBox and a roundel with a wide

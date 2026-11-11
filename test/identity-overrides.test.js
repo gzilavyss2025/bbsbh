@@ -38,10 +38,10 @@ import {
   treatmentScale,
   treatmentTile,
 } from '../src/lib/teams.js'
-import { TEAM_COLOR_PAIRS } from '../src/lib/brandColors.js'
-import { milbTreatmentTile, milbWpaBandColor, milbWpaLogoLayout, milbWpaWordmark } from '../src/lib/milbColors.js'
-import { stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
-import { resolveMarkPlacement } from '../src/lib/stampArt.js'
+import { TEAM_COLOR_PAIRS } from '../src/lib/colors/brandColors.js'
+import { milbTreatmentTile, milbWpaBandColor, milbWpaLogoLayout, milbWpaWordmark } from '../src/lib/colors/milbColors.js'
+import { stampLogoTuningRecord } from '../src/lib/stamp/stampLogoTuning.js'
+import { resolveMarkPlacement } from '../src/lib/stamp/stampArt.js'
 import { wpaBandColor, wpaBandPinstripeColor } from '../src/lib/wpa/wpaBandColors.js'
 import { wpaLogoLayout, wpaWordmarkOn } from '../src/lib/wpa/wpaLogo.js'
 import { identityWriteRefusal } from '../api/identity.js'
@@ -549,7 +549,7 @@ test('a mono pins override lands in the mono-ink store, and reads back through m
     null,
   )
 
-  const { monoInkFor } = await import('../src/lib/monoInk.js')
+  const { monoInkFor } = await import('../src/lib/logo/monoInk.js')
   withOverrides(
     {
       'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',

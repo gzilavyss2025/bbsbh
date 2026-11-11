@@ -2,20 +2,20 @@
 // wpa/wpaBandColors.js on purpose: this module is on the eager first-paint path
 // (headerTheme.js -> SiteHeader), and importing them from their home modules
 // pulled data/wpa-tuning.json into the entry chunk. See lib/wpa/wpaDefaults.js.
-import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from './wpa/wpaDefaults.js'
-import { byTreatment, liveStore } from './tuningStore.js'
-import { registerIdentityStore } from './identity/overlay.js'
-import { teamLogoUrl } from './teams.js'
-import { logoUrlOverride } from './identity/logoUrlOverrides.js'
-import { customMarkFor } from './customMarks.js'
+import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from '../wpa/wpaDefaults.js'
+import { byTreatment, liveStore } from '../tuningStore.js'
+import { registerIdentityStore } from '../identity/overlay.js'
+import { teamLogoUrl } from '../teams.js'
+import { logoUrlOverride } from '../identity/logoUrlOverrides.js'
+import { customMarkFor } from '../logo/customMarks.js'
 import {
   MILB_COLORS,
   MILB_RESEARCHED_PAIRS,
   milbColorPair,
   milbHasResearchedColor,
 } from './brandColors.js'
-import MILB_TREATMENT_TUNING_JSON from './data/milb-treatment-tuning.json' with { type: 'json' }
-import LOGO_ART from './data/logo-art.json' with { type: 'json' }
+import MILB_TREATMENT_TUNING_JSON from '../data/milb-treatment-tuning.json' with { type: 'json' }
+import LOGO_ART from '../data/logo-art.json' with { type: 'json' }
 
 // Per-affiliate MiLB brand colors + the Home/Away tuning tables behind the
 // Team Identity Lab's MiLB dimensions (screens/identity-lab/profiles/milb.jsx,
@@ -115,7 +115,7 @@ export const MILB_WPA_WORDMARK_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) =>
 
 // `{ [teamId]: { [variant]: { bar, accent, onBar } } }` — the MiLB half of the
 // header chrome a themed lineup page wears (ADR-0030), same shape and same
-// role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/headerTheme.js` is
+// role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/colors/headerTheme.js` is
 // what both of them resolve through; nothing else should read either table
 // directly except the lab that authors them.
 export const MILB_HEADER_COLOR_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) => f.header)

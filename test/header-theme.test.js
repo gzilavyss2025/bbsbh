@@ -9,9 +9,9 @@ import {
   markScaleValue,
   withMarkScale,
   MARK_SCALE_LIMITS,
-} from '../src/lib/headerTheme.js'
+} from '../src/lib/colors/headerTheme.js'
 import { draftFieldsMatchLanded } from '../src/screens/identity-lab/useDraftStore.js'
-import { milbHeaderColorOverride, MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/milbColors.js'
+import { milbHeaderColorOverride, MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/colors/milbColors.js'
 import { contrastRatio } from '../src/lib/contrast.js'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' with { type: 'json' }
@@ -44,7 +44,7 @@ test('a MiLB affiliate resolves through the Home/Away table, not the MLB one', (
 
 test("a MiLB club's Home and Away share the exact same bar", () => {
   // 234 Durham Bulls — landed under the 'home' slot (milbHeaderColorOverride,
-  // src/lib/milbColors.js); Away must resolve to the identical triad rather
+  // src/lib/colors/milbColors.js); Away must resolve to the identical triad rather
   // than owning a second bar of its own.
   assert.deepEqual(headerThemeFor(234, 'home'), headerThemeFor(234, 'away'))
 })
@@ -142,9 +142,9 @@ test('the resolver is pure in (teamId, treatment) — no third input exists', ()
   }
   // And structurally: the module imports no feed, linescore, reveal, or
   // derivation module. This is the check that catches someone wiring one in.
-  const source = readFileSync(new URL('../src/lib/headerTheme.js', import.meta.url), 'utf8')
+  const source = readFileSync(new URL('../src/lib/colors/headerTheme.js', import.meta.url), 'utf8')
   const imports = [...source.matchAll(/^import .*? from '([^']+)'/gm)].map((m) => m[1])
-  assert.deepEqual(imports.sort(), ['./contrast.js', './milbColors.js', './teams.js'])
+  assert.deepEqual(imports.sort(), ['../contrast.js', '../teams.js', './milbColors.js'])
 })
 
 // Every landed triad is reachable through the resolver, and every one of them

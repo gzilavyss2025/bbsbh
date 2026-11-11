@@ -7,9 +7,9 @@ import { revealStampFacts } from '../src/api/linescore.js'
 import { withSeriesFacts } from '../src/api/game.js'
 import { parseRoute } from '../src/lib/route.js'
 import { badgeFieldPins, secondaryLogoSvg, secondaryMarkCache } from '../src/lib/heritage/marks.js'
-import { recordAfterGame } from '../src/lib/stamps.js'
+import { recordAfterGame } from '../src/lib/stamp/stamps.js'
 import { heritageArt } from '../src/lib/heritage/art.js'
-import { logoCdnUrl } from '../src/lib/logoCdn.js'
+import { logoCdnUrl } from '../src/lib/logo/logoCdn.js'
 
 const fixtures = JSON.parse(readFileSync(new URL('../src/screens/heritage/fixtures.json', import.meta.url)))
 const regular = fixtures[0].game

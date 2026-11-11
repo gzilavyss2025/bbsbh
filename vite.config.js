@@ -34,7 +34,7 @@ import {
   saveEra,
   saveEraArt,
 } from './scripts/lib/eras/dev-season-marks.mjs'
-import { describeLogoCaveat } from './src/lib/logoArt.js'
+import { describeLogoCaveat } from './src/lib/logo/logoArt.js'
 
 // Dev-only save endpoint for the curation surfaces — the Team Identity Lab
 // (/identity-lab) and the Uniform Names page — writing straight back to the
@@ -266,7 +266,7 @@ const DEV_MONO_LOGO_ROUTE = 'mono-logo'
 const DEV_WPA_ART_ROUTE = 'wpa-art'
 
 // Fill a treatment's WPA slot from one of the club's own marks. No body — the
-// source is a `kind:id` key from the closed vocabulary src/lib/markSources.js
+// source is a `kind:id` key from the closed vocabulary src/lib/logo/markSources.js
 // defines, resolved server-side to either a CDN fetch or a file already under
 // public/team-logos/ (scripts/lib/dev-logo-upload.mjs).
 async function handleWpaArt(req, res, query) {

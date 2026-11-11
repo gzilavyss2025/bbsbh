@@ -11,7 +11,7 @@
 // decoration on a cover that, by ADR-0002, holds no data at all — read
 // SealBox.jsx's header before wiring any of this to something that does.
 //
-// THE SEED IS THE STAMP'S SEED. `stampSeed` (lib/stampArt.js) already answers
+// THE SEED IS THE STAMP'S SEED. `stampSeed` (lib/stamp/stampArt.js) already answers
 // "give this game a number that never changes" for the Logbook stamp's wear
 // filter, for the same reason this needs one: a keepsake that re-rolls its own
 // roughness on every render is not a keepsake. A seal is the same promise at a
@@ -24,7 +24,7 @@
 // SVG `feTurbulence`, which expands one integer into noise itself; a polygon has
 // to be expanded here instead, so the seed needs something to expand it. Keep
 // that split — derive the seed there, spend it here.
-import { stampSeed } from './stampArt.js'
+import { stampSeed } from './stamp/stampArt.js'
 
 // The edge is drawn as a run of vertices across the cover, alternating above
 // and below the midline so it always reads as a tear rather than a fold. Nine

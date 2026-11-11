@@ -21,7 +21,7 @@ where the build deliberately departed from it), and `src/CLAUDE.md` for the
 component wiring.
 
 **An October stamp names its round.** The bottom arc of a postseason stamp reads
-"ALDS · Oct 3, 2026" (`stampBottomText`, `src/lib/stampArt.js`). The round comes from
+"ALDS · Oct 3, 2026" (`stampBottomText`, `src/lib/stamp/stampArt.js`). The round comes from
 the facts blob's `gameType` and `leagueId`, which all three producers write (the
 server, the Logbook's schedule read and the box score's live feed). It carries no game
 number, because the live feed has none and a stamp must read the same whichever
@@ -130,7 +130,7 @@ recent) to the same shared sheet:
 | `src/screens/identity-lab/editors/StampPlacementEditor.jsx` | Identity Lab hints that name the destination |
 | `api/_lib/cards.js` | the shared-link Open Graph card (`logbook` key) |
 
-A grep for `Logbook` that returns hits in `src/lib/stamps.js`, `src/lib/stampArt.js`,
+A grep for `Logbook` that returns hits in `src/lib/stamp/stamps.js`, `src/lib/stamp/stampArt.js`,
 `api/stamps.js`, `src/hooks/useStamps.js`, or any `*.css` is finding **comments and
 identifiers**. Leave them.
 
@@ -301,7 +301,7 @@ What the server still refuses:
 
 ### 4.2 Storage, shape, and limits
 
-Local-first, in `localStorage` under `bbsbh:stamps` (`src/lib/stamps.js` is the
+Local-first, in `localStorage` under `bbsbh:stamps` (`src/lib/stamp/stamps.js` is the
 pure rules module; `src/hooks/useStamps.js` is the React store over it, with a
 cross-tab `storage` listener and a same-tab echo — two hook instances really are
 mounted at once).
@@ -385,7 +385,7 @@ fields fail CLOSED (`sanitizeCoverMark`/`sanitizeCoverColor`, `src/lib/books.js`
 `bookEntry`, `api/books.js`): an unknown value never reaches storage.
 
 The league art is precomputed by `scripts/gen-league-logos.mjs` into
-`public/data/logos/league/{mlb,milb}.svg` through the same `src/lib/logoMono.js`
+`public/data/logos/league/{mlb,milb}.svg` through the same `src/lib/logo/logoMono.js`
 knockout pipeline the club marks use, with each mark's viewBox recorded in
 `src/lib/data/league-logo-manifest.json` — MLB is a near-square badge and MiLB a
 wide wordmark, so no one crest slot fits both. The three boards are real tokens
@@ -438,10 +438,10 @@ union merge resurrecting it. See ADR-0041.
 ### 4.5 Stamp art
 
 `src/components/logbook/GameStamp.jsx` is a tracing with no numbers of its own;
-the geometry is pure math in `src/lib/stampArt.js` (unit-tested), the ink in
-`src/lib/stampInk.js`, and per-club mark placement in `src/lib/stampLogoTuning.js`
+the geometry is pure math in `src/lib/stamp/stampArt.js` (unit-tested), the ink in
+`src/lib/stamp/stampInk.js`, and per-club mark placement in `src/lib/stamp/stampLogoTuning.js`
 — tunable from the Identity Lab. The ink defaults to the winning club's darkest
-brand colour but a club may override it (`src/lib/stampInkTuning.js` +
+brand colour but a club may override it (`src/lib/stamp/stampInkTuning.js` +
 `src/lib/data/stamp-ink.json`, tuned from the Stamp ink row at the foot of the
 Identity Lab's Stamp placement card),
 still walked through the same contrast floor either way (ADR-0036). **A stamp

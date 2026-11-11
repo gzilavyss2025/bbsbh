@@ -14,8 +14,8 @@
 import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { logoCdnUrl } from '../../src/lib/logoCdn.js'
-import { monoLogoFingerprint, monoLogoSvg } from '../../src/lib/logoMono.js'
+import { logoCdnUrl } from '../../src/lib/logo/logoCdn.js'
+import { monoLogoFingerprint, monoLogoSvg } from '../../src/lib/logo/logoMono.js'
 import { applyIdentityOverrides } from '../../src/lib/identity/apply.js'
 import { SITE_URL } from '../../src/copy/landing/site.js'
 
@@ -102,7 +102,7 @@ export async function readMonoInkStoreWithOverrides() {
 
 // The pins to apply to this art, or null. A saved set whose fingerprint doesn't
 // match the art in hand is dropped rather than applied to shapes nobody looked
-// at — see src/lib/monoInk.js, which is the browser-side copy of this rule.
+// at — see src/lib/logo/monoInk.js, which is the browser-side copy of this rule.
 export function pinsFor(store, teamId, sourceSvg) {
   const entry = store?.[String(teamId)]
   const parts = entry?.parts

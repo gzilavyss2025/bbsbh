@@ -116,7 +116,7 @@ const BUDGETS = {
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
   'src/screens/BoxScore.jsx': 900, // 824
-  'src/lib/teams.js': 1240, // 1227
+  'src/lib/teams.js': 820, // 806
   'src/lib/route.js': 1000, // 970
   'scripts/gen-fouls.mjs': 1100, // 1057
   // The sweep gained a batter-side dimension: the side is read off the matchup,

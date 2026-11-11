@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { monoInkFor } from '../../lib/monoInk.js'
+import { monoInkFor } from '../../lib/logo/monoInk.js'
 import { seasonMark } from '../../lib/identity/seasonMarks.js'
 import { sanitizeSvgMarkup } from '../../lib/svgSanitize.js'
 import { secondaryMarkCache } from '../../lib/heritage/marks.js'

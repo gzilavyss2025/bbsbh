@@ -155,7 +155,7 @@ reveal through a `storage` listener in `useRevealProgress.js`.
 - **Claude Code practice moves fast.** Before you change hooks, skills, or CLAUDE.md
   structure, ask the `claude-code-guide` agent.
 - **MiLB data degrades gracefully.** MLB feeds are complete. Minor-league feeds
-  (sportIds 11–14, see `src/lib/teams.js`) often miss lineups, weather, coaches, or
+  (sportIds 11–14, see `src/lib/teams/levels.js`) often miss lineups, weather, coaches, or
   logos. Every selector falls back to `''`/`null`/`—`, and callers render "not
   posted yet" instead of crashing. Keep this pattern for any new field you read.
 - **Team ids are the universal key.** The same `teamId` drives schedule data, box

@@ -44,14 +44,14 @@ const MLB = 'https://statsapi.mlb.com'
 // patience. The budget covers the whole call, headers and body.
 const FETCH_TIMEOUT_MS = 4000
 // Every level resolveGame() searches across when matching a shared link's
-// matchup slug. Hand-copied from SEARCHABLE_SPORT_IDS in src/lib/teams.js —
+// matchup slug. Hand-copied from SEARCHABLE_SPORT_IDS in src/lib/teams/levels.js —
 // this edge function is bundled separately from browser-facing src/, and a
 // plain module pulling from it isn't worth the added coupling for one array
 // literal. One of four copies; scripts/check-searchable-sport-ids.mjs fails
-// `npm run lint` if this one drifts from src/lib/teams.js's (issue #852).
+// `npm run lint` if this one drifts from src/lib/teams/levels.js's (issue #852).
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
-// sportId → level abbreviation, mirrored from src/lib/teams.js SPORT_LABEL. Used
+// sportId → level abbreviation, mirrored from src/lib/teams/levels.js SPORT_LABEL. Used
 // to build the team card's "LEVEL | LEAGUE" line (e.g. "MLB | NATIONAL LEAGUE",
 // "AAA | INTERNATIONAL LEAGUE").
 const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK', 17: 'WINTER' }

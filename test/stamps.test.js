@@ -1,4 +1,4 @@
-// The Logbook's pure rules (src/lib/stamps.js, ADR-0035).
+// The Logbook's pure rules (src/lib/stamp/stamps.js, ADR-0035).
 //
 // This file used to open with the reveal-gate cases — `meetsRevealGate` across a
 // walk-off, extra innings, and a home team that never batted. That gate was
@@ -41,7 +41,7 @@ import {
   stampsToPublish,
   toGamePk,
   unplaceStamp,
-} from '../src/lib/stamps.js'
+} from '../src/lib/stamp/stamps.js'
 
 
 // ---------------------------------------------------------------------------

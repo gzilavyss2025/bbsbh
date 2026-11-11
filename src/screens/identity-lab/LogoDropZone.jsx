@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logoArt.js'
+import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logo/logoArt.js'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 
@@ -8,7 +8,7 @@ import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 // thing you are looking at, rather than a separate upload panel you have to
 // aim at while comparing marks.
 //
-// The file is checked HERE first, against the same src/lib/logoArt.js rules the
+// The file is checked HERE first, against the same src/lib/logo/logoArt.js rules the
 // endpoint enforces, purely so a rejection is instant and specific — the server
 // re-checks every byte it is handed and is the one that decides. Both messages
 // come from the same function, so they can't disagree about why something
@@ -27,7 +27,7 @@ import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 // one that isn't an upload: WEAR a mark recolored in the lab. That's an
 // assignment, not a copy — the procured file this treatment already has stays
 // on disk untouched, and picking "Original art" hands it straight back
-// (src/lib/customMarks.js). Which is why this is a select rather than another
+// (src/lib/logo/customMarks.js). Which is why this is a select rather than another
 // button: the choice is reversible and has a current value worth showing.
 // `cdnMarks` (markSources.js's `clubMarkSources`, filtered to `kind: 'cdn'`)
 // shares that same select and assignment mechanism — the CDN's own

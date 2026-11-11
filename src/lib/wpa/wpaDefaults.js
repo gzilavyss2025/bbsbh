@@ -1,9 +1,9 @@
 // The two WPA constants that a non-WPA caller needs, kept in a leaf module with
 // NO imports of its own.
 //
-// This file exists for a bundle reason, not a design one. src/lib/milbColors.js
+// This file exists for a bundle reason, not a design one. src/lib/colors/milbColors.js
 // needs exactly these two values, and milbColors is on the eager first-paint
-// path (lib/headerTheme.js -> SiteHeader). Importing them from wpaLogo.js and
+// path (lib/colors/headerTheme.js -> SiteHeader). Importing them from wpaLogo.js and
 // wpaBandColors.js pulled both of those modules — and, through wpaLogo.js,
 // the whole of data/wpa-tuning.json — into the entry graph, so every first
 // visit downloaded the per-team win-probability logo tuning for all 30 clubs

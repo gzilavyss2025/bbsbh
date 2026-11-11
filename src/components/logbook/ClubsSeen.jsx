@@ -26,7 +26,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 //
 // `factsByPk` is the resolved game facts from api/logbook/stampGames.js, which is where a
 // stamp's two clubs live — the local stamp record itself deliberately holds no
-// club (src/lib/stamps.js). A stamp whose facts haven't resolved (offline, or a
+// club (src/lib/stamp/stamps.js). A stamp whose facts haven't resolved (offline, or a
 // failed batch) simply doesn't colour anything in, the same degrade the grid
 // below this makes.
 

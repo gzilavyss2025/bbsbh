@@ -1,4 +1,4 @@
-// The sketch modal's per-club mark picker (src/lib/markSources.js's
+// The sketch modal's per-club mark picker (src/lib/logo/markSources.js's
 // sketchMarkVariants) — the list LogoModal renders on the Logo Sheet and in the
 // game flow. Two things are pinned here: the fixed order (cap, base, wordmark),
 // and that City Connect appears for a club whose CC art we actually have and
@@ -6,7 +6,7 @@
 // without art would silently fall back to the base logo.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { sketchMarkVariants } from '../src/lib/markSources.js'
+import { sketchMarkVariants } from '../src/lib/logo/markSources.js'
 
 const keys = (teamId) => sketchMarkVariants(teamId).map((v) => v.key)
 

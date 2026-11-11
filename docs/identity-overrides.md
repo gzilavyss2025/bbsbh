@@ -122,7 +122,7 @@ otherwise shadow it), and by `mainOverrideLogoUrl` — which is what routes Main
 tile through `main-recolor`. The decorative `base`/`mono` variants stay
 override-blind on purpose. The value is normally what **`/api/identity-logo`**
 answered after taking the bytes — admin-gated Vercel Blob, ballpark-photo's
-pattern, held to `src/lib/logoArt.js`'s 512×512-PNG standard, and *uploading is
+pattern, held to `src/lib/logo/logoArt.js`'s 512×512-PNG standard, and *uploading is
 not saving*: the URL lands only through the drawer's ordinary Save. Any pasted
 https URL is equally legal, which is also what keeps the field usable on a
 deploy with no blob store (the endpoint answers 501 there).
@@ -131,14 +131,14 @@ deploy with no blob store (the endpoint answers 501 there).
 variant (the knockout CDN request `teamLogoUrl(teamId, 'mono')` resolves)
 stays override-blind, as the paragraph above says. This dimension is a
 different thing entirely: the SHAPE PINS behind that variant's precomputed
-file (`src/lib/logoMono.js`, ADR-0031), not a URL. It is also the one
+file (`src/lib/logo/logoMono.js`, ADR-0031), not a URL. It is also the one
 dimension whose save is not instant — see ADR-0054. `parts` is this
 catalog's one non-scalar value, a `{ shapeIndex: 'ink' | 'knockout' }` map
 carried as a JSON string on the wire like everything else here; `source` is
 which CDN mark those pins were picked against, and `art` is that art's
 fingerprint, carried so a club that rebrands between a drawer save and the
 next generator run drops the stale pins instead of re-inking wrong shapes —
-the same staleness rule `src/lib/monoInk.js` already applies to
+the same staleness rule `src/lib/logo/monoInk.js` already applies to
 lab-authored pins. `scripts/gen-mono-logos.mjs` fetches this override on its
 own weekly schedule (`scripts/lib/mono-logo-art.mjs`'s
 `readMonoInkStoreWithOverrides`) and merges it in exactly the way a page

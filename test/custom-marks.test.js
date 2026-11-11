@@ -1,11 +1,11 @@
-// The custom-mark library/assignment resolution (src/lib/customMarks.js,
+// The custom-mark library/assignment resolution (src/lib/logo/customMarks.js,
 // ADR-0029) — a treatment's "Replace art" select can point at either a mark
 // recolored in the Logo art editor (a bare slug) or one of the CDN's own
 // vectors (`cdn:<variant>`, no recolor needed). Both share one assignments
 // map, so parseMarkAssignmentKey is what tells the two apart.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { parseMarkAssignmentKey, customMarkFor, customMarksFor, customMarkAssignment } from '../src/lib/customMarks.js'
+import { parseMarkAssignmentKey, customMarkFor, customMarksFor, customMarkAssignment } from '../src/lib/logo/customMarks.js'
 
 test('parseMarkAssignmentKey: no assignment at all is null', () => {
   assert.equal(parseMarkAssignmentKey(undefined), null)

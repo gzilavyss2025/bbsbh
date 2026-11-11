@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Guards the four independent copies of the searchable/full-season MiLB level
 // set — MLB + AAA/AA/High-A/Single-A, `[1, 11, 12, 13, 14]` — AND api/_lib/
-// cards.js's SPORT_LEVEL hand-copy of src/lib/teams.js's SPORT_LABEL map,
+// cards.js's SPORT_LEVEL hand-copy of src/lib/teams/levels.js's SPORT_LABEL map,
 // against silently drifting apart (issue #852; SPORT_LEVEL folded in during
 // the #850/#856 Rookie-level review, same risk shape, one guard away from the
 // exact gap #852 was opened to close). Each copy exists because its file
 // can't import the canonical one:
 //
-//   1. src/lib/teams.js's SEARCHABLE_SPORT_IDS — the canonical, browser-side
+//   1. src/lib/teams/levels.js's SEARCHABLE_SPORT_IDS — the canonical, browser-side
 //      source. Every other copy below restates this value by hand.
 //   2. scripts/gen-teams.mjs — a plain Node script; importing browser-facing
 //      src/ into it isn't worth the coupling for one array literal.
@@ -40,7 +40,7 @@ const ROOT = join(import.meta.dirname, '..')
 // skipping the check.
 const COPIES = [
   {
-    rel: 'src/lib/teams.js',
+    rel: 'src/lib/teams/levels.js',
     pattern: /export const SEARCHABLE_SPORT_IDS\s*=\s*\[([^\]]*)\]/,
     canonical: true,
   },
@@ -113,13 +113,13 @@ if (canonical) {
   }
 }
 
-// --- SPORT_LEVEL (api/_lib/cards.js) vs SPORT_LABEL (src/lib/teams.js) -----
+// --- SPORT_LEVEL (api/_lib/cards.js) vs SPORT_LABEL (src/lib/teams/levels.js) -----
 // A second hand-copy relationship in the same file, same bundling-isolation
 // reason as SEARCHABLE_SPORT_IDS above, but a sportId -> label OBJECT rather
 // than a plain id array, so it needs its own key/value parity check.
 const MAP_COPIES = [
   {
-    rel: 'src/lib/teams.js',
+    rel: 'src/lib/teams/levels.js',
     pattern: /export const SPORT_LABEL\s*=\s*\{([^}]*)\}/,
     canonical: true,
   },
@@ -182,11 +182,11 @@ if (mapCanonical) {
 if (problems.length) {
   console.error(
     '\n✗ Searchable-sport-id / sport-level parity guard failed — the following\n' +
-      '  copy(ies) no longer match their canonical source in src/lib/teams.js:\n',
+      '  copy(ies) no longer match their canonical source in src/lib/teams/levels.js:\n',
   )
   for (const p of problems) console.error(`  ${p}`)
   console.error(
-    '\n  Update SEARCHABLE_SPORT_IDS/SPORT_LABEL in src/lib/teams.js, then hand-copy\n' +
+    '\n  Update SEARCHABLE_SPORT_IDS/SPORT_LABEL in src/lib/teams/levels.js, then hand-copy\n' +
       '  the same value into scripts/gen-teams.mjs, api/_lib/cards.js, and\n' +
       '  src/lib/account/preferences.js\'s LEVEL_SPORT_IDS — see this guard\'s own\n' +
       '  header for why each is a hand copy rather than an import.\n',
@@ -195,6 +195,6 @@ if (problems.length) {
 }
 
 console.log(
-  `✓ All ${found.length} searchable-sport-id copies match src/lib/teams.js's SEARCHABLE_SPORT_IDS,\n` +
+  `✓ All ${found.length} searchable-sport-id copies match src/lib/teams/levels.js's SEARCHABLE_SPORT_IDS,\n` +
     `  and api/_lib/cards.js's SPORT_LEVEL matches its SPORT_LABEL map.`,
 )

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
 import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
-import { milbTreatmentTile } from '../../lib/milbColors.js'
+import { milbTreatmentTile } from '../../lib/colors/milbColors.js'
 import { readableTextColor } from '../../lib/contrast.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'

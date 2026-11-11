@@ -20,14 +20,14 @@ research. So PR 5 was not a merge. It was:
 - the `third`/`confidence`/`source`/`note` metadata the earlier copy dropped,
   restored onto all 120 entries;
 - the 5 missing teams resolved or explicitly marked unresolved (below);
-- one fallback chain replacing two (`src/lib/brandColors.js`).
+- one fallback chain replacing two (`src/lib/colors/brandColors.js`).
 
 ## How it was built
 
 Confirmed first: **statsapi.mlb.com carries no color field for any team, MLB or
 MiLB**, and MLB/MiLB do not publish an official public hex/Pantone spec sheet. So
 this leaned on the same kind of third-party color-aggregator sites the MLB-club
-colors in `src/lib/brandColors.js` cite (`teamcolorcodes.com`) — except for MiLB,
+colors in `src/lib/colors/brandColors.js` cite (`teamcolorcodes.com`) — except for MiLB,
 `teamcolorcodes.com` doesn't have per-team pages, and `sportsfancovers.com`
 (which does) had an expired SSL cert during the research pass, so those results
 are **search-snippet excerpts of that site**, not a direct fetch — treat

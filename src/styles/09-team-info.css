@@ -4,7 +4,7 @@
    themed root: system/section-head.css (#1113). */
 
 /* A masthead's club mark is the MONO knockout art — a flat, single-ink white
-   silhouette (ADR-0031, lib/logoMono.js). On a light bar that disappears, so a
+   silhouette (ADR-0031, lib/logo/logoMono.js). On a light bar that disappears, so a
    theme whose ink is dark re-inks the mark to match — `--mark-filter`, set by
    `headerThemeStyle` alongside `--bar-fill`/`--bar-accent`/`--bar-text`, not a
    `.is-themed--dark` descendant selector: a class selector matches ANY themed

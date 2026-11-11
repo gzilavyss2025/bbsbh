@@ -185,7 +185,7 @@ test('the blowout and extra-inning thresholds are the exported constants', () =>
 test('the watched / followed split comes from the stamp record, not the game', () => {
   const mixed = [stamp(1, '2026-04-01', 'followed'), stamp(2, '2026-04-02'), stamp(3, '2026-04-05', 'nonsense')]
   const out = computeLogbookStats(mixed, FACTS)
-  // An unknown mode normalizes to 'watched', matching src/lib/stamps.js — the
+  // An unknown mode normalizes to 'watched', matching src/lib/stamp/stamps.js — the
   // mode is flavour, the stamp is the keepsake.
   assert.deepEqual(out.modes, { watched: 2, followed: 1 })
 })

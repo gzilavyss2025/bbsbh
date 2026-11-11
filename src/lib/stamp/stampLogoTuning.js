@@ -21,9 +21,9 @@
 // Retuning a club restyles that club's stamps everywhere, including ones
 // already placed in someone's passport book, as soon as the change ships.
 
-import bundled from './data/stamp-logo-tuning.json' with { type: 'json' }
-import { liveStore, treatmentRecord } from './tuningStore.js'
-import { registerIdentityStore } from './identity/overlay.js'
+import bundled from '../data/stamp-logo-tuning.json' with { type: 'json' }
+import { liveStore, treatmentRecord } from '../tuningStore.js'
+import { registerIdentityStore } from '../identity/overlay.js'
 import { markPlacement } from './stampArt.js'
 
 // Registered so a club's mark placement can be retuned at runtime from that

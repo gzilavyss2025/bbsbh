@@ -32,7 +32,7 @@
 //
 // Nothing here is score-bearing. A book is a name, a subtitle, and a cover
 // club — the same footing as a stamp's own cover fields, never the stamps
-// filed inside it (those live in src/lib/stamps.js's own records, each
+// filed inside it (those live in src/lib/stamp/stamps.js's own records, each
 // carrying its own `bookId`).
 //
 // Unconfigured degrades exactly like the other three: no Redis (or no Clerk)

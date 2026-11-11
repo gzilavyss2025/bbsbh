@@ -8,7 +8,7 @@ import { sectionHeadClassName, sectionHeadTitleTag } from '../../../lib/design/s
 //           'rule' — the label, then a pencil rule running to the note.
 //           'band' — the club band: --bar-fill ground, a 3px --bar-accent
 //           underline, --bar-text ink, all three read from the NEAREST
-//           ancestor that sets them (lib/headerTheme.js). With no club, the
+//           ancestor that sets them (lib/colors/headerTheme.js). With no club, the
 //           house navy with a pencil-rule line. SectionHead takes no theme prop: a
 //           club may colour a head that names the club, and the theme stays on
 //           the card or page root, where it is now (ADR-0030).

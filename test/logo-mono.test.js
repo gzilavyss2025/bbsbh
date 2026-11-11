@@ -1,5 +1,5 @@
 // The one-color knockout conversion behind the navy section mastheads
-// (src/lib/logoMono.js, ADR-0031). Every case here is a shape real mlbstatic
+// (src/lib/logo/logoMono.js, ADR-0031). Every case here is a shape real mlbstatic
 // art actually takes — each was found by converting all ~150 clubs' marks and
 // looking at the result, and the last two are live bugs the first pass shipped:
 // a mark whose interior is a saturated cream turning into a solid blob, and a
@@ -13,7 +13,7 @@ import {
   monoLogoParts,
   monoLogoPickerSvg,
   monoLogoSvg,
-} from '../src/lib/logoMono.js'
+} from '../src/lib/logo/logoMono.js'
 
 const wrap = (body, attrs = '') =>
   `<svg xmlns="http://www.w3.org/2000/svg"${attrs} viewBox="0 0 100 100">${body}</svg>`
@@ -149,7 +149,7 @@ test('art that cannot be re-inked falls back instead of writing an empty mark', 
 
 // --------------------------------------------------------------------------
 // Per-shape pins — the hand correction picked in /identity-lab's Knockout mark
-// editor and applied by the generator (src/lib/monoInk.js,
+// editor and applied by the generator (src/lib/logo/monoInk.js,
 // scripts/lib/mono-logo-art.mjs). The classifier is a heuristic over art nobody
 // controls, so the escape hatch has to be exact about WHICH shape it moves.
 // --------------------------------------------------------------------------
@@ -254,7 +254,7 @@ test('the fingerprint tracks the SHAPES, so pins survive a recolor but not a red
 })
 
 test('slimSvgNumbers rounds an absolute traced path and leaves a relative one alone (#2288)', async () => {
-  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const { slimSvgNumbers } = await import('../src/lib/logo/logoMono.js')
   const svg = (d, box = '0 0 300 300') => `<svg viewBox="${box}"><path opacity="1.000000" d="${d}"/></svg>`
   assert.equal(
     slimSvgNumbers(svg('\nM1.000000,447.123456 \n\tC1.5,2.0 3.0,4.0 5.999999,6.0 \n\tz')),
@@ -273,7 +273,7 @@ test('slimSvgNumbers rounds an absolute traced path and leaves a relative one al
 })
 
 test('slimSvgNumbers leaves a small coordinate space and a data-d attribute untouched (#2288)', async () => {
-  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const { slimSvgNumbers } = await import('../src/lib/logo/logoMono.js')
   const small = '<svg viewBox="0 0 1 1"><path d="M0.123456,0.654321L0.5,0.5"/></svg>'
   assert.equal(slimSvgNumbers(small), small)
   const data = '<svg viewBox="0 0 300 300"><path data-d="1.234567" d="M1.123456,2L3,4z"/></svg>'
@@ -281,7 +281,7 @@ test('slimSvgNumbers leaves a small coordinate space and a data-d attribute unto
 })
 
 test('slimSvgNumbers skips art with a transform, and reads only the root viewBox (#2288)', async () => {
-  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const { slimSvgNumbers } = await import('../src/lib/logo/logoMono.js')
   const scaled = '<svg viewBox="0 0 300 300"><g transform="scale(50)"><path d="M0.123456,0.5L1,1z"/></g></svg>'
   assert.equal(slimSvgNumbers(scaled), scaled)
   const nested = '<svg viewBox="0,0,300,300"><svg viewBox="0 0 1 1"/><path d="M1.234567,2L3,4z"/></svg>'

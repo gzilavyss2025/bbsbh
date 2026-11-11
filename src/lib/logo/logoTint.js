@@ -6,7 +6,7 @@
 // there are hundreds of MiLB clubs. Pure string/number math; the fetching lives
 // in api/person-fetch.js (fetchTeamLogoTint).
 
-import { rgbToHsl, toRgb } from './contrast.js'
+import { rgbToHsl, toRgb } from '../contrast.js'
 
 // Every hex fill in the SVG, normalized to 6-digit lowercase. Handles both
 // `fill="#rgb"` / `fill="#rrggbb"` attributes and `fill:#…` inside a style="".

@@ -1,12 +1,12 @@
 // Multiple named Game Log passport books (ADR-0036 gave the Logbook a single
 // book; this module is the foundation for letting a user hold several). React-
-// free and dependency-free, mirroring src/lib/stamps.js's own posture exactly,
+// free and dependency-free, mirroring src/lib/stamp/stamps.js's own posture exactly,
 // so the rules here can be pinned by the unit suite (test/books.test.js) and —
 // if a later phase needs it server-side, the way stamps.js is bundled into
 // api/stamps.js — reused verbatim without dragging React along.
 //
 // A book is a COVER, not a collection. It never holds the stamps that are
-// filed in it — those live in src/lib/stamps.js's per-gamePk records, each
+// filed in it — those live in src/lib/stamp/stamps.js's per-gamePk records, each
 // carrying its own `bookId` (see the restated constant and the `bookId` field
 // added to `normalizePlacement` there). This module only tracks which named
 // books exist: `{ id, state, title, subtitle, coverTeamId, coverMark,
@@ -367,7 +367,7 @@ export function sameBookRecord(a, b) {
 // WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
 // ---------------------------------------------------------------------------
 // This is the same fix, for the same defect, as stampsToPublish in
-// src/lib/stamps.js — read its header for the full argument; the short version
+// src/lib/stamp/stamps.js — read its header for the full argument; the short version
 // adapted to books: publishing "whatever changed since the last thing I
 // observed" is correct for every change made from then on, and wrong for the
 // collection that already existed. A phone holding three named books signs in,

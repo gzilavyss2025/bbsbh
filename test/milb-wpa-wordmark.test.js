@@ -5,7 +5,7 @@
 // resolution the real WinProbChart (via useMilbWpaLogo) depends on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { milbWpaWordmark, milbWpaMarkUrl, milbHasLogoArt } from '../src/lib/milbColors.js'
+import { milbWpaWordmark, milbWpaMarkUrl, milbHasLogoArt } from '../src/lib/colors/milbColors.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
 
 // A team id with no entry anywhere in milb-treatment-tuning.json/logo-art.json

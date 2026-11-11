@@ -28,7 +28,7 @@ import { localStore, onStorageOrRestore, readOwner, writeOwner } from '../lib/ac
 // WHAT IS NOT IN HERE: the stamps themselves. A book is a cover — a name, a
 // subtitle, a cover club — never the collection filed inside it. Which stamps
 // belong to which book lives on the STAMP record's own `placement.bookId`
-// (src/lib/stamps.js), not here.
+// (src/lib/stamp/stamps.js), not here.
 
 // Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
 const store = localStore(BOOKS_KEY, parseBooks, serializeBooks)
