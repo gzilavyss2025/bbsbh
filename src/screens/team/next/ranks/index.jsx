@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LEDGER_HITTING, LEDGER_PITCHING } from '../../../../api/teamLeaders.js'
+import { LEDGER_HITTING, LEDGER_PITCHING } from '../../../../api/team/leaders.js'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../../../../components/teamstats/TeamLeaders.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'

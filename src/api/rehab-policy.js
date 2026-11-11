@@ -212,7 +212,7 @@ export function rehabListRow(transactions, mlbIds, asOf) {
 // pre-2019 era: a player genuinely on the DL read as healthy, and a season lost
 // to injury could not earn the career register's "Injured — missed season" note.
 // The name test lives here ONCE rather than as a literal at each call site —
-// person.js's IL detector and gap note, teamTransactions.js's story filter, and
+// person.js's IL detector and gap note, transactions/team.js's story filter, and
 // isRehabEndingTxn above all key on it, and that is exactly the drift this
 // module exists to prevent (see the header). Extend here, never re-inline.
 export function mentionsInjuredList(t) {

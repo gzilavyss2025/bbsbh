@@ -1,5 +1,5 @@
 import { isFrozenSeason, seasonOf } from './shared.js'
-import { fetchTeam } from '../../../api/team.js'
+import { fetchTeam } from '../../../api/team/fetch.js'
 import { fetchTeamContracts, fetchLeagueSalaries, clubStanding } from '../../../api/salaries.js'
 
 // The Contracts tab's own data, and almost nothing: one static club ledger, plus

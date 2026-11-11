@@ -1,4 +1,4 @@
-import { fetchTeam } from '../../api/team.js'
+import { fetchTeam } from '../../api/team/fetch.js'
 import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
 import { DIRECT } from './data/sources.js'
 

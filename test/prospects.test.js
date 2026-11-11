@@ -175,7 +175,7 @@ function pitSplit(playerId, teamId, sportId, { outs, earnedRuns, strikeOuts }) {
 }
 
 // MUST run before any other resolveCurrentLevels test in this file:
-// fetchAffiliates's static-snapshot read (src/api/team.js) is memoized at
+// fetchAffiliates's static-snapshot read (src/api/team/fetch.js) is memoized at
 // module scope for the whole process, same trap team.test.js's own
 // fetchAffiliates coverage documents. Failing it here once is what sends
 // every later test's fetchAffiliates call straight to the live per-org URL

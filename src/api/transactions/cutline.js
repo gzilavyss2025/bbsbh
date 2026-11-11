@@ -1,11 +1,11 @@
 // The PROSE half of the Team Transactions pipeline: a story draft in,
 // the cutline's segment array out — plus the label and clause helpers the
-// rail half needs too. Split out of teamTransactions.js (ADR-0038) once that
+// rail half needs too. Split out of transactions/team.js (ADR-0038) once that
 // file passed its size budget a second time.
 //
 // The seam is the same kind the vocabulary split used. Everything here turns
 // rows into words. Nothing here decides which rows belong in a story — that
-// stays in teamTransactions.js, which imports this. So a change to what the
+// stays in transactions/team.js, which imports this. So a change to what the
 // card SAYS lands in one file, and a change to what it GROUPS lands in
 // another.
 //
@@ -441,7 +441,7 @@ function linkifyTeamsInSegments(segments, teams) {
 
 // One story draft -> its cutline segment array. Exported standalone (per the
 // data-layer scope's reader shape) so cutline prose unit-tests independently
-// of the day-grouping walk in teamTransactions.js.
+// of the day-grouping walk in transactions/team.js.
 export function buildCutline(story, ctx = {}) {
   const samePlayer = story.subtype === 'double'
     || story.subtype === 'departure'

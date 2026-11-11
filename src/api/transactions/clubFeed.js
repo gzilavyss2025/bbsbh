@@ -41,7 +41,7 @@ import {
   filterStoryworthy,
   groupIntoStories,
   loadMoreTeamTransactions,
-} from '../teamTransactions.js'
+} from './team.js'
 import { TRANSACTION_FIELDS, feedWindow, fetchAffiliateParentMap, fetchPeople } from './leagueFeed.js'
 
 // One club's live window: the same three-day window and five-day fetch the

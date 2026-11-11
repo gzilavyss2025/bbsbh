@@ -13,7 +13,7 @@
 // verified live in gen-team-transactions.mjs that teamId= is club-scoped and
 // silently misses affiliate-only rows; irrelevant here anyway since a real
 // MLB trade always names two MLB clubs). The de-dupe logic is imported
-// straight from teamTransactions.js and the trade-grouping logic from
+// straight from transactions/team.js and the trade-grouping logic from
 // tradeDeadline.js — both pure, exported shapers this script imports rather
 // than re-deriving (the gen-callouts.mjs "import the app's own shaper so the
 // two can't drift" convention).
@@ -22,7 +22,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getJson as statsapiJson, getPeople } from './lib/statsapi.mjs'
-import { dedupeTransactions } from '../src/api/teamTransactions.js'
+import { dedupeTransactions } from '../src/api/transactions/team.js'
 import {
   SEASONS,
   groupTradeStories,

@@ -9,7 +9,7 @@ import { apDate } from '../../lib/time/apDate.js'
 // so every rule below says nothing when it cannot be sure.
 //
 // It reads each story's `moves` — [personId, kind] per row, written by
-// rosterKind in teamTransactions.js. An older nightly file without them simply
+// rosterKind in transactions/team.js. An older nightly file without them simply
 // draws no replies until the next regeneration.
 //
 // The four rules (docs/transactions-wire.md §5 has the roster underneath):

@@ -152,7 +152,7 @@ The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
 directory's shared footing. `boxscore/`, `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `milb/` (MiLB affiliate history, the offseason game pool, minor-league season lines), `notable/` (the feat index: the feat label, the callout and the `/notable` shelf), `pitcher/` (pitcher lines, health, split, arsenal, callouts), `player/`, `postseason/`
-(`docs/api/postseason.md`), `schedule/` (slate and team-schedule fetchers, post-fetch filters, schedule shape), `score/` (Season Score, Season Grade, Team Score; `docs/season-score.md`, `docs/season-grade.md`), and `scorecard/` have only their file headers and the
+(`docs/api/postseason.md`), `schedule/` (slate and team-schedule fetchers, post-fetch filters, schedule shape), `score/` (Season Score, Season Grade, Team Score; `docs/season-score.md`, `docs/season-grade.md`), `scorecard/`, and `team/` (team identity/roster/standings fetchers, team leaderboards, the six-degrees team-seasons file) have only their file headers and the
 manifest.
 
 Related research docs, worth reading before wiring a NEW source:
@@ -164,6 +164,6 @@ Related research docs, worth reading before wiring a NEW source:
   `/api/v1/transactions`: every field, all 22 type codes and the thirteen
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
-  before touching `teamTransactions.js` or building anything league-wide. The pipeline
+  before touching `transactions/team.js` or building anything league-wide. The pipeline
   (six files, five seams): `transactions/CLAUDE.md`.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

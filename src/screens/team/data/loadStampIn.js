@@ -1,4 +1,4 @@
-import { fetchTeam } from '../../../api/team.js'
+import { fetchTeam } from '../../../api/team/fetch.js'
 import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
 import { seasonOf, cutoffFor } from './shared.js'
 

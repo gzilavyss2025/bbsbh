@@ -1,4 +1,4 @@
-import { fetchTeam } from '../../../api/team.js'
+import { fetchTeam } from '../../../api/team/fetch.js'
 import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 
 // The club Transactions page's own data: the club, and the first page of its

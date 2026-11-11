@@ -248,7 +248,7 @@ async function main() {
       `GET /api/v1/teams?sportId={${LEVELS.join('|')}}&season={Y}, which reports each club’s ` +
       'name/locationName/league and parentOrgId/parentOrgName AS OF THAT SEASON; consecutive seasons ' +
       'with an equal parent (or name) collapse into one [startYear, endYear] era. This is the ground ' +
-      'truth the app’s live lookups (src/api/team.js) miss — those only fetch the CURRENT season and ' +
+      'truth the app’s live lookups (src/api/team/fetch.js) miss — those only fetch the CURRENT season and ' +
       'would mislabel a past stint. Pre-' + START_YEAR + ' eras come from the hand-verified seed ' +
       '(statsapi’s own affiliate data is unreliable before then; see the generator header).',
     scope:

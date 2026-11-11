@@ -4,7 +4,7 @@
 along five seams:
 
 - `transactions/vocabulary.js` answers *is this row news, and whose?*
-- `teamTransactions.js` decides which rows belong in one story.
+- `transactions/team.js` decides which rows belong in one story.
 - `transactions/cutline.js` turns a story into words.
 - `transactions/league.js` runs the whole thing once per OWNING club over the entire
   league, for the home feed.

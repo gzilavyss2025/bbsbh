@@ -215,7 +215,7 @@ function splitSentReturned(row) {
 // Barley to Fredericksburg Nationals," both Single-A affiliates, no MLB
 // team id anywhere in the row) for a real prospect-only deal between two
 // real MLB organizations. Resolving every team id up through
-// `ctx.affilToOrg` (same map/convention as teamTransactions.js's
+// `ctx.affilToOrg` (same map/convention as transactions/team.js's
 // bucketToOrg) before it becomes a story's `teamId` is what lets the page
 // attribute the deal to "San Diego Padres" / "Washington Nationals" (what a
 // reader expects a trade-deadline report to say) instead of showing a blank
@@ -300,7 +300,7 @@ function cutlineFor(rows) {
 }
 
 // The lowest raw transaction `id` in the group anchors this story's own id
-// (same technique as teamTransactions.js's shapeStory) — guarantees
+// (same technique as transactions/team.js's shapeStory) — guarantees
 // uniqueness even in the rare case of the same team pair trading twice in
 // one day (two distinct descriptions, so two groups, but a naive
 // date+teamIds key alone could still collide).
@@ -457,7 +457,7 @@ function mergeSplitRecordPairs(stories) {
   return [...untouched, ...merged].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
 }
 
-// Deduped TR rows (already run through teamTransactions.js's
+// Deduped TR rows (already run through transactions/team.js's
 // dedupeTransactions) -> an array of trade stories for one season, newest
 // day first. `ctx.positions` is the generator's batched /people fallback;
 // `ctx.affilToOrg` (a Map<affiliateTeamId, orgId>) resolves an

@@ -36,7 +36,7 @@
 // date would print a three-day-old dateline inside a card headed "Last 48
 // hours" (probe-retro-il.mjs).
 import { getJson } from '../statsapi.js'
-import { fetchStaticAffiliates } from '../team.js'
+import { fetchStaticAffiliates } from '../team/fetch.js'
 import { addDays, toApiDate } from '../../lib/dates.js'
 import { fetchTeams } from '../schedule/fetch.js'
 import { SPORT_IDS } from '../../lib/teams.js'

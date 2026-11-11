@@ -1,5 +1,5 @@
 // Six degrees of teammates: a shortest chain of teammates between two players.
-// Pure. `data` is what loadTeamSeasons() returns (src/api/teamSeasons.js):
+// Pure. `data` is what loadTeamSeasons() returns (src/api/team/seasons.js):
 // `players` holds MLBAM ids, and each `teamSeasons` row is [key, label, [index into players]].
 //
 // Breadth-first over the bipartite graph (player -> team-season -> player).

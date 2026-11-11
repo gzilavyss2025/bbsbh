@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { TRANSACTION_FIELDS, shapeLeagueFeed, feedWindow } from '../src/api/transactions/leagueFeed.js'
 import { leagueCandidateIds } from '../src/api/transactions/league.js'
-import { bucketToOrg, dedupeTransactions, filterStoryworthy, groupIntoStories } from '../src/api/teamTransactions.js'
+import { bucketToOrg, dedupeTransactions, filterStoryworthy, groupIntoStories } from '../src/api/transactions/team.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
 // #2985: the wire asks the transactions endpoint for TRANSACTION_FIELDS only.

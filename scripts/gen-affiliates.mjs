@@ -13,7 +13,7 @@
 // own weekly update-affiliates.yml cron until 2026-08-28) rather than fetched live on every
 // team-page visit AND every prospect resolved on the Prospects page (the
 // latter used to fan out one live request per distinct org — up to ~30 on a
-// single page load). src/api/team.js reads this file first and only falls
+// single page load). src/api/team/fetch.js reads this file first and only falls
 // back to the live per-org call when the file is missing, stale for the
 // requested season, or doesn't cover the org.
 //
@@ -33,11 +33,11 @@ const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'affiliates.json')
 const season = new Date().getFullYear()
 
-// Same four full-season farm levels fetchAffiliates() (src/api/team.js)
+// Same four full-season farm levels fetchAffiliates() (src/api/team/fetch.js)
 // filters to — the endpoint also returns complex-league/DSL/alternate-site/
 // "Prospects" entries (sportId 16) that don't fit this snapshot's
 // one-club-per-org-per-level shape, since an org can field more than one at
-// once (ACL + DSL). They're not excluded from the app: src/api/team.js's
+// once (ACL + DSL). They're not excluded from the app: src/api/team/fetch.js's
 // fetchComplexAffiliates fetches them live instead (an org's complex/rookie
 // clubs change too rarely to justify a second static file, and the Minors
 // tab's affiliates card list merges the two together), so this snapshot

@@ -3,7 +3,7 @@
 // is step 2 of the one affiliate-color chain (see that file's header): an
 // affiliate research never resolved a hex for still tints with its org's
 // colors rather than a neutral placeholder. Reads public/data/affiliates.json
-// (the same file src/api/team.js's fetchAffiliateTree reads) rather than
+// (the same file src/api/team/fetch.js's fetchAffiliateTree reads) rather than
 // hitting statsapi directly, so this only needs `npm run` — no network call —
 // as long as that file is reasonably fresh.
 //

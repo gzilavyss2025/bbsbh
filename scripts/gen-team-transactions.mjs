@@ -26,7 +26,7 @@
 // ONE league-wide /api/v1/transactions fetch per run (like gen-rehab.mjs),
 // season-start-to-today — verified live that teamId= is club-scoped and
 // silently misses affiliate-only rows, so this buckets to each org itself
-// (bucketToOrg, src/api/teamTransactions.js) rather than looping a per-team
+// (bucketToOrg, src/api/transactions/team.js) rather than looping a per-team
 // query. The de-dupe/noise-filter/story-grouping/cutline logic lives in that
 // same module as pure, exported shapers this script imports — the
 // gen-callouts.mjs "import the app's own shaper so the two can't drift"
@@ -38,7 +38,7 @@ import { join } from 'node:path'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { transactionsSeason, transactionsWindow } from './lib/time/transactions-window.mjs'
-import { dedupeTransactions, filterStoryworthy, groupIntoStories, bucketToOrg } from '../src/api/teamTransactions.js'
+import { dedupeTransactions, filterStoryworthy, groupIntoStories, bucketToOrg } from '../src/api/transactions/team.js'
 
 // The browser client this file used to import capped every call at 15 s; keep
 // that cap on the shared client, whose own default is none.
@@ -70,7 +70,7 @@ async function fetchAffiliateParentMap(orgIds, season) {
 
 // One batched /people pass covering two needs: the position fallback for
 // players whose position can't be parsed out of their own transaction
-// description (see teamTransactions.js's extractPosFromDescription), and
+// description (see transactions/team.js's extractPosFromDescription), and
 // which personIds have ever appeared in an MLB game (`mlbDebutDate` — rides
 // along on the same response, no extra fetch) — the signal
 // filterStoryworthy's undebuted-signing suppression uses (see its own

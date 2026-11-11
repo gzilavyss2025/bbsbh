@@ -24,7 +24,7 @@ that all read the same feed and all decided the IL was worth showing:
   very page whose timeline was silent about it;
 - `careerRegisterView`'s gap note reads IL placements to label a blank season
   "Injured — missed season";
-- `teamTransactions.js` keeps IL rows explicitly — `injured-list` is a
+- `transactions/team.js` keeps IL rows explicitly — `injured-list` is a
   first-class story type on the Team Page with its own `IL-N` banner.
 
 So the Team Page told you a player went on the IL and his own page didn't.

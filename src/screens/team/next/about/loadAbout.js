@@ -1,4 +1,4 @@
-import { fetchMilbAlumni, fetchSeasonVenue } from '../../../../api/team.js'
+import { fetchMilbAlumni, fetchSeasonVenue } from '../../../../api/team/fetch.js'
 import { fetchAttendance, attendanceRatesFor } from '../../../../api/attendance.js'
 import { franchiseFor, venueForSeason } from '../../../../api/franchiseHistory.js'
 import { pennantsBefore, pennantsFor } from '../../../../api/history/leaguePennants.js'

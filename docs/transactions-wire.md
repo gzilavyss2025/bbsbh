@@ -302,7 +302,7 @@ Six files along five seams, plus the generator:
 | File | Answers |
 | --- | --- |
 | `src/api/transactions/vocabulary.js` | Is this row news, and whose? |
-| `src/api/teamTransactions.js` | Which rows belong in one story? |
+| `src/api/transactions/team.js` | Which rows belong in one story? |
 | `src/api/transactions/cutline.js` | What does that story say? |
 | `src/api/transactions/league.js` | Whose story is a row, league-wide? (§11) |
 | `src/api/transactions/leagueFeed.js` | What does a browser fetch to read that live? (§12) |

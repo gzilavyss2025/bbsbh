@@ -1,11 +1,11 @@
 // Unit coverage for the wire's replies (src/api/transactions/replies.js): which
 // roster move answers which earlier one, and the per-row roster kind it reads
-// (rosterKind, src/api/teamTransactions.js). The Romero fixture is cut down
+// (rosterKind, src/api/transactions/team.js). The Romero fixture is cut down
 // from the Brewers' 2026 file (Aug. 3); the rest are built to one rule each.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { extraManCandidates, findReplies, gameReply } from '../src/api/transactions/replies.js'
-import { groupIntoStories } from '../src/api/teamTransactions.js'
+import { groupIntoStories } from '../src/api/transactions/team.js'
 
 const MIL = 158
 const SEASON = { start: '2026-03-26', end: '2026-09-27' }

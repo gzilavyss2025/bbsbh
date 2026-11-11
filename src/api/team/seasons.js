@@ -8,7 +8,7 @@
 //     teamSeasons: [[key, label, [index]]] }    // index into `players`; label "Cubs 1998"
 //
 // Empty before the file exists or on any failure.
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 export const loadTeamSeasons = staticJson('/data/team-seasons.json', {
   fallback: { credit: [], throughSeason: null, players: [], teamSeasons: [] },

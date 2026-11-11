@@ -13,7 +13,7 @@ import {
   MILESTONE_EVENTS,
 } from '../person-fetch.js'
 import { resolveCareerOrgs } from '../careerTimeline.js'
-import { fetchTeam } from '../team.js'
+import { fetchTeam } from '../team/fetch.js'
 import {
   awardsView,
   fieldingView,

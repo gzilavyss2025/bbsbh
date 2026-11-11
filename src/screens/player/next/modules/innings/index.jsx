@@ -4,7 +4,7 @@ import {
 } from '../../../../../api/person-fetch.js'
 import { fieldingView, pitchingStints, starterRelieverView } from '../../../../../api/person.js'
 import { loadPositionScope } from '../../../../../api/player/history.js'
-import { fetchTeam } from '../../../../../api/team.js'
+import { fetchTeam } from '../../../../../api/team/fetch.js'
 import { BallparkDiagram } from '../../../../../components/ballpark/BallparkDiagram.jsx'
 import { FieldBackdrop } from '../../../../../components/scoring/field/FieldBackdrop.jsx'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'

@@ -116,7 +116,7 @@ don't run these by hand.
   player's scanned stints, and only a new player, a stale season, or someone
   whose bus-league career could still be moving is re-scanned. Shards carry no
   `generatedAt` on purpose — 120 committed files on a nightly cron must not all
-  churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
+  churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team/fetch.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. A 40-day league scan finds the candidates; each candidate's WHOLE feed then
   decides his stint through `rehabListRow` / `openRehabStint` in
@@ -232,7 +232,7 @@ don't run these by hand.
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so
   the file stays ~150KB and the leader-relative qualifier's floor is baked in.
   **NOT self-contained** — imports the app's own `combineToPool` (`statsLevels.js`) +
-  `computeLeaders` (`teamLeaders.js`), the same code the live `org` board uses, to
+  `computeLeaders` (`team/leaders.js`), the same code the live `org` board uses, to
   stay in lockstep. It then tags each ranked entry with `fromLevel`/`toLevel` — the
   level a season BEGAN at and the level it ENDED at (`lib/level-path.mjs`, issue
   #1122). `levels` is a Set sorted by level, so it says which levels a season
@@ -1572,7 +1572,7 @@ don't run these by hand.
   data changes at most once a year (the PDC realignment), so all three had their
   own weekly crons until 2026-08-28 — but running them on a cadence made the
   nightly steps that READ their output impossible to gate on them, so as of
-  2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team.js`.
+  2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team/fetch.js`.
 - `gen-milb-ballparks.mjs` → `src/lib/data/park-keys.json` and
   `src/lib/data/milb-ballparks.json`. The first pins one store key per MLB and
   MiLB venue id, append-only: a rename keeps the key and adds the new name, and
@@ -2136,7 +2136,7 @@ Re-run only to fold in a new season.
   `CHN-1998` and `label` is `Cubs 1998`
   (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
   the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
-  `src/api/teamSeasons.js`.
+  `src/api/team/seasons.js`.
 - `gen-played-for-both.mjs` → `public/data/played-for-both/{a}-{b}.json` — for each of the 435
   pairs of MLB clubs (ids ascending), every player with an MLB game for each, for the lineup
   page's "Played for both" card (#2579, ADR-0100). Reads `public/data/team-seasons.json` and

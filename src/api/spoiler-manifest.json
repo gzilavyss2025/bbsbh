@@ -752,7 +752,7 @@
       "class": "spoiler-free",
       "why": "A club's coaching staff for one season, from /teams/{id}/coaches: who is on a staff, never a score. Feeds the team page's Coaching staff card, an open surface."
     },
-    "teamSeasons.js": {
+    "team/seasons.js": {
       "class": "spoiler-free",
       "why": "Static team-seasons.json: who played for each MLB team-season, from Retrosheet (ADR-0100). History about people, with no game, score or reveal state. Open surface (ADR-0034); no SealBox."
     },
@@ -1297,11 +1297,11 @@
       "class": "spoiler-free",
       "why": "The one getJson fetch wrapper. Transport only — it has no idea what it is fetching."
     },
-    "team.js": {
+    "team/fetch.js": {
       "class": "spoiler-free",
       "why": "Team identity, roster, affiliates, ranked team stats. An open surface."
     },
-    "teamLeaders.js": {
+    "team/leaders.js": {
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
@@ -1321,7 +1321,7 @@
       "class": "spoiler-free",
       "why": "Pure Quality formula (60% actual wins, 40% Pythagorean) over season totals."
     },
-    "teamTransactions.js": {
+    "transactions/team.js": {
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
     },
@@ -1331,7 +1331,7 @@
     },
     "tradeDeadline.js": {
       "class": "spoiler-free",
-      "why": "Completed trades and their dates carry no score — as spoiler-free as teamTransactions.js."
+      "why": "Completed trades and their dates carry no score — as spoiler-free as transactions/team.js."
     },
     "transactions/clubFeed.js": {
       "class": "spoiler-free",
@@ -1339,7 +1339,7 @@
     },
     "transactions/cutline.js": {
       "class": "spoiler-free",
-      "why": "The prose half of teamTransactions.js — a finished story draft in, the cutline's segment array out, plus the label helpers the rail half shares. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
+      "why": "The prose half of transactions/team.js — a finished story draft in, the cutline's segment array out, plus the label helpers the rail half shares. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
     },
     "transactions/replies.js": {
       "class": "spoiler-free",
@@ -1375,7 +1375,7 @@
     },
     "transactions/vocabulary.js": {
       "class": "spoiler-free",
-      "why": "The wire vocabulary half of teamTransactions.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
+      "why": "The wire vocabulary half of transactions/team.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
     },
     "umpireFavor.js": {
       "class": "reveal-only",

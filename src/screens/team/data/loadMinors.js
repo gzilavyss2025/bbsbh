@@ -4,7 +4,7 @@ import {
   fetchComplexAffiliates,
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
-} from '../../../api/team.js'
+} from '../../../api/team/fetch.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, isPitcher } from '../../../api/prospects.js'
 import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospectTrend.js'
 import { loadRehabAssignments } from '../../../api/rehab.js'

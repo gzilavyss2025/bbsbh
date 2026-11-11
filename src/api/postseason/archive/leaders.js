@@ -15,7 +15,7 @@
 //
 // Batting/pitching entries are pre-shaped into TeamLeaders' `precomputed`
 // category-map contract ({ id, name, teamId, display, value } per category
-// key — see api/teamLeaders.js) so the page can reuse that component (and
+// key — see api/team/leaders.js) so the page can reuse that component (and
 // its Featured-leader/chasers layout) instead of a bespoke render, same as
 // minorsLeaders.js does for the all-minors board.
 //

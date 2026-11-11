@@ -7,7 +7,7 @@ import {
   buildCutline,
   bucketToOrg,
   loadMoreTeamTransactions,
-} from '../src/api/teamTransactions.js'
+} from '../src/api/transactions/team.js'
 
 // ---------------------------------------------------------------------------
 // Real fixture rows — the Brewers' (team id 158) actual statsapi transactions

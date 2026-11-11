@@ -1,4 +1,4 @@
-// The team hub's leader ledger lists (src/api/teamLeaders.js's LEDGER_HITTING /
+// The team hub's leader ledger lists (src/api/team/leaders.js's LEDGER_HITTING /
 // LEDGER_PITCHING).
 //
 // computeLeaders itself is not retested here — it is the same ranking function
@@ -15,7 +15,7 @@ import {
   LEDGER_HITTING,
   LEDGER_PITCHING,
   computeLeaders,
-} from '../src/api/teamLeaders.js'
+} from '../src/api/team/leaders.js'
 
 // The depth the Overview's door takes from each list.
 const PREVIEW = 3

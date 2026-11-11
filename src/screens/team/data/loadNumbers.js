@@ -1,4 +1,4 @@
-import { fetchTeam, fetchLeagueTeamStats, fetchTeamGamesPlayed } from '../../../api/team.js'
+import { fetchTeam, fetchLeagueTeamStats, fetchTeamGamesPlayed } from '../../../api/team/fetch.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/schedule/shape.js'

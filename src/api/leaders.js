@@ -1,7 +1,7 @@
 // League / level / organization leader pools — the Phase 3 producer promised in
-// api/teamLeaders.js. Assembles a MANY-team pool for a broader scope and hands
+// api/team/leaders.js. Assembles a MANY-team pool for a broader scope and hands
 // it to the same computeLeaders + descriptors. Nothing here is score-revealing
-// (season aggregates only — see teamLeaders.js's header), so no seals.
+// (season aggregates only — see team/leaders.js's header), so no seals.
 //
 // The team list for every scope comes straight from the static teams snapshot
 // (public/data/teams.json via fetchStaticTeams) — it already carries each MLB
@@ -35,7 +35,7 @@ export const LEADER_SCOPES = [
 
 // The four full-season farm levels, highest first — the org and all-minors
 // combined scopes span exactly these (MiLB-only, mirroring AFFILIATE_SPORT_IDS
-// in team.js; Rookie/complex ball is excluded from both, as it is everywhere).
+// in team/fetch.js; Rookie/complex ball is excluded from both, as it is everywhere).
 const ORG_SPORT_IDS = [SPORT_IDS.AAA, SPORT_IDS.AA, SPORT_IDS['A+'], SPORT_IDS.A]
 
 export function scopeMeta(key) {

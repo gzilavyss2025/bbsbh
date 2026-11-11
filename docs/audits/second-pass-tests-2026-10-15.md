@@ -64,7 +64,7 @@ team-transactions 1,563; route 1,285; table-cascade 1,243.
   `cluster`, `grid`, `stack`, `pill-cascade`) each test their own class module.
   Same-title tests across them (for example "a list gets the reset modifier")
   pin separate modules. Result: no overlap. Proof status: inferred.
-- `team-transactions.test.js` shares `teamTransactions.js` with
+- `team-transactions.test.js` shares `transactions/team.js` with
   `trade-deadline.test.js`. `trade-deadline` calls `dedupeTransactions` only as
   setup for `groupTradeStories` (lines 107 and 127). **Proved by break:** I made
   `dedupeTransactions` return its input. Six tests failed, all in

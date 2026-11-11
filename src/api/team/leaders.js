@@ -28,9 +28,9 @@
 // pool — an org's whole farm system — can badge each leader with his level;
 // null / ignored for a single-level pool.
 
-import { ipToOuts, outsToIp } from '../lib/math/innings.js'
-import { num } from '../lib/math/number.js'
-import { rate3 } from './person/shared.js'
+import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
+import { num } from '../../lib/math/number.js'
+import { rate3 } from '../person/shared.js'
 
 const DASH = '—'
 

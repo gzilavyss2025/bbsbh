@@ -43,7 +43,7 @@ const here = import.meta.dirname
 const historyPath = join(here, '..', 'public', 'data', 'postseason-history.json')
 const out = join(here, '..', 'public', 'data', 'postseason-leaders.json')
 // Career-postseason qualifier floors for rate stats — same idea as the live
-// leader boards' playing-time floor (teamLeaders.js): a single pinch-hit at-bat
+// leader boards' playing-time floor (team/leaders.js): a single pinch-hit at-bat
 // or one mop-up relief inning shouldn't win a rate-stat leaderboard.
 const MIN_AB_FOR_AVG = 40
 const MIN_OUTS_FOR_ERA = 45 // 15 innings
