@@ -32,9 +32,10 @@ Before touching any of these, read `docs/adr/` (0001, 0003, 0005–0007, 0009, 0
 **The classification is also machine-readable.** `spoiler-manifest.json` in this
 directory carries one entry per module — its class (`reveal-only`, `reveal-gated`,
 `caller-gated`, `cutoff-gated`, `progress-only`, `mixed`, `spoiler-free`), a `why`,
-and for the gated classes an `importers` allowlist.
+and for the gated classes an `importers` allowlist (any other class may carry one too,
+as the raw win-probability fetcher `winprob/feed.js` does; the guard holds it the same way).
 `scripts/check-spoiler-manifest.mjs` (run by `npm run lint`) fails if a module here
-has no entry, if an entry names a file that no longer exists, or if a gated module
+has no entry, if an entry names a file that no longer exists, or if a module with a list
 gains an importer that isn't on its list. **A new module in this directory does not
 lint until it is classified.** It cannot prove a reveal-only call sits inside a
 `SealBox` reveal (ADR-0002's render-function shape does that); it makes an audit a diff
