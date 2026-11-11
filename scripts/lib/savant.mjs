@@ -314,6 +314,11 @@ export async function fetchPercentiles(type, season) {
 // qualified rows (#2972). `values` is { id: number }; returns { id: 0-100 }.
 // Percentile = share of OTHER players he beats (ties count half), rounded.
 // `lowerIsBetter` flips it (pop time), so a high percentile is always good.
+// Why not percentileAmong (lib/ovr/build.mjs) or percentileRank (lib/prospectPercentile.mjs)
+// (#3023): these ranks sit in rows beside Savant's own, which run 0 to 100 with the best at
+// 100. Both divide by the whole pool, so neither reaches both ends (percentileAmong gives
+// the best of 94 catchers 99.5, percentileRank gives him 99), and a framing leader would
+// read 99th beside Savant's 100th.
 export function rankPercentiles(values, { lowerIsBetter = false } = {}) {
   const ids = Object.keys(values).filter((id) => Number.isFinite(values[id]))
   const out = {}

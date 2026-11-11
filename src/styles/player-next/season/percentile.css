@@ -9,9 +9,16 @@
   flex-direction: column;
   gap: var(--space-2);
 }
-/* The reserve is for the load only: one 44px line per metric, the axis and the foot. */
+/* The reserve is for the load only: a 44px row plus its hairline per metric, a 25px group
+   header, and the axis, key and foot (measured, #3023). The key wraps to two lines on a phone
+   and fits on one once the page goes wide at 740px. */
 .pctl--loading {
-  min-height: calc(var(--rows, 9) * 44px + 72px);
+  min-height: calc(var(--rows, 12) * 45px + var(--groups, 3) * 25px + 101px);
+}
+@media (min-width: 740px) {
+  .pctl--loading {
+    min-height: calc(var(--rows, 12) * 45px + var(--groups, 3) * 25px + 79px);
+  }
 }
 
 /* layout-exempt: the axis row shares the ledger's columns */
