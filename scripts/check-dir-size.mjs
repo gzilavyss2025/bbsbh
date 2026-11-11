@@ -67,7 +67,7 @@ const BUDGETS = {
   // See ADR-0038.
   'src/styles': 105,
   // Static-file readers over nightly precomputes (targetCommand, gloveTarget,
-  // milbPool (ADR-0080), notebook, ...) sit flat beside the siblings they are read with and
+  // notebook, ...) sit flat beside the siblings they are read with and
   // written to match; every module the player page's Analytics tab loads is here
   // together. catcherOfRecord.js sits BESIDE defense.js, whose chain it asks a
   // narrower question of and whose spoiler gate it inherits whole.
