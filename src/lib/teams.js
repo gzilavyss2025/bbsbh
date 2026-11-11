@@ -28,7 +28,8 @@ import { TEAM_COLORS } from './teams/clubColors.js'
 export * from './teams/levels.js'
 export * from './teams/names.js'
 export * from './teams/headshots.js'
-export * from './teams/clubColors.js'
+// TEAM_COLORS stays private to teams.js and its tile resolvers.
+export { teamColorExtras, teamTintColor, teamPrimaryColor, teamChipColors, favoriteAccentColor } from './teams/clubColors.js'
 
 // Registered with the key their RUNTIME overrides are filed under, then read
 // only through tuningStore's readers — so a value retuned from a club's own page
@@ -280,7 +281,7 @@ export function pickMastheadMark(assigned, uploadedUrl) {
 // A club's own curated pick for its home/away predictive fallback
 // (mlb-team-colors.json's `defaultHomeTreatment`/`defaultAwayTreatment`,
 // edited from the Team Identity Lab) — the side-scoped counterpart to
-// offDayTreatmentFor below. Absent for every club that hasn't set one, so
+// offDayTreatmentFor above. Absent for every club that hasn't set one, so
 // defaultTreatmentFor falls through to its own Friday/City-Connect heuristic.
 export function defaultHomeTreatmentFor(teamId) {
   return MLB_TEAM_COLORS[teamId]?.defaultHomeTreatment ?? null
@@ -288,6 +289,14 @@ export function defaultHomeTreatmentFor(teamId) {
 
 export function defaultAwayTreatmentFor(teamId) {
   return MLB_TEAM_COLORS[teamId]?.defaultAwayTreatment ?? null
+}
+
+// Which treatment a club's off-day tile (OffDaySection.jsx) wears on a day it
+// has no game — a curated per-club choice (mlb-team-colors.json's
+// `offDayTreatment`, edited from the Team Identity Lab), defaulting to Main
+// for every club that hasn't set one.
+export function offDayTreatmentFor(teamId) {
+  return MLB_TEAM_COLORS[teamId]?.offDayTreatment ?? 'main'
 }
 
 // Predictive fallback tile for a game whose actual worn jersey hasn't posted

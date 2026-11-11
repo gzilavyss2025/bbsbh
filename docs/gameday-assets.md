@@ -78,7 +78,7 @@ was tried.
 - `…/people/{personId}/action/hitting/current`: 404 for every player tried.
 - Do not add Gameday's `d_people:generic…` segment to a photo URL. With it, a
   missing photo returns 200 and a generic silhouette, so the app cannot fall
-  back (see the headshot comments in `src/lib/teams.js`).
+  back (see the headshot comments in `src/lib/teams/headshots.js`).
 
 ## Risk
 

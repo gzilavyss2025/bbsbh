@@ -28,7 +28,7 @@
    the decorative flourish, never the sole identifier (the title names the same
    club), so the image carries no alt text. The one-color white lockup is the
    ART, not a treatment: callers ask TeamLogo for the `mono` variant (ADR-0031,
-   src/lib/logoMono.js). `.sectionhead__mark` also names the mark for the dark-theme
+   src/lib/logo/logoMono.js). `.sectionhead__mark` also names the mark for the dark-theme
    re-ink rule (`--mark-filter`, 09-team-info.css), which the innings bars'
    marks (DueUpNextCard, EnteringReference, RosterPanel) share. */
 .sectionhead__mark {

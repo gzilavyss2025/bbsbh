@@ -32,7 +32,7 @@ Module issue: #1884.
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Photo | headshot URL builder in `src/lib/teams.js` | have | — |
+| Photo | headshot URL builder in `src/lib/teams/headshots.js` | have | — |
 | Role and number ("Batter · #2"), name | `fetchPerson` (`src/api/person-fetch.js`), shaped by `personBio` (`src/api/person/identity.js`) | have | — |
 | Position pill (2B, SP) | `posAbbr`; SP/RP from `pitcherRole` (`src/api/person.js`) | have | The bio says "P"; use the role for a pitcher |
 | Club logo and name | `currentTeam` hydrate, `teamLogoUrl` (`src/lib/teams.js`) | have | — |
@@ -77,7 +77,7 @@ Module issue: #1885.
 | Scope switch MLB / Minors / All / Postseason | rows from the sources below | have | UI only |
 | MLB rows by year (every column, both roles) | `yearByYear` sportId 1 in `src/api/player/context.js`, then `careerRegisterView` (`src/api/person/careerRegister.js`) | have | — |
 | Minor-league rows by level | `fetchMilbYearByYear` (`src/api/person-fetch.js`, one call per level) | have | — |
-| Level pill (AAA, AA, A+, A, ROK) | `SPORT_LABEL` (`src/lib/teams.js`) | have | — |
+| Level pill (AAA, AA, A+, A, ROK) | `SPORT_LABEL` (`src/lib/teams/levels.js`) | have | — |
 | Team abbreviation | `fetchTeamAbbrevs` (`src/api/person-fetch.js`) | reshape | It reads today's abbreviation ("ACL" for the 2018 "AZL Brewers"). Pass `season` to `/teams` |
 | "2 TM" subtotal row | live `numTeams: 2` row; the repo drops it (`withoutMultiTeamAggregate`, `src/api/person/stats.js`) | reshape | Keep it as a subtotal row in `careerRegisterView` |
 | MLB career line | `stats=career` | have | — |
