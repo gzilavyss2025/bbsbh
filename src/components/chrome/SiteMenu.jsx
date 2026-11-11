@@ -78,24 +78,20 @@ function SiteMenuModal({ onClose }) {
   const dialogRef = useRef(null)
 
   useEffect(() => {
-    dialogRef.current?.showModal()
+    const dialog = dialogRef.current
+    if (dialog && !dialog.open) dialog.showModal()
   }, [])
 
-  // close() hands focus back to the trigger before React unmounts the dialog.
-  const close = () => {
-    dialogRef.current?.close()
-    onClose()
-  }
+  // Every way out (Escape, back gesture, a row, the backdrop) ends in the
+  // dialog's own `close` event, which is the one place React hears about it.
+  const close = () => dialogRef.current?.close()
 
   return (
     <dialog
       ref={dialogRef}
       className="scrim scrim--site-menu"
       aria-label="Site menu"
-      onCancel={(e) => {
-        e.preventDefault()
-        close()
-      }}
+      onClose={onClose}
       onClick={(e) => e.target === dialogRef.current && close()}
     >
       <div className="sheet sitemenusheet">
