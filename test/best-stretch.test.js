@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -80,4 +80,13 @@ test('a setup man shows holds; a closer keeps saves', () => {
   assert.equal(showsHolds({ holds: 20, saves: 2 }), true)
   assert.equal(showsHolds({ holds: 0, saves: 42 }), false)
   assert.equal(kRate({ strikeOuts: 107, battersFaced: 239 }), 107 / 239)
+})
+
+test('each measure prints in its usual form; an infinite ERA is a dash', () => {
+  assert.equal(measureByKey('ops').format(1.1771), '1.177')
+  assert.equal(measureByKey('avg').format(0.352), '.352')
+  assert.equal(measureByKey('era', 'pitching').format(2.1234), '2.12')
+  assert.equal(measureByKey('era', 'pitching').format(Infinity), '—')
+  assert.equal(measureByKey('hr').format(61), '61')
+  assert.equal(dec2(Infinity), '—')
 })

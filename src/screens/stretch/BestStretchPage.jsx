@@ -1,7 +1,7 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, bestStretch, era, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, bestStretch, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
@@ -19,7 +19,7 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
-const rate = (v) => v.toFixed(3).replace(/^0/, '')
+const rate = rate3
 const longDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 const pct = (v) => `${(v * 100).toFixed(1)}%`
 const count = (v) => v.toLocaleString('en-US')
@@ -29,23 +29,13 @@ const int = (v, lo, hi, dflt) => {
   return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt
 }
 
-// The big number: the stat the stretch was ranked by, in its usual format.
-function heroValue(key, t) {
-  if (key === 'ops') return rate(obp(t) + slg(t))
-  if (key === 'avg') return rate(avg(t))
-  if (key === 'era') return era(t).toFixed(2)
-  if (key === 'whip') return whip(t).toFixed(2)
-  if (key === 'kbb') return t.strikeOuts - t.baseOnBalls
-  return { hr: t.homeRuns, h: t.hits, rbi: t.rbi, sb: t.stolenBases, k: t.strikeOuts }[key]
-}
-
 // The 3x2 grid per role: [value, label, "of" denominator].
 function tilesFor(role, t) {
   if (role === 'hitter') return [[rate(avg(t)), 'Avg'], [rate(obp(t)), 'OBP'], [rate(slg(t)), 'SLG'], [t.homeRuns, 'Home runs'], [t.rbi, 'RBI'], [t.stolenBases, 'Steals']]
-  if (role === 'starter') return [[whip(t).toFixed(2), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [`${t.wins}–${t.losses}`, 'W–L'], [ip(t), 'Innings'], [t.baseOnBalls, 'Walks'], [t.homeRuns, 'HR allowed']]
+  if (role === 'starter') return [[dec2(whip(t)), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [`${t.wins}–${t.losses}`, 'W–L'], [ip(t), 'Innings'], [t.baseOnBalls, 'Walks'], [t.homeRuns, 'HR allowed']]
   return [
     showsHolds(t) ? [t.holds, 'Holds'] : [t.saves, 'Saves', t.saveOpportunities],
-    [whip(t).toFixed(2), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [pct(kRate(t)), 'K rate'], [ip(t), 'Innings'],
+    [dec2(whip(t)), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [pct(kRate(t)), 'K rate'], [ip(t), 'Innings'],
     [t.inheritedRunnersScored, 'Inherited scored', t.inheritedRunners],
   ]
 }
@@ -58,18 +48,18 @@ function lineFor(role, t) {
 }
 
 // The window search, cached per loaded log so a keystroke or a modal toggle does
-// not redo it. Keyed on the log's array (dropped with it) plus the picks.
+// not redo it (nor the starts-only filter). Keyed on the log's array, so it is
+// dropped with the log.
 const searches = new WeakMap()
-function cachedBest(games, startsOnly, n, by, group) {
-  if (!games?.length) return null
-  let byPick = searches.get(games)
-  if (!byPick) searches.set(games, (byPick = new Map()))
+function cachedSearch(games, startsOnly, n, by, group) {
+  if (!games) return { pool: null, best: null }
+  let entry = searches.get(games)
+  if (!entry) searches.set(games, (entry = { pools: new Map(), bests: new Map() }))
+  if (!entry.pools.has(startsOnly)) entry.pools.set(startsOnly, startsOnly ? games.filter((g) => g.gamesStarted > 0) : games)
+  const pool = entry.pools.get(startsOnly)
   const key = `${startsOnly}:${n}:${by}:${group}`
-  if (!byPick.has(key)) {
-    const pool = startsOnly ? games.filter((g) => g.gamesStarted > 0) : games
-    byPick.set(key, bestStretch(pool, n, measureByKey(by, group), group))
-  }
-  return byPick.get(key)
+  if (!entry.bests.has(key)) entry.bests.set(key, pool.length ? bestStretch(pool, n, measureByKey(by, group), group) : null)
+  return { pool, best: entry.bests.get(key) }
 }
 
 // The picks ride the query so a link opens the same card.
@@ -106,8 +96,6 @@ export function BestStretchPage() {
   )
   const pitching = picks.group === 'pitching'
   const starter = pitching && log ? isStarter(log.games) : false
-  // A starter's window counts starts only; a reliever's counts every outing.
-  const games = log ? (starter ? log.games.filter((g) => g.gamesStarted > 0) : log.games) : null
   const unit = pitching ? (starter ? 'starts' : 'appearances') : 'games'
   // Before a pitcher's log loads his role is unknown; the chips assume a starter.
   const role = pitching ? (log && !starter ? 'reliever' : 'starter') : 'hitter'
@@ -118,9 +106,11 @@ export function BestStretchPage() {
   // The log's own name wins: the query's `name` is only a placeholder until it loads.
   const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
-  const best = cachedBest(log?.games, starter, n, picks.by, picks.group)
+  // A starter's window counts starts only; a reliever's counts every outing.
+  const { pool: games, best } = cachedSearch(log?.games, starter, n, picks.by, picks.group)
   const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key }) }
-  const commitN = () => update({ n: nDraft === '' ? null : int(nDraft, 5, 500, null) })
+  // An emptied box keeps the length in effect rather than snapping to the default.
+  const commitN = () => { if (nDraft !== '') update({ n: int(nDraft, 5, 500, picks.n) }) }
   // A preset chip; the season-length one stores no n, so the role's default applies.
   const pickPreset = (v) => { setCustomOpen(false); setNDraft(''); update({ n: v === presets.season ? null : v }) }
 
@@ -165,16 +155,13 @@ export function BestStretchPage() {
                   </Cluster>
                   {custom && (
                     <span className="streaks__total">
-                      <input type="number" inputMode="numeric" min="5" max="500" aria-label={`Custom number of ${unit}`} value={nDraft}
+                      <input type="number" inputMode="numeric" min="5" max="500" aria-label={`Custom number of ${unit}`} value={nDraft === '' ? String(n) : nDraft}
                         onChange={(e) => setNDraft(e.target.value)} onBlur={commitN} />
                       <span className="hint">{unit}, 5 to 500</span>
                     </span>
                   )}
                 </Stack>
               </Cluster>
-              {pitching && log?.games.length > 0 && (
-                <p className="hint">Role: <strong>{starter ? 'Starter' : 'Reliever'}</strong>, read from his career ({starter ? 'most outings were starts, so relief outings are skipped' : 'most outings were in relief'}).</p>
-              )}
             </Stack>
           </form>
         </Card>
@@ -198,31 +185,31 @@ export function BestStretchPage() {
         )}
 
         {best && !loading && (
-          <section className="stretch" style={headerThemeStyle(headerThemeFor(best.mainTeamId, 'main'))} aria-label={`${name}, best ${n} ${unit}`}>
+          <Card frame="stamped" body="flush" className="stretch" style={headerThemeStyle(headerThemeFor(best.mainTeamId, 'main'))} aria-label={`${name}, best ${n} ${unit}`}>
             <div className="stretch__band">
               <div className="stretch__shot"><Headshot personId={picks.player.id} name={name} teamId={best.mainTeamId} /></div>
               <Stack gap="tight" className="stretch__who-line">
                 <span className="stretch__kicker">His best {n} {unit}</span>
                 <a className="stretch__name" href={playerPath(picks.player.id, { name })}>{name}</a>
               </Stack>
-              {best.mainTeamId && <TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" />}
+              {best.mainTeamId && <span className="stretch__mark"><TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" /></span>}
             </div>
             <Stack gap="snug" className="stretch__body">
               <p className="stretch__dates">{longDate(best.first)} → {longDate(best.last)}</p>
               <p className="stretch__hero">
-                <span className="stretch__hero-num">{heroValue(measure.key, best)}</span>
+                <span className="stretch__hero-num">{measure.format(measure.of(best))}</span>
                 <span className="stretch__hero-label">{measure.label}</span>
                 <span className="stretch__ranked">Ranked by</span>
               </p>
               <dl className="stretch__grid">
                 {tilesFor(role, best).map(([v, k, of]) => (
-                  <div key={k}><dt className="t-label">{k}</dt><dd>{v}{of && <span className="stretch__of"> of {of}</span>}</dd></div>
+                  <div key={k}><dt className="t-label">{k}</dt><dd>{v}{of != null && <span className="stretch__of"> of {of}</span>}</dd></div>
                 ))}
               </dl>
               <p className="stretch__line">{lineFor(role, best)}</p>
               <p className="hint">{best.teams.join(', ')} · regular season · {count(best.careerGames)} career {unit} on file</p>
             </Stack>
-          </section>
+          </Card>
         )}
       </Stack>
       <ReportFooter />

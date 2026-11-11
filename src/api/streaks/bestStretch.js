@@ -12,23 +12,30 @@ const BAT = ['atBats', 'plateAppearances', 'hits', 'doubles', 'triples', 'homeRu
 const PITCH = ['outs', 'earnedRuns', 'hits', 'baseOnBalls', 'hitByPitch', 'strikeOuts', 'homeRuns', 'wins', 'losses', 'saves', 'completeGames', 'shutouts', 'gamesStarted', 'saveOpportunities', 'holds', 'blownSaves', 'gamesFinished', 'inheritedRunners', 'inheritedRunnersScored', 'battersFaced']
 const FIELDS = { hitting: BAT, pitching: PITCH }
 
+// How a rate reads: .352 (no leading zero), 2.12, and an infinite ERA or WHIP
+// (a line with no outs) as a dash, not the word Infinity.
+export const rate3 = (v) => v.toFixed(3).replace(/^0/, '')
+export const dec2 = (v) => (Number.isFinite(v) ? v.toFixed(2) : '—')
+
 // What "best" means. Each ranks one number from a window's summed line; `lower`
-// marks one where less is better (ERA, WHIP).
+// marks one where less is better (ERA, WHIP); `format` is how the card prints it.
 export const BAT_MEASURES = [
-  { key: 'ops', label: 'OPS', of: (t) => obp(t) + slg(t) },
-  { key: 'avg', label: 'Batting average', of: (t) => avg(t) },
+  { key: 'ops', label: 'OPS', of: (t) => obp(t) + slg(t), format: rate3 },
+  { key: 'avg', label: 'Batting average', of: (t) => avg(t), format: rate3 },
   { key: 'hr', label: 'Home runs', of: (t) => t.homeRuns },
   { key: 'h', label: 'Hits', of: (t) => t.hits },
   { key: 'rbi', label: 'RBI', of: (t) => t.rbi },
   { key: 'sb', label: 'Stolen bases', of: (t) => t.stolenBases },
 ]
 export const PITCH_MEASURES = [
-  { key: 'era', label: 'ERA', lower: true, of: (t) => era(t) },
-  { key: 'whip', label: 'WHIP', lower: true, of: (t) => whip(t) },
+  { key: 'era', label: 'ERA', lower: true, of: (t) => era(t), format: dec2 },
+  { key: 'whip', label: 'WHIP', lower: true, of: (t) => whip(t), format: dec2 },
   { key: 'k', label: 'Strikeouts', of: (t) => t.strikeOuts },
   { key: 'kbb', label: 'K minus BB', of: (t) => t.strikeOuts - t.baseOnBalls },
 ]
 export const measuresFor = (group) => (group === 'pitching' ? PITCH_MEASURES : BAT_MEASURES)
+const asCount = (v) => String(v)
+for (const m of [...BAT_MEASURES, ...PITCH_MEASURES]) m.format ??= asCount
 export const measureByKey = (key, group = 'hitting') => measuresFor(group).find((m) => m.key === key) ?? measuresFor(group)[0]
 
 const div = (a, b) => (b > 0 ? a / b : 0)

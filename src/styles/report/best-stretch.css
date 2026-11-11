@@ -22,11 +22,14 @@
   cursor: pointer;
 }
 
+/* The frame is Card's stamped frame; this only caps the width on desktop. */
 .stretch {
-  border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--surface-card);
-  box-shadow: 6px 6px 0 var(--border-stamped);
   max-inline-size: 56rem;
+}
+/* The white knockout mark re-inks dark on a light club bar (ADR-0031). */
+.stretch__mark {
+  flex: none;
+  filter: var(--mark-filter, none);
 }
 /* layout-exempt: headshot, name block and mark sit in one row on the band */
 .stretch__band {
@@ -118,7 +121,7 @@
   margin-inline-start: auto;
   padding: 0 var(--space-1);
   background: var(--marker);
-  color: var(--ink-0);
+  color: var(--text-on-bright);
   font-family: var(--font-display);
   font-size: var(--fs-label);
 }
