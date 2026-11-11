@@ -163,6 +163,10 @@ _Avoid_: box position, current position
 
 ### Names
 
+**Route table**:
+The one record of each addressable page's route name and address (`src/lib/route/table.js`). The parser, the path builders, `App.jsx`'s screen map and the menu all read it, so a page's slug is written once. First pass covers the pages whose screen takes no route params.
+_Avoid_: registry, page list (the menu's `PAGE_GROUPS` is a different thing: which pages the menu shows, and in what order).
+
 **Game Log**:
 The collection of the games a user has stamped, and the screen that holds it. Every
 user-visible string says Game Log. The code name is `logbook`: the route

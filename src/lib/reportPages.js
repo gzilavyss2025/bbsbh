@@ -1,3 +1,5 @@
+import { pathOf } from './route/table.js'
+
 // Single source of truth for the app's standalone report/reference pages —
 // everything reachable from the header/slate hamburger menu (SiteMenu.jsx),
 // the slate footer's "More Baseball" list (SiteFooter.jsx), the standalone
@@ -45,10 +47,10 @@ export const PAGE_GROUPS = [
     id: 'this-season',
     label: 'This season',
     pages: [
-      { label: 'Standings', path: '/standings' },
+      { label: 'Standings', path: pathOf('standings') },
       // Sits next to Standings on purpose: it's the same "who's winning"
       // question, narrowed to the six-team postseason field.
-      { label: 'Postseason Race', path: '/postseason-race' },
+      { label: 'Postseason Race', path: pathOf('postseason-race') },
       { label: 'League Leaders', path: '/leaders' },
       // The same season-to-date read, asked as "who is out of the ordinary": every hot or
       // cold callout in the league, with a date slider (#2453).
@@ -58,7 +60,7 @@ export const PAGE_GROUPS = [
       // puts all four of them — bat, glove, legs, arm — on one scale of runs
       // and adds them up. A reader who has just seen who leads in home runs is
       // one row away from who has been worth the most, whatever he does.
-      { label: 'Run Value Leaders', path: '/run-value' },
+      { label: 'Run Value Leaders', path: pathOf('run-value') },
       // Landed on main while this regrouping was in flight (#742): one
       // situational record, every club at one level, ranked. It belongs next
       // to League Leaders because it is the same gesture — a season-to-date
@@ -67,19 +69,19 @@ export const PAGE_GROUPS = [
       { label: 'Situational Records', path: '/situational-records' },
       // The season's tensest at-bats by MLB's pressure score, a club's and the league's.
       // Beside Situational Records: the same season-to-date board gesture.
-      { label: 'Pressure Moments', path: '/pressure-moments' },
+      { label: 'Pressure Moments', path: pathOf('tensest') },
       // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
-      { label: 'Kept It in the Infield', path: '/infield' },
+      { label: 'Kept It in the Infield', path: pathOf('infield') },
       // Any club, any counting stat, N games in a row at a total, back to the franchise's first season.
-      { label: 'Streak Finder', path: '/streaks' },
+      { label: 'Streak Finder', path: pathOf('streaks') },
       // Games each club played after it was mathematically out, by season span.
-      { label: 'Games After Elimination', path: '/eliminated' },
+      { label: 'Games After Elimination', path: pathOf('eliminated') },
       // Money, read across the league: who is paid the most, what each club
       // spends, where the spend goes by position. Here rather than under
       // "Around the game" because it is a season-to-date board over the whole
       // league, the same gesture as the two rows above it; a club's own book is
       // the Contracts tab on its team page, reached from this page's club rail.
-      { label: 'Salaries', path: '/salaries' },
+      { label: 'Salaries', path: pathOf('salaries') },
       // The hot-stove board (#2509): who filed for free agency and where each
       // one signed. Beside Salaries because it is the same money question,
       // read league-wide.
@@ -88,8 +90,8 @@ export const PAGE_GROUPS = [
       // hitter does against it, and every time they met (#1408). A lookup on
       // the season's data, read like the boards above it, not a game page.
       { label: 'Matchup Scout', path: '/scout' },
-      { label: 'Foul Tracker', path: '/fouls' },
-      { label: 'Umpire Rankings', path: '/umpires' },
+      { label: 'Foul Tracker', path: pathOf('fouls') },
+      { label: 'Umpire Rankings', path: pathOf('umpire-rankings') },
       // The season board for the ABS Challenge System, 2026's first in MLB.
       // Next to Umpire Rankings because the two are the same kind of page —
       // a season-to-date officiating board read across the league — asking
@@ -97,7 +99,7 @@ export const PAGE_GROUPS = [
       // against the zone, this one scores only the calls a player thought
       // were wrong. Not under "Around the game": this is about a result on
       // the field, not about the conditions around it.
-      { label: 'ABS Challenges', path: '/abs-challenges' },
+      { label: 'ABS Challenges', path: pathOf('abs-challenges') },
     ],
   },
   {
@@ -134,11 +136,11 @@ export const PAGE_GROUPS = [
     // if a first-click test says readers look for it under This season
     // instead, move it back rather than duplicating it.
     pages: [
-      { label: 'Attendance', path: '/attendance' },
-      { label: 'Bullpen Availability', path: '/bullpen-availability' },
-      { label: 'Pace of Play', path: '/pace-of-play' },
-      { label: 'Doubleheaders', path: '/doubleheaders' },
-      { label: 'All Star Game', path: '/all-star-rosters' },
+      { label: 'Attendance', path: pathOf('attendance') },
+      { label: 'Bullpen Availability', path: pathOf('bullpens') },
+      { label: 'Pace of Play', path: pathOf('pace') },
+      { label: 'Doubleheaders', path: pathOf('doubleheaders') },
+      { label: 'All Star Game', path: pathOf('all-star-rosters') },
       // Every club's pregame notes PDFs, links only. It was reachable only from
       // the What's Brewing modal; it is the same "around the game" question —
       // what a club hands the press before first pitch.
@@ -149,9 +151,9 @@ export const PAGE_GROUPS = [
     id: 'prospects',
     label: 'Prospects & injuries',
     pages: [
-      { label: 'Top MLB Prospects', path: '/prospects' },
-      { label: 'Farm System Rankings', path: '/farm-system-rankings' },
-      { label: 'Rehab Assignments', path: '/rehab' },
+      { label: 'Top MLB Prospects', path: pathOf('prospects') },
+      { label: 'Farm System Rankings', path: pathOf('farm-system') },
+      { label: 'Rehab Assignments', path: pathOf('rehab') },
     ],
   },
   {
@@ -159,14 +161,14 @@ export const PAGE_GROUPS = [
     label: 'History',
     pages: [
       { label: 'Where they’re from', path: '/from' },
-      { label: 'Awards History', path: '/awards' },
-      { label: 'Postseason History', path: '/postseason-history' },
+      { label: 'Awards History', path: pathOf('awards-history') },
+      { label: 'Postseason History', path: pathOf('postseason-history') },
       // A shelf of results (final scores), like Postseason History beside it.
-      { label: 'Notable Games', path: '/notable' },
+      { label: 'Notable Games', path: pathOf('notable') },
       // Beside Postseason History because it reads the same 26 brackets from
       // the other end: that page shows what happened each October, this one
       // asks what every champion had in common before October started.
-      { label: 'Nine Keys', path: '/nine-keys' },
+      { label: 'Nine Keys', path: pathOf('nine-keys') },
       // Directly under Postseason History because it is that page's question
       // turned around: the bracket page shows who won each October, this one
       // takes the clubs that were plainly the best over a season and asks what
@@ -174,14 +176,14 @@ export const PAGE_GROUPS = [
       // src/screens/around-the-game/ for the same reason /abs-challenges does —
       // that is where the report components and the one report stylesheet live
       // — and is filed here because it is history, back to 1901.
-      { label: 'Run Differential', path: '/run-differential' },
+      { label: 'Run Differential', path: pathOf('run-differential') },
       // Unsettled: a leader board filed by era, while League Leaders is filed
       // by season. Same kind of page, two different groups.
-      { label: 'Postseason Leaders', path: '/postseason-leaders' },
+      { label: 'Postseason Leaders', path: pathOf('postseason-leaders') },
       { label: 'Postseason Records', path: '/postseason-records' },
-      { label: 'All-Star Legacy', path: '/all-star-legacy' },
-      { label: 'Six Degrees of Teammates', path: '/teammates' },
-      { label: 'Milestone Watch', path: '/milestones' },
+      { label: 'All-Star Legacy', path: pathOf('all-star-legacy') },
+      { label: 'Six Degrees of Teammates', path: pathOf('teammates') },
+      { label: 'Milestone Watch', path: pathOf('milestones') },
       { label: 'Trade Deadline', path: '/trade-deadline' },
     ],
   },
@@ -191,9 +193,9 @@ export const PAGE_GROUPS = [
     pages: [
       // My Tally leads on purpose: it is what the slate footer's "Settings"
       // button opens, so it is the one a reader looks for by name.
-      { label: 'My Tally', path: '/profile' },
+      { label: 'My Tally', path: pathOf('profile') },
       { label: 'Game Log', path: '/logbook' },
-      { label: 'My First Scorebook', path: '/first-scorebook' },
+      { label: 'My First Scorebook', path: pathOf('first-scorebook') },
       { label: 'Game Photos', path: '/photos' },
     ],
   },
@@ -278,47 +280,6 @@ export const FOOTER_TRAIL = [
     group: { id: TOOLS_GROUP.id, label: TOOLS_GROUP.label },
   },
 ]
-
-// The four broadcast reports, ADDRESS -> route name (src/screens/around-the-game/).
-// Their addresses live here rather than in route.js because this file is
-// already the single source of truth for what a report page is and where it
-// lives, and the group above lists these same four: a table beside those rows
-// cannot drift from them the way a second copy in the parser could. route.js
-// imports it for its one parse branch.
-//
-// They are flat segments carrying no query. Each shows a whole league's season
-// to date, so `?d=`/`?s=` has nothing to narrow, and every control on them (the
-// sort column, the index weighting) is page state rather than an address — the
-// same call StandingsPage and SituationalRecordsPage already made for their boards.
-//
-// THE ADDRESSES SPELL THEIR SUBJECT OUT. '/farm-system-rankings',
-// '/bullpen-availability' and '/pace-of-play' are the phrases people actually
-// search for, and a report page's URL is one of the few places in this app that
-// has to answer to a search engine as well as to a reader (ADR-0053).
-// '/attendance' is already that phrase and needs no lengthening.
-//
-// Each of the three keeps a SHORTER route name ('farm-system', 'bullpens',
-// 'pace'), which is what App.jsx's switch and the preview-card key read. The
-// address and the name are allowed to differ, and this table is the only place
-// that has to know they do.
-// (Plus two pages that are NOT among the four: '/abs-challenges' and
-// '/run-differential' share this package's directory and stylesheet but are
-// filed under "This season" and "History" — see their rows in PAGE_GROUPS. They
-// are here because this table is what route.js parses, and a single-segment
-// report address belongs beside the menu row that links to it whichever group
-// that row sits in.)
-export const REPORT_ROUTES = {
-  salaries: 'salaries',
-  'run-value': 'run-value',
-  'abs-challenges': 'abs-challenges',
-  'run-differential': 'run-differential',
-  attendance: 'attendance',
-  'pace-of-play': 'pace',
-  doubleheaders: 'doubleheaders',
-  teammates: 'teammates',
-  'farm-system-rankings': 'farm-system',
-  'bullpen-availability': 'bullpens',
-}
 
 // A guide path is an ordinary URL, not an app route — anything rendering one
 // of these must use a real anchor and let the browser leave the SPA, or the

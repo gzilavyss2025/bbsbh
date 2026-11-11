@@ -41,7 +41,7 @@
 //   '/standings[/{year}]'               -> { name: 'standings', ... } (parseSeasonRoute)
 //   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
 //   '/bullpen-availability' '/doubleheaders' '/abs-challenges' '/run-differential'
-//                                       -> single-segment report pages (REPORT_ROUTES, reportPages.js)
+//                                       -> single-segment report pages (ROUTE_TABLE, route/table.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/admin/research'                   -> { name: 'admin-research' }  (research diary, Clerk-admin gated)
@@ -137,7 +137,7 @@
 // the way its sender meant it to, but nothing puts it there for you. Accepts a
 // URL that may include a `?query`.
 
-import { REPORT_ROUTES } from './reportPages.js'
+import { NAME_BY_PATH, pathOf } from './route/table.js'
 import { parseRecordsRoute } from './postseason/recordsRoute.js'
 import { parseFromRoute } from './from/route.js'
 import { parseScoutRoute } from './scout/route.js'
@@ -295,7 +295,18 @@ export function isSlateUrl(url) {
   return parseRoute(url).name === 'home'
 }
 
+// A route-table page (lib/route/table.js) is an exact address, so it is looked
+// up first and the hand branches below never see it. test/route-table.test.js
+// runs every table address through parseRouteByHand and expects the slate
+// fallback, so a hand branch that would also claim one fails there.
 export function parseRoute(url) {
+  const parts = (url || '').split('?')[0].split('/').filter(Boolean)
+  const tabled = NAME_BY_PATH.get('/' + parts.join('/'))
+  return tabled ? { name: tabled } : parseRouteByHand(url)
+}
+
+// Every route the table does not hold. Exported for that test only.
+export function parseRouteByHand(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)
   const q = new URLSearchParams(query)
@@ -347,57 +358,18 @@ export function parseRoute(url) {
   if (season) return season
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
-  if (parts.length === 1 && parts[0] === 'more') return { name: 'more' }
-  if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
-  if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
-  if (parts.length === 1 && (parts[0] === 'pressure-moments' || parts[0] === 'tensest')) return { name: 'tensest' }
-  if (parts.length === 1 && parts[0] === 'infield') return { name: 'infield' }
-  if (parts.length === 1 && parts[0] === 'streaks') return { name: 'streaks' }
-  if (parts.length === 1 && parts[0] === 'eliminated') return { name: 'eliminated' }
   if (parts[0] === 'free-agents' && parts.length <= 2) {
     const year = parts.length === 2 && /^\d{4}$/.test(parts[1]) ? Number(parts[1]) : null
     return { name: 'free-agents', season: year }
   }
-  if (parts.length === 1 && parts[0] === 'milestones') return { name: 'milestones' }
-  if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
-  if (parts.length === 1 && parts[0] === 'postseason-history')
-    return { name: 'postseason-history' }
-  if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
-  if (parts.length === 1 && parts[0] === 'classics') return { name: 'classics' }
-  if (parts.length === 1 && parts[0] === 'notable') return { name: 'notable' }
-  if (parts.length === 1 && parts[0] === 'postseason-leaders')
-    return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
     return { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
-  if (parts.length === 1 && parts[0] === 'all-star-rosters')
-    return { name: 'all-star-rosters' }
-  if (parts.length === 1 && parts[0] === 'all-star-legacy')
-    return { name: 'all-star-legacy' }
   // Admin copy editor — the site owner tunes the editable copy here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
   // production visit renders the (locked) panel rather than falling through to
   // the generic game route.
   if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
-  // The prospect-research diary. Under /admin because that is what it is —
-  // owner-only, unlisted in the shared page registry — and a second segment
-  // there rather than a top-level word so the address itself says who it is
-  // for. Parsed unconditionally for the same reason as the line above: a stray
-  // visit should render the locked page, not fall through to a game route.
-  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'research')
-    return { name: 'admin-research' }
-  // The Contender Diary — same reasoning as the line above, a sibling
-  // research program asking what separates deep postseason runs rather than
-  // how a prospect develops (docs/agents/contender-diary.md).
-  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'contenders')
-    return { name: 'admin-contenders' }
-  // The historical-contract identity review queue (ADR-0066) — same
-  // reasoning as the two lines above: owner-only, unlisted, under /admin
-  // because that is what it is. Reviews the ambiguous/unresolved rows the
-  // scripts/gen-contracts-identity.mjs pipeline could not confidently match
-  // on its own.
-  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'contracts')
-    return { name: 'admin-contracts' }
   // The guides at /learn are NOT React routes — they are standalone documents
   // rendered by api/page.js, because the crawlers this app wants to reach do not
   // execute JavaScript (see src/copy/landing/render.js). The SPA only ever sees
@@ -412,18 +384,6 @@ export function parseRoute(url) {
   if (parts.length === 2 && parts[0] === 'learn' && q.has('edit')) {
     return { name: 'admin', focus: `learn.${parts[1]}`, returnTo: `/learn/${parts[1]}` }
   }
-  // My Tally — the page that reports on YOU rather than on baseball: the club
-  // you follow, how this device behaves, what an account carries between them.
-  // Deliberately ONE address with sections on it, not '/profile/{sub}': a
-  // sub-route would make this parser grow a wildcard it has never needed, and
-  // would force Clerk's <UserProfile> into path routing (it owns its own
-  // sub-navigation), which is why that component is mounted routing="virtual".
-  // A stray '/profile/x' therefore falls through to the slate, same forgiving
-  // shape as every other unknown second segment here.
-  if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
-  // Single-segment report pages — table in lib/reportPages.js, beside the menu
-  // rows that link to them, so an address and its parse cannot drift.
-  if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
   // The two situational-record explorers (see postseason/recordsRoute.js).
   if (parts.length === 1) {
     const records = parseRecordsRoute(parts[0], q, { asOf, sportId })
@@ -457,22 +417,6 @@ export function parseRoute(url) {
     const team = Number(q.get('team'))
     return { name: 'game-notes', teamId: Number.isInteger(team) && team > 0 ? team : null }
   }
-  // Unlisted QA page cataloging every decorative animation in the app, live +
-  // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
-  if (parts.length === 1 && parts[0] === 'animation-lab')
-    return { name: 'animation-lab' }
-  // Unlisted catalog of the design system — every token, shared component and
-  // card/pill block, drawn from invented fixtures. No score/reveal content,
-  // safe to ship (issue #1112).
-  if (parts.length === 1 && parts[0] === 'design-lab')
-    return { name: 'design-lab' }
-  // Unlisted tuning page for the wire's fact templates: real roster moves,
-  // grouped by template. No score/reveal content, safe to ship.
-  if (parts.length === 1 && parts[0] === 'wire-lab')
-    return { name: 'wire-lab' }
-  // Personal scorebook archive, reached from the site menu or a direct link.
-  if (parts.length === 1 && parts[0] === 'first-scorebook')
-    return { name: 'first-scorebook' }
   // The Logbook — this user's own collection of game stamps (ADR-0035). It
   // renders scores plainly, which is safe for exactly one reason: a stamp only
   // exists for a game its owner already finished revealing. `season: null` means
@@ -857,7 +801,7 @@ export function umpirePath(id, name, season = {}) {
   return seasonPath(`/umpire/${entitySegment(id, name)}`, season)
 }
 export function umpireRankingsPath(season = {}) {
-  return seasonPath('/umpires', season)
+  return seasonPath(pathOf('umpire-rankings'), season)
 }
 // The league-wide view of ONE situational record. `metric` is a row id from
 // teamRecords.js's RECORD_GROUPS / COUNT_METRICS, `half` a HALVES key — this is
@@ -883,18 +827,18 @@ export function managerPath(id, name) {
   return `/manager/${entitySegment(id, name)}`
 }
 export function foulsPath(season = {}) {
-  return seasonPath('/fouls', season)
+  return seasonPath(pathOf('fouls'), season)
 }
 // The league run value board. No arguments: the role filter and the club filter
 // are page state, not an address, the same call StandingsPage and the four
-// broadcast reports already made (see lib/reportPages.js's REPORT_ROUTES note).
+// broadcast reports already made (see lib/route/table.js).
 export function runValuePath(opts = {}) {
-  return `/run-value${linkQuery(opts)}`
+  return `${pathOf('run-value')}${linkQuery(opts)}`
 }
 // The league ABS challenge board, for the same reason and with the same shape:
 // the level chip and every board's sort are page state, not an address.
 export function absChallengesPath(season = {}) {
-  return seasonPath('/abs-challenges', season)
+  return seasonPath(pathOf('abs-challenges'), season)
 }
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`
@@ -939,7 +883,7 @@ export function logbookPlacePath(gamePk) {
 // (docs/game-log.md §2): the URL outlives any redirect we would maintain, so it
 // never changes even if the destination is renamed again.
 export function profilePath() {
-  return '/profile'
+  return pathOf('profile')
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`

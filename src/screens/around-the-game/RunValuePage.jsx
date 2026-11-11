@@ -1,3 +1,4 @@
+import { pathOf } from '../../lib/route/table.js'
 import '../../styles/68-around-the-game.css'
 import '../../styles/report/chrome.css'
 import { useMemo, useState } from 'react'
@@ -60,7 +61,7 @@ import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunVa
 // League Leaders (src/lib/reportPages.js), the same call /abs-challenges made.
 // The masthead chip reads that group back rather than naming the package.
 
-const RUN_VALUE_PATH = '/run-value'
+const RUN_VALUE_PATH = pathOf('run-value')
 const BOARD_LIMIT = 25
 const COMPONENT_LEADERS = 5
 

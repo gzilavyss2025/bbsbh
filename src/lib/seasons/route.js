@@ -1,3 +1,5 @@
+import { SEASON_NAME_BY_SLUG } from '../route/table.js'
+
 // A SEASON VIEW's address (#1202), parsed and built. lib/route.js owns the
 // routes; this owns the one segment and the one query every season view adds,
 // so the five pages that take it cannot spell it five ways.
@@ -59,17 +61,11 @@ export function seasonPath(base, season) {
 // had before #1202; a season segment or `?vs=` only adds keys.
 // `standings` and `postseason-race` take a season too ('/standings/2024') but no
 // `vs`: one year's table is not compared with another's here.
-const SEASON_PAGES = {
-  fouls: 'fouls',
-  umpires: 'umpire-rankings',
-  'abs-challenges': 'abs-challenges',
-  standings: 'standings',
-  'postseason-race': 'postseason-race',
-}
+// Which slugs are season views is the route table's call (`season: true`).
 export function parseSeasonRoute(parts, q, { idFromSlug }) {
   const [head, second, third] = parts
   const scope = pitchScopeOf(q.get('scope'))
-  if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...(scope && { scope }), ...seasonParams(second, q) }
+  if (parts.length <= 2 && SEASON_NAME_BY_SLUG[head]) return { name: SEASON_NAME_BY_SLUG[head], ...(scope && { scope }), ...seasonParams(second, q) }
   if ((parts.length === 2 || parts.length === 3) && head === 'umpire')
     return { name: 'umpire', id: idFromSlug(second), ...seasonParams(third, q) }
   return null
