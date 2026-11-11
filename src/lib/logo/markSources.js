@@ -15,8 +15,8 @@
 
 import { LOGO_TREATMENT_DIRS, LOGO_ART_URL_ROOT, logoUploadTarget } from './logoArt.js'
 import { customMarkFor, customMarksFor } from './customMarks.js'
-import { LOGO_VARIANTS, teamLogoUrl } from './teams.js'
-import LOGO_ART from './data/logo-art.json' with { type: 'json' }
+import { LOGO_VARIANTS, teamLogoUrl } from '../teams.js'
+import LOGO_ART from '../data/logo-art.json' with { type: 'json' }
 
 // The treatments whose art can be reused elsewhere — every real destination
 // except the `-wpa` slots themselves, which are where this material GOES.

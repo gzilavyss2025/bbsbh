@@ -1,6 +1,6 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
-import { milbTreatmentTile } from '../../lib/milbColors.js'
+import { milbTreatmentTile } from '../../lib/colors/milbColors.js'
 import { seasonTile } from '../../lib/identity/seasonMarks.js'
 
 // A club's mark on the tinted tile of whatever uniform treatment it's wearing

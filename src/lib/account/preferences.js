@@ -3,7 +3,7 @@
 // the unit suite (test/preferences.test.js) and reused VERBATIM by the
 // serverless function (api/preferences.js), which is the point: the client and
 // the server must not be able to disagree about what a valid preference is.
-// Same contract src/lib/stamps.js has with api/stamps.js.
+// Same contract src/lib/stamp/stamps.js has with api/stamps.js.
 //
 // WHAT THIS IS NOT, and can never become: score-bearing. A preference is
 // identity (which club) and device behaviour (keep the screen awake, which
@@ -69,7 +69,7 @@ export const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000
 
 // The slate's level toggle stores a statsapi **sportId**, which is what
 // src/lib/teams.js's SPORT_IDS/LEVELS and every fetch in the app already speak.
-// Restated here rather than imported for the reason src/lib/stamps.js restates
+// Restated here rather than imported for the reason src/lib/stamp/stamps.js restates
 // the passport bounds: this module is bundled into a serverless function and
 // has no business pulling a 1,100-line identity module in behind it. If LEVELS
 // ever grows a rung, this list is the second place to change.
@@ -328,7 +328,7 @@ export function applyRemotePreferences(local, remote) {
 // WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
 // ---------------------------------------------------------------------------
 // Verbatim the lesson ADR-0026's 2026-08-06 amendment records, and the reason
-// `stampsToPublish` exists (src/lib/stamps.js). A sync that publishes
+// `stampsToPublish` exists (src/lib/stamp/stamps.js). A sync that publishes
 // "whatever changed since the last state I saw" establishes a silent baseline on
 // its first observation — so state that existed BEFORE sign-in registers as no
 // change, publishes nothing, and never will. The owner's second device signs in

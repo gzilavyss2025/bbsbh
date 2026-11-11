@@ -5,7 +5,7 @@ import { factsRecord, heritagePassModel, passCity, yearRecordThrough } from '../
 import { fetchClubSeason } from '../../api/heritage/records.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
-import { stampSeed } from '../../lib/stampArt.js'
+import { stampSeed } from '../../lib/stamp/stampArt.js'
 import { PassMark } from './PassMark.jsx'
 import { PassHeader } from './PassHeader.jsx'
 

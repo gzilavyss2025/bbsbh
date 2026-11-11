@@ -394,7 +394,7 @@ export function useGameData(game, activeStep = null) {
   //
   // Two consumers: the win-probability chart's tiled band (WinProbChart.jsx),
   // and the lineup page's own header chrome (TeamInfo.jsx via
-  // lib/headerTheme.js — ADR-0030). Both want the same answer to "what is this
+  // lib/colors/headerTheme.js — ADR-0030). Both want the same answer to "what is this
   // club wearing", so it is resolved once here rather than twice.
   //
   // A uniform choice, not a game state — same

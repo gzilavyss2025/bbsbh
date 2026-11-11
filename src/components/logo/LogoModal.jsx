@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { sketchMarkVariants } from '../../lib/markSources.js'
+import { sketchMarkVariants } from '../../lib/logo/markSources.js'
 import { TeamLogo } from './TeamLogo.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'

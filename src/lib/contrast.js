@@ -31,7 +31,7 @@ export function rgbToHsl([r, g, b]) {
 // WCAG relative luminance: 0 (black) to 1 (white). Exported because "which of
 // these hexes is the DARKEST" is the same question in other clothes, and
 // answering it off the hex digits gets yellow badly wrong — the green channel
-// carries three quarters of the weight (src/lib/stampInk.js).
+// carries three quarters of the weight (src/lib/stamp/stampInk.js).
 export function relativeLuminance(hex) {
   const [r, g, b] = toRgb(hex).map((c) => {
     c /= 255

@@ -62,7 +62,7 @@ build that, and §"Erase" below is what it built.
 ### The schema is a CLOSED four-field registry
 
 `src/lib/account/preferences.js` — pure, React-free, dependency-free, and
-imported **verbatim** by `api/preferences.js`, exactly as `src/lib/stamps.js` is
+imported **verbatim** by `api/preferences.js`, exactly as `src/lib/stamp/stamps.js` is
 imported by `api/stamps.js`. The client and the server must not be able to
 disagree about what a valid preference is.
 
@@ -87,7 +87,7 @@ Two departures from the first draft of the schema, both deliberate:
   two would drift.
 - **`club` is validated as a bounded integer, not as membership of the real club
   list.** Checking membership would drag the 1,100-line `teams.js` into the
-  serverless bundle — the same reason `src/lib/stamps.js` restates the passport
+  serverless bundle — the same reason `src/lib/stamp/stamps.js` restates the passport
   bounds rather than importing `passportLayout.js`. The cost of a
   well-formed-but-wrong id is a fallback logo, not a security hole.
 

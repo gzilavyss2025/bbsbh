@@ -22,10 +22,10 @@
 // so the two disagreed by construction. There is now one ordering, and both
 // teams.js's teamTintColor and milbColors.js's milbTreatmentTile read it.
 
-import { byTeam, liveStore } from './tuningStore.js'
-import { registerIdentityStore } from './identity/overlay.js'
-import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
-import MLB_TEAM_COLORS_JSON from './data/mlb-team-colors.json' with { type: 'json' }
+import { byTeam, liveStore } from '../tuningStore.js'
+import { registerIdentityStore } from '../identity/overlay.js'
+import MILB_COLORS from '../data/milb-colors.json' with { type: 'json' }
+import MLB_TEAM_COLORS_JSON from '../data/mlb-team-colors.json' with { type: 'json' }
 
 // A club's brand triad is editable at runtime from that club's own team page
 // (identity/overlay.js), so this store is registered and every read below goes

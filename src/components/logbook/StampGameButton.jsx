@@ -5,7 +5,7 @@ import { useStamps } from '../../hooks/useStamps.js'
 import { useNav } from '../../lib/nav.js'
 import { Button } from '../ui/control/Button.jsx'
 import { pathForBook } from '../../lib/logbookNav.js'
-import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../../lib/stamps.js'
+import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../../lib/stamp/stamps.js'
 import { logbookPath, logbookPlacePath } from '../../lib/route.js'
 import { GameStamp } from './GameStamp.jsx'
 
@@ -116,7 +116,7 @@ export function StampGameButton({ game }) {
         {/* The stamp sits in a mount — an album hinge, empty until one is
             pressed into it. Un-minted it is a dashed well holding a pale
             preview of what you'd keep; minted, the well goes solid and the
-            stamp comes up to the winning club's ink (lib/stampInk.js). */}
+            stamp comes up to the winning club's ink (lib/stamp/stampInk.js). */}
         <div className={`stampstrip__mount${existing ? '' : ' stampstrip__mount--empty'}`}>
           <GameStamp game={game} instanceId={`bs-${game.gamePk}`} />
           {burst > 0 && (

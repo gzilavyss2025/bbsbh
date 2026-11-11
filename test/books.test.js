@@ -1,6 +1,6 @@
 // Multiple named Game Log books (src/lib/books.js) — the foundation module a
 // single passport book (ADR-0036) is being widened into a shelf of several.
-// A book is a COVER only; the stamps filed inside it are src/lib/stamps.js's
+// A book is a COVER only; the stamps filed inside it are src/lib/stamp/stamps.js's
 // business, pinned separately (see the bookId cases at the end of
 // test/stamps.test.js).
 import assert from 'node:assert/strict'

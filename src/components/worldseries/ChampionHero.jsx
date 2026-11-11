@@ -1,6 +1,6 @@
 import '../../styles/worldseries/home.css'
 import { fetchSeasonAward } from '../../api/awardsHistory.js'
-import { TEAM_COLOR_PAIRS } from '../../lib/brandColors.js'
+import { TEAM_COLOR_PAIRS } from '../../lib/colors/brandColors.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useSeriesLog } from '../../hooks/postseason/useSeriesLog.js'
 import { mvpStatLine, MVP_PHOTOS, mvpPhotoUrl, mvpPhotoSrcSet } from '../../lib/postseason/mvpLine.js'

@@ -24,7 +24,7 @@
 // decade, so there is no cron behind this.
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { monoLogoSvg } from '../src/lib/logoMono.js'
+import { monoLogoSvg } from '../src/lib/logo/logoMono.js'
 
 const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'logos', 'league')

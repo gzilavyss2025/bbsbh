@@ -78,7 +78,7 @@ import { leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 // in words.)
 //
 // CLUB: the sanctioned mechanism is the precomputed mono knockout file
-// (ADR-0031, src/lib/logoMono.js, public/data/logos/mono/) drawn as an
+// (ADR-0031, src/lib/logo/logoMono.js, public/data/logos/mono/) drawn as an
 // <image> inside an SVG <mask> over a currentColor rect — the exact recipe
 // GameStamp.jsx documents, reused here rather than re-derived. `filter:
 // brightness(0) invert(1)` is forbidden for this (ADR-0031: it crushes a
@@ -116,7 +116,7 @@ import { leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 // is why an untouched book is byte-for-byte what it always drew.
 //
 // The two league marks are precomputed by scripts/gen-league-logos.mjs through
-// the SAME src/lib/logoMono.js pipeline as a club's, so warning (1) above
+// the SAME src/lib/logo/logoMono.js pipeline as a club's, so warning (1) above
 // applies to them identically: the <image> resolves only while this SVG is
 // inline. They differ from a club mark in one way that matters here — MLB is a
 // near-square badge and MiLB a wide wordmark — so they get their own viewBox

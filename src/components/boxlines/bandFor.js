@@ -1,4 +1,4 @@
-import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../lib/colors/headerTheme.js'
 
 // The band a Box Lines sheet wears: the club whose card the door sat on lends its colours
 // and its mark, as that card's own head does (ADR-0030: a club colour may fill a head that

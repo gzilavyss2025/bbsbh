@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { clubMarkSources } from '../../../lib/markSources.js'
+import { clubMarkSources } from '../../../lib/logo/markSources.js'
 import { fillWpaArt } from '../saveStores.js'
 import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 

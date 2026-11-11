@@ -76,7 +76,7 @@ worth recording:
   as `resolveStoreFile()`.
 - **Validated without an image library.** A PNG stores width and height as
   big-endian uint32s at bytes 16 and 20 of the IHDR chunk, which is the whole of
-  what the 512×512 standard needs to check — so `src/lib/logoArt.js` reads those
+  what the 512×512 standard needs to check — so `src/lib/logo/logoArt.js` reads those
   bytes directly and adds no dependency. It is environment-neutral on purpose:
   the browser runs it to reject a bad file instantly with a reason, the server
   runs the same functions to decide. The standard itself (512×512, PNG, 400 KB)

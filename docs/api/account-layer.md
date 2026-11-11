@@ -21,7 +21,7 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
   (teamId), `level` (a statsapi sportId, the same vocabulary `teams.js`
   speaks — not a second string name for it), `keepAwake`, `motion`. Pure,
   React-free, and imported **verbatim** by `api/preferences.js`, the same
-  contract `src/lib/stamps.js` has with `api/stamps.js`, so the client and the
+  contract `src/lib/stamp/stamps.js` has with `api/stamps.js`, so the client and the
   server cannot disagree about what a valid preference is.
   - **Never score-bearing, and never derived from game state.** That is the
     invariant that keeps it on the same footing as `revealedThrough`. The module

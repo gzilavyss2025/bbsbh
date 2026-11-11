@@ -8,10 +8,10 @@ import {
   MARK_PLACEMENT_LIMITS,
   MARK_SIDES,
   resolveMarkPlacement,
-} from '../../../lib/stampArt.js'
-import { STAMP_PAPER, deepenToContrast, isHex } from '../../../lib/stampInk.js'
-import { stampInkOverrideFor, stampInkStore } from '../../../lib/stampInkTuning.js'
-import { stampLogoTuningRecord, stampLogoTuningStore } from '../../../lib/stampLogoTuning.js'
+} from '../../../lib/stamp/stampArt.js'
+import { STAMP_PAPER, deepenToContrast, isHex } from '../../../lib/stamp/stampInk.js'
+import { stampInkOverrideFor, stampInkStore } from '../../../lib/stamp/stampInkTuning.js'
+import { stampLogoTuningRecord, stampLogoTuningStore } from '../../../lib/stamp/stampLogoTuning.js'
 import { HexField } from '../HexField.jsx'
 import { saveStores } from '../saveStores.js'
 import { shiftStepKeys } from './numberSteps.js'
@@ -19,7 +19,7 @@ import { shiftStepKeys } from './numberSteps.js'
 // Place a club's knockout mark inside a Logbook stamp — the hand correction to
 // "letterbox it into a 150x150 square", which is right for most marks and
 // visibly wrong for a tall cap logo or a wide wordmark (ADR-0035; the geometry
-// and its clamps live in src/lib/stampArt.js's "Per-club mark placement"
+// and its clamps live in src/lib/stamp/stampArt.js's "Per-club mark placement"
 // block, the store in src/lib/data/stamp-logo-tuning.json).
 //
 // Tuned per SIDE, and judged per side, because the two slots are not mirror
@@ -59,7 +59,7 @@ import { shiftStepKeys } from './numberSteps.js'
 // because they are genuinely separate files and separate decisions.
 //
 // The ink is walked through `deepenToContrast` before it reaches the art
-// (src/lib/stampInk.js); the "as pressed" line reports what actually prints
+// (src/lib/stamp/stampInk.js); the "as pressed" line reports what actually prints
 // when that differs from what was typed, so a light pick doesn't quietly turn
 // into a different colour with no explanation.
 

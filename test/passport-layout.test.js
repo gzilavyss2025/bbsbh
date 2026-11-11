@@ -37,7 +37,7 @@ import {
   stampsOnPage,
   tiltFor,
 } from '../src/lib/passportLayout.js'
-import { MAX_PLACEMENT_PAGE, MAX_PLACEMENT_TILT } from '../src/lib/stamps.js'
+import { MAX_PLACEMENT_PAGE, MAX_PLACEMENT_TILT } from '../src/lib/stamp/stamps.js'
 
 // The bounds a centre must respect for the whole mark to stay on the page.
 const HALF_W = STAMP_WIDTH / 2 + PAGE_MARGIN
@@ -681,7 +681,7 @@ test('orderByDate reads oldest first, and newest first is its exact reverse', ()
 
 // Two games on one date is a doubleheader, or two levels in an afternoon. The
 // tiebreak is WHEN YOU PRESSED THE STAMP, the same total order allStamps()
-// (src/lib/stamps.js) already puts the collection in, and gamePk behind it so
+// (src/lib/stamp/stamps.js) already puts the collection in, and gamePk behind it so
 // the answer is total even for two keepsakes minted in one millisecond.
 test('orderByDate settles two stamps on one date on when they were pressed', () => {
   const stamps = [
@@ -807,7 +807,7 @@ test('layoutInDateOrder newest first is the same book read backwards', () => {
   assert.deepEqual(layoutInDateOrder(stamps, { direction: 'newest' }), newest)
 })
 
-// The bound lives in normalizePlacement (src/lib/stamps.js); if it did not also
+// The bound lives in normalizePlacement (src/lib/stamp/stamps.js); if it did not also
 // live here, this function could hand back a page the store then refuses, and
 // the stamp would vanish the moment it was confirmed.
 test('placementFor clamps the page into the book', () => {

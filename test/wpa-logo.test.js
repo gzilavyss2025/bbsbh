@@ -21,7 +21,7 @@ import {
   wpaTilePlacements,
 } from '../src/lib/wpa/wpaLogo.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
-import { wpaArtUrl } from '../src/lib/logoArt.js'
+import { wpaArtUrl } from '../src/lib/logo/logoArt.js'
 import WPA_TUNING from '../src/lib/data/wpa-tuning.json' with { type: 'json' }
 
 // Nationals (120) — a 'flood' club with procured PNGs for three treatments.

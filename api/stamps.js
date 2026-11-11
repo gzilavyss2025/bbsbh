@@ -56,7 +56,7 @@ import {
   seasonFromDate,
   recordAfterGame,
   toGamePk,
-} from '../src/lib/stamps.js'
+} from '../src/lib/stamp/stamps.js'
 import { withUser } from './_lib/auth.js'
 import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { overLimit } from './_lib/redis.js'
@@ -148,7 +148,7 @@ export async function fetchGameFinal(gamePk) {
     gameType: game.gameType ?? null,
     seriesDescription: game.seriesDescription ?? '',
     seriesGameNumber: game.seriesGameNumber ?? null,
-    // The home club's league, so a postseason stamp can name its round (src/lib/stampArt.js).
+    // The home club's league, so a postseason stamp can name its round (src/lib/stamp/stampArt.js).
     leagueId: game.teams?.home?.team?.league?.id ?? null,
     venue: game.venue?.name ?? '',
     innings,
@@ -227,7 +227,7 @@ async function readSeasons(redis, userId) {
 // WHY `includeRemoved` EXISTS — the un-stamp propagation fix
 // ---------------------------------------------------------------------------
 // A removal is stored as an explicit 'off' tombstone rather than a deleted
-// field (see `applyRemoteStamps` in src/lib/stamps.js for why deleting would
+// field (see `applyRemoteStamps` in src/lib/stamp/stamps.js for why deleting would
 // resurrect the stamp on the next merge). This function used to filter those
 // tombstones out of EVERY response — which meant the removal reached the server
 // and stopped there: a second device holding that stamp saw a payload with the

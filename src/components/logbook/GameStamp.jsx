@@ -3,9 +3,9 @@
 // score's seal — so it carries that partial itself rather than relying on a page.
 import '../../styles/48-logbook.css'
 import { hasMonoLogo, teamLogoUrl } from '../../lib/teams.js'
-import { stampInkFor, stampWinnerId } from '../../lib/stampInk.js'
-import { stampInkOverrideFor } from '../../lib/stampInkTuning.js'
-import { stampMarkPlacement } from '../../lib/stampLogoTuning.js'
+import { stampInkFor, stampWinnerId } from '../../lib/stamp/stampInk.js'
+import { stampInkOverrideFor } from '../../lib/stamp/stampInkTuning.js'
+import { stampMarkPlacement } from '../../lib/stamp/stampLogoTuning.js'
 import {
   BAND_INNER_R,
   BAND_OUTER_R,
@@ -29,11 +29,11 @@ import {
   stampLabel,
   stampRingInverted,
   stampSeed,
-} from '../../lib/stampArt.js'
+} from '../../lib/stamp/stampArt.js'
 
 // A Logbook game stamp (ADR-0035) — Concept 1, "The Cancellation", the locked
 // design. This file is a tracing of that art; every number it
-// draws with comes from the pure module src/lib/stampArt.js, whose header
+// draws with comes from the pure module src/lib/stamp/stampArt.js, whose header
 // records what is locked and why. Do not redesign here.
 //
 // ===========================================================================
@@ -63,7 +63,7 @@ import {
 // (src/lib/data/stamp-ink.json, picked in /identity-lab's Stamp ink editor) —
 // still walked through the SAME contrast floor, because that floor is about
 // what a stamp needs to read at hairline widths, not about which colour a
-// club owns. The pick itself is src/lib/stampInk.js — including why darkest
+// club owns. The pick itself is src/lib/stamp/stampInk.js — including why darkest
 // rather than primary, and the contrast floor under it — and it is published
 // here as `--stamp-ink` rather than as a `color`, so the CSS keeps the last
 // word: a surface that wants its own ink (the un-minted preview in the mint
@@ -93,7 +93,7 @@ import {
 //
 // WHERE a mark sits inside its slot is the one tunable part of the locked art:
 // a club may carry a hand-picked scale/offset/rotation per SIDE, resolved by
-// src/lib/stampLogoTuning.js and applied as a transform on the mask's <image>
+// src/lib/stamp/stampLogoTuning.js and applied as a transform on the mask's <image>
 // (the geometry, and why it clamps, is stampArt.js's "Per-club mark placement"
 // block). Untuned clubs get a null transform and draw exactly as before. The
 // visible rect is the whole stamp rather than the slot, so a tuned mark can be
@@ -112,7 +112,7 @@ import {
 // else. `placements` (`{ away, home }`) stands in for what stamp-logo-tuning.json
 // holds, so /identity-lab's Stamp placement editor can show an unsaved edit on
 // the real stamp instead of a mock-up. `inkOverride` does the same job for
-// stamp-ink.json's per-club ink (src/lib/stampInkTuning.js): pass any string,
+// stamp-ink.json's per-club ink (src/lib/stamp/stampInkTuning.js): pass any string,
 // including an EMPTY one, to force the preview to ignore the landed override
 // and show what that draft (or clearing it back to automatic) would actually
 // print. Every real caller omits both and reads the landed stores.

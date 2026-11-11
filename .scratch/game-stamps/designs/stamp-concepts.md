@@ -26,7 +26,7 @@ Files (all verified by rendering a Playwright contact sheet at 300/110/72/48px �
 
 Identity is now carried by the project's precomputed mono knockout marks:
 `public/data/logos/mono/{teamId}.svg` (150 clubs, built by
-`scripts/gen-mono-logos.mjs`; see `src/lib/logoMono.js` and ADR-0031). Each file
+`scripts/gen-mono-logos.mjs`; see `src/lib/logo/logoMono.js` and ADR-0031). Each file
 is white ink on transparent — already a luminance mask — so recoloring to any
 single ink is:
 

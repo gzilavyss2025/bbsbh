@@ -12,7 +12,7 @@ you place by tapping the page. Three rules, each with a reason:
   **dividing** by `PAGE_ASPECT`, while a stamp's width-fraction converts to a
   height-fraction by **multiplying**.
 - **A placement is `{ bookId, page, x, y, tilt }` with x/y as FRACTIONS**,
-  stored on the stamp record and synced (`src/lib/stamps.js`). Pixels would be
+  stored on the stamp record and synced (`src/lib/stamp/stamps.js`). Pixels would be
   a fact about one screen; the same book has to render on a phone page and a
   desktop spread, and on both of one user's devices. A book is separate
   metadata (`src/lib/books.js` + `hooks/useBooks.js`) never holding the
@@ -44,7 +44,7 @@ you place by tapping the page. Three rules, each with a reason:
   page holds 8" cannot disagree. It is a **guide, not a snap** — the tap still
   decides (ADR-0036 rejected snapping and still does). The grid also absorbed
   the dashed margin guide that used to be drawn on the tap target.
-- **A stamp is pressed in the winner's ink** — `lib/stampInk.js`, published as
+- **A stamp is pressed in the winner's ink** — `lib/stamp/stampInk.js`, published as
   `--stamp-ink` so any rule that sets `color` outright still wins (the mint
   card's un-minted preview stays graphite). No winner, or a club with no colour
   on file, means no property and the book's own navy.

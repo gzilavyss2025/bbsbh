@@ -55,7 +55,7 @@ likely.
 The two existing stores compose here without either being bent, which is the
 best evidence available that the model is right. Do not add a third way in.
 
-The predicate itself is `meetsRevealGate` in `src/lib/stamps.js` — pure,
+The predicate itself is `meetsRevealGate` in `src/lib/stamp/stamps.js` — pure,
 dependency-free, and covered by `test/stamps.test.js`, so the invariant is
 pinned by CI rather than by review.
 
@@ -199,8 +199,8 @@ hand-fix 120 files.
 
 So a club may carry `{ scale, offsetX, offsetY, rotation }` **per side** —
 `src/lib/data/stamp-logo-tuning.json`, picked by eye in `/identity-lab`'s Stamp
-placement editor, resolved by `src/lib/stampLogoTuning.js`, applied by
-`src/lib/stampArt.js`'s `markTransform`. Per side because the two slots are not
+placement editor, resolved by `src/lib/stamp/stampLogoTuning.js`, applied by
+`src/lib/stamp/stampArt.js`'s `markTransform`. Per side because the two slots are not
 mirror images: each bleeds off the opposite edge of the clip circle, so the nudge
 that rescues the away mark can ruin the home one.
 
@@ -234,7 +234,7 @@ build at all. Read this ADR before adding a fourth name.
 
 **The server-side reveal gate is gone.** `POST /api/stamps` no longer reads
 `reveal:{userId}:{gamePk}` or `spoiled:{userId}`, `meetsRevealGate` and
-`finalHalfIndex` are deleted from `src/lib/stamps.js`, and `StampsCloudSync`'s
+`finalHalfIndex` are deleted from `src/lib/stamp/stamps.js`, and `StampsCloudSync`'s
 reveal push (the "known gap" closer named above) went with them. What survives
 server-side is the refusal that protects the *artifact* rather than the user —
 only a **Final** game mints, because a stamp is permanent and a live score is

@@ -22,7 +22,7 @@
 // check-contrast.mjs. An era with a triad tints its tile with `bar` and wears
 // it on the bars (seasonTile, seasonTheme).
 
-import { barMarkTone } from '../headerTheme.js'
+import { barMarkTone } from '../colors/headerTheme.js'
 import { teamLogoUrl } from '../teams.js'
 import SEASON_MARKS_JSON from '../data/season-marks.json' with { type: 'json' }
 
@@ -87,7 +87,7 @@ export function seasonTile(teamId, season, tile) {
 }
 
 // The bar theme of a club in a season-covered era: the app's default chrome,
-// set EXPLICITLY. lib/headerTheme.js's headerThemeStyle resets the custom
+// set EXPLICITLY. lib/colors/headerTheme.js's headerThemeStyle resets the custom
 // properties for it. Plain null is not enough: TeamInfo nests the opposing
 // club's cards inside the page's own themed shell, so a 1979 White Sox card
 // would inherit the Tigers' colours. headerThemeFor itself stays a function of

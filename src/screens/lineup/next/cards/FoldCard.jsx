@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
+import { headerThemeClass, headerThemeStyle } from '../../../../lib/colors/headerTheme.js'
 
 // A stamped card folded shut until its head is tapped (Former teammates, Bullpen). The head
 // is the button; the body mounts only when open, so nothing inside it loads or draws first.

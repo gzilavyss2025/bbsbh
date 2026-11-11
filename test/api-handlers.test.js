@@ -44,7 +44,7 @@ import {
   applyRemoteStamps,
   isStamped,
   remoteStampsFromExport,
-} from '../src/lib/stamps.js'
+} from '../src/lib/stamp/stamps.js'
 import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // --------------------------------------------------------------------------

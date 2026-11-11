@@ -22,7 +22,7 @@ every resolver answers with it immediately, no deploy (ADR-0050,
 
 The knockout mark doesn't work that way. It is **precomputed at build time**:
 `scripts/gen-mono-logos.mjs` fetches a club's CDN art, converts it to a
-one-color SVG mask (`src/lib/logoMono.js`), and writes a static file to
+one-color SVG mask (`src/lib/logo/logoMono.js`), and writes a static file to
 `public/data/logos/mono/{teamId}.svg` — the file `TeamLogo`'s `mono` variant
 requests directly (ADR-0031). What a club can tune today (`/identity-lab`'s
 Knockout mark editor, `MonoInkEditor.jsx`) is not the mark itself but the

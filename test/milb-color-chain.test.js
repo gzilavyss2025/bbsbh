@@ -1,4 +1,4 @@
-// The one affiliate -> colour-pair chain (src/lib/brandColors.js), and the two
+// The one affiliate -> colour-pair chain (src/lib/colors/brandColors.js), and the two
 // call sites that used to disagree about it.
 //
 //   1. the affiliate's own researched pair   (data/milb-colors.json)
@@ -23,9 +23,9 @@ import {
   milbBrandPair,
   milbColorPair,
   milbHasResearchedColor,
-} from '../src/lib/brandColors.js'
+} from '../src/lib/colors/brandColors.js'
 import { teamTintColor, teamPrimaryColor, teamChipColors } from '../src/lib/teams.js'
-import { milbVariantColors, milbTreatmentTile } from '../src/lib/milbColors.js'
+import { milbVariantColors, milbTreatmentTile } from '../src/lib/colors/milbColors.js'
 
 // Durham Bulls, a Rays affiliate with a researched pair of its own — the
 // example the whole change is argued from.

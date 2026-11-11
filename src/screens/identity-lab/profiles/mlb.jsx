@@ -8,10 +8,10 @@ import {
   wpaBandPinstripeBg,
 } from '../../../lib/wpa/wpaBandColors.js'
 import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpa/wpaLogo.js'
-import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
-import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
-import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
-import { clubMarkSources } from '../../../lib/markSources.js'
+import { MLB_TEAM_COLORS } from '../../../lib/colors/brandColors.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/colors/headerTheme.js'
+import { customMarkAssignment, customMarksFor } from '../../../lib/logo/customMarks.js'
+import { clubMarkSources } from '../../../lib/logo/markSources.js'
 import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
@@ -48,7 +48,7 @@ import {
   defaultHomeTreatmentFor,
   defaultAwayTreatmentFor,
 } from '../../../lib/teams.js'
-import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logoArt.js'
+import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logo/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
 import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
@@ -349,7 +349,7 @@ function resolveWpaOwnArt(teamId, treatment, wpaDraft) {
 
 // Whether this (team, treatment)'s WPA band tiles the club's wordmark instead
 // of its usual mark — the MLB counterpart to MiLB's own milbWpaWordmark
-// (lib/milbColors.js), same draft-beats-landed chain as resolveWpaOwnArt
+// (lib/colors/milbColors.js), same draft-beats-landed chain as resolveWpaOwnArt
 // above.
 function resolveWpaWordmark(teamId, treatment, wpaDraft) {
   return wpaDraft?.wpaWordmark ?? Boolean(WPA_WORDMARK_OVERRIDES[teamId]?.[treatment])
@@ -376,7 +376,7 @@ function resolvedWpaLayout(teamId, treatment, draft) {
 // swatches supply one — the app's current navy/kraft-amber brand pair (--navy /
 // --seal, tokens/colors.css) and its light on-ink text color (--paper-2),
 // copied as literals since a JS default can't reach into CSS custom properties.
-// These are the same three DEFAULT_CHROME (lib/headerTheme.js) falls back to
+// These are the same three DEFAULT_CHROME (lib/colors/headerTheme.js) falls back to
 // for an unlanded tile, so the editor's starting point and the app's fallback
 // can't drift.
 const DEFAULT_HEADER_BAR = '#1B2A3A'

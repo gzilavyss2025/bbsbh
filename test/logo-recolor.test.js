@@ -1,18 +1,18 @@
 // Repainting individual SHAPES of a club's mark in full color — the Logo art
-// editor in /identity-lab (src/lib/logoRecolor.js, ADR-0031's amendment). Shares
+// editor in /identity-lab (src/lib/logo/logoRecolor.js, ADR-0031's amendment). Shares
 // logoMono.js's shape numbering on purpose, which is what these first cases
 // pin: a shape means the same thing in both editors or the two disagree about
 // what you clicked.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { monoLogoParts } from '../src/lib/logoMono.js'
+import { monoLogoParts } from '../src/lib/logo/logoMono.js'
 import {
   TRANSPARENT_PAINT,
   isRecolorHex,
   isRecolorPaint,
   markSlug,
   recolorSvg,
-} from '../src/lib/logoRecolor.js'
+} from '../src/lib/logo/logoRecolor.js'
 
 const wrap = (body, attrs = '') =>
   `<svg xmlns="http://www.w3.org/2000/svg"${attrs} viewBox="0 0 100 100">${body}</svg>`

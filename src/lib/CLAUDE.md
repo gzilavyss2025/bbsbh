@@ -1,7 +1,7 @@
 # src/lib — the colour, logo, and identity data model
 
 Pure data and pure functions, no React. This file covers the **club identity
-layer**: which colours a club owns, which mark a tile wears, and how a
+layer** (`logo/`, `stamp/`, `colors/`, `teams.js` + `teams/`, `identity/`): which colours a club owns, which mark a tile wears, and how a
 hand-tuned adjustment gets from someone's eye into the app. Other modules document
 themselves at their tops; `math/` holds the shared pure helpers, `scorecard/` the scorecard
 lens's (#724), `person/` the birthplace rule (#1777) and the roster-status rule (#1779) that the player page and the crawler body share. `pitch/` is the pitch-type language: one shape and colour per pitch code (`docs/pitch-types.md`); `pitchFlight.js` there is the pure real-flight physics of one tracked pitch (#2602), which `pitcherCard/camera.js` re-exports. `gameday/flightPath.js` is the chase camera's ball path (#2603): the data tier of a revealed ball and its time-stamped flight to the hit coordinate. `gameday/fetchOnce.js` is Gameday's per-session request memo (the checkpoint's roster lines, the Scout line's Savant read). Share a pure helper. Keep a copy only when it carries a comment that says
@@ -58,20 +58,20 @@ own `note`.
 
 | Module | Owns |
 | --- | --- |
-| `brandColors.js` | `TEAM_COLOR_PAIRS`, `MILB_PARENT_ORG`, the researched MiLB pairs, and **the one affiliate→colour chain** both layers read |
-| `teams.js` | Club names/abbreviations/ids, logo URL builders, the MLB-only colour tables (`TEAM_COLORS` — the distinctiveness accent — plus `teamColorExtras`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
-| `logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
-| `milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
+| `colors/brandColors.js` | `TEAM_COLOR_PAIRS`, `MILB_PARENT_ORG`, the researched MiLB pairs, and **the one affiliate→colour chain** both layers read |
+| `teams.js` | The MLB tuning stores, logo URL builders, the MLB-only treatment colour tables (`ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through. It re-exports `teams/`, so importers keep one path: `levels.js` (sportIds, level toggles), `names.js` (club names/abbreviations/ids), `headshots.js` (headshot URLs), `clubColors.js` (`TEAM_COLORS` — the distinctiveness accent — plus `teamColorExtras`, tint, chip and favourite-accent colours) |
+| `logo/logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
+| `colors/milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
 | `wpa/wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
 | `wpa/wpaBandColors.js` | That band's fill/pinstripe resolution |
 | `wpa/wpaDefaults.js` | The two WPA constants a **non-WPA** caller needs, in a dependency-free leaf. `milbColors.js` is on the eager first-paint path, so importing them from their home modules dragged `data/wpa-tuning.json` into the entry chunk (−3.7 KB gz once split out). Keep it import-free |
-| `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
-| `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
-| `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
-| `stampInkTuning.js` | A club's hand-picked stamp ink (`data/stamp-ink.json`), read at RENDER time like `stampLogoTuning.js`, so a retune restyles every stamp already minted |
-| `stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour (or the `stampInkTuning.js` pick), floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The theming rule" below |
-| `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
-| `customMarks.js` | The library of those recolored marks, and which treatment wears one — plus each BAR's own pasted-SVG masthead mark (Main, City Connect, MiLB's one bar), under synthetic keys (`data/custom-marks.json`; ADR-0031's addendum) |
+| `logo/logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
+| `logo/monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
+| `stamp/stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
+| `stamp/stampInkTuning.js` | A club's hand-picked stamp ink (`data/stamp-ink.json`), read at RENDER time like `stampLogoTuning.js`, so a retune restyles every stamp already minted |
+| `stamp/stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour (or the `stampInkTuning.js` pick), floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The theming rule" below |
+| `logo/logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
+| `logo/customMarks.js` | The library of those recolored marks, and which treatment wears one — plus each BAR's own pasted-SVG masthead mark (Main, City Connect, MiLB's one bar), under synthetic keys (`data/custom-marks.json`; ADR-0031's addendum) |
 
 `treatmentTile(teamId, treatment)` is the single resolver behind the slate card
 (`GameCard`), the in-game masthead (`GameView`), and the lab's own grid — a club
@@ -100,9 +100,9 @@ Two ways to edit a stored value (the lab and the team hub gear): `docs/identity-
 
 ## Stamp placement (`stampLogoTuning.js` + `data/stamp-logo-tuning.json`)
 
-The stamp art is locked and lives as pure math in `lib/stampArt.js`, with one tunable
+The stamp art is locked and lives as pure math in `lib/stamp/stampArt.js`, with one tunable
 part. The Logbook stamp letterboxes each club's knockout mark into one 150×150 slot
-(`lib/stampArt.js`'s `MARK_BOX`). One slot has to hold a portrait cap logo, a
+(`lib/stamp/stampArt.js`'s `MARK_BOX`). One slot has to hold a portrait cap logo, a
 square roundel and a wide wordmark, so a club may carry
 `{ scale, offsetX, offsetY, rotation }` — picked by eye in `/identity-lab`'s
 **Stamp placement** editor, which previews the real stamp for both slots.

@@ -46,7 +46,7 @@ export function WpaPreview({
             mark this treatment's own logo box shows, unchanged from before
             this checkbox existed. Unchecked switches to a separately
             uploaded WPA-only mark (artUpload below) — absent for MiLB, which
-            has no WPA-only upload destination (src/lib/logoArt.js). */}
+            has no WPA-only upload destination (src/lib/logo/logoArt.js). */}
         {artUpload && (
           <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
             <input

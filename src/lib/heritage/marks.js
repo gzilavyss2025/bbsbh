@@ -1,6 +1,6 @@
 import { rgbToHsl, toRgb } from '../contrast.js'
-import { logoCdnUrl } from '../logoCdn.js'
-import { monoLogoFingerprint, monoLogoParts, monoLogoSvg } from '../logoMono.js'
+import { logoCdnUrl } from '../logo/logoCdn.js'
+import { monoLogoFingerprint, monoLogoParts, monoLogoSvg } from '../logo/logoMono.js'
 
 // Pick an actual distinct secondary mark from the existing CDN variants.
 // loadSvg supplies sanitized SVG, never arbitrary inline markup. No team-specific

@@ -11,7 +11,7 @@
 //   - a `--name:` declaration in any stylesheet under src/ (tokens, and a local rule
 //     such as --band-fill in system/section-head.css);
 //   - a `'--name'` string literal in src/ JS (setProperty, a style-object key, a theme
-//     such as --bar-fill in lib/headerTheme.js). A literal that opens a template
+//     such as --bar-fill in lib/colors/headerTheme.js). A literal that opens a template
 //     (`--row-${i}`) defines every property with that prefix.
 // A read with a fallback, var(--x, y), is allowed.
 //

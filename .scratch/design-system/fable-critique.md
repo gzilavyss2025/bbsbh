@@ -126,7 +126,7 @@ The band is painted by six selectors: `.team-hub.is-themed .thub-card__head`,
 (`09-team-info.css:242–248`), `.player.is-themed .section__title--bar`
 (`09-team-info.css:153`, negative margins to bleed), and `.metricbar`
 (`44-pre-game-cards.css:29`, the undressed navy + `--seal` form). All six read
-the same three properties from `lib/headerTheme.js` (`--bar-fill`,
+the same three properties from `lib/colors/headerTheme.js` (`--bar-fill`,
 `--bar-accent`, `--bar-text`). Across the tree there are 63 `__title`, 61
 `__head`, 47 `__label`, 12 `__eyebrow` and 6 `__kicker` base rules.
 
