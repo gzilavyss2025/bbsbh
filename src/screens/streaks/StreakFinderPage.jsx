@@ -97,7 +97,7 @@ export function StreakFinderPage() {
 
   const { data: firstData, error: firstError, reload: reloadFirst } = useAsync((signal) => firstSeason(applied.team, signal), [applied.team])
   // If the first-season lookup fails, fall back to 1871 rather than spin: the game
-  // log is one date-range request, so the extra empty years cost nothing.
+  // log comes in 40-season blocks, so the extra empty years cost one small request.
   const first = firstData ?? (firstError ? 1871 : null)
   const [lo, hi] = [applied.from, applied.to].map((y) => (y == null ? null : int(y, first ?? 1871, THIS_YEAR, null)))
   const from = Math.min(lo ?? first ?? THIS_YEAR, hi ?? THIS_YEAR)

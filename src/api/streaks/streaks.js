@@ -1,6 +1,6 @@
 // The Streak Finder (/streaks): every run of N games in a row in which a club
 // reached (or stayed under) a total in one counting stat. Read live from the Stats
-// API's team game logs: one date-range request per log covers every season. Not a scoring
+// API's team game logs, in 40-season date-range blocks. Not a scoring
 // surface, so nothing is sealed (ADR-0034).
 
 import { getJson } from '../statsapi.js'
@@ -134,35 +134,61 @@ export async function firstSeason(teamId, signal) {
   return Number(d?.teams?.[0]?.firstYearOfPlay) || 1901
 }
 
-// Raw splits per (team, log, seasons, game type) for the session: every stat on one
-// side reads the same log, so a stat switch needs no new request.
-const logCache = new Map()
+// The game log comes in fixed 40-season blocks (1870–1909, 1910–1949, …): one
+// date-range request each, so the oldest clubs' ~126 seasons (the Cubs' pitching log
+// is ~23 MB whole) arrive as four responses of a few MB, not one. Fixed edges let
+// any From/To reuse what is cached.
+const BLOCK = 40
+const BLOCK_ZERO = 1870
+const blockOf = (y) => BLOCK_ZERO + Math.floor((y - BLOCK_ZERO) / BLOCK) * BLOCK
 
-// One game log covering every season in [from, to]: statsapi takes a date range,
-// so the whole history is one request (the Brewers since 1969: ~9,200 games, ~8 MB),
-// not one per season. A 404 is a range with no games, not a failure.
-async function rangeLog(teamId, group, from, to, gameType, signal) {
-  const key = `${teamId}:${group}:${from}:${to}:${gameType}`
-  if (logCache.has(key)) return logCache.get(key)
+// Raw splits per (team, log, block, game type), most recently used last. Every stat
+// on one side reads the same log, so a stat switch needs no request. Capped: one
+// block is several MB, and a phone keeps the PWA open for days. The block holding
+// this season goes stale after ten minutes, so new games show up.
+const logCache = new Map()
+const CACHE_MAX = 8
+const LIVE_TTL_MS = 10 * 60_000
+
+async function blockLog(teamId, group, start, gameType, signal) {
+  const key = `${teamId}:${group}:${start}:${gameType}`
+  const hit = logCache.get(key)
+  const live = start === blockOf(new Date().getFullYear())
+  if (hit && !(live && Date.now() - hit.at > LIVE_TTL_MS)) {
+    logCache.delete(key)
+    logCache.set(key, hit)
+    return hit.splits
+  }
   let splits
   try {
-    const d = await getJson(`/api/v1/teams/${teamId}/stats?stats=gameLog&group=${group}&startDate=${from}-01-01&endDate=${to}-12-31&gameType=${gameType}`, { signal, timeoutMs: 45_000 })
+    // No retry here: a stalled multi-MB body would only stall again, and the page
+    // has a Retry button.
+    const d = await getJson(`/api/v1/teams/${teamId}/stats?stats=gameLog&group=${group}&startDate=${start}-01-01&endDate=${start + BLOCK - 1}-12-31&gameType=${gameType}`, { signal, timeoutMs: 30_000, retries: 0 })
     splits = d?.stats?.[0]?.splits ?? []
   } catch (e) {
+    // A 404 is a block with no games, not a failure.
     if (!/MLB API 404/.test(e?.message)) throw e
     splits = []
   }
-  logCache.set(key, splits)
+  logCache.delete(key)
+  logCache.set(key, { splits, at: Date.now() })
+  while (logCache.size > CACHE_MAX) logCache.delete(logCache.keys().next().value)
   return splits
 }
 
-// Every game in the season range for one group, as `{ splits, post }` logs: one
-// request for the regular season and one more with the postseason. Turn them into
-// rows with `toGames`.
+// Every game in [from, to] for one group, as `{ splits, post }` logs: one request
+// per block, regular season and (with `withPost`) postseason, all at once. Turn
+// them into rows with `toGames`.
 export async function loadLogs(teamId, group, from, to, withPost, signal) {
-  const types = withPost ? ['R', 'P'] : ['R']
-  const logs = await Promise.all(types.map((t) => rangeLog(teamId, group, from, to, t, signal)))
-  return logs.map((splits, i) => ({ splits, post: types[i] === 'P' }))
+  const jobs = []
+  for (const type of withPost ? ['R', 'P'] : ['R']) {
+    for (let b = blockOf(from); b <= to; b += BLOCK) jobs.push([b, type])
+  }
+  const logs = await Promise.all(jobs.map(([b, type]) => blockLog(teamId, group, b, type, signal)))
+  return logs.map((splits, i) => ({
+    splits: splits.filter((s) => Number(s.season) >= from && Number(s.season) <= to),
+    post: jobs[i][1] === 'P',
+  }))
 }
 
 export const toGames = (logs, field) => logs.flatMap(({ splits, post }) => splits.map((s) => gameRow(s, field, post)))
