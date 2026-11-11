@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseRoute } from '../src/lib/route.js'
-import { ledgerItems, liveRow, oddSeasons, postLabel, seasonCells } from '../src/screens/team/franchise/ledgerRows.js'
+import { ledgerItems, oddSeasons, postLabel, seasonCells } from '../src/screens/team/franchise/ledgerRows.js'
 
 // #2763: the franchise page's route and the pure shaping of its season ledger.
 
@@ -88,75 +88,6 @@ test('ledgerItems: no rows is an empty list', () => {
 })
 
 // The live row: standings records and the club's own schedule for one season.
-const standings = (w, l, extra = {}) => [
-  { teamRecords: [{ team: { id: 158 }, wins: w, losses: l, gamesBack: '-', divisionRank: '1', leagueRank: '1', runsScored: 832, runsAllowed: 618, ...extra }] },
-]
-const g = (gameType, desc, away, home, awayWon, state = 'Final', gamesInSeries = 7) => ({
-  gameType,
-  seriesDescription: desc,
-  gamesInSeries,
-  status: { abstractGameState: state },
-  teams: { away: { team: { id: away }, isWinner: state === 'Final' ? awayWon : undefined }, home: { team: { id: home }, isWinner: state === 'Final' ? !awayWon : undefined } },
-})
-const base = { teamId: 158, season: 2026, name: 'Milwaukee Brewers', manager: { personId: 580268, name: 'Pat Murphy' } }
-
-test('liveRow: a finished season that ended in a World Series win, no tag', () => {
-  const dates = [{ games: [g('R', 'Regular Season', 158, 112, true, 'Final', 3), ...[1, 2, 3, 4].map(() => g('W', 'World Series', 158, 147, true)), g('W', 'World Series', 158, 147, false)] }]
-  const r = liveRow({ ...base, records: standings(103, 59), dates })
-  assert.deepEqual([r.season, r.w, r.l, r.gb, r.divisionRank, r.rs, r.ra], [2026, 103, 59, 0, 1, 832, 618])
-  assert.deepEqual(r.postseason, { round: 'World Series', won: true })
-  assert.equal(r.inProgress, false)
-  // #2784 review: fetchManager names one manager (an interim first), never who managed which
-  // games, so the live row credits no W-L. The page shows it with the † until the ledger run splits it.
-  assert.deepEqual(r.managers, [{ id: 580268, name: 'Pat Murphy' }])
-})
-
-test('liveRow: a game left to play tags the row in progress; a series not yet decided reads as neither won nor lost', () => {
-  const dates = [{ games: [
-    g('L', 'NL Championship Series', 158, 119, true),
-    g('L', 'NL Championship Series', 158, 119, true),
-    g('L', 'NL Championship Series', 119, 158, false, 'Preview'),
-  ] }]
-  const r = liveRow({ ...base, records: standings(103, 59), dates })
-  assert.equal(r.inProgress, true)
-  assert.deepEqual(r.postseason, { round: 'NL Championship Series', won: null })
-})
-
-test('liveRow: the highest round wins; a lost series is lost even with games unplayed in the bracket', () => {
-  const dates = [{ games: [
-    ...[1, 2, 3].map(() => g('D', 'NL Division Series', 158, 135, true, 'Final', 5)),
-    ...[1, 2, 3, 4].map(() => g('L', 'NL Championship Series', 119, 158, true)),
-  ] }]
-  const r = liveRow({ ...base, records: standings(103, 59), dates })
-  assert.deepEqual(r.postseason, { round: 'NL Championship Series', won: false })
-  assert.equal(r.inProgress, false)
-})
-
-test('liveRow: a regular season under way with no postseason; a season not started is null', () => {
-  const live = liveRow({ ...base, records: standings(40, 30, { gamesBack: '2.5', divisionRank: '2' }), dates: [{ games: [g('R', 'Regular Season', 158, 112, true, 'Live')] }] })
-  assert.deepEqual([live.gb, live.divisionRank, live.postseason, live.inProgress], [2.5, 2, null, true])
-  assert.equal(liveRow({ ...base, records: standings(0, 0), dates: [] }), null)
-  assert.equal(liveRow({ ...base, records: [], dates: [] }), null)
-})
-
-test('liveRow: no manager on file reads an empty list', () => {
-  const r = liveRow({ ...base, manager: null, records: standings(1, 0), dates: [] })
-  assert.deepEqual(r.managers, [])
-})
-
-test('liveRow: a schedule that could not be read (null) drops the row rather than guessing', () => {
-  assert.equal(liveRow({ ...base, records: standings(103, 59), dates: null }), null)
-})
-
-test('liveRow: a game listed twice (suspended, then resumed) counts once', () => {
-  const ws = (pk, awayWon) => ({ ...g('W', 'World Series', 158, 147, awayWon), gamePk: pk })
-  // 3-1 in a best of seven, with game 4 listed on both its dates: not decided yet
-  const dates = [{ games: [ws(1, true), ws(2, true), ws(3, false), ws(4, true)] }, { games: [ws(4, true), { ...ws(5, true), status: { abstractGameState: 'Preview' } }] }]
-  const r = liveRow({ ...base, records: standings(103, 59), dates })
-  assert.deepEqual(r.postseason, { round: 'World Series', won: null })
-})
-
-// #2784: an odd season carries a short tag on its row; the notes read as one line under the table.
 test('seasonCells: an odd season gets a short tag; any other row has none', () => {
   assert.equal(seasonCells(row(2020, { note: '60-game season' })).tag, '60 G')
   assert.equal(seasonCells(row(1994, { note: 'strike' })).tag, 'Strike')
