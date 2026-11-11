@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { preload } from 'react-dom'
 import {
   fetchLevelSeasonDates,
@@ -48,19 +48,27 @@ const FETCHERS = {
 
 export function useSlateDay({ dateStr, sportId, leagueId = null, favoriteTeamId = null }) {
   const key = `${dateStr}|${sportId}|${leagueId}|${favoriteTeamId}`
-  const first = useMemo(
-    () => initialSlateDay({ dateStr, sportId, leagueId, favoriteTeamId }, readSeasonRow),
-    [dateStr, sportId, leagueId, favoriteTeamId],
-  )
-  const [state, setState] = useState({ key, value: first, ctl: null })
+  // The last run's state, so a new date or level keeps every answer whose own key is unchanged.
+  const seed = useRef(null)
+  const [state, setState] = useState(() => ({
+    key,
+    value: initialSlateDay({ dateStr, sportId, leagueId, favoriteTeamId }, readSeasonRow),
+    ctl: null,
+    raw: null,
+  }))
 
   useEffect(() => {
     // The loader reports its first value synchronously, before it has returned its controls.
     let ctl = null
-    ctl = loadSlateDay({ dateStr, sportId, leagueId, favoriteTeamId }, FETCHERS, (value) =>
-      setState({ key, value, ctl }),
+    ctl = loadSlateDay(
+      { dateStr, sportId, leagueId, favoriteTeamId },
+      FETCHERS,
+      (value, raw) => {
+        seed.current = raw
+        setState({ key, value, ctl, raw })
+      },
+      seed.current,
     )
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((s) => ({ ...s, ctl }))
     const onVisible = () => {
       if (document.visibilityState === 'visible') ctl.reload('counts')
@@ -72,8 +80,12 @@ export function useSlateDay({ dateStr, sportId, leagueId = null, favoriteTeamId 
     }
   }, [key, dateStr, sportId, leagueId, favoriteTeamId])
 
-  // The render where the key changes still holds the last key's value: answer the fresh one (#2925).
-  const value = state.key === key ? state.value : first
+  // The render where the key changes still holds the last key's value: answer the new key's
+  // first frame instead (#2925), seeded the same way the loader will be.
+  const value =
+    state.key === key
+      ? state.value
+      : initialSlateDay({ dateStr, sportId, leagueId, favoriteTeamId }, readSeasonRow, state.raw)
   const ctl = state.key === key ? state.ctl : null
 
   // The MLB winter opens on the champion hero, whose photo URL is static: start it now, not after

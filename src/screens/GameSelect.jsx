@@ -263,7 +263,7 @@ export function GameSelect({
   }, [sorted])
 
   // Every active club at this level (see fetchTeams), independent of the date.
-  const levelTeams = { data: day.levelTeams }
+  const levelTeams = day.levelTeams
 
   // This level's full league minus whoever's on today's slate = the clubs
   // with an off day, favorite (or its affiliate, on a MiLB level — see
@@ -284,7 +284,7 @@ export function GameSelect({
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
     const all = bracketCoversPage
       ? offDayAliveTeams(postseasonBracket.bracket, playing)
-      : (levelTeams.data ?? []).filter((t) => !playing.has(t.id))
+      : (levelTeams ?? []).filter((t) => !playing.has(t.id))
     if (!all.length) return []
     return [...all].sort((a, b) => {
       const pa = isPinnedTeam(a.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
@@ -292,7 +292,7 @@ export function GameSelect({
       if (pa !== pb) return pa - pb
       return (a.name ?? '').localeCompare(b.name ?? '')
     })
-  }, [data, bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
+  }, [data, bracketCoversPage, postseasonBracket.bracket, levelTeams, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
@@ -511,9 +511,9 @@ export function GameSelect({
           holds the strip's height open while fetchTeams is in flight — see
           .slatestrip in 03-slate-header.css (a ~0.37 CLS fix). */}
       <div className="slatestrip">
-        {levelTeams.data?.length > 0 && (
+        {levelTeams?.length > 0 && (
           <TeamFilterStrip
-            teams={levelTeams.data}
+            teams={levelTeams}
             selectedTeamId={null}
             onSelect={(id, team) => navigate(teamPath(id, { name: team?.name }))}
             showMlbPin={false}

@@ -39,7 +39,7 @@ import { levelFetchYear, phaseOf, winterOf } from './phase.js'
 // What the winter calendar says for this date, the shape useWinter used to return:
 // `tabVisible` (a sixth stop), `leagues` (the picker's chips), `leagueId` (the league to
 // fetch), `games` (the Winter stop's count), `defaultLeagueId` and `ready`. All fail closed.
-export function winterBallOf(calendar, dateStr, sportId, leagueId, ready) {
+function winterBallOf(calendar, dateStr, sportId, leagueId, ready) {
   const onWinter = isWinterSport(sportId)
   return {
     tabVisible: hasWinterTab(calendar, dateStr),
@@ -51,17 +51,41 @@ export function winterBallOf(calendar, dateStr, sportId, leagueId, ready) {
   }
 }
 
-// The state before anything has answered. Shared with the hook's first frame.
-function freshState(input) {
-  const { sportId } = input
-  const onWinter = isWinterSport(sportId)
+// Each slot's own key: what it was fetched FOR. A slot whose key did not change keeps its
+// answer across a new date, level or favourite (the ladder counts are one per date, the club
+// list one per level, the bracket's season row one per year), so paging re-fetches nothing it
+// already knows and the masthead does not blank and refill.
+function slotKeys(input) {
+  const { dateStr, sportId, leagueId = null, favoriteTeamId = null } = input
+  const year = Number(dateStr.slice(0, 4))
+  const noAffiliates = sportId === SPORT_IDS.MLB || isWinterSport(sportId)
   return {
+    bracket: sportId === SPORT_IDS.MLB ? year : null,
+    calendar: winterSeasonFor(dateStr),
+    counts: dateStr,
+    affiliates: noAffiliates ? null : `${favoriteTeamId}|${year}|${sportId}`,
+    slate: `${dateStr}|${sportId}|${leagueId}`,
+    teams: sportId,
+    rows: `${dateStr}|${sportId}`,
+  }
+}
+
+// The state before anything has answered, plus whatever `seed` (the last run's state) already
+// answered for a slot whose key is unchanged. Shared with the hook's first frame.
+function freshState(input, seed = null) {
+  const { sportId } = input
+  const keys = slotKeys(input)
+  const same = (slot) => Boolean(seed) && seed.keys[slot] === keys[slot]
+  const s = {
+    keys,
     bracketMeta: sportId === SPORT_IDS.MLB ? undefined : null,
     calendar: undefined,
     counts: null,
-    affiliates: sportId === SPORT_IDS.MLB || onWinter ? [] : undefined,
-    league: undefined, // the league the slate and teams were last asked for
+    affiliates: keys.affiliates === null ? [] : undefined,
+    affiliateIds: new Set(),
+    league: undefined, // the league the slate was last asked for
     slate: { data: null, error: null, loading: true },
+    teamsLeague: undefined, // the league the club list was last asked for
     teams: null,
     seasonAsked: false,
     seasonRow: undefined, // undefined until answered; a rejection leaves it undefined
@@ -69,6 +93,30 @@ function freshState(input) {
     level: { key: null, rows: undefined, settled: false },
     next: { key: null, rows: undefined, settled: false },
   }
+  if (!seed) return s
+  if (same('bracket') && keys.bracket) s.bracketMeta = seed.bracketMeta
+  if (same('calendar')) s.calendar = seed.calendar
+  if (same('counts')) s.counts = seed.counts
+  if (same('affiliates') && keys.affiliates) {
+    s.affiliates = seed.affiliates
+    s.affiliateIds = seed.affiliateIds
+  }
+  if (same('slate') && !seed.slate.loading) {
+    s.league = seed.league
+    s.slate = seed.slate
+  }
+  if (same('teams') && seed.teams) {
+    s.teamsLeague = seed.teamsLeague
+    s.teams = seed.teams
+  }
+  if (same('rows') && seed.seasonSettled) {
+    s.seasonAsked = true
+    s.seasonRow = seed.seasonRow
+    s.seasonSettled = true
+    if (seed.level.settled) s.level = seed.level
+    if (seed.next.settled) s.next = seed.next
+  }
+  return s
 }
 
 const keyOf = (id, year) => (year ? `${id}:${year}` : null)
@@ -121,7 +169,7 @@ function view(input, s, load) {
     inPostseasonWindow:
       sportId === SPORT_IDS.MLB && year >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta),
     slate: { games, loading, error: s.slate.error },
-    affiliateIds: new Set((s.affiliates ?? []).map((a) => a.id)),
+    affiliateIds: s.affiliateIds,
     levelTeams: s.teams,
     isEmptyDay,
     seasonMeta,
@@ -146,17 +194,19 @@ const strip = (v) => {
   return out
 }
 
-export function initialSlateDay(input, load) {
-  return strip(view(input, freshState(input), load))
+export function initialSlateDay(input, load, seed = null) {
+  return strip(view(input, freshState(input, seed), load))
 }
 
-export function loadSlateDay(input, f, onUpdate) {
+// `seed` is the last run's state (the second argument `onUpdate` gets), carried per slot.
+export function loadSlateDay(input, f, onUpdate, seed = null) {
   const { dateStr, sportId, favoriteTeamId = null } = input
   const year = Number(dateStr.slice(0, 4))
   const onWinter = isWinterSport(sportId)
   const load = f.readSeasonRow
-  const s = freshState(input)
+  const s = freshState(input, seed)
   let dead = false
+  let last = null
   const tokens = {}
 
   // Run one fetch under a named slot: a newer run of the same slot, or cancel(), voids it.
@@ -165,10 +215,17 @@ export function loadSlateDay(input, f, onUpdate) {
     const live = () => !dead && tokens[slot] === t
     Promise.resolve()
       .then(run)
-      .then(
-        (data) => live() && (onOk(data), step()),
-        (err) => live() && (onErr(err), step()),
-      )
+      .then((d) => live() && onOk(d), (e) => live() && onErr(e))
+      .catch((e) => live() && onErr(e)) // an onOk that throws settles the slot as a failure, never wedges it
+      .then(() => live() && safeStep())
+  }
+  // A throw while building the value is a bug: report it, and keep the last value on screen.
+  const safeStep = () => {
+    try {
+      step()
+    } catch (err) {
+      console.error('slate day:', err)
+    }
   }
 
   const startSlate = (keep) => {
@@ -181,11 +238,15 @@ export function loadSlateDay(input, f, onUpdate) {
       (error) => (s.slate = { ...s.slate, error, loading: false }),
     )
   }
+  // The club list is per level and league, never per date.
+  const startTeams = (lg) => {
+    s.teamsLeague = lg
+    s.teams = null
+    track('teams', () => f.fetchTeams(sportId, lg), (d) => (s.teams = d), () => {})
+  }
   const startLeague = (lg) => {
     s.league = lg
     startSlate(false)
-    s.teams = null
-    track('teams', () => f.fetchTeams(sportId, lg), (d) => (s.teams = d), () => {})
   }
   const startCounts = () =>
     track('counts', () => f.fetchLevelCounts(dateStr), (d) => (s.counts = d), () => {})
@@ -198,11 +259,14 @@ export function loadSlateDay(input, f, onUpdate) {
       startLeague(v.activeLeagueId)
       v = view(input, s, load)
     }
+    if (s.teamsLeague !== s.league) startTeams(s.league)
     if (v.isEmptyDay && !s.seasonAsked) {
       s.seasonAsked = true
+      // On MLB the bracket already asked for this very row: reuse its answer once it is in.
+      const known = s.bracketMeta !== undefined && sportId === SPORT_IDS.MLB
       track(
         'season',
-        () => f.fetchSeasonMeta(year),
+        () => (known ? s.bracketMeta : f.fetchSeasonMeta(year)),
         (row) => {
           s.seasonRow = row
           s.seasonSettled = true
@@ -239,28 +303,42 @@ export function loadSlateDay(input, f, onUpdate) {
       )
       v = view(input, s, load)
     }
-    onUpdate(strip(v))
+    const out = strip(v)
+    // An unchanged offseason keeps its identity, so the winter page does not re-render for nothing.
+    if (last && JSON.stringify(last.offseason) === JSON.stringify(out.offseason)) out.offseason = last.offseason
+    last = out
+    onUpdate(out, s)
   }
 
-  if (sportId === SPORT_IDS.MLB)
+  if (sportId === SPORT_IDS.MLB && s.bracketMeta === undefined)
     track('bracket', () => f.fetchSeasonMeta(year), (d) => (s.bracketMeta = d), () => (s.bracketMeta = null))
-  track(
-    'calendar',
-    () => f.fetchWinterCalendar(winterSeasonFor(dateStr)),
-    (d) => (s.calendar = d ?? null),
-    () => (s.calendar = null),
-  )
-  startCounts()
+  if (s.calendar === undefined) {
+    track(
+      'calendar',
+      () => f.fetchWinterCalendar(winterSeasonFor(dateStr)),
+      (d) => (s.calendar = d ?? null),
+      () => (s.calendar = null),
+    )
+  }
+  if (!s.counts) startCounts()
   if (s.affiliates === undefined)
-    track('affiliates', () => f.fetchAffiliates(favoriteTeamId, year), (d) => (s.affiliates = d ?? []), () => (s.affiliates = []))
-  step()
+    track(
+      'affiliates',
+      () => f.fetchAffiliates(favoriteTeamId, year),
+      (d) => {
+        s.affiliates = d ?? []
+        s.affiliateIds = new Set(s.affiliates.map((a) => a.id))
+      },
+      () => (s.affiliates = []),
+    )
+  safeStep()
 
   return {
     reload(part) {
       if (dead) return
       if (part === 'slate') startSlate(true)
       else if (part === 'counts') startCounts()
-      step()
+      safeStep()
     },
     cancel() {
       dead = true

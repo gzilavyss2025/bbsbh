@@ -203,3 +203,69 @@ test('the slate-day value holds no score', async () => {
   walk(r.last(), 'value')
   assert.equal(r.last().stops[0].count, '15')
 })
+
+// Paging carries every answer whose own key is unchanged (review of #3059): the ladder counts
+// are one per date, the club list one per level, the bracket's season row one per year.
+async function settledRun(input, seed) {
+  const fx = fakes()
+  const out = { values: [], raw: null }
+  const ctl = loadSlateDay(input, fx.f, (v, raw) => (out.values.push(v), (out.raw = raw)), seed)
+  return { ...fx, ...out, ctl, last: () => out.values.at(-1), get raw() { return out.raw } }
+}
+
+test('a new level keeps the date\'s ladder counts; a new date keeps the level\'s clubs', async () => {
+  const a = await settledRun({ dateStr: '2026-07-17', sportId: SPORT_IDS.MLB, favoriteTeamId: 158 })
+  await flush()
+  a.take('fetchSeasonMeta').resolve(null)
+  a.take('fetchWinterCalendar').resolve(null)
+  a.take('fetchLevelCounts').resolve({ 1: 15, 11: 14 })
+  a.take('fetchTeams').resolve([{ id: 158 }])
+  a.take('fetchSchedule').resolve([{ gamePk: 1, away: { id: 1 }, home: { id: 2 } }])
+  await flush()
+  let raw = a.values.length && a.raw
+  a.ctl.cancel()
+
+  const b = await settledRun({ dateStr: '2026-07-17', sportId: SPORT_IDS.AAA, favoriteTeamId: 158 }, raw)
+  assert.equal(b.called('fetchLevelCounts').length, 0, 'same date: the counts are not asked again')
+  assert.equal(b.last().stops[1].count, '14', 'and never blank')
+  assert.equal(b.called('fetchWinterCalendar').length, 0)
+  b.ctl.cancel()
+
+  const c = await settledRun({ dateStr: '2026-07-18', sportId: SPORT_IDS.MLB, favoriteTeamId: 158 }, raw)
+  await flush()
+  assert.equal(c.called('fetchTeams').length, 0, 'same level: the club list is not asked again')
+  assert.deepEqual(c.last().levelTeams, [{ id: 158 }])
+  assert.equal(c.called('fetchSeasonMeta').length, 0, 'same year: the bracket row is kept')
+  assert.equal(c.called('fetchLevelCounts').length, 1, 'a new date asks its own counts')
+})
+
+test('a new favourite re-asks only the affiliates, never the slate', async () => {
+  const a = await settledRun(NOV)
+  await flush()
+  a.take('fetchAffiliates').resolve([])
+  a.take('fetchWinterCalendar').resolve(null)
+  a.take('fetchLevelCounts').resolve({})
+  a.take('fetchTeams').resolve([])
+  a.take('fetchSchedule').resolve([{ gamePk: 1, away: { id: 1 }, home: { id: 2 } }])
+  await flush()
+  const raw = a.raw
+  a.ctl.cancel()
+  const b = await settledRun({ ...NOV, favoriteTeamId: 147 }, raw)
+  assert.equal(b.called('fetchSchedule').length, 0)
+  assert.equal(b.called('fetchAffiliates').length, 1)
+  b.take('fetchAffiliates').resolve([])
+  await flush()
+  assert.equal(b.last().slate.games.length, 1)
+})
+
+test('the MLB empty day reuses the bracket\'s season row instead of asking twice', async () => {
+  const r = run({ dateStr: '2026-12-01', sportId: SPORT_IDS.MLB, favoriteTeamId: 158 })
+  await flush()
+  r.take('fetchSeasonMeta').resolve(null)
+  r.take('fetchWinterCalendar').resolve(null)
+  r.take('fetchSchedule').resolve([])
+  await flush()
+  await flush()
+  assert.equal(r.called('fetchSeasonMeta').length, 1)
+  assert.equal(r.last().seasonMeta.loading, false)
+})
