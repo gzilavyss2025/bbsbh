@@ -36,6 +36,7 @@ import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
 import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 import { absChallengesPath } from '../../lib/route.js'
+import { pathOf } from '../../lib/route/table.js'
 import { useNav } from '../../lib/nav.js'
 import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
 import { useSeasonData } from '../../hooks/seasons/useSeasonData.js'
@@ -87,7 +88,7 @@ import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 // Rankings — see src/lib/reportPages.js. The masthead chip reads that group
 // back rather than naming the package.
 
-const ABS_PATH = '/abs-challenges'
+const ABS_PATH = pathOf('abs-challenges')
 
 // THE SCOPE (#1514): Regular, Postseason or All, the Matchup Scout's three
 // words. The address alone holds it (`?scope=`, absent is Regular), so a shared

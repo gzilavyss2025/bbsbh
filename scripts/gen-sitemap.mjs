@@ -57,6 +57,7 @@ import { resolve } from 'node:path'
 import { LANDING_PAGES } from '../src/copy/landing/pages/index.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { entitySegment } from '../src/lib/route.js'
+import { pathOf } from '../src/lib/route/table.js'
 
 const WINTER_SPORT_ID = 17
 
@@ -69,42 +70,42 @@ const APP_ROUTES = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/about', priority: '0.5', changefreq: 'monthly' },
   { path: '/leaders', priority: '0.7', changefreq: 'daily' },
-  { path: '/standings', priority: '0.7', changefreq: 'daily' },
-  { path: '/prospects', priority: '0.5', changefreq: 'weekly' },
-  { path: '/rehab', priority: '0.4', changefreq: 'daily' },
-  { path: '/milestones', priority: '0.5', changefreq: 'daily' },
-  { path: '/umpires', priority: '0.5', changefreq: 'weekly' },
-  { path: '/awards', priority: '0.4', changefreq: 'monthly' },
-  { path: '/postseason-history', priority: '0.4', changefreq: 'monthly' },
-  { path: '/postseason-leaders', priority: '0.4', changefreq: 'monthly' },
-  { path: '/all-star-rosters', priority: '0.4', changefreq: 'yearly' },
-  { path: '/all-star-legacy', priority: '0.4', changefreq: 'yearly' },
+  { path: pathOf('standings'), priority: '0.7', changefreq: 'daily' },
+  { path: pathOf('prospects'), priority: '0.5', changefreq: 'weekly' },
+  { path: pathOf('rehab'), priority: '0.4', changefreq: 'daily' },
+  { path: pathOf('milestones'), priority: '0.5', changefreq: 'daily' },
+  { path: pathOf('umpire-rankings'), priority: '0.5', changefreq: 'weekly' },
+  { path: pathOf('awards-history'), priority: '0.4', changefreq: 'monthly' },
+  { path: pathOf('postseason-history'), priority: '0.4', changefreq: 'monthly' },
+  { path: pathOf('postseason-leaders'), priority: '0.4', changefreq: 'monthly' },
+  { path: pathOf('all-star-rosters'), priority: '0.4', changefreq: 'yearly' },
+  { path: pathOf('all-star-legacy'), priority: '0.4', changefreq: 'yearly' },
   { path: '/trade-deadline', priority: '0.4', changefreq: 'yearly' },
   { path: '/logos', priority: '0.3', changefreq: 'yearly' },
   // The broadcast reports. Daily on the three that move every night; the farm
   // board is weekly because the rank list behind it is republished far less
   // often than the affiliate records are.
-  { path: '/attendance', priority: '0.6', changefreq: 'daily' },
-  { path: '/pace-of-play', priority: '0.6', changefreq: 'daily' },
-  { path: '/farm-system-rankings', priority: '0.6', changefreq: 'weekly' },
-  { path: '/bullpen-availability', priority: '0.6', changefreq: 'daily' },
-  { path: '/doubleheaders', priority: '0.6', changefreq: 'daily' },
+  { path: pathOf('attendance'), priority: '0.6', changefreq: 'daily' },
+  { path: pathOf('pace'), priority: '0.6', changefreq: 'daily' },
+  { path: pathOf('farm-system'), priority: '0.6', changefreq: 'weekly' },
+  { path: pathOf('bullpens'), priority: '0.6', changefreq: 'daily' },
+  { path: pathOf('doubleheaders'), priority: '0.6', changefreq: 'daily' },
   // The season boards. Same class as /standings and /leaders above — league-wide,
   // public, no game's line on them — and they were left out only because each
   // arrived after this list was last read end to end.
   { path: '/situational-records', priority: '0.5', changefreq: 'daily' },
-  { path: '/salaries', priority: '0.5', changefreq: 'weekly' },
-  { path: '/postseason-race', priority: '0.6', changefreq: 'daily' },
-  { path: '/fouls', priority: '0.4', changefreq: 'daily' },
+  { path: pathOf('salaries'), priority: '0.5', changefreq: 'weekly' },
+  { path: pathOf('postseason-race'), priority: '0.6', changefreq: 'daily' },
+  { path: pathOf('fouls'), priority: '0.4', changefreq: 'daily' },
   // Footer pages that were missing here. Same class as the boards above: public,
   // league-wide, no game's result on them. The personal pages (/profile, /logbook,
   // /first-scorebook, /photos) stay out on purpose — they are yours, not the site's.
-  { path: '/run-value', priority: '0.5', changefreq: 'daily' },
+  { path: pathOf('run-value'), priority: '0.5', changefreq: 'daily' },
   { path: '/scout', priority: '0.4', changefreq: 'daily' },
   { path: '/from', priority: '0.4', changefreq: 'weekly' },
-  { path: '/abs-challenges', priority: '0.5', changefreq: 'daily' },
-  { path: '/nine-keys', priority: '0.4', changefreq: 'yearly' },
-  { path: '/run-differential', priority: '0.4', changefreq: 'monthly' },
+  { path: pathOf('abs-challenges'), priority: '0.5', changefreq: 'daily' },
+  { path: pathOf('nine-keys'), priority: '0.4', changefreq: 'yearly' },
+  { path: pathOf('run-differential'), priority: '0.4', changefreq: 'monthly' },
   { path: '/postseason-records', priority: '0.4', changefreq: 'monthly' },
 ]
 

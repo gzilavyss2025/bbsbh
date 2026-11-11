@@ -295,7 +295,18 @@ export function isSlateUrl(url) {
   return parseRoute(url).name === 'home'
 }
 
+// A route-table page (lib/route/table.js) is an exact address, so it is looked
+// up first and the hand branches below never see it. test/route-table.test.js
+// runs every table address through parseRouteByHand and expects the slate
+// fallback, so a hand branch that would also claim one fails there.
 export function parseRoute(url) {
+  const parts = (url || '').split('?')[0].split('/').filter(Boolean)
+  const tabled = NAME_BY_PATH.get('/' + parts.join('/'))
+  return tabled ? { name: tabled } : parseRouteByHand(url)
+}
+
+// Every route the table does not hold. Exported for that test only.
+export function parseRouteByHand(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)
   const q = new URLSearchParams(query)
@@ -314,10 +325,6 @@ export function parseRoute(url) {
   const asOf = isRealDate(raw) ? raw : yearAsOf(q.get('y'))
   const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
-  // A route-table page is an exact address, so it is looked up before any hand
-  // branch below; test/route-table.test.js checks none of them could match one.
-  const tabled = NAME_BY_PATH.get('/' + parts.join('/'))
-  if (tabled) return { name: tabled }
   // A bare 8-digit date is the slate paged to that day ('/07172026') — the
   // home screen, shareable. Every named single-segment route below is
   // non-numeric, so the digit test can safely come first. An impossible

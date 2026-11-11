@@ -1,3 +1,4 @@
+import { pathOf } from '../../../../lib/route/table.js'
 import { keysVerdict, nineKeysTeams } from '../../../../lib/postseason/keysVerdict.js'
 import { ordinalSuffix } from '../../../../lib/format.js'
 import { teamAbbr } from '../../../../lib/teams.js'
@@ -29,7 +30,7 @@ export function NineKeys({ data, clubIds, season }) {
             Failed keys · {sideA.abbr} {sideA.failed} · {sideB.abbr} {sideB.failed}
             <InfoPopover label="What the failed-key count means" className="infopop--paper">{verdict}</InfoPopover>
           </span>
-          <Door {...routeLink('/nine-keys')}>Full report</Door>
+          <Door {...routeLink(pathOf('nine-keys'))}>Full report</Door>
         </Cluster>
         <ComparisonLegend lead="Better rank" bar={data.bar} />
       </>}

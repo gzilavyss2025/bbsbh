@@ -62,11 +62,10 @@ export function seasonPath(base, season) {
 // `standings` and `postseason-race` take a season too ('/standings/2024') but no
 // `vs`: one year's table is not compared with another's here.
 // Which slugs are season views is the route table's call (`season: true`).
-const SEASON_PAGES = SEASON_NAME_BY_SLUG
 export function parseSeasonRoute(parts, q, { idFromSlug }) {
   const [head, second, third] = parts
   const scope = pitchScopeOf(q.get('scope'))
-  if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...(scope && { scope }), ...seasonParams(second, q) }
+  if (parts.length <= 2 && SEASON_NAME_BY_SLUG[head]) return { name: SEASON_NAME_BY_SLUG[head], ...(scope && { scope }), ...seasonParams(second, q) }
   if ((parts.length === 2 || parts.length === 3) && head === 'umpire')
     return { name: 'umpire', id: idFromSlug(second), ...seasonParams(third, q) }
   return null

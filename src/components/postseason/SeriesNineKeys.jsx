@@ -1,3 +1,4 @@
+import { pathOf } from '../../lib/route/table.js'
 import '../../styles/postseason/series-parts.css'
 import { keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { ordinal } from '../../lib/format.js'
@@ -88,7 +89,7 @@ export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
               {verdict}
             </InfoPopover>
           </p>
-          <Door {...routeLink('/nine-keys')}>Full report</Door>
+          <Door {...routeLink(pathOf('nine-keys'))}>Full report</Door>
         </Cluster>
       </Card>
     </section>

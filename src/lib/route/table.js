@@ -76,7 +76,9 @@ export const ROUTE_TABLE = [
   { name: 'wire-lab', path: '/wire-lab' },
 ]
 
-const BY_NAME = new Map(ROUTE_TABLE.map((r) => [r.name, r]))
+// Route name → canonical address, for callers that hold a name from outside
+// the table's control (api/preview.js's card key) and must not throw on one.
+export const PATH_BY_NAME = new Map(ROUTE_TABLE.map((r) => [r.name, r.path]))
 
 // Exact address → route name, for every static entry's path and aliases.
 // Season views are left out: their address carries a year and a query
@@ -95,7 +97,7 @@ export const SEASON_NAME_BY_SLUG = Object.fromEntries(
 // The canonical address of a table route. Throws on an unknown name, so a
 // typo in the menu or a builder fails at import, not as a dead link.
 export function pathOf(name) {
-  const route = BY_NAME.get(name)
-  if (!route) throw new Error(`No route named '${name}' in ROUTE_TABLE`)
-  return route.path
+  const path = PATH_BY_NAME.get(name)
+  if (!path) throw new Error(`No route named '${name}' in ROUTE_TABLE`)
+  return path
 }

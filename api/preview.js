@@ -26,6 +26,7 @@
 // as the matchup. ADR-0059 argues it.
 
 import { SITE_URL } from '../src/copy/landing/site.js'
+import { PATH_BY_NAME } from '../src/lib/route/table.js'
 import { buildCard, buildRoster } from './_lib/cards.js'
 import { appShell, CRAWL_STYLE, esc, renderCrawlBody } from './_lib/crawl.js'
 
@@ -79,8 +80,10 @@ export function canonicalUrl(params, card = null) {
   const date = /^\d{8}$/.test(params.get('date') ?? '') ? params.get('date') : null
   const [matchup, section, scope] = ['matchup', 'section', 'scope'].map((k) => segment(params.get(k)))
   const orgId = /^\d+$/.test(params.get('orgId') ?? '') ? params.get('orgId') : null
-  let path
-  switch (route) {
+  // A route-table page's address comes from the table, never a second copy here
+  // (that copy once missed the three whose name is not their path).
+  let path = PATH_BY_NAME.get(route)
+  if (!path) switch (route) {
     case 'player':
       path = entity ? `/player/${entity}` : '/'
       break
@@ -99,40 +102,20 @@ export function canonicalUrl(params, card = null) {
     case 'leaders-org':
       path = orgId ? `/leaders/org/${orgId}` : '/leaders'
       break
-    case 'standings':
-    case 'prospects':
-    case 'rehab':
     case 'about':
     case 'logos':
-    case 'fouls':
-    case 'milestones':
-    case 'umpires':
-    case 'awards':
-    case 'postseason-history':
-    case 'postseason-leaders':
     case 'trade-deadline':
-    case 'all-star-rosters':
-    case 'all-star-legacy':
     case 'logbook':
-    case 'first-scorebook':
     case 'photos':
     case 'situational-records':
-    case 'salaries':
-    case 'doubleheaders':
-    case 'postseason-race':
-    case 'attendance':
       path = `/${route}`
       break
-    // Three whose route name is not their path. They cannot join the
-    // fallthrough above, and that is precisely why they were missed.
-    case 'pace':
-      path = '/pace-of-play'
+    // Card keys older than the route table's names for the same two pages.
+    case 'umpires':
+      path = PATH_BY_NAME.get('umpire-rankings')
       break
-    case 'farm-system':
-      path = '/farm-system-rankings'
-      break
-    case 'bullpens':
-      path = '/bullpen-availability'
+    case 'awards':
+      path = PATH_BY_NAME.get('awards-history')
       break
     default:
       path = '/'
