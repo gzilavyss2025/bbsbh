@@ -1,4 +1,4 @@
-// Coverage for src/api/team.js — team identity, roster, affiliates, standings,
+// Coverage for src/api/team/fetch.js — team identity, roster, affiliates, standings,
 // and ranked team stats. Every export here fetches (either the static weekly
 // snapshot or a live statsapi endpoint), so each test mocks globalThis.fetch
 // and restores it in a finally block, same convention as test/jerseys.test.js.
@@ -18,7 +18,7 @@ import {
   fetchSeasonVenue,
   fetchLeagueStandings,
   fetchLeagueTeamStats,
-} from '../src/api/team.js'
+} from '../src/api/team/fetch.js'
 
 // A fetch stub keyed by exact URL match, so each test only has to describe the
 // requests it actually expects; anything unlisted throws loudly instead of

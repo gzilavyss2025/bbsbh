@@ -12,7 +12,7 @@
 // `venue: { id, name, link }` on the plain /teams call.
 //
 // One call per sportId to /api/v1/teams already returns everything BOTH
-// fetchTeams() (src/api/schedule/fetch.js) and fetchTeam() (src/api/team.js) need,
+// fetchTeams() (src/api/schedule/fetch.js) and fetchTeam() (src/api/team/fetch.js) need,
 // so this single file backs both — no per-team /teams/{id} calls at runtime.
 //
 // The sportId list below must stay in sync with SEARCHABLE_SPORT_IDS in

@@ -1,5 +1,5 @@
-import { fetchTeam, fetchTeamGamesPlayed } from '../api/team.js'
-import { ALL_CATEGORIES } from '../api/teamLeaders.js'
+import { fetchTeam, fetchTeamGamesPlayed } from '../api/team/fetch.js'
+import { ALL_CATEGORIES } from '../api/team/leaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'

@@ -16,7 +16,7 @@ globalThis.fetch = async (url) => {
   return { ok: true, status: 200, headers: new Headers(), json: async () => body, text: async () => JSON.stringify(body) }
 }
 
-const { fetchStaticAffiliates } = await import('../src/api/team.js')
+const { fetchStaticAffiliates } = await import('../src/api/team/fetch.js')
 const { fetchAffiliateParentMap } = await import('../src/api/transactions/leagueFeed.js')
 const { SHARED } = await import('../src/screens/team/next/once.js')
 
@@ -65,7 +65,7 @@ test('a failed affiliates.json load is not kept: the next call tries again', asy
     return { ok: true, status: 200, headers: new Headers(), json: async () => ({ season: 2026, byOrgId: { 158: [{ id: 1 }] } }), text: async () => '' }
   }
   try {
-    const fresh = await import('../src/api/team.js?affiliates-retry')
+    const fresh = await import('../src/api/team/fetch.js?affiliates-retry')
     assert.deepEqual((await fresh.fetchStaticAffiliates()).byOrgId, {})
     assert.deepEqual(Object.keys((await fresh.fetchStaticAffiliates()).byOrgId), ['158'])
     assert.equal(calls, 2)

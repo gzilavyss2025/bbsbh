@@ -100,7 +100,7 @@ It counts **tracked** files only: 2,510 files, 152.6 MB. Untracked `.scratch/` f
 | `team-page-ia` | 39 KB | 9 | 11: `e2e/team-hub-tabs.spec.js`, `src/App.jsx`, `src/lib/route.js` | no | 4 / 5 / 0 |
 | `team-scores` | 11 KB | 1 | 0 | no | 0 / 0 / 1 |
 | `team-success` | 32.64 MB | 52 | 26: `.claude/hooks/contender-diary-reminder.mjs`, `.gitignore`, `docs/agents/contender-diary.md` | yes (25) | 52 / 0 / 0 |
-| `team-transactions` | 60 KB | 3 | 6: `docs/transactions-wire.md`, `scripts/gen-team-transactions.mjs`, `src/api/teamTransactions.js` | no | 2 / 1 / 0 |
+| `team-transactions` | 60 KB | 3 | 6: `docs/transactions-wire.md`, `scripts/gen-team-transactions.mjs`, `src/api/transactions/team.js` | no | 2 / 1 / 0 |
 | `top-prospects-history` | 225 KB | 8 | 10: `.claude/hooks/research-diary-reminder.mjs`, `docs/prospect-ranking-value.md`, `docs/scripts/generators.md` | yes (3) | 5 / 3 / 0 |
 | `umpire-accuracy` | 25 KB | 2 | 11: `docs/api/live-game.md`, `docs/enhancement-proposals.md`, `docs/scripts/generators.md` | no | 2 / 0 / 0 |
 | `umpire-tendencies` | 87 KB | 6 | 3: `scripts/gen-umpire-accuracy.mjs`, `src/components/umpire/UmpireTendencies.jsx`, `src/styles/53-umpire-tendencies.css` | no | 1 / 5 / 0 |
@@ -118,13 +118,13 @@ Totals: 64 folders, 2,510 files, 152.6 MB.
 | --- | ---: | --- |
 | `level-benchmarks` | 22 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/api/statsLevels.js`, `src/lib/shardKey.js` |
 | `abs-reports` | 16 | `scripts/lib/db.js`, `scripts/lib/statsapi.mjs` |
-| `home-transactions` | 13 | `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/api/teamTransactions.js`, `src/api/transactions/league.js`, `src/lib/data/mlb-team-colors.json` |
+| `home-transactions` | 13 | `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/api/transactions/team.js`, `src/api/transactions/league.js`, `src/lib/data/mlb-team-colors.json` |
 | `offseason-design` | 11 | `scripts/lib/statsapi.mjs` |
 | `team-success` | 11 | `scripts/lib/csv.mjs`, `scripts/lib/statsapi.mjs`, `src/lib/contracts/clubCodes.js`, `src/lib/contracts/parseMoney.js`, `src/lib/contracts/positions.js`, `src/lib/teams.js` |
 | `abs-aaa-gate` | 10 | `scripts/lib/statsapi.mjs`, `src/api/challenges.js` |
 | `blockage` | 4 | `scripts/lib/statsapi.mjs` |
 | `design-system` | 4 | `src/components/admin/contracts/CandidateList.jsx`, `src/components/admin/contracts/LookupDeck.jsx`, `src/components/ui/control/Button.jsx`, `src/index.css`, `src/lib/design/contrastPairings.js`, `src/styles/62-identity-admin.css`, `src/styles/74-contract-workbench.css` |
-| `club-live-overlay` | 3 | `scripts/lib/statsapi.mjs`, `src/api/teamTransactions.js`, `src/api/transactions/clubFeed.js`, `src/api/transactions/leagueFeed.js` |
+| `club-live-overlay` | 3 | `scripts/lib/statsapi.mjs`, `src/api/transactions/team.js`, `src/api/transactions/clubFeed.js`, `src/api/transactions/leagueFeed.js` |
 | `contracts-extensions` | 3 | `scripts/lib/csv.mjs`, `src/lib/contracts/parseMoney.js`, `src/lib/contracts/positions.js`, `src/lib/shardKey.js` |
 | `game-notes` | 3 | `src/api/whatsBrewing.js` |
 | `prospect-traits` | 3 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/lib/shardKey.js` |
@@ -144,7 +144,7 @@ Totals: 64 folders, 2,510 files, 152.6 MB.
 | `scripts/lib/db.js` | 11 | `abs-reports` |
 | `src/api/rehab-policy.js` | 9 | `home-transactions`, `level-benchmarks`, `prospect-traits` |
 | `scripts/lib/concurrency.mjs` | 7 | `level-benchmarks`, `prospect-traits` |
-| `src/api/teamTransactions.js` | 7 | `club-live-overlay`, `home-transactions` |
+| `src/api/transactions/team.js` | 7 | `club-live-overlay`, `home-transactions` |
 | `scripts/lib/csv.mjs` | 5 | `contracts`, `contracts-extensions`, `prospect-value`, `team-success`, `top-prospects-history` |
 | `src/api/transactions/league.js` | 5 | `home-transactions` |
 | `src/lib/contracts/parseMoney.js` | 5 | `contracts`, `contracts-extensions`, `prospect-value`, `team-success` |

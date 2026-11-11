@@ -212,7 +212,7 @@ export function sumPitching(splits) {
   const ip = t.outs / 3
   t.inningsPitched = outsToIp(t.outs)
   // null, not 0, at no outs: a pitcher with no out has no ERA, and a 0 would rank
-  // him first. Readers check for it (teamLeaders.js, prospects.js, loadMinors.js).
+  // him first. Readers check for it (team/leaders.js, prospects.js, loadMinors.js).
   t.era = eraOf(t.earnedRuns, t.outs)
   t.whip = whipOf(t.baseOnBalls, t.hits, t.outs)
   t.avg = rate(t.hits, t.atBats)
@@ -224,7 +224,7 @@ export function sumPitching(splits) {
 }
 
 // Group hitting + pitching splits by player and combine into PoolPlayer[] (the
-// shape api/teamLeaders.js ranks). Each player's identity is taken from his
+// shape api/team/leaders.js ranks). Each player's identity is taken from his
 // HIGHEST level reached (lowest MiLB sportId — 11 AAA tops 14 A); `levels` is
 // every level his totals span, ordered low→high for the progression badge
 // ("A+·AA"). A player with only one group carries a null for the other.

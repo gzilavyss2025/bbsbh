@@ -38,7 +38,7 @@ import {
   dedupeTransactions,
   filterStoryworthy,
   groupIntoStories,
-} from '../teamTransactions.js'
+} from './team.js'
 
 // The same unordered from/to key the grouper's own trade step uses, so a deal
 // is owned as one unit by exactly the rows that will later be grouped as one

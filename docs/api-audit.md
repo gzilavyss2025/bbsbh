@@ -50,12 +50,12 @@ which sets no default params and no caching.
 | `schedule` | `/api/v1/schedule` | `sportId&teamId&season&gameType=R&hydrate=team` | `schedule/fetch.js:229` `fetchTeamSchedule` | scores present, **not copied** |
 | `teams` | `/api/v1/teams` | `sportId&activeStatus=Y` | `schedule/fetch.js:110` (fallback) | no |
 | `game_uniforms` | `/api/v1/uniforms/game` | `gamePks={gamePk}` / `{csv}` (slate batched) | `uniforms.js:16,54` | no |
-| `team` | `/api/v1/teams/{teamId}` | none | `team.js:34` `fetchTeam` (static-first) | no |
-| `team_roster` | `/api/v1/teams/{teamId}/roster` | `rosterType&hydrate=person(stats(type=season,group=[hitting,pitching],sportId,season))` | `team.js:79` `fetchTeamRoster` | aggregates |
-| `team_roster` | `/api/v1/teams/{teamId}/roster` | `rosterType=40Man&season` / `rosterType=active` | `team.js:104,131` | no |
-| `teams_affiliates` | `/api/v1/teams/affiliates` | `teamIds&season&hydrate=venue(location)` | `team.js:192` (static-first) | no |
-| `standings` | `/api/v1/standings` | `leagueId&season&standingsTypes=regularSeason[&date][&hydrate]` | `team.js:236` `fetchLeagueStandings` | **YES — date-gated (see §4)** |
-| `teams_stats` | `/api/v1/teams/stats` | `season&sportIds=1&group&stats=season` | `team.js:292` | aggregates |
+| `team` | `/api/v1/teams/{teamId}` | none | `team/fetch.js:34` `fetchTeam` (static-first) | no |
+| `team_roster` | `/api/v1/teams/{teamId}/roster` | `rosterType&hydrate=person(stats(type=season,group=[hitting,pitching],sportId,season))` | `team/fetch.js:79` `fetchTeamRoster` | aggregates |
+| `team_roster` | `/api/v1/teams/{teamId}/roster` | `rosterType=40Man&season` / `rosterType=active` | `team/fetch.js:104,131` | no |
+| `teams_affiliates` | `/api/v1/teams/affiliates` | `teamIds&season&hydrate=venue(location)` | `team/fetch.js:192` (static-first) | no |
+| `standings` | `/api/v1/standings` | `leagueId&season&standingsTypes=regularSeason[&date][&hydrate]` | `team/fetch.js:236` `fetchLeagueStandings` | **YES — date-gated (see §4)** |
+| `teams_stats` | `/api/v1/teams/stats` | `season&sportIds=1&group&stats=season` | `team/fetch.js:292` | aggregates |
 | `person` | `/api/v1/people/{personId}` | `hydrate=currentTeam,team,draft` | `person-fetch.js:27` | no |
 | `person_stats` | `/api/v1/people/{personId}/stats` | many (`stats`,`group`,`season`,`startDate`,`endDate`,`sitCodes`,`sportId`) | `person-fetch.js:56,130,157` | aggregates |
 | `people` (batch) | `/api/v1/teams?teamId={csv}` | batched | `person-fetch.js:210` | no |
@@ -169,7 +169,7 @@ trims to related objects but not scalar fields.
 ### 2b. `hydrate` — N+1 fan-outs
 
 The app already uses `hydrate` well in several spots (schedule readiness in one call
-`schedule/fetch.js:85`; roster+season-stats in one call `team.js:79`; venue location `game.js:34`).
+`schedule/fetch.js:85`; roster+season-stats in one call `team/fetch.js:79`; venue location `game.js:34`).
 Remaining fan-outs:
 
 - **`gen-vs-team-splits.mjs` (worst).** One `gameLog` call **per MLB season per player**
@@ -195,7 +195,7 @@ Remaining fan-outs:
 
 **Already handled well; no fetch-current-and-subtract anti-pattern found.**
 
-- `fetchLeagueStandings` (`team.js:233-236`) passes `&date=${date}`; `src/api/standings.js:5-11`
+- `fetchLeagueStandings` (`team/fetch.js:233-236`) passes `&date=${date}`; `src/api/standings.js:5-11`
   documents that spoiler-safety comes entirely from the caller requesting "entering today"
   (yesterday). `gen-callouts.mjs:344` does the same for the extra-inning/one-run split records
   (`date=${asOf}`, slate eve). This is exactly the recommended pattern.
@@ -314,7 +314,7 @@ Exactly four statsapi endpoints, plus one social feed:
 2. **`/game/{pk}/winProbability`** (`game.js:18`) — per-play win % (a 4% away WP in the 8th
    announces the result).
 3. **`/game/{pk}/boxscore`** (`postseason/archive/series.js:73`) — a completed series game's line score.
-4. **`/standings`** (`team.js:236`) — league W/L aggregates.
+4. **`/standings`** (`team/fetch.js:236`) — league W/L aggregates.
 5. **Bluesky `searchPosts`** (`buzz.js:67`) — post text stating finals.
 
 ### What enforces the invariant, and whether it's *enforced* or *conventional*

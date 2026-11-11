@@ -12,7 +12,7 @@ import {
 } from '../../../api/select.js'
 import { selectRecordIsClosed } from '../../../api/gamerecord/played.js'
 import { fetchSeasonSeries } from '../../../api/schedule/fetch.js'
-import { fetchTeam, fetchTeamRoster } from '../../../api/team.js'
+import { fetchTeam, fetchTeamRoster } from '../../../api/team/fetch.js'
 import { POS_ORDER, splitDisplayName } from '../../../api/person.js'
 import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitcher/arsenal.js'
 import { fetchHitterEntryLines } from '../../../api/player/hitterEntryLines.js'

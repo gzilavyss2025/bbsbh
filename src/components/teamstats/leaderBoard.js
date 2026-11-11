@@ -1,4 +1,4 @@
-import { computeLeaders } from '../../api/teamLeaders.js'
+import { computeLeaders } from '../../api/team/leaders.js'
 
 // The pure half of TeamLeaders.jsx (a node test cannot import a .jsx file).
 

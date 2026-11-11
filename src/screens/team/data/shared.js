@@ -204,7 +204,7 @@ export function injuredIdsFrom(ilRoster) {
 // rows — added to this roster but not yet appeared in this uniform — has
 // nothing here to prefer; returning those rows anyway read as this team's own
 // numbers to every caller (a AAA roster's stats hydrate is scoped by LEVEL,
-// not by team — see fetchTeamRoster, api/team.js — so a rostered-but-unplayed
+// not by team — see fetchTeamRoster, api/team/fetch.js — so a rostered-but-unplayed
 // pickup's season-elsewhere splits ride along in the same response).
 export function preferTeamSplits(splits, teamId) {
   const teamRows = splits.filter((s) => s.team?.id === teamId)
@@ -224,7 +224,7 @@ export function rosterPitchingStat(r, teamId) {
 }
 
 // A roster row's season fielding splits, one per position played — see
-// fetchTeamRoster's hydrate note (api/team.js) on why this needs live
+// fetchTeamRoster's hydrate note (api/team/fetch.js) on why this needs live
 // verification. Feeds the Preferred Lineup diamond below.
 function rosterFieldingSplits(r, teamId) {
   const stats = r.person?.stats ?? []
@@ -358,7 +358,7 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
 // farm levels (AAA/AA/A+/A, already sorted highest level first by
 // fetchAffiliates); `complexAffiliates` is the org's current Rookie/complex
 // clubs (ACL/FCL/DSL, sometimes more than one at once — fetchComplexAffiliates
-// in api/team.js), appended AFTER Single-A so the rendered order keeps
+// in api/team/fetch.js), appended AFTER Single-A so the rendered order keeps
 // stepping down the ladder. On a MiLB affiliate's own page, lead with a card
 // for the parent MLB club (which the affiliate fetchers deliberately omit
 // from the farm tree) — location is unavailable from the static team record,

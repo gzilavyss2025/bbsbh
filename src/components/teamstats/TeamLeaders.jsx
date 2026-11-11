@@ -18,7 +18,7 @@ import { displayRanks, rankedCategories, rowLook } from './leaderBoard.js'
 // a LeaderList (its name on the tab, a "Top 10" tag) of LeaderRows: the headshot in the mark
 // slot, the name over a small line, the figure on the right. Rank 1 leads; the reader's club
 // is "mine" (ADR-0030). Pool-agnostic: it ranks whatever normalized PoolPlayer[] it's handed
-// (see api/teamLeaders.js), so one component serves /team/{id}/leaders, the league/level/org
+// (see api/team/leaders.js), so one component serves /team/{id}/leaders, the league/level/org
 // boards and the postseason boards alike.
 //
 // The team page's Ranks band renders it too, for its batting and pitching leaders: the top 5 of
@@ -130,7 +130,7 @@ function LeaderCategory({
 // badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
 // fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
 // playing-time bar mode for rate categories, forwarded to computeLeaders
-// ('leader-relative' for the large pools; see api/teamLeaders.js).
+// ('leader-relative' for the large pools; see api/team/leaders.js).
 // `precomputed`: a { categoryKey: entries[] } map of ALREADY-RANKED rows
 // (computeLeaders' output shape) — passed instead of `pool` when the ranking
 // was baked at build time (the static all-minors board, too heavy to rank

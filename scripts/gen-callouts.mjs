@@ -122,7 +122,7 @@
 //
 // Like gen-minors-leaders.mjs it is NOT self-contained for RANKING: it imports
 // the app's own computeLeaders + category descriptors + normalizeRosterToPool
-// (src/api/teamLeaders.js) so a leader here can never drift from the team page.
+// (src/api/team/leaders.js) so a leader here can never drift from the team page.
 // The raw fetches are done inline (self-contained, like the other gen-*.mjs) to
 // avoid the app's browser-oriented fetch/cache layers.
 //
@@ -145,7 +145,7 @@ import {
   computeLeaders,
   HITTING_CATEGORIES,
   PITCHING_CATEGORIES,
-} from '../src/api/teamLeaders.js'
+} from '../src/api/team/leaders.js'
 import { HIT_CATEGORY_KEYS, SCORING_FIRST_MIN_GAMES } from '../src/api/callout-notes.js'
 // The checkpoint innings and thresholds these records are tallied against come
 // FROM the note builders that read them (the "import the app's own shaper so
@@ -192,9 +192,9 @@ const SWEPT_SPORT_IDS = [1, 11, 12, 13, 14]
 // when his level's sportId is passed explicitly.
 const sportParam = (sportId) => (sportId === MLB ? '' : `&sportId=${sportId}`)
 
-// One team's roster → PoolPlayer[] (see teamLeaders.js's PoolPlayer shape),
+// One team's roster → PoolPlayer[] (see team/leaders.js's PoolPlayer shape),
 // self-contained like the rest of this script's fetches — `normalizeRosterToPool`
-// used to live in teamLeaders.js itself but was replaced there by the
+// used to live in team/leaders.js itself but was replaced there by the
 // roster-INDEPENDENT `loadCombinedPoolForTeams` (added to include departed
 // players in team/league leader boards); this script still wants the CURRENT
 // roster (a departed player has no bearing on tonight's game), so the
@@ -415,9 +415,9 @@ const BIRTHDAY_MIN_AB = 5
 
 // One club's 40-man roster with season hitting+pitching hydrated — the exact
 // request fetchTeamRoster builds, inlined so this script needn't import the
-// app's browser-oriented team.js. rosterType=40Man so an injured leader (e.g. a
+// app's browser-oriented team/fetch.js. rosterType=40Man so an injured leader (e.g. a
 // club's HR leader on the IL) still counts; for a MiLB affiliate it resolves to
-// the affiliate's own roster (same as team.js's fetchTeamIl notes). The season
+// the affiliate's own roster (same as team/fetch.js's fetchTeamIl notes). The season
 // stats hydrate is scoped to the club's own level so minor leaguers rank on
 // their level's line, not an empty MLB one.
 async function fetchRoster(teamId, sportId) {

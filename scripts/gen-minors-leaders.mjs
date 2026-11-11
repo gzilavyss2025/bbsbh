@@ -14,7 +14,7 @@
 //
 // Unlike the FanGraphs/rehab generators — which keep self-contained copies of
 // their logic — this imports the app's OWN combine AND ranking (statsLevels.js +
-// teamLeaders.js). Those modules are pure and node-safe, and the live scopes use
+// team/leaders.js). Those modules are pure and node-safe, and the live scopes use
 // the very same combineToPool + computeLeaders, so importing keeps the static
 // board in exact lockstep with the live ones rather than risking a drifting copy.
 //
@@ -27,7 +27,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
-import { computeLeaders, ALL_CATEGORIES } from '../src/api/teamLeaders.js'
+import { computeLeaders, ALL_CATEGORIES } from '../src/api/team/leaders.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { levelSpan, seasonWindows } from './lib/level-path.mjs'
 import { getJson } from './lib/statsapi.mjs'

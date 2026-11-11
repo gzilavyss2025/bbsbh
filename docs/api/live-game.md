@@ -369,7 +369,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   unrostered — a signed player who has missed the whole year is the IL banner's
   story, not this one. Both are pure and take the page's cutoff date, so a
   player page opened from an old box score reports his status THAT day.
-- `team.js` — team identity, roster, affiliates, standings, ranked team stats.
+- `team/fetch.js` — team identity, roster, affiliates, standings, ranked team stats.
 - `staff/coaches.js` — a club's whole coaching staff for a season, off `/teams/{id}/coaches` (the endpoint `fetchManager` reads for one row). One card per person: the feed repeats a coach once per jersey number and lists a man twice when he holds two jobs. Spoiler-free; the team page's Coaching staff card reads it.
 - `search.js` — the footer's player/team directory search.
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
@@ -685,8 +685,8 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
 
 ## Leader boards (live)
 
-- `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:
-  `teamLeaders.js` holds the category descriptors + `computeLeaders`, which ranks
+- `leaders.js` / `team/leaders.js` / `statsLevels.js` — ranking is pool-agnostic:
+  `team/leaders.js` holds the category descriptors + `computeLeaders`, which ranks
   any normalized `PoolPlayer[]`; `leaders.js` produces the pool for a scope (a team
   level or MLB/AL/NL via `fetchTeamRoster` fan-out; an `org` via `statsLevels.js`).
   `statsLevels.js` reads the roster-INDEPENDENT season-stats endpoint and SUMS a

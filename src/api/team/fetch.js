@@ -1,9 +1,9 @@
 // Team pages — identity, roster, standings, ranked team stats.
 
-import { getJson } from './statsapi.js'
-import { staticJsonBy } from './staticJson.js'
-import { fetchStaticTeams } from './teams-static.js'
-import { SPORT_IDS } from '../lib/teams.js'
+import { getJson } from '../statsapi.js'
+import { staticJsonBy } from '../staticJson.js'
+import { fetchStaticTeams } from '../teams-static.js'
+import { SPORT_IDS } from '../../lib/teams.js'
 
 // Basic team identity, incl. league + division ids (needed to pull the right
 // standings). Team identity barely ever changes mid-season, so this looks the
@@ -67,7 +67,7 @@ const teamRosterCache = new Map()
 // lines hydrated: pitching so the team page can infer starter/reliever/closer
 // (there is no role field in the API), hitting+pitching so the Team Leaders
 // section can rank individual players by any season stat (see
-// api/teamLeaders.js), fielding so the Preferred Lineup diamond can find each
+// api/team/leaders.js), fielding so the Preferred Lineup diamond can find each
 // position's #1 starter by games started there. All three arrive in one request; the API
 // returns only the split(s) a given player has, so a position player carries a hitting split
 // (plus one fielding split per position he's played), a pitcher a pitching

@@ -23,7 +23,7 @@ import { foldLine, foldStats } from '../src/api/boxlines/fold.js'
 import { mergeCareerSplits } from '../src/api/boxlines/careerSplits.js'
 import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 import { eraOf, mlbOps, rate3, whipOf } from '../src/api/person/shared.js'
-import { PITCHING_CATEGORIES, computeLeaders } from '../src/api/teamLeaders.js'
+import { PITCHING_CATEGORIES, computeLeaders } from '../src/api/team/leaders.js'
 
 // Judge's 2025 line, whole.
 const JUDGE = { atBats: 541, hits: 179, baseOnBalls: 124, hitByPitch: 7, sacFlies: 7, totalBases: 372 }
@@ -109,7 +109,7 @@ test('the computed homes print a 23-for-80 half as .288 (#1356)', () => {
 test('no hand-rolled toFixed(3) rate formatter is left beside the shared rate3 (#1356)', () => {
   for (const path of [
     '../src/api/boxlines/fold.js',
-    '../src/api/teamLeaders.js',
+    '../src/api/team/leaders.js',
     '../src/api/prospects.js',
     '../src/api/tradeDeadline.js',
     '../src/screens/team/data/loadMinors.js',

@@ -4,7 +4,7 @@
 // MLB Stats API (mlb.js's territory) or a shaping of a /people response
 // (person.js's territory), so it gets its own small file.
 
-import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from './team.js'
+import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from './team/fetch.js'
 import { loadCombinedPoolForTeams, sumHitting, sumPitching } from './statsLevels.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { rate3 as sharedRate3 } from './person/shared.js'
@@ -173,7 +173,7 @@ function statLineFrom(splits, pitching) {
 // `p.teamId` in the snapshot is each player's MLB parent org, so this fans
 // out an affiliate tree — full-season AAA/AA/A+/A PLUS complex/rookie clubs,
 // since fetchAffiliates alone omits the latter (see prospectAffiliateMap's
-// own note above, and fetchComplexAffiliates in team.js) — plus a 40-man
+// own note above, and fetchComplexAffiliates in team/fetch.js) — plus a 40-man
 // roster lookup per distinct org, then falls back to this season's stats
 // across the same org's teams for anyone roster membership still misses
 // (released, a stint between assignments, a foreign-league loanee). A player

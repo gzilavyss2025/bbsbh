@@ -4,7 +4,7 @@
 // game-log fixup). Fetch nothing another tab owns: no standings,
 // schedule-for-display, photos, uniforms, transactions, comebacks, odds,
 // affiliates or prospects table.
-import { fetchTeam } from '../../../api/team.js'
+import { fetchTeam } from '../../../api/team/fetch.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../../../api/person-fetch.js'
 import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'

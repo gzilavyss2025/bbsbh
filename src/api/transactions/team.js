@@ -16,8 +16,8 @@
 //
 // Roster moves and their dates carry no score, so nothing here is reveal-only.
 
-import { txnDate } from './rehab-policy.js'
-import { buildCutline, resolvePosition, surnameOf } from './transactions/cutline.js'
+import { txnDate } from '../rehab-policy.js'
+import { buildCutline, resolvePosition, surnameOf } from './cutline.js'
 import {
   OUTSIDE_ARRIVAL_CODES,
   isIlEndingTxn,
@@ -27,13 +27,13 @@ import {
   isNonIlListPlacement,
   nonIlList,
   rosterKind,
-} from './transactions/vocabulary.js'
+} from './vocabulary.js'
 
 // Re-exported so this module stays the pipeline's single public surface for
 // its existing callers — the generator, the team page's reader, and the
 // tests, none of which should have to know where a helper moved to.
-export { bucketToOrg, filterStoryworthy } from './transactions/vocabulary.js'
-export { buildCutline } from './transactions/cutline.js'
+export { bucketToOrg, filterStoryworthy } from './vocabulary.js'
+export { buildCutline } from './cutline.js'
 
 // ---------------------------------------------------------------------------
 // §2 De-dupe

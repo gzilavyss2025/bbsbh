@@ -10,7 +10,7 @@
 // already carries every season's (playerId, teamId) pairs back to 1933, so
 // this is a pure re-shape of data the All-Star Rosters page already loads.
 // The "current roster" half needs one live join against each club's roster
-// (`fetchRosterIdsForTeams`, api/team.js), which the page fetches once and
+// (`fetchRosterIdsForTeams`, api/team/fetch.js), which the page fetches once and
 // reuses for both sections.
 //
 // Selection membership carries no individual game's score (same footing as
@@ -66,7 +66,7 @@ function mostRecentTeamId(entry, years) {
 
 // Top `limit` all-time All-Star appearance leaders, restricted to a caller-
 // supplied Set of active player ids (see fetchRosterIdsForTeams in
-// api/team.js — the caller fans that out across ALL_MLB_TEAM_IDS with
+// api/team/fetch.js — the caller fans that out across ALL_MLB_TEAM_IDS with
 // rosterType='40Man' so an injured active All-Star still counts, same
 // convention as gen-callouts.mjs). Ranked by total career selections, not
 // selections for any one club, since this is a career honor. Ties go to
@@ -96,7 +96,7 @@ export function topActiveByAppearances(rosters, activeIds, limit = 10) {
 // was wearing at selection time (a traded All-Star shows up on his new
 // club's card, not his old one). `rosterEntriesByTeam` is the
 // `{teamId: {id, position}[]}` shape `fetchRosterEntriesForTeams`
-// (api/team.js) returns — the same current-roster fetch the page already
+// (api/team/fetch.js) returns — the same current-roster fetch the page already
 // needs for the active-leaders section above, reused here rather than
 // fetched twice. `position` is his CURRENT roster position (for the card's
 // position pill), not whatever he played the year he was selected. Sorted by

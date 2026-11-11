@@ -1,11 +1,11 @@
 // What the transaction wire's vocabulary MEANS — the scoping and noise-filter
-// half of the Team Transactions pipeline, split out of teamTransactions.js
+// half of the Team Transactions pipeline, split out of transactions/team.js
 // (ADR-0038) once that file passed its size budget.
 //
 // The split is along a real seam, not an arbitrary line. Everything here
 // answers "is this row news, and whose?" from a row's typeCode and sentence
 // alone. Nothing here groups rows into stories or writes prose — that stays in
-// teamTransactions.js, which imports this. The league-wide home-page feed
+// transactions/team.js, which imports this. The league-wide home-page feed
 // (issue #772) needs exactly this half and none of the other: its own grouping
 // pass runs without an `orgId`, over the same vocabulary.
 //
@@ -128,7 +128,7 @@ const STORY_WORTHY_CODES = new Set([
 // fromTeam, never touching the MLB roster at all) — REL/SU/SFA/SGN/IFA are
 // NOT inherently MLB-anchored the way a trade or a call-up/option is (those
 // always name the MLB club on one side, confirmed against the live feed —
-// see teamTransactions.js's module header). Rather than special-case which
+// see transactions/team.js's module header). Rather than special-case which
 // codes can leak, every row must clear this gate.
 // A signing (SFA/SGN/IFA) is the one whitelisted family with no other signal
 // separating a real roster move from anonymous org-filler — a mass minor-

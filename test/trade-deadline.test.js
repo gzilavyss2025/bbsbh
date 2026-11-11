@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { dedupeTransactions } from '../src/api/teamTransactions.js'
+import { dedupeTransactions } from '../src/api/transactions/team.js'
 import { bothSidesMlb } from '../scripts/gen-trade-deadline.mjs'
 import {
   groupTradeStories,

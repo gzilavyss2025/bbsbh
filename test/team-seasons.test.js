@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildTeamSeasons, compactTeamSeasons } from '../scripts/lib/open-data/team-seasons.mjs'
 import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../scripts/lib/open-data/credits.mjs'
-import { loadTeamSeasons } from '../src/api/teamSeasons.js'
+import { loadTeamSeasons } from '../src/api/team/seasons.js'
 
 // "Six degrees of teammates" data (ADR-0100): one roster per MLB team-season from
 // Retrosheet's allplayers.csv. Two players are teammates when both have g >= 1 for

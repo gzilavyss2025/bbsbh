@@ -164,6 +164,6 @@ Related research docs, worth reading before wiring a NEW source:
   `/api/v1/transactions`: every field, all 22 type codes and the thirteen
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
-  before touching `teamTransactions.js` or building anything league-wide. The pipeline
+  before touching `transactions/team.js` or building anything league-wide. The pipeline
   (six files, five seams): `transactions/CLAUDE.md`.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

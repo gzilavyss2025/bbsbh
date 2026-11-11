@@ -82,7 +82,7 @@ for each generator; the reader modules:
   six per group (SP, RP, CL, C, IF, OF, DH), from `public/data/top-free-agents.json`
   (`scripts/gen-top-free-agents.mjs`, nightly). Not its own module: the ranking and card
   logic it was built from live beside it, and the /free-agents page reads the same class live.
-- `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
+- `team/fetch.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
   `public/data/milb-alumni/{teamId}.json` (`scripts/gen-milb-alumni.mjs`, nightly).
   Not its own module: this reader sits beside `fetchAffiliates`, which already
   owns the static farm-system snapshot it is keyed against. Sharded by the club's
@@ -419,7 +419,7 @@ for each generator; the reader modules:
   `postseason_batting_totals`/`postseason_pitching_totals` (scripts/lib/
   schema.sql, docs/adr/0021) — the genuine cross-game aggregation case that ADR
   calls out, storing CAREER totals rather than a per-game ledger to keep the
-  committed dump lean. Entries are pre-shaped into `teamLeaders.js`'s
+  committed dump lean. Entries are pre-shaped into `team/leaders.js`'s
   `precomputed` category-map contract so `PostseasonLeadersPage.jsx` reuses
   `TeamLeaders` (Featured-leader/chasers layout) for the batting/pitching
   sections, same as `minorsLeaders.js` does for the all-minors board; the
@@ -1195,7 +1195,7 @@ for each generator; the reader modules:
   975 by 610 map. `country/{slug}.json` holds `{ name, places }`. `map/us.json` holds the state outlines
   and `map/{ST}.json` the zones. Spoiler-free: a school or a birthplace says nothing about a game
   (ADR-0034). Reader: `src/api/from/whereFrom.js`: `fetchFromIndex()`, `fetchFromMap()`, `fetchFromStateMap(st)`, `fetchFromLookup(kind)`, `fetchFromPlaces(kind, st)`, `fetchFromCountry(slug)` and `fetchFromPlace(route)` (one place for a place page, from the parsed address), each memoized through `staticJson` / `staticJsonBy`; a missing file answers with `null` (`[]` for a lookup). `fetchFromPlace` and `fetchFromCountry` throw when the device is offline, when a school's shard is missing, or within 30 seconds of a failed load (`staticJson` will not retry an unanswered URL sooner), so a page says it could not load and never says there is no such place. The pure helpers (search, zoom, copy, routes) are in `src/lib/from/`; the picker is `src/screens/from/FromPage.jsx` and a place is `src/screens/from/FromPlacePage.jsx` (`docs/where-theyre-from.md`).
-- `teamSeasons.js` — who played for each MLB team-season, from
+- `team/seasons.js` — who played for each MLB team-season, from
   `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
   `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:
   `players` lists each MLBAM id once, and each `teamSeasons` entry is

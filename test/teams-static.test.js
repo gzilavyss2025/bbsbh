@@ -1,5 +1,5 @@
 // Coverage for the static team-identity reader (src/api/teams-static.js), the
-// shared once-a-week snapshot fetchTeams (schedule/fetch.js) and fetchTeam (team.js)
+// shared once-a-week snapshot fetchTeams (schedule/fetch.js) and fetchTeam (team/fetch.js)
 // both read before falling back to a live statsapi call.
 import assert from 'node:assert/strict'
 import test from 'node:test'
