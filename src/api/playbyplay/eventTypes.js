@@ -33,7 +33,7 @@ export const GAME_ADVISORY_EVENT_TYPE = 'game_advisory'
 
 // Two more local-only, NON_PA_EVENT_TYPES-adjacent classifications — kept out
 // of the shared set above (also used for PA/BF counting in this file and in
-// pitcher/lines.js/derive.js, where neither belongs) but named here rather than
+// pitcher/lines.js and derive.js, where neither belongs) but named here rather than
 // spelled out inline at each call site, so the two lists below can't drift
 // apart from each other without a reader noticing why they differ.
 //

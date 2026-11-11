@@ -627,7 +627,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       //  2. The interrupted at-bat itself. The play's pitch events are the
       //     pitches thrown to the batter who was up — they are NOT re-listed
       //     when his at-bat restarts from scratch next inning (same feed fact
-      //     derive.js/pitcher/lines.js lean on to count these pitches; see
+      //     derive.js and pitcher/lines.js lean on to count these pitches; see
       //     NON_PA_EVENT_TYPES' doc). Verified against the same game: Luis
       //     Lara saw 4 pitches (1-2) on the caught_stealing_2b play, then led
       //     off the 8th with a fresh count. Without a card those pitches

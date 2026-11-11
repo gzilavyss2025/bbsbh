@@ -814,7 +814,7 @@
     },
     "pitcher/callouts.js": {
       "class": "reveal-gated",
-      "why": "Margin Notes — the ranked in-progress digest across both teams' pitchers. Built on computePitcherLines and pitcherHealth, so it carries their revealedThrough clamp (ADR-0009), not a seal.",
+      "why": "Margin Notes — the ranked in-progress digest across both teams' pitchers. Built on computePitcherLines and pitcher/health.js, so it carries their revealedThrough clamp (ADR-0009), not a seal.",
       "importers": [
         "screens/InningViewer.jsx"
       ]
