@@ -390,7 +390,13 @@
     },
     "winprob/feed.js": {
       "class": "spoiler-free",
-      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface."
+      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface. The raw feed reaches past any reveal clamp, so its importers are listed (#3038): each one either feeds selectWinProbPath's clamp, hands the whole game to the box score inside its seal, or reads Final games off the scoring surfaces (usePastGameSignals, called from a reveal).",
+      "importers": [
+        "hooks/useGameData.js",
+        "hooks/usePastGameSignals.js",
+        "screens/gameday/next/panels/GamedayPressure.jsx",
+        "screens/gameday/next/panels/GamedaySheets.jsx"
+      ]
     },
     "game.js": {
       "class": "spoiler-free",
