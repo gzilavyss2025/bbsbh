@@ -141,10 +141,14 @@ and pins that a club body carries no record — the same shape
 
 ## Consequences
 
-**A human on the first hard load of a shared link sees the body for a moment.**
-Only there: client-side navigation never reaches this function, and an installed
-reader never does either, because the service worker answers navigations with the
-precached shell (`navigateFallback`, with only `/learn` on its denylist). A small
+**A human on a hard load of a rewritten link sees the body for a moment.**
+Client-side navigation never reaches this function. An installed reader used to
+skip it too, because the service worker answered every navigation from the
+precached shell. Since #3041 the worker asks the network first (a `NetworkFirst`
+rule in `vite.config.js`, 3 s timeout, nothing stored; `/learn` excluded), so an
+installed reader who opens the app online at a rewritten URL gets this function's
+page too. Offline or after the timeout, the worker still serves the precached
+shell, which has no body. A small
 scoped stylesheet in the head keeps that moment looking like a plain document
 rather than unstyled soup, and the body is removed one statement before the app
 paints. The alternative was to hide it from browsers, which is the rejected
