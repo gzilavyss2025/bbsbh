@@ -173,12 +173,17 @@ test('the crawl layer imports nothing that can reach a game', () => {
     assert.doesNotMatch(source, /from '[^']*src\/api\//, `${path} must not import the app's data layer`)
     assert.doesNotMatch(source, /linescore|derive\.js|hitchart/, `${path} must not name a reveal-only module`)
   }
-  // The body layer's whole import graph is one line, and that line is the slug
-  // helpers — which fetch nothing either. There is almost no graph to audit,
-  // which is the strongest form of this claim available.
+  // The body layer's whole import graph is two lines: the slug helpers and the
+  // route table (#3040). Neither fetches anything, and neither imports anything,
+  // so there is almost no graph to audit — the strongest form of this claim.
   const imports = read('api/_lib/crawl.js').match(/^import .*$/gm) ?? []
-  assert.deepEqual(imports, ["import { clean, entitySegment, niceDate } from './entity.js'"])
-  assert.doesNotMatch(read('api/_lib/entity.js'), /^import /m, 'and that one imports nothing at all')
+  assert.deepEqual(imports, [
+    "import { clean, entitySegment, niceDate } from './entity.js'",
+    "import { pathOf } from '../../src/lib/route/table.js'",
+  ])
+  for (const leaf of ['api/_lib/entity.js', 'src/lib/route/table.js']) {
+    assert.doesNotMatch(read(leaf), /^\s*import\b|\bimport\(/m, `${leaf} imports nothing at all`)
+  }
 })
 
 test('a game route produces no body, and cannot grow one by accident', () => {

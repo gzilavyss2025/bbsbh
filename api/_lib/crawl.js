@@ -49,6 +49,7 @@
 // exactly what a reader who does would see before the bundle takes over.
 
 import { clean, entitySegment, niceDate } from './entity.js'
+import { pathOf } from '../../src/lib/route/table.js'
 
 // --- what the page says ----------------------------------------------------
 //
@@ -258,9 +259,9 @@ export async function appShell(origin) {
 const SITE_LINKS = [
   { href: '/', text: "Today's games" },
   { href: '/learn', text: 'Scorekeeping guides' },
-  { href: '/standings', text: 'Standings' },
+  { href: pathOf('standings'), text: 'Standings' },
   { href: '/leaders', text: 'League leaders' },
-  { href: '/umpires', text: 'Umpire rankings' },
+  { href: pathOf('umpire-rankings'), text: 'Umpire rankings' },
   { href: '/about', text: 'About Tally Baseball' },
 ]
 
