@@ -34,7 +34,7 @@ export const GATES = {
   'vs-team-splits': { when: 'upcoming', datasets: ['vs-team-splits/'] },
   umpires: { when: 'finalsAaa', datasets: ['umpires/'] },
   'umpire-accuracy': { when: 'finalsAaa', datasets: ['umpire-accuracy/'] },
-  tensest: { when: 'finals', datasets: ['tensest.json'] },
+  tensest: { when: 'finals', datasets: ['tensest.json', 'tensest-cutoffs.json'] },
   nuggets: { when: 'finals', datasets: ['nuggets/'] },
   'long-at-bats': { when: 'finals', datasets: ['long-at-bats/'] },
   'outfield-outs': { when: 'finals', datasets: ['outfield-outs/'] },
