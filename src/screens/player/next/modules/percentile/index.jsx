@@ -4,8 +4,9 @@ import { fetchSavantPercentiles } from '../../../../../api/savantPercentiles.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { percentileView } from './percentileView.js'
 
-// Rows a role draws at most: the loading box holds one line per metric (a typical hitter, 7 pitcher).
-const ROWS = { hitting: 12, pitching: 7 }
+// What the loading box reserves, so the card does not shift on load (#3023): a regular hitter
+// draws 12 rows under 3 group headers, a regular catcher 13 (pop time and framing, no OAA), a pitcher 7.
+const RESERVE = { hitting: [12, 3], catcher: [13, 3], pitching: [7, 0] }
 
 // Percentile rank (#2011): a rank-strip ledger, best at the right edge. Open surface (ADR-0034):
 // season Statcast ranks off a nightly file, no seal. The file holds one season; another season has no card.
@@ -22,7 +23,10 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
   useEffect(() => {
     onCount(tag)
   }, [tag, onCount])
-  if (loading) return <div className="pctl pctl--loading" style={{ '--rows': ROWS[role] ?? 9 }} aria-busy="true" />
+  if (loading) {
+    const [rows, groups] = RESERVE[role === 'hitting' && bio.posAbbr === 'C' ? 'catcher' : role] ?? RESERVE.hitting
+    return <div className="pctl pctl--loading" style={{ '--rows': rows, '--groups': groups }} aria-busy="true" />
+  }
   if (empty) return null
   return (
     <div className="pctl">

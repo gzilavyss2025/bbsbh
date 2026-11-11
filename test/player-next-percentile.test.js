@@ -115,3 +115,22 @@ test('each row counts its own ranked pool, and swing length is not "better than"
   assert.doesNotMatch(row(v, 'swingLength').detail, /better than/)
   assert.match(row(v, 'swingLength').detail, /8th percentile of 1 hitter/)
 })
+
+// #3023: players only on the ranked boards (bsr, pop, framing) keep their card but stay out of the count.
+test('board-only players do not grow the hitter pool', () => {
+  const d = { ...data, bat: { ...data.bat, 900: { pop: 80, framing: 60, bsr: 40 }, 901: { bsr: 10 } } }
+  const v = percentileView(d, 668930, 'hitting', 2026)
+  assert.equal(v.pool, '612 hitters')
+  assert.ok(percentileView(d, 900, 'hitting', 2026), 'a board-only catcher still gets his card')
+})
+
+// #3023: a catcher's arm comes off the pop-time board, ranked among catchers only.
+test('a catcher arm row names the catcher pool, an outfielder arm the hitter pool', () => {
+  const d = {
+    ...data,
+    bat: { ...data.bat, 800: { xwoba: 50, arm: 92, pop: 70, framing: 50 }, 801: { xwoba: 50, arm: 30, pop: 20 }, 802: { xwoba: 50, arm: 70, oaa: 60, sprintSpeed: 50 } },
+    rawBat: { ...data.rawBat, 800: { arm: 85.1, pop: 1.9, framing: 3 }, 801: { arm: 80, pop: 2.0 } },
+  }
+  assert.match(row(percentileView(d, 800, 'hitting', 2026), 'arm').detail, /of 2 catchers$/)
+  assert.match(row(percentileView(d, 802, 'hitting', 2026), 'arm').detail, /of 3 hitters$/)
+})

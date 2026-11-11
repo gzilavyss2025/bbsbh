@@ -12,6 +12,9 @@ const GLOSS = {
     'How far his bat travels on its way to the ball. Savant ranks a longer swing higher, so a short swing reads low here.',
 }
 
+// Keys the generator merges in from its own ranked boards (scripts/gen-savant-percentiles.mjs).
+const BOARD_ONLY = new Set(['bsr', 'pop', 'framing', 'arm'])
+
 // Top third mint with a triangle up, bottom third clay with a triangle down, the middle plain.
 export function tierOf(p) {
   if (p >= 67) return { tier: 'top', mark: '▲' }
@@ -31,16 +34,23 @@ export function percentileView(data, id, role, season) {
   // so each row counts the players ranked on that metric.
   const ranks = Object.values((role === 'pitching' ? data.pit : data.bat) ?? {})
   const noun = role === 'pitching' ? 'pitcher' : 'hitter'
-  const poolOf = (key) => {
-    const n = ranks.filter((r) => r?.[key] != null).length
-    return `${n.toLocaleString()} ${noun}${n === 1 ? '' : 's'}`
-  }
-  const pool = role === 'pitching' ? 'all pitchers' : `${Object.keys(data.bat ?? {}).length} hitters`
+  const count = (n, word) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`
+  // A catcher's arm is ranked among catchers off the pop-time board, and only that board gives a raw arm.
+  const catcherArm = role !== 'pitching' && raw?.arm != null
+  const poolOf = (key) =>
+    key === 'arm' && catcherArm
+      ? count(Object.values(data.rawBat ?? {}).filter((r) => r?.arm != null).length, 'catcher')
+      : count(ranks.filter((r) => r?.[key] != null).length, noun)
+  // The headline pool is Savant's percentile board. A player only on the generator's ranked boards
+  // (#3023) keeps his Glove/Legs card but is not counted.
+  const onBoard = ranks.filter((r) => Object.keys(r ?? {}).some((k) => !BOARD_ONLY.has(k))).length
+  const pool = role === 'pitching' ? 'all pitchers' : `${onBoard} hitters`
   const rows = bare.map((r) => {
     const value = r.value ?? DASH
     const baseline = withMedian.find((m) => m.key === r.key)?.baseline ?? DASH
     const def = GLOSS[r.key] ?? r.def
     const ord = ordinal(r.percentile)
+    const of = poolOf(r.key)
     return {
       key: r.key,
       label: r.label,
@@ -53,8 +63,8 @@ export function percentileView(data, id, role, season) {
       def,
       ...tierOf(r.percentile),
       // Swing length keeps Savant's order: a high rank is a long swing, not a better one.
-      detail: `His ${value} · MLB median ${baseline} · ${r.key === 'swingLength' ? `${ord} percentile of` : `better than ${r.percentile}% of`} ${poolOf(r.key)}`,
-      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${poolOf(r.key)}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
+      detail: `His ${value} · MLB median ${baseline} · ${r.key === 'swingLength' ? `${ord} percentile of` : `better than ${r.percentile}% of`} ${of}`,
+      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${of}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
     }
   })
   return { rows, pool, tag: `vs ${pool}`, season: Number(data.season) }
