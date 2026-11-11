@@ -54,6 +54,7 @@ export const EXCEPT = {
   'postseason-history.json': 'hand-run; only October adds to it',
   'postseason-leaders.json': 'hand-run; only October adds to it',
   'run-expectancy.json': 'hand-run; the 24-state table is recomputed per season',
+  'tensest-cutoffs.json': 'rewritten by gen-tensest.mjs only when the 9 Pressure-meter edges move, so generatedAt is when they last moved, not when the step ran; a quiet or offseason night leaves it alone (#3001)',
   'level-tenure-benchmark.json': 'hand-run research dataset (docs/level-tenure-benchmark.md)',
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
