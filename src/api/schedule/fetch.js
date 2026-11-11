@@ -2,15 +2,15 @@
 // abbreviation slug) back to a game. See api/statsapi.js for the shared
 // fetch wrapper and its field-path verification note.
 
-import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, teamAbbr } from '../lib/teams.js'
-import { matchupSlug } from '../lib/route.js'
-import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from './broadcast.js'
-import { getJson } from './statsapi.js'
-import { fetchStaticTeams } from './teams-static.js'
-import { postseasonThrough } from './scheduleGames.js'
-import { slateToday } from '../lib/dates.js'
-import { isFullSeasonMilb, roundNameAt } from '../lib/postseason/roundTag.js'
-import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
+import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, teamAbbr } from '../../lib/teams.js'
+import { matchupSlug } from '../../lib/route.js'
+import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from '../broadcast.js'
+import { getJson } from '../statsapi.js'
+import { fetchStaticTeams } from '../teams-static.js'
+import { postseasonThrough } from './games.js'
+import { slateToday } from '../../lib/dates.js'
+import { isFullSeasonMilb, roundNameAt } from '../../lib/postseason/roundTag.js'
+import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
 // test/slate-scores.test.js can pin the spoiler-critical invariant that this
@@ -746,7 +746,7 @@ export function pageDay(resultsCutoff) {
 }
 
 // allDecidedGames / allStartedGames / postseasonThrough — the pure post-fetch
-// filters over this list — live in scheduleGames.js (split out once this file hit the
+// filters over this list — live in schedule/games.js (split out once this file hit the
 // 600-line size cap, ADR-0038).
 
 // The opponent from a team's most recently COMPLETED game — the Team Identity

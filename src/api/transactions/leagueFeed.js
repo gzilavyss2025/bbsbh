@@ -38,7 +38,7 @@
 import { getJson } from '../statsapi.js'
 import { fetchStaticAffiliates } from '../team.js'
 import { addDays, toApiDate } from '../../lib/dates.js'
-import { fetchTeams } from '../schedule.js'
+import { fetchTeams } from '../schedule/fetch.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 import { chunk } from '../../lib/math/number.js'
 import { groupLeagueWide, leagueCandidateIds } from './league.js'

@@ -23,7 +23,7 @@
 // by rule (ADR-0034); this is a season-shape aggregate of completed games, not
 // a live line.
 
-import { staticJsonBy } from './staticJson.js'
+import { staticJsonBy } from '../staticJson.js'
 
 const fetchShard = staticJsonBy((teamId) => `/data/schedule-shape/${teamId}.json`, { fallback: null })
 

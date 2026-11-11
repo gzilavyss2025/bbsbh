@@ -22,7 +22,7 @@ export async function loadPlayerCore(id, asOf) {
   // A player the transaction feed still shows on rehab/the IL may already be
   // announced as tonight's probable starter — MLB posts that days before the
   // club files the activation that would clear the banner (see
-  // isProbableStarterToday, schedule.js). Live view only (`!asOf`): a game-
+  // isProbableStarterToday, schedule/fetch.js). Live view only (`!asOf`): a game-
   // scoped historical page reflects that game's own cutoff, never "today".
   const startingToday =
     !asOf && onIL && il.team?.id ? await isProbableStarterToday(il.team.id, id, ctx.endDate) : false

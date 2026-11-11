@@ -29,7 +29,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // consumer gets away with that because it's scoped to decided games only —
 // but this rail is a DELIBERATE exception, same posture as TeamPhotosPage
 // (its own header has the full argument): its callers hand it `photoGames`
-// (`allStartedGames`, scheduleGames.js), not `seasonGames`, on the current
+// (`allStartedGames`, schedule/games.js), not `seasonGames`, on the current
 // (undated) tab — so a photo here may come from a game still in progress,
 // by explicit product override, not by omission. A dated view (`asOf` set)
 // falls back to the decided-only list instead, so a `?d=` link still

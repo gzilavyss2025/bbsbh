@@ -1,5 +1,5 @@
 import { monthDayName, monthDayNameYear } from '../../../../lib/dates.js'
-import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/scheduleShape.js'
+import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/schedule/shape.js'
 import { ALL_MLB_TEAM_IDS, teamClubName, teamLocationName } from '../../../../lib/teams.js'
 import '../../../../styles/65-team-records.css'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
@@ -17,11 +17,11 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 // The Records card above answers a RATE over this season ("7-5 in series
 // openers"). This one answers a DATE across a decade, which is a different
 // question and the one people actually repeat to each other: "the last time
-// the Brewers won game 1 of a road trip was July 3rd." src/api/scheduleShape.js
+// the Brewers won game 1 of a road trip was July 3rd." src/api/schedule/shape.js
 // derives it; docs/schedule-shape.md is the catalog.
 //
 // It prints nothing most days, and that is the design. Every row has passed a
-// gate in scheduleShape.js, and the two things those gates throw out are worth
+// gate in schedule/shape.js, and the two things those gates throw out are worth
 // naming here because both look like good rows until you check:
 //
 //   - A run whose chances were too rare. "Hasn't won a series opener in

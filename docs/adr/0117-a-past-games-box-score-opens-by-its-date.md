@@ -47,7 +47,7 @@ The rule reads the date and nothing else.
 | Stats, standings, leader boards, player and team pages | Open | No change |
 
 The day boundary is the slate's today, taken as the EARLIEST of the UTC, local and Pacific
-date (`slateToday` in `src/lib/dates.js`). That is the rule `pageDay` in `api/schedule.js`
+date (`slateToday` in `src/lib/dates.js`). That is the rule `pageDay` in `api/schedule/fetch.js`
 already uses (ADR-0087): after midnight in the East, a West-coast game is still on, and
 tonight's game must not open early. A game is "past" when its `officialDate`
 (`gameData.datetime.officialDate`) is a real date before that day. Gary chose this over the

@@ -1,5 +1,5 @@
 import { loadSeriesStats } from '../../api/postseason/archive/series.js'
-import { fetchGameCardsByPk } from '../../api/schedule.js'
+import { fetchGameCardsByPk } from '../../api/schedule/fetch.js'
 import { useAsync } from '../useAsync.js'
 import { usePastGameSignals } from '../usePastGameSignals.js'
 

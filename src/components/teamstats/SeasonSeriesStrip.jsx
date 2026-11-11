@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
-import { fetchSeasonSeries } from '../../api/schedule.js'
+import { fetchSeasonSeries } from '../../api/schedule/fetch.js'
 import { centeredScrollLeft, seasonSeriesCells, seasonSeriesRecord } from '../../api/seasonSeries.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'

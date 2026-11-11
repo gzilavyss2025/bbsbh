@@ -24,7 +24,7 @@ measured and thrown out, and how the noteworthiness gate was calibrated.
 - **Generator** — `scripts/gen-schedule-shape.mjs`, nightly, one statsapi
   request per season for all thirty clubs.
 - **Segmentation** — `scripts/lib/schedule-shape.mjs` (build side),
-  `src/api/scheduleShape.js` (read side). Both are unit-tested against each
+  `src/api/schedule/shape.js` (read side). Both are unit-tested against each
   other in `test/schedule-shape.test.js`.
 - **Surface** — the Team hub's Numbers tab, the **Last Time** card, under
   Records (`src/screens/team/modules/records/LastTimeCard.jsx`).
@@ -72,7 +72,7 @@ from the feed's own `seriesGameNumber` / `gamesInSeries` (those describe the
 schedule as *planned* — a rained-out middle game leaves them describing a series
 nobody played).
 
-- **Series** — consecutive games against the same opponent on the same side of the road (`seriesRuns` in `src/api/scheduleShape.js`, shared with `gen-team-records.mjs`). A neutral-site game joins the series beside it.
+- **Series** — consecutive games against the same opponent on the same side of the road (`seriesRuns` in `src/api/schedule/shape.js`, shared with `gen-team-records.mjs`). A neutral-site game joins the series beside it.
 - **Homestand** — a run of consecutive home games, however many opponents visit.
 - **Road trip** — a run of consecutive away games, however many cities it crosses.
 
@@ -107,7 +107,7 @@ before the move.
 
 ## The slots
 
-`SLOTS` in `src/api/scheduleShape.js`. `every` is how often a full season
+`SLOTS` in `src/api/schedule/shape.js`. `every` is how often a full season
 presents the slot, **measured** over 2015–2025, not guessed — the gate divides by
 it.
 
@@ -207,7 +207,7 @@ crosses one — so it is not in the code.
 
 ### The event gate
 
-`isNotableEvent` in `src/api/scheduleShape.js`. Three conditions, and each one
+`isNotableEvent` in `src/api/schedule/shape.js`. Three conditions, and each one
 throws out a different kind of impostor:
 
 | Condition | Value | Throws out |

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { fetchLevelSeasonDates, fetchSeasonMeta } from '../api/schedule.js'
+import { fetchLevelSeasonDates, fetchSeasonMeta } from '../api/schedule/fetch.js'
 import { useAsync } from './useAsync.js'
 import {
   levelOffseasonPhase,

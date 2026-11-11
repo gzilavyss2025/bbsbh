@@ -146,7 +146,7 @@ tries `src/` and `scripts/` prefixes for short forms. Result: 36 truly missing.
 7. **`docs/lineup-redesign.md:5, 48`** says `TeamInfo.jsx` "is deleted". That
    is correct history. **Keep.** Likewise `docs/api-audit.md:131, 357`
    (`api/og.js` "was deleted") are correct history. **inferred**.
-8. **`docs/api-audit.md:401, 411`** cite `src/api/schedule.js:192,229` and
+8. **`docs/api-audit.md:401, 411`** cite `src/api/schedule/fetch.js:192,229` and
    `src/api/person-fetch.js:262-321,435`. Both files exist. The comma range
    breaks the path test, so this is a false hit. The line numbers will have
    drifted. **inferred**.

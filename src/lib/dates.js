@@ -29,7 +29,7 @@ export function photoGameRows(games) {
 }
 
 // The day a seal counts as "today": the EARLIEST of the UTC, local and Pacific date, as
-// pageDay (api/schedule.js, ADR-0087) reads it. After midnight in the East, or after 00:00
+// pageDay (api/schedule/fetch.js, ADR-0087) reads it. After midnight in the East, or after 00:00
 // UTC, a late West-coast game is still on; the earliest date keeps it on today's side.
 export function slateToday(now = new Date()) {
   return [now.toISOString().slice(0, 10), toApiDate(now), baseballToday(now)].sort()[0]

@@ -23,7 +23,7 @@ test('/profile issues no request to statsapi and prints nothing score-shaped', a
 
   // The club strip's marks come from the same-origin public/data/teams.json,
   // deliberately, so this page never touches the feed. If this fails, something
-  // reached for src/api/schedule.js — check the import, not the assertion.
+  // reached for src/api/schedule/fetch.js — check the import, not the assertion.
   expect(feedRequests, `unexpected feed requests: ${feedRequests.join(', ')}`).toHaveLength(0)
 
   // No stamp art, by any route — an import, a copy-pasted SVG, anything.

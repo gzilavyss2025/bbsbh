@@ -1,6 +1,6 @@
 import { Suspense, useMemo } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
-import { fetchTeams } from '../../api/schedule.js'
+import { fetchTeams } from '../../api/schedule/fetch.js'
 import { resolveGameNotes } from '../../api/gameNotes.js'
 import { rankText } from '../../api/person.js'
 import { SPORT_LABEL, treatmentTile, defaultHomeTreatmentFor } from '../../lib/teams.js'

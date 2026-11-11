@@ -1,5 +1,5 @@
 import { loadUmpireRankings } from '../api/umpires.js'
-import { fetchTodayPlateUmpireIds } from '../api/schedule.js'
+import { fetchTodayPlateUmpireIds } from '../api/schedule/fetch.js'
 import { toApiDate } from '../lib/dates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

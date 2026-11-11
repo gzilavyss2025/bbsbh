@@ -1,6 +1,6 @@
 import { fetchTeam } from '../../../api/team.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
-import { allStartedGames } from '../../../api/scheduleGames.js'
+import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
+import { allStartedGames } from '../../../api/schedule/games.js'
 import { isMlbTeamId } from '../../../lib/teams.js'
 import { seasonOf } from './shared.js'
 

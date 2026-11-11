@@ -1,6 +1,6 @@
 // The schedule-shape pipeline: the segmentation the nightly
 // gen-schedule-shape.mjs writes (scripts/lib/schedule-shape.mjs) and the
-// drought reader the Team hub's card asks (src/api/scheduleShape.js).
+// drought reader the Team hub's card asks (src/api/schedule/shape.js).
 //
 // Two halves have to agree here and cannot import each other — one is a build
 // script, one ships to the browser — so the cases below deliberately pin them
@@ -40,7 +40,7 @@ import {
   SLOT_BY_ID,
   EVENTS,
   EVENT_BY_ID,
-} from '../src/api/scheduleShape.js'
+} from '../src/api/schedule/shape.js'
 
 // A tiny season builder. `g('04-01', away, home, venue, awayScore, homeScore)`.
 const g = (date, awayId, homeId, venueId, awayScore, homeScore, gameNumber = 1) => ({
@@ -200,7 +200,7 @@ test('tagTrips cuts homestands and road trips, and a neutral game is transparent
 test('encodeRow round-trips through the reader, which owns its own copy of the tables', () => {
   // The two halves cannot import each other. This is the only thing keeping
   // SITE/RESULT in scripts/lib/schedule-shape.mjs and the arrays in
-  // src/api/scheduleShape.js from silently drifting apart.
+  // src/api/schedule/shape.js from silently drifting apart.
   const homeVenues = new Map([[MIL, MIL_PARK], [CHC, CHC_PARK]])
   const rows = ledgerFor([
     g('04-01', CHC, MIL, MIL_PARK, 1, 2),

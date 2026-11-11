@@ -5,7 +5,7 @@ import {
   RAN_OUT_EARLY_THROUGH,
 } from '../../../api/around-the-game/absChallenges.js'
 import { clubShort } from '../../../api/around-the-game/clubs.js'
-import { fetchGamesByPk } from '../../../api/schedule.js'
+import { fetchGamesByPk } from '../../../api/schedule/fetch.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../../hooks/preferences/useFavoriteTeam.js'
 import { monthDayName } from '../../../lib/dates.js'

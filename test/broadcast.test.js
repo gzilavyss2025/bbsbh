@@ -6,7 +6,7 @@ import {
   nationalName,
   summarizeBroadcasts,
 } from '../src/api/broadcast.js'
-import { normalizeGame } from '../src/api/schedule.js'
+import { normalizeGame } from '../src/api/schedule/fetch.js'
 
 // The shape statsapi's `hydrate=broadcasts(all)` really returns, trimmed to
 // the fields the projection keeps. Every literal below is copied from a live

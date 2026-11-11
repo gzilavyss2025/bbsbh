@@ -1,6 +1,6 @@
 import { fetchTeam } from '../../../api/team.js'
-import { fetchAllStarGame } from '../../../api/schedule.js'
-import { allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
+import { fetchAllStarGame } from '../../../api/schedule/fetch.js'
+import { allDecidedGames, allStartedGames } from '../../../api/schedule/games.js'
 import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 import { seasonOf, cutoffFor } from './shared.js'
 import { DIRECT } from './sources.js'

@@ -119,7 +119,7 @@ export function selectFinalReached(feed, revealedThrough) {
 // ("Delayed Start: Rain", "Suspended: Rain", "Postponed", "Warmup"); `reason`
 // is the separate free-text cause field the feed sometimes also carries.
 // Works from either a full live feed (`feed.gameData.status`) or a slate row
-// already normalized by schedule.js's normalizeGame (same field names,
+// already normalized by schedule/fetch.js's normalizeGame (same field names,
 // flattened).
 export function selectGameStatus(source) {
   const status = source?.gameData?.status ?? source ?? {}

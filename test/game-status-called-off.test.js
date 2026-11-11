@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { selectGameStatus, selectHasResult } from '../src/api/select.js'
 
-// A slate row as schedule.js's normalizeGame flattens it. The cancelled row
+// A slate row as schedule/fetch.js's normalizeGame flattens it. The cancelled row
 // is gamePk 823490 (BAL @ NYY, 2026-09-27) as statsapi reports it.
 const row = (detailedState, extra = {}) => ({
   gamePk: 1,

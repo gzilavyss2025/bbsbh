@@ -1,7 +1,7 @@
 import { fetchTeam, fetchLeagueTeamStats, fetchTeamGamesPlayed } from '../../../api/team.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
-import { fetchScheduleShape } from '../../../api/scheduleShape.js'
+import { fetchScheduleShape } from '../../../api/schedule/shape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseason/odds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
 import {

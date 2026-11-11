@@ -1,8 +1,8 @@
-// Pure post-fetch filters over fetchTeamSchedule's (schedule.js) already
-// cutoff-respecting rows — split out into their own file once schedule.js
+// Pure post-fetch filters over fetchTeamSchedule's (schedule/fetch.js) already
+// cutoff-respecting rows — split out into their own file once schedule/fetch.js
 // hit the 600-line size cap (ADR-0038). Every row here already carries
 // `won`/`runs`/`innings` gated by fetchTeamSchedule's own `resultsCutoff`
-// (or left null past it), and `started` ungated (see schedule.js's own
+// (or left null past it), and `started` ungated (see schedule/fetch.js's own
 // header on that field) — nothing in this file reaches the network or
 // re-derives either.
 

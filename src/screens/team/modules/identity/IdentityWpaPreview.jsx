@@ -1,5 +1,5 @@
 import { useAsync } from '../../../../hooks/useAsync.js'
-import { fetchLastOpponent } from '../../../../api/schedule.js'
+import { fetchLastOpponent } from '../../../../api/schedule/fetch.js'
 import { WpaScenarios } from '../../../identity-lab/editors/WpaScenarios.jsx'
 
 // The WPA group's live preview: the REAL WinProbChart, at three fixed

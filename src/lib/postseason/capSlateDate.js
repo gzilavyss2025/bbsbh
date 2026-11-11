@@ -15,7 +15,7 @@
 // so every future date caps): its results read must never run past today.
 //
 // The window is read off the season row `fetchSeasonMeta` already fetches
-// (`src/api/schedule.js`) — `postSeasonStartDate` through the day before
+// (`src/api/schedule/fetch.js`) — `postSeasonStartDate` through the day before
 // `offseasonStartDate` — never off the clock and never inferred from an
 // empty slate, the same rule `src/hooks/useOffseason.js` follows for the
 // regular-season/offseason line. Every date argument here is `YYYY-MM-DD`

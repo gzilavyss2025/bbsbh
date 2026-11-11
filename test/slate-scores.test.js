@@ -5,7 +5,7 @@
 // line that once rode a second fetch is gone (ADR-0116).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { normalizeGame } from '../src/api/schedule.js'
+import { normalizeGame } from '../src/api/schedule/fetch.js'
 
 // A raw schedule row LADEN with every score-bearing field the real feed can
 // carry — exactly what fetchSchedule receives before normalizeGame runs.

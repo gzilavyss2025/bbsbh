@@ -4,7 +4,7 @@
 // caller always gets a fresh row, and a failed read is never kept.
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchSeasonMeta } from '../src/api/schedule.js'
+import { fetchSeasonMeta } from '../src/api/schedule/fetch.js'
 
 function withFetch(respond, run) {
   const calls = []

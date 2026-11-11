@@ -788,7 +788,7 @@ don't run these by hand.
   and getaway days come from the LEDGER, not the feed's `seriesGameNumber` /
   `gamesInSeries` — those describe the series as SCHEDULED, and a rained-out
   middle game leaves them describing one that never happened. The cut is
-  `seriesRuns` in `src/api/scheduleShape.js`, shared with gen-schedule-shape
+  `seriesRuns` in `src/api/schedule/shape.js`, shared with gen-schedule-shape
   and the reader (same opponent, same side of the road, a neutral-site game
   joins its neighbours; #1283). Each row's `site` comes from the
   same home-park inference gen-schedule-shape uses. Daily division
@@ -863,7 +863,7 @@ don't run these by hand.
   `generatedAt`, the same reason gen-milb-alumni.mjs's don't: thirty committed
   files on a nightly cron must not churn on a timestamp. Catalog, gate
   calibration and the rejected candidates: `docs/schedule-shape.md`. App reads it
-  via `src/api/scheduleShape.js`.
+  via `src/api/schedule/shape.js`.
 - `gen-jerseys.mjs` → `public/data/jerseys.json` — what each MLB club wore in
   every game, from `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the
   live feed carries zero uniform data). SQLite-backed (`jerseys` group,
@@ -1845,7 +1845,7 @@ Re-run only to fold in a new season.
   pitched the Sunday before) and never played. Each season's game is looked up via
   `GET /api/v1/schedule?sportId=1&season=YYYY&gameType=A`, but the file stores only
   the `gamePk` — the app resolves team/date info live via `fetchGameCardsByPk`
-  (`src/api/schedule.js`), same as the Top Games page, so a franchise rename never
+  (`src/api/schedule/fetch.js`), same as the Top Games page, so a franchise rename never
   goes stale in this file. Team NAMES in the roster itself are resolved per
   `(teamId, season)` via the season-scoped `GET /api/v1/teams/{id}?season=YYYY` (not
   the app's current-team table) so a historical pick reads under the name he actually

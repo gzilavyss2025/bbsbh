@@ -17,7 +17,7 @@ import { stampButtonState, stampInGames } from '../src/lib/stampIn.js'
 // --------------------------------------------------------------------------
 // The season list
 // --------------------------------------------------------------------------
-// fetchTeamSchedule's own shape (src/api/schedule.js): `won`/`runs`/`oppRuns`
+// fetchTeamSchedule's own shape (src/api/schedule/fetch.js): `won`/`runs`/`oppRuns`
 // are null for anything not yet safe to show, which is exactly the "no result,
 // nothing to stamp" case this filter exists to drop.
 const SCHEDULE = [

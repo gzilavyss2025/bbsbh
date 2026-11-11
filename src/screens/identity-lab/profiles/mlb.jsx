@@ -51,7 +51,7 @@ import {
 import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
+import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
 import { gamePhotosPath } from '../../../lib/route.js'
 import {
   fetchTeamUniformCatalog,

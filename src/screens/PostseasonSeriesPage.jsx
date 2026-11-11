@@ -12,7 +12,7 @@ import {
   BATTING_CATEGORIES,
   SERIES_PITCHING_CATEGORIES,
 } from '../api/postseason/archive/series.js'
-import { fetchGameCardsByPk } from '../api/schedule.js'
+import { fetchGameCardsByPk } from '../api/schedule/fetch.js'
 import { loadNineKeys } from '../api/nineKeys.js'
 import { roundTitle } from '../api/postseason/text.js'
 import { computePlayOfTheGame } from '../api/boxscore.js'

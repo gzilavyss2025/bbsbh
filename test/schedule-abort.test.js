@@ -5,7 +5,7 @@
 // answering null, so it can never read as "no game within ten days" (ADR-0074).
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchNextGameDate, fetchSchedule } from '../src/api/schedule.js'
+import { fetchNextGameDate, fetchSchedule } from '../src/api/schedule/fetch.js'
 
 // A fetch that never answers until its own signal aborts, as a slow statsapi would.
 function hangingFetch(calls) {

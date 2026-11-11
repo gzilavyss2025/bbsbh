@@ -97,7 +97,7 @@ export const firstNonNull = (promises) =>
   Promise.any(promises.map(async (p) => (await p) ?? Promise.reject(new Error('empty')))).catch(() => null)
 
 // Scan a date's slate across every level and match the away+home slug back to a
-// game — the edge-side twin of src/api/schedule.js's resolveGame. `hydrate=team`
+// game — the edge-side twin of src/api/schedule/fetch.js's resolveGame. `hydrate=team`
 // only: resolution needs abbreviations, nothing else.
 //
 // Every sport level's schedule call fires concurrently, but we resolve as soon

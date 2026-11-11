@@ -3,7 +3,7 @@
 
 import { SEARCHABLE_SPORT_IDS } from '../lib/teams.js'
 import { getJson } from './statsapi.js'
-import { fetchTeams } from './schedule.js'
+import { fetchTeams } from './schedule/fetch.js'
 
 // Name search across every person the Stats API knows (current and retired
 // alike — the endpoint doesn't distinguish). Matches on either name part as a

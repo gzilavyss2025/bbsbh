@@ -75,7 +75,7 @@ const seasonsKey = (userId) => `stamps:${userId}:seasons`
 // One schedule call, ~20 KB, with everything a stamp needs to draw itself. The
 // field paths were verified live against gamePk 778241 (2025-04-20 SEA@TOR);
 // `hydrate=team` is what supplies `abbreviation` and `sport.id`, which the bare
-// row does not carry (same reason src/api/schedule.js hydrates it).
+// row does not carry (same reason src/api/schedule/fetch.js hydrates it).
 const SCHEDULE_URL = (gamePk) =>
   `https://statsapi.mlb.com/api/v1/schedule?gamePk=${gamePk}` +
   '&hydrate=linescore,decisions,venue,team'

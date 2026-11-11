@@ -1,6 +1,6 @@
 import '../../styles/worldseries/home.css'
 import '../../styles/worldseries/square.css'
-import { fetchScheduleGame } from '../../api/schedule.js'
+import { fetchScheduleGame } from '../../api/schedule/fetch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
 import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'

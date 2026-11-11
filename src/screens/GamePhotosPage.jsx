@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fetchGamePhotos, withoutGraphics } from '../api/gamePhotos.js'
-import { fetchTeamSchedule } from '../api/schedule.js'
+import { fetchTeamSchedule } from '../api/schedule/fetch.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PINNED_TEAM_ID, SPORT_IDS, teamFullName } from '../lib/teams.js'
