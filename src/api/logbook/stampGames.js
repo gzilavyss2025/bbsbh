@@ -1,6 +1,6 @@
-import { chunk } from '../lib/math/number.js'
-import { getJson } from './statsapi.js'
-import { recordAfterGame } from '../lib/stamps.js'
+import { chunk } from '../../lib/math/number.js'
+import { getJson } from '../statsapi.js'
+import { recordAfterGame } from '../../lib/stamps.js'
 
 // The Logbook's game facts — runs, clubs, venue, innings — for a set of stamped
 // gamePks (ADR-0035).

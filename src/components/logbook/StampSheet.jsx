@@ -1,6 +1,6 @@
 import '../../styles/48c-stamp-sheet.css'
 import { useEffect, useMemo, useState } from 'react'
-import { computeAllMilestones, rosterFor } from '../../api/logbookMilestones.js'
+import { computeAllMilestones, rosterFor } from '../../api/logbook/milestones.js'
 import { fetchStaticTeams } from '../../api/teams-static.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useMilestoneCelebration } from '../../hooks/useMilestoneCelebration.js'
@@ -22,7 +22,7 @@ import { StampDetailModal } from './StampDetailModal.jsx'
 // ONE COMPONENT, TWO SURFACES, ONE DIFFERENCE — `counts`
 // ===========================================================================
 // This renders on BOTH Game Log surfaces, from the same computed objects
-// (src/api/logbookMilestones.js):
+// (src/api/logbook/milestones.js):
 //
 //   - the retrospective (screens/logbook/LogbookMilestones.jsx), where it is
 //     the milestone shelf and MAY say "12 of 30" and mark a set complete;

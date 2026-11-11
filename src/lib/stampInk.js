@@ -132,7 +132,7 @@ export function deepenToContrast(hex, paper = STAMP_PAPER, minRatio = MIN_INK_CO
 
 // Which club won, from the stamp facts. `winnerId` is what both producers of
 // this shape already carry (src/api/linescore.js from a live feed,
-// src/api/logbook.js from the schedule), so the runs are only a fallback for a
+// src/api/logbook/stampGames.js from the schedule), so the runs are only a fallback for a
 // hand-built or older record — and a tie, or a side whose runs never resolved,
 // is `null` in both readings.
 export function stampWinnerId(game) {

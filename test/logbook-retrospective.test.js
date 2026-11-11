@@ -1,4 +1,4 @@
-// Unit coverage for src/api/logbookRetrospective.js — the Logbook
+// Unit coverage for src/api/logbook/retrospective.js — the Logbook
 // retrospective's ported First Scorebook sections (ADR-0035).
 //
 // The one genuinely tricky case this suite exists to pin: a pitcher who
@@ -7,7 +7,7 @@
 // nothing here may blend a start's line into his relief totals or vice versa.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { computeLogbookRetrospective } from '../src/api/logbookRetrospective.js'
+import { computeLogbookRetrospective } from '../src/api/logbook/retrospective.js'
 
 function stamp(gamePk, date) {
   return { gamePk, mode: 'watched', stampedAt: 1_700_000_000_000, updatedAt: 1_700_000_000_000, note: '', date }

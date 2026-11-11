@@ -1,6 +1,6 @@
 // The Logbook stamp's pure layer: the locked art's geometry (src/lib/stampArt.js)
 // and the two producers of the game-facts blob it draws from
-// (revealStampFacts in src/api/linescore.js, stampGameFacts in src/api/logbook.js).
+// (revealStampFacts in src/api/linescore.js, stampGameFacts in src/api/logbook/stampGames.js).
 //
 // Two things here are worth more than the rest:
 //
@@ -50,7 +50,7 @@ import {
 import { stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
 import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
-import { stampGameFacts } from '../src/api/logbook.js'
+import { stampGameFacts } from '../src/api/logbook/stampGames.js'
 import { stampBottomText, stampSeriesText } from '../src/lib/stampArt.js'
 import { fetchGameFinal } from '../api/stamps.js'
 

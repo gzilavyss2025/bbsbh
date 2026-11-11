@@ -16,7 +16,7 @@
 export const MILESTONE_CELEBRATIONS_KEY = 'bbsbh:milestoneCelebrations'
 
 // The closed set this module recognizes — kept in step with
-// src/api/logbookMilestones.js's MILESTONE_COLLECTIONS ids. A collection
+// src/api/logbook/milestones.js's MILESTONE_COLLECTIONS ids. A collection
 // dropped from that registry stops being writable here (scrub below), so a
 // stale id left over from a removed collection can't linger forever.
 //

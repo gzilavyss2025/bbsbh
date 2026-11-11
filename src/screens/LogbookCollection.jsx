@@ -1,7 +1,7 @@
 import '../styles/48-logbook.css'
 import '../styles/49-passport-book.css'
 import { useCallback, useMemo, useState } from 'react'
-import { fetchStampGames } from '../api/logbook.js'
+import { fetchStampGames } from '../api/logbook/stampGames.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useBooks } from '../hooks/useBooks.js'
 import { useStamps } from '../hooks/useStamps.js'

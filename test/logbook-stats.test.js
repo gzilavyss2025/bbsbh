@@ -1,4 +1,4 @@
-// Unit coverage for src/api/logbookStats.js — the Logbook's Tier 1
+// Unit coverage for src/api/logbook/stats.js — the Logbook's Tier 1
 // retrospective (ADR-0035, the game-stamps PRD §6).
 //
 // This file is the reason that module is pure. FirstScorebookPage.jsx derives
@@ -18,11 +18,11 @@ import {
   BLOWOUT_MARGIN,
   REGULATION_INNINGS,
   computeLogbookStats,
-} from '../src/api/logbookStats.js'
+} from '../src/api/logbook/stats.js'
 
 // --------------------------------------------------------------------------
 // Fixture — the `game:final` blob shape both producers emit
-// (src/api/logbook.js's stampGameFacts, api/stamps.js's fetchGameFinal).
+// (src/api/logbook/stampGames.js's stampGameFacts, api/stamps.js's fetchGameFinal).
 // --------------------------------------------------------------------------
 const CLUBS = {
   158: { id: 158, abbreviation: 'MIL', name: 'Milwaukee Brewers' },

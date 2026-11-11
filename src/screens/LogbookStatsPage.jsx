@@ -1,9 +1,9 @@
 import '../styles/48a-logbook-stats.css'
 import { useMemo, useState } from 'react'
-import { fetchStampGames } from '../api/logbook.js'
-import { computeLogbookStats } from '../api/logbookStats.js'
-import { fetchStampBoxscores, fetchStampMoments } from '../api/logbookGameDetail.js'
-import { computeLogbookRetrospective } from '../api/logbookRetrospective.js'
+import { fetchStampGames } from '../api/logbook/stampGames.js'
+import { computeLogbookStats } from '../api/logbook/stats.js'
+import { fetchStampBoxscores, fetchStampMoments } from '../api/logbook/gameDetail.js'
+import { computeLogbookRetrospective } from '../api/logbook/retrospective.js'
 import { fetchHighlights } from '../api/highlights.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useBooks } from '../hooks/useBooks.js'
@@ -56,7 +56,7 @@ import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
 // adding a number whose source is anything but `stamps` + the facts resolved
 // for those exact gamePks.
 //
-// The math is NOT here. It lives in src/api/logbookStats.js, pure and unit
+// The math is NOT here. It lives in src/api/logbook/stats.js, pure and unit
 // tested (test/logbook-stats.test.js) — deliberately unlike
 // FirstScorebookPage.jsx, which derives its equivalent numbers inline in
 // `useMemo`s where nothing can reach them. This file is a rendering of a
@@ -66,7 +66,7 @@ import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
 // The ported First Scorebook sections (performances/moments/leaders/
 // rotation/bullpen) are a SECOND computed object, from a SECOND pure module
 // ===========================================================================
-// src/api/logbookRetrospective.js, fed by src/api/logbookGameDetail.js's two
+// src/api/logbook/retrospective.js, fed by src/api/logbook/gameDetail.js's two
 // fetchers (per-game boxscores and win-probability "moments"). Same
 // containment argument as everything else on this page: only ever the games
 // in `levelStamps` below. The level filter narrows those BEFORE either
@@ -172,7 +172,7 @@ export function LogbookStatsPage({ bookId = null }) {
 
   // The ported First Scorebook sections are the expensive part of this page —
   // a per-game boxscore AND winProbability fetch apiece, plus the aggregation
-  // over all of them (src/api/logbookRetrospective.js). A big book was firing
+  // over all of them (src/api/logbook/retrospective.js). A big book was firing
   // both fetches for every stamp on load, which is what ground the page to a
   // halt; they now stay collapsed until asked for. `retroGamePks` is empty
   // while collapsed, and `fetchStampBoxscores`/`fetchStampMoments` return `{}`

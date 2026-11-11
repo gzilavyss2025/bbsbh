@@ -1,4 +1,4 @@
-// Unit coverage for src/api/logbookMilestones.js — the Game Log retrospective's
+// Unit coverage for src/api/logbook/milestones.js — the Game Log retrospective's
 // milestone/collection-progress shelf (docs/design-inspiration.md §8).
 import assert from 'node:assert/strict'
 import test from 'node:test'
@@ -7,7 +7,7 @@ import {
   computeAllMilestones,
   computeMilestoneProgress,
   rosterFor,
-} from '../src/api/logbookMilestones.js'
+} from '../src/api/logbook/milestones.js'
 
 // --------------------------------------------------------------------------
 // The generic engine, exercised against a small synthetic collection so a
@@ -120,7 +120,7 @@ test('computeMilestoneProgress: a collection filling more than one slot per fact
 
 // --------------------------------------------------------------------------
 // The real registry — team identity from the stamped game facts shape
-// api/logbook.js's stampGameFacts produces.
+// api/logbook/stampGames.js's stampGameFacts produces.
 // --------------------------------------------------------------------------
 function fact(gamePk, { away, home, date = '2026-04-01' }) {
   return { gamePk, date, away: { id: away }, home: { id: home } }

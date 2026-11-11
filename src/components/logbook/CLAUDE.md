@@ -17,7 +17,7 @@ The collection (`screens/LogbookCollection.jsx`, `/logbook` + `/logbook/{season}
 may hold more than one book, ADR-0041) and its store
 (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
 signed-out user has a real Logbook on that device, holding no scores at all —
-the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
+the facts are resolved at render time by `api/logbook/stampGames.js`. `StampsCloudSync`
 mirrors the collection across a signed-in user's devices; its header records
 why the old pre-mint reveal-mark push could never satisfy the retired gate.
 

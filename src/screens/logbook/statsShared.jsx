@@ -38,7 +38,7 @@ export function gameTitle(game) {
 
 // A stamped game's own box score, from this page's already-fetched `facts` —
 // the ported sections' equivalent of FirstScorebookPage's ScorebookGameLink,
-// reading THIS page's facts shape (api/logbook.js's stampGameFacts) instead
+// reading THIS page's facts shape (api/logbook/stampGames.js's stampGameFacts) instead
 // of that page's frozen archive.
 // `card` draws the tap tile on Card (a ledger button); without it, a plain button.
 export function LogbookGameLink({ gamePk, facts, className = '', card, children }) {

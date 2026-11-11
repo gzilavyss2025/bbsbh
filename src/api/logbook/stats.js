@@ -29,7 +29,7 @@
 //                 as `stampsForSeason` / the useStamps hook hand them out.
 //                 Tombstones must already be filtered out; this module does not
 //                 know the store's vocabulary.
-//   `gameFacts` — `{ [gamePk]: facts }` from src/api/logbook.js's
+//   `gameFacts` — `{ [gamePk]: facts }` from src/api/logbook/stampGames.js's
 //                 `fetchStampGames` (or, signed in, the `game` blob
 //                 /api/stamps joins on — deliberately the same shape).
 //
@@ -39,7 +39,7 @@
 // many are still resolving instead of quietly reporting a smaller total as if
 // it were the whole book.
 
-import { POSTSEASON_TYPES } from './game.js'
+import { POSTSEASON_TYPES } from '../game.js'
 
 // A game is a blowout at this margin or wider. Five is the conventional line —
 // it is where a game stops being one swing away in the ninth — and it sits well
@@ -53,7 +53,7 @@ export const BLOWOUT_MARGIN = 5
 // blob with two producers and an immutable server-side cache of already-written
 // entries to migrate — not worth it for a miscount on a game type the Logbook
 // rarely holds. Stated rather than hidden; see `stampGameFacts` in
-// src/api/logbook.js for the other half of that shape.
+// src/api/logbook/stampGames.js for the other half of that shape.
 export const REGULATION_INNINGS = 9
 
 // The empty result, so a caller destructures the same shape whether the

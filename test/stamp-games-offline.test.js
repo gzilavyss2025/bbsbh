@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { fetchStampGames } from '../src/api/logbook.js'
+import { fetchStampGames } from '../src/api/logbook/stampGames.js'
 
 test('fetchStampGames rejects when every schedule read fails', async () => {
   const real = globalThis.fetch

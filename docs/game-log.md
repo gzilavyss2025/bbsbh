@@ -78,7 +78,7 @@ rename. Do not "complete" it.
 |---|---|---|
 | Everything a user reads or hears | **Game Log** | headings, buttons, menu labels, tab titles, `aria-label`s, OG cards |
 | Route | `logbook` | `/logbook`, `/logbook/{season}`, `/logbook/stats`, `/logbook/book/{bookId}[/{season}\|/stats]`, `?place={gamePk}` |
-| Modules, components, CSS, storage | `logbook` / `Logbook` | `LogbookPage.jsx`, `src/api/logbook.js`, `.logbook__cell`, `bbsbh:stamps` |
+| Modules, components, CSS, storage | `logbook` / `Logbook` | `LogbookPage.jsx`, `src/api/logbook/stampGames.js`, `.logbook__cell`, `bbsbh:stamps` |
 
 **Why the route can never change:** a stamped game's `/logbook` link is shared,
 bookmarked, and — critically — its Open Graph card is cached by iMessage, Slack,
@@ -308,7 +308,7 @@ mounted at once).
 
 A record holds `mode`, `note`, `date`, `placement`, `stampedAt`, and `updatedAt`.
 **It does not hold the score.** Facts are resolved at render time by
-`src/api/logbook.js` — the one fetcher in the app that asks statsapi *for* the
+`src/api/logbook/stampGames.js` — the one fetcher in the app that asks statsapi *for* the
 score, which is why it is its own file rather than a function in `schedule.js`.
 
 `updatedAt` and `stampedAt` are two fields because one cannot do both jobs:

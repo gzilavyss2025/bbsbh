@@ -11,7 +11,7 @@ import { dateLabel, SectionHead, gameTitle, LogbookGameLink } from './statsShare
 // individual performances, most memorable moments, combined leaders, and the
 // rotation/bullpen split. Split out of LogbookStatsPage.jsx to keep that file
 // under the file-size cap (ADR-0038); this is purely presentational over the
-// `retro` object src/api/logbookRetrospective.js computes — no fetching, no
+// `retro` object src/api/logbook/retrospective.js computes — no fetching, no
 // game-state knowledge of its own.
 //
 // Same containment argument as the page it's rendered from (ADR-0035): every
