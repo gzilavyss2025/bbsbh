@@ -74,6 +74,8 @@ export const PAGE_GROUPS = [
       { label: 'Kept It in the Infield', path: pathOf('infield') },
       // Any club, any counting stat, N games in a row at a total, back to the franchise's first season.
       { label: 'Streak Finder', path: pathOf('streaks') },
+      // A player's best stretch in a row (162 games, 32 starts, 65 relief outings), across seasons.
+      { label: 'Best Stretch', path: pathOf('best-stretch') },
       // Games each club played after it was mathematically out, by season span.
       { label: 'Games After Elimination', path: pathOf('eliminated') },
       // Money, read across the league: who is paid the most, what each club

@@ -22,6 +22,7 @@
 //   '/eliminated'                       -> { name: 'eliminated' }  (games played after elimination)
 //   '/infield'                          -> { name: 'infield' }  (team-games with no out to an outfielder, #2976)
 //   '/streaks'                          -> { name: 'streaks' }  (N games in a row at a stat total; picks ride the query)
+//   '/best-stretch'                     -> { name: 'best-stretch' }  (a hitter's best N games in a row; picks ride the query)
 //   '/free-agents'                      -> { name: 'free-agents', season: null }  (the latest class)
 //   '/free-agents/{year}'               -> { name: 'free-agents', season: year }
 //   '/milestones'                       -> { name: 'milestones' }

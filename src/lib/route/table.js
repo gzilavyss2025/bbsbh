@@ -28,6 +28,7 @@ export const ROUTE_TABLE = [
   { name: 'tensest', path: '/pressure-moments', aliases: ['/tensest'] },
   { name: 'infield', path: '/infield' },
   { name: 'streaks', path: '/streaks' },
+  { name: 'best-stretch', path: '/best-stretch' },
   { name: 'eliminated', path: '/eliminated' },
   { name: 'milestones', path: '/milestones' },
   { name: 'awards-history', path: '/awards' },

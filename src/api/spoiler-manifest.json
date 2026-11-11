@@ -1129,6 +1129,10 @@
       "class": "spoiler-free",
       "why": "Static outfield-outs/{season}.json: team-games with no out to an outfielder. Holds no scores or winners, and the page is a standalone report outside the four scoring surfaces (ADR-0034)."
     },
+    "streaks/bestStretch.js": {
+      "class": "spoiler-free",
+      "why": "Live player batting game log summed over N games in a row for Best Stretch (/best-stretch). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
+    },
     "streaks/streaks.js": {
       "class": "spoiler-free",
       "why": "Live team game logs summed over N games in a row for the Streak Finder (/streaks). A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
