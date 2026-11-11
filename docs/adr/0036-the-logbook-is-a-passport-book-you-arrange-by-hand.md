@@ -55,7 +55,7 @@ auto-layout used by "place them all for me". It is pure and unit-tested
 (`test/passport-layout.test.js`); the components under
 `src/components/passport/` import from it rather than restating a number.
 
-This is the same lesson `src/api/logbookStats.js` was written for and
+This is the same lesson `src/api/logbook/stats.js` was written for and
 `FirstScorebookPage.jsx` is the counter-example to: a number tuned by eye inside
 JSX is a number nothing can check. Two of these in particular would be invisible
 bugs — the vertical clamp must use the stamp's height *as a fraction of the

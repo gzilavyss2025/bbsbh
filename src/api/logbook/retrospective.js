@@ -1,6 +1,6 @@
-import { contextNeutralPoints } from './performanceScore.js'
-import { byEra, eraOf, whipOf } from './person/shared.js'
-import { outsToIp } from '../lib/math/innings.js'
+import { contextNeutralPoints } from '../performanceScore.js'
+import { byEra, eraOf, whipOf } from '../person/shared.js'
+import { outsToIp } from '../../lib/math/innings.js'
 
 // The Logbook retrospective's ported First Scorebook sections — best
 // individual performances, most memorable moments, combined leaders, and the
@@ -29,12 +29,12 @@ import { outsToIp } from '../lib/math/innings.js'
 // The four inputs
 // ===========================================================================
 //   `stamps`     — live stamp records, as computeLogbookStats takes them.
-//   `gameFacts`  — `{ [gamePk]: facts }` from api/logbook.js's
+//   `gameFacts`  — `{ [gamePk]: facts }` from api/logbook/stampGames.js's
 //                  fetchStampGames — used here only for `date` and
 //                  `winnerId` (rotation/bullpen "team record" needs to know
 //                  which side won).
 //   `boxscores`  — `{ [gamePk]: { away, home } }` from
-//                  api/logbookGameDetail.js's fetchStampBoxscores.
+//                  api/logbook/gameDetail.js's fetchStampBoxscores.
 //   `moments`    — `{ [gamePk]: [...] }` from that same module's
 //                  fetchStampMoments.
 // A stamp missing its boxscore or moments entry (still resolving, or that
@@ -290,9 +290,9 @@ function pitchingRoles(rows) {
  * The Logbook retrospective's ported First Scorebook sections.
  *
  * @param {Array} stamps        live stamp records (see the header)
- * @param {Object} gameFacts    `{ [gamePk]: facts }` (api/logbook.js)
- * @param {Object} boxscores    `{ [gamePk]: { away, home } }` (api/logbookGameDetail.js)
- * @param {Object} momentsByGame `{ [gamePk]: [...] }` (api/logbookGameDetail.js)
+ * @param {Object} gameFacts    `{ [gamePk]: facts }` (api/logbook/stampGames.js)
+ * @param {Object} boxscores    `{ [gamePk]: { away, home } }` (api/logbook/gameDetail.js)
+ * @param {Object} momentsByGame `{ [gamePk]: [...] }` (api/logbook/gameDetail.js)
  */
 export function computeLogbookRetrospective(stamps, gameFacts, boxscores, momentsByGame) {
   const rows = appearances(stamps, gameFacts, boxscores)

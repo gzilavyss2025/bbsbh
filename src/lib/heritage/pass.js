@@ -5,7 +5,7 @@ import { roundNameAt, isFullSeasonMilb } from '../postseason/roundTag.js'
  * Presentation adapter for the EXISTING game:final / stamp facts contract.
  * No feed reads, fetches, storage, score derivations or artwork lookup here.
  * Call only after reveal, or with the owner's collection / dev fixtures.
- * @typedef {ReturnType<import('../../api/logbook.js').stampGameFacts>} StampFacts
+ * @typedef {ReturnType<import('../../api/logbook/stampGames.js').stampGameFacts>} StampFacts
  */
 
 const DATE = new Intl.DateTimeFormat('en-US', {

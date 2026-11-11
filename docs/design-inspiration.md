@@ -157,7 +157,7 @@ here as the worked example of "research → decision → build":
   slots, and a rule for which of a stamped game's facts fills which slot. One
   registry, one generic progress function, one generic display; adding a new
   collection later is a config entry, not new plumbing.
-  See `src/api/logbookMilestones.js`.
+  See `src/api/logbook/milestones.js`.
 - **Where it landed, and what moved since.** The slots are now a LEVEL's roster
   rather than the 30 MLB clubs — MLB/AAA/AA/A+/A, off the weekly team snapshot,
   toggled on the sheet itself. And the art outgrew the retrospective: the open

@@ -39,7 +39,7 @@ import { savePhotos } from '../lib/scorecard-photos/store.js'
 // stamp sits in the passport book, which is a picture, not a result. So
 // localStorage stays as non-score-bearing as `bbsbh:reveal:{gamePk}` already
 // is. The Logbook resolves runs, clubs, and venue from the game facts at render
-// time (src/api/logbook.js). Do not "cache the score here to save a fetch."
+// time (src/api/logbook/stampGames.js). Do not "cache the score here to save a fetch."
 
 // Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
 const store = localStore(STAMPS_KEY, parseStamps, serializeStamps)

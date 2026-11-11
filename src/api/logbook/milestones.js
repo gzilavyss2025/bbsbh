@@ -1,4 +1,4 @@
-import { ALL_MLB_TEAM_IDS, teamClubName, teamClubNameShort } from '../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, teamClubName, teamClubNameShort } from '../../lib/teams.js'
 
 // The Game Log retrospective's milestone shelf — completion sets over the
 // user's own stamped games (ADR-0035; `docs/design-inspiration.md` §8 has the
@@ -57,7 +57,7 @@ import { ALL_MLB_TEAM_IDS, teamClubName, teamClubNameShort } from '../lib/teams.
 // SPOILER FOOTING — same as ClubsSeen.jsx, and for the same reason
 // ===========================================================================
 // Every collection here reads only team identity off a stamped game's facts
-// (api/logbook.js's stampGameFacts) — which club played, which club was
+// (api/logbook/stampGames.js's stampGameFacts) — which club played, which club was
 // home — never a score, a result, or a decision. A stamp's two clubs say who
 // played, never who won, so this needs no seal and no gate: it is spoiler-
 // free on the same footing as the clubs-seen grid it sits beside on the
@@ -133,7 +133,7 @@ export const MILESTONE_COLLECTIONS = [
 
 // One collection's progress over a set of stamps + their resolved facts.
 // `stamps` is whatever the retrospective is already showing (whole
-// collection, or one book) and `factsByPk` is the same `api/logbook.js`
+// collection, or one book) and `factsByPk` is the same `api/logbook/stampGames.js`
 // result the page already fetched — no new data source. `roster` is the
 // level's slot list (`rosterFor`); omitted, it means MLB.
 //
@@ -156,7 +156,7 @@ export function computeMilestoneProgress(collection, stamps, factsByPk, roster) 
         continue
       }
       entry.stampCount += 1
-      // Dates sort lexicographically (YYYY-MM-DD, api/logbook.js), so a plain
+      // Dates sort lexicographically (YYYY-MM-DD, api/logbook/stampGames.js), so a plain
       // string compare finds the earliest/latest without parsing either one.
       if (fact.date < entry.date) {
         entry.gamePk = stamp.gamePk

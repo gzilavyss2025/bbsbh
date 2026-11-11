@@ -157,7 +157,7 @@ a keepsake that vanishes on its own is a broken promise.
   untouched — this is a read shape, not a permission. Pinned in
   `test/api-handlers.test.js`, round trip through `applyRemoteStamps` included.
 - **The retrospective (`/logbook/stats`) inherits this containment argument,
-  and only it.** `src/api/logbookStats.js` is pure and reveal-only by
+  and only it.** `src/api/logbook/stats.js` is pure and reveal-only by
   classification (ADR-0001): it handles scores, so it is callable only from the
   Logbook screens, and its input must only ever be the user's own stamps.
   Nothing on that page may involve a game the user has NOT stamped — no "recent

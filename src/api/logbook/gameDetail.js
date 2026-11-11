@@ -1,5 +1,5 @@
-import { getJson } from './statsapi.js'
-import { ipToOuts } from '../lib/math/innings.js'
+import { getJson } from '../statsapi.js'
+import { ipToOuts } from '../../lib/math/innings.js'
 
 // Per-game batting/pitching lines and win-probability "moments" for the
 // Logbook retrospective's ported First Scorebook sections (ADR-0035).

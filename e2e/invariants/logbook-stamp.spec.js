@@ -62,7 +62,7 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
   // StampGameButton.jsx), so un-stamping is reached through it below.
   await expect(page.getByRole('button', { name: 'Place it in your book' })).toBeVisible()
 
-  // The collection page resolves this game's facts itself (api/logbook.js) —
+  // The collection page resolves this game's facts itself (api/logbook/stampGames.js) —
   // signed out, there is no server to ask, which is the whole local-first
   // point. One stamp, and it links back to the game it came from.
   await page.goto('/logbook')

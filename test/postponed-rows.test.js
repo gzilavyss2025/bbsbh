@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { fetchGameFinal } from '../api/stamps.js'
-import { fetchStampGames } from '../src/api/logbook.js'
+import { fetchStampGames } from '../src/api/logbook/stampGames.js'
 
 const side = (id, abbreviation, runs, isWinner) => ({
   team: { id, abbreviation, name: abbreviation, sport: { id: 11 } },

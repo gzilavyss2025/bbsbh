@@ -105,7 +105,7 @@ import {
 //
 // `game` is the shape api/stamps.js caches as `game:final:{gamePk}` — produced
 // either by revealStampFacts (src/api/linescore.js, from a live feed) or by
-// fetchStampGames (src/api/logbook.js, from the schedule). One shape, so the
+// fetchStampGames (src/api/logbook/stampGames.js, from the schedule). One shape, so the
 // two sources cannot drift.
 //
 // `placements` and `inkOverride` are the lab's live-preview seam and nothing

@@ -19,7 +19,7 @@
 //     itself (ADR-0022).
 //   * `buildGameLogExport` writes out the LOCAL stamp records — gamePk, mode,
 //     note, date, placement, clocks. A local stamp record has never held a
-//     score: the Logbook resolves those at render time from api/logbook.js
+//     score: the Logbook resolves those at render time from api/logbook/stampGames.js
 //     (ADR-0035), which is exactly why a signed-out visitor's book is
 //     score-free on disk. Keep it that way — an export that carried a final
 //     score would put one in a file, which is a spoiler surface with a

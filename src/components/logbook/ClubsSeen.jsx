@@ -24,7 +24,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // gated: this reads the same stamps the page around it already draws, and
 // takes only the two team ids off each one.
 //
-// `factsByPk` is the resolved game facts from api/logbook.js, which is where a
+// `factsByPk` is the resolved game facts from api/logbook/stampGames.js, which is where a
 // stamp's two clubs live — the local stamp record itself deliberately holds no
 // club (src/lib/stamps.js). A stamp whose facts haven't resolved (offline, or a
 // failed batch) simply doesn't colour anything in, the same degrade the grid

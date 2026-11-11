@@ -601,7 +601,7 @@
       "class": "spoiler-free",
       "why": "The scorecard loader + pre-pitch staging view — select.js reads plus the manager/uniform side fetches, the same staging the lineup pages show. Long the manifest's motivating 'mixed' case (its header claimed safe while importing revealInning); the inked grid moved to scorecardGame.js and this half is finally what the header always said."
     },
-    "logbook.js": {
+    "logbook/stampGames.js": {
       "class": "reveal-only",
       "why": "The ONE fetcher here that deliberately asks statsapi FOR the score (every other schedule fetcher prunes it with fields=). Safe only because its input is the user's own stamps, and a stamp cannot exist for a game they have not finished revealing. Do not call it with an arbitrary game list.",
       "importers": [
@@ -609,25 +609,25 @@
         "screens/LogbookStatsPage.jsx"
       ]
     },
-    "logbookGameDetail.js": {
+    "logbook/gameDetail.js": {
       "class": "reveal-only",
       "why": "Per-game boxscore and win-probability fetchers for the Logbook retrospective's ported First Scorebook sections. Same containment argument as logbook.js: safe only because its input is the user's own stamps.",
       "importers": [
         "screens/LogbookStatsPage.jsx"
       ]
     },
-    "logbookMilestones.js": {
+    "logbook/milestones.js": {
       "class": "spoiler-free",
       "why": "The Game Log retrospective's milestone/collection-progress shelf. Reads only team identity (which club, which club was home) off a stamped game's already-resolved facts, never a score or a result — same footing as ClubsSeen.jsx's grid. Docs: docs/design-inspiration.md §8."
     },
-    "logbookRetrospective.js": {
+    "logbook/retrospective.js": {
       "class": "reveal-only",
       "why": "The ported First Scorebook sections (performances/moments/leaders/rotation/bullpen) for the Game Log retrospective. Pure, but it handles scores and pitching lines, so ADR-0001 applies; the discipline is the INPUT — only ever the user's own stamps and the facts/boxscores/moments resolved for those exact gamePks.",
       "importers": [
         "screens/LogbookStatsPage.jsx"
       ]
     },
-    "logbookStats.js": {
+    "logbook/stats.js": {
       "class": "reveal-only",
       "why": "The Game Log retrospective. Pure, but it handles scores, so ADR-0001 applies; with no seal to sit inside, the discipline is the INPUT — only ever the user's own stamps.",
       "importers": [
@@ -701,7 +701,7 @@
       "why": "Pure math, but its inputs are a player's box-score game line. Every caller is a reveal-only module by construction — don't wire it into a spoiler-free surface.",
       "importers": [
         "api/boxscore.js",
-        "api/logbookRetrospective.js"
+        "api/logbook/retrospective.js"
       ]
     },
     "person-fetch.js": {
