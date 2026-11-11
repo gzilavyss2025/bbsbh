@@ -8,7 +8,7 @@ import {
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, isPitcher } from '../../../api/prospects.js'
 import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospectTrend.js'
 import { loadRehabAssignments } from '../../../api/rehab.js'
-import { parentOrgHistory } from '../../../api/milbHistory.js'
+import { parentOrgHistory } from '../../../api/milb/history.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'

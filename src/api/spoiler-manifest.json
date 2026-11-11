@@ -658,7 +658,7 @@
       "class": "spoiler-free",
       "why": "Shared rendering mechanics (rate formatting, the sentence-shape rotation, the length-aware short-form assembler, the 'just' emphasis rule) for matchup/notes.js and matchup/arsenal.js. Pure string formatting with no data source of its own — it is handed already-computed numbers and clauses."
     },
-    "milbHistory.js": {
+    "milb/history.js": {
       "class": "spoiler-free",
       "why": "Static milb-history.json — per-season parent-org and club-name history."
     },
@@ -666,11 +666,11 @@
       "class": "cutoff-gated",
       "why": "Career counting-stat totals carry no individual game's score, so the page needs no seal — but the precompute cannot be retrofit to an old game's cutoff, so the player-page card shows its projection only on a bare current-day view."
     },
-    "milbSeasons.js": {
+    "milb/seasons.js": {
       "class": "spoiler-free",
       "why": "Static milb-seasons shards: a player's finished minor-league season totals (2021-2025) and their level percentile. Season aggregates, never a game."
     },
-    "milbPool.js": {
+    "milb/pool.js": {
       "class": "spoiler-free",
       "why": "The offseason page's checked pool of minor-league games. Two clubs, a date, a park and counts of the careers in the game — the generator stores no score, no run total, no winner and no inning count, so there is nothing here to reconstruct one from."
     },

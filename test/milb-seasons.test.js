@@ -12,7 +12,7 @@ import {
   milbShardKey,
   packRow,
   unpackRow,
-} from '../src/api/milbSeasons.js'
+} from '../src/api/milb/seasons.js'
 
 const hit = (season, ops, plateAppearances, teamId) => ({
   season,

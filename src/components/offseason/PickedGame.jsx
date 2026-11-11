@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { fetchMilbPool, pickGame, poolGamePath, reasonLine, seedFrom } from '../../api/milbPool.js'
+import { fetchMilbPool, pickGame, poolGamePath, reasonLine, seedFrom } from '../../api/milb/pool.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { readRevealMarkFor } from '../../lib/account/revealMark.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -32,7 +32,7 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // game. That is not a stylistic preference. A pool secretly dealt by drama, or
 // a line hinting at a close finish, would be the page reading the result it
 // refuses to show (research.md §5.6); the facts here are all true before the
-// first pitch (api/milbPool.js holds the full ordering).
+// first pitch (api/milb/pool.js holds the full ordering).
 //
 // THE SEAL IS THE ORDINARY ONE. This links to the game's first lineup page at
 // the same address the slate's own cards build, so the game opens sealed under

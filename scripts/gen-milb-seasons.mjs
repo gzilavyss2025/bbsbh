@@ -1,7 +1,7 @@
 // Regenerates public/data/milb-seasons/{NN}.json: each player's minor-league season
 // lines for 2021-2025 at AAA, AA, A+ and A (sportId 11-14), bucketed on `personId % 100`.
 // The career rating (docs/ovr-rating.md, "Career rating") blends them in at a discount.
-// Reader: src/api/milbSeasons.js. Row shape and the parse rules: scripts/lib/milb/seasons.mjs.
+// Reader: src/api/milb/seasons.js. Row shape and the parse rules: scripts/lib/milb/seasons.mjs.
 //
 // HAND-RUN, NOT a cron: a finished minor-league season never changes, so run it once a
 // year to fold in the season that just ended (bump SEASONS in the lib). Expect about 40
@@ -20,7 +20,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fetchLevelSeasonStats } from '../src/api/statsLevels.js'
-import { milbShardKey, packRow } from '../src/api/milbSeasons.js'
+import { milbShardKey, packRow } from '../src/api/milb/seasons.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShards } from './lib/io.js'
 import { qualifiedMetrics } from './lib/prospectPercentile.mjs'

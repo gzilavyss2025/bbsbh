@@ -294,7 +294,7 @@ for each generator; the reader modules:
   finished. The file's `season` is carried through the reader because the
   generator names the calendar year it ran in — a caller that prints a season
   has to check that the board is still about it.
-- `milbPool.js` — the checked pool of minor-league games the offseason page's
+- `milb/pool.js` — the checked pool of minor-league games the offseason page's
   picked-game card is dealt from, one file per level
   (`public/data/milb-pool/{sportId}.json`, `gen-milb-pool.mjs`). Spoiler-free by
   CONSTRUCTION rather than by gate: the file holds two clubs, a date, a park and
@@ -308,7 +308,7 @@ for each generator; the reader modules:
   through the reader for the same reason the leaders board's is: a level's winter
   opens hours before the night's generator run, and a card offering a game from
   the wrong season is worse than no card.
-- `milbSeasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
+- `milb/seasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
   (`public/data/milb-seasons/{NN}.json`, bucketed on `personId % 100`, hand-run by
   `gen-milb-seasons.mjs`). The rows are
   `{ season, sport, group, n, v, pct }` (`unpackRow`; no reader function in `src/` yet): the season total at one level, `n` plate
@@ -336,7 +336,7 @@ for each generator; the reader modules:
   and a pitch count, and no result, inning or score (ADR-0081).
   `test/long-at-bats.test.js` asserts that of the committed files by vocabulary
   rather than by trust. Both readers carry the file's `season` for the same reason
-  `milbPool.js` does.
+  `milb/pool.js` does.
 - `notable/notable.js` — the feat index behind the box score's feat label, the callout's "last time" lines and the `/notable` shelf, from `public/data/notable/`
   (`nohitters.json`, `cycles.json`, `tripleplays.json`; `gen-notable.mjs`, row keys in
   `ALLOWED_KEYS`, `scripts/lib/notable/merge.mjs`). `fetchNotable()` loads the three files
@@ -387,7 +387,7 @@ for each generator; the reader modules:
   executive or other, and `year` is null when the source gives none. Jackie Robinson's 42 is the one `league` entry.
   `test/retired-numbers.test.js` fails an entry with no https source or checked date. Edit the file by hand; there
   is no generator. No screen reads it yet.
-- `milbHistory.js` — historical MiLB affiliate/franchise data, from
+- `milb/history.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run
   regenerate. Derives 2005+ eras from statsapi's season-scoped team snapshots and

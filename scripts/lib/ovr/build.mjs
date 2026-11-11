@@ -5,7 +5,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { blendCareer } from '../../../src/api/ovr/career.js'
-import { unpackRow } from '../../../src/api/milbSeasons.js'
+import { unpackRow } from '../../../src/api/milb/seasons.js'
 import { ESTABLISHED_SEASONS, careerOvr } from '../../../src/api/ovr/minor.js'
 import { potRating } from '../../../src/api/ovr/pot.js'
 import { CONSTANTS, rateHitter, ratePitcher } from '../../../src/api/ovr/rating.js'

@@ -282,7 +282,7 @@ not swing a rating. It includes minor-league career history.
   discount. Minor-league years have no Statcast (part A), so they use the
   level-relative stats percentile (`public/data/milb-seasons/` for 2021-2025,
   `prospect-trend.json` for the current season). A row weighs recency x level weight
-  x playing time (`LEVEL_WEIGHT` in `src/api/milbSeasons.js`; 400 PA or 150 IP is
+  x playing time (`LEVEL_WEIGHT` in `src/api/milb/seasons.js`; 400 PA or 150 IP is
   full). **Decided (2026-10-08, #1803):** only a player with fewer than 3 MLB seasons
   has minor-league rows in his rating. With all rows, 26% of established hitters moved
   by more than 2 points. **Guess:** the two kinds of season are averaged on the OVR

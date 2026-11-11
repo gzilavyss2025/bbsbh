@@ -2,7 +2,7 @@
 // club-name) history for every full-season (AAA/AA/A+/A) AND Rookie-level
 // (ACL/FCL/DSL) affiliate, so a career-timeline stop shows the org a
 // since-reassigned farm club belonged to AT THE TIME, not the one it reports
-// today. See src/api/milbHistory.js for the reader.
+// today. See src/api/milb/history.js for the reader.
 //
 // ROOKIE LEVEL (sportId 16) WAS EXCLUDED, THEN ADDED BACK (issue #856) — the
 // exclusion read as an unargued scope note ("skip rookie/complex/DSL noise"),
@@ -20,7 +20,7 @@
 // years, plus the 2021 GCL→FCL/AZL→ACL league renaming) — but `nameHistory` is
 // a separate era list from `parentHistory` (see the merge below) and isn't
 // read by the Minors tab's "Affiliation history" strip
-// (`parentOrgHistory` in src/api/milbHistory.js), so that cosmetic churn
+// (`parentOrgHistory` in src/api/milb/history.js), so that cosmetic churn
 // changes this file's byte count, never what any screen renders.
 //
 // WHY THIS EXISTS AS A SCRIPT (the file used to be hand-typed): the file's
@@ -239,7 +239,7 @@ async function main() {
       'refresh. Hand-authored data — per-club/era `note`s, era `logo`s, verified pre-' +
       `${START_YEAR} eras, and the top-level \`caveats\` — lives in scripts/milb-history-seed.json ` +
       'and is merged in each run, so edit the SEED, not this file (edits here are overwritten). ' +
-      'See src/api/milbHistory.js for the reader and docs/milb-historical-logos.md for the logo manifest.',
+      'See src/api/milb/history.js for the reader and docs/milb-historical-logos.md for the logo manifest.',
     generator: 'scripts/gen-milb-history.mjs',
     generatedAt: new Date().toISOString(),
     coverage: { seasons: [START_YEAR, END_YEAR], sportIds: LEVELS },

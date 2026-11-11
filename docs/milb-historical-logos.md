@@ -81,7 +81,7 @@ set, not every MiLB rename ever). Candidates NOT included, with why:
 
 ## Wiring it in (not done yet — by design)
 
-`src/api/milbHistory.js` already exposes `historicalClubName(teamId, year)`,
+`src/api/milb/history.js` already exposes `historicalClubName(teamId, year)`,
 which resolves to `{ name, city, logo }` for a covered (team, year) — the
 `logo` field is exactly the filename in the table above. Nothing calls it yet
 because:

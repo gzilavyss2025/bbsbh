@@ -1,4 +1,4 @@
-import { shardKey100 } from '../lib/shardKey.js'
+import { shardKey100 } from '../../lib/shardKey.js'
 
 // A player's minor-league season lines, 2021-2025, levels AAA to A (sportId 11-14).
 // Read from public/data/milb-seasons/{NN}.json, hand-run by scripts/gen-milb-seasons.mjs
