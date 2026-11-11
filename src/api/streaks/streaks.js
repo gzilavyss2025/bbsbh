@@ -1,6 +1,6 @@
 // The Streak Finder (/streaks): every run of N games in a row in which a club
 // reached (or stayed under) a total in one counting stat. Read live from the Stats
-// API's per-season team game logs, one request per season and group. Not a scoring
+// API's team game logs: one date-range request per log covers every season. Not a scoring
 // surface, so nothing is sealed (ADR-0034).
 
 import { getJson } from '../statsapi.js'
@@ -129,57 +129,40 @@ export function labelRanks(found, lowFirst) {
   })
 }
 
-async function seasonLog(teamId, group, season, gameType, signal) {
-  const d = await getJson(`/api/v1/teams/${teamId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=${gameType}`, { signal })
-  return d?.stats?.[0]?.splits ?? []
-}
-
 export async function firstSeason(teamId, signal) {
   const d = await getJson(`/api/v1/teams/${teamId}?fields=teams,firstYearOfPlay`, { signal })
   return Number(d?.teams?.[0]?.firstYearOfPlay) || 1901
 }
 
-// Raw splits per (team, log, season, game type) for the session: every stat on one
+// Raw splits per (team, log, seasons, game type) for the session: every stat on one
 // side reads the same log, so a stat switch needs no new request.
 const logCache = new Map()
 
-// Every game log in the season range for one group, six requests at a time. A
-// season that fails is retried once, then reported in `failed` (e.g. "1987" or
-// "1987 postseason") rather than dropped silently. Returns `{ logs, failed }`,
-// `logs` as `{ splits, post }`; turn them into rows with `toGames`.
+// One game log covering every season in [from, to]: statsapi takes a date range,
+// so the whole history is one request (the Brewers since 1969: ~9,200 games, ~8 MB),
+// not one per season. A 404 is a range with no games, not a failure.
+async function rangeLog(teamId, group, from, to, gameType, signal) {
+  const key = `${teamId}:${group}:${from}:${to}:${gameType}`
+  if (logCache.has(key)) return logCache.get(key)
+  let splits
+  try {
+    const d = await getJson(`/api/v1/teams/${teamId}/stats?stats=gameLog&group=${group}&startDate=${from}-01-01&endDate=${to}-12-31&gameType=${gameType}`, { signal, timeoutMs: 45_000 })
+    splits = d?.stats?.[0]?.splits ?? []
+  } catch (e) {
+    if (!/MLB API 404/.test(e?.message)) throw e
+    splits = []
+  }
+  logCache.set(key, splits)
+  return splits
+}
+
+// Every game in the season range for one group, as `{ splits, post }` logs: one
+// request for the regular season and one more with the postseason. Turn them into
+// rows with `toGames`.
 export async function loadLogs(teamId, group, from, to, withPost, signal) {
-  const jobs = []
-  for (let y = from; y <= to; y++) {
-    jobs.push([y, 'R'])
-    if (withPost) jobs.push([y, 'P'])
-  }
-  const logs = []
-  const failed = []
-  let next = 0
-  const worker = async () => {
-    while (next < jobs.length) {
-      const [y, type] = jobs[next++]
-      const key = `${teamId}:${group}:${y}:${type}`
-      let splits = logCache.get(key)
-      if (!splits) {
-        for (let attempt = 0; attempt < 2 && !splits; attempt++) {
-          try {
-            splits = await seasonLog(teamId, group, y, type, signal)
-          } catch (e) {
-            if (signal?.aborted) throw e
-            // A 404 is a season the club has no log for (the Brewers' 1968, a
-            // franchise year before play), not a failure.
-            if (/MLB API 404/.test(e?.message)) splits = []
-          }
-        }
-        if (splits) logCache.set(key, splits)
-        else failed.push(type === 'P' ? `${y} postseason` : String(y))
-      }
-      if (splits) logs.push({ splits, post: type === 'P' })
-    }
-  }
-  await Promise.all(Array.from({ length: 6 }, worker))
-  return { logs, failed: failed.sort() }
+  const types = withPost ? ['R', 'P'] : ['R']
+  const logs = await Promise.all(types.map((t) => rangeLog(teamId, group, from, to, t, signal)))
+  return logs.map((splits, i) => ({ splits, post: types[i] === 'P' }))
 }
 
 export const toGames = (logs, field) => logs.flatMap(({ splits, post }) => splits.map((s) => gameRow(s, field, post)))
