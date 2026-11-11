@@ -101,7 +101,7 @@ export function movedUpIds(leaders) {
 // `top` names one player because a name is worth more than a number: "the No. 1
 // prospect in baseball played in this game" is a reason, where "13 ranked
 // prospects" is a statistic. Both are kept, and the sentence picked from them
-// lives on the page side (src/api/milbPool.js) so the wording can change
+// lives on the page side (src/api/milb/pool.js) so the wording can change
 // without a regeneration.
 export function reasonFacts(ids, { prospects, movers, alumni, staleMovers }) {
   const played = new Set(ids)

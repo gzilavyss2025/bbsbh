@@ -165,7 +165,7 @@
    row: the two marks large and centred, the matchup on the app's own '@' axis,
    and one filled control under it. Every figure it could otherwise carry — a
    score, a margin, an inning count — is absent by design, and the data file it
-   reads has none of them to give (api/milbPool.js).
+   reads has none of them to give (api/milb/pool.js).
 
    It borrows .btn rather than restating one: the actions here are ordinary
    buttons and the one solid fill is the navy primary the app uses for a

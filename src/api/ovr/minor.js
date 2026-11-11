@@ -1,10 +1,10 @@
 // OVR for a minor leaguer, and the minor-league half of the career blend
 // (docs/ovr-rating.md, "OVR for a minor leaguer" and "Career rating"; #1721).
 // Pure: level-relative OPS or ERA percentiles in, one rating out. No fetch, no React.
-// Levels are sportIds, the keys of LEVEL_WEIGHT (milbSeasons.js).
+// Levels are sportIds, the keys of LEVEL_WEIGHT (milb/seasons.js).
 import { recency } from './career.js'
 import { CONSTANTS } from './rating.js'
-import { FULL_WEIGHT_OUTS, FULL_WEIGHT_PA, LEVEL_WEIGHT } from '../milbSeasons.js'
+import { FULL_WEIGHT_OUTS, FULL_WEIGHT_PA, LEVEL_WEIGHT } from '../milb/seasons.js'
 
 // Spec, "One band for every level" (decided). Floor 20 at every level (decided).
 export const CEILING = { 11: 58, 12: 55, 13: 45, 14: 39, 16: 30 }

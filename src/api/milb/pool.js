@@ -16,8 +16,8 @@
 // season says "Final", postponements included. Whether a game was played, and
 // whether its feed can carry the scoring flow, is a question per game — 120 of
 // them, at 17 KB a call, which is a build-time job and never a page load.
-import { staticJsonBy } from './staticJson.js'
-import { gamePath } from '../lib/route.js'
+import { staticJsonBy } from '../staticJson.js'
+import { gamePath } from '../../lib/route.js'
 
 export const fetchMilbPool = staticJsonBy((sportId) => `/data/milb-pool/${sportId}.json`, {
   shape: (d) => ({

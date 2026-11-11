@@ -56,7 +56,7 @@
 // back to a one-sided check: does any player's own career pass through the
 // OPPOSING club's current parent org? A stint's org is resolved as of the
 // season it happened in via public/data/milb-history.json's researched eras
-// (mirroring src/api/milbHistory.js's historicalParentOrg — the 2021 MiLB
+// (mirroring src/api/milb/history.js's historicalParentOrg — the 2021 MiLB
 // reorg means a naive "current org" lookup misattributes older stints), falling
 // back to a live current-team lookup when that file doesn't cover the
 // (team, season), and to that season's own team record when the live parent
@@ -228,7 +228,7 @@ async function loadPeakWar() {
 
 // --- org ties (fallback when a matchup has zero literal teammate pairs) --------
 // Season-accurate parent-org history, read straight from the static file
-// src/api/milbHistory.js also reads (public/data/milb-history.json) — loaded
+// src/api/milb/history.js also reads (public/data/milb-history.json) — loaded
 // once, synchronously reused here instead of that module's fetch()-based
 // reader, since this script runs in Node against the file on disk. Mirrors
 // eraForYear/historicalParentOrg there; keep the two in sync if that shape

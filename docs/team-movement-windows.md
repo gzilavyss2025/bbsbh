@@ -224,7 +224,7 @@ Buffalo Bisons (n=390), Round Rock Express (n=386), Syracuse Chiefs
 `.scratch/level-benchmarks/org-gaps.json`. Add findings to
 `scripts/milb-history-seed.json` in its existing format — that file
 already feeds the shipped Minors tab "Affiliation history" strip
-(`src/api/milbHistory.js`), so verified entries help there immediately;
+(`src/api/milb/history.js`), so verified entries help there immediately;
 wiring this research pipeline (`team-windows.mjs`, `org-and-timing.mjs`)
 to prefer the seed over the raw sweep is unbuilt, not yet needed since
 today's window has zero measured gaps.

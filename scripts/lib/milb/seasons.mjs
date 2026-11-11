@@ -1,7 +1,7 @@
 // Pure parse for gen-milb-seasons.mjs: one person's yearByYear lines at ONE level
 // (statsapi `/people?hydrate=stats(type=[yearByYear],sportId=N)`) become season rows,
 // ranked against that level-season's pool with the existing prospectPercentile math.
-// No I/O (scripts/CLAUDE.md's "testable helper" rule). Row shape: src/api/milbSeasons.js.
+// No I/O (scripts/CLAUDE.md's "testable helper" rule). Row shape: src/api/milb/seasons.js.
 
 import { meetsPlayingTimeFloor, percentileRank, populationKey } from '../prospectPercentile.mjs'
 

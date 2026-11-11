@@ -9,13 +9,13 @@
 //
 // Two things this file pins: the generated static file actually carries
 // Rookie-level coverage now (a regression here means someone reverted LEVELS
-// or hand-edited the output), and the reader (src/api/milbHistory.js) surfaces
+// or hand-edited the output), and the reader (src/api/milb/history.js) surfaces
 // a Rookie club's real parent-org eras exactly like it does for any other
 // level — the same function, no level-specific branch.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { parentOrgHistory } from '../src/api/milbHistory.js'
+import { parentOrgHistory } from '../src/api/milb/history.js'
 
 const dataPath = new URL('../public/data/milb-history.json', import.meta.url)
 const fileText = readFileSync(dataPath, 'utf8')

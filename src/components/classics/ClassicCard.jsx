@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { rollClassic } from '../../api/classics/deck.js'
 import { fetchClassicFacts } from '../../api/classics/reason.js'
-import { poolGamePath } from '../../api/milbPool.js'
+import { poolGamePath } from '../../api/milb/pool.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { readRevealMarkFor } from '../../lib/account/revealMark.js'
 import { useRouteLink } from '../../lib/nav.js'

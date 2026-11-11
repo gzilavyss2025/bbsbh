@@ -238,7 +238,7 @@ function labelFor(baseLabel, rows) {
 // mark (teamLogoUrl in lib/teams.js). A row whose feed entry names no club
 // leaves it null and the cell prints the name alone. `orgId` is the CURRENT
 // answer for the MLB column; loadPlayer.js overwrites it with the historically
-// correct org, when milbHistory.js's era data covers that club and season.
+// correct org, when milb/history.js's era data covers that club and season.
 export function awardsView(awards, endDate = null) {
   const byKey = new Map()
   let selections = 0

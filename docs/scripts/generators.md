@@ -1792,7 +1792,7 @@ Re-run only to fold in a new season.
   `level` (the sportId) and no `bars`: `src/api/ovr/minor.js`, rating
   `20 + (ceiling - 20) * percentile / 100`. A player with fewer than 3 MLB seasons
   (`ESTABLISHED_SEASONS`) also has his minor-league rows blended into his OVR (recency x
-  level weight x playing time, from `milbSeasons.js`); an established player is not
+  level weight x playing time, from `milb/seasons.js`); an established player is not
   touched. A rated Top 100 player gets `pot` (`src/api/ovr/pot.js`); everyone else has no
   `pot`. The run prints how far the minor-league seasons move MLB ratings, and how many
   Top 100 players have no rating.

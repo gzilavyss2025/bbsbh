@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CEILING, careerOvr, minorRating } from '../../src/api/ovr/minor.js'
 import { CONSTANTS } from '../../src/api/ovr/career.js'
-import { LEVEL_WEIGHT } from '../../src/api/milbSeasons.js'
+import { LEVEL_WEIGHT } from '../../src/api/milb/seasons.js'
 
 const near = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} not within ${tol} of ${b}`)
 const { W } = CONSTANTS

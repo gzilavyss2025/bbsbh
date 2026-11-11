@@ -7,7 +7,7 @@
 // keys in the 1982 Brewers' season, 57 KB). Never `hydrate=linescore`. A game
 // is dealt on who played, never on what happened (ADR-0080).
 import { getJson } from '../statsapi.js'
-import { seedFrom, pickGame } from '../milbPool.js'
+import { seedFrom, pickGame } from '../milb/pool.js'
 
 
 export const CLASSICS_FIELDS =

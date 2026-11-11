@@ -14,7 +14,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { movedUpIds, poolSeasonFor, reasonFacts, selectPool } from '../scripts/lib/milb-pool.mjs'
-import { pickGame, poolGamePath, reasonLine, seedFrom } from '../src/api/milbPool.js'
+import { pickGame, poolGamePath, reasonLine, seedFrom } from '../src/api/milb/pool.js'
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 

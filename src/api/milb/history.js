@@ -18,7 +18,7 @@
 // this module existed. That makes wiring this in strictly additive: it can
 // only make a resolution MORE correct, never less.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 export const fetchMilbHistory = staticJson('/data/milb-history.json', { fallback: { clubs: {} } })
 
