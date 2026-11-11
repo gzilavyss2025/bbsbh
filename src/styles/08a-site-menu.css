@@ -211,6 +211,31 @@
   font-size: var(--fs-small);
 }
 
+/* The <dialog> IS the scrim (SiteMenu.jsx). Reset the browser's dialog box
+   so .scrim fills the window, and hold the page still behind it. */
+.scrim--site-menu {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+}
+
+.scrim--site-menu:not([open]) {
+  display: none;
+}
+
+.scrim--site-menu::backdrop {
+  background: none;
+}
+
+body:has(.scrim--site-menu[open]) {
+  overflow: hidden;
+}
+
 /* -------------------------------------------------- the More sheet
    SiteMenu.jsx. The list scrolls, and until #744 it did not: `.sheet`
    (14-strike-zone.css) sets no max-height and no overflow, and `.scrim` docks
