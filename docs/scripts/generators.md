@@ -2215,7 +2215,12 @@ Re-run only to fold in a new season.
   scroll starts. The warm and `--sw` visits are primed in a separate page. With `--sw`,
   CDP throttling does not reach the service-worker target, so every request the worker
   serves on the second visit is unthrottled, not only the install: treat `--sw` timings as
-  a best case. The precache numbers count `precache` caches only.
+  a best case. The precache numbers count `precache` caches only. `--size WxH` measures a desktop
+  window of that size (no touch) and `--cpu N` sets the CPU slowdown (4; 1 is unthrottled);
+  #2986 used `--size 1440x900 --cpu 1`.
+- `perf/sw-update.mjs` — hand-run, same footing: the first launch after a deploy (#2986).
+  Give it two saved builds; it installs A's service worker, serves B, and prints a timeline
+  of launch 2 (plus an in-app move to a lazy route) and launch 3. Usage in its header.
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
   layer over the research JSON under `.scratch/` and `public/data/`, and the first
