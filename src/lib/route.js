@@ -124,7 +124,7 @@
 //
 // A page ABOUT SOMEBODY carries their name in its address: a player, a club, an
 // umpire and a manager are all '{slug}-{id}' — '/player/mike-trout-545361',
-// '/team/milwaukee-brewers-158/roster'. See entitySegment() below for the whole
+// '/team/milwaukee-brewers-158/roster'. See entitySegment() (route/segments.js) for the whole
 // rule, and ADR-0057 for why the id stays.
 //
 // Player/team pages are game-independent (resolvable by id on a cold link) and
@@ -139,21 +139,20 @@
 // URL that may include a `?query`.
 
 import { NAME_BY_PATH, pathOf } from './route/table.js'
+import { buildPath, parsePattern, TEAM_TAB_BAND } from './route/patterns.js'
+import { entitySegment, idFromSlug, linkQuery, slugify, teamSegment } from './route/segments.js'
 import { parseRecordsRoute } from './postseason/recordsRoute.js'
 import { parseFromRoute } from './from/route.js'
 import { parseScoutRoute } from './scout/route.js'
 import { parseSeasonRoute, seasonPath } from './seasons/route.js'
-import { SPORT_IDS, teamFullName } from './teams.js'
-import { isYearView, yearAsOf } from './dates.js'
+import { SPORT_IDS } from './teams.js'
+import { yearAsOf } from './dates.js'
 import {
   WINTER_LEAGUES,
   WINTER_SPORT_ID,
   winterLeagueById,
   winterLeagueBySlug,
 } from './winter/leagues.js'
-
-// Newest SEASONS year in api/tradeDeadline.js (test/route.test.js pins it).
-const LATEST_TRADE_DEADLINE_SEASON = 2026
 
 // The slate's league, as a URL prefix. Two things are deliberately missing.
 //
@@ -195,100 +194,10 @@ const SPORT_ID_BY_SLUG = Object.freeze({
   ...Object.fromEntries(WINTER_LEAGUES.map((l) => [l.slug, WINTER_SPORT_ID])),
 })
 
-// The team hub's own pages, as `third URL segment -> route name`. The old tabs
-// (roster, games, numbers, contracts, minors) are gone: see TEAM_TAB_BAND.
-const TEAM_TAB_ROUTES = {
-  leaders: 'team-leaders',
-}
-
-// Where each old tab address lands on the one-scroll team page (ADR-0082, #1107). `/numbers`
-// lands on Standings, where the Numbers tab's lead content (the standings table) went.
-export const TEAM_TAB_BAND = {
-  roster: 'roster',
-  games: 'games',
-  numbers: 'standings',
-  contracts: 'money',
-  minors: 'farm',
-}
-
-// The old player-hub tab addresses (#1898). The tabs are gone: each opens the one
-// player page, which scrolls to the tab's section, so every shared link still works.
-// Any other segment is the bare page; a fourth one (the old '/analytics/{year}') is
-// dropped, and the tab it hangs off is kept.
-const PLAYER_OLD_TABS = new Set(['stats', 'analytics', 'history'])
-
-// --- Addresses that carry a name -------------------------------------------
-//
-// A page about a PERSON or a CLUB is addressed by their name AND their MLB id:
-// '/player/mike-trout-545361', '/team/milwaukee-brewers-158/roster'. The id
-// resolves the page; the slug in front of it is for the reader, the search
-// engine, and whoever pastes the link into a message.
-//
-// READING IS LOOSE, WRITING IS STRICT. parseRoute takes the trailing digits and
-// ignores everything in front of them, so '/player/545361' — every link shared
-// before this existed — resolves unchanged, with no redirect, forever. Builders
-// emit the slug whenever the caller hands them a name, the bare id when not.
-// Because BOTH forms resolve, rel=canonical decides which one a search engine
-// counts; api/preview.js writes it at the slugged form and keeps its own copy of
-// these helpers, since the edge runtime can't import this module graph. Change
-// one, change both. ADR-0057 has the why the id stays.
-
-// Longest slug we will put in front of an id: long enough for any real club or
-// person ('rocket-city-trash-pandas' is 24), short enough that a MiLB club with
-// a sponsor in its name can't run away with the address bar.
-const SLUG_MAX = 48
-
-// A name -> a URL-safe slug. Diacritics are FOLDED, not dropped: 'José Ramírez'
-// has to become 'jose-ramirez', because stripping the marks without decomposing
-// first gives 'jos-ram-rez', which no reader would match to the plain spelling.
-export function slugify(name) {
-  return String(name ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, SLUG_MAX)
-    .replace(/-+$/, '')
-}
-
-// The id inside a '{slug}-{id}' segment, and the whole segment when there is no
-// slug on it. The id is always the LAST hyphen-separated group, so a name that
-// itself ends in a number cannot be mistaken for one. Anything matching neither
-// shape is handed back untouched, so a mangled URL still fails where it used to
-// — at the fetch — rather than somewhere new.
-export function idFromSlug(segment) {
-  const s = String(segment ?? '')
-  if (/^\d+$/.test(s)) return s
-  const m = s.match(/-(\d+)$/)
-  return m ? m[1] : s
-}
-
-// The counterpart every path builder below goes through. No name, or an id that
-// is not a plain number (an undefined off a half-loaded row): emit the bare id
-// and let the address stay short rather than mint 'undefined-158'.
-export function entitySegment(id, name) {
-  const slug = /^\d+$/.test(String(id ?? '')) ? slugify(name) : ''
-  return slug ? `${slug}-${id}` : String(id ?? '')
-}
-
-// Clubs get their name for free. All 30 MLB clubs are already named in a static
-// table (teams.js MLB_TEAM_NAMES), so every '/team/...' address slugs itself
-// whether or not the caller had a name to hand — which is most of the team hub,
-// where a tab button knows an id and a tab key and nothing else. A MiLB club is
-// not in that table: only its own feed knows its name, so those callers pass it,
-// and an affiliate whose feed hasn't landed yet keeps the bare-id address it has
-// always had (the MiLB degrade in root CLAUDE.md).
-//
-// The static table WINS over a passed name, which is the opposite of everywhere
-// else here and is the point: a club is called several things on this site — the
-// standings say "Rays", the off-day tile says "D-backs", the hub says "Tampa Bay
-// Rays" — and a link picks up whichever one it happens to be rendering. One club
-// must have ONE address, so for the 30 the table knows, the table decides. Only
-// a club it does not know takes the caller's word.
-export function teamSegment(id, name) {
-  return entitySegment(id, teamFullName(Number(id)) || name)
-}
+// The '{slug}-{id}' segment rule (ADR-0057) and the `?d=`/`?s=` query live in
+// route/segments.js, beside the pattern entries that spell addresses with them.
+// Re-exported here so their importers did not change.
+export { entitySegment, idFromSlug, linkQuery, slugify, teamSegment, TEAM_TAB_BAND }
 
 // True when the URL is the home slate ('/', '/aaa', '/11042026', unknown paths).
 // App.jsx uses it to start the slate's chunk at boot.
@@ -300,10 +209,35 @@ export function isSlateUrl(url) {
 // up first and the hand branches below never see it. test/route-table.test.js
 // runs every table address through parseRouteByHand and expects the slate
 // fallback, so a hand branch that would also claim one fails there.
+//
+// Then the pattern entries (route/patterns.js), tried by first segment. Their
+// heads are words no hand branch below claims, so trying them first changes no
+// precedence; the same test runs a sample of each through parseRouteByHand.
 export function parseRoute(url) {
-  const parts = (url || '').split('?')[0].split('/').filter(Boolean)
+  const [path, query = ''] = (url || '').split('?')
+  const parts = path.split('/').filter(Boolean)
   const tabled = NAME_BY_PATH.get('/' + parts.join('/'))
-  return tabled ? { name: tabled } : parseRouteByHand(url)
+  if (tabled) return { name: tabled }
+  const q = new URLSearchParams(query)
+  return parsePattern(parts, q, hintsOf(q)) ?? parseRouteByHand(url)
+}
+
+// The `?d=`/`?y=` as-of and the `?s=` sportId hint every dated page reads.
+// A `?d=` that is not a real calendar date degrades to LIVE, never rides on.
+// Every dated loader funnels it into dayBefore(), whose
+// `new Date(...).toISOString()` THROWS on an unparseable value, and the throw
+// surfaced three different ways: the team hub and /player showed "Couldn't
+// load this…", /leaders drew a banner reading "Stats entering Invalid Date",
+// and /situational-records rendered a blank page. A regex is not enough —
+// '2026-02-30' matches the shape and still makes an Invalid Date — so this
+// takes the same calendar-validity check the date picker already uses.
+// `?y=2018` is a past season: the same as-of as `?d=2018-12-31`. A real `?d=` wins (#2588).
+function hintsOf(q) {
+  const raw = q.get('d')
+  return {
+    asOf: isRealDate(raw) ? raw : yearAsOf(q.get('y')),
+    sportId: q.get('s') ? Number(q.get('s')) : null,
+  }
 }
 
 // Every route the table does not hold. Exported for that test only.
@@ -311,20 +245,7 @@ export function parseRouteByHand(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)
   const q = new URLSearchParams(query)
-  // A `?d=` that is not a real calendar date degrades to LIVE, never rides on.
-  // Every dated loader funnels it into dayBefore(), whose
-  // `new Date(...).toISOString()` THROWS on an unparseable value, and the throw
-  // surfaced three different ways: the team hub and /player showed "Couldn't
-  // load this…", /leaders drew a banner reading "Stats entering Invalid Date",
-  // and /situational-records rendered a blank page. A regex is not enough —
-  // '2026-02-30' matches the shape and still makes an Invalid Date — so this
-  // takes the same calendar-validity check the date picker already uses.
-  // Same stance the bare-date slate below already takes: a hand-mangled date
-  // falls through to the live page rather than erroring on it.
-  const raw = q.get('d')
-  // `?y=2018` is a past season: the same as-of as `?d=2018-12-31`. A real `?d=` wins (#2588).
-  const asOf = isRealDate(raw) ? raw : yearAsOf(q.get('y'))
-  const sportId = q.get('s') ? Number(q.get('s')) : null
+  const { asOf, sportId } = hintsOf(q)
   if (parts.length === 0) return { name: 'home' }
   // A bare 8-digit date is the slate paged to that day ('/07172026') — the
   // home screen, shareable. Every named single-segment route below is
@@ -359,12 +280,6 @@ export function parseRouteByHand(url) {
   if (season) return season
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
-  if (parts[0] === 'free-agents' && parts.length <= 2) {
-    const year = parts.length === 2 && /^\d{4}$/.test(parts[1]) ? Number(parts[1]) : null
-    return { name: 'free-agents', season: year }
-  }
-  if (parts.length === 1 && parts[0] === 'trade-deadline')
-    return { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
   // Admin copy editor — the site owner tunes the editable copy here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
@@ -409,196 +324,10 @@ export function parseRouteByHand(url) {
   // still parsed: see ADR-0029's isolation layers.
   if (parts.length === 1 && parts[0] === 'uniform-names')
     return { name: 'uniform-names' }
-  // The Game Notes archive (#1258). `?team=` is the team hub's door onto one
-  // club and the page writes the pick back, so the address is the pick; 'all' is
-  // every club. Anything else degrades to the page's default rather than erroring,
-  // and the page rejects an id that is not an MLB club.
-  if (parts.length === 1 && parts[0] === 'game-notes') {
-    if (q.get('team') === 'all') return { name: 'game-notes', teamId: 'all' }
-    const team = Number(q.get('team'))
-    return { name: 'game-notes', teamId: Number.isInteger(team) && team > 0 ? team : null }
-  }
-  // The Logbook — this user's own collection of game stamps (ADR-0035). It
-  // renders scores plainly, which is safe for exactly one reason: a stamp only
-  // exists for a game its owner already finished revealing. `season: null` means
-  // "the newest season you have stamps in" and is resolved by the page, not
-  // here, since only the local collection knows.
-  // `?place={gamePk}` puts the book into placement mode for one stamp — the
-  // hand-off from the box score's mint card. Deliberately a QUERY and not a
-  // route name: it is a transient mode of this same page (you leave it by
-  // placing the stamp or by cancelling), not an address worth sharing, and a
-  // stale link to it degrades to the plain book.
-  if (parts.length === 1 && parts[0] === 'logbook')
-    return { name: 'logbook', season: null, placing: toGamePkParam(q.get('place')) }
-  // A specific named BOOK (ADR-0036's shelf), additive alongside the two
-  // routes above rather than a replacement for them: '/logbook' and
-  // '/logbook/{season}' keep meaning exactly what they always have — the
-  // default book's content, since every stamp minted before this feature
-  // already lives in DEFAULT_BOOK_ID (src/lib/books.js's migration). This is
-  // the only way to deep-link or bookmark a NON-default book. Same `?place=`
-  // hand-off as the bare route, for the same reason: opening a specific book
-  // from the box score's mint card should drop straight into placement mode.
-  if (parts.length === 3 && parts[0] === 'logbook' && parts[1] === 'book')
-    return {
-      name: 'logbook',
-      bookId: parts[2],
-      season: null,
-      placing: toGamePkParam(q.get('place')),
-    }
-  // THIS BRANCH MUST STAY ABOVE THE SEASON BRANCH BELOW, for the identical
-  // reason '/logbook/stats' has to stay above '/logbook/{season}' above:
-  // `Number(parts[3])` would parse 'stats' as NaN and silently fall through to
-  // the bare book page instead of the retrospective.
-  if (parts.length === 4 && parts[0] === 'logbook' && parts[1] === 'book' && parts[3] === 'stats')
-    return { name: 'logbook-stats', bookId: parts[2] }
-  // One season of a specific book. A non-numeric or out-of-range segment falls
-  // back to that book's bare page (same idea as the invalid-date fallback
-  // above) rather than stranding it on a season that cannot exist.
-  if (parts.length === 4 && parts[0] === 'logbook' && parts[1] === 'book') {
-    const season = Number(parts[3])
-    return {
-      name: 'logbook',
-      bookId: parts[2],
-      season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
-      placing: toGamePkParam(q.get('place')),
-    }
-  }
-  // High-res game photo finder — an open page, no seal.
-  if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
-  // Same page, deep-linked straight to one game's gallery (e.g. from the box
-  // score) — skips the club/season picker instead of adding a distinct route name.
-  // A non-numeric segment falls back to the plain browse view (same idea as
-  // the invalid-date fallback above) rather than stranding the page with
-  // neither a picker nor a gallery to show.
-  if (parts.length === 2 && parts[0] === 'photos') {
-    const gamePk = Number(parts[1])
-    return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
-  }
-  // The Logbook retrospective — what your collection adds up to (ADR-0035, the
-  // game-stamps PRD §6). It reads ONLY your own stamps, which is what lets it
-  // print final scores plainly, same argument as /logbook itself.
-  //
-  // THIS BRANCH MUST STAY ABOVE THE SEASON BRANCH BELOW. That one parses
-  // `Number(parts[1])`, so '/logbook/stats' would resolve to season NaN ->
-  // null -> the bare Logbook page, silently and with no error to notice. Every
-  // named second segment this route ever grows has the same problem and needs
-  // the same placement.
-  if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'stats')
-    return { name: 'logbook-stats' }
-  // Starting a new book. A named second segment, so it sits above the season
-  // branch below for the reason the block just above spells out. It carries the
-  // same `?place=` hand-off as every other Logbook route: starting a book is one
-  // of the ways to answer "which book does this stamp go in", so the stamp has
-  // to still be in hand on the other side of it.
-  if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'new')
-    return { name: 'logbook', creating: true, season: null, placing: toGamePkParam(q.get('place')) }
-  // One season of the Logbook. A non-numeric or out-of-range segment falls back
-  // to the bare page (same idea as the invalid-date fallback above) rather than
-  // stranding it on a season that cannot exist.
-  if (parts.length === 2 && parts[0] === 'logbook') {
-    const season = Number(parts[1])
-    return {
-      name: 'logbook',
-      season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
-      placing: toGamePkParam(q.get('place')),
-    }
-  }
   const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
   if (scout) return scout
   const from = parseFromRoute(parts, q) // above the generic 3-segment game branch below
   if (from) return from
-  if (parts.length === 2 && parts[0] === 'player')
-    return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
-  if (parts.length === 2 && parts[0] === 'team')
-    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
-  // A series id (e.g. '2025-division-112-158') already matches
-  // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
-  // One address for both series pages (Gary, 2026-09-28); seriesPageFor picks
-  // the page. `?d=` is the cutoff the live page shows the series heading
-  // into; no `?d=` means today.
-  if (parts.length === 2 && parts[0] === 'postseason')
-    return { name: 'postseason-series', seriesId: parts[1], asOf }
-  // The year matches the precomputed file's own name 1:1 (public/data/
-  // trade-deadline/{year}.json) — no separate slug scheme, same idea as the
-  // postseason series id above. A non-numeric segment falls back to the
-  // latest season rather than stranding the page with nothing to show.
-  if (parts.length === 2 && parts[0] === 'trade-deadline') {
-    const season = Number(parts[1])
-    return Number.isFinite(season)
-      ? { name: 'trade-deadline-season', season }
-      : { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
-  }
-  // Umpires carry no as-of hint: assignments/dates are never score-revealing,
-  // so unlike player/team links there's no `?d=`/`?s=` to parse. Managers carry
-  // none either — a coaching career/awards record is never score-revealing, same
-  // footing as umpires above.
-  if (parts.length === 2 && parts[0] === 'manager')
-    return { name: 'manager', id: idFromSlug(parts[1]) }
-  if (parts.length === 1 && parts[0] === 'outliers') return { name: 'outliers', asOf }
-  if (parts.length === 1 && parts[0] === 'leaders')
-    return { name: 'leaders', scope: 'mlb', asOf, sportId }
-  if (parts.length === 2 && parts[0] === 'leaders')
-    return { name: 'leaders', scope: parts[1].toLowerCase(), asOf, sportId }
-  // Both 3-segment 'leaders'/'team' branches must come BEFORE the generic
-  // 3-segment game branch below, which would otherwise swallow them as a game
-  // (date='leaders'/'team').
-  if (parts.length === 3 && parts[0] === 'leaders' && parts[1] === 'org')
-    return { name: 'leaders', scope: 'org', orgId: Number(idFromSlug(parts[2])), asOf, sportId }
-  // Stamp In (ADR-0042) — a club's played season with every result showing, so
-  // the reader can press a stamp for each game they watched. Deliberately NOT
-  // in TEAM_TAB_ROUTES above: it is a standalone page with exactly one entry
-  // point (the Schedule card's button on the Games band), not a band. Same 3-segment
-  // shape as the tabs, so it needs the same placement above the generic game
-  // branch below, which would otherwise read it as date='team'.
-  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'stamp-in')
-    return { name: 'team-stamp-in', id: idFromSlug(parts[1]), asOf, sportId }
-  // A club's professional photos, merged across its whole season — reached
-  // from exactly one place (the Photos rail's own "Full season" door), not a
-  // sixth tab, same reasoning and same placement as stamp-in just above.
-  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'photos')
-    return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId }
-  // The same page with both clubs' photos from every game this club played.
-  if (parts.length === 4 && parts[0] === 'team' && parts[2] === 'photos' && parts[3] === 'games')
-    return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId, allGames: true }
-  // A club's roster moves, the whole season, one day under another. Reached
-  // from the club's own Transactions deck and — the reason it exists — from
-  // every row of the home slate's wire, which used to land a reader on the
-  // Games tab with the deck four sections below the fold. Not a sixth tab
-  // either, same reasoning and same placement as the two above.
-  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'transactions')
-    return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
-  // The club across all its seasons (#2763): a standalone page like the three above.
-  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'franchise')
-    return { name: 'team-franchise', id: idFromSlug(parts[1]), asOf, sportId }
-  // The old tab addresses ('/team/{id}/roster', and behind the hidden '/team/{id}/next/' the
-  // same five) are the one-scroll team page, which lands on the tab's band (#1107). A bare or
-  // unknown '/team/{id}/next/{x}' is the bare page. All sit above the unknown-segment branch.
-  if (parts[0] === 'team' && parts.length === 3 && Object.hasOwn(TEAM_TAB_BAND, parts[2]))
-    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId, tab: parts[2] }
-  if (parts[0] === 'team' && parts.length === 4 && parts[2] === 'next') {
-    const page = { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
-    return Object.hasOwn(TEAM_TAB_BAND, parts[3]) ? { ...page, tab: parts[3] } : page
-  }
-  if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
-    return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
-  // An UNKNOWN third segment ('/team/158/media', a hand-edited URL, a tab
-  // renamed later) lands on the club's own page — the same contract
-  // PLAYER_OLD_TABS keeps for '/player/{id}/…'. Without it the generic game
-  // branch below read the URL as date='team', matchup='158', and GameRoute
-  // asked statsapi for the schedule of date=null at every level (#1164).
-  if (parts.length === 3 && parts[0] === 'team')
-    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
-  // The old player tab addresses. Same 3-segment shape as the team tabs above, so
-  // this sits ahead of the generic game branch below, which would otherwise read
-  // '/player/661388/stats' as date='player'.
-  if ((parts.length === 3 || parts.length === 4) && parts[0] === 'player')
-    return {
-      name: 'player',
-      id: idFromSlug(parts[1]),
-      asOf,
-      sportId,
-      ...(PLAYER_OLD_TABS.has(parts[2]) && { tab: parts[2] }),
-    }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -665,14 +394,6 @@ export function stepToSection(step, inning = 1, half = 'top') {
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }
 
-// A `?place=` gamePk, or null. Deliberately strict — a mangled value drops the
-// mode rather than putting the book into placement for a game that isn't real.
-function toGamePkParam(value) {
-  if (!value || !/^\d+$/.test(value)) return null
-  const pk = Number(value)
-  return Number.isInteger(pk) && pk > 0 ? pk : null
-}
-
 // URL date (MMDDYYYY) <-> API date (YYYY-MM-DD).
 export function urlDateToApi(d) {
   if (!/^\d{8}$/.test(d)) return null
@@ -728,42 +449,30 @@ export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
   return `/${apiDateToUrl(apiDate)}/${matchupSlug(awayAbbr, homeAbbr, gameNumber)}/${section}`
 }
 
-// Build a player / team page path. `d` = the as-of date (YYYY-MM-DD), `s` =
-// sportId. Both optional, and both absent on an ordinary link — including one
-// out of a game, which is the change ADR-0034's amendment records. A path
-// carrying `d` is one the reader asked for, and every link built from that page
-// keeps it so a single visit gives a single answer.
-// Exported so the as-of date control (`components/seal/AsOfBanner.jsx`) can
-// apply a picked date to whatever page it's rendering on by re-appending this
-// query to `location.pathname` — the same query string every path builder
-// below already produces, so a hand-built one can't drift from theirs.
-export function linkQuery({ d, s } = {}) {
-  const q = new URLSearchParams()
-  // A past season's last day is the address `?y=2018` (#2588), the way parseRoute reads it back.
-  if (d) isYearView(d) ? q.set('y', d.slice(0, 4)) : q.set('d', d)
-  if (s) q.set('s', String(s))
-  const qs = q.toString()
-  return qs ? `?${qs}` : ''
-}
 // `name` joins `d`/`s` as an optional hint on every one of these: it changes
 // only the SPELLING of the address, never which page it opens, so a caller that
 // hasn't loaded the name yet builds a working link without it.
+//
+// Every builder below that has a pattern entry (route/patterns.js) is a
+// one-liner over it; `hinted` turns the `{ name, d, s }` options these have
+// always taken into the entry's route-shaped params.
+const hinted = (opts = {}) => ({ slugName: opts.name, asOf: opts.d, sportId: opts.s })
 export function playerPath(id, opts = {}) {
-  return `/player/${entitySegment(id, opts.name)}${linkQuery(opts)}`
+  return buildPath('player', { id, ...hinted(opts) })
 }
 export function teamPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`
+  return buildPath('team', { id, ...hinted(opts) })
 }
 // The Game Notes archive, bare or opened on one club (or 'all').
 export function gameNotesPath(teamId = null) {
-  return teamId ? `/game-notes?team=${teamId}` : '/game-notes'
+  return buildPath('game-notes', { teamId })
 }
 
 export function postseasonSeriesPath(seriesId) {
-  return `/postseason/${seriesId}`
+  return buildPath('postseason-series', { seriesId })
 }
 export function postseasonLivePath(seriesId, cutoffDate = null) {
-  return `/postseason/${seriesId}${linkQuery({ d: cutoffDate })}`
+  return buildPath('postseason-series', { seriesId, asOf: cutoffDate })
 }
 // Which page one /postseason/{id} address opens. The finished page only with
 // no `?d=` and an id postseason-history.json holds (the link seriesHref below
@@ -793,10 +502,10 @@ export function gameSeriesHref(series, officialDate) {
   return series?.id && officialDate ? postseasonLivePath(series.id, officialDate) : null
 }
 export function tradeDeadlinePath() {
-  return '/trade-deadline'
+  return buildPath('trade-deadline-season')
 }
 export function tradeDeadlineSeasonPath(year) {
-  return `/trade-deadline/${year}`
+  return buildPath('trade-deadline-season', { season: year })
 }
 export function umpirePath(id, name, season = {}) {
   return seasonPath(`/umpire/${entitySegment(id, name)}`, season)
@@ -825,7 +534,7 @@ export function situationalRecordsPath({ category, metric, half, month, sort, or
   return `/situational-records${qs ? `?${qs}` : ''}`
 }
 export function managerPath(id, name) {
-  return `/manager/${entitySegment(id, name)}`
+  return buildPath('manager', { id, slugName: name })
 }
 export function foulsPath(season = {}) {
   return seasonPath(pathOf('fouls'), season)
@@ -842,24 +551,24 @@ export function absChallengesPath(season = {}) {
   return seasonPath(pathOf('abs-challenges'), season)
 }
 export function gamePhotosPath(gamePk) {
-  return `/photos/${gamePk}`
+  return buildPath('photos', { gamePk })
 }
 // The Logbook, optionally paged to one season. A bare `/logbook` lets the page
 // pick the newest season the local collection actually has.
 export function logbookPath(season = null) {
-  return season ? `/logbook/${season}` : '/logbook'
+  return buildPath('logbook', { season })
 }
 // The retrospective over the whole collection — deliberately not season-paged,
 // so 'stats' can never collide with a season segment.
 export function logbookStatsPath() {
-  return '/logbook/stats'
+  return buildPath('logbook-stats')
 }
 // Starting a new book — its own page, so no other book is on screen while you
 // decide what one looks like. Optionally carrying a stamp, for the same reason
 // every other Logbook path can: you may start a book in order to put THIS
 // keepsake in it, and the flow must not drop it on the way.
 export function logbookNewPath(gamePk = null) {
-  return gamePk ? `/logbook/new?place=${Number(gamePk)}` : '/logbook/new'
+  return buildPath('logbook', { creating: true, placing: gamePk || undefined })
 }
 // A specific named book (ADR-0036's shelf), optionally paged to one season —
 // the additive counterpart to logbookPath() for a user with more than one
@@ -868,17 +577,17 @@ export function logbookNewPath(gamePk = null) {
 // addresses that book can have; read that file's header before building
 // either by hand.
 export function bookPath(bookId, season = null) {
-  return season ? `/logbook/book/${bookId}/${season}` : `/logbook/book/${bookId}`
+  return buildPath('logbook', { bookId, season })
 }
 // The retrospective over one specific book, additive counterpart to
 // logbookStatsPath().
 export function bookStatsPath(bookId) {
-  return `/logbook/book/${bookId}/stats`
+  return buildPath('logbook-stats', { bookId })
 }
 // The book, opened in placement mode for one freshly minted stamp. See the
 // `?place=` note in parseRoute for why this is a query rather than a route.
 export function logbookPlacePath(gamePk) {
-  return `/logbook?place=${Number(gamePk)}`
+  return buildPath('logbook', { placing: gamePk })
 }
 // My Tally. A fixed address with no parameters — same reasoning as /logbook
 // (docs/game-log.md §2): the URL outlives any redirect we would maintain, so it
@@ -887,7 +596,7 @@ export function profilePath() {
   return pathOf('profile')
 }
 export function teamLeadersPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
+  return buildPath('team-leaders', { id, ...hinted(opts) })
 }
 // A team address by its old tab segment ('roster' / 'games' / 'numbers' / 'contracts' /
 // 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'. An old tab segment
@@ -902,44 +611,44 @@ export function teamSeasonPath(id, season, { name, asOf, now = new Date() } = {}
 export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview'
     ? teamPath(id, opts)
-    : `/team/${teamSegment(id, opts.name)}/${tab}${linkQuery(opts)}`
+    : buildPath('team', { id, tab, ...hinted(opts) })
 }
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the
 // Games tab, and carried through linkQuery like every other team link so a
 // dated visit stays dated across the hop. Do not build a second entry point.
 export function teamStampInPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/stamp-in${linkQuery(opts)}`
+  return buildPath('team-stamp-in', { id, ...hinted(opts) })
 }
 // A club's professional photos, merged across its whole season (unsealed,
 // same footing as gamePhotosPath). Built in exactly one place today — the
 // Photos rail's own "Full season" door — and carried through linkQuery like
 // every other team link.
 export function teamPhotosPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/photos${linkQuery(opts)}`
+  return buildPath('team-photos', { id, ...hinted(opts) })
 }
 // Every photo from the club's games, both clubs (TeamPhotosPage's other mode).
 export function teamGamePhotosPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/photos/games${linkQuery(opts)}`
+  return buildPath('team-photos', { id, allGames: true, ...hinted(opts) })
 }
 // A club's roster moves for the whole season (a move carries no score). Built
 // in two places: the club's own Transactions deck, and every club chip on the
 // home slate's wire.
 export function teamTransactionsPath(id, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/transactions${linkQuery(opts)}`
+  return buildPath('team-transactions', { id, ...hinted(opts) })
 }
 // The league-wide Standing out page; `d` is the slider's cutoff, none for the latest night.
 export function outliersPath(opts = {}) {
-  return `/outliers${linkQuery(opts)}`
+  return buildPath('outliers', hinted(opts))
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.
 export function leadersPath(scope = 'mlb', opts = {}) {
-  return `${scope === 'mlb' ? '/leaders' : `/leaders/${scope}`}${linkQuery(opts)}`
+  return buildPath('leaders', { scope, ...hinted(opts) })
 }
 // A farm system's leader board is a page about a CLUB, so its address names one
 // the same way '/team/...' does — teamSegment, not entitySegment, so the org
 // names itself off the static table without the caller passing anything.
 export function orgLeadersPath(orgId, opts = {}) {
-  return `/leaders/org/${teamSegment(orgId, opts.name)}${linkQuery(opts)}`
+  return buildPath('leaders', { scope: 'org', orgId, ...hinted(opts) })
 }

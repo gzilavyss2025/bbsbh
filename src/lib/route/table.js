@@ -14,9 +14,10 @@
 //   season   true for a SEASON VIEW (#1202): '/{slug}/{year|all}' and `?vs=`
 //            parse here too, via lib/seasons/route.js (optional)
 //
-// First pass (2026-11): the pages whose screen takes no route params. Pages
-// with ids, dates or slugs (game, player, team, …) still parse by hand in
-// route.js; an entry may later carry its own parse/build to join.
+// This file holds the pages whose screen takes no route params. Pages with an
+// id, a year or a query (player, team, leaders, logbook, …) are entries with
+// their own parse/build in route/patterns.js (#3034); that file's header lists
+// the shapes still parsed by hand in route.js, and why.
 //
 // Pure data, no React: lib/route.js is imported by ~100 modules and the node
 // unit suite. The screens live in App.jsx, keyed by `name`.
