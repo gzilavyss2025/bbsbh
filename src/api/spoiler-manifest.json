@@ -71,7 +71,10 @@
       "header already draws the line."
     ],
     "spoiler-free": [
-      "Carries no per-game result. Safe at render top-level, on any surface."
+      "Carries no per-game result. Safe at render top-level, on any surface.",
+      "One exception: a raw FETCHER whose result is score-bearing (winprob/feed.js) is",
+      "spoiler-free because a fetch draws nothing, but it may carry an `importers` list,",
+      "and the guard holds it to that list. Its selector is where the reveal gate lives."
     ]
   },
   "modules": {
@@ -398,7 +401,7 @@
     },
     "winprob/feed.js": {
       "class": "spoiler-free",
-      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface. The raw feed reaches past any reveal clamp, so its importers are listed (#3038): each one either feeds selectWinProbPath's clamp, hands the whole game to the box score inside its seal, or reads Final games off the scoring surfaces (usePastGameSignals, called from a reveal).",
+      "why": "The /winProbability FETCHER, one request shared per game (the box score's loader, Gameday's Win % sheet and its Pressure meter). A raw fetch result produces no DOM on its own; the feed is score-bearing, so its selector (winprob.js) is reveal-only and every caller still waits for its sealed surface. The raw feed reaches past any reveal clamp, so its importers are listed (#3038): each one either feeds selectWinProbPath's clamp, hands the whole game to the box score inside its seal, or reads Final games off the scoring surfaces (usePastGameSignals, called from a reveal). The list covers DIRECT importers only: a screen that reads the feed through useGameData or usePastGameSignals is not caught here, and those hooks stay reveal-scoped by their own headers and by review (accepted, #3038).",
       "importers": [
         "hooks/useGameData.js",
         "hooks/usePastGameSignals.js",
