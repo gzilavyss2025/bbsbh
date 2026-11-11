@@ -1,12 +1,15 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
-import { useId, useMemo, useState } from 'react'
-import { avg, bestStretch, era, ip, isStarter, loadCareerLog, measureByKey, measuresFor, obp, slg, whip } from '../../api/streaks/bestStretch.js'
+import { useId, useState } from 'react'
+import { avg, bestStretch, era, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { playerPath } from '../../lib/route.js'
+import { headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
+import { Headshot } from '../../components/player/Headshot.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { SiteSearchModal } from '../../components/chrome/SiteSearch.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -17,10 +20,56 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 const rate = (v) => v.toFixed(3).replace(/^0/, '')
-const longDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+const longDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+const pct = (v) => `${(v * 100).toFixed(1)}%`
+const count = (v) => v.toLocaleString('en-US')
+const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`
 const int = (v, lo, hi, dflt) => {
   const x = Number.parseInt(v, 10)
   return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt
+}
+
+// The big number: the stat the stretch was ranked by, in its usual format.
+function heroValue(key, t) {
+  if (key === 'ops') return rate(obp(t) + slg(t))
+  if (key === 'avg') return rate(avg(t))
+  if (key === 'era') return era(t).toFixed(2)
+  if (key === 'whip') return whip(t).toFixed(2)
+  if (key === 'kbb') return t.strikeOuts - t.baseOnBalls
+  return { hr: t.homeRuns, h: t.hits, rbi: t.rbi, sb: t.stolenBases, k: t.strikeOuts }[key]
+}
+
+// The 3x2 grid per role: [value, label, "of" denominator].
+function tilesFor(role, t) {
+  if (role === 'hitter') return [[rate(avg(t)), 'Avg'], [rate(obp(t)), 'OBP'], [rate(slg(t)), 'SLG'], [t.homeRuns, 'Home runs'], [t.rbi, 'RBI'], [t.stolenBases, 'Steals']]
+  if (role === 'starter') return [[whip(t).toFixed(2), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [`${t.wins}–${t.losses}`, 'W–L'], [ip(t), 'Innings'], [t.baseOnBalls, 'Walks'], [t.homeRuns, 'HR allowed']]
+  return [
+    showsHolds(t) ? [t.holds, 'Holds'] : [t.saves, 'Saves', t.saveOpportunities],
+    [whip(t).toFixed(2), 'WHIP'], [t.strikeOuts, 'Strikeouts'], [pct(kRate(t)), 'K rate'], [ip(t), 'Innings'],
+    [t.inheritedRunnersScored, 'Inherited scored', t.inheritedRunners],
+  ]
+}
+
+// One quiet secondary line under the grid.
+function lineFor(role, t) {
+  if (role === 'hitter') return `${t.hits} H · ${t.runs} R · ${t.doubles} 2B · ${t.triples} 3B · ${t.baseOnBalls} BB · ${t.strikeOuts} SO · ${t.plateAppearances} PA`
+  if (role === 'starter') return [`${(t.outs / 3 / t.games).toFixed(1)} innings per start`, `${t.hits} H`, t.completeGames && plural(t.completeGames, 'complete game'), t.shutouts && plural(t.shutouts, 'shutout')].filter(Boolean).join(' · ')
+  return [`${t.hits} H`, `${t.homeRuns} HR`, `${t.baseOnBalls} BB`, plural(t.blownSaves, 'blown save'), `${t.gamesFinished} games finished`, `${t.wins}–${t.losses}`].join(' · ')
+}
+
+// The window search, cached per loaded log so a keystroke or a modal toggle does
+// not redo it. Keyed on the log's array (dropped with it) plus the picks.
+const searches = new WeakMap()
+function cachedBest(games, startsOnly, n, by, group) {
+  if (!games?.length) return null
+  let byPick = searches.get(games)
+  if (!byPick) searches.set(games, (byPick = new Map()))
+  const key = `${startsOnly}:${n}:${by}:${group}`
+  if (!byPick.has(key)) {
+    const pool = startsOnly ? games.filter((g) => g.gamesStarted > 0) : games
+    byPick.set(key, bestStretch(pool, n, measureByKey(by, group), group))
+  }
+  return byPick.get(key)
 }
 
 // The picks ride the query so a link opens the same card.
@@ -58,15 +107,22 @@ export function BestStretchPage() {
   const pitching = picks.group === 'pitching'
   const starter = pitching && log ? isStarter(log.games) : false
   // A starter's window counts starts only; a reliever's counts every outing.
-  const games = useMemo(() => (log ? (starter ? log.games.filter((g) => g.gamesStarted > 0) : log.games) : null), [log, starter])
+  const games = log ? (starter ? log.games.filter((g) => g.gamesStarted > 0) : log.games) : null
   const unit = pitching ? (starter ? 'starts' : 'appearances') : 'games'
-  const n = picks.n ?? (pitching ? (starter ? 32 : 65) : 162)
+  // Before a pitcher's log loads his role is unknown; the chips assume a starter.
+  const role = pitching ? (log && !starter ? 'reliever' : 'starter') : 'hitter'
+  const presets = presetsFor(role)
+  const n = picks.n ?? presets.season
+  const [customOpen, setCustomOpen] = useState(false)
+  const custom = customOpen || !presets.options.includes(n)
   // The log's own name wins: the query's `name` is only a placeholder until it loads.
   const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
-  const best = useMemo(() => (games?.length ? bestStretch(games, n, measure, picks.group) : null), [games, n, measure, picks.group])
-  const setGroup = (group) => { setNDraft(''); update({ group, n: null, by: measureByKey(null, group).key }) }
+  const best = cachedBest(log?.games, starter, n, picks.by, picks.group)
+  const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key }) }
   const commitN = () => update({ n: nDraft === '' ? null : int(nDraft, 5, 500, null) })
+  // A preset chip; the season-length one stores no n, so the role's default applies.
+  const pickPreset = (v) => { setCustomOpen(false); setNDraft(''); update({ n: v === presets.season ? null : v }) }
 
   return (
     <div className="screen">
@@ -81,7 +137,10 @@ export function BestStretchPage() {
               <Cluster className="streaks__fields">
                 <Stack gap="tight" className="streaks__field streaks__field--wide">
                   <span className="t-label">Player</span>
-                  <Button size="control" onClick={() => setSearching(true)}>{name || (pitching ? 'Search pitchers' : 'Search hitters')}</Button>
+                  <button type="button" className="stretch__who" onClick={() => setSearching(true)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+                    <span>{name || (pitching ? 'Search pitchers' : 'Search hitters')}</span>
+                  </button>
                 </Stack>
                 <Stack gap="tight" className="streaks__field streaks__field--wide">
                   <span className="t-label">Side</span>
@@ -94,12 +153,28 @@ export function BestStretchPage() {
                     {measuresFor(picks.group).map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
                   </select>
                 </Stack>
-                <Stack gap="tight" className="streaks__field">
-                  <label className="t-label" htmlFor={nId}>{pitching ? 'Outings in a row' : 'Games in a row'}</label>
-                  <input id={nId} type="number" inputMode="numeric" min="5" max="500" value={nDraft} placeholder={String(n)}
-                    onChange={(e) => setNDraft(e.target.value)} onBlur={commitN} />
+                <Stack gap="tight" className="streaks__field streaks__field--wide">
+                  <span className="t-label" id={nId}>{pitching ? (role === 'reliever' ? 'Appearances in a row' : 'Starts in a row') : 'Games in a row'}</span>
+                  <Cluster gap="tight" role="group" aria-labelledby={nId} className="stretch__chips">
+                    {presets.options.map((v) => (
+                      <Button key={v} size="control" skin={!custom && n === v ? 'ink' : 'outline'} aria-pressed={!custom && n === v} onClick={() => pickPreset(v)}>
+                        {v === presets.season ? `${v} · season` : v}
+                      </Button>
+                    ))}
+                    <Button size="control" skin={custom ? 'ink' : 'outline'} aria-pressed={custom} onClick={() => { setCustomOpen(true); setNDraft(String(n)) }}>Custom</Button>
+                  </Cluster>
+                  {custom && (
+                    <span className="streaks__total">
+                      <input type="number" inputMode="numeric" min="5" max="500" aria-label={`Custom number of ${unit}`} value={nDraft}
+                        onChange={(e) => setNDraft(e.target.value)} onBlur={commitN} />
+                      <span className="hint">{unit}, 5 to 500</span>
+                    </span>
+                  )}
                 </Stack>
               </Cluster>
+              {pitching && log?.games.length > 0 && (
+                <p className="hint">Role: <strong>{starter ? 'Starter' : 'Reliever'}</strong>, read from his career ({starter ? 'most outings were starts, so relief outings are skipped' : 'most outings were in relief'}).</p>
+              )}
             </Stack>
           </form>
         </Card>
@@ -123,37 +198,31 @@ export function BestStretchPage() {
         )}
 
         {best && !loading && (
-          <Card frame="stamped" label={`His best ${n} ${unit}`} count={`by ${measure.label}`}>
-            <Stack gap="snug" className="stretch">
-              <p className="stretch__name"><a href={playerPath(picks.player.id, { name })}>{name}</a></p>
-              <p className="t-label">{longDate(best.first)} to {longDate(best.last)}</p>
+          <section className="stretch" style={headerThemeStyle(headerThemeFor(best.mainTeamId, 'main'))} aria-label={`${name}, best ${n} ${unit}`}>
+            <div className="stretch__band">
+              <div className="stretch__shot"><Headshot personId={picks.player.id} name={name} teamId={best.mainTeamId} /></div>
+              <Stack gap="tight" className="stretch__who-line">
+                <span className="stretch__kicker">His best {n} {unit}</span>
+                <a className="stretch__name" href={playerPath(picks.player.id, { name })}>{name}</a>
+              </Stack>
+              {best.mainTeamId && <TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" />}
+            </div>
+            <Stack gap="snug" className="stretch__body">
+              <p className="stretch__dates">{longDate(best.first)} → {longDate(best.last)}</p>
+              <p className="stretch__hero">
+                <span className="stretch__hero-num">{heroValue(measure.key, best)}</span>
+                <span className="stretch__hero-label">{measure.label}</span>
+                <span className="stretch__ranked">Ranked by</span>
+              </p>
               <dl className="stretch__grid">
-                {(pitching
-                  ? [[era(best).toFixed(2), 'ERA'], [whip(best).toFixed(2), 'WHIP'], [best.strikeOuts, 'Strikeouts'],
-                      [`${best.wins}–${best.losses}`, 'W–L'], [ip(best), 'Innings'], [best.baseOnBalls, 'Walks']]
-                  : [[rate(avg(best)), 'Batting avg'], [rate(obp(best)), 'On-base pct'], [rate(slg(best)), 'Slugging'],
-                      [best.homeRuns, 'Home runs'], [best.rbi, 'RBI'], [best.stolenBases, 'Stolen bases']]
-                ).map(([v, k]) => <div key={k}><dt className="t-label">{k}</dt><dd>{v}</dd></div>)}
+                {tilesFor(role, best).map(([v, k, of]) => (
+                  <div key={k}><dt className="t-label">{k}</dt><dd>{v}{of && <span className="stretch__of"> of {of}</span>}</dd></div>
+                ))}
               </dl>
-              <ul className="stretch__notes">
-                {pitching ? (
-                  <>
-                    <li>{best.hits} hits and {best.homeRuns} home runs allowed</li>
-                    {(best.completeGames > 0 || best.shutouts > 0) && <li>{best.completeGames} complete games, {best.shutouts} shutouts</li>}
-                    {best.saves > 0 && <li>{best.saves} saves</li>}
-                  </>
-                ) : (
-                  <>
-                    <li>{best.hits} hits and {best.runs} runs</li>
-                    <li>{rate(obp(best) + slg(best))} OPS</li>
-                    <li>{best.doubles} 2B · {best.triples} 3B · {best.baseOnBalls} BB · {best.strikeOuts} SO in {best.plateAppearances} PA</li>
-                  </>
-                )}
-                {best.teams.length > 0 && <li>{best.teams.join(', ')}</li>}
-              </ul>
-              <p className="hint">Regular-season MLB {unit}{pitching ? '' : ' he appeared in'}, {best.careerGames} on file. A stretch may run across seasons.</p>
+              <p className="stretch__line">{lineFor(role, best)}</p>
+              <p className="hint">{best.teams.join(', ')} · regular season · {count(best.careerGames)} career {unit} on file</p>
             </Stack>
-          </Card>
+          </section>
         )}
       </Stack>
       <ReportFooter />

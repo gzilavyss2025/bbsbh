@@ -1,10 +1,113 @@
 /* ---------------------------------------------------------------- best stretch
-   The "his best 162 games" card (BestStretchPage): a big name, a 3x2 stat grid of
-   mono numbers, and a short list of the rest. Stack owns the spacing. */
+   BestStretchPage: the player picker, the length chips, and the hero card — a
+   club band (headshot, kicker, name, mark), then the dates, the ranked stat as
+   the biggest number, a 3x2 grid and one secondary line. The band wears the
+   club's curated bar colours where Identity Lab has them, else the ink band
+   (a club may colour a card that identifies the club, ADR-0030). */
+
+/* The picker is the page's first move: a full field, not a quiet button. */
+.stretch__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-field);
+  text-align: start;
+  cursor: pointer;
+}
+
+.stretch {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: 6px 6px 0 var(--border-stamped);
+  max-inline-size: 56rem;
+}
+/* layout-exempt: headshot, name block and mark sit in one row on the band */
+.stretch__band {
+  /* component-reuse-exempt: a photo band (headshot, name, mark) in club colours; SectionHead draws a titled bar, not this */
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bar-fill, var(--surface-band-deep));
+  color: var(--bar-text, var(--text-on-band));
+  border-block-end: 4px solid var(--bar-accent, var(--marker));
+}
+.stretch__shot {
+  flex: none;
+  inline-size: 84px;
+  block-size: 104px;
+  overflow: hidden;
+  border: var(--bw-heavy) solid var(--bar-accent, var(--marker));
+}
+.stretch__shot img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.stretch__who-line {
+  flex: 1;
+  min-width: 0;
+}
+.stretch__kicker {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  color: var(--bar-accent, var(--marker));
+}
 .stretch__name {
   font-family: var(--font-display);
+  font-weight: var(--w-black);
   font-size: var(--fs-display);
   line-height: var(--lh-display);
+  color: inherit;
+  text-decoration: none;
+}
+.stretch__body {
+  padding: var(--space-4);
+}
+.stretch__dates {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-md);
+  color: var(--text-heading);
+}
+/* layout-exempt: the hero number, its label and the tag on one baseline */
+.stretch__hero {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+}
+.stretch__hero-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-score-lg);
+  line-height: var(--lh-score);
+  color: var(--text-heading);
+}
+.stretch__hero-label {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+.stretch__ranked {
+  margin-inline-start: auto;
+  padding: 0 var(--space-1);
+  background: var(--marker);
+  color: var(--ink-0);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
 }
 /* layout-exempt: a fixed three-across stat grid, as the card it echoes */
 .stretch__grid {
@@ -12,16 +115,29 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
 }
-.stretch__name a {
-  color: var(--text-heading, inherit);
-}
 .stretch__grid dd {
   margin: 0;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-title-lg);
   font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
-.stretch__notes {
-  padding-inline-start: var(--space-4);
+.stretch__of {
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
+}
+.stretch__line {
+  padding-block-start: var(--space-3);
+  border-block-start: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
+}
+/* The Stack owns the card's rhythm; paragraphs bring no margins of their own. */
+.stretch p {
+  margin: 0;
+}
+/* The length chips are taps, as tall as the fields beside them. */
+.stretch__chips .btn {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
 }

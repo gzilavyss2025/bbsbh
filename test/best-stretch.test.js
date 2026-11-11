@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, era, ip, isStarter, measureByKey, obp, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -63,4 +63,21 @@ test('pitching: a window with no outs is the worst ERA and WHIP, not a perfect o
 test('a window keeps the club names the log carries, defunct clubs included', () => {
   const g = toGame({ date: '1994-07-01', team: { id: 9999, name: 'Montreal Expos' }, stat: {} })
   assert.deepEqual(bestStretch([g], 1, measureByKey('h')).teams, ['Montreal Expos'])
+})
+
+test('the card wears the club he played most of the stretch for', () => {
+  const at = (i, id) => toGame({ date: day(i), team: { id, name: String(id) }, stat: {} })
+  assert.equal(bestStretch([at(0, 1), at(1, 2), at(2, 2)], 3, measureByKey('h')).mainTeamId, 2)
+})
+
+test('presets: season length is the default for each role', () => {
+  assert.equal(presetsFor('hitter').season, 162)
+  assert.equal(presetsFor('starter').season, 32)
+  assert.equal(presetsFor('reliever').season, 65)
+})
+
+test('a setup man shows holds; a closer keeps saves', () => {
+  assert.equal(showsHolds({ holds: 20, saves: 2 }), true)
+  assert.equal(showsHolds({ holds: 0, saves: 42 }), false)
+  assert.equal(kRate({ strikeOuts: 107, battersFaced: 239 }), 107 / 239)
 })

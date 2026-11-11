@@ -9,7 +9,7 @@ import { getJson } from '../statsapi.js'
 
 const BAT = ['atBats', 'plateAppearances', 'hits', 'doubles', 'triples', 'homeRuns', 'runs', 'rbi', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'stolenBases', 'totalBases', 'strikeOuts']
 
-const PITCH = ['outs', 'earnedRuns', 'hits', 'baseOnBalls', 'hitByPitch', 'strikeOuts', 'homeRuns', 'wins', 'losses', 'saves', 'completeGames', 'shutouts', 'gamesStarted']
+const PITCH = ['outs', 'earnedRuns', 'hits', 'baseOnBalls', 'hitByPitch', 'strikeOuts', 'homeRuns', 'wins', 'losses', 'saves', 'completeGames', 'shutouts', 'gamesStarted', 'saveOpportunities', 'holds', 'blownSaves', 'gamesFinished', 'inheritedRunners', 'inheritedRunnersScored', 'battersFaced']
 const FIELDS = { hitting: BAT, pitching: PITCH }
 
 // What "best" means. Each ranks one number from a window's summed line; `lower`
@@ -39,6 +39,7 @@ export const slg = (t) => div(t.totalBases, t.atBats)
 const perOut = (a, outs) => (outs > 0 ? a / outs : a > 0 ? Infinity : 0)
 export const era = (t) => perOut(t.earnedRuns * 27, t.outs)
 export const whip = (t) => perOut((t.hits + t.baseOnBalls) * 3, t.outs)
+export const kRate = (t) => div(t.strikeOuts, t.battersFaced)
 export const ip = (t) => `${Math.floor(t.outs / 3)}.${t.outs % 3}`
 
 // One game log split -> a dated row of counting stats (a missing field is 0).
@@ -77,9 +78,29 @@ export function bestStretch(games, n, measure, group = 'hitting') {
     first: window[0].date,
     last: window[n - 1].date,
     teams: [...new Set(window.map((g) => g.teamName).filter(Boolean))],
+    mainTeamId: mostCommon(window.map((g) => g.teamId).filter(Boolean)),
     careerGames: sorted.length,
   }
 }
+
+// The club he played the most of the window for: the card wears its colours.
+function mostCommon(ids) {
+  const n = new Map()
+  for (const id of ids) n.set(id, (n.get(id) ?? 0) + 1)
+  let best = null
+  for (const [id, c] of n) if (best == null || c > n.get(best)) best = id
+  return best
+}
+
+// The length presets a reader can tap, and the default (the season-length one).
+export function presetsFor(role) {
+  if (role === 'starter') return { options: [5, 10, 32], season: 32 }
+  if (role === 'reliever') return { options: [10, 30, 65], season: 65 }
+  return { options: [10, 30, 81, 162], season: 162 }
+}
+
+// A reliever's saves tile shows holds instead when he set up more than he closed.
+export const showsHolds = (t) => t.holds > t.saves
 
 // Starter or reliever: a starter if at least half his outings were starts.
 export const isStarter = (games) => games.filter((g) => g.gamesStarted > 0).length * 2 >= games.length
