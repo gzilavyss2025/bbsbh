@@ -8,7 +8,7 @@
 //
 // Flags: --runs N (5) | --storage empty|warm (empty) | --sw (let the service worker run;
 // adds install bytes/count and a second visit) | --sources (list the elements behind
-// each layout shift) | --wide (1280x800 desktop, no touch) | --size WxH (desktop at that size, no touch;
+// each layout shift) | --size WxH (desktop at that size, no touch;
 // #2986 used 1440x900) | --cpu N (CPU slowdown, 4; 1 = unthrottled) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -25,7 +25,6 @@ const { values: o, positionals } = parseArgs({
     storage: { type: 'string', default: 'empty' },
     sw: { type: 'boolean', default: false },
     sources: { type: 'boolean', default: false },
-    wide: { type: 'boolean', default: false },
     size: { type: 'string' },
     cpu: { type: 'string', default: '4' },
     date: { type: 'string' },
@@ -39,8 +38,7 @@ const cpu = Number(o.cpu)
 if (!(cpu >= 1)) throw new Error('--cpu is a slowdown factor, 1 or more')
 const size = o.size?.match(/^(\d+)x(\d+)$/)
 if (o.size && !size) throw new Error('--size is WIDTHxHEIGHT, e.g. 1440x900')
-if (o.size && o.wide) throw new Error('give --wide or --size, not both')
-const desktop = size ? { width: +size[1], height: +size[2] } : o.wide ? { width: 1280, height: 800 } : null
+const desktop = size ? { width: +size[1], height: +size[2] } : null
 const wait = Number(o.wait)
 if (!(wait >= 0)) throw new Error('--wait is a number of seconds')
 const date = o.date && o.date.match(/^(\d{4})-(\d\d)-(\d\d)$/)

@@ -2,32 +2,29 @@
 //
 //   node scripts/perf/sw-update.mjs <buildA> <buildB> [phone|desktop] [runs]
 //
-// Make two builds that differ in code (copy dist/ away after each `npm run build`). A tiny
-// static server serves build A; launch 1 installs its service worker. The server then serves
-// build B. Launch 2 is the first launch after the deploy: it waits 8 s, then moves in-app to a
+// Make two builds that differ in code (copy dist/ away after each `npm run build`). `vite preview`
+// serves build A; launch 1 installs its service worker. It then restarts on
+// the same port with build B. Launch 2 is the first launch after the deploy: it waits 8 s, then moves in-app to a
 // lazy route (/postseason-history). Launch 3 is the next one. Every launch prints a timeline:
 // which build's HTML loaded (the build-commit meta), navigations, 4xx responses, console
 // errors, and the final document's FCP/LCP. Phone = 390x844, CPU 4x; desktop = 1440x900, CPU 1x;
 // both ~6 Mbps / 150 ms. For a code check, build B with `globalThis.__buildB` / `__lazyB` set
 // in src/main.jsx and the lazy page; without them the "code" tag reads A.
-import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path'
+import { spawn } from 'node:child_process'
+import { createServer } from 'node:net'
+import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 const [A, B, form = 'phone', runsArg = '5'] = process.argv.slice(2)
-const MIME = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain', '.xml': 'application/xml' }
-let root = A
-const srv = http.createServer((q, s) => {
-  let p = decodeURIComponent(new URL(q.url, 'http://x').pathname)
-  let f = path.resolve(root, '.' + p)
-  if (f !== path.resolve(root) && !f.startsWith(path.resolve(root) + path.sep)) { s.writeHead(403); return s.end() } // nothing outside the build
-  if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) {
-    if (path.extname(p) && p !== '/') { s.writeHead(404); return s.end() }
-    f = path.join(root, 'index.html')
-  }
-  s.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream', 'cache-control': p.startsWith('/assets/') ? 'public,max-age=31536000,immutable' : 'no-cache' })
-  fs.createReadStream(f).pipe(s)
-})
-await new Promise((res) => srv.listen(0, '127.0.0.1', res))
-const BASE = `http://127.0.0.1:${srv.address().port}`
+// `vite preview` serves one saved build; the "deploy" restarts it on the same port with the other.
+const port = await new Promise((res) => { const s = createServer().listen(0, () => { const { port } = s.address(); s.close(() => res(port)) }) })
+const BASE = `http://localhost:${port}`
+const vite = fileURLToPath(new URL('../../node_modules/.bin/vite', import.meta.url))
+let server = null
+async function serve(dir) {
+  if (server) await new Promise((res) => { server.once('exit', res); server.kill() })
+  server = spawn(vite, ['preview', '--outDir', dir, '--port', String(port), '--strictPort'], { stdio: 'ignore' })
+  while (!(await fetch(BASE).then((r) => r.ok, () => false))) await new Promise((r) => setTimeout(r, 250))
+}
 const phone = form === 'phone'
 async function throttle(ctx, page) {
   const cdp = await ctx.newCDPSession(page)
@@ -70,15 +67,15 @@ async function launch(ctx, url, lazy) {
 const results = []
 const browser = await chromium.launch({ executablePath: process.env.CLAUDE_CODE_REMOTE ? '/opt/pw-browsers/chromium' : undefined })
 for (let i = 0; i < Number(runsArg); i++) {
-  root = A
+  await serve(A)
   const ctx = await browser.newContext({ ...(phone ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true } : { viewport: { width: 1440, height: 900 } }), serviceWorkers: 'allow' })
   await ctx.addInitScript(observe)
-  const first = await launch(ctx, BASE + '/?nointro')
-  root = B
+  await launch(ctx, BASE + '/?nointro') // installs A's worker
+  await serve(B)
   const second = await launch(ctx, BASE + '/?nointro', true)
   const third = await launch(ctx, BASE + '/?nointro')
-  results.push({ first, second, third })
+  results.push({ second, third })
   await ctx.close()
 }
-await browser.close(); srv.close()
+await browser.close(); server.kill()
 console.log(JSON.stringify(results, null, 1))
