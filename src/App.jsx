@@ -300,7 +300,9 @@ function currentUrl() {
   return window.location.pathname + window.location.search
 }
 
-// Routes whose screen takes no props. `profile` is deliberately NOT gated on isClerkEnabled
+// Routes whose screen takes no props, keyed by route name. Each key is one entry in
+// lib/route/table.js, which owns the address; test/route-table.test.js fails if the
+// two lists differ. `profile` is deliberately NOT gated on isClerkEnabled
 // or on being signed in: settings are settings, and every one of them works on this device
 // with no account at all. The account section is the only part that appears or disappears.
 const BARE_ROUTES = {
