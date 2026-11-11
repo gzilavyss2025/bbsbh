@@ -380,6 +380,10 @@
       "class": "spoiler-free",
       "why": "Derived from the franchise ledger and league pennants: a club's names, seasons, all-time record, postseasons, titles, pennants and winningest manager. Finished seasons, no game."
     },
+    "history/franchise.js": {
+      "class": "spoiler-free",
+      "why": "The franchise page's loader: the stored ledger plus a live standings-and-schedule row per season after it, and the people and parks. History surface (ADR-0034), no cutoff, never on a scoring surface."
+    },
     "history/franchiseHof.js": {
       "class": "spoiler-free",
       "why": "Static franchise-hof shards: a club's Hall of Famers, inducted as the club and also played there, with the seasons. History, no game."
