@@ -176,13 +176,15 @@ test('the crawl layer imports nothing that can reach a game', () => {
   // The body layer's whole import graph is two lines: the slug helpers and the
   // route table (#3040). Neither fetches anything, and neither imports anything,
   // so there is almost no graph to audit — the strongest form of this claim.
-  const imports = read('api/_lib/crawl.js').match(/^import .*$/gm) ?? []
+  const crawl = read('api/_lib/crawl.js')
+  const imports = crawl.match(/^import .*$/gm) ?? []
   assert.deepEqual(imports, [
     "import { clean, entitySegment, niceDate } from './entity.js'",
     "import { pathOf } from '../../src/lib/route/table.js'",
   ])
+  assert.doesNotMatch(crawl, /\bimport\(|\brequire\(|^\s*export\b[^\n]*\bfrom\s*'/m, 'crawl.js reaches nothing else')
   for (const leaf of ['api/_lib/entity.js', 'src/lib/route/table.js']) {
-    assert.doesNotMatch(read(leaf), /^\s*import\b|\bimport\(/m, `${leaf} imports nothing at all`)
+    assert.doesNotMatch(read(leaf), /^\s*import\b|\bimport\(|\brequire\(|^\s*export\b[^\n]*\bfrom\s*'/m, `${leaf} imports nothing at all`)
   }
 })
 

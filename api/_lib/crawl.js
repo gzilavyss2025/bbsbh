@@ -11,8 +11,9 @@
 // rewrites, and it reuses their already-resolved payload rather than fetching
 // again. ADR-0059.
 //
-// EVERYTHING HERE IS PURE. No fetch, no Redis, no clock, and one import — the
-// slug helpers in ./entity.js, which fetch nothing either. api/_lib/cards.js
+// EVERYTHING HERE IS PURE. No fetch, no Redis, no clock, and two imports — the
+// slug helpers in ./entity.js and the route table (#3040), which import and
+// fetch nothing either. api/_lib/cards.js
 // does all of the I/O and hands the payload here, the same split
 // src/copy/landing/render.js keeps for /learn, and for the same reason: this
 // HTML is composed COMPLETE and handed to whoever asked, with no SealBox in
