@@ -41,15 +41,23 @@ try {
 
 // Pull the denylist literal out of the generated worker and evaluate it, so
 // this checks the REGEXES THAT SHIPPED rather than the presence of a string.
-// Workbox emits `new NavigationRoute(handler,{denylist:[…]})`; the array is
-// regex literals and commas only, which is why evaluating it is safe here.
-const match = source.match(/denylist:\s*(\[[^\]]*\])/)
+// Since #3041 there is no NavigationRoute at all (one would answer every page
+// from the precache, ahead of any rule): navigations go through a NetworkFirst
+// rule, emitted as `"navigate"===r.mode&&![…].some(…)`; the match allows either
+// operand order. The array is regex
+// literals and commas only, which is why evaluating it is safe here.
+if (/new \w+\.NavigationRoute\(/.test(source)) {
+  console.error('check-sw-learn-fallback: the built worker registers a NavigationRoute again.\n' +
+    "Keep `navigateFallback: null` in vite.config.js (#3041).")
+  process.exit(1)
+}
+const match = source.match(/"navigate"[^,;]{0,40}?(\[\/[^\]]*\])\.some/)
 if (!match) {
   console.error(
     'check-sw-learn-fallback: the built worker registers its navigation fallback\n' +
       'with no denylist, so every navigation — including the server-rendered guides\n' +
       'at /learn — is answered from the precached app shell.\n\n' +
-      "Restore `navigateFallbackDenylist` in vite.config.js's workbox block.",
+      "Restore the /learn denylist on the navigation rule in vite.config.js.",
   )
   process.exit(1)
 }
@@ -71,7 +79,7 @@ if (unsealed.length) {
       unsealed.map((u) => `  ${u}`).join('\n') +
       '\n\nThese are server-rendered guides, not React routes. A reader with the PWA\n' +
       'installed would land on the slate with the guide URL still in the address bar.\n' +
-      'See docs/adr/0053 and the note beside navigateFallbackDenylist in vite.config.js.',
+      'See docs/adr/0053 and the note beside navigateFallback in vite.config.js.',
   )
   process.exit(1)
 }

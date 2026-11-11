@@ -557,29 +557,38 @@ export default defineConfig({
           // holds only the current season, which the slate series line uses.
           'logos/historical/**',
         ],
-        navigateFallback: '/index.html',
-        // …EXCEPT the guides. `navigateFallback` alone registers a
-        // NavigationRoute that answers EVERY navigation this worker controls
-        // with the precached shell, and the guides at /learn are the one part
-        // of this site the server renders itself (ADR-0053). Without this
-        // denylist an installed reader tapping a guide got index.html at the
-        // guide's URL, the client router failed to match '/learn/{slug}' (it
-        // never matches one, on purpose — see src/lib/route.js) and fell
-        // through to the slate. The document api/page.js had already written
-        // was never requested.
+        // NO navigateFallback (#3041). It answered every navigation from the
+        // precached shell, so the first launch after a deploy ran the OLD
+        // build's HTML. Its chunks were already gone from the server: a
+        // startup import failed about a second in, and the repair wiped and
+        // reloaded the page. The runtime rule FIRST in the list below asks the
+        // network for the page instead, and falls back to the precached shell
+        // only offline or after 3 s. Cost: one round trip for a small
+        // HTML file on each online launch.
         //
-        // It survived review because nothing that tests this app runs a
-        // service worker: `npm run dev` registers none, curl and Playwright
-        // start with an empty one, and the crawlers these pages exist for
-        // execute no JavaScript at all. Only a returning human with the PWA
-        // installed ever saw it. scripts/check-sw-learn-fallback.mjs now reads
-        // the assertion out of the built worker for that reason.
-        //
-        // Scope is exactly /learn. Every other rewrite in vercel.json points at
-        // api/preview.js, which returns this same app shell with its OG block
-        // swapped — serving those from the precache is correct.
-        navigateFallbackDenylist: [/^\/learn(\/|$)/],
+        // The guides at /learn stay out of it: the server renders them
+        // (ADR-0053), and the shell at a guide's URL fell through to the slate
+        // for every installed reader. scripts/check-sw-learn-fallback.mjs reads
+        // that denylist out of the built worker. null, not left out:
+        // vite-plugin-pwa defaults a missing value to index.html.
+        navigateFallback: null,
         runtimeCaching: [
+          {
+            urlPattern: ({ request, url }) => request.mode === 'navigate' && ![/^\/learn(\/|$)/].some((re) => re.test(url.pathname)),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'bbsbh-pages',
+              networkTimeoutSeconds: 3,
+              plugins: [{
+                // Store nothing: a page kept per URL would hold an older build's HTML,
+                // whose code the precache has already dropped (blank offline).
+                cacheWillUpdate: async () => null,
+                // So offline or after the timeout, the "cached" page is always the
+                // precached shell, which matches the precached code.
+                cachedResponseWillBeUsed: async () => caches.match('/index.html', { ignoreSearch: true }),
+              }],
+            },
+          },
           {
             // Every whole-file dataset. NetworkFirst keeps them fresh online
             // and usable after a successful visit when the user is offline at

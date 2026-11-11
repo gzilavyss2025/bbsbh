@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { claimRecovery, clearRecoveryFlag, recoverOnce } from '../src/lib/crash/recover.js'
+import { claimRecovery, clearRecoveryFlag, recoverOnce, precacheKeys } from '../src/lib/crash/recover.js'
 
 function memoryStorage() {
   const m = new Map()
@@ -28,3 +28,9 @@ test('blocked storage never auto-reloads (it could not stop a loop)', () => {
   assert.equal(recoverOnce(blocked, () => repairs++), false)
   assert.equal(repairs, 0)
 })
+
+test('a chunk-load repair drops only the precache, so image and data caches survive (#3041)', () => {
+  const keys = ['workbox-precache-v2-http://x/', 'team-logos', 'route-chunks', 'statsapi-none', 'data-json']
+  assert.deepEqual(precacheKeys(keys), ['workbox-precache-v2-http://x/'])
+})
+

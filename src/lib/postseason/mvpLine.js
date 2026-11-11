@@ -28,3 +28,12 @@ export function mvpStatLine(lines, playerId) {
     : []
   return pit && (!bat || pit.outs > bat.atBats) ? pitching : batting
 }
+
+// A Series photo of the MVP, picked by hand from the clincher's MLB highlights (an image id on
+// img.mlbstatic.com). 2026: Contreras lifting the MVP trophy after Game 5. Here, not in
+// ChampionHero, so useOffseason can start the photo before the hero's chunk and bracket land (#3042).
+export const MVP_PHOTOS = { 2026: { id: 'cz7beynol16rtuq2neot', club: 158 } } // club: the photo's side (Brewers), known before the award loads
+export const mvpPhotoUrl = (id, w = 900) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_${w},h_${w},f_jpg,q_auto:good,c_fill,g_center/mlb/${id}.jpg`
+// 450 for a 1x screen, 900 for 2x and up (the phone slab is about 360 CSS px wide).
+export const mvpPhotoSrcSet = (id) => `${mvpPhotoUrl(id, 450)} 450w, ${mvpPhotoUrl(id)} 900w`
+export const MVP_PHOTO_SIZES = '(max-width: 739px) 100vw, 450px'

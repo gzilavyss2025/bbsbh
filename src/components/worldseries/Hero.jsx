@@ -26,6 +26,7 @@ import { Key } from '../ui/frame/Key.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { ScheduleStrip } from './ScheduleStrip.jsx'
+import { MVP_PHOTO_SIZES } from '../../lib/postseason/mvpLine.js'
 
 // Championship Matchup: the approved World Series overview. The next game's
 // date is the centre of the stage, between two player layers; the calendar
@@ -312,7 +313,7 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
                     {i === slabAt ? (
                       photo ? (
                         <>
-                          <img src={photo} srcSet={photoSrcSet} sizes="(max-width: 739px) 100vw, 450px" alt="" className="ww-hero__photo" decoding="async" fetchPriority="high" />
+                          <img src={photo} srcSet={photoSrcSet} sizes={MVP_PHOTO_SIZES} alt="" className="ww-hero__photo" decoding="async" fetchPriority="high" />
                           {stripe && <span className="ww-hero__stripe" aria-hidden="true" style={{ '--stripe-out': stripe[0], '--stripe-in': stripe[1] }} />}
                         </>
                       ) : <>

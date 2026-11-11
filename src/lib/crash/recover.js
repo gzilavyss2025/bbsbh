@@ -38,6 +38,24 @@ export async function purgeAndReload() {
   window.location.reload()
 }
 
+// Workbox's precache holds the build's own code; every other cache (logos, art, data, route
+// chunks kept by the CacheFirst rules) is keyed by URL and still right after a deploy (#3041).
+export const precacheKeys = (keys) => keys.filter((k) => k.startsWith('workbox-precache'))
+
+// The repair for a chunk that failed to load after a deploy: drop the precache and the worker,
+// keep the runtime caches, reload. The next load installs the new build's shell once.
+export async function dropBuildAndReload() {
+  try {
+    const keys = precacheKeys(await caches.keys())
+    await Promise.all(keys.map((k) => caches.delete(k)))
+  } catch { /* no Cache Storage */ }
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(regs.map((r) => r.unregister()))
+  } catch { /* no service worker */ }
+  window.location.reload()
+}
+
 // The automatic repair: purge and reload once a session. Returns whether it did.
 export function recoverOnce(storage = sessionStorage, repair = purgeAndReload) {
   if (!claimRecovery(storage)) return false

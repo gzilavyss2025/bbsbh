@@ -60,8 +60,8 @@ async function launch(ctx, url, lazy) {
     await page.waitForTimeout(8000)
     ev.push(`${at()} after move: lazyB=${await page.evaluate(() => !!globalThis.__lazyB).catch(() => '?')} text=${(await page.evaluate(() => document.body.innerText.slice(0, 100)).catch(() => '?')).replace(/\s+/g, ' ')}`)
   }
-  const m = await page.evaluate(() => ({ fcp: Math.round(window.__m.fcp), lcp: Math.round(window.__m.lcp), sw: !!navigator.serviceWorker.controller })).catch(() => ({}))
-  ev.push(`${at()} end build ${await build(page).catch(() => '?')} (final document FCP ${m.fcp} LCP ${m.lcp}, controlled ${m.sw})`)
+  const m = await page.evaluate(async () => ({ fcp: Math.round(window.__m.fcp), lcp: Math.round(window.__m.lcp), sw: !!navigator.serviceWorker.controller, caches: (await caches.keys()).join(',') })).catch(() => ({}))
+  ev.push(`${at()} end build ${await build(page).catch(() => '?')} (final document FCP ${m.fcp} LCP ${m.lcp}, controlled ${m.sw}, caches ${m.caches})`)
   await page.close(); return ev
 }
 const results = []
