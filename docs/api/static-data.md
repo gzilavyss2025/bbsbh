@@ -401,7 +401,7 @@ for each generator; the reader modules:
   deliberately thin, so most (team, year) pairs fall through unchanged. A parallel
   `historicalClubName()` covers renames/relocations but isn't wired into any screen
   yet (no historical logo art; see `docs/milb-historical-logos.md`).
-- `postseasonHistory.js` — the Postseason History page's completed bracket
+- `postseason/archive/history.js` — the Postseason History page's completed bracket
   (who played, who won, series length, each team's 1-6 seed, round MVP) for
   every MLB postseason back to 2000, from `public/data/postseason-history.json`.
   Hand-run (`gen-postseason-history.mjs`) — a finished postseason's results are
@@ -410,11 +410,11 @@ for each generator; the reader modules:
   abbreviation or a live-resolvable field) — team names/logos resolve
   client-side via `src/lib/teams.js` so this file can't drift from the rest of
   the app's team identity.
-- `postseasonLeaders.js` — the Postseason Leaders page's since-2000 career
+- `postseason/archive/leaders.js` — the Postseason Leaders page's since-2000 career
   batting/pitching leaderboards plus franchise/award leaders, from
   `public/data/postseason-leaders.json`. Hand-run (`gen-postseason-leaders.mjs`,
-  same immutable-history footing as `postseasonHistory.js` above) — batting/
-  pitching need per-game boxscore lines `postseasonHistory.js`'s own generator
+  same immutable-history footing as `postseason/archive/history.js` above) — batting/
+  pitching need per-game boxscore lines `postseason/archive/history.js`'s own generator
   never fetches, so this is the one file backed by the shared SQLite layer's
   `postseason_batting_totals`/`postseason_pitching_totals` (scripts/lib/
   schema.sql, docs/adr/0021) — the genuine cross-game aggregation case that ADR
@@ -434,7 +434,7 @@ for each generator; the reader modules:
   points). `stats` is `{ batting, pitching, totals }`, the same as
   `loadSeriesStats` returns without `rosters`, so `SeriesTotals` and the leaders
   ledger read it with no change. Both sides fold through one function,
-  `foldSeriesStats` (`src/api/postseasonSeries.js`). The builder is
+  `foldSeriesStats` (`src/api/postseason/archive/series.js`). The builder is
   `src/lib/postseason/primer/seriesBlock.js`. A game counts only when the bracket
   counts it (`deriveBracket`, cut at the slate date): Final with a winner before
   that date, on its resume date for a suspended game. The slate game, a later game
@@ -980,7 +980,7 @@ for each generator; the reader modules:
   class and argument as `teamRecords.js`. Degrades to null with no file (every
   MiLB club), and the card hides. Catalog and calibration:
   `docs/schedule-shape.md`.
-- `postseason/records.js` — the MLB postseason's ledger
+- `postseason/archive/records.js` — the MLB postseason's ledger
   (`public/data/postseason-records/{season}.json`, `gen-postseason-records.mjs`)
   handed to the same two modules above, for the `/postseason-records` page.
   `fetchPostseasonEntries(season, seasons)` returns the `{ team, data }`
@@ -1028,7 +1028,7 @@ for each generator; the reader modules:
   cutoff })` returns `{ rank, of }` (`of` is the level's club count) or null:
   no shard, no ranks, unknown metric or scope, or any `cutoff` (ranks are
   not dated). Never throws. Cutoff-gated; no UI importer yet.
-- `postseasonOdds.js` — MLB postseason odds (overall / division / bye
+- `postseason/odds.js` — MLB postseason odds (overall / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and
   `teamScore.js`: `postseasonOddsFor(data, teamId, season, cutoff)` picks the

@@ -1407,7 +1407,7 @@ don't run these by hand.
   a separate layer; this answers only "does this club make the six-team field."
   `--date=YYYY-MM-DD` rebuilds one date and `--from`/`--to` backfills a range,
   which is how the 2026-07-14 → 2026-08-09 gap was closed when this generator
-  was finally wired to the cron. App reads it via `src/api/postseasonOdds.js`.
+  was finally wired to the cron. App reads it via `src/api/postseason/odds.js`.
 - `gen-manager-history.mjs` → `public/data/manager-history/{NN}.json` (bucketed
   on `personId % 100`) — every current MLB club's full coaching staff, season by
   season, re-indexed by personId so `/manager/{id}` can show a person's whole
@@ -1892,7 +1892,7 @@ Re-run only to fold in a new season.
   (`PostseasonHistoryPage.jsx`) shows 2020-present eagerly and gates
   2000-2019 behind a "Load more" — that's a UI cutoff, not a generator one;
   this file always carries the full range. App reads it via
-  `src/api/postseasonHistory.js`.
+  `src/api/postseason/archive/history.js`.
 - `gen-postseason-leaders.mjs` → `public/data/postseason-leaders.json` — since-
   2000 career postseason batting/pitching leaderboards, plus franchise
   (titles/pennants/appearances) and repeat-Series-MVP leaders computed
@@ -1912,7 +1912,7 @@ Re-run only to fold in a new season.
   FIRST — this script reads its gamePk list, never re-walks the schedule API
   itself. AVG/ERA carry a minimum-AB/IP qualifier (same idea as the live
   leader boards' floor) so a single pinch-hit or mop-up inning can't top a
-  rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
+  rate-stat board. App reads it via `src/api/postseason/archive/leaders.js`.
 - `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` — the
   one-time historical sweep establishing the season the nightly
   `gen-highlights.mjs` can't reach back to. Same relationship, and same
@@ -2215,7 +2215,12 @@ Re-run only to fold in a new season.
   scroll starts. The warm and `--sw` visits are primed in a separate page. With `--sw`,
   CDP throttling does not reach the service-worker target, so every request the worker
   serves on the second visit is unthrottled, not only the install: treat `--sw` timings as
-  a best case. The precache numbers count `precache` caches only.
+  a best case. The precache numbers count `precache` caches only. `--size WxH` measures a desktop
+  window of that size (no touch) and `--cpu N` sets the CPU slowdown (4; 1 is unthrottled);
+  #2986 used `--size 1440x900 --cpu 1`.
+- `perf/sw-update.mjs` — hand-run, same footing: the first launch after a deploy (#2986).
+  Give it two saved builds; it installs A's service worker, serves B, and prints a timeline
+  of launch 2 (plus an in-app move to a lazy route) and launch 3. Usage in its header.
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
   layer over the research JSON under `.scratch/` and `public/data/`, and the first

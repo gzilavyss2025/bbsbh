@@ -16,7 +16,7 @@ import { startsSeason } from './seasons.js'
 // sheet shell and the same row.
 //
 // It fetches nothing. The postseason ledger the page already holds carries
-// every game (src/api/postseason/records.js's gameRowsFor), so the rows are
+// every game (src/api/postseason/archive/records.js's gameRowsFor), so the rows are
 // handed in and computed only once the door opens — a board of thirty clubs
 // pays for none of them until one is tapped.
 //

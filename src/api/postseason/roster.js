@@ -51,7 +51,7 @@ function positionRank(position) {
 }
 
 // One club's players ({ id, name, teamId, position, jersey }) split into the
-// two groups RosterCard draws. The box-score roster in ../postseasonSeries.js
+// two groups RosterCard draws. The box-score roster in ./archive/series.js
 // uses this same split and order.
 export function rosterGroups(players) {
   const all = [...players]

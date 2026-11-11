@@ -170,7 +170,7 @@ import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.
 import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
 import { deriveBracket, seriesForGame } from '../src/api/postseason/bracket.js'
 import { resultRowsFrom, resultsUrl, skeletonRowsFrom, skeletonUrl } from '../src/api/postseason/fetch.js'
-import { WHIFF_FEED_FIELDS } from '../src/api/postseasonSeries.js'
+import { WHIFF_FEED_FIELDS } from '../src/api/postseason/archive/series.js'
 import { seriesBlock } from '../src/lib/postseason/primer/seriesBlock.js'
 import { wsEventsBlock, wsCountedPks } from '../src/lib/postseason/primer/wsEventsBlock.js'
 import { fetchPlays } from './lib/world-series/plays.mjs'

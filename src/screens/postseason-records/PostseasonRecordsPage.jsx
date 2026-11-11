@@ -14,7 +14,7 @@ import {
   resolveSeason,
   resolveMinGames,
   teamRankRows,
-} from '../../api/postseason/records.js'
+} from '../../api/postseason/archive/records.js'
 import { buildRankingIndex, rankMetric } from '../../api/situationalRecordRankings.js'
 import { cutoffFor } from '../team/data/shared.js'
 import { postseasonRecordsPath } from '../../lib/postseason/recordsRoute.js'
@@ -37,7 +37,7 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 // over the MLB postseason: one split with every postseason club ranked, or one
 // club with all of its splits, for one postseason or for every one since 1995.
 // Same ranking index, same board, same index of splits; only the ledger
-// (src/api/postseason/records.js) and the scope controls differ.
+// (src/api/postseason/archive/records.js) and the scope controls differ.
 //
 // Two views, one switch. "By situation" is the regular-season page's own shape:
 // the bare route is the index of splits, `?metric=` the focused board. "By

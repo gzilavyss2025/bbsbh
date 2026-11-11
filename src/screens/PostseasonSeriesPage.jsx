@@ -5,13 +5,13 @@ import '../styles/postseason/series-live.css'
 import '../styles/worldseries/home.css'
 import '../styles/worldseries/square.css'
 import { Fragment, useMemo } from 'react'
-import { loadPostseasonHistory } from '../api/postseasonHistory.js'
+import { loadPostseasonHistory } from '../api/postseason/archive/history.js'
 import {
   loadSeriesStats,
   findSeriesById,
   BATTING_CATEGORIES,
   SERIES_PITCHING_CATEGORIES,
-} from '../api/postseasonSeries.js'
+} from '../api/postseason/archive/series.js'
 import { fetchGameCardsByPk } from '../api/schedule.js'
 import { loadNineKeys } from '../api/nineKeys.js'
 import { roundTitle } from '../api/postseason/text.js'
@@ -119,7 +119,7 @@ async function loadSeries(seriesId, getSignals) {
 // Postseason Series: a single series' final result (winner/loser, series
 // score), game-by-game scores linking to each game's box score, the round
 // MVP where one exists, and batting/pitching leaders scoped to just that
-// series (see api/postseasonSeries.js for why this is a live client-side
+// series (see api/postseason/archive/series.js for why this is a live client-side
 // aggregation rather than a precomputed file, unlike the career leaders
 // page). No SealBox needed — same footing as Postseason History/Leaders: a
 // past series' result carries no LIVE game's spoiler risk. Deliberately no

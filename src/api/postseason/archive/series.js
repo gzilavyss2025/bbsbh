@@ -1,7 +1,7 @@
 // Postseason Series page's data — a single series' game-by-game result,
 // batting/pitching leaders scoped to just that series (e.g. "2025 NL Division
 // Series"), and both teams' series rosters — a narrower cut than
-// postseasonLeaders.js's since-2000 career boards.
+// postseason/archive/leaders.js's since-2000 career boards.
 //
 // A series is only 3-7 games, so unlike the career boards (backed by the
 // shared SQLite layer, docs/adr/0021) this aggregates LIVE, client-side, on
@@ -9,18 +9,18 @@
 // precomputing it would be over-engineering. Every game in
 // postseason-history.json is already Final (gen-postseason-history.mjs skips
 // any season whose postseason hasn't finished), so this carries no live-game
-// result and needs no SealBox, same footing as postseasonLeaders.js.
+// result and needs no SealBox, same footing as postseason/archive/leaders.js.
 //
 // Field reads mirror scripts/gen-postseason-leaders.mjs's ingestGame (verified
 // live there against gamePk 263172) — summed over just this series' games
 // instead of folded into the career SQLite totals.
-import { getJson } from './statsapi.js'
-import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
-import { startingPositionAbbr } from './select.js'
-import { rosterGroups } from './postseason/roster.js'
-import { outsToIp } from '../lib/math/innings.js'
-import { foldTeamTotals } from '../lib/postseason/seriesTotals.js'
-import { WHIFF_CODES, pitchCallCode } from './playbyplay/eventTypes.js'
+import { getJson } from '../../statsapi.js'
+import { BATTING_CATEGORIES, int, rate3 } from './leaders.js'
+import { startingPositionAbbr } from '../../select.js'
+import { rosterGroups } from '../roster.js'
+import { outsToIp } from '../../../lib/math/innings.js'
+import { foldTeamTotals } from '../../../lib/postseason/seriesTotals.js'
+import { WHIFF_CODES, pitchCallCode } from '../../playbyplay/eventTypes.js'
 
 export { BATTING_CATEGORIES }
 
@@ -206,7 +206,7 @@ export function foldRunsByGame(games, boxscores) {
 // Sums every player's batting/pitching lines across just this series' games
 // (a handful of `/boxscore` fetches), then shapes the totals into
 // TeamLeaders' `precomputed` category-map contract ({ id, name, teamId,
-// display, value } per category key) — same contract postseasonLeaders.js
+// display, value } per category key) — same contract postseason/archive/leaders.js
 // uses, so the page can reuse TeamLeaders' Featured-leader/chasers layout. A
 // category with no qualifying player (e.g. no saves in this series, or too
 // thin a sample for the AVG floor) comes back as an empty array —

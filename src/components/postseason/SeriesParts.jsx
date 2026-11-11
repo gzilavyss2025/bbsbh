@@ -131,7 +131,7 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
 // sides apart (the info the old showTeamAbbr={false} pass threw away), so
 // "the losing side owned the batting board" is legible at a glance.
 // Categories with no qualifying player in this thin sample (no saves in a
-// sweep, nobody past the AVG floor — see api/postseasonSeries.js) are
+// sweep, nobody past the AVG floor — see api/postseason/archive/series.js) are
 // already empty arrays and simply don't render a line; a board with zero
 // lines renders nothing at all. Title uses the same label head (SectionHead)
 // as "Game by game" above and the base TeamLeaders board it replaced, so the
@@ -274,7 +274,7 @@ function LeaderDoor({ leader, category, doors }) {
 // One team's series roster — every player who dressed for at least one game
 // of the series (see loadSeriesStats/rosterEntry), split into position
 // players and pitchers, each already in scorebook defensive order (see
-// buildRosters/POSITION_ORDER in postseasonSeries.js). Deliberately no
+// buildRosters/POSITION_ORDER in postseason/archive/series.js). Deliberately no
 // favoriteTeamId highlight here: this is a reference list of who was ON the
 // roster, not a ranked/comparative board like the result banner or the
 // leader sections above it.

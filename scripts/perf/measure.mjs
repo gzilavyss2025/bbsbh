@@ -8,7 +8,8 @@
 //
 // Flags: --runs N (5) | --storage empty|warm (empty) | --sw (let the service worker run;
 // adds install bytes/count and a second visit) | --sources (list the elements behind
-// each layout shift) | --wide (1280x800 desktop, no touch) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
+// each layout shift) | --size WxH (desktop at that size, no touch;
+// #2986 used 1440x900) | --cpu N (CPU slowdown, 4; 1 = unthrottled) | --date YYYY-MM-DD (the slate for that day) | --wait S (6)
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
@@ -24,7 +25,8 @@ const { values: o, positionals } = parseArgs({
     storage: { type: 'string', default: 'empty' },
     sw: { type: 'boolean', default: false },
     sources: { type: 'boolean', default: false },
-    wide: { type: 'boolean', default: false },
+    size: { type: 'string' },
+    cpu: { type: 'string', default: '4' },
     date: { type: 'string' },
     wait: { type: 'string', default: '6' },
   },
@@ -32,6 +34,11 @@ const { values: o, positionals } = parseArgs({
 if (!['empty', 'warm'].includes(o.storage)) throw new Error('--storage is empty or warm')
 const runs = Number(o.runs)
 if (!Number.isInteger(runs) || runs < 1) throw new Error('--runs is a whole number, 1 or more')
+const cpu = Number(o.cpu)
+if (!(cpu >= 1)) throw new Error('--cpu is a slowdown factor, 1 or more')
+const size = o.size?.match(/^(\d+)x(\d+)$/)
+if (o.size && !size) throw new Error('--size is WIDTHxHEIGHT, e.g. 1440x900')
+const desktop = size ? { width: +size[1], height: +size[2] } : null
 const wait = Number(o.wait)
 if (!(wait >= 0)) throw new Error('--wait is a number of seconds')
 const date = o.date && o.date.match(/^(\d{4})-(\d\d)-(\d\d)$/)
@@ -125,7 +132,7 @@ async function swInstall(page) {
 // CPU and network throttling for one page. (Service-worker traffic is not covered by this.)
 async function throttle(ctx, page) {
   const cdp = await ctx.newCDPSession(page)
-  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu })
   await cdp.send('Network.enable')
   await cdp.send('Network.emulateNetworkConditions', {
     offline: false, latency: 150, downloadThroughput: (6 * 1024 * 1024) / 8, uploadThroughput: (1.5 * 1024 * 1024) / 8,
@@ -134,8 +141,8 @@ async function throttle(ctx, page) {
 
 async function run(browser) {
   const ctx = await browser.newContext({
-    ...(o.wide
-      ? { viewport: { width: 1280, height: 800 } }
+    ...(desktop
+      ? { viewport: desktop }
       : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }),
     serviceWorkers: o.sw ? 'allow' : 'block',
   })
@@ -188,7 +195,7 @@ try {
   }
   const col = (f) => results.map(f)
   const mode = o.sw ? 'service worker on, 2nd visit (warm; requests the worker serves are NOT throttled)' : `${o.storage} storage`
-  console.log(`**${route}** · ${o.wide ? '1280×800' : '390×844'}, CPU 4×, 6 Mbps / 150 ms · ${mode} · ${runs} run(s), median (min–max)\n`)
+  console.log(`**${route}** · ${desktop ? `${desktop.width}×${desktop.height}` : '390×844'}, CPU ${cpu}×, 6 Mbps / 150 ms · ${mode} · ${runs} run(s), median (min–max)\n`)
   console.log('| Metric | Value |\n| --- | --- |')
   const rows = [
     ['FCP', fmt(col((r) => r.fcp), 0, ' ms')],

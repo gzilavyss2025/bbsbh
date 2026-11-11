@@ -6,7 +6,7 @@ import fs from 'node:fs'
 import test from 'node:test'
 import { clubLeague, roundName, roundTag } from '../src/lib/postseason/roundTag.js'
 import { seriesAbbr } from '../src/api/boxlines/rows.js'
-import { entriesFrom, gameRowsFor } from '../src/api/postseason/records.js'
+import { entriesFrom, gameRowsFor } from '../src/api/postseason/archive/records.js'
 import { lastAppearanceHeading } from '../src/lib/pitcherCard/card.js'
 import { gamesOf } from '../src/screens/scout/meetings/meetings.js'
 

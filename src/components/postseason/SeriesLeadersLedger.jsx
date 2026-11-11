@@ -1,5 +1,5 @@
 import '../../styles/postseason/primer-rail.css'
-import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
+import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseason/archive/series.js'
 import { leaderRows } from '../../lib/postseason/primer/leaderRows.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -21,7 +21,7 @@ import { Table } from '../ui/table/Table.jsx'
 // category with no entry draws no row, and a block with no rows draws nothing.
 //
 // Draw-only, on loadSeriesStats's box-score sums, which hold counted games
-// only (api/postseasonSeries.js, spoiler-free in the manifest).
+// only (api/postseason/archive/series.js, spoiler-free in the manifest).
 //
 //   batting    loadSeriesStats's `batting`:  { [category key]: Entry[] }
 //   pitching   loadSeriesStats's `pitching`, same shape

@@ -4,8 +4,8 @@
 // as-of cutoff, so a historical page never renders odds computed with
 // knowledge of games past that date.
 
-import { staticJson } from './staticJson.js'
-import { latestAtOrBefore } from '../lib/math/snapshot.js'
+import { staticJson } from '../staticJson.js'
+import { latestAtOrBefore } from '../../lib/math/snapshot.js'
 
 export const fetchPostseasonOdds = staticJson('/data/postseason-odds.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },

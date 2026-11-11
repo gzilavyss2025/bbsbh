@@ -19,7 +19,8 @@
 // its Featured-leader/chasers layout) instead of a bespoke render, same as
 // minorsLeaders.js does for the all-minors board.
 //
-// Degrades to an empty shape before the file exists or on any failure.
+// Degrades to an empty shape before the file exists or on any failure. Only a
+// good read is cached, so a failure is retried on the next visit.
 let cached = null
 
 const EMPTY = {
@@ -30,7 +31,7 @@ const EMPTY = {
   pitching: { wins: [], strikeouts: [], saves: [], era: [] },
 }
 
-// Exported so postseasonSeries.js's series-scoped board can share these
+// Exported so postseason/archive/series.js's series-scoped board can share these
 // instead of keeping its own copy — both format the same career/series
 // counting + rate stats.
 export const int = (v) => String(v)
@@ -93,7 +94,7 @@ export async function loadPostseasonLeaders() {
       },
     }
   } catch {
-    cached = EMPTY
+    return EMPTY // not cached: a failed read is tried again on the next visit
   }
   return cached
 }

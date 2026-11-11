@@ -554,7 +554,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
     if (leagueRows.length) opponentGroups.push({ title: 'By league', rows: leagueRows })
   }
 
-  // A postseason ledger (src/api/postseason/records.js) has no division table,
+  // A postseason ledger (src/api/postseason/archive/records.js) has no division table,
   // and its league line is each row's own `il` flag: the opponent map above
   // would give a club that changed leagues one league across every year.
   if (data.postseason) {
@@ -568,7 +568,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
   }
 
   // `series` false skips the series counts, for a ledger of several clubs'
-  // games in a row where a series is not one run of rows (postseason/records.js).
+  // games in a row where a series is not one run of rows (postseason/archive/records.js).
   const seriesRecord = series ? seriesRecordCounts(games) : { won: 0, lost: 0 }
 
   return {

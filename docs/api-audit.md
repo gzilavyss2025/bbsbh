@@ -38,7 +38,7 @@ which sets no default params and no caching.
 |---|---|---|---|---|
 | `game` (feed/live) | `/api/v1.1/game/{gamePk}/feed/live` | **none** | `game.js:7` `fetchGameFeed`; also `person-fetch.js:268,288,321,435` (player "firsts") | **YES** |
 | `game_winProbability` | `/api/v1/game/{gamePk}/winProbability` | none | `game.js:18` `fetchWinProbability` | **YES** |
-| `game_boxscore` | `/api/v1/game/{gamePk}/boxscore` | none | `postseasonSeries.js:73` | **YES** |
+| `game_boxscore` | `/api/v1/game/{gamePk}/boxscore` | none | `postseason/archive/series.js:73` | **YES** |
 | `venue` | `/api/v1/venues/{venueId}` | `hydrate=location,fieldInfo` | `game.js:34` `fetchVenue` | no |
 | `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager`; `staff/coaches.js` `fetchCoachingStaff` (the whole staff) | no |
 | `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game.js` `fetchPitcherSeasonLine` | aggregate |
@@ -313,7 +313,7 @@ Exactly four statsapi endpoints, plus one social feed:
    scores, the full boxscore. **Pulled unpruned into `feedState.data.feed` eagerly on game load.**
 2. **`/game/{pk}/winProbability`** (`game.js:18`) — per-play win % (a 4% away WP in the 8th
    announces the result).
-3. **`/game/{pk}/boxscore`** (`postseasonSeries.js:73`) — a completed series game's line score.
+3. **`/game/{pk}/boxscore`** (`postseason/archive/series.js:73`) — a completed series game's line score.
 4. **`/standings`** (`team.js:236`) — league W/L aggregates.
 5. **Bluesky `searchPosts`** (`buzz.js:67`) — post text stating finals.
 

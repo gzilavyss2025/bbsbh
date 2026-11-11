@@ -42,7 +42,7 @@ import {
   groupIntoStories,
   loadMoreTeamTransactions,
 } from '../teamTransactions.js'
-import { feedWindow, fetchAffiliateParentMap, fetchPeople } from './leagueFeed.js'
+import { TRANSACTION_FIELDS, feedWindow, fetchAffiliateParentMap, fetchPeople } from './leagueFeed.js'
 
 // One club's live window: the same three-day window and five-day fetch the
 // wire uses, for the same reason — the endpoint filters on the day a row was
@@ -58,7 +58,7 @@ import { feedWindow, fetchAffiliateParentMap, fetchPeople } from './leagueFeed.j
 async function fetchClubMoves(orgId, endDate, { signal } = {}) {
   const window = feedWindow(endDate)
   const [rows, affilToOrg] = await Promise.all([
-    getJson(`/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`, {
+    getJson(`/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}&fields=${TRANSACTION_FIELDS}`, {
       signal,
     }).then((data) => data.transactions ?? []),
     fetchAffiliateParentMap(),

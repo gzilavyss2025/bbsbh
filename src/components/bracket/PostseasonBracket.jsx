@@ -9,7 +9,7 @@
 import '../../styles/80-postseason-bracket.css'
 import { useMemo, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { historySeriesIds, loadPostseasonHistory } from '../../api/postseasonHistory.js'
+import { historySeriesIds, loadPostseasonHistory } from '../../api/postseason/archive/history.js'
 import { BracketFold } from './BracketFold.jsx'
 import { FullBracket } from './FullBracket.jsx'
 import { bracketOpensByItself } from '../../lib/postseason/bracketDisplay.js'

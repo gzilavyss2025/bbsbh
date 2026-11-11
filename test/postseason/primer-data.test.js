@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { recordAfterGame } from '../../src/lib/postseason/primer/recordAfter.js'
-import { foldRunsByGame, loadSeriesStats } from '../../src/api/postseasonSeries.js'
+import { foldRunsByGame, loadSeriesStats } from '../../src/api/postseason/archive/series.js'
 import { planShard, primerData, seriesBlockFor } from '../../src/lib/postseason/primer/primerGames.js'
 
 // ---- recordAfterGame ------------------------------------------------------
