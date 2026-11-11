@@ -46,7 +46,7 @@ GET https://statsapi.mlb.com/api/v1/transactions?startDate=YYYY-MM-DD&endDate=YY
 → { transactions: [ … ] }
 ```
 
-- **The slate's live read trims with `fields=`** (`LEAGUE_FEED_FIELDS` in
+- **The slate's live read trims with `fields=`** (`TRANSACTION_FIELDS` in
   `src/api/transactions/leagueFeed.js`, #2985): only the keys the shaping reads.
   2026-09-16..20 went from 245,787 to 157,423 bytes decoded (checked 2026-11-11).
   Add a key there before you read a new row field on the wire, or it arrives empty;

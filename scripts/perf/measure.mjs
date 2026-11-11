@@ -39,6 +39,7 @@ const cpu = Number(o.cpu)
 if (!(cpu >= 1)) throw new Error('--cpu is a slowdown factor, 1 or more')
 const size = o.size?.match(/^(\d+)x(\d+)$/)
 if (o.size && !size) throw new Error('--size is WIDTHxHEIGHT, e.g. 1440x900')
+if (o.size && o.wide) throw new Error('give --wide or --size, not both')
 const desktop = size ? { width: +size[1], height: +size[2] } : o.wide ? { width: 1280, height: 800 } : null
 const wait = Number(o.wait)
 if (!(wait >= 0)) throw new Error('--wait is a number of seconds')

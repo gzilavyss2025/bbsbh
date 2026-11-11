@@ -17,15 +17,17 @@ const MIME = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html
 let root = A
 const srv = http.createServer((q, s) => {
   let p = decodeURIComponent(new URL(q.url, 'http://x').pathname)
-  let f = path.join(root, p)
+  let f = path.resolve(root, '.' + p)
+  if (f !== path.resolve(root) && !f.startsWith(path.resolve(root) + path.sep)) { s.writeHead(403); return s.end() } // nothing outside the build
   if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) {
     if (path.extname(p) && p !== '/') { s.writeHead(404); return s.end() }
     f = path.join(root, 'index.html')
   }
   s.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream', 'cache-control': p.startsWith('/assets/') ? 'public,max-age=31536000,immutable' : 'no-cache' })
   fs.createReadStream(f).pipe(s)
-}).listen(0)
-const BASE = `http://localhost:${srv.address().port}`
+})
+await new Promise((res) => srv.listen(0, '127.0.0.1', res))
+const BASE = `http://127.0.0.1:${srv.address().port}`
 const phone = form === 'phone'
 async function throttle(ctx, page) {
   const cdp = await ctx.newCDPSession(page)
@@ -46,7 +48,14 @@ async function launch(ctx, url, lazy) {
   page.on('requestfailed', (r) => ev.push(`${at()} FAILED ${r.url().replace(BASE, '').slice(0, 80)} ${r.failure()?.errorText}`))
   page.on('console', (c) => { if (c.type() === 'error') ev.push(`${at()} console ${c.text().slice(0, 120)}`) })
   page.on('framenavigated', (f) => { if (f === page.mainFrame()) ev.push(`${at()} NAV ${f.url().replace(BASE, '')}`) })
-  page.on('domcontentloaded', async () => { try { ev.push(`${at()} DCL build ${await build(page)}`) } catch { /* page gone */ } })
+  // Read the build id from the HTML response itself, not the live DOM: a recovery reload can
+  // replace the document before an evaluate would run, and tag the old load with the new build.
+  page.on('response', async (r) => {
+    if (r.request().resourceType() !== 'document') return
+    const t = at()
+    const html = await r.text().catch(() => '')
+    ev.push(`${t} HTML build ${html.match(/name="build-commit" content="([0-9a-f]{0,8})/)?.[1] ?? '?'}${r.fromServiceWorker() ? ' (from the service worker)' : ''}`)
+  })
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(8000)
   if (lazy) {
     ev.push(`${at()} -> in-app move to /postseason-history`)

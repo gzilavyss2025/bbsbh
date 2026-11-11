@@ -197,13 +197,13 @@ async function scopeFor(sportId) {
 }
 
 // Every row field the shaping reads (`groupLeagueWide`, `leagueCandidateIds`,
-// the vocabulary), and nothing else. `fields=` names keys at ANY depth, so `id`
+// the vocabulary, and clubFeed.js's per-club pass), and nothing else. `fields=` names keys at ANY depth, so `id`
 // and `name` also keep `person.id`, `toTeam.id`/`.name` and `fromTeam.id`/`.name`;
 // `date` stays as `txnDate`'s fallback when `effectiveDate` is absent. Dropped:
 // `typeDesc`, `resolutionDate`, `nameSlug` and every `link`. A 2026-09-16..20
 // pull went from 245,787 to 157,423 bytes decoded (checked 2026-11-11, #2985).
 // test/league-feed-fields.test.js fails if a field the shaping reads leaves this list.
-export const LEAGUE_FEED_FIELDS =
+export const TRANSACTION_FIELDS =
   'transactions,id,date,effectiveDate,typeCode,description,person,fullName,toTeam,fromTeam,name'
 
 // The card's whole load. Two round trips deep, because the `/people` call
@@ -227,7 +227,7 @@ export async function fetchLeagueMoves(endDate, sportId = SPORT_IDS.MLB, { signa
   const window = feedWindow(endDate, sportId, { singleDay })
   const [rows, scope] = await Promise.all([
     getJson(
-      `/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}&fields=${LEAGUE_FEED_FIELDS}`,
+      `/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}&fields=${TRANSACTION_FIELDS}`,
       { signal },
     ).then((data) => data.transactions ?? []),
     scopeFor(sportId),
