@@ -268,6 +268,21 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   )
 }
 
+// The MVP's five-stat line, held empty and hidden while the award or the Series log loads, so
+// the schedule under the hero does not jump when the real line lands (#2984).
+function MvpStatsHold() {
+  return (
+    <dl className="ww-hero__mvpstats ww-hero__mvpstats--pending" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="ww-hero__mvpstat">
+          <dt>&nbsp;</dt>
+          <dd>&nbsp;</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
 // A decided Series (#2562; layout A, Gary 2026-10-27): this card replaces the result banner. It names
 // the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
 // one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
@@ -280,7 +295,7 @@ const SIDES = ['away', 'home']
 // `washBehind` (the home slate): the action photo sits behind the MVP's cut-out, not across the stage.
 // `photo` (+ `photoSrcSet`, `photoTeamId`): a Series photo that takes the MVP's side in place of the cut-out; `stripe`, two
 // colours [outer, inner], edges it with a three-band club stripe.
-export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, photoSrcSet = undefined, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
+export function DecidedHero({ mode, mvp = null, stats = [], mvpPending = false, statsPending = false, washBehind = false, photo = null, photoSrcSet = undefined, photoTeamId = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
   // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
   // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
   const [noPhoto, setNoPhoto] = useState(false)
@@ -339,6 +354,15 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
               <h2 className="ww-hero__game ww-hero__result">{`${teamClubNameShort(hero.winnerId)} win in ${hero.gamesPlayed}`}</h2>
             </Stack>
           </div>
+          {/* While the award or the Series log loads, a hidden block of the same size holds the MVP's
+              place, so the schedule under it does not jump when he lands (#2984). Five stats always. */}
+          {mvpAt < 0 && mvpPending && slabAt >= 0 && (
+            <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - slabAt]} ww-hero__mvp--pending`} aria-hidden="true">
+              <span className="ww-hero__mvptag">Series MVP</span>
+              <span className="ww-hero__mvpname">&nbsp;</span>
+              <MvpStatsHold />
+            </section>
+          )}
           {mvpAt >= 0 && (
             <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - slabAt]}`} aria-label="Series MVP">
               <span className="ww-hero__mvptag">Series MVP</span>
@@ -356,6 +380,7 @@ export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, 
                   ))}
                 </dl>
               )}
+              {stats.length === 0 && statsPending && <MvpStatsHold />}
             </section>
           )}
         </div>

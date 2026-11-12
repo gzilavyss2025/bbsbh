@@ -15,6 +15,7 @@ in GitHub, where it can be found without knowing which directory to look in.
 
 - `gh issue list`, `gh issue view <n>`, `gh issue create`, `gh issue close <n>`
 - Triage state is a GitHub **label** (see `triage-labels.md` for the role strings)
+- Each new issue also gets a kind label, `data`, `design`, or both (`triage-labels.md`, "Kind labels")
 - Discussion is a GitHub comment, not an appended `## Comments` section
 - A PR closes its issue with `Closes #<n>` in the PR body when it meets the issue's "Done
   means". A slice of a larger issue says `Part of #<n>` instead. `/stack-prs` copies the
@@ -55,7 +56,7 @@ Rules for a spec issue:
 
 ## When a skill says "publish to the issue tracker"
 
-`gh issue create` with a title, a body in the shape above, and the triage label. If the
+`gh issue create` with a title, a body in the shape above, the triage label, and the kind label. If the
 work has a scope document, link it rather than inlining it.
 
 ## When a skill says "fetch the relevant ticket"

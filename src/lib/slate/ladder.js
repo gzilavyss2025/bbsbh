@@ -49,16 +49,19 @@ export function ladderStops({ levels, counts, sportId, winterGames = null }) {
     const isWinter = isWinterSport(l.sportId)
     const full = FULL_NAME[l.label] ?? l.label
     const label = isWinter ? 'Winter' : l.label
-    const n = merged?.[l.sportId]
+    // A Winter stop with no count yet (its calendar still in flight) reads blank, like a
+    // farm level before its counts land, never a dash: a dash means no games.
+    const known = isWinter && winterGames == null ? null : merged
+    const n = known?.[l.sportId]
     return {
       key: String(l.sportId),
       sportId: l.sportId,
       leagueId: l.leagueId ?? null,
       label,
       fullName: full,
-      count: countText(merged, l.sportId),
-      aria: ariaFor(label, full, merged, n),
-      empty: Boolean(merged) && !(n > 0),
+      count: countText(known, l.sportId),
+      aria: ariaFor(label, full, known, n),
+      empty: Boolean(known) && !(n > 0),
       winter: isWinter,
       picked: l.sportId === sportId,
     }
