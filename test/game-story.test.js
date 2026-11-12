@@ -1,11 +1,11 @@
-// Coverage for src/api/gameStory.js's pure helpers: pulling an mlb.com
+// Coverage for src/api/game/story.js's pure helpers: pulling an mlb.com
 // article slug back out of the RSS-derived story URL, and building a
 // card-sized photo crop from the content API's Cloudinary-style template.
 // Fixtures are real shapes verified live 2026-08-21 against gamePk 823035
 // and dapi.mlbinfra.com/v2/content/en-us/stories/{slug}.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildStoryPhotoUrl, slugFromStoryUrl } from '../src/api/gameStory.js'
+import { buildStoryPhotoUrl, slugFromStoryUrl } from '../src/api/game/story.js'
 
 test('slugFromStoryUrl pulls the slug out of a normalized mlb.com/news URL', () => {
   assert.equal(

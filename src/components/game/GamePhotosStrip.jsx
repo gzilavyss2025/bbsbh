@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { fetchGamePhotos, withoutGraphics } from '../../api/gamePhotos.js'
+import { fetchGamePhotos, withoutGraphics } from '../../api/game/photos.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePhotosPath } from '../../lib/route.js'
@@ -24,7 +24,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // so permanently-visible arrows there would just be clutter.
 //
 // SPOILER RULE: `fetchGamePhotos` is deliberately NOT reveal-only in
-// api/gamePhotos.js's own sense (it carries no SealBox of its own — see that
+// api/game/photos.js's own sense (it carries no SealBox of its own — see that
 // module's header) because a recap/celebration photo narrates the outcome
 // just by looking at it, same risk as a highlight clip's title. This
 // component is therefore only ever rendered from inside BoxScore's SealBox

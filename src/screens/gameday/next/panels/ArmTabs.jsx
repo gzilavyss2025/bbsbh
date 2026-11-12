@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { mixOf } from '../../../../api/gameday/pitchMix.js'
-import { fetchPitcherRecentGames } from '../../../../api/game.js'
+import { fetchPitcherRecentGames } from '../../../../api/game/fetch.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { monthDay } from '../../../../lib/dates.js'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'

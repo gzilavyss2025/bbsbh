@@ -4,7 +4,7 @@ import { fetchStampGames } from '../api/logbook/stampGames.js'
 import { computeLogbookStats } from '../api/logbook/stats.js'
 import { fetchStampBoxscores, fetchStampMoments } from '../api/logbook/gameDetail.js'
 import { computeLogbookRetrospective } from '../api/logbook/retrospective.js'
-import { fetchHighlights } from '../api/highlights.js'
+import { fetchHighlights } from '../api/game/highlights.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useBooks } from '../hooks/useBooks.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -195,7 +195,7 @@ export function LogbookStatsPage({ bookId = null }) {
   const retroLoading = boxscores.loading || moments.loading
 
   // A highlight clip for a rendered moment, resolved only for the handful
-  // that actually make the cut (see api/highlights.js — a `content` fetch per
+  // that actually make the cut (see api/game/highlights.js — a `content` fetch per
   // game, so this stays cheap regardless of how many games are in the book).
   const topMoments = retro.moments.slice(0, 7)
   const momentGamePkKey = [...new Set(topMoments.map((m) => m.gamePk))].join(',')

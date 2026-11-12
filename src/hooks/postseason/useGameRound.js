@@ -7,7 +7,7 @@
 // facts (lib/postseason/gameRound.js), so the print sheet and the preview poster
 // may print them for any game, played or not.
 import { useAsync } from '../useAsync.js'
-import { fetchSeriesGameNumber } from '../../api/game.js'
+import { fetchSeriesGameNumber } from '../../api/game/fetch.js'
 import { feedRoundName, roundLine } from '../../lib/postseason/gameRound.js'
 
 export function useGameRound(feed) {

@@ -9,7 +9,7 @@ import {
   POSTER,
   posterLayout,
 } from '../src/lib/preview/posterLayout.js'
-import { posterDateParts } from '../src/api/gamePreview.js'
+import { posterDateParts } from '../src/api/game/preview.js'
 import { focusPoint } from '../src/lib/preview/posterArt.js'
 
 // The poster is exported as an image, so nothing about it can be checked by

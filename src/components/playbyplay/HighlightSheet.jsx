@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { highlightPlaybacks } from '../../api/highlights.js'
+import { highlightPlaybacks } from '../../api/game/highlights.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'

@@ -219,7 +219,7 @@ export function spotlightRoster(pool, { clubId, season, started }, limit = SPOTL
 }
 
 // A player's highlight, from the clubs' stored files (public/data/highlights/{teamId}.json, the
-// nightly gen-highlights.mjs; src/api/gamehighlights.js reads them). `files` are those files'
+// nightly gen-highlights.mjs; src/api/game/teamHighlights.js reads them). `files` are those files'
 // answers, which hold only clips that already passed the generator's positive-play, non-abs and
 // blocklist filters (scripts/lib/highlights.mjs). A hitter's is any play clip crediting him that is not a pitching one (a strikeout of him
 // credits the pitcher); a pitcher's is a pitching one. The newest from a game in `gamePks` (the

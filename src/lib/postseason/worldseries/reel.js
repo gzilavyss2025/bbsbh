@@ -11,13 +11,13 @@
 // dropped (every MLB photo is some clip's thumbnail), capped at `maxPerGame`.
 // Newest game first. [DECISION: the issue says "mixed, in feed order"; the two
 // feeds are separate, so they alternate.]
-import { classifyHighlight, isEligibleForPositiveFilter } from '../../../api/highlights.js'
-import { originalPhotoUrl } from '../../../api/gamePhotos.js'
+import { classifyHighlight, isEligibleForPositiveFilter } from '../../../api/game/highlights.js'
+import { originalPhotoUrl } from '../../../api/game/photos.js'
 
 const RECAP = /^game\s+\d+\s+highlights?$/i
 const CDN_PREFIX = 'https://img.mlbstatic.com/mlb-images/image/upload/'
 
-// highlights.js keeps selectCondensedGame on a reveal-only allowlist (its one
+// game/highlights.js keeps selectCondensedGame on a reveal-only allowlist (its one
 // importer is the box score's GameVideoRow), so the
 // reel reads the same taxonomy tag itself rather than widen that list.
 const isCondensed = (item) => (item?.keywordsAll ?? []).some((k) => k.type === 'taxonomy' && k.value === 'condensed-game')

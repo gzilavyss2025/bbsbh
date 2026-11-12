@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import { selectGameInfo, selectTeamMeta } from '../../api/select.js'
-import { resolveGameNotes } from '../../api/gameNotes.js'
+import { resolveGameNotes } from '../../api/game/notes.js'
 import { useAsync } from '../../hooks/useAsync.js'
 
 // A club's official pre-game press notes (a PDF) for this game, or null. MLB only, and null
 // when there is no note to link (every MiLB game, or a date the club never posted). The
 // note posts in the afternoon or evening ET, after the page first loads, so on the game's own
 // day with no note yet this re-checks every few minutes; once a note is in hand the poll
-// stops. Past games never gain a note, so they do not poll (api/gameNotes.js has the gate).
+// stops. Past games never gain a note, so they do not poll (api/game/notes.js has the gate).
 
 // How often to re-check for a not-yet-posted note.
 const NOTES_POLL_MS = 5 * 60 * 1000

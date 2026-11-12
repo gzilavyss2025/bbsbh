@@ -1,6 +1,6 @@
 // Unit coverage for the win-probability chart's data layer — the reveal-only
 // selector (winprob.js) that feeds WinProbChart, plus a REGRESSION GUARD on the
-// `fields=` allowlist the fetch prunes with (game.js).
+// `fields=` allowlist the fetch prunes with (game/fetch.js).
 //
 // Why the guard exists: WIN_PROB_FIELDS is a hand-maintained allowlist. The chart
 // line reads the CUMULATIVE `homeTeamWinProbability`, but the list was once tuned
@@ -11,7 +11,7 @@
 // reads so that regression can't recur unnoticed.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { WIN_PROB_FIELDS } from '../src/api/game.js'
+import { WIN_PROB_FIELDS } from '../src/api/game/fetch.js'
 import { selectWinProbPath, winProbSplit, selectWinProbBigPlays } from '../src/api/winprob.js'
 
 // A tiny win-probability array shaped like the /winProbability endpoint's rows:

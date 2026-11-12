@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { highlightForPlay } from '../../../api/highlights.js'
+import { highlightForPlay } from '../../../api/game/highlights.js'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../../highlights/watchClip.js'
 import { useWatchClip } from '../../highlights/useWatchClip.js'
 

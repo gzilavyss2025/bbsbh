@@ -1,5 +1,5 @@
 import { getJson } from '../statsapi.js'
-import { WIN_PROB_FIELDS } from '../game.js'
+import { WIN_PROB_FIELDS } from '../game/fetch.js'
 
 // The /winProbability read (one entry per completed play: the cumulative home win %,
 // the leverage index and the play), trimmed to WIN_PROB_FIELDS. Null off-MLB or on any

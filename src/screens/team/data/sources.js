@@ -1,6 +1,6 @@
 import { fetchStandings, fetchTeamRoster, fetchTeamIL } from '../../../api/team/fetch.js'
 import { fetchTeamSchedule } from '../../../api/schedule/fetch.js'
-import { fetchManager } from '../../../api/game.js'
+import { fetchManager } from '../../../api/game/fetch.js'
 import { fetchTeamSeasonStats } from '../../../api/statsLevels.js'
 
 // The six reads more than one team-hub loader makes: standings (the header and Standings),

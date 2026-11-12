@@ -107,7 +107,7 @@ list says what each guard checks.
   module's named reveal-only EXPORTS, or any module carrying an `importers` list (the raw
   win-probability fetcher `winprob/feed.js`) — is imported only from its allowlist. Unlike its siblings it
   RESOLVES import specifiers rather than substring-matching a basename, because
-  `highlights.js` is a substring of `gamehighlights.js` and those two carry opposite
+  `game/highlights.js` is a substring of `game/teamHighlights.js` and those two carry opposite
   classifications. See `src/api/CLAUDE.md` and the manifest's own header.
 - `check-statsapi-client.mjs` — fails a `.mjs`/`.js` file under `scripts/` or
   `.scratch/` that names `statsapi.mlb.com` or `STATSAPI_BASE` on a code line

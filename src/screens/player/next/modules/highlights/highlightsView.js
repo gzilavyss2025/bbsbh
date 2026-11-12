@@ -1,5 +1,5 @@
 // The Highlights module's pure view (#2022): his clips for this season, newest first.
-import { formatClipDuration } from '../../../../../api/highlights.js'
+import { formatClipDuration } from '../../../../../api/game/highlights.js'
 import { plural } from '../../parts/foulsFormat.js'
 import { monthDayName } from '../../../../../lib/dates.js'
 

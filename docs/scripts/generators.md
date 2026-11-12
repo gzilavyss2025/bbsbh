@@ -428,7 +428,7 @@ don't run these by hand.
   and never drops old ones (the img.mlbstatic.com PDF stays live forever, keeping a
   game reachable after mlb.com de-lists it). The twist vs. the other generators,
   which regenerate from scratch. Self-contained; MLB only; kept OUT of the PWA
-  precache (grows each game day). App reads it via `src/api/gameNotes.js`.
+  precache (grows each game day). App reads it via `src/api/game/notes.js`.
 - `gen-callouts.mjs` → `callouts/{MMDDYYYY}/{gamePk}.json` — every team-record,
   starter-record, hitter-split, and situational callout. Covers MLB + the four
   full-season MiLB levels (each MiLB person-stats fetch must carry the level's
@@ -1378,7 +1378,7 @@ don't run these by hand.
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
   per MLB club holding its per-play video highlights, game by game, newest first.
   Feeds the Team hub's Games-tab rail and the player page's rail; the box score's
-  own per-play clips stay a LIVE single-game fetch (`src/api/highlights.js`) and
+  own per-play clips stay a LIVE single-game fetch (`src/api/game/highlights.js`) and
   are unaffected. **Scans by GAME, not by team** — each game belongs to two clubs,
   so per-team schedule scans would fetch the same `content` twice — and files each
   clip under the team its own `team_id` names, which handles a mid-season trade for
@@ -1388,7 +1388,7 @@ don't run these by hand.
   generator, never the reader**, so the rails stay dumb: the `abs`/`challenge`
   exclusion (the `team_id` sign is unrecoverable for those — it tags the
   participant, not who benefited), the non-play content gate
-  (`NON_PLAY_TAXONOMY` in `src/api/highlights.js` — the same `content` array
+  (`NON_PLAY_TAXONOMY` in `src/api/game/highlights.js` — the same `content` array
   carries recaps, condensed games, interviews, pressers, Data Viz cards, injury
   exits and ejections, ~half of all items), and the hand-maintained
   `scripts/highlight-blocklist.json` (`{clipId, reason}`, starts empty — **edit
@@ -1396,7 +1396,7 @@ don't run these by hand.
   54% of content items carry no guid, real highlights among them. Kept OUT of the
   PWA precache. Shares every bit of its per-game logic with the hand-run backfill
   below via `scripts/lib/highlights.mjs`. App reads it via
-  `src/api/gamehighlights.js`. Full write-up: `.scratch/highlights-cascade/`.
+  `src/api/game/teamHighlights.js`. Full write-up: `.scratch/highlights-cascade/`.
 
 - `gen-postseason-odds.mjs` → `public/data/postseason-odds.json` — date-keyed
   MLB postseason odds (overall / division / bye probability + projected wins),

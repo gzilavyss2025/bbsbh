@@ -16,7 +16,7 @@ import {
   classifyHighlight,
   fetchHighlights,
   isEligibleForPositiveFilter,
-} from '../../src/api/highlights.js'
+} from '../../src/api/game/highlights.js'
 
 const here = import.meta.dirname
 export const OUT_DIR = join(here, '..', '..', 'public', 'data', 'highlights')

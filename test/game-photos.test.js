@@ -7,7 +7,7 @@ import {
   photosForPlayer,
   photosForTeam,
   withoutGraphics,
-} from '../src/api/gamePhotos.js'
+} from '../src/api/game/photos.js'
 
 function mockContentFetch(body) {
   return async () => ({ ok: true, status: 200, json: async () => body })

@@ -1,4 +1,4 @@
-import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.js'
+import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game/fetch.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { entryFlag, pitcherRole } from '../../../lib/pitcherCard/card.js'
 import { noticeClass } from '../../../lib/design/noticeClass.js'

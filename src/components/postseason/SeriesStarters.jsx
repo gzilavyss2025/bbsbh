@@ -1,4 +1,4 @@
-import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../api/game.js'
+import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../api/game/fetch.js'
 import { fetchPitcherPostseasonCareer } from '../../api/postseason/pitcherCareer.js'
 import { fetchPitcherWorldSeriesCareer } from '../../api/postseason/pitcherWorldSeries.js'
 import { fetchWorkload } from '../../api/workload.js'

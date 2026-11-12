@@ -1,4 +1,4 @@
-import { fetchPitcherSeasonLine } from '../game.js'
+import { fetchPitcherSeasonLine } from '../game/fetch.js'
 import { fetchPitcherPostseasonCareer } from './pitcherCareer.js'
 
 // A starter's all-time World Series line, ending the day before the game: earlier

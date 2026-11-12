@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { buildPreviewModel, isPostseason } from '../api/gamePreview.js'
+import { buildPreviewModel, isPostseason } from '../api/game/preview.js'
 import { fetchHitterEntryLines } from '../api/player/hitterEntryLines.js'
 import { selectGameSeason, selectLineup, selectOfficials } from '../api/select.js'
 import { loadUmpire } from '../api/umpires.js'
@@ -32,7 +32,7 @@ import '../styles/62-game-preview.css'
 //
 // Nothing here can print a score: the canvas is handed buildPreviewModel's
 // object and nothing else — no feed, no linescore, no gamePk. See
-// api/gamePreview.js for why that boundary is where the spoiler audit happens.
+// api/game/preview.js for why that boundary is where the spoiler audit happens.
 
 // Each block, and the question that decides whether there is anything to put
 // in it. A block with no data is switched OFF rather than printed as a tall

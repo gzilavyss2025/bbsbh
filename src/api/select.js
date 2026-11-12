@@ -35,7 +35,7 @@ export function lastFirst(person) {
 // The fullName fallback (thin records with neither boxscoreName nor
 // lastFirstName — e.g. a box.person stub) needs its own suffix guard: a bare
 // last-token split turns "Michael Harris II" into "II". Same generational
-// suffixes and cut logic as game.js's toLastFirst.
+// suffixes and cut logic as game/fetch.js's toLastFirst.
 const GENERATIONAL_SUFFIX = /^(Jr\.?|Sr\.?|II|III|IV)$/i
 
 function surnameWithSuffix(fullName) {
@@ -270,7 +270,7 @@ export function selectTeamMeta(feed, side, { includeDerivedStarter = false } = {
   // fielding-side arithmetic matchup/forHalf.js's armFor uses.
   //
   // Defaults OFF because this function is shared far beyond TeamInfo.jsx: the
-  // share-preview poster (gamePreview.js), the printed sheet (sheetModel.js),
+  // share-preview poster (game/preview.js), the printed sheet (sheetModel.js),
   // and loadScorecard.js's pre-pitch staging view all call it too, each
   // documented spoiler-free "by construction" on the premise that select.js
   // never reads live play data ungated. Only TeamInfo.jsx passes

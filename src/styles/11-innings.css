@@ -37,7 +37,7 @@
 /* Game Notes (lineup page and team hub) — a Button, control size, outline,
    riding in the team head right-aligned beside the Away/Home label. It is an
    anchor, because the action really is an address: the club's press-notes PDF,
-   in a new tab, which the ↗ in its icon slot says. See api/gameNotes.js. It
+   in a new tab, which the ↗ in its icon slot says. See api/game/notes.js. It
    keeps only its refusal to shrink in the head's flex row. */
 .innings__notes {
   flex: none;

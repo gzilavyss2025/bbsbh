@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchPitcherSeasonVsOpponent } from '../src/api/game.js'
+import { fetchPitcherSeasonVsOpponent } from '../src/api/game/fetch.js'
 
 // The shape /api/v1/people/{id}/stats?stats=gameLog&group=pitching really
 // returns, trimmed to the fields the sum reads. Every literal is the live

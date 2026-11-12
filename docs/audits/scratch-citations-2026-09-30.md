@@ -68,7 +68,7 @@ It counts **tracked** files only: 2,510 files, 152.6 MB. Untracked `.scratch/` f
 | `identity-admin-drawer` | 6 KB | 1 | 1: `docs/adr/0054-a-precomputed-store-can-carry-a-runtime-override-too.md` | no | 1 / 0 / 0 |
 | `level-benchmarks` | 51.05 MB | 60 | 12: `.claude/hooks/research-diary-reminder.mjs`, `.gitignore`, `docs/agents/research-diary.md` | yes (31) | 47 / 13 / 0 |
 | `lineup-strength` | 19 KB | 2 | 4: `docs/callouts.md`, `docs/scripts/generators.md`, `scripts/gen-war.mjs` | no | 1 / 1 / 0 |
-| `live-feed-diffpatch` | 9 KB | 4 | 4: `docs/adr/0032-diffpatch-feed-polling-for-follow-live.md`, `scripts/probe-diffpatch.mjs`, `src/api/game.js` | skip list (4) | 4 / 0 / 0 |
+| `live-feed-diffpatch` | 9 KB | 4 | 4: `docs/adr/0032-diffpatch-feed-polling-for-follow-live.md`, `scripts/probe-diffpatch.mjs`, `src/api/game/fetch.js` | skip list (4) | 4 / 0 / 0 |
 | `live-follow-and-scores-unlocked` | 48 KB | 2 | 0 | no | 0 / 0 / 2 |
 | `metric-engines` | 61 KB | 5 | 9: `docs/api/static-data.md`, `scripts/gen-fouls.mjs`, `scripts/gen-workload.mjs` | no | 4 / 1 / 0 |
 | `mets-interim-manager` | 2 KB | 1 | 0 | no | 0 / 0 / 1 |
@@ -104,7 +104,7 @@ It counts **tracked** files only: 2,510 files, 152.6 MB. Untracked `.scratch/` f
 | `top-prospects-history` | 225 KB | 8 | 10: `.claude/hooks/research-diary-reminder.mjs`, `docs/prospect-ranking-value.md`, `docs/scripts/generators.md` | yes (3) | 5 / 3 / 0 |
 | `umpire-accuracy` | 25 KB | 2 | 11: `docs/api/live-game.md`, `docs/enhancement-proposals.md`, `docs/scripts/generators.md` | no | 2 / 0 / 0 |
 | `umpire-tendencies` | 87 KB | 6 | 3: `scripts/gen-umpire-accuracy.mjs`, `src/components/umpire/UmpireTendencies.jsx`, `src/styles/53-umpire-tendencies.css` | no | 1 / 5 / 0 |
-| `video-highlights` | 18 KB | 3 | 2: `docs/api/live-game.md`, `src/api/highlights.js` | no | 1 / 2 / 0 |
+| `video-highlights` | 18 KB | 3 | 2: `docs/api/live-game.md`, `src/api/game/highlights.js` | no | 1 / 2 / 0 |
 
 Totals: 64 folders, 2,510 files, 152.6 MB.
 

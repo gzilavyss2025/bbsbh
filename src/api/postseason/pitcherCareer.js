@@ -4,7 +4,7 @@ import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 // ---------------------------------------------------------------------------
 // A pitcher's all-time postseason line, ending the day before the cutoff. The
 // API's `stats=career` is NOT used: it counts a game in progress, the same
-// spoiler `fetchPitcherSeasonLine` (game.js) exists to avoid (ADR-0088). Instead this adds
+// spoiler `fetchPitcherSeasonLine` (game/fetch.js) exists to avoid (ADR-0088). Instead this adds
 // the seasons BEFORE `season` (`yearByYear`, finished games only) to
 // `thisSeason`, the postseason line that function already returns for the cutoff.
 // Rates cannot be averaged, so ERA and WHIP are rebuilt from outs, earned runs,

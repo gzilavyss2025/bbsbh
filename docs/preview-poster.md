@@ -12,7 +12,7 @@ map — what each module does and what bites when you change it.
 
 | File | Holds |
 | --- | --- |
-| `src/api/gamePreview.js` | `buildPreviewModel(feed, extras)` — every value the poster can print, and the whole spoiler audit. `spoiler-free` in the manifest. |
+| `src/api/game/preview.js` | `buildPreviewModel(feed, extras)` — every value the poster can print, and the whole spoiler audit. `spoiler-free` in the manifest. |
 | `src/screens/GamePreview.jsx` | The studio: the sheet, three include/exclude checkboxes, the Save button. Owns no composition. |
 | `src/components/preview/SavePosterButton.jsx` | `canvas.toBlob()` → share sheet on a phone, download on a computer. |
 | `src/lib/preview/posterLayout.js` | Pure arithmetic: the frame, the block stack, the head's stretch. Unit-tested. |

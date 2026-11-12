@@ -53,7 +53,7 @@ export function revealTotals(feed, side) {
 // five rows carry no `runs` at all — reading its length would claim nine innings
 // and demand a half nobody played.
 // The live feed carries no seriesDescription or seriesGameNumber (checked on gamePk 715724,
-// 2026-10-31); the box score adds them from the schedule with withSeriesFacts (api/game.js).
+// 2026-10-31); the box score adds them from the schedule with withSeriesFacts (api/game/fetch.js).
 export function revealStampFacts(feed) {
   if (!feed?.gamePk && !feed?.gameData) return null
   const gameData = feed?.gameData ?? {}

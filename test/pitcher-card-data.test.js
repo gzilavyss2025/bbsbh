@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
-import { fetchPitcherLastGame, fetchPitcherRecentGames, fetchPitcherSeasonLine, resetPitcherReads } from '../src/api/game.js'
+import { fetchPitcherLastGame, fetchPitcherRecentGames, fetchPitcherSeasonLine, resetPitcherReads } from '../src/api/game/fetch.js'
 import { fetchPitcherPostseasonCareer } from '../src/api/postseason/pitcherCareer.js'
 
 // The Now Pitching card's two fetchers, run against responses captured from

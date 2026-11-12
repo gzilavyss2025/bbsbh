@@ -5,7 +5,7 @@ import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from '../src/componen
 
 const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 import { selectWinProbPath, selectWinProbBigPlays } from '../src/api/winprob.js'
-import { WIN_PROB_FIELDS } from '../src/api/game.js'
+import { WIN_PROB_FIELDS } from '../src/api/game/fetch.js'
 
 test('snap selects recorded events, excludes origin, and clamps edges', () => {
   assert.equal(nearestWinProbEvent(-1, 80), 0)

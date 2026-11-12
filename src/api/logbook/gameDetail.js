@@ -26,9 +26,9 @@ import { ipToOuts } from '../../lib/math/innings.js'
 //     blownSaves, and gamesStarted (the starter/reliever flag) per pitcher —
 //     e.g. Paul Blackburn's line carried `"note":"(H, 5)"` and `holds: 1`.
 //   - /game/{pk}/winProbability (the standalone endpoint, unlike the pruned
-//     fetch api/game.js uses for a live game) already includes each entry's
+//     fetch api/game/fetch.js uses for a live game) already includes each entry's
 //     own `playEvents`, so the terminal pitch's `playId` — the join key to a
-//     highlight clip (api/highlights.js) — comes for free with no second
+//     highlight clip (api/game/highlights.js) — comes for free with no second
 //     cross-referencing fetch.
 
 // A phone on a live network, not a CI box — kept well below the generator's

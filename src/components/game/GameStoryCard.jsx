@@ -1,4 +1,4 @@
-import { fetchGameStory } from '../../api/gameStory.js'
+import { fetchGameStory } from '../../api/game/story.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { teamClubName, teamPrimaryColor } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -6,14 +6,14 @@ import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Each team's own MLB.com coverage of this game — a recap, and any same-game
-// news (an in-game injury, e.g.) — resolved by api/gameStory.js, which also
+// news (an in-game injury, e.g.) — resolved by api/game/story.js, which also
 // enriches each story with a photo and a preview blurb where the content API
 // has them. The first story leads with that full treatment; the rest render
 // as a compact logo+headline row, in publish order. If the first story's
 // enrichment came back thin (no photo, no blurb), nothing gets the lead
 // treatment and every story falls back to a compact row — the pre-enrichment
 // look, never a lead card missing its photo. Only ever mounts inside the box
-// score's already-revealed render (see BoxScore.jsx / api/gameStory.js): the
+// score's already-revealed render (see BoxScore.jsx / api/game/story.js): the
 // full final score is already on the same screen by the time this renders,
 // so real headlines and blurbs here spoil nothing beyond what's already
 // unsealed. Renders nothing while loading, for a game still in progress

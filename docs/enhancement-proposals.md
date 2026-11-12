@@ -221,7 +221,7 @@ measurement methodology need design):**
 
 ```
 You are planning (not implementing) a new feature for bbsbh. Read CLAUDE.md
-(the umpires.js and gameNotes.js entries — the cron and append-only
+(the umpires.js and game/notes.js entries — the cron and append-only
 patterns), docs/data-enrichment.md §1 (pitchData fields and availability),
 scripts/gen-umpires.mjs, src/api/umpires.js, src/screens/UmpirePage.jsx,
 and docs/enhancement-proposals.md §3 first.

@@ -1,7 +1,7 @@
 import { Suspense, useMemo } from 'react'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { fetchTeams } from '../../api/schedule/fetch.js'
-import { resolveGameNotes } from '../../api/gameNotes.js'
+import { resolveGameNotes } from '../../api/game/notes.js'
 import { rankText } from '../../api/person.js'
 import { SPORT_LABEL, treatmentTile, defaultHomeTreatmentFor } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/colors/milbColors.js'
@@ -51,7 +51,7 @@ const INK_LIGHT = '#FBF6E9'
 // The club's most recent official press-notes PDF — a direct link-out, the same
 // as the lineup page's Game Notes button. No gameDate, so resolveGameNotes falls
 // through to the newest note on file rather than one tied to tonight's game.
-// MLB only — see gameNotes.js.
+// MLB only — see game/notes.js.
 //
 // Beside it, the one door onto the Game Notes archive (#1258): every note this
 // club has posted, opened on this club. The archive has no other link in the app,

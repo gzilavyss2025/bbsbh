@@ -1,5 +1,5 @@
-import { fetchGameFeed } from '../../../../../api/game.js'
-import { classifyHighlight, fetchHighlights, formatClipDuration, highlightForPlay, highlightPlaybacks, isEligibleForPositiveFilter } from '../../../../../api/highlights.js'
+import { fetchGameFeed } from '../../../../../api/game/fetch.js'
+import { classifyHighlight, fetchHighlights, formatClipDuration, highlightForPlay, highlightPlaybacks, isEligibleForPositiveFilter } from '../../../../../api/game/highlights.js'
 import { HIT_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from '../../../../../api/playbyplay/eventTypes.js'
 
 // The game detail view's data (#1851): his pitches, strikeouts and big plays from the game's
@@ -31,7 +31,7 @@ function watch(item) {
 const isWhiff = (call) => call === 'T' || WHIFF_CODES.has(call)
 const lastPitch = (play) => play.playEvents?.findLast((e) => e.isPitch) ?? null
 
-// The clip for one play: MLB's highlight, joined on the last pitch's playId (highlights.js),
+// The clip for one play: MLB's highlight, joined on the last pitch's playId (game/highlights.js),
 // else the Baseball Savant single-pitch clip of that pitch. Savant has none before 2016
 // (expresslane/clipIndex.js) or for an untracked pitch, so no button then.
 function clipFor(play, items, day) {

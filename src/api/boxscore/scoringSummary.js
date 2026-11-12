@@ -21,7 +21,7 @@
 // himself on an error keeps the row, RBI or not.
 //
 // THE CLIP KEY is the plate appearance's LAST pitch — the same key
-// `playIdForWinProbEntry` resolves, and the one `highlights.js` and
+// `playIdForWinProbEntry` resolves, and the one `game/highlights.js` and
 // `clipIndex.js` join on. Null on the pruned past-game feed, which lists no
 // `playEvents`; callers render no Watch button for a null.
 //

@@ -26,7 +26,7 @@
 // Cached in-memory per team for the session, since a file only changes once a
 // day (mirrors war.js's module-level cache).
 
-import { staticJsonBy } from './staticJson.js'
+import { staticJsonBy } from '../staticJson.js'
 
 const loadTeamHighlights = staticJsonBy((teamId) => `/data/highlights/${teamId}.json`, {
   shape: (d) => (Array.isArray(d.games) ? d : { ...d, games: [] }),

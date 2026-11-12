@@ -511,7 +511,7 @@ export function selectBoxscore(feed) {
 
 // The terminal pitch's `playId` for a /winProbability entry — the join key to
 // that play's video highlight clip, whose `guid` is the same string (see
-// api/highlights.js). Resolved by cross-referencing the entry's OWN
+// api/game/highlights.js). Resolved by cross-referencing the entry's OWN
 // `about.atBatIndex` into the live feed's `allPlays`, then taking the last
 // pitch event, the identical rule playbyplay/halfInningFeed.js already uses
 // for the per-play "Watch" button.
@@ -519,7 +519,7 @@ export function selectBoxscore(feed) {
 // Why not read it straight off the win-prob entry, which does carry its own
 // `playEvents[]` with the very same playIds? Because WIN_PROB_FIELDS
 // deliberately prunes `playEvents` out of that fetch — it is ~85% of the
-// payload (game.js's header) — and putting it back to recover one string per
+// payload (game/fetch.js's header) — and putting it back to recover one string per
 // game measured at +70% on the pruned response (51 KB -> 87 KB, gamePk
 // 823035). The feed is already fully in memory wherever this runs, so the
 // cross-reference is free.

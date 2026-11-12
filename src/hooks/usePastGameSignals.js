@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { fetchGameFeed, PAST_GAME_FEED_FIELDS } from '../api/game.js'
+import { fetchGameFeed, PAST_GAME_FEED_FIELDS } from '../api/game/fetch.js'
 import { fetchWinProbability } from '../api/winprob/feed.js'
 
 // A past, Final game's result never changes, so once its feed and win

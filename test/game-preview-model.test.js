@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { buildPreviewModel } from '../src/api/gamePreview.js'
+import { buildPreviewModel } from '../src/api/game/preview.js'
 
 // The preview poster is exported as an IMAGE and posted in public, so a number
 // that leaks into it cannot be un-leaked by re-sealing anything. These pin the

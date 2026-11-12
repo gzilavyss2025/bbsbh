@@ -266,7 +266,7 @@ const T3 = [
     label: /label=\{`Batting, \$\{side\.teamName\}`\}/,
     apis: [
       '../api/expresslane/eligibility.js',
-      '../api/game.js',
+      '../api/game/fetch.js',
       '../api/defense.js',
       '../api/select.js',
       '../api/umpires.js',

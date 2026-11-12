@@ -1,12 +1,12 @@
 // Per-game fetchers that aren't the live feed's own hydration: win
 // probability, venue, managers, and a probable starter's season/last-game line.
 
-import { getJson } from './statsapi.js'
-import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
-import { num } from './person/shared.js'
-import { ipToOuts, outsToIp } from '../lib/math/innings.js'
-import { dayBefore } from '../lib/dates.js'
-import { roundShort } from '../lib/postseason/gameRound.js'
+import { getJson } from '../statsapi.js'
+import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../../lib/teams.js'
+import { num } from '../person/shared.js'
+import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
+import { dayBefore } from '../../lib/dates.js'
+import { roundShort } from '../../lib/postseason/gameRound.js'
 
 // `options.fields` (array or comma-string) opts a caller into a pruned
 // response — see PAST_GAME_FEED_FIELDS below for the one such caller. Omitted

@@ -121,7 +121,7 @@ function clubBlock(feed, side, managers) {
 }
 
 // Assemble the whole sheet. `managers` is `useGameData`'s `{ away, home }` pair
-// (managers aren't in the live feed — see api/game.js) and `weather` is its
+// (managers aren't in the live feed — see api/game/fetch.js) and `weather` is its
 // outdoor scorebook reading; both are optional and both degrade to a blank line.
 // Returns null with no feed, so the page can render nothing rather than a sheet
 // of empty strings that looks like a load succeeded.

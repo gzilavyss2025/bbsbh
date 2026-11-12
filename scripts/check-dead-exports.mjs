@@ -86,7 +86,7 @@ Object.assign(
   staged('src/api/history/onThisDay.js', ['onThisDay'], 'ADR-0100 ships the on-this-day shards and their reader first; the page that calls it is not built. Pinned by test/on-this-day.test.js.'),
   staged('src/api/savant/attackAngle.js', ['fetchAttackAngles'], 'Phase C data fetch of the contact replay (docs/contact-replay.md, row C), kept with the replay models listed below; the replay card is deleted, so nothing calls it. test/savant-attack-angle.test.js.'),
   staged('src/api/boxlines/careerSplits.js', ['DOOR_COLUMNS_WIDE', 'DOOR_EMPHASIS'], 'Card column vocabulary (ADR-0073) that names doorCells({ wide }) and the inked cell; no screen reads it today. Pinned against doorCells in test/splits-part-a.test.js and test/boxlines-card-facets.test.js.'),
-  staged('src/api/game.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
+  staged('src/api/game/fetch.js', ['resetPitcherReads'], 'test seam: clears the pitcher-read memos between cases, test/pitcher-card-data.test.js.'),
   staged('src/api/scout/rosterStats.js', ['resetRosterReads'], 'test seam: clears the roster-read memo between cases, test/world-series/roster-card.test.js.'),
   staged('src/lib/headshot/retry.js', ['resetSiloMisses'], 'test seam: clears the silo-miss set between cases, test/headshot.test.js.'),
   staged('src/lib/ballpark/layout/fenceShape.js', ['fenceProblems'], 'test seam: validates every live ballpark outline, test/ballpark-layouts.test.js.'),

@@ -1,6 +1,6 @@
 import test, { mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { resetPitcherReads } from '../../src/api/game.js'
+import { resetPitcherReads } from '../../src/api/game/fetch.js'
 import { fetchPitcherWorldSeriesCareer, fetchWorldSeriesStartsBefore } from '../../src/api/postseason/pitcherWorldSeries.js'
 
 // yearByYear gameType=W rows. A split with a `team` is one club's share; the

@@ -5,9 +5,9 @@ import {
   fetchPitcherSeasonLine,
   fetchPitcherLastGame,
   fetchPitcherSeasonVsOpponent,
-} from '../api/game.js'
+} from '../api/game/fetch.js'
 import { fetchWinProbability } from '../api/winprob/feed.js'
-import { fetchHighlights } from '../api/highlights.js'
+import { fetchHighlights } from '../api/game/highlights.js'
 import { fetchGameUniforms, uniformSummary, liveJerseyTreatment } from '../api/uniforms.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
@@ -225,7 +225,7 @@ export function useGameData(game, activeStep = null) {
     [game.gamePk, Boolean(feed), winProbActive],
   )
 
-  // Video highlight clips for this game (see api/highlights.js). Unlike the
+  // Video highlight clips for this game (see api/game/highlights.js). Unlike the
   // rest of this hook's useAsyncOnFeed tier, clips keep posting THROUGHOUT a
   // live game (MLB cuts them play-by-play, not all at once), so a one-shot
   // fetch near game start would miss nearly all of them. Poll every 5 minutes

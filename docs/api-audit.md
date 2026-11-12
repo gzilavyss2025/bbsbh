@@ -36,12 +36,12 @@ which sets no default params and no caching.
 
 | Reference endpoint | URL built | Params | Where it lives | Score-revealing? |
 |---|---|---|---|---|
-| `game` (feed/live) | `/api/v1.1/game/{gamePk}/feed/live` | **none** | `game.js:7` `fetchGameFeed`; also `person-fetch.js:268,288,321,435` (player "firsts") | **YES** |
-| `game_winProbability` | `/api/v1/game/{gamePk}/winProbability` | none | `game.js:18` `fetchWinProbability` | **YES** |
+| `game` (feed/live) | `/api/v1.1/game/{gamePk}/feed/live` | **none** | `game/fetch.js:7` `fetchGameFeed`; also `person-fetch.js:268,288,321,435` (player "firsts") | **YES** |
+| `game_winProbability` | `/api/v1/game/{gamePk}/winProbability` | none | `game/fetch.js:18` `fetchWinProbability` | **YES** |
 | `game_boxscore` | `/api/v1/game/{gamePk}/boxscore` | none | `postseason/archive/series.js:73` | **YES** |
-| `venue` | `/api/v1/venues/{venueId}` | `hydrate=location,fieldInfo` | `game.js:34` `fetchVenue` | no |
-| `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager`; `staff/coaches.js` `fetchCoachingStaff` (the whole staff) | no |
-| `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game.js` `fetchPitcherSeasonLine` | aggregate |
+| `venue` | `/api/v1/venues/{venueId}` | `hydrate=location,fieldInfo` | `game/fetch.js:34` `fetchVenue` | no |
+| `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game/fetch.js:60` `fetchManager`; `staff/coaches.js` `fetchCoachingStaff` (the whole staff) | no |
+| `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game/fetch.js` `fetchPitcherSeasonLine` | aggregate |
 | `person_stats` (yearByYear, postseason) | `/api/v1/people/{personId}/stats` | `stats=yearByYear&group=pitching&gameType=F,D,L,W`; only seasons before the page's season are read (ADR-0088) | `postseason/pitcherCareer.js` `fetchPitcherPostseasonCareer` | aggregate |
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team,venue(timezone),lineups,officials,probablePitcher` | `schedule/fetch.js:88` `fetchSchedule` | rows carry scores; **dropped in `normalizeGame`** |
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team` (light) | `schedule/fetch.js:132` `resolveGame` | dropped |
@@ -70,7 +70,7 @@ which sets no default params and no caching.
 |---|---|---|---|
 | `api.open-meteo.com` / `archive-api.open-meteo.com` | `weather.js:199,205` | outdoor first-pitch weather | no |
 | `api.bsky.app` (searchPosts) | `buzz.js:67` | Bluesky game buzz | **YES — reveal-only, SealBox-gated** |
-| `dapi.mlbinfra.com` | `gameNotes.js:62` | live Game Notes PDF links | link only in-app; PDF recaps results |
+| `dapi.mlbinfra.com` | `game/notes.js:62` | live Game Notes PDF links | link only in-app; PDF recaps results |
 | `mlbstatic.com` logos / `img.mlbstatic.com` headshots | `lib/teams.js`, `person-fetch.js:235` | art | no |
 
 **Same-origin static reads** (build-time-fetch pattern; `public/data/*.json` precomputed by
@@ -142,7 +142,7 @@ Not one statsapi call in `src/`, `scripts/`, or `api/` passes `fields=`. Every c
 full object and discards most of it client-side; a few scope sub-resources via `hydrate=`, which
 trims to related objects but not scalar fields.
 
-- **The live feed is the headline.** `fetchGameFeed` (`game.js:6-8`) is literally
+- **The live feed is the headline.** `fetchGameFeed` (`game/fetch.js:6-8`) is literally
   `getJson(\`/api/v1.1/game/${gamePk}/feed/live\`)` — no `fields`, no `hydrate`. The multi-MB
   feed is pulled unpruned on **every game view and every Refresh**, and again N times per
   player-page "firsts" scan. On a phone at a ballpark with bad signal this is the dominant cost.
@@ -169,7 +169,7 @@ trims to related objects but not scalar fields.
 ### 2b. `hydrate` — N+1 fan-outs
 
 The app already uses `hydrate` well in several spots (schedule readiness in one call
-`schedule/fetch.js:85`; roster+season-stats in one call `team/fetch.js:79`; venue location `game.js:34`).
+`schedule/fetch.js:85`; roster+season-stats in one call `team/fetch.js:79`; venue location `game/fetch.js:34`).
 Remaining fan-outs:
 
 - **`gen-vs-team-splits.mjs` (worst).** One `gameLog` call **per MLB season per player**
@@ -270,7 +270,7 @@ mid-game**, silently. Hotspots:
   for the whole lineup/PA model.
 - **Description-string regexes.** `scorebookCode` (`playbyplay.js:214-220`) branches on
   `/called out on strikes/i`, `/lines? (out|into)/i`, `/pops?/`, `/flies?/` to pick `L7` vs `F8`;
-  `advanceCode` (`:238`) and manager matching (`game.js:63`, `/(^|\s)manager$/i`) do the same.
+  `advanceCode` (`:238`) and manager matching (`game/fetch.js:63`, `/(^|\s)manager$/i`) do the same.
   Templated MLB prose is stable but **phrasing-dependent** — a wording tweak silently falls
   through to a generic fielding chain or drops a manager. Most fragile class.
 - **Deep runner/credit paths.** `runners[].movement.{isOut,outNumber,outBase,end}` and
@@ -309,9 +309,9 @@ scope: **DOM**, not JS memory. That scoping is the crux of this section, and it 
 
 Exactly four statsapi endpoints, plus one social feed:
 
-1. **`/feed/live`** (`game.js:7`) — carries the full linescore R/H/E, every play with running
+1. **`/feed/live`** (`game/fetch.js:7`) — carries the full linescore R/H/E, every play with running
    scores, the full boxscore. **Pulled unpruned into `feedState.data.feed` eagerly on game load.**
-2. **`/game/{pk}/winProbability`** (`game.js:18`) — per-play win % (a 4% away WP in the 8th
+2. **`/game/{pk}/winProbability`** (`game/fetch.js:18`) — per-play win % (a 4% away WP in the 8th
    announces the result).
 3. **`/game/{pk}/boxscore`** (`postseason/archive/series.js:73`) — a completed series game's line score.
 4. **`/standings`** (`team/fetch.js:236`) — league W/L aggregates.
@@ -336,7 +336,7 @@ resolves — before any reveal.** Two independent eager fetches put it there:
 - `feedState.data.feed` (the whole feed) — fetched on game load (`useGameData.js:35-48`).
 - `winProb.data` (per-play win %) — fetched via `useAsyncOnFeed` gated only on `feed` being
   truthy (`useGameData.js:117`), i.e. **as soon as the feed lands on any game page**, not lazily
-  on the box-score view. The in-code comments ("fetched lazily with that view", `game.js:14`;
+  on the box-score view. The in-code comments ("fetched lazily with that view", `game/fetch.js:14`;
   "fetched lazily once the feed exists", `useGameData.js:116`) **overstate the laziness** — opening
   a sealed game's *lineup* page already lands the full win-prob array in memory.
 
@@ -375,7 +375,7 @@ Honest "fine as-is" calls included.
 very low.** Today the per-play win-prob array lands in memory on *any* game page. Gate its fetch
 on the box-score view actually mounting (or on first reveal), matching what the comments already
 claim. Also correct the misleading "lazily" comments.
-**Files:** `src/hooks/useGameData.js:117` (the `useAsyncOnFeed` trigger), `src/api/game.js:14`.
+**Files:** `src/hooks/useGameData.js:117` (the `useAsyncOnFeed` trigger), `src/api/game/fetch.js:14`.
 **What could go wrong:** the innings-view win-prob chart also consumes it — confirm that surface
 still gets the data when it needs it (it's `revealedThrough`-gated, so fetch on first reveal, not
 on mount). Small, contained.
@@ -423,7 +423,7 @@ worst failure mode. Recommended staged approach, not a one-shot:
 3. Build the allowlist mechanically from the read-paths in `select.js`/`linescore.js`/`derive.js`/
    `playbyplay.js`/`pitcher/lines.js`/`boxscore.js`, and add the §3 coverage guard so a missing path is
    caught in CI, not at the park.
-**Files:** `src/api/game.js:7` plus a shared field-path manifest.
+**Files:** `src/api/game/fetch.js:7` plus a shared field-path manifest.
 **Honest note:** if measurement shows the feed is tolerable on 4G, this is churn with a real
 regression risk. If it's genuinely multi-MB on bad signal, it's the single biggest user win — but
 only done carefully.
