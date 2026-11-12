@@ -1,5 +1,5 @@
 // The pre-half strip's "times through the order" cards — split out of
-// ../callout-notes.js. Entering-tense, CALLER-GATED (prehalf-callouts.js):
+// ../callout-notes.js. Entering-tense, CALLER-GATED (callout-notes/surfaces/prehalf.js):
 // both builders read plate appearances from the batting side's PREVIOUS
 // halves, so the caller must not invoke them until those halves are
 // revealed. See ../callout-notes.js's header for the two-tenses rule
@@ -21,7 +21,7 @@ import { ordinal } from '../../lib/format.js'
 //
 // CALLER-GATED like buildAfterInningNote: it reads plate appearances from
 // this side's PREVIOUS halves to count who has faced the pitcher how often, so
-// the caller (prehalf-callouts.js) must not invoke it until those halves are
+// the caller (callout-notes/surfaces/prehalf.js) must not invoke it until those halves are
 // revealed. It also reads the STAGED half's own pre-pitch changes AND its
 // leadoff batter via plain feed plays — safe here for the same reason: the
 // caller already restricts this to halfIndex(inning, half) <= revealedThrough

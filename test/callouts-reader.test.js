@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchCallouts, calloutsForGame } from '../src/api/callouts.js'
+import { fetchCallouts, calloutsForGame } from '../src/api/callout-notes/surfaces/bundle.js'
 
 // The callouts set is one file per game. What matters at the reader is that a
 // surface pays for the games it asks about and nothing else — a lineup page

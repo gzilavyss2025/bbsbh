@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildWorldSeriesOddsNotes } from '../../src/api/callout-notes/worldSeries/odds.js'
 import { SCORE_BASE, ONCE_PER_GAME_KINDS, RECORD_KINDS } from '../../src/api/callout-notes/shared.js'
-import { BETWEEN_INNINGS_ALLOWED_KINDS } from '../../src/api/between-innings.js'
+import { BETWEEN_INNINGS_ALLOWED_KINDS } from '../../src/api/callout-notes/surfaces/betweenInnings.js'
 import { HISTORY, bundleAfter, mk } from './ws-fixture.js'
 
 const run = (bundle, extra = {}) =>
@@ -76,7 +76,7 @@ test('kind sets', () => {
 })
 
 test('the pre-half strip shows it on the first half of a World Series game only', async () => {
-  const { buildPreHalfCallouts } = await import('../../src/api/prehalf-callouts.js')
+  const { buildPreHalfCallouts } = await import('../../src/api/callout-notes/surfaces/prehalf.js')
   const feed = (type) => ({ gameData: { game: { type }, datetime: { officialDate: '2001-10-12' } }, liveData: { plays: { allPlays: [] }, linescore: { innings: [] } } })
   const args = (type, inning, half) => ({
     feed: feed(type), bundle: bundleAfter(1, 2, [1]), inning, half, revealedThrough: -1,
@@ -90,7 +90,7 @@ test('the pre-half strip shows it on the first half of a World Series game only'
 })
 
 test('an old World Series game (no workload date) still gets the odds note; a non-W game does not', async () => {
-  const { buildPreHalfCallouts } = await import('../../src/api/prehalf-callouts.js')
+  const { buildPreHalfCallouts } = await import('../../src/api/callout-notes/surfaces/prehalf.js')
   const feed = (type) => ({ gameData: { game: { type }, datetime: { officialDate: '2001-10-12' } }, liveData: { plays: { allPlays: [] }, linescore: { innings: [] } } })
   const kinds = (type) => buildPreHalfCallouts({
     feed: feed(type), bundle: bundleAfter(1, 2, [1]), inning: 1, half: 'top', revealedThrough: -1,
@@ -141,7 +141,7 @@ test('the last-meeting winner is named as he was that season', () => {
 })
 
 test('the pre-half strip never caps, ranks or trims a World Series note', async () => {
-  const { buildPreHalfCallouts } = await import('../../src/api/prehalf-callouts.js')
+  const { buildPreHalfCallouts } = await import('../../src/api/callout-notes/surfaces/prehalf.js')
   const feed = { gameData: { game: { type: 'W' }, datetime: { officialDate: '2001-10-12' }, probablePitchers: { away: { id: 10 }, home: { id: 20 } } }, liveData: { plays: { allPlays: [] }, linescore: { innings: [] } } }
   // Game 1: the repeat champion and the first meeting are two notes of one kind, with the
   // home starter's first Series start besides: three Series notes on a strip of two slots.

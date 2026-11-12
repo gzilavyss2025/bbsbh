@@ -106,7 +106,7 @@ test('a callouts shard is one game, filed under its slate date', () => {
     for (const f of files) {
       const bundle = JSON.parse(readFileSync(new URL(f, sub), 'utf8'))
       // The reader names the file from the gamePk it is already looking at
-      // (api/callouts.js). A bundle filed under any other name is a note that
+      // (api/callout-notes/surfaces/bundle.js). A bundle filed under any other name is a note that
       // can never be found — or worse, found on the wrong game.
       assert.equal(String(bundle.gamePk), f.replace('.json', ''), `${d}/${f}: wrong gamePk`)
       const [mm, dd, yyyy] = [d.slice(0, 2), d.slice(2, 4), d.slice(4)]

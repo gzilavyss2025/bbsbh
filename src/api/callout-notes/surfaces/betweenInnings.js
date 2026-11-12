@@ -2,7 +2,7 @@
 // facts, ranked by the shared worthiness score, filtered through a hard kind
 // allowlist. `inning`/`half` is the half that just closed; the four
 // reveal-gated families below are computed for the NEXT half, same footing
-// prehalf-callouts.js uses (postHalf implies viewIdx <= revealedThrough, so
+// callout-notes/surfaces/prehalf.js uses (postHalf implies viewIdx <= revealedThrough, so
 // halfIndex(next) <= revealedThrough + 1 holds with equality).
 //
 // leadAfterLive/tiedAfterLive/bothScoreless/scorelessThrough are excluded on
@@ -28,13 +28,13 @@
 // ledger's read (src/hooks/useCalloutLedger.js) and is optional — without it
 // this card ranks exactly as it always did.
 
-import { halfIndex, derivedHalfStartingPitcherId, openingHalfFor } from './select.js'
-import { matchupNotesForHalf } from './matchup/forHalf.js'
-import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
-import { isWorldSeriesKind } from '../lib/worldSeries/calloutKind.js'
-import { selectDueUpNow } from './dueup.js'
-import { nuggetsForGame } from './nuggets/nuggets.js'
-import { buildNuggetNotes } from './callout-notes/nugget.js'
+import { halfIndex, derivedHalfStartingPitcherId, openingHalfFor } from '../../select.js'
+import { matchupNotesForHalf } from '../../matchup/forHalf.js'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from '../worldSeries/odds.js'
+import { isWorldSeriesKind } from '../../../lib/worldSeries/calloutKind.js'
+import { selectDueUpNow } from '../../dueup.js'
+import { nuggetsForGame } from '../../nuggets/nuggets.js'
+import { buildNuggetNotes } from '../nugget.js'
 import {
   buildStarterTeamRecordNote,
   buildBullpenThinNote,
@@ -47,7 +47,7 @@ import {
   weekdayFromDate,
   gameWeekday,
   rankNotes,
-} from './callout-notes.js'
+} from '../../callout-notes.js'
 
 export const CARD_MAX = 5
 
@@ -86,7 +86,7 @@ export function buildBetweenInnings({
 
   // The announced probable where a level posts one pregame, else each side's
   // actual starter once his half's first play is logged (issue #851 — same
-  // fallback selectTeamMeta/prehalf-callouts.js use). Away starts the
+  // fallback selectTeamMeta and callout-notes/surfaces/prehalf.js use). Away starts the
   // bottom of the 1st, home the top; derivedHalfStartingPitcherId carries
   // its own revealedThrough gate, so this note still withholds itself until
   // the game's first half is at or under the reveal mark.

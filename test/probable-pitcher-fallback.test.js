@@ -6,8 +6,8 @@
 // armFor has used it as the entering-arm source since before this fix. This
 // pins the same fallback newly wired into the three call sites that read
 // ONLY probablePitchers and rendered nothing when it was empty: selectTeamMeta
-// (TeamInfo's Starting pitcher card), prehalf-callouts.js's starter-record
-// note, and between-innings.js's starter-record note.
+// (TeamInfo's Starting pitcher card), callout-notes/surfaces/prehalf.js's starter-record
+// note, and callout-notes/surfaces/betweenInnings.js's starter-record note.
 //
 // selectTeamMeta's fallback is opt-in (`{ includeDerivedStarter: true }`),
 // defaulting OFF: it's shared far beyond TeamInfo.jsx by callers documented
@@ -27,8 +27,8 @@ import {
   selectOpposingPitcher,
   derivedHalfStartingPitcherId,
 } from '../src/api/select.js'
-import { buildPreHalfCallouts } from '../src/api/prehalf-callouts.js'
-import { buildBetweenInnings } from '../src/api/between-innings.js'
+import { buildPreHalfCallouts } from '../src/api/callout-notes/surfaces/prehalf.js'
+import { buildBetweenInnings } from '../src/api/callout-notes/surfaces/betweenInnings.js'
 import { buildFeed } from './fixtures/mini-game.js'
 
 // --- derivedHalfStartingPitcherId (the shared derivation) -------------------
@@ -110,7 +110,7 @@ test('selectOpposingPitcher mirrors the same opt-in default', () => {
   )
 })
 
-// --- prehalf-callouts.js's starter-record note --------------------------------
+// --- callout-notes/surfaces/prehalf.js's starter-record note --------------------------------
 
 const RECORD_BUNDLE = {
   home: { teamId: 138, name: 'Home Club' },
@@ -147,7 +147,7 @@ test('prehalf-callouts\' starter fallback still respects the half\'s own reveal 
   assert.equal(rec?.personId, 300)
 })
 
-// --- between-innings.js's starter-record note ---------------------------------
+// --- callout-notes/surfaces/betweenInnings.js's starter-record note ---------------------------------
 
 test('between-innings falls back to the derived starter for both sides when probablePitchers is empty', () => {
   const feed = buildFeed() // no probablePitchers

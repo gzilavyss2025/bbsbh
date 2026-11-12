@@ -175,7 +175,7 @@ src/api/gameday/checkpoint.js. Part of #2566. Reveal-only work.
 
 READ FIRST
 - CLAUDE.md, src/api/CLAUDE.md, src/api/gameday/CLAUDE.md, src/api/gameday/checkpoint.js (its header
-  comment is the contract), src/api/between-innings.js.
+  comment is the contract), src/api/callout-notes/surfaces/betweenInnings.js.
 - #2572 and its comments. ADR-0043 (2026-08-13 amendment), ADR-0014, ADR-0006.
 - .scratch/gameday-design/README.md, "Round 2: what Gary locked", item 3, "Found in round 2" and
   "Decided after round 2"; .scratch/gameday-design/tools/extract2.mjs (foulsByPitcher shows the walk).

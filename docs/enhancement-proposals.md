@@ -292,7 +292,7 @@ interaction is the one subtle design point.
 
 **Likely touchpoints.** `src/api/person.js` (pure milestone math +
 thresholds), `src/screens/PlayerPage.jsx`, `scripts/gen-callouts.mjs` +
-`src/api/callouts.js` / `callout-notes.js` (the staging note), tokens/CSS.
+`src/api/callout-notes/surfaces/bundle.js` / `callout-notes.js` (the staging note), tokens/CSS.
 
 **Agent planning prompt (suggested model: Sonnet):**
 

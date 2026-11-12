@@ -1,4 +1,4 @@
-import { fetchCallouts } from '../../api/callouts.js'
+import { fetchCallouts } from '../../api/callout-notes/surfaces/bundle.js'
 import { apiDateToUrl } from '../../lib/route.js'
 import { planShard, primerData, seriesBlockFor } from '../../lib/postseason/primer/primerGames.js'
 import { useAsync } from '../useAsync.js'

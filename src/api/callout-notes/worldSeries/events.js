@@ -7,7 +7,7 @@
 //
 // Tense (ADR-0014): the play-card builder reads only the revealed play (the feed supplies the
 // earlier plays, and "last play" only once the game is Final); the roll-up builder is
-// reveal-only; the 9th-inning builder reads tonight's score, so prehalf-callouts.js calls it
+// reveal-only; the 9th-inning builder reads tonight's score, so callout-notes/surfaces/prehalf.js calls it
 // only once the 8th is at or under the reveal mark, the same gate as buildAfterInningNote.
 import { lastBefore } from '../../../lib/worldSeries/lastBefore.js'
 import * as C from '../../../lib/worldSeries/classify.js'

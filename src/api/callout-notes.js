@@ -1,7 +1,7 @@
 // Pure builder for the play-by-play "call-out" notes — the season-context lines
 // (leader / streak / situational-record) shown on an at-bat card. Reads only an
 // atbat entry (see computeHalfInningFeed) plus a precomputed callouts bundle
-// (see api/callouts.js) and returns an ordered list of notes the card renders.
+// (see api/callout-notes/surfaces/bundle.js) and returns an ordered list of notes the card renders.
 // Kept pure + separate so the trigger rules and wording are checkable and
 // PlayByPlay.jsx stays a view. Empty when there's no bundle (an un-generated
 // date, or a MiLB game in a file predating the MiLB expansion), so the card

@@ -425,7 +425,7 @@ for each generator; the reader modules:
   sections, same as `minorsLeaders.js` does for the all-minors board; the
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
-- `callouts.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
+- `callout-notes/surfaces/bundle.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
   `series` key of an LCS or World Series game's `callouts/{MMDDYYYY}/{gamePk}.json`
   (`gen-callouts.mjs`, nightly). Returns `null` for every other game. The shape is
   `{ id, gamePks, games, stats }` (`id` is the bracket series' id; the primer's own reader,

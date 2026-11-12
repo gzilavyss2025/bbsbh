@@ -2,7 +2,7 @@
 // It reads tonight's score, so it waits for the 8th to be revealed (like buildAfterInningNote).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildPreHalfCallouts } from '../../src/api/prehalf-callouts.js'
+import { buildPreHalfCallouts } from '../../src/api/callout-notes/surfaces/prehalf.js'
 import { halfIndex } from '../../src/api/select.js'
 import { EVENTS_JSON, BUNDLE } from './ws-fixture.js'
 

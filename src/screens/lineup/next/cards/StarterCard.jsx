@@ -1,6 +1,6 @@
 import { prospectBadge } from '../../../../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../../../../api/rookies.js'
-import { milestoneTextFor } from '../../../../api/callouts.js'
+import { milestoneTextFor } from '../../../../api/callout-notes/surfaces/bundle.js'
 import { splitDisplayName } from '../../../../api/person.js'
 import { vsTeamDoorLabel } from '../../../../api/vsTeamSplits.js'
 import { BoxLinesDoor } from '../../../../components/boxlines/BoxLinesDoor.jsx'

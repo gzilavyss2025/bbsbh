@@ -20,7 +20,7 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
-Gameday's checkpoint (`src/screens/gameday/next/checkpoint/`) carries the finished half's tally and notes, from `src/api/between-innings.js`. The old `HalfTally`, `BetweenInnings` and the "due up" card `UpNextBatters` were deleted with the hidden half page (#2747); the old console row (`ConsoleBand`, `DueUpConsole`) and `RollingLine` went with the Gameday swap (#2566).
+Gameday's checkpoint (`src/screens/gameday/next/checkpoint/`) carries the finished half's tally and notes, from `src/api/callout-notes/surfaces/betweenInnings.js`. The old `HalfTally`, `BetweenInnings` and the "due up" card `UpNextBatters` were deleted with the hidden half page (#2747); the old console row (`ConsoleBand`, `DueUpConsole`) and `RollingLine` went with the Gameday swap (#2566).
 
 ## `inning/`
 

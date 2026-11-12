@@ -42,7 +42,7 @@
 // pitcher: a change made before the next half's first pitch would leak (#2572).
 // At the game's last half it is the final line, with no due-up.
 //
-// Page 5, facts: the score-free notes for the next half (../between-innings.js,
+// Page 5, facts: the score-free notes for the next half (../callout-notes/surfaces/betweenInnings.js,
 // with its allowlist); `notes` carries that builder's inputs (bundle,
 // marginNotes, workload, gameDate, shownCounts, ...). An empty list drops the
 // page (Gary, 2026-10-26: hide the tab). Inference: that is safe because the
@@ -53,7 +53,7 @@ import { revealInning } from '../linescore.js'
 import { computeHalfInningFeed, pitchCallCode, FOUL_CODES, WHIFF_CODES } from '../playbyplay.js'
 import { halfIndex, personNameParts, selectFinalReached } from '../select.js'
 import { selectDueUpNext } from '../dueup.js'
-import { buildBetweenInnings } from '../between-innings.js'
+import { buildBetweenInnings } from '../callout-notes/surfaces/betweenInnings.js'
 import { battingSideOf, fieldingSideOf } from './stepCut.js'
 
 export const PAGE_ORDER = ['tally', 'pitching', 'atBats', 'gameSoFar', 'facts']

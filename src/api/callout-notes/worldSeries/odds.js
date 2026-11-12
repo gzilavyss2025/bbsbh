@@ -3,7 +3,7 @@
 // spoiler-free (ADR-0014): the state comes from bundle.series, which holds only
 // games that went Final before tonight's date, and the history is cut strictly
 // before tonight by lib/worldSeries (ADR-0087). Nothing here reads tonight's score.
-import { seriesBlockFor } from '../../callouts.js'
+import { seriesBlockFor } from '../surfaces/bundle.js'
 import { seriesOdds, clubFacts } from '../../../lib/worldSeries/odds.js'
 import { ordinal } from '../../../lib/format.js'
 import { SCORE_BASE, clampScore, skewBonus, magnitudeOf } from '../shared.js'

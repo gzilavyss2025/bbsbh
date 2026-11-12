@@ -556,7 +556,7 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
 // Which half a side's OWN game-opening start falls in: home takes the mound
 // in the top of the 1st, away in the bottom. The inverse of sideOnMoundFor.
 // Shared so this mapping is written once instead of independently in
-// selectTeamMeta, prehalf-callouts.js, and between-innings.js (issue #851's
+// selectTeamMeta, callout-notes/surfaces/prehalf.js, and callout-notes/surfaces/betweenInnings.js (issue #851's
 // three probablePitchers-fallback call sites).
 export function openingHalfFor(side) {
   return side === 'home' ? 'top' : 'bottom'

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { nuggetsForGame, CARD_WINDOW_DAYS } from '../src/api/nuggets/nuggets.js'
 import { buildNuggetNotes, nuggetText } from '../src/api/callout-notes/nugget.js'
-import { buildBetweenInnings } from '../src/api/between-innings.js'
+import { buildBetweenInnings } from '../src/api/callout-notes/surfaces/betweenInnings.js'
 import { ONCE_PER_GAME_KINDS } from '../src/api/callout-notes/shared.js'
 import { buildFeed } from './fixtures/mini-game.js'
 
