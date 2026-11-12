@@ -418,11 +418,12 @@
 .fcontact__stats dd,
 .fcontact__stats dt { white-space: nowrap; }
 
-/* ==== ZONES (#2975, design A) ====
-   ZoneField.jsx: nine cells on the field, inked by share (the opacity rides inline); ZoneTable
-   repeats them as a table in the side column on a wide card. */
+/* ==== ZONES (#2975, round 3) ====
+   ZoneField.jsx: nine places on the field, each filled inline (the share sets the lightness, the
+   ball-type filter the hue). The fills ignore the theme, so the labels take the two fixed inks
+   --zone-on-light/--zone-on-dark; contactZones.js picks one and its test checks every pairing.
+   ZoneTable repeats the shares beside the field on a wide card. */
 .fcontact__zone {
-  fill: var(--text-heading);
   stroke: var(--bg-canvas);
   stroke-width: 3;
 }
@@ -430,12 +431,12 @@
   font-family: var(--font-mono);
   font-size: 1.4em;
   font-weight: var(--w-semibold);
-  fill: var(--bg-canvas);
+  fill: var(--zone-on-dark);
   text-anchor: middle;
   dominant-baseline: middle;
   font-variant-numeric: tabular-nums;
 }
-.fcontact__zlabel--dark { fill: var(--text-heading); }
+.fcontact__zlabel--dark { fill: var(--zone-on-light); }
 .fcontact__zdir {
   font-family: var(--font-display);
   font-size: 1.25em;
@@ -463,7 +464,6 @@
   letter-spacing: var(--ls-label);
 }
 .fcontact__ztable td { font-family: var(--font-mono); }
-.fcontact__ztable .fcontact__swatch { display: inline-block; width: 0.75em; height: 0.75em; margin-right: var(--space-2); vertical-align: -1px; }
 /* breakpoint-exempt: the stacked side of this card's own 720px two-column step */
 @media (max-width: 719.98px) {
   .fcontact__ztable { display: none; }

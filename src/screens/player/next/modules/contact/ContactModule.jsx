@@ -18,7 +18,7 @@ import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFligh
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { ZoneField, ZoneTable } from './ZoneField.jsx'
-import { contactZones } from './contactZones.js'
+import { ZONE_TYPES, contactZones } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -30,6 +30,8 @@ import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKe
 // The field plus room for a dot's radius on every side: a ball on the plate, deep in a corner or
 // past the fence draws whole (Gary, 2026-10-30: the frame clipped dots at its edges).
 const VIEWBOX = '0 20 620 525'
+// Zones need no room past the fence for a home run's dot: crop to the zones and their labels.
+const ZONES_VIEWBOX = '40 105 540 420'
 const FOUL_FT = 330
 const FENCE_FT = 400
 const pt = (deg, ft) => {
@@ -58,6 +60,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const [pickedView, setView] = useState(null) // null opens on the first view with balls
   const [color, setColor] = useState('result')
   const [mode, setMode] = useState('dots') // Dots / Zones (#2975); starts on Dots, not kept
+  const [zoneType, setZoneType] = useState(null) // the Zones view's ball-type filter; null is All
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
   const [shot, setShot] = useState(0) // counts taps, so a second tap on one ball flies it again
@@ -79,7 +82,11 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const mix = useMemo(() => card && mixRows(card.balls), [card])
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
   const marks = useMemo(() => byDate(shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p)), [shown])
-  const zones = useMemo(() => (mode === 'zones' ? contactZones(shown) : null), [mode, shown])
+  // Zones read the view's balls with their own type filter, not the menu's (which narrows the dots).
+  const zones = useMemo(
+    () => (mode === 'zones' && card ? contactZones(pickBalls(card.balls, view, null), zoneType) : null),
+    [mode, card, view, zoneType],
+  )
   // Pull's side of the field: the side most of these balls came from (a switch hitter's majority).
   const side = shown.filter((b) => b.side === 'L').length * 2 > shown.length ? 'L' : 'R'
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
@@ -145,6 +152,14 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
             onChange={(k) => pick(setView, k)}
             options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
           />
+          {mode === 'zones' && (
+            <Segmented
+              label="Ball type"
+              value={zoneType}
+              onChange={setZoneType}
+              options={ZONE_TYPES.map(([k, name]) => ({ value: k, label: name }))}
+            />
+          )}
           {mode === 'dots' && (
             <div className="fcontact__chips" role="group" aria-label="Color by">
               {COLORS.map(([k, name]) => (
@@ -155,13 +170,13 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         </div>
         <div className="fcontact__grid">
           <div className="fcontact__plot">
-            <svg className="fcontact__field" viewBox={VIEWBOX} role="group" aria-label={`Spray field of ${shown.length} balls in play`}>
+            <svg className="fcontact__field" viewBox={zones ? ZONES_VIEWBOX : VIEWBOX} role="group" aria-label={`Spray field of ${shown.length} balls in play`}>
               <g className="spray__art" aria-hidden="true">
-                <path className="spray__fence" d={FENCE} />
+                {!zones && <path className="spray__fence" d={FENCE} />}
                 <path className="spray__foul" d={LINES} />
                 <path className="spray__diamond" d={DIAMOND} />
               </g>
-              {zones && <ZoneField zones={zones} side={side} />}
+              {zones && <ZoneField zones={zones} side={side} type={zoneType} />}
               {!zones && <g className={dotsCls}>
                 {marks.map(({ b, p }, i) => (
                   <FlightDot
@@ -185,8 +200,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
           </div>
           {zones ? (
             <div className="fcontact__side fcontact__side--zones">
-              <ZoneTable zones={zones} />
-              {zones.leftOut > 0 && <p className="hint">{zones.leftOut} {zones.leftOut === 1 ? 'ball' : 'balls'} left out: no launch angle.</p>}
+              <ZoneTable zones={zones} side={side} />
             </div>
           ) : (
             <div className="fcontact__side">
