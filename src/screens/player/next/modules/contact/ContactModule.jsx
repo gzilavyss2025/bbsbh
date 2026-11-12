@@ -86,7 +86,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   // its own controls, so the bar never holds three rows at once (Gary, 2026-11-12).
   const zones = useMemo(() => (mode === 'zones' && card ? contactZones(card.balls, zoneType) : null), [mode, card, zoneType])
   // Names the zones' thirds: Pull / Oppo by the batter's side, or LF / CF / RF for a switch hitter.
-  const side = useMemo(() => batterSide(card?.balls ?? []), [card])
+  const side = useMemo(() => batterSide(card?.balls ?? [], bio.bats), [card, bio.bats])
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null

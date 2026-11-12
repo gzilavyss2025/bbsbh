@@ -1,4 +1,4 @@
-import { sprayAngle } from '../../../../../api/spray.js'
+import { CENTER_BAND_DEG, sprayAngle } from '../../../../../api/spray.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { typeOf } from './contactView.js'
@@ -11,12 +11,13 @@ import { typeOf } from './contactView.js'
 // place, so it is a filter over the nine, never a ring of them; a pop-up folds into fly ball. A ball
 // with no coordinate cannot be placed; one with no launch angle is placed under All only.
 export const ZONE_THIRDS = ['left', 'center', 'right'] // left field to right field
-const CENTER_DEG = 15 // the centre third: ±15° of dead centre, the spray store's own split
-const thirdOf = (deg) => (deg == null ? null : deg < -CENTER_DEG ? 'left' : deg > CENTER_DEG ? 'right' : 'center')
+const thirdOf = (deg) => (deg == null ? null : deg < -CENTER_BAND_DEG ? 'left' : deg > CENTER_BAND_DEG ? 'right' : 'center')
 
-// The batter's side for naming the thirds: 'S' when the other box has at least a tenth of his
-// balls (Inference: a stray ball recorded from the other box does not make a switch hitter).
-export function batterSide(balls) {
+// The batter's side for naming the thirds: his listed side (`bats`: 'L', 'R' or 'S') when the
+// feed has one. A MiLB bio can lack it, so then the balls decide: 'S' when the other box has at
+// least a tenth of them (Inference: a stray ball from the other box is not a switch hitter).
+export function batterSide(balls, bats = '') {
+  if (['L', 'R', 'S'].includes(bats)) return bats
   const l = balls.filter((b) => b.side === 'L').length
   const minor = Math.min(l, balls.length - l)
   return balls.length && minor / balls.length >= 0.1 ? 'S' : l * 2 > balls.length ? 'L' : 'R'

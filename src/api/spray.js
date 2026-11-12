@@ -169,7 +169,7 @@ const LEVELS = ['mlb', 'aaa']
 // The centre third of fair territory, in degrees either side of dead centre.
 // Fair ground spans roughly ±45°, so ±15° cuts it in three — the same split
 // every published pull/centre/oppo rate uses.
-const CENTER_BAND_DEG = 15
+export const CENTER_BAND_DEG = 15
 
 // One batter's stored entry, or null. Ids arrive from the app as numbers and
 // sit in JSON as strings, so both spellings are tried — the same lookup

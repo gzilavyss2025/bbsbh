@@ -29,12 +29,15 @@ test('a switch hitter: each ball stays in the field it went to, from either side
   assert.equal(cell(z, 'right', 'deep').n, 1)
 })
 
-test('batterSide: one side, or S when the other side has at least a tenth of the balls', () => {
+test('batterSide: his listed side; else one side, or S when the other side has a tenth of the balls', () => {
   const of = (r, l) => [...Array(r).fill({ side: 'R' }), ...Array(l).fill({ side: 'L' })]
   assert.equal(batterSide(of(100, 0)), 'R')
   assert.equal(batterSide(of(0, 50)), 'L')
   assert.equal(batterSide(of(95, 5)), 'R') // a stray ball from the other box is not a switch hitter
   assert.equal(batterSide(of(80, 20)), 'S')
+  // His listed side wins: a switch hitter who faced mostly right-handers is still S.
+  assert.equal(batterSide(of(8, 92), 'S'), 'S')
+  assert.equal(batterSide(of(80, 20), 'R'), 'R')
 })
 
 test('zoneNames: Pull/Oppo by side, field names for a switch hitter, always left to right', () => {

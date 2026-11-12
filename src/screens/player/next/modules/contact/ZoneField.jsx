@@ -38,8 +38,8 @@ export function ZoneField({ zones, side, type }) {
   )
 }
 
-// The same nine shares as a table, deep to infield, its columns in the field's own left-to-right
-// order for this batter: the side column on a wide card.
+// The same nine shares as a table, deep to infield, its columns left field to right field like the
+// field beside it (only their names follow the batter): the side column on a wide card.
 export function ZoneTable({ zones, side }) {
   const names = zoneNames(side)
   return (
