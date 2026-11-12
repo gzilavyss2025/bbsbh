@@ -17,7 +17,12 @@ export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF
 // has an All (every ball in play), and two Alls a row apart read as one choice.
 export const ZONE_TYPES = [[null, 'Any type'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
 
-const zoneType = (la) => (typeOf(la) === 'pop' ? 'fly' : typeOf(la))
+// The zones' type for a module type key: a pop-up is a fly ball here.
+const foldPop = (t) => (t === 'pop' ? 'fly' : t)
+const zoneType = (la) => foldPop(typeOf(la))
+// A ball-type card under "How contact ends" also sets the Zones filter (Gary, 2026-11-12), so the
+// cards and the buttons above the field never disagree. Null (the rail's back link) is Any type.
+export const zoneTypeForCard = (key) => foldPop(key ?? null)
 // The same projection the dots are drawn with (SVG units are feet), so a dot and its zone agree.
 const feet = (b) => {
   const p = hitCoordToSvg(b.x, b.y)

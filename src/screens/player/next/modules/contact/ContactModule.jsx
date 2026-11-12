@@ -18,7 +18,7 @@ import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFligh
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { ZoneField, ZoneTable } from './ZoneField.jsx'
-import { ZONE_TYPES, contactZones, zoneSummary } from './contactZones.js'
+import { ZONE_TYPES, contactZones, zoneSummary, zoneTypeForCard } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -235,7 +235,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               figures: <span className="fcontact__mfig">{r.hits} hits · {r.outs} outs</span>,
             }))}
             picked={type}
-            onPick={(k) => pick(setType, k)}
+            onPick={(k) => { pick(setType, k); setZoneType(zoneTypeForCard(k)) }}
             panel={(k) => <TypeFacts row={mix.find((r) => r.key === k)} />}
             backLabel="All batted balls"
           />

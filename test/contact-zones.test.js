@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
-import { contactZones, fieldOrder, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
+import { contactZones, fieldOrder, zoneTypeForCard, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
 
 // A raw Gameday coordinate `deg` off dead centre (negative = left field), `ft` feet from the plate.
 const at = (deg, ft) => {
@@ -125,4 +125,11 @@ test('zoneSummary reads the nine shares for a screen reader, deep to infield, in
 test('zoneFill is a plain oklch() colour, not relative colour syntax', () => {
   assert.match(zoneFill('line', 0.2), /^oklch\(0\.\d{3} 0\.\d{4} 159\.6\)$/)
   assert.doesNotMatch(zoneFill(null, 0), /from|var\(/)
+})
+
+test('a ball-type card maps to the zones filter: pop-up folds into fly, the back link clears it', () => {
+  assert.equal(zoneTypeForCard('ground'), 'ground')
+  assert.equal(zoneTypeForCard('line'), 'line')
+  assert.equal(zoneTypeForCard('pop'), 'fly')
+  assert.equal(zoneTypeForCard(null), null)
 })
