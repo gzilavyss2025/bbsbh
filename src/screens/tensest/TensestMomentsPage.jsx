@@ -62,13 +62,13 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
             {/* The meter and the number beside it: every play here is in the season's top 1%,
                 so the meter is nearly always full and the number tells the rows apart (Gary). */}
             <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
-            <td>{monthDayName(r.d) || DASH}</td>
+            <td className="date">{monthDayName(r.d) || DASH}</td>
             <td className="game">
               <a href={boxPath(r)}>{gameLabel(r, teamId)}</a>
               {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
             </td>
             {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
-            <td aria-label={`${r.top ? 'Top' : 'Bottom'} ${r.inn}`}>
+            <td className="inn" aria-label={`${r.top ? 'Top' : 'Bottom'} ${r.inn}`}>
               {r.top ? '▲' : '▼'}
               {r.inn}
             </td>

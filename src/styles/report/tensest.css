@@ -73,3 +73,38 @@
 .tensest .batter a {
   color: var(--text-body);
 }
+
+/* On a phone the seven columns don't fit, so each row stacks as a small card: rank,
+   pressure, date and inning on the first line, then the game, the at-bat and what
+   happened, each on its own line. The head row hides; the cells say what they are. */
+@media (max-width: 739.98px) {
+  .tensest thead {
+    display: none;
+  }
+  /* layout-exempt: a table row restacked as a card on a phone has no layout primitive */
+  .tensest tbody tr {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas:
+      'rank pressure date inn'
+      'game game game game'
+      'batter batter batter batter'
+      'what what what what';
+    column-gap: var(--space-2);
+    padding-block: var(--space-2);
+    border-bottom: var(--bw-hair) solid var(--border-rule);
+  }
+  .tensest tbody td {
+    padding: 0 var(--space-3);
+    border: 0;
+    text-align: left;
+    min-width: 0;
+  }
+  .tensest .rank { grid-area: rank; }
+  .tensest .tensest__pressure { grid-area: pressure; }
+  .tensest .date { grid-area: date; }
+  .tensest .inn { grid-area: inn; }
+  .tensest .game { grid-area: game; }
+  .tensest .batter { grid-area: batter; }
+  .tensest .what { grid-area: what; color: var(--text-muted); }
+}
