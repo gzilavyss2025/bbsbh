@@ -1,17 +1,16 @@
-import { ZONE_DEPTHS, ZONE_DIRS, fieldOrder, polar as at, zoneFill, zoneLabelOnLight } from './contactZones.js'
+import { ZONE_DEPTHS, ZONE_THIRDS, polar as at, zoneFill, zoneLabelOnLight, zoneNames } from './contactZones.js'
 
 // The Zones view of the spray field (#2975, round 3, Gary 2026-11-12): nine places on the field,
-// pull / center / oppo by infield / shallow / deep, each lit by its share on one fixed scale. The
+// left / center / right thirds by infield / shallow / deep, each lit by its share on one fixed scale. The
 // ball-type filter sets only the hue. Drawn inside ContactModule's own <svg>, over the same foul
-// lines; the outer band IS the fence here, so the arc and the zones share one edge.
+// lines; the outer band IS the fence here, so the arc and the zones share one edge. `side` only names
+// the thirds (zoneNames): Pull / Oppo, or LF / CF / RF for a switch hitter.
 // The bands' radii in SVG feet: the depth edges (150, 250 ft), the outer edge at the fence line.
 const RADII = { infield: [45, 150], shallow: [150, 250], deep: [250, 345] }
-const WEDGE = { pull: [-45, -15], center: [-15, 15], oppo: [15, 45] } // a right-handed hitter
+const WEDGE = { left: [-45, -15], center: [-15, 15], right: [15, 45] }
 
 const cellPath = (a0, a1, r0, r1) =>
   `M ${at(a0, r0)} L ${at(a0, r1)} A ${r1} ${r1} 0 0 1 ${at(a1, r1)} L ${at(a1, r0)} A ${r0} ${r0} 0 0 0 ${at(a0, r0)} Z`
-// A left-handed hitter pulls to right field: mirror the wedges.
-const angles = (dir, side) => (side === 'L' ? WEDGE[dir].map((a) => -a).reverse() : WEDGE[dir])
 const pct = (x) => (x == null ? '—' : `${Math.round(x * 100)}%`)
 
 export function ZoneField({ zones, side, type }) {
@@ -19,7 +18,7 @@ export function ZoneField({ zones, side, type }) {
   return (
     <g className="fcontact__zones" aria-hidden="true">
       {zones.cells.map((c) => {
-        const [a0, a1] = angles(c.dir, side)
+        const [a0, a1] = WEDGE[c.dir]
         const [r0, r1] = RADII[c.depth]
         const [lx, ly] = at((a0 + a1) / 2, (r0 + r1) / 2)
         return (
@@ -30,8 +29,8 @@ export function ZoneField({ zones, side, type }) {
         )
       })}
       <path className="spray__fence" d={`M ${at(-45, R)} A ${R} ${R} 0 0 1 ${at(45, R)}`} />
-      {Object.entries(ZONE_DIRS).map(([dir, name]) => {
-        const [a0, a1] = angles(dir, side)
+      {Object.entries(zoneNames(side)).map(([dir, name]) => {
+        const [a0, a1] = WEDGE[dir]
         const [x, y] = at((a0 + a1) / 2, R + 22)
         return <text key={dir} className="fcontact__zdir" x={x} y={y}>{name}</text>
       })}
@@ -42,17 +41,17 @@ export function ZoneField({ zones, side, type }) {
 // The same nine shares as a table, deep to infield, its columns in the field's own left-to-right
 // order for this batter: the side column on a wide card.
 export function ZoneTable({ zones, side }) {
-  const cols = fieldOrder(side)
+  const names = zoneNames(side)
   return (
     <table className="fcontact__ztable">
       <thead>
-        <tr><th scope="col">Depth</th>{cols.map((d) => <th key={d} scope="col">{ZONE_DIRS[d]}</th>)}</tr>
+        <tr><th scope="col">Depth</th>{ZONE_THIRDS.map((d) => <th key={d} scope="col">{names[d]}</th>)}</tr>
       </thead>
       <tbody>
         {[...ZONE_DEPTHS].reverse().map(([depth, name]) => (
           <tr key={depth}>
             <th scope="row">{name}</th>
-            {cols.map((d) => <td key={d}>{pct(zones.byKey[`${d}:${depth}`].share)}</td>)}
+            {ZONE_THIRDS.map((d) => <td key={d}>{pct(zones.byKey[`${d}:${depth}`].share)}</td>)}
           </tr>
         ))}
       </tbody>

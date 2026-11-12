@@ -18,7 +18,7 @@ import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFligh
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { ZoneField, ZoneTable } from './ZoneField.jsx'
-import { ZONE_TYPES, contactZones, polar, zoneSummary, zoneTypeForCard } from './contactZones.js'
+import { ZONE_TYPES, batterSide, contactZones, polar, zoneSummary, zoneTypeForCard } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -85,11 +85,8 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   // narrow the dots only (a nine-way split of a dozen home runs says nothing). Each mode shows only
   // its own controls, so the bar never holds three rows at once (Gary, 2026-11-12).
   const zones = useMemo(() => (mode === 'zones' && card ? contactZones(card.balls, zoneType) : null), [mode, card, zoneType])
-  // Pull's side of the field: the side most of these balls came from (a switch hitter's majority).
-  const side = useMemo(() => {
-    const all = card?.balls ?? []
-    return all.filter((b) => b.side === 'L').length * 2 > all.length ? 'L' : 'R'
-  }, [card])
+  // Names the zones' thirds: Pull / Oppo by the batter's side, or LF / CF / RF for a switch hitter.
+  const side = useMemo(() => batterSide(card?.balls ?? []), [card])
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null

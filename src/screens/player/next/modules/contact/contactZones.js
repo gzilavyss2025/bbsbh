@@ -1,16 +1,32 @@
-import { directionOf, sprayAngle } from '../../../../../api/spray.js'
+import { sprayAngle } from '../../../../../api/spray.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { typeOf } from './contactView.js'
 
-// The spray chart as nine zones (#2975, round 3, Gary 2026-11-12): WHERE each ball went, pull /
-// center / oppo by infield / shallow outfield / deep outfield. Direction is the spray store's own
-// 30° thirds, read through the side of each ball (a switch hitter flips per ball). Depth is the
-// hit coordinate's distance from the plate: where the ball was fielded or landed. Ball type is a
-// launch angle, not a place, so it is a filter over the nine, never a ring of them; a pop-up
-// folds into fly ball. A ball with no coordinate cannot be placed; one with no launch angle is
-// placed under All but not under a type.
-export const ZONE_DIRS = { pull: 'Pull', center: 'Center', oppo: 'Oppo' }
+// The spray chart as nine zones (#2975, round 3, Gary 2026-11-12): WHERE each ball went, the left /
+// center / right thirds of fair ground (30° each) by infield / shallow outfield / deep outfield.
+// The thirds are the field's own, never the batter's, so a switch hitter's balls from both boxes
+// land where they went; the side only names them (zoneNames). Depth is the hit coordinate's
+// distance from the plate: where the ball was fielded or landed. Ball type is a launch angle, not a
+// place, so it is a filter over the nine, never a ring of them; a pop-up folds into fly ball. A ball
+// with no coordinate cannot be placed; one with no launch angle is placed under All only.
+export const ZONE_THIRDS = ['left', 'center', 'right'] // left field to right field
+const CENTER_DEG = 15 // the centre third: ±15° of dead centre, the spray store's own split
+const thirdOf = (deg) => (deg == null ? null : deg < -CENTER_DEG ? 'left' : deg > CENTER_DEG ? 'right' : 'center')
+
+// The batter's side for naming the thirds: 'S' when the other box has at least a tenth of his
+// balls (Inference: a stray ball recorded from the other box does not make a switch hitter).
+export function batterSide(balls) {
+  const l = balls.filter((b) => b.side === 'L').length
+  const minor = Math.min(l, balls.length - l)
+  return balls.length && minor / balls.length >= 0.1 ? 'S' : l * 2 > balls.length ? 'L' : 'R'
+}
+// The thirds' names: pull is left field for a right-handed hitter, right field for a left-handed
+// one. A switch hitter pulls to both, so his thirds take the field's names.
+export function zoneNames(side) {
+  if (side === 'S') return { left: 'LF', center: 'CF', right: 'RF' }
+  return side === 'L' ? { left: 'Oppo', center: 'Center', right: 'Pull' } : { left: 'Pull', center: 'Center', right: 'Oppo' }
+}
 // Outer edge of each band in feet (Inference: about the infield's edge, then shallow vs. deep).
 export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF', 250], ['deep', 'Deep OF', Infinity]]
 // Short labels so the four fit one row at 390 px. "Any type", not "All": the row above already
@@ -38,14 +54,14 @@ export function contactZones(balls, type = null) {
   let n = 0
   for (const b of balls) {
     if (type && zoneType(b.launchAngle) !== type) continue
-    const dir = directionOf(sprayAngle(b.x, b.y), b.side)
+    const dir = thirdOf(sprayAngle(b.x, b.y))
     if (!dir) continue
     const key = `${dir}:${depthOf(feet(b))}`
     counts.set(key, (counts.get(key) ?? 0) + 1)
     n++
   }
   const cells = ZONE_DEPTHS.flatMap(([depth]) =>
-    Object.keys(ZONE_DIRS).map((dir) => {
+    ZONE_THIRDS.map((dir) => {
       const c = counts.get(`${dir}:${depth}`) ?? 0
       return { dir, depth, n: c, share: n ? c / n : null }
     }),
@@ -53,10 +69,6 @@ export function contactZones(balls, type = null) {
   // `byKey['pull:deep']`: the same cells, for readers that walk them in another order.
   return { cells, n, byKey: Object.fromEntries(cells.map((c) => [`${c.dir}:${c.depth}`, c])) }
 }
-
-// The thirds as they sit on the field, left field to right field, so a table beside the field
-// reads in the same order: a right-handed hitter pulls to left field.
-export const fieldOrder = (side) => (side === 'L' ? ['oppo', 'center', 'pull'] : ['pull', 'center', 'oppo'])
 
 // Darker always means more, on ONE fixed scale for every ball type (Gary, 2026-11-12): a share
 // sets the OKLCH lightness and the type sets only the hue. The scale jumps over 0.66–0.54, the
@@ -81,13 +93,15 @@ export function zoneFill(type, share) {
 // carries every zone by name, deep to infield and left field to right field, like the table.
 const TYPE_NAMES = { ground: 'Ground balls', line: 'Line drives', fly: 'Fly balls' }
 const DEPTH_NAMES = { infield: 'infield', shallow: 'shallow outfield', deep: 'deep outfield' }
+const SPOKEN = { LF: 'left field', CF: 'center field', RF: 'right field' }
 export function zoneSummary(zones, side, type) {
   const head = TYPE_NAMES[type] ?? 'All balls in play'
   if (!zones.n) return `${head}: none placed.`
   const parts = [...ZONE_DEPTHS].reverse().flatMap(([depth]) =>
-    fieldOrder(side).map((dir) => {
+    ZONE_THIRDS.map((dir) => {
       const c = zones.byKey[`${dir}:${depth}`]
-      return `${DEPTH_NAMES[depth]} ${dir} ${Math.round(c.share * 100)}%`
+      const name = zoneNames(side)[dir]
+      return `${DEPTH_NAMES[depth]} ${SPOKEN[name] ?? name.toLowerCase()} ${Math.round(c.share * 100)}%`
     }),
   )
   return `${head}, ${zones.n} placed: ${parts.join(', ')}.`

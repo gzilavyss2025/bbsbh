@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
-import { contactZones, fieldOrder, zoneTypeForCard, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
+import { batterSide, contactZones, zoneNames, zoneTypeForCard, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
 
 // A raw Gameday coordinate `deg` off dead centre (negative = left field), `ft` feet from the plate.
 const at = (deg, ft) => {
@@ -12,20 +12,35 @@ const at = (deg, ft) => {
 const ball = (deg, ft, la, side = 'R') => ({ ...at(deg, ft), launchAngle: la, side })
 const cell = (z, dir, depth) => z.cells.find((c) => c.dir === dir && c.depth === depth)
 
-test('nine zones by direction and depth: a righty pulls to left field', () => {
+test('nine zones by field third and depth: where the ball went, whoever hit it', () => {
   const z = contactZones([ball(-30, 100, 5), ball(0, 200, 15), ball(30, 320, 35), ball(30, 300, 60)])
   assert.equal(z.cells.length, 9)
   assert.equal(z.n, 4)
-  assert.equal(cell(z, 'pull', 'infield').n, 1)
+  assert.equal(cell(z, 'left', 'infield').n, 1)
   assert.equal(cell(z, 'center', 'shallow').n, 1)
-  assert.equal(cell(z, 'oppo', 'deep').n, 2)
-  assert.equal(cell(z, 'oppo', 'deep').share, 0.5)
+  assert.equal(cell(z, 'right', 'deep').n, 2)
+  assert.equal(cell(z, 'right', 'deep').share, 0.5)
 })
 
-test('a left-handed batter flips pull and oppo', () => {
-  const z = contactZones([ball(30, 100, 5, 'L'), ball(-30, 100, 5, 'L')])
-  assert.equal(cell(z, 'pull', 'infield').n, 1)
-  assert.equal(cell(z, 'oppo', 'infield').n, 1)
+test('a switch hitter: each ball stays in the field it went to, from either side', () => {
+  // Pulled from both sides: right-handed to left field, left-handed to right field.
+  const z = contactZones([ball(-30, 300, 30, 'R'), ball(30, 300, 30, 'L')])
+  assert.equal(cell(z, 'left', 'deep').n, 1)
+  assert.equal(cell(z, 'right', 'deep').n, 1)
+})
+
+test('batterSide: one side, or S when the other side has at least a tenth of the balls', () => {
+  const of = (r, l) => [...Array(r).fill({ side: 'R' }), ...Array(l).fill({ side: 'L' })]
+  assert.equal(batterSide(of(100, 0)), 'R')
+  assert.equal(batterSide(of(0, 50)), 'L')
+  assert.equal(batterSide(of(95, 5)), 'R') // a stray ball from the other box is not a switch hitter
+  assert.equal(batterSide(of(80, 20)), 'S')
+})
+
+test('zoneNames: Pull/Oppo by side, field names for a switch hitter, always left to right', () => {
+  assert.deepEqual(zoneNames('R'), { left: 'Pull', center: 'Center', right: 'Oppo' })
+  assert.deepEqual(zoneNames('L'), { left: 'Oppo', center: 'Center', right: 'Pull' })
+  assert.deepEqual(zoneNames('S'), { left: 'LF', center: 'CF', right: 'RF' })
 })
 
 test('the type filter keeps only that type; a pop-up counts as a fly ball', () => {
@@ -47,11 +62,6 @@ test('a ball with no coordinate is not placed, and no balls gives null shares', 
   const z = contactZones([{ x: null, y: null, launchAngle: 20, side: 'R' }])
   assert.equal(z.n, 0)
   assert.ok(z.cells.every((c) => c.n === 0 && c.share === null))
-})
-
-test('fieldOrder runs left field to right field for the batter side', () => {
-  assert.deepEqual(fieldOrder('R'), ['pull', 'center', 'oppo'])
-  assert.deepEqual(fieldOrder('L'), ['oppo', 'center', 'pull'])
 })
 
 test('darker always means more: lightness falls as the share rises, on one fixed scale', () => {
@@ -111,7 +121,7 @@ test('every zone label clears 4.5:1 on its fill, for every hue and share', async
   }
 })
 
-test('zoneSummary reads the nine shares for a screen reader, deep to infield, in field order', () => {
+test('zoneSummary reads the nine shares for a screen reader, deep to infield, left to right', () => {
   const z = contactZones([ball(-30, 100, 5), ball(0, 300, 35)])
   const s = zoneSummary(z, 'R', null)
   assert.match(s, /^All balls in play, 2 placed: /)
@@ -119,6 +129,7 @@ test('zoneSummary reads the nine shares for a screen reader, deep to infield, in
   assert.match(s, /deep outfield center 50%/)
   assert.match(s, /infield pull 50%/)
   assert.match(zoneSummary(contactZones([ball(0, 300, 20)], 'line'), 'L', 'line'), /^Line drives, 1 placed: deep outfield oppo 0%/)
+  assert.match(zoneSummary(z, 'S', null), /infield left field 50%/)
   assert.equal(zoneSummary(contactZones([], 'fly'), 'R', 'fly'), 'Fly balls: none placed.')
 })
 
