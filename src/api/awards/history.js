@@ -7,7 +7,7 @@
 //
 // scripts/gen-awards-history.mjs builds it: a hand-run full regenerate, plus a
 // `--nightly` run from October to February that folds in the season in play
-// (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js/rehab.js (see
+// (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js and rehab/assignments.js (see
 // docs/data-enrichment.md §5). Historical award winners carry no individual
 // game's score — same footing as the (ungated) League Leaders/WAR/Milestone
 // Watch pages — so this file needs no as-of cutoff.

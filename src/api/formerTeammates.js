@@ -15,7 +15,7 @@
 // matchup is hundreds of requests. Past-season career history is immutable, so
 // scripts/gen-former-teammates.mjs precomputes it on a cron (see
 // .github/workflows/update-nightly-data.yml) and this module just reads it.
-// Same build-time-fetch pattern as war.js / rehab.js (see docs/data-enrichment.md
+// Same build-time-fetch pattern as war.js / rehab/assignments.js (see docs/data-enrichment.md
 // §5). Rosters and team-season history carry no score, so the file is
 // spoiler-free like the rest of the lineup-page surfaces.
 //

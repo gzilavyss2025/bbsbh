@@ -8,8 +8,8 @@
 // Pure — no fetching, no DOM. Every export here is meant to be imported, not
 // re-implemented; if a caller needs its own copy, extend this file instead.
 
-import { ipToOuts } from '../lib/math/innings.js'
-import { num } from '../lib/math/number.js'
+import { ipToOuts } from '../../lib/math/innings.js'
+import { num } from '../../lib/math/number.js'
 
 // A minor-league stint clears a workload threshold in whichever unit fits the
 // group and role: games played for a hitter, but EITHER innings pitched OR

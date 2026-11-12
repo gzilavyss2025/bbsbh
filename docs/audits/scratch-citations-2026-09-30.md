@@ -116,9 +116,9 @@ Totals: 64 folders, 2,510 files, 152.6 MB.
 
 | Folder | Builder files | Modules imported from `src/` or `scripts/` |
 | --- | ---: | --- |
-| `level-benchmarks` | 22 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/api/statsLevels.js`, `src/lib/shardKey.js` |
+| `level-benchmarks` | 22 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab/policy.js`, `src/api/statsLevels.js`, `src/lib/shardKey.js` |
 | `abs-reports` | 16 | `scripts/lib/db.js`, `scripts/lib/statsapi.mjs` |
-| `home-transactions` | 13 | `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/api/transactions/team.js`, `src/api/transactions/league.js`, `src/lib/data/mlb-team-colors.json` |
+| `home-transactions` | 13 | `scripts/lib/statsapi.mjs`, `src/api/rehab/policy.js`, `src/api/transactions/team.js`, `src/api/transactions/league.js`, `src/lib/data/mlb-team-colors.json` |
 | `offseason-design` | 11 | `scripts/lib/statsapi.mjs` |
 | `team-success` | 11 | `scripts/lib/csv.mjs`, `scripts/lib/statsapi.mjs`, `src/lib/contracts/clubCodes.js`, `src/lib/contracts/parseMoney.js`, `src/lib/contracts/positions.js`, `src/lib/teams.js` |
 | `abs-aaa-gate` | 10 | `scripts/lib/statsapi.mjs`, `src/api/challenges.js` |
@@ -127,7 +127,7 @@ Totals: 64 folders, 2,510 files, 152.6 MB.
 | `club-live-overlay` | 3 | `scripts/lib/statsapi.mjs`, `src/api/transactions/team.js`, `src/api/transactions/clubFeed.js`, `src/api/transactions/leagueFeed.js` |
 | `contracts-extensions` | 3 | `scripts/lib/csv.mjs`, `src/lib/contracts/parseMoney.js`, `src/lib/contracts/positions.js`, `src/lib/shardKey.js` |
 | `game-notes` | 3 | `src/api/whatsBrewing.js` |
-| `prospect-traits` | 3 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab-policy.js`, `src/lib/shardKey.js` |
+| `prospect-traits` | 3 | `scripts/lib/concurrency.mjs`, `scripts/lib/statsapi.mjs`, `src/api/rehab/policy.js`, `src/lib/shardKey.js` |
 | `prospect-value` | 2 | `scripts/lib/csv.mjs`, `scripts/lib/statsapi.mjs`, `src/lib/contracts/parseMoney.js`, `src/lib/contracts/positions.js` |
 | `service-clock` | 2 | `scripts/lib/statsapi.mjs` |
 | `top-prospects-history` | 2 | `scripts/lib/csv.mjs`, `scripts/lib/io.js` |
@@ -142,7 +142,7 @@ Totals: 64 folders, 2,510 files, 152.6 MB.
 | --- | ---: | --- |
 | `scripts/lib/statsapi.mjs` | 79 | `abs-aaa-gate`, `abs-challenges`, `abs-reports`, `blockage`, `club-live-overlay`, `home-transactions`, `level-benchmarks`, `offseason-design`, `prospect-traits`, `prospect-value`, `rookie-crossover`, `service-clock`, `team-success` |
 | `scripts/lib/db.js` | 11 | `abs-reports` |
-| `src/api/rehab-policy.js` | 9 | `home-transactions`, `level-benchmarks`, `prospect-traits` |
+| `src/api/rehab/policy.js` | 9 | `home-transactions`, `level-benchmarks`, `prospect-traits` |
 | `scripts/lib/concurrency.mjs` | 7 | `level-benchmarks`, `prospect-traits` |
 | `src/api/transactions/team.js` | 7 | `club-live-overlay`, `home-transactions` |
 | `scripts/lib/csv.mjs` | 5 | `contracts`, `contracts-extensions`, `prospect-value`, `team-success`, `top-prospects-history` |

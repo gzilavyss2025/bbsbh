@@ -10,7 +10,7 @@
 // .github/workflows/update-nightly-data.yml) and the app just reads the shaped
 // file (src/api/prospects/minorsLeaders.js) and ranks it client-side with the same
 // computeLeaders it uses everywhere. Same build-time-fetch pattern as war.js /
-// rehab.js (docs/data-enrichment.md §5); still spoiler-free (season aggregates).
+// rehab/assignments.js (docs/data-enrichment.md §5); still spoiler-free (season aggregates).
 //
 // Unlike the FanGraphs/rehab generators — which keep self-contained copies of
 // their logic — this imports the app's OWN combine AND ranking (statsLevels.js +

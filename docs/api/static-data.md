@@ -102,11 +102,11 @@ for each generator; the reader modules:
   with no curated art in `public/team-logos/`) falls back to `'base'` via
   `TeamLogo`'s own fallback chain, never a broken image. Spoiler-free: a
   jersey choice, not game state.
-- `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
+- `rehab/assignments.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
   calls. `gen-rehab.mjs` (daily cron) imports the one stint rule (`rehabListRow` /
-  `openRehabStint` in `rehab-policy.js`) that `person.js`'s `detectRehabAssignment`
+  `openRehabStint` in `rehab/policy.js`) that `person.js`'s `detectRehabAssignment`
   also calls, so the list and the banner agree on every day (#1362).
 - `nuggets/nuggets.js` — the nugget store, `public/data/nuggets/{season}.json` (#2809, ADR-0129), for Between Innings'
   `nugget` notes. Cost-driven: dating a crossing needs a game log per player. Cutoff-gated: `nuggetsForGame`

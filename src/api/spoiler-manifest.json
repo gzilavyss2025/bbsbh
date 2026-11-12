@@ -1130,11 +1130,11 @@
       "class": "spoiler-free",
       "why": "The Team Page's Last-10 roster projection. Every game it reads is already Final, same footing as postseason/archive/series.js. NOT hitterForm.js — the names differ on purpose."
     },
-    "rehab-policy.js": {
+    "rehab/policy.js": {
       "class": "spoiler-free",
       "why": "Pure transaction-text predicates shared by the rehab and transaction readers."
     },
-    "rehab.js": {
+    "rehab/assignments.js": {
       "class": "spoiler-free",
       "why": "Static rehab.json — league-wide rehab assignments. Roster state, no score."
     },
@@ -1344,7 +1344,7 @@
     },
     "transactions/team.js": {
       "class": "spoiler-free",
-      "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
+      "why": "Roster moves and their dates carry no score — as spoiler-free as rehab/assignments.js and prospects/rookies.js."
     },
     "teams-static.js": {
       "class": "spoiler-free",
