@@ -1,6 +1,6 @@
 import '../styles/37-all-star-rosters.css'
 import { useState } from 'react'
-import { loadAllStarRosters } from '../api/allStarRosters.js'
+import { loadAllStarRosters } from '../api/awards/allStarRosters.js'
 import { fetchGameCardsByPk } from '../api/schedule/fetch.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

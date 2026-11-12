@@ -78,11 +78,11 @@
     ]
   },
   "modules": {
-    "allStarLegacy.js": {
+    "awards/allStarLegacy.js": {
       "class": "spoiler-free",
       "why": "Pure re-shape of the static All-Star roster file plus a live roster join — who was ever selected, never a game's line."
     },
-    "allStarRosters.js": {
+    "awards/allStarRosters.js": {
       "class": "spoiler-free",
       "why": "Static all-star-rosters.json reader. Shows each game's final plainly, but an All-Star Game is decades-settled exhibition trivia outside the rule's scope (ADR-0019)."
     },
@@ -134,7 +134,7 @@
       "class": "spoiler-free",
       "why": "Static attendance.json — a Final-games season aggregate (total/avg/high/low gate, sellouts, fill rate), same footing as WAR. No SealBox."
     },
-    "awardsHistory.js": {
+    "awards/history.js": {
       "class": "spoiler-free",
       "why": "Static awards-history.json reader — who won what, by season — plus the live current-season awards/recipients read (an award is not a game result)."
     },
@@ -359,7 +359,7 @@
       "class": "spoiler-free",
       "why": "Static former-teammates.json — shared (teamId, season) history between opposing rosters."
     },
-    "franchiseHistory.js": {
+    "history/franchiseSeasons.js": {
       "class": "spoiler-free",
       "why": "Static franchise-history shards: a club's names, leagues and ballparks by season, 1901 to the last complete season. Names and parks only, no game."
     },

@@ -15,7 +15,7 @@ import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postse
 import { fetchScheduleGame } from '../../api/schedule/fetch.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
-import { fetchSeasonAward } from '../../api/awardsHistory.js'
+import { fetchSeasonAward } from '../../api/awards/history.js'
 import { mvpStatLine } from '../../lib/postseason/mvpLine.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'

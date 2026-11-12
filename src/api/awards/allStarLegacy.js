@@ -1,4 +1,4 @@
-// Client-side aggregation over All-Star Rosters data (see allStarRosters.js —
+// Client-side aggregation over All-Star Rosters data (see awards/allStarRosters.js —
 // the same static public/data/all-star-rosters.json this reads) into two
 // "who's ever been an All-Star" views the source page doesn't answer on its
 // own: the all-time appearance leaders among CURRENTLY ACTIVE players, and

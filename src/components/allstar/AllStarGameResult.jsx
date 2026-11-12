@@ -31,7 +31,7 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // CURRENT MLB teams' home parks — an older/relocated venue falls back to
 // the generic league mark instead of guessing a team. `mvp.pos`/`mvp.stat`
 // come from the generator reading the MVP's own boxscore entry (absent for
-// very old games or a season with no MVP award — see allStarRosters.js).
+// very old games or a season with no MVP award — see awards/allStarRosters.js).
 export function AllStarGameResult({ score, mvp, venue, venueId, gameDate, dateLabel, onBoxScore }) {
   const [ballparkOpen, setBallparkOpen] = useState(false)
   if (!score) return null

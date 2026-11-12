@@ -1,6 +1,6 @@
 import { fetchMilbAlumni, fetchSeasonVenue } from '../../../../api/team/fetch.js'
 import { fetchAttendance, attendanceRatesFor } from '../../../../api/attendance.js'
-import { franchiseFor, venueForSeason } from '../../../../api/franchiseHistory.js'
+import { franchiseFor, venueForSeason } from '../../../../api/history/franchiseSeasons.js'
 import { pennantsBefore, pennantsFor } from '../../../../api/history/leaguePennants.js'
 import { loadJerseys } from '../../data/loadNumbers.js'
 import { seasonOf } from '../../data/shared.js'

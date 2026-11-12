@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { franchiseFor, nameForSeason } from '../../../../api/franchiseHistory.js'
+import { franchiseFor, nameForSeason } from '../../../../api/history/franchiseSeasons.js'
 import { pageDay } from '../../../../api/schedule/fetch.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { ordinal } from '../../../../lib/format.js'
