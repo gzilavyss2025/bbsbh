@@ -30,6 +30,16 @@
   color: var(--text-muted);
 }
 
+/* The (i) tip on this page wears the stamped frame too: square, a heavy ink edge and the
+   hard ink shadow, like the picker and the cards. Scoped here, as the picker is, so the tip
+   keeps its own look on other pages. */
+.tensest__intro .infopop__tip {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+  background: var(--surface-card);
+}
+
 /* The club picker on this page wears the stamped frame: square, a heavy ink edge and the
    hard ink shadow, like the cards under it. Scoped here so the same TeamFilterStrip on
    other pages keeps its own look. The picked club's box is square too. */
@@ -123,4 +133,10 @@
     padding-block: var(--space-2);
     margin-block: calc(var(--space-2) * -1);
   }
+}
+
+/* A club in the Game cell is its logo, set on the text's baseline like a word. */
+.tensest__club {
+  display: inline-flex;
+  vertical-align: text-bottom;
 }

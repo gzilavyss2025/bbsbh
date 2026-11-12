@@ -17,26 +17,38 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 
 const DASH = '—'
 
-// "W 4-3 vs CHC" for the selected club's own games, "PIT 7 at WSH 8"-style for the rest.
-function gameLabel(row, teamId) {
+// A club as its logo, with the abbreviation for screen readers (the logo is aria-hidden).
+function Club({ id }) {
+  const abbr = teamAbbr({ id })
+  return (
+    <span className="tensest__club">
+      <TeamLogo teamId={id} name={teamFullName(id) || abbr} size={16} />
+      <span className="sr-only">{abbr}</span>
+    </span>
+  )
+}
+
+// "W 4-3 vs [CHC]" for the selected club's own games, "[PIT] 7, [WSH] 8" for the rest.
+function GameLabel({ row, teamId }) {
   const hasScore = row.as != null && row.hs != null
   if (teamId && (row.aw === teamId || row.hm === teamId)) {
     const home = row.hm === teamId
     const mine = home ? row.hs : row.as
     const theirs = home ? row.as : row.hs
-    const other = teamAbbr({ id: home ? row.aw : row.hm })
-    if (!hasScore) return `${home ? 'vs' : 'at'} ${other}`
-    return `${mine > theirs ? 'W' : 'L'} ${mine}-${theirs} ${home ? 'vs' : 'at'} ${other}`
+    const where = home ? 'vs' : 'at'
+    const other = <Club id={home ? row.aw : row.hm} />
+    if (!hasScore) return <>{where} {other}</>
+    return <>{mine > theirs ? 'W' : 'L'} {mine}-{theirs} {where} {other}</>
   }
-  const away = teamAbbr({ id: row.aw })
-  const home = teamAbbr({ id: row.hm })
-  return hasScore ? `${away} ${row.as}, ${home} ${row.hs}` : `${away} at ${home}`
+  if (!hasScore) return <><Club id={row.aw} /> at <Club id={row.hm} /></>
+  return <><Club id={row.aw} /> {row.as}, <Club id={row.hm} /> {row.hs}</>
 }
 
 const boxPath = (r) => gamePath(r.d, teamAbbr({ id: r.aw }), teamAbbr({ id: r.hm }), 'boxscore', r.gn ?? 1)
@@ -68,7 +80,7 @@ function TensestTable({ rows, teamId, label }) {
             <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> <span className="sr-only">Pressure </span>{r.li.toFixed(2)}</td>
             <td className="date">{monthDay(r.d) || DASH}</td>
             <td className="game">
-              <a className="tensest__gamelink" {...routeLink(boxPath(r))}>{gameLabel(r, teamId)}</a>
+              <a className="tensest__gamelink" {...routeLink(boxPath(r))}><GameLabel row={r} teamId={teamId} /></a>
               {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
             </td>
             {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
@@ -127,7 +139,7 @@ export function TensestMomentsPage() {
       </header>
 
       {/* One line up front; the explanation is opt-in, behind the (i) (src/styles/CLAUDE.md). */}
-      <p className="hint infopop-row">
+      <p className="hint infopop-row tensest__intro">
         The season’s tensest at-bats, by MLB’s pressure score.{' '}
         <InfoPopover label="About pressure moments" className="infopop--paper infopop--down">
           MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
