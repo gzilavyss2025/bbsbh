@@ -102,9 +102,9 @@ const parksFor = (id, live) => {
 
 test('parksView: newest first, the current name with the old ones as "also", "on" for a park in use', () => {
   assert.deepEqual(parksFor(158), [
-    { id: 32, name: 'American Family Field', also: ['Miller Park'], years: '2001 on', clubs: ['Milwaukee Brewers'], mates: [] },
-    { id: 23, name: 'Milwaukee County Stadium', also: [], years: '1970–2000', clubs: ['Milwaukee Brewers'], mates: [] },
-    { id: 3144, name: "Sick's Stadium", also: [], years: '1969', clubs: ['Seattle Pilots'], mates: [] },
+    { id: 32, name: 'American Family Field', also: ['Miller Park 2001–2020'], years: '2001 on', clubs: ['Milwaukee Brewers'], mates: [], temporary: false },
+    { id: 23, name: 'Milwaukee County Stadium', also: [], years: '1970–2000', clubs: ['Milwaukee Brewers'], mates: [], temporary: false },
+    { id: 3144, name: "Sick's Stadium", also: [], years: '1969', clubs: ['Seattle Pilots'], mates: [], temporary: false },
   ])
 })
 
@@ -125,6 +125,20 @@ test('parksView: a live season after the file extends the runs; a club that move
   const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
   assert.equal(brewers[0].years, '2001 on')
   assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
+})
+
+// #2959: a temporary home from the hand-curated file is its own row, marked, sorted by its last season.
+test('parksView: a temporary home joins the list with its note; the regular parks are unchanged', () => {
+  const temp = [{ venueId: 2756, name: 'Sahlen Field', seasons: [2020, 2021], note: 'Buffalo, during the pandemic' }]
+  const d = history(141)
+  const v = parksView({ spans: d.spans, mates: d.mates, through: d.through }, [], temp)
+  assert.deepEqual(v.map((p) => [p.name, p.years, p.temporary]), [
+    ['Rogers Centre', '1990 on', false],
+    ['Sahlen Field', '2020–2021', true],
+    ['Exhibition Stadium', '1977–1989', false],
+  ])
+  assert.deepEqual(v[0].also, ['SkyDome 1990–2004'])
+  assert.equal(v[1].note, 'Buffalo, during the pandemic')
 })
 
 // #2784 review: the retired-numbers file has no ids, so a name two ids share links nowhere.

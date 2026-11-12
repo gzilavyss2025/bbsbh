@@ -65,25 +65,45 @@ export function clubPeople(hof, leaders) {
 // reaches the newest season reads "2001 on". `clubs` are the club's own names there; `mates` the
 // other clubs that used it in the same seasons. The data starts in 1901 and holds one park per run
 // of seasons, so a one-off neutral site is not in it.
-export function parksView(history, live = []) {
+export function parksView(history, live = [], temporary = []) {
   const known = history?.spans ?? []
   if (!known.length) return []
   const name = known[known.length - 1].name
   const extra = live.filter((l) => l.venue?.id && l.season > (history.through ?? 0))
   const spans = [...known, ...extra.map((l) => ({ from: l.season, to: l.season, name, venueId: l.venue.id, venueName: l.venue.name }))]
   const newest = Math.max(history.through ?? 0, ...extra.map((l) => l.season))
-  return parkHistory(spans, history.mates ?? {})
-    .sort((a, b) => b.runs[b.runs.length - 1][1] - a.runs[a.runs.length - 1][1])
-    .map((p) => {
-      const mine = spans.filter((s) => s.venueId === p.venueId)
-      const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
-      return {
+  const regular = parkHistory(spans, history.mates ?? {}).map((p) => {
+    const mine = spans.filter((s) => s.venueId === p.venueId)
+    const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
+    const end = p.runs[p.runs.length - 1][1]
+    // A former name runs from its first season to the season before the next name (#2959).
+    const also = p.names.flatMap((n, i) => (n === current ? [] : [`${n} ${years(p.from[i], (p.from[i + 1] ?? end + 1) - 1)}`]))
+    return {
+      last: end,
+      row: {
         id: p.venueId,
         name: current,
-        also: p.names.filter((n) => n !== current),
+        also,
         years: p.runs.map(([a, b]) => (b === newest ? `${a} on` : years(a, b))).join(', '),
         clubs: [...new Set(mine.map((s) => s.name))],
         mates: p.mates.map((m) => `${m.name} ${years(m.from, m.to)}`),
-      }
-    })
+        temporary: false,
+      },
+    }
+  })
+  // A temporary home from the hand-curated file: its seasons are part-seasons, so never "on".
+  const extraParks = temporary.map((t) => ({
+    last: Math.max(...t.seasons),
+    row: {
+      id: `temp-${t.venueId}`,
+      name: t.name,
+      also: [],
+      years: years(Math.min(...t.seasons), Math.max(...t.seasons)),
+      clubs: [],
+      mates: [],
+      temporary: true,
+      note: t.note,
+    },
+  }))
+  return [...regular, ...extraParks].sort((a, b) => b.last - a.last).map((p) => p.row)
 }

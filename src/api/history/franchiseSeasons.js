@@ -1,4 +1,4 @@
-import { staticJsonBy } from '../staticJson.js'
+import { staticJson, staticJsonBy } from '../staticJson.js'
 
 // A club's history by season: one name, league and ballpark per run of seasons,
 // from public/data/franchise-history/{teamId}.json (hand-run
@@ -35,13 +35,17 @@ export function nameForSeason(spans, season) {
 // Pure: group spans by venue, oldest first. `runs` are the club's stints there
 // as [from, to] pairs (a park left and returned to has two). `mates` is the
 // file's { venueId: [{ teamId, name, from, to }] }, the other clubs there in the
-// same seasons.
+// same seasons. `from` holds the first season of each of `names`, index for index (#2959).
 export function parkHistory(spans, mates) {
   const byVenue = new Map()
   for (const s of [...spans].sort((a, b) => a.from - b.from)) {
     if (s.venueId == null) continue
-    const p = byVenue.get(s.venueId) ?? { venueId: s.venueId, names: [], runs: [] }
-    for (const n of s.venueNames ?? [s.venueName]) if (n && !p.names.includes(n)) p.names.push(n)
+    const p = byVenue.get(s.venueId) ?? { venueId: s.venueId, names: [], from: [], runs: [] }
+    ;(s.venueNames ?? [s.venueName]).forEach((n, i) => {
+      if (!n || p.names.includes(n)) return
+      p.names.push(n)
+      p.from.push(s.venueNamesFrom?.[i] ?? s.from)
+    })
     const last = p.runs[p.runs.length - 1]
     if (last && s.from === last[1] + 1) last[1] = s.to
     else p.runs.push([s.from, s.to])
@@ -64,4 +68,14 @@ export function venueForSeason(spans, season) {
 // the era still running, the one that reaches the file's last season `through`.
 export function eraSeason(span, through) {
   return span.to >= through ? null : span.to
+}
+
+// A club's temporary or neutral home parks, from public/data/temporary-parks.json (hand-curated,
+// #2959): the season feed names one home park a season, so a club that played part of a season
+// elsewhere (the Blue Jays in Buffalo, the Expos in San Juan) is missing there. Each entry is
+// { venueId, name, seasons, note, source, checked }. A club with none, or a missing file, reads [].
+const loadTemporary = staticJson('/data/temporary-parks.json', { fallback: { clubs: {} } })
+
+export async function temporaryParksFor(teamId) {
+  return (await loadTemporary()).clubs?.[teamId] ?? []
 }

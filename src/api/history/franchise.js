@@ -7,7 +7,7 @@ import { pennantsFor } from './leaguePennants.js'
 import { hallOfFamersFor } from './franchiseHof.js'
 import { retiredNumbersFor } from './retiredNumbers.js'
 import { franchiseLeaders } from './franchiseLeaders.js'
-import { franchiseFor } from './franchiseSeasons.js'
+import { franchiseFor, temporaryParksFor } from './franchiseSeasons.js'
 import { isoToday } from '../../lib/dates.js'
 
 // The franchise page's data (#2763, #3036): the club, its stored ledger (finished seasons,
@@ -77,15 +77,16 @@ export async function loadFranchise(id) {
 // the parks (#2788): the franchise-history file, plus the park of each season after it, since a
 // club can move (the Rays, back at Tropicana in 2026).
 export async function loadFranchisePeople(teamId) {
-  const [hof, retired, leaders, history] = await Promise.all([
+  const [hof, retired, leaders, history, temporary] = await Promise.all([
     hallOfFamersFor(teamId),
     retiredNumbersFor(teamId),
     franchiseLeaders(teamId),
     franchiseFor(teamId),
+    temporaryParksFor(teamId),
   ])
   const after = liveSeasons(history.through, thisYear())
   const venues = await Promise.all(after.map(async (s) => ({ season: s, venue: await fetchSeasonVenue(teamId, s) })))
-  return { hof, retired, leaders, history, venues }
+  return { hof, retired, leaders, history, venues, temporary }
 }
 
 const POST_ROUND = { F: 1, D: 2, L: 3, W: 4 }

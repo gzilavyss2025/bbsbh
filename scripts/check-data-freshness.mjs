@@ -65,6 +65,7 @@ export const EXCEPT = {
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
   'retired-numbers.json': 'hand-curated from the club pages (#2598); each entry carries its own checked date',
+  'temporary-parks.json': 'hand-curated from park pages (#2959); each entry carries its own checked date',
   'franchise-hof/': 'hand-run after each induction (scripts/franchise/gen-franchise-hof.mjs, #2597); the files carry no clock',
   'umpire-history/': 'hand-run from the Stats API schedule (issue 1565); closed seasons, and the files carry no clock',
   'played-for-both/': 'hand-run from team-seasons.json, war-history and the Chadwick register (gen-played-for-both.mjs, ADR-0100, #2579); history, and the files carry no clock',
