@@ -19,8 +19,16 @@
    not what a move looks like.
    ============================================================================ */
 
+/* The top space is padding, not margin: a margin collapses out through .slatebody, so
+   the whole slate body dropped 8px when this replaced the loader (#2984). 8px of padding
+   plus the strip's 8px margin is the same 16px gap the margin drew. */
 .oseason {
-  margin: var(--space-4) 0 var(--space-8);
+  margin: 0 0 var(--space-8);
+  padding-top: var(--space-2);
+}
+/* From 740px .slatebody is a two-column layout and nothing collapsed: the full 16px. */
+@media (min-width: 740px) {
+  .oseason { padding-top: var(--space-4); }
 }
 
 /* The head takes the RAIL's head, not a page title's: a hairline rule under a

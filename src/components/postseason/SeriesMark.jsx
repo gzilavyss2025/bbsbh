@@ -18,6 +18,8 @@ export function SeriesMark({ mark, height = 32, plate = false, decorative = fals
       alt={decorative ? '' : mark.alt}
       aria-hidden={decorative ? 'true' : undefined}
       className={`seriesmark${plate ? '' : ` ${className}`}`.trim()}
+      width={mark.width}
+      height={mark.height}
       style={{ height, width: 'auto' }}
       decoding="async"
     />

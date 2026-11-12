@@ -134,3 +134,15 @@ test('league heading: no mark for a season with no art, or no bracket', () => {
   assert.equal(leagueRoundMark(b, 'AL'), null)
   assert.equal(leagueRoundMark(null, 'AL'), null)
 })
+
+// The width lets SeriesMark size the <img> before the file loads, so the hero's
+// crest column does not grow and shove the club marks sideways (#2984).
+test('every 2026 mark carries its file width and height', async () => {
+  const { readFileSync } = await import('node:fs')
+  for (const [round, league] of [['wildcard', 'AL'], ['wildcard', 'NL'], ['division', 'AL'], ['division', 'NL'], ['lcs', 'AL'], ['lcs', 'NL'], ['worldseries', null]]) {
+    const mark = seriesMark({ season: 2026, round, league })
+    const png = readFileSync(publicPath(mark.src))
+    assert.equal(mark.height, png.readUInt32BE(20), `${mark.src} height`)
+    assert.equal(mark.width, png.readUInt32BE(16), `${mark.src} width`)
+  }
+})
