@@ -248,6 +248,10 @@ const [bat, pit, rawBat, rawPit, batTracking, ...ranked] = await Promise.all([
   ...RANKED_BOARDS.map(fetchRankedBoard),
 ])
 
+// The hitter pool the card prints ("vs 612 hitters"): Savant's percentile board only, counted
+// before the ranked boards below add their board-only players (#3023, #3065).
+const batPool = Object.keys(bat).length
+
 // Merge the ranked boards into bat (percentile) and rawBat (raw value). A
 // catcher missing from the percentile board still gets an entry here.
 for (const { key, fillOnly, raw, pct } of ranked) {
@@ -318,6 +322,7 @@ const midPit = medianRates(pit, rawPit, Object.values(METRICS.pit), MEDIAN_FLOOR
 await writeJsonAtomic(out, {
   season,
   generatedAt: new Date().toISOString(),
+  batPool,
   bat,
   pit,
   rawBat,

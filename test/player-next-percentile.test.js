@@ -6,6 +6,7 @@ import { percentileView, tierOf } from '../src/screens/player/next/modules/perce
 // Brice Turang and Robert Gasser, from public/data/savant-percentiles.json (2026), trimmed to the rows under test.
 const data = {
   season: 2026,
+  batPool: 612,
   bat: {
     668930: { xwoba: 80, ev: 71, hardHit: 54, brl: 48, chase: 80, sprintSpeed: 81, batSpeed: 22, squaredUp: 51, swingLength: 8 },
     1: { xwoba: 50, ev: 50, hardHit: 50 },
@@ -122,6 +123,21 @@ test('board-only players do not grow the hitter pool', () => {
   const v = percentileView(d, 668930, 'hitting', 2026)
   assert.equal(v.pool, '612 hitters')
   assert.ok(percentileView(d, 900, 'hitting', 2026), 'a board-only catcher still gets his card')
+})
+
+// #3065: the count comes from the generator's batPool, so a board the view has never heard of
+// (here 'cs') cannot grow it.
+test('the hitter pool is the file\'s batPool, whatever boards the bat map holds', () => {
+  const d = { ...data, bat: { ...data.bat, 902: { cs: 70 }, 903: { cs: 20 } } }
+  assert.equal(percentileView(d, 668930, 'hitting', 2026).pool, '612 hitters')
+})
+
+// A file from before batPool (served from the offline cache) still leaves board-only players out.
+test('a file without batPool counts only the percentile board\'s rows', () => {
+  const { batPool, ...old } = data
+  const d = { ...old, bat: { ...data.bat, 900: { pop: 80, framing: 60, bsr: 40 }, 901: { bsr: 10 } } }
+  assert.equal(batPool, 612)
+  assert.equal(percentileView(d, 668930, 'hitting', 2026).pool, '612 hitters')
 })
 
 // #3023: a catcher's arm comes off the pop-time board, ranked among catchers only.
