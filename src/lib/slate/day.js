@@ -119,6 +119,8 @@ function freshState(input, seed = null) {
   return s
 }
 
+const WINTER_STOP_MONTHS = [10, 11, 12, 1]
+
 const keyOf = (id, year) => (year ? `${id}:${year}` : null)
 
 // The value the slate draws, from the state so far. Pure.
@@ -128,7 +130,11 @@ function view(input, s, load) {
   const onWinter = isWinterSport(sportId)
   const winterBall = winterBallOf(s.calendar ?? null, dateStr, sportId, leagueId, s.calendar !== undefined)
   const activeLeagueId = onWinter ? (winterBall.leagueId ?? leagueId ?? null) : null
-  const levels = winterBall.tabVisible
+  // While the calendar is in flight, the date guesses: the winter leagues play October
+  // through January. Holding the stop keeps the ladder from gaining a sixth stop and
+  // squeezing the other five after it paints (#2984); the calendar decides once it lands.
+  const winterGuess = s.calendar === undefined && WINTER_STOP_MONTHS.includes(Number(dateStr.slice(5, 7)))
+  const levels = winterBall.tabVisible || winterGuess
     ? [...LEVELS, { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId }]
     : LEVELS
   const stops = ladderStops({ levels, counts: s.counts, sportId, winterGames: winterBall.games })

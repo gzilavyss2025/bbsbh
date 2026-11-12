@@ -279,3 +279,19 @@ test('an MLB day reports its bracket season row in flight, so October cards wait
   assert.equal(r.last().bracketSeasonLoading, false, 'a failed read settles it')
   assert.equal(run({ ...NOV }).last().bracketSeasonLoading, false, 'a minor level never asks')
 })
+
+// The Winter stop's place is held while the winter calendar is in flight, from October
+// through January, so the ladder does not gain a sixth stop and squeeze the other five
+// after it paints (#2984). The calendar's own answer still decides once it lands.
+test('the Winter stop is guessed from the date until the winter calendar answers', async () => {
+  const MLB = SPORT_IDS.MLB
+  const winterIn = (v) => v.stops.some((s) => s.winter)
+  assert.equal(winterIn(initialSlateDay({ dateStr: '2026-11-12', sportId: MLB }, () => null)), true, 'November')
+  assert.equal(winterIn(initialSlateDay({ dateStr: '2027-01-20', sportId: MLB }, () => null)), true, 'January')
+  assert.equal(winterIn(initialSlateDay({ dateStr: '2026-07-04', sportId: MLB }, () => null)), false, 'July')
+  const r = run({ dateStr: '2026-11-12', sportId: MLB })
+  await flush()
+  r.take('fetchWinterCalendar').resolve(null)
+  await flush()
+  assert.equal(winterIn(r.last()), false, 'a calendar with no league on the date drops the guess')
+})

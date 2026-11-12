@@ -56,5 +56,5 @@ test('a 2026 series card carries its series mark', () => {
   // The 2025 fixture relabelled 2026: the mark reads the bracket's season,
   // and 2026 is the first season with art on file.
   const lines = cardLines({ gamePk: 813047 }, { ...bracket2025('2025-10-04'), season: 2026 })
-  assert.deepEqual(lines.mark, { src: '/postseason-marks/2026/nlds.png', alt: 'NLDS' })
+  assert.deepEqual(lines.mark, { src: '/postseason-marks/2026/nlds.png', alt: 'NLDS', width: 393 })
 })
