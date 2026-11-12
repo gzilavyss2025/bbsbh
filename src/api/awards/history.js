@@ -19,10 +19,10 @@
 // friendly empty state, not a broken page. The file read is cached in memory for
 // the session (staticJson); a new night's file arrives on the next load.
 
-import { staticJson } from './staticJson.js'
-import { getJson } from './statsapi.js'
-import { MAJOR_AWARDS } from './person/awards.js'
-import { teamFullName } from '../lib/teams.js'
+import { staticJson } from '../staticJson.js'
+import { getJson } from '../statsapi.js'
+import { MAJOR_AWARDS } from '../person/awards.js'
+import { teamFullName } from '../../lib/teams.js'
 
 export const loadAwardsHistory = staticJson('/data/awards-history.json', {
   shape: (d) => ({

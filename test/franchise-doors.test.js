@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { teamSeasonPath } from '../src/lib/route.js'
-import { eraSeason } from '../src/api/franchiseHistory.js'
+import { eraSeason } from '../src/api/history/franchiseSeasons.js'
 
 // #2779/#2786 review: the one builder for a club-season address, and the era an About row opens.
 const now = new Date('2026-11-05T12:00:00Z')

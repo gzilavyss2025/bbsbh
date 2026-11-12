@@ -352,7 +352,7 @@ for each generator; the reader modules:
   are about 300 KB raw and 34 KB gzipped (2026-10-06). Not precached; `vite.config.js` caches them
   NetworkFirst in `bbsbh-record-shards`, so a box score opened offline keeps its label.
   `test/notable-feats.test.js`.
-- `allStarRosters.js` — the All-Star Rosters page, from
+- `awards/allStarRosters.js` — the All-Star Rosters page, from
   `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
   season's roster is decided once and never changes. Every named selectee,
   including one who withdrew and never played, since the source is the official
@@ -1052,7 +1052,7 @@ for each generator; the reader modules:
   names, except the pitcher's strikeouts, `pitchingStrikeouts`. Regular season only. Keyed by the
   current team id, so 158 holds the 1969 Pilots. Rate stats are the feed's qualified lists. MLB only;
   a MiLB id reads empty. No screen reads it yet.
-- `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
+- `history/franchiseSeasons.js` — a club's names, leagues and ballparks by season, from
   `public/data/franchise-history/{teamId}.json` (hand-run
   `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.

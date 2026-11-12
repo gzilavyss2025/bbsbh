@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awardsHistory.js'
+import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awards/history.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'

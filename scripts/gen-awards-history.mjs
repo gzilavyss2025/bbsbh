@@ -41,14 +41,14 @@
 import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { isPostseasonAward } from '../src/api/person.js'
-import { awardsSeasonInPlay, recipientsOf, SEASON_AWARDS } from '../src/api/awardsHistory.js'
+import { awardsSeasonInPlay, recipientsOf, SEASON_AWARDS } from '../src/api/awards/history.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { mergeSeasons } from './lib/awards/history-merge.mjs'
 
-// Hardware only, no All-Star selections — SEASON_AWARDS (src/api/awardsHistory.js, the
+// Hardware only, no All-Star selections — SEASON_AWARDS (src/api/awards/history.js, the
 // same list the page's live "so far" block reads) is MAJOR_AWARDS minus ALAS/NLAS.
 const HARDWARE_AWARDS = Object.fromEntries(SEASON_AWARDS)
 
@@ -96,13 +96,13 @@ const awardIds = Object.keys(HARDWARE_AWARDS)
 const jobs = awardIds.flatMap((awardId) => seasons.map((season) => ({ awardId, season })))
 
 const results = await mapConcurrent(jobs, 8, async ({ awardId, season }) => {
-  // 404 = not announced yet (see src/api/awardsHistory.js); anything else throws.
+  // 404 = not announced yet (see src/api/awards/history.js); anything else throws.
   const data = await getJson(`/api/v1/awards/${awardId}/recipients?season=${season}`).catch((err) => {
     if (err?.status === 404) return { awards: [] }
     throw err
   })
   // The recipient row (league, team name from the static id->name table, position) is
-  // src/api/awardsHistory.js's, shared with the page's live block.
+  // src/api/awards/history.js's, shared with the page's live block.
   const recipients = recipientsOf(awardId, data)
   return { awardId, season, recipients }
 })

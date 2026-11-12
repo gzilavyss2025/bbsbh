@@ -1,5 +1,5 @@
 // The season sheet's groups (#2599): one per run of seasons under one name and league, from the
-// franchise-history spans (api/franchiseHistory.js). A span splits at every park change, so
+// franchise-history spans (api/history/franchiseSeasons.js). A span splits at every park change, so
 // adjacent spans with the same name and league merge. The file ends at `through`, the season
 // before today's, so the last run reaches `current`. Newest group first, newest year first.
 export function seasonEras(spans, current) {

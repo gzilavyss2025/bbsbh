@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchSeasonAward, loadSeasonAwards, awardsSeasonInPlay } from '../src/api/awardsHistory.js'
+import { fetchSeasonAward, loadSeasonAwards, awardsSeasonInPlay } from '../src/api/awards/history.js'
 
 const row = { id: 592450, nameFirstLast: 'Aaron Judge', primaryPosition: { abbreviation: 'OF' } }
 const announced = { awards: [{ player: row, team: { id: 147 } }] }

@@ -4,7 +4,7 @@
 //
 // scripts/gen-all-star-rosters.mjs builds it — a hand-run regenerate, not a
 // cron, since a season's roster is decided once and never changes. Same
-// build-time-fetch pattern as awardsHistory.js and milb/history.js (see
+// build-time-fetch pattern as awards/history.js and milb/history.js (see
 // docs/data-enrichment.md §5). `rosters[season]` is `{ AL, NL }`, each a
 // precomputed `{ starters, bullpen, substitutes }` — the generator itself
 // resolves who started (from that game's boxscore) so the page does no
@@ -30,7 +30,7 @@
 // in-memory for the session since the file only changes on a hand-run
 // regenerate.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 export const loadAllStarRosters = staticJson('/data/all-star-rosters.json', {
   shape: (d) => ({

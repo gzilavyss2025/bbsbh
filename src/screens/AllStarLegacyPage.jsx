@@ -1,7 +1,7 @@
 import '../styles/42-first-scorebook.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { loadAllStarRosters } from '../api/allStarRosters.js'
-import { topActiveByAppearances, currentRosterLegacyByTeam } from '../api/allStarLegacy.js'
+import { loadAllStarRosters } from '../api/awards/allStarRosters.js'
+import { topActiveByAppearances, currentRosterLegacyByTeam } from '../api/awards/allStarLegacy.js'
 import { fetchRosterEntriesForTeams } from '../api/team/fetch.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -109,7 +109,7 @@ function HonoreeRow({ p }) {
 // One of the 30 team cards, ranked #1 (most current All-Stars) to #30
 // (fewest) — see rankedTeamIds in AllStarLegacyPage. Every player CURRENTLY
 // on this club's roster who has ever been named an All-Star, for any club
-// (see currentRosterLegacyByTeam in allStarLegacy.js — the honor travels
+// (see currentRosterLegacyByTeam in awards/allStarLegacy.js — the honor travels
 // with the player, not the jersey he earned it in). Collapsed to
 // TEAM_PREVIEW_COUNT rows by default; "Show all" reveals the rest, same
 // flat-expand convention as the All-Star Rosters page's own "Load more".
@@ -184,7 +184,7 @@ function TeamRankRail({ rank, total }) {
 }
 
 // All-Star Legacy: who's ever been named an All-Star, distilled two ways from
-// the same All-Star Rosters data (see api/allStarLegacy.js) — the all-time
+// the same All-Star Rosters data (see api/awards/allStarLegacy.js) — the all-time
 // appearance leaders among today's active players up top, then every
 // CURRENT roster's All-Star alumni below (a traded veteran's honor shows up
 // under his new club, not the one he earned it with). Selection membership
