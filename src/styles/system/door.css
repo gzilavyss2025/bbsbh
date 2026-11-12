@@ -76,6 +76,7 @@
 .door__label,
 .plink.lsp__seeall,
 .pcard__gamelink,
+.tensest__gamelink,
 .outl__name,
 .gnotes__pdf a {
   /* THE DOTTED LINK RULE (#2528): the one place a link's dotted rule is drawn. An anchor

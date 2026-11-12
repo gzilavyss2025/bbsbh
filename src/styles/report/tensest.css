@@ -68,10 +68,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The game, batter and pitcher are links (to the box score and the player pages), in ink. */
-.tensest .game a,
-.tensest .batter a {
-  color: var(--text-body);
+/* The game opens its box score: a door-style ink link, whose dotted rule is drawn in
+   system/door.css. The batter and pitcher are PlayerLinks, plain text until hovered. */
+.tensest__gamelink {
+  color: var(--text-heading);
 }
 
 /* On a phone the seven columns don't fit, so each row stacks as a small card: rank,

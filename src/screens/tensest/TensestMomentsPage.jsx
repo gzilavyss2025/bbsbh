@@ -11,7 +11,9 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { PINNED_TEAM_ID, teamAbbr, teamFullName } from '../../lib/teams.js'
 import { monthDayName } from '../../lib/dates.js'
-import { gamePath, playerPath } from '../../lib/route.js'
+import { gamePath } from '../../lib/route.js'
+import { useRouteLink } from '../../lib/nav.js'
+import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
@@ -42,6 +44,7 @@ const boxPath = (r) => gamePath(r.d, teamAbbr({ id: r.aw }), teamAbbr({ id: r.hm
 const countOf = (rows) => (rows?.length ? `${rows.length} at-bats` : undefined)
 
 function TensestTable({ rows, teamId, label, cutoffs }) {
+  const routeLink = useRouteLink()
   return (
     <Table frame="bare" label={label} className="tensest">
       <thead>
@@ -64,7 +67,7 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
             <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
             <td className="date">{monthDayName(r.d) || DASH}</td>
             <td className="game">
-              <a href={boxPath(r)}>{gameLabel(r, teamId)}</a>
+              <a className="tensest__gamelink" {...routeLink(boxPath(r))}>{gameLabel(r, teamId)}</a>
               {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
             </td>
             {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
@@ -73,7 +76,7 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
               {r.inn}
             </td>
             <td className="batter">
-              <a href={playerPath(r.bid, { name: r.bn })}>{r.bn}</a> vs <a href={playerPath(r.pid, { name: r.pn })}>{r.pn}</a>
+              <PlayerLink id={r.bid}>{r.bn}</PlayerLink> vs <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
             </td>
             <td className="what">{r.what}</td>
           </tr>
