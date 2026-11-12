@@ -84,10 +84,21 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The game opens its box score: a door-style ink link, whose dotted rule is drawn in
-   system/door.css. The batter and pitcher are PlayerLinks, plain text until hovered. */
+/* The game opens its box score. Like the batter and pitcher (PlayerLinks), it rests as
+   plain ink and shows the dotted rule only on hover or keyboard focus (Gary, 2026-11-12). */
 .tensest__gamelink {
   color: var(--text-heading);
+  text-decoration: none;
+}
+.tensest__gamelink:hover,
+.tensest__gamelink:focus-visible {
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
+}
+.tensest__gamelink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* On a phone the seven columns don't fit, so each row stacks as a small card: rank,
