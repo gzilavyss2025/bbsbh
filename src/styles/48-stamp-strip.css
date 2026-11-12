@@ -338,3 +338,107 @@
   70% { opacity: 1; }
   100% { transform: translate(-50%, -50%) translate(calc(var(--side) * var(--reach)), calc(var(--rise) + 40px)) rotate(calc(var(--side) * 540deg)); opacity: 0; }
 }
+
+/* ---- the stamp and the souvenir ticket, side by side (Gary, 2026-11-12) ---- */
+@media (min-width: 740px) {
+  /* layout-exempt: two equal souvenirs across the head of the sheet */
+  .bs__souvenirs {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  /* No card behind the stamp: the pair sits straight on the page, set down
+     like two keepsakes, the ticket tipped the other way from the stamp. */
+  .bs__souvenirs > .stampstrip { background: none; border: 0; box-shadow: none; }
+  .bs__souvenirs .heritagepass-open .heritagepass { transform: rotate(4deg); }
+  /* The stamp's box runs the ticket's full height, its contents centred in it. */
+  /* layout-exempt: the stamp centred top to bottom beside the ticket */
+  .bs__souvenirs > .stampstrip {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .bs__souvenirs > .stampstrip,
+  .bs__souvenirs > .heritagepass-box { margin: 0; }
+  /* The ticket is a tall portrait card and sizes from its width (a container),
+     so a narrower ticket keeps the sheet's head short. */
+  .bs__souvenirs .heritagepass-open .heritagepass { width: 300px; max-width: none; }
+}
+@media (max-width: 739.98px) {
+  .bs__souvenirs { display: contents; }
+  .bs .heritagepass-box { order: 26; }
+}
+/* Beside the ticket: both souvenirs 250px tall, and the stamp is its own control
+   (no button under it). Grey until pressed, full ink once stamped (Gary, 2026-11-12). */
+.stampstrip__mount { cursor: pointer; font: inherit; color: inherit; }
+.stampstrip__mount:disabled { cursor: default; }
+.stampstrip__mount:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--space-1); }
+.bs .stampstrip__mount--empty .gamestamp { filter: grayscale(1); }
+@media (min-width: 740px) {
+  .bs .bs__souvenirs .stampstrip__mount { width: 250px; height: 250px; }
+  .bs .bs__souvenirs .stampstrip__row { padding: var(--space-4); }
+  .bs .bs__souvenirs .stampstrip__do { display: none; }
+  /* The ticket sizes from its width; zoom scales the whole card, type and all,
+     down to the stamp's height without re-wrapping its lines. */
+  .bs__souvenirs .heritagepass-open .heritagepass { zoom: 0.36; }
+}
+
+/* The souvenir ticket opens full size (BoxScore.jsx's PassViewer). */
+.heritagepass-open {
+  all: unset;
+  display: block;
+  cursor: zoom-in;
+}
+.heritagepass-open:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--space-1); }
+.heritagepass-dialog {
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  max-height: 100dvh;
+  overflow: auto;
+}
+.heritagepass-dialog::backdrop { background: rgba(22, 34, 47, 0.7); } /* raw-value-exempt: the app scrim ink (.scrim), deeper so the ticket reads */
+/* The ticket is ~2.1x as tall as wide: fit it to the screen height, close button included. */
+.heritagepass-dialog .heritagepass { width: min(360px, 90vw, calc((100dvh - 7rem) / 2.12)); }
+.heritagepass-dialog__close { display: block; margin: var(--space-3) auto 0; color: var(--text-on-band); }
+/* On the dark backdrop: keep the cream label, and hover with a faint light wash, not the paper ghost hover. */
+.heritagepass-dialog .heritagepass-dialog__close:hover,
+.heritagepass-dialog .heritagepass-dialog__close:focus-visible { color: var(--text-on-band); background: color-mix(in srgb, var(--text-on-band) 14%, transparent); border-color: color-mix(in srgb, var(--text-on-band) 40%, transparent); }
+
+/* The press (Gary, 2026-11-12): the Game Log book's landing (passport-stamp-land,
+   49-passport-book.css) on the box score's stamp. It comes down large, from a
+   different angle each press (--land-from), meets the paper at 0.96 and settles.
+   Un-stamping is the reverse in spirit: the ink fades back to the grey proof. */
+.stampstrip__ink { display: block; width: 100%; }
+/* Lifting it: the ink drains back to the grey proof (a transition cannot start
+   from where the landing animation left off, so this is its own animation). */
+.stampstrip__ink--lifting .gamestamp { animation: strip-stamp-lift var(--dur-slow) var(--ease-out) both; }
+@keyframes strip-stamp-lift {
+  from { opacity: 1; filter: grayscale(0); color: var(--stamp-ink, currentColor); } /* --stamp-ink is set inline on the stamp (GameStamp.jsx) */
+  to { opacity: 0.4; filter: grayscale(1); color: var(--graphite-soft); }
+}
+.stampstrip__ink--landing .gamestamp { animation: strip-stamp-land var(--dur-slow) both; }
+@keyframes strip-stamp-land {
+  from {
+    opacity: 0;
+    transform: rotate(var(--land-from, -8deg)) scale(1.42);
+    animation-timing-function: var(--ease-press);
+  }
+  30% {
+    opacity: 1;
+    transform: rotate(calc(var(--land-from, -8deg) * 0.55)) scale(1.22);
+    animation-timing-function: var(--ease-press);
+  }
+  62% {
+    opacity: 1;
+    transform: rotate(0deg) scale(0.96);
+    animation-timing-function: var(--ease-out);
+  }
+  to { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stampstrip__ink--landing .gamestamp,
+  .stampstrip__ink--lifting .gamestamp { animation: none; }
+}

@@ -219,6 +219,16 @@
   align-items: center;
   gap: var(--space-2);
 }
+/* Who was pitching (Tensest moments): heading ink after the meter, clipped
+   short of the Watch button rather than wrapping under it. */
+.winprob__ledger-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-heading);
+}
+.winprob__ledger-row:has(.winprob__ledger-watch) .winprob__ledger-note { margin-right: 88px; }
 /* Clear the Watch button, which sits over the meta line's right end. The
    meta line is at least as tall as the button, so the description below
    starts under it rather than running beneath it. */

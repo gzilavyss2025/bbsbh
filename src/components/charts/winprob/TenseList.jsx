@@ -30,6 +30,7 @@ export function TenseList({ plays, activeIdx, cutoffs, clip, onPick, onWatch }) 
               active={activeIdx === p.idx}
               tag={tag}
               bars={bars}
+              note={p.pitcher ? `${p.pitcher} pitching` : null}
               desc={p.desc}
               label={`Tense moment ${index + 1}: ${halfWords}.${pressure ? ` ${pressure}.` : ''} Show on the chart`}
               watchLabel={`Watch tense moment ${index + 1}, ${halfWords}`}

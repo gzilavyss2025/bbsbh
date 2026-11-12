@@ -103,6 +103,10 @@ export function revealStampFacts(feed) {
     // The home club's league, so a postseason stamp can name its round (stampArt.js).
     leagueId: gameData.teams?.home?.league?.id ?? null,
     venue: gameData.venue?.name ?? '',
+    // First pitch (UTC) and the park's time zone, for the ticket's stub line
+    // (checked against gamePk 778538: gameData.datetime.dateTime, gameData.venue.timeZone.id).
+    gameDate: gameData.datetime?.dateTime ?? '',
+    timeZone: gameData.venue?.timeZone?.id ?? null,
     innings,
     scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,
     homeBattedLast,

@@ -10,6 +10,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { ClubStrip } from './ClubStrip.jsx'
+import { useRouteLink } from '../../lib/nav.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr } from '../../lib/teams.js'
 const MLB_CLUBS = new Set(ALL_MLB_TEAM_IDS)
 
@@ -191,8 +192,37 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
         </EmptyState>
       )}
 
+      <RevisitSeason season={winter.seasonEnded} />
+
       {/* The season's notebook: one row of stamped cards (LongAtBats.jsx). */}
       <LongAtBats season={winter.seasonEnded} />
+    </section>
+  )
+}
+
+// Doors to the season's standalone boards, between the wire and the notebook.
+const REVISIT = [
+  ['Streak Finder', '/streaks'],
+  ['Best Stretch', '/best-stretch'],
+  ['Pressure Moments', '/pressure-moments'],
+  ['Situational Records', '/situational-records'],
+  ['League Leaders', '/leaders'],
+  ['ABS Challenges', '/abs-challenges'],
+  ['Games After Elimination', '/eliminated'],
+  ['Standing Out', '/outliers'],
+]
+function RevisitSeason({ season }) {
+  const linkProps = useRouteLink()
+  return (
+    <section className="oseason__revisit" aria-label={`Revisit the ${season} season`}>
+      <SectionHead as="h3" className="oseason__head">{`Revisit the ${season} season`}</SectionHead>
+      <div className="oseason__revisitgrid">
+        {REVISIT.map(([label, path]) => (
+          <a key={path} className="door door--boxed door--stamped srecord__door" {...linkProps(path)}>
+            {label}
+          </a>
+        ))}
+      </div>
     </section>
   )
 }

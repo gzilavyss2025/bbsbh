@@ -418,3 +418,11 @@ test('a reliever stuck in the minors also gets his minor-league years', () => {
   })
   assert.match(cutStory(reliever, { clause: 'Sent X outright.' }), /in Triple-A in 2026, after he .* in Triple-A in 2025\./)
 })
+
+// A trade names two players, so its note leads with the last name, never "The
+// 23-year-old" (Gary, 2026-11-12: "who is the 23-year-old?").
+test('seasonSentence({ named: true }) always leads with the last name', () => {
+  for (const date of ['2026-01-01', '2026-01-02', '2026-01-03', '2026-01-04']) {
+    assert.match(seasonSentence(facts(), date, { named: true }), /^Suárez, 35,/)
+  }
+})

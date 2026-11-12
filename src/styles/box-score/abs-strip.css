@@ -1,0 +1,89 @@
+/* ------------------------------------------------- box score: ABS strip
+   A club's ABS challenges, joined to the foot of its batting/pitching card
+   (BoxScore.jsx's BoxAbs, Gary 2026-11-12): two columns, the calls it
+   challenged while batting and while pitching, one green/red pip per call
+   (the .abs__pip marks, 12-sealbox.css); an empty column is left blank. */
+/* layout-exempt: the ABS strip: its title, then batting and pitching columns */
+.bs__abs2 {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-4);
+  padding: var(--space-2h) var(--space-3h);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--surface-card);
+  /* Bolted on: no gap above, so it reads as the card's last row. */
+  margin-top: calc(-1 * var(--space-4));
+}
+.bs__abs2Col {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* A phone has no column gap to undo, and the strip ranks right after its
+   club's batting/pitching card (48-stamp-strip.css). */
+@media (max-width: 739.98px) {
+  .bs__abs2 {
+    margin-top: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: var(--space-1h);
+  }
+  .bs__abs2Title { grid-column: 1 / -1; }
+  .bs .bs__col--away > .bs__abs2 { order: 10; }
+  .bs .bs__col--home > .bs__abs2 { order: 14; }
+}
+/* A club that spent its last challenge: its own ruled row under both columns,
+   set like the strip's labels (condensed, small caps) in the failed pip's red. */
+.bs__abs2Out {
+  grid-column: 1 / -1;
+  margin: var(--space-2) calc(-1 * var(--space-3h)) calc(-1 * var(--space-2h));
+  padding: var(--space-1h) var(--space-3h);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-negative);
+}
+/* The box score's navy tags (Gary, 2026-11-12): the ABS strip's title and the
+   team card's note headers (Batting, Baserunning, Fielding, Pitching; .bs__notesTitle
+   in 21-box-score.css, which is at its line budget), in the card bands' ink. */
+.bs__abs2Title,
+.bs__notesTitle {
+  justify-self: start;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-band);
+  color: var(--text-on-band);
+}
+.bs__notesTitle {
+  display: inline-block;
+  margin-bottom: var(--space-1h);
+}
+
+/* The team card's batting and pitching tables run to the card's edges (Gary,
+   2026-11-12): pulled out by the card's side padding, with that padding moved
+   into the first and last columns so the text keeps its line. */
+.bs__team .table {
+  margin-inline: calc(-1 * var(--space-3h));
+}
+.bs__team .table :is(th, td):first-child { padding-left: var(--space-3h); }
+.bs__team .table :is(th, td):last-child { padding-right: var(--space-3h); }
+/* The name column's own `padding-left: 0 !important` (21-box-score.css) needs
+   the same weight to take the edge padding; a substitute keeps its extra step in. */
+.bs__team .table .bs__nameCol { padding-left: var(--space-3h) !important; }
+.bs__team .table .bs__row--substitute .bs__nameCol { padding-left: calc(2 * var(--space-3h)) !important; }
+
+/* Tensest moments, its own card under the scoring summary (Gary, 2026-11-12).
+   The win-prob chart portals its list in (WinProbChart's tenseSlot); the
+   card's masthead names it, so the list's own small heading goes, and the card
+   hides while the chart has nothing to put there. */
+.bs__tense { --card-radius: var(--radius-square); }
+.bs__tense:not(:has(.winprob__tense)) { display: none; }
+.bs__tense .winprob__tense-head { display: none; }
+.bs__tense .winprob__tense { margin: 0; padding: 0 var(--space-3h) var(--space-2); border: 0; }
+/* Phone order (48-stamp-strip.css): right after the scoring summary it came out of. */
+@media (max-width: 739.98px) {
+  .bs .bs__tense { order: 3; }
+}

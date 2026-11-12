@@ -41,3 +41,10 @@ test('ties never grow the list past 5 rows', () => {
   assert.equal(got.length, 5)
   assert.deepEqual(got.map((p) => p.idx), [0, 7, 1, 2, 3])
 })
+
+// The row names who was pitching (Gary, 2026-11-12): carried from the point.
+test('a tense play carries its pitcher, and an empty name when the point has none', () => {
+  const [top] = selectTensePlays([{ ...pt(2.5), pitcher: 'Max Fried' }, pt(1)])
+  assert.equal(top.pitcher, 'Max Fried')
+  assert.equal(selectTensePlays([pt(3)])[0].pitcher, '')
+})

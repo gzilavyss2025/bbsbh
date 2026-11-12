@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync, existsSync } from 'node:fs'
-import { factsRecord, heritagePassModel, passCity, passDate, passRecordText, yearRecordThrough } from '../src/lib/heritage/pass.js'
+import { factsRecord, heritagePassModel, passCity, passDate, passRecordText, passTime, yearRecordThrough } from '../src/lib/heritage/pass.js'
 import { stampGameFacts } from '../src/api/logbook/stampGames.js'
 import { revealStampFacts } from '../src/api/linescore.js'
 import { withSeriesFacts } from '../src/api/game/fetch.js'
@@ -60,7 +60,7 @@ test('the component model refuses live games, missing or invalid runs; keeps zer
 })
 
 test('dates are formatted without timezone shifts and invalid dates are omitted', () => {
-  assert.equal(passDate('2026-07-07'), 'Jul 7, 2026')
+  assert.equal(passDate('2026-07-07'), 'July 7, 2026') // spelled out on the stub (Gary, 2026-11-12)
   for (const value of ['', null, '2026-02-30', '2026-99-02', '2026-7-7', 'garbage']) {
     assert.equal(passDate(value), '')
   }
@@ -270,4 +270,14 @@ test('a postseason box-score pass reads the same ribbon as the Game Log pass', (
   const fromLog = heritagePassModel(stampGameFacts(game))
   assert.equal(fromBox.occasion, fromLog.occasion)
   assert.equal(fromBox.seriesGame, fromLog.seriesGame)
+})
+
+// The stub's first pitch, in the park's own clock (Gary, 2026-11-12). gamePk 778538:
+// gameDate 2025-03-29T17:05:00Z at Yankee Stadium (America/New_York, EDT).
+test('passTime reads first pitch in the park time zone, and nothing when unknown', () => {
+  assert.equal(passTime('2025-03-29T17:05:00Z', 'America/New_York'), '1:05 PM')
+  assert.equal(passTime('2025-03-29T17:05:00Z', 'America/Los_Angeles'), '10:05 AM')
+  assert.equal(passTime('', 'America/New_York'), '')
+  assert.equal(passTime('not a date', 'America/New_York'), '')
+  assert.equal(passTime('2025-03-29T17:05:00Z', 'Not/A_Zone'), '')
 })

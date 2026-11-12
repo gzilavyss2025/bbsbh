@@ -6,7 +6,7 @@ import { PressureMeter } from '../PressureMeter.jsx'
 // (the swing ledger's number and chip; nothing on the tense list). `label` is
 // the pick button's whole accessible name, which carries the pressure words,
 // since a button's own content is not read (the meter inside is decorative).
-export function LedgerRow({ play, active, lead = null, tag, bars, desc, label, watchLabel, watchable, onPick, onWatch }) {
+export function LedgerRow({ play, active, lead = null, tag, bars, note = null, desc, label, watchLabel, watchable, onPick, onWatch }) {
   return (
     <li className={`winprob__ledger-row${active ? ' is-active' : ''}`}>
       <button type="button" className="winprob__ledger-pick" aria-pressed={active} aria-label={label} onClick={() => onPick(play.idx)}>
@@ -14,6 +14,7 @@ export function LedgerRow({ play, active, lead = null, tag, bars, desc, label, w
           {lead}
           <span className="t-label">{tag}</span>
           <PressureMeter bars={bars} decorative />
+          {note && <span className="winprob__ledger-note t-label t-label--bold">{note}</span>}
         </span>
         <span className="winprob__ledger-desc">{desc}</span>
       </button>

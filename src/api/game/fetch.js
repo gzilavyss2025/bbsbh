@@ -187,6 +187,8 @@ export const WIN_PROB_FIELDS = [
   'batter',
   'pitcher',
   'id',
+  // The pitcher's name, for the Tensest moments rows ("Max Fried pitching").
+  'fullName',
   'result',
   'awayScore',
   'homeScore',

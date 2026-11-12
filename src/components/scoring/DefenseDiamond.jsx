@@ -158,7 +158,12 @@ function DefenseName({ entry }) {
         entry.last
       )}
       {entry.inning != null && (
-        <span className="defdiamond__enter"> ({ordinal(entry.inning)})</span>
+        <span className="defdiamond__enter">
+          {' '}
+          <span className="defdiamond__paren">(</span>
+          {ordinal(entry.inning)}
+          <span className="defdiamond__paren">)</span>
+        </span>
       )}
       <InjuredMark hurt={entry.hurt} />
     </StruckLine>

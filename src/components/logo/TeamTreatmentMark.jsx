@@ -51,6 +51,11 @@ export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, 
     '--offset-y': offsetY ? `${offsetY}%` : undefined,
     '--pinstripe-color': pinstripeColor || undefined,
     '--pinstripe-bg': pinstripeBg || undefined,
+    // The broadcast gloss catches each club's tile a little differently, fixed
+    // by its id, so two tiles side by side never shine alike (Gary, 2026-11-12).
+    '--gloss-x': `${40 + ((teamId * 37) % 40)}%`,
+    '--gloss-a': `${100 + ((teamId * 53) % 40)}deg`,
+    '--gloss-cut': `${38 + ((teamId * 29) % 18)}%`,
   }
   const cls = [block, pinstripeColor ? `${block}--pinstripe` : '', className].filter(Boolean).join(' ')
   return (

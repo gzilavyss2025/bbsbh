@@ -1,4 +1,5 @@
 import { useId, useMemo, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { selectTensePlays, winProbSplit } from '../../api/winprob.js'
 import { loadCutoffs } from '../../api/tensest/tenseBars.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -104,6 +105,10 @@ export function WinProbChart({
   highlights = null,
   filmEligible = true,
   onActive = null,
+  // A DOM node to draw the Tensest moments list into instead of under the
+  // ledger (the box score gives it a card of its own, Gary 2026-11-12). A
+  // portal, so its rows still pick plays on this chart and open its clips.
+  tenseSlot = null,
 }) {
   const patternUid = useId()
   // The latest play until the user picks one (winprob/useWinProbSelection.js).
@@ -423,14 +428,19 @@ export function WinProbChart({
         onPick={pickSwing}
         onWatch={select}
       />
-      <TenseList
-        plays={tensePlays}
-        activeIdx={activeIdx}
-        cutoffs={cutoffs}
-        clip={clip}
-        onPick={pickSwing}
-        onWatch={select}
-      />
+      {(() => {
+        const tense = (
+          <TenseList
+            plays={tensePlays}
+            activeIdx={activeIdx}
+            cutoffs={cutoffs}
+            clip={clip}
+            onPick={pickSwing}
+            onWatch={select}
+          />
+        )
+        return tenseSlot ? createPortal(tense, tenseSlot) : tense
+      })()}
       </div>
 
       {clip.open && (

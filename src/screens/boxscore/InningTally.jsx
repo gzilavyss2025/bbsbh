@@ -144,7 +144,7 @@ export function InningTally({ rows, away, home, treatments }) {
                 <tr key={side}>
                   {i === 0 && (
                     <th className="bs__tallyMeasure" scope="rowgroup" rowSpan={shown.length}>
-                      {label}
+                      <span className="bs__tallyTag">{label}</span>
                     </th>
                   )}
                   <th className="bs__tallyClub" scope="row">

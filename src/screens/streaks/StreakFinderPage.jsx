@@ -1,6 +1,6 @@
 import '../../styles/report/streaks.css'
-import { useId, useMemo, useState } from 'react'
-import { statsFor, statByKey, findStretches, rankStretches, labelRanks, firstSeason, loadLogs, toGames } from '../../api/streaks/streaks.js'
+import { Fragment, useId, useMemo, useState } from 'react'
+import { statsFor, statByKey, findStretches, rankStretches, labelRanks, firstSeason, loadLogs, toGames, fetchStretchScores } from '../../api/streaks/streaks.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -108,6 +108,7 @@ export function StreakFinderPage() {
     (signal) => (first ? loadLogs(applied.team, group, from, to, applied.post, signal) : Promise.resolve(null)),
     [applied.team, group, from, to, applied.post, first],
   )
+  const [open, setOpen] = useState(null)
   const games = useMemo(() => (loaded ? toGames(loaded, field) : null), [loaded, field])
 
   const rows = useMemo(() => {
@@ -147,6 +148,31 @@ export function StreakFinderPage() {
   const what = applied.op === 'top' || applied.op === 'bottom'
     ? `${applied.op === 'top' ? 'Most' : 'Fewest'} ${stat.label}, ${games_}`
     : `${applied.v}${applied.op === 'max' ? ' or fewer' : '+'} ${stat.label}, ${games_}`
+
+  // The results, said in one sentence above the table (Gary, 2026-11-12): what was
+  // counted, by or against whom, over which seasons.
+  const unit = `${stat.label}`.toLowerCase() // caps-js-exempt: a stat name inside running prose (a copy: the compiler reads a method call on stat as a mutation)
+  const club = teamClub(applied.team)
+  const by = applied.side === 'against' ? `against the ${club}` : `by the ${club}`
+  const stretch = `in a ${applied.n}-game stretch`
+  // The seasons the log actually holds, not the search bounds: statsapi's
+  // firstYearOfPlay is the year a franchise was awarded (Brewers 1968, first game 1969).
+  const [y0, y1] = useMemo(() => {
+    if (!games?.length) return [from, to]
+    let lo = Infinity
+    let hi = -Infinity
+    for (const g of games) {
+      if (g.season < lo) lo = g.season
+      if (g.season > hi) hi = g.season
+    }
+    return [lo, hi]
+  }, [games, from, to])
+  const years = y0 === y1 ? `in ${y0}` : `${y0}–${y1}`
+  const extras = [applied.first && 'season openers only', applied.post && 'postseason included'].filter(Boolean)
+  const summary = (applied.op === 'top' || applied.op === 'bottom'
+    ? `${applied.op === 'top' ? 'Most' : 'Fewest'} ${unit} ${stretch} ${by}, ${years}`
+    : `${rows.length} ${rows.length === 1 ? 'time' : 'times'} with ${applied.op === 'max' ? 'at most' : 'at least'} ${applied.v} ${unit} ${stretch} ${by}, ${years}`)
+    + (extras.length ? ` (${extras.join(', ')})` : '') + '.'
 
   return (
     <div className="screen">
@@ -229,7 +255,9 @@ export function StreakFinderPage() {
         </Notice>
       )}
       {games && !loading && (
-        <Card frame="stamped" body="flush" label={what} count={`${rows.length} ${rows.length === 1 ? 'streak' : 'streaks'}`}>
+        <Stack gap="base">
+        <h2 className="streaks__summary">{summary}</h2>
+        <Card frame="stamped" body="flush" aria-label={what}>
           {rows.length ? (
             <>
               <Table frame="bare" label={`${name} streaks`} className="streaks">
@@ -247,8 +275,15 @@ export function StreakFinderPage() {
                   {rows.map((w) => {
                     const a = w.games[0]
                     const z = w.games[w.games.length - 1]
+                    const key = `${a.date}:${a.gameNumber}:${w.post}`
+                    const isOpen = open === key
                     return (
-                      <tr key={`${a.date}:${a.gameNumber}:${w.post}`}>
+                      <Fragment key={key}>
+                      <tr
+                        className={`streaks__row${isOpen ? ' streaks__row--open' : ''}`}
+                        onClick={(e) => !e.target.closest('a') && setOpen(isOpen ? null : key)}
+                        aria-expanded={isOpen}
+                      >
                         <td className="rank">{w.rank}</td>
                         <td className="dates">
                           <a href={gameHref(applied.team, a)}>{shortDate(a.date)}</a>
@@ -265,6 +300,14 @@ export function StreakFinderPage() {
                           {w.games.map((g, i) => <span key={i} className="streaks__game">{g.value}<span className="streaks__unit">{stat.unit}</span></span>)}
                         </td>
                       </tr>
+                      {isOpen && (
+                        <tr className="streaks__detail">
+                          <td colSpan={6}>
+                            <StretchGames teamId={applied.team} games={w.games} unit={stat.unit} />
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     )
                   })}
                 </tbody>
@@ -274,10 +317,53 @@ export function StreakFinderPage() {
             <p className="hint">No streaks reached that total. Try a lower number.</p>
           )}
         </Card>
+        </Stack>
       )}
       </Stack>
 
       <ReportFooter />
     </div>
+  )
+}
+
+// A clicked row's games, one line each: the date, the opponent, the result and
+// the stat, with the box score a tap away. The scores are read on open.
+function StretchGames({ teamId, games, unit }) {
+  const { data: scores, loading } = useAsync((signal) => fetchStretchScores(games.map((g) => g.gamePk), signal), [games])
+  return (
+    <table className="streaks__games">
+      <thead>
+        <tr>
+          <th className="t-label">Date</th>
+          <th className="t-label">Opponent</th>
+          <th className="t-label">Result</th>
+          <th className="t-label">Stat</th>
+          <th><span className="sr-only">Box score</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {games.map((g, i) => {
+          const s = scores?.[g.gamePk]
+          const us = s ? (g.isHome ? s.home : s.away) : null
+          const them = s ? (g.isHome ? s.away : s.home) : null
+          const wl = us == null || them == null ? null : us > them ? 'W' : us < them ? 'L' : 'T'
+          return (
+            <tr key={i}>
+              <td>{shortDate(g.date)}</td>
+              <td>
+                <span className="streaks__gopp">
+                  <span className="streaks__gside">{g.isHome ? 'vs' : '@'}</span>
+                  <TeamLogo teamId={g.oppId} name={teamFullName(g.oppId)} size={18} />
+                  {teamAbbr({ id: g.oppId })}
+                </span>
+              </td>
+              <td className={wl ? `streaks__gres--${wl}` : ''}>{wl ? `${wl} ${us}–${them}` : loading ? '…' : '—'}</td>
+              <td>{g.value}<span className="streaks__unit">{unit}</span></td>
+              <td className="streaks__gbox"><a className="t-label t-label--bold" href={gameHref(teamId, g)}>Box score ›</a></td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   )
 }

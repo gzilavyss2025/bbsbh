@@ -288,7 +288,7 @@ test('mainTreatmentPinstripe is true only for the pinstriped Main-tile teams', (
 })
 
 test('mainTreatmentPinstripeColor defaults to black unless a team overrides it', () => {
-  assert.equal(mainTreatmentPinstripeColor(147), 'rgba(0, 0, 0, 0.16)') // Yankees — no override, shares the default
+  assert.equal(mainTreatmentPinstripeColor(147), 'rgba(0, 0, 0, 0.32)') // Yankees — no override, shares the default (darkened 2026-11-12: 0.16 vanished against the paper grid)
 })
 
 test('mainTreatmentRecolor is true only for teams whose Main mark swaps to the hand-edited asset', () => {
@@ -467,7 +467,7 @@ test('treatmentTile spells the Main look the three ways its callers do', () => {
 
 test('treatmentTile picks a pinstripe pattern over a flat tint, never both', () => {
   const rockies = treatmentTile(115, 'main') // pinstriped Main tile
-  assert.equal(rockies.pinstripeColor, 'rgba(0, 0, 0, 0.16)')
+  assert.equal(rockies.pinstripeColor, 'rgba(0, 0, 0, 0.32)') // the shared default, darkened 2026-11-12
   assert.equal(rockies.tint, null, 'a pattern tile has no flat swatch to fill with')
 
   const dbacks = treatmentTile(109, 'main')

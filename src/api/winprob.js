@@ -81,6 +81,9 @@ export function selectWinProbPath(
       half,
       isScoring: !!e.about?.isScoringPlay,
       desc: e.result?.description ?? '',
+      // Who was on the mound (verified against gamePk 778538's winProbability:
+      // matchup.pitcher.fullName); the Tensest moments row names him.
+      pitcher: e.matchup?.pitcher?.fullName ?? '',
       atBatIndex,
       // The terminal pitch's playId, the key a raw clip resolves on (the same
       // read as halfInningFeed.js). Verified against gamePk 823738; null when
@@ -146,7 +149,7 @@ export function selectWinProbBigPlays(
 export function selectTensePlays(points, { limit = 3, max = 5 } = {}) {
   if (!Array.isArray(points)) return []
   const ranked = points
-    .map((p, idx) => ({ idx, li: p.li, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId }))
+    .map((p, idx) => ({ idx, li: p.li, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId, pitcher: p.pitcher ?? '' }))
     .filter((p) => typeof p.li === 'number')
     .sort((a, b) => b.li - a.li || a.idx - b.idx)
   const out = []

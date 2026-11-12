@@ -192,3 +192,18 @@ export async function loadLogs(teamId, group, from, to, withPost, signal) {
 }
 
 export const toGames = (logs, field) => logs.flatMap(({ splits, post }) => splits.map((s) => gameRow(s, field, post)))
+
+// The finals of a stretch's games, by gamePk: { [pk]: { home, away } } runs.
+// Read when a row is opened, never with the table (one schedule call per row).
+export async function fetchStretchScores(gamePks, signal) {
+  const pks = gamePks.filter(Boolean)
+  if (!pks.length) return {}
+  const data = await getJson(`/api/v1/schedule?gamePks=${pks.join(',')}`, { signal })
+  const out = {}
+  for (const d of data?.dates ?? []) {
+    for (const g of d.games ?? []) {
+      out[g.gamePk] = { home: g.teams?.home?.score ?? null, away: g.teams?.away?.score ?? null }
+    }
+  }
+  return out
+}

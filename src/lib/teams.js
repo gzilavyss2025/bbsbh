@@ -753,7 +753,7 @@ export function mainTreatmentPinstripe(teamId) {
 // (Rockies), overridable per team (Yankees' navy) to match that club's own
 // home pinstripe.
 export function mainTreatmentPinstripeColor(teamId) {
-  return MAIN_OVERRIDES[teamId]?.pinstripeColor ?? 'rgba(0, 0, 0, 0.16)'
+  return MAIN_OVERRIDES[teamId]?.pinstripeColor ?? 'rgba(0, 0, 0, 0.32)'
 }
 
 // The colored fill under a pinstriped Main tile's lines, or null for the

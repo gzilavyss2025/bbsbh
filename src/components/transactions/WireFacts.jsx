@@ -59,7 +59,10 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
   // A one-player send-down or cash deal runs its note on even as a one-line
   // move: his last game, his season, his time with the club are the context the
   // bare sentence lacks.
-  const line = oneLine && !(subjects.length === 1 && ['option', 'sold'].includes(subjects[0].template))
+  // A trade always runs its players' notes on, even a minor one: the bare names
+  // say nothing about who moved, and the row is two club marks tall anyway.
+  const isTrade = subjects.some((s) => ['trade', 'minor-deal'].includes(s.template))
+  const line = oneLine && !isTrade && !(subjects.length === 1 && ['option', 'sold'].includes(subjects[0].template))
   const promoted = oneLine && !line
   const probe = useRef(null)
   const near = useNearView(probe, promoted)

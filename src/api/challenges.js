@@ -260,6 +260,21 @@ export function challengesLeft(outcomes, { regulation = 9, throughInning = 1 } =
   return left
 }
 
+// The challenge that spent a club's last one, as `{ inning, half }`, or null if
+// it never ran out (Gary, 2026-11-12: the box score's "Ran out of ABS challenges
+// in ▲5"). Same rule as challengesLeft, read after each challenge in turn.
+export function ranOutAt(outcomes, { regulation = 9 } = {}) {
+  const list = outcomes ?? []
+  for (let i = 0; i < list.length; i++) {
+    const o = list[i]
+    if (o.outcome !== 'fail' || o.inProgress) continue
+    if (challengesLeft(list.slice(0, i + 1), { regulation, throughInning: o.inning ?? 1 }) === 0) {
+      return { inning: o.inning, half: o.half }
+    }
+  }
+  return null
+}
+
 // Each club's challenges, in chronological order, through (throughInning,
 // throughHalf) inclusive — grouped by side for AbsRow's pip row + expandable
 // detail list (StatBox.jsx). Each entry is a full challengesForPlay record
@@ -279,7 +294,11 @@ export function selectChallengeState(feed, throughInning, throughHalf) {
   const regulation = regulationInnings(feed?.liveData?.linescore?.scheduledInnings)
   const sideOf = (side) => {
     const outcomes = all.filter((c) => c.side === side)
-    return { outcomes, remaining: challengesLeft(outcomes, { regulation, throughInning: reached }) }
+    return {
+      outcomes,
+      remaining: challengesLeft(outcomes, { regulation, throughInning: reached }),
+      ranOut: ranOutAt(outcomes, { regulation }),
+    }
   }
   return {
     away: { teamId: awayId, ...sideOf('away') },
