@@ -10,7 +10,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { PINNED_TEAM_ID, teamAbbr, teamFullName } from '../../lib/teams.js'
-import { monthDayName } from '../../lib/dates.js'
+import { monthDay, monthDayName } from '../../lib/dates.js'
 import { gamePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
@@ -65,7 +65,7 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
             {/* The meter and the number beside it: every play here is in the season's top 1%,
                 so the meter is nearly always full and the number tells the rows apart (Gary). */}
             <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
-            <td className="date">{monthDayName(r.d) || DASH}</td>
+            <td className="date">{monthDay(r.d) || DASH}</td>
             <td className="game">
               <a className="tensest__gamelink" {...routeLink(boxPath(r))}>{gameLabel(r, teamId)}</a>
               {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
