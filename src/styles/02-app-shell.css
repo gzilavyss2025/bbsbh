@@ -26,3 +26,11 @@
   letter-spacing: var(--ls-num);
 }
 
+
+/* The block above the site footer is at least one screen tall, so the footer
+   always starts below the fold. Without this the footer drew right under a
+   short loading state, then the data pushed it off screen: a layout shift of
+   about 0.5 on most report pages in the field (#2984). */
+.screen > :has(+ .sitefooter) {
+  min-height: 100dvh;
+}
