@@ -335,7 +335,3 @@ a.frnums__link:focus-visible {
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
-.frparks__foot {
-  margin: var(--space-2) 0 0;
-  padding-bottom: 0;
-}

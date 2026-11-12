@@ -36,6 +36,8 @@ test('collapseSeasons: a venue renamed inside a span keeps every name, newest in
   const span = collapseSeasons(sample()).find((s) => s.from === 1986)
   assert.deepEqual(span.venueNames, ['County Stadium', 'County Stadium II'])
   assert.equal(span.venueName, 'County Stadium II')
+  // #2959: each name keeps the season it first appears, index for index.
+  assert.deepEqual(span.venueNamesFrom, [1986, 1990])
 })
 
 test('collapseSeasons: unsorted input and no rows', () => {

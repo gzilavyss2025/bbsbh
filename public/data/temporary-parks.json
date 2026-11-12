@@ -1,0 +1,33 @@
+{
+ "about": "Hand-curated (#2959): temporary or part-season home parks the season feed misses. Each entry has a source and the day it was checked.",
+ "clubs": {
+  "120": [
+   {
+    "venueId": 2535,
+    "name": "Hiram Bithorn Stadium",
+    "seasons": [2003, 2004],
+    "note": "San Juan, part of the Expos' home slate",
+    "source": "https://en.wikipedia.org/wiki/Hiram_Bithorn_Stadium",
+    "checked": "2026-11-12"
+   }
+  ],
+  "141": [
+   {
+    "venueId": 2756,
+    "name": "Sahlen Field",
+    "seasons": [2020, 2021],
+    "note": "Buffalo, during the pandemic border closure",
+    "source": "https://en.wikipedia.org/wiki/Sahlen_Field",
+    "checked": "2026-11-12"
+   },
+   {
+    "venueId": 2536,
+    "name": "TD Ballpark",
+    "seasons": [2021],
+    "note": "Dunedin, the first two months of 2021",
+    "source": "https://en.wikipedia.org/wiki/TD_Ballpark",
+    "checked": "2026-11-12"
+   }
+  ]
+ }
+}

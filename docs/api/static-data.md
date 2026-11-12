@@ -1057,7 +1057,14 @@ for each generator; the reader modules:
   `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.
   The data starts in 1901, so a park's first season is the first IN THIS DATA,
-  never its opening year. A MiLB id has no file and reads empty.
+  never its opening year. A MiLB id has no file and reads empty. Each span's `venueNamesFrom` holds the
+  first season of each of `venueNames` (#2959), so the Parks card dates a park's former names; a name
+  that came back keeps only its first season, and that park lists its former names undated.
+  `temporaryParksFor(teamId)` reads `public/data/temporary-parks.json`, hand-curated (#2959): a club's
+  temporary or part-season home parks the season feed misses (the Blue Jays in Buffalo and Dunedin, the
+  Expos in San Juan), each `{ venueId, name, seasons, note, source, checked }`. `test/temporary-parks.test.js`
+  fails an entry with no https source or checked date. Edit the file by hand; there is no generator. A club
+  with none, or a missing file, reads `[]`.
 - `history/franchiseLedger.js` — a club's season ledger, from `public/data/franchise-ledger/{teamId}.json`
   (hand-run `gen-franchise-ledger.mjs`, #2595). `franchiseLedger(teamId)` returns `{ through, rows }`,
   oldest first. A row: `season`, `name`, `league` (the franchise-history span's), `w`, `l`, `gb`,
