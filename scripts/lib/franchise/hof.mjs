@@ -36,7 +36,7 @@ export function seasonsByTeam(person) {
 // plaques: hand-kept {id: {club, source}} (franchise/hof-plaques.json, #2966): the club NAME on the plaque,
 // which the feed lacks (it gives only the current franchise). Stored as `plaqueClub`.
 // recipients: inducteesFrom's list. careers: Map(personId -> people response person). clubIds: the
-// clubs to write. -> Map(clubId -> { teamId, inductedAs: [{ id, name, year }],
+// clubs to write. -> Map(clubId -> { teamId, inductedAs: [{ id, name, year, plaqueClub? }],
 // alsoPlayed: [{ id, name, year, seasons }] }). `year` is the induction year. A player inducted as a
 // club is not repeated in that club's alsoPlayed (once, under "inducted as"). A recipient inducted
 // under a club outside `clubIds` (no club on the plaque, a Negro League or 1800s club) appears only

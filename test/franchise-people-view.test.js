@@ -86,21 +86,27 @@ test('summaryView: a long pennant or title list moves out of the tile caption in
   assert.equal(short.title.runs, null)
 })
 
-test('hofHeading: names the club unless a plaque names an earlier club (#2966)', async () => {
+test('hofHeading: names the club unless a plaque names an earlier name of this franchise (#2966)', async () => {
   const { hofHeading } = await import('../src/screens/team/franchise/people/peopleView.js')
-  const brewers = [{ name: 'Robin Yount', plaqueClub: 'Milwaukee Brewers' }, { name: 'Paul Molitor', plaqueClub: 'Milwaukee Brewers' }]
-  assert.equal(hofHeading('Milwaukee Brewers', brewers), 'Inducted as Milwaukee Brewers')
-  const nats = [{ name: 'Gary Carter', plaqueClub: 'Montreal Expos' }, { name: 'Andre Dawson', plaqueClub: 'Montreal Expos' }]
-  assert.equal(hofHeading('Washington Nationals', nats), 'Inducted with this franchise')
-  assert.equal(hofHeading('Milwaukee Brewers', [{ name: 'No plaque on file' }]), 'Inducted as Milwaukee Brewers')
-  assert.equal(hofHeading('Milwaukee Brewers', null), 'Inducted as Milwaukee Brewers')
+  const brewers = [{ plaqueClub: 'Milwaukee Brewers' }, { plaqueClub: 'Milwaukee Brewers' }]
+  const bNames = [{ name: 'Seattle Pilots' }, { name: 'Milwaukee Brewers' }]
+  assert.equal(hofHeading('Milwaukee Brewers', brewers, bNames), 'Inducted as Milwaukee Brewers')
+  const nNames = [{ name: 'Montreal Expos' }, { name: 'Washington Nationals' }]
+  assert.equal(hofHeading('Washington Nationals', [{ plaqueClub: 'Montreal Expos' }], nNames), 'Inducted with this franchise')
+  // The Hall files a player under another franchise: not an earlier club of this one.
+  assert.equal(hofHeading('Boston Red Sox', [{ plaqueClub: 'Chicago White Sox' }], [{ name: 'Boston Red Sox' }]), 'Inducted as Boston Red Sox')
+  assert.equal(hofHeading('Milwaukee Brewers', [{ name: 'No plaque on file' }], bNames), 'Inducted as Milwaukee Brewers')
+  assert.equal(hofHeading('Milwaukee Brewers', null, null), 'Inducted as Milwaukee Brewers')
 })
 
-test('hof files: the Brewers read "as", the Nationals read "with this franchise" (#2966)', async () => {
+test('hof files: a club that never moved reads "as"; the Nationals read "with this franchise" (#2966)', async () => {
   const { hofHeading } = await import('../src/screens/team/franchise/people/peopleView.js')
   const hof = (id) => JSON.parse(readFileSync(new URL(`../public/data/franchise-hof/${id}.json`, import.meta.url), 'utf8'))
-  assert.equal(hofHeading('Milwaukee Brewers', hof(158).inductedAs), 'Inducted as Milwaukee Brewers')
-  assert.equal(hofHeading('Washington Nationals', hof(120).inductedAs), 'Inducted with this franchise')
+  const names = (id) => [...new Set(history(id).spans.map((s) => s.name))].map((name) => ({ name }))
+  for (const [id, club] of [[158, 'Milwaukee Brewers'], [111, 'Boston Red Sox'], [143, 'Philadelphia Phillies'], [138, 'St. Louis Cardinals'], [147, 'New York Yankees']]) {
+    assert.equal(hofHeading(club, hof(id).inductedAs, names(id)), `Inducted as ${club}`, club)
+  }
+  assert.equal(hofHeading('Washington Nationals', hof(120).inductedAs, names(120)), 'Inducted with this franchise')
 })
 
 // #2788: the Parks card, on the real franchise-history files.

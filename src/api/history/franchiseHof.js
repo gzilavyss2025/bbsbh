@@ -2,7 +2,7 @@ import { staticJsonBy } from '../staticJson.js'
 
 // A club's Hall of Famers, from public/data/franchise-hof/{teamId}.json (hand-run
 // scripts/franchise/gen-franchise-hof.mjs, #2597). Two groups:
-//   inductedAs:  [{ id, name, year, plaqueClub? }]           the club on the plaque (awards/MLBHOF/recipients)
+//   inductedAs:  [{ id, name, year, plaqueClub? }]  the club on the plaque (awards/MLBHOF/recipients)
 //   alsoPlayed:  [{ id, name, year, seasons }]  played for the club, inducted as another club or
 //                                               none; `seasons` are the years on this club
 // `year` is the induction year. A player inducted as a club is not repeated in its alsoPlayed.

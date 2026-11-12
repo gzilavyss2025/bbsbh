@@ -9,11 +9,14 @@ import { pct } from '../ledgerRows.js'
 export const years = (from, to) => (from === to ? String(from) : `${from}–${to}`)
 
 // The Hall of Fame card's first group (#2966). The plaques name the club as it was then: the heading
-// names the club unless some plaque names another (the Expos' on the Nationals' page). An entry with
-// no `plaqueClub` on file does not count against it. `inductedAs` is the club's HOF file group.
-export function hofHeading(teamName, inductedAs) {
-  const moved = (inductedAs ?? []).some((p) => p.plaqueClub && p.plaqueClub !== teamName)
-  return moved ? 'Inducted with this franchise' : `Inducted as ${teamName}`
+// names the club unless a plaque names an earlier name of THIS franchise (the Expos' on the
+// Nationals' page). `names` is the summary's [{ name, years }]. A plaque club that is no name of the
+// franchise (the Hall files a few inductees under another club than the MLB feed does) is not an
+// earlier club and is ignored, as is an entry with no `plaqueClub` on file.
+export function hofHeading(teamName, inductedAs, names) {
+  const own = new Set((names ?? []).map((n) => n.name))
+  const earlier = (inductedAs ?? []).some((p) => p.plaqueClub && p.plaqueClub !== teamName && own.has(p.plaqueClub))
+  return earlier ? 'Inducted with this franchise' : `Inducted as ${teamName}`
 }
 
 // summarizeFranchise's `managers` -> the card's rows, newest first (by his last season, then his
