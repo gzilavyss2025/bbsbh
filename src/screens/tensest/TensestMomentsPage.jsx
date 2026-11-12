@@ -10,7 +10,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { PINNED_TEAM_ID, teamAbbr, teamFullName } from '../../lib/teams.js'
-import { monthDay, monthDayName } from '../../lib/dates.js'
+import { monthDay } from '../../lib/dates.js'
 import { gamePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
@@ -113,7 +113,7 @@ export function TensestMomentsPage() {
   const league = useMemo(() => leagueTop(filtering ? filterPlays(plays, filters) : plays), [plays, filters, filtering])
   const hasData = (plays?.length ?? 0) > 0
   const name = teamFullName(teamId) || 'This club'
-  const updated = monthDayName(data?.through)
+  const updated = monthDay(data?.through)
 
   return (
     <div className="screen">
