@@ -98,3 +98,13 @@ test('gameNumbers keeps a doubleheader game 2 and a postseason series game', () 
   assert.deepEqual(gameNumbers({ gameType: 'R', gameNumber: 2 }), { gn: 2 })
   assert.deepEqual(gameNumbers({ gameType: 'D', gameNumber: 1, seriesGameNumber: 1 }), { sg: 1 })
 })
+
+import { boardBars } from '../src/api/tensest/tensest.js'
+
+test('boardBars spreads the page\'s range (4 to 9.99) over the 10 bars', () => {
+  assert.equal(boardBars(9.99), 10)
+  assert.equal(boardBars(4), 1)
+  assert.equal(boardBars(6.1), 4)
+  assert.ok(boardBars(6.1) < boardBars(8.48))
+  assert.equal(boardBars(undefined), null)
+})

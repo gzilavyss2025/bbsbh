@@ -1,8 +1,7 @@
 import '../../styles/report/tensest.css'
 import { useMemo, useState } from 'react'
-import { loadTensest, rankLabel, postseasonLabel } from '../../api/tensest/tensest.js'
+import { boardBars, loadTensest, rankLabel, postseasonLabel } from '../../api/tensest/tensest.js'
 import { clubTop, filterOptions, filterPlays, leagueTop } from '../../api/tensest/slices.js'
-import { loadCutoffs, tenseBars } from '../../api/tensest/tenseBars.js'
 import { PressureMeter } from '../../components/charts/PressureMeter.jsx'
 import { TensestFilters } from './TensestFilters.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
@@ -43,7 +42,7 @@ const boxPath = (r) => gamePath(r.d, teamAbbr({ id: r.aw }), teamAbbr({ id: r.hm
 
 const countOf = (rows) => (rows?.length ? `${rows.length} at-bats` : undefined)
 
-function TensestTable({ rows, teamId, label, cutoffs }) {
+function TensestTable({ rows, teamId, label }) {
   const routeLink = useRouteLink()
   return (
     <Table frame="bare" label={label} className="tensest">
@@ -62,9 +61,10 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
         {rows.map((r) => (
           <tr key={`${r.pk}:${r.i}`}>
             <td className="rank">{rankLabel(r, rows)}</td>
-            {/* The meter and the number beside it: every play here is in the season's top 1%,
-                so the meter is nearly always full and the number tells the rows apart (Gary). */}
-            <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
+            {/* The meter spreads this board's own range (boardBars), not the season's: on the
+                season scale every row here is full. The number beside it is what a screen
+                reader hears, so the meter is decorative. */}
+            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> {r.li.toFixed(2)}</td>
             <td className="date">{monthDay(r.d) || DASH}</td>
             <td className="game">
               <a className="tensest__gamelink" {...routeLink(boxPath(r))}>{gameLabel(r, teamId)}</a>
@@ -99,7 +99,6 @@ export function TensestMomentsPage() {
   useDocumentTitle('Pressure Moments')
   const { loading, error, data } = useAsync(() => loadTensest(), [])
   const { favoriteTeamId } = useFavoriteTeam()
-  const { data: cutoffs } = useAsync(() => loadCutoffs(), [])
   const [picked, setPicked] = useState(null)
   const [filters, setFilters] = useState({})
   const plays = data?.plays
@@ -128,8 +127,8 @@ export function TensestMomentsPage() {
 
       <p className="hint">
         MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
-        the runners. A normal at-bat is 1.0 and the scale stops at 9.99. The meter shows where each one ranks
-        among every at-bat of the season. These are the season’s tensest: each club’s top 25 batting and pitching,
+        the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more; the
+        meter runs from 4 (one bar) to 9.99 (full). These are the season’s tensest: each club’s top 25 batting and pitching,
         and the league’s top 50, which you can narrow by batter, pitcher, park or club. Ties are included and marked T.
         Postseason games are included and marked with their round and game.
       </p>
@@ -157,14 +156,14 @@ export function TensestMomentsPage() {
           <Stack gap="loose">
           <Card frame="stamped" body="flush" label={`${name} batting`} count={countOf(mine?.bat)} className="tensest__section">
             {mine?.bat?.length ? (
-              <TensestTable rows={mine.bat} teamId={teamId} cutoffs={cutoffs} label={`${name} batting, tensest at-bats`} />
+              <TensestTable rows={mine.bat} teamId={teamId} label={`${name} batting, tensest at-bats`} />
             ) : (
               <p className="hint">No tense at-bats for this club yet.</p>
             )}
           </Card>
           <Card frame="stamped" body="flush" label={`${name} pitching`} count={countOf(mine?.pit)} className="tensest__section">
             {mine?.pit?.length ? (
-              <TensestTable rows={mine.pit} teamId={teamId} cutoffs={cutoffs} label={`${name} pitching, tensest at-bats`} />
+              <TensestTable rows={mine.pit} teamId={teamId} label={`${name} pitching, tensest at-bats`} />
             ) : (
               <p className="hint">No tense at-bats for this club yet.</p>
             )}
@@ -172,7 +171,7 @@ export function TensestMomentsPage() {
           <Card frame="stamped" body="flush" label="All of baseball" count={countOf(league)} className="tensest__section">
             <TensestFilters value={filters} options={options} onChange={setFilters} />
             {league.length ? (
-              <TensestTable rows={league} teamId={null} cutoffs={cutoffs} label="All of baseball, tensest at-bats" />
+              <TensestTable rows={league} teamId={null} label="All of baseball, tensest at-bats" />
             ) : (
               <p className="hint">{filtering ? 'No tense at-bats match these filters.' : 'No tense at-bats yet.'}</p>
             )}
