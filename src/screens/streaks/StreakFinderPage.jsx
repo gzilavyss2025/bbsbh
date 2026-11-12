@@ -281,10 +281,14 @@ export function StreakFinderPage() {
                       <Fragment key={key}>
                       <tr
                         className={`streaks__row${isOpen ? ' streaks__row--open' : ''}`}
-                        onClick={(e) => !e.target.closest('a') && setOpen(isOpen ? null : key)}
-                        aria-expanded={isOpen}
+                        onClick={(e) => !e.target.closest('a, button') && setOpen(isOpen ? null : key)}
                       >
-                        <td className="rank">{w.rank}</td>
+                        <td className="rank">
+                          {/* The row opens on a tap anywhere; this is its keyboard and screen-reader door. */}
+                          <button type="button" className="streaks__toggle" aria-expanded={isOpen} aria-label={`Rank ${w.rank}, game by game`} onClick={() => setOpen(isOpen ? null : key)}>
+                            {w.rank}
+                          </button>
+                        </td>
                         <td className="dates">
                           <a href={gameHref(applied.team, a)}>{shortDate(a.date)}</a>
                           {w.games.length > 1 && <> – <a href={gameHref(applied.team, z)}>{shortDate(z.date)}</a></>}
@@ -329,7 +333,8 @@ export function StreakFinderPage() {
 // A clicked row's games, one line each: the date, the opponent, the result and
 // the stat, with the box score a tap away. The scores are read on open.
 function StretchGames({ teamId, games, unit }) {
-  const { data: scores, loading } = useAsync((signal) => fetchStretchScores(games.map((g) => g.gamePk), signal), [games])
+  const pks = games.map((g) => g.gamePk).join(',')
+  const { data: scores, loading } = useAsync((signal) => fetchStretchScores(pks.split(',').map(Number), signal), [pks])
   return (
     <table className="streaks__games">
       <thead>

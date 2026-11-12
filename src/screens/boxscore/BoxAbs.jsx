@@ -39,9 +39,8 @@ export function BoxAbs({ feed, sideKey, abbr }) {
       {side.ranOut && (
         <p className="bs__abs2Out">
           Ran out of ABS challenges in{' '}
-          <span aria-label={`the ${side.ranOut.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(side.ranOut.inning)}`}>
-            <span aria-hidden="true">{side.ranOut.half === 'top' ? '▲' : '▼'}{side.ranOut.inning}</span>
-          </span>
+          <span aria-hidden="true">{side.ranOut.half === 'top' ? '▲' : '▼'}{side.ranOut.inning}</span>
+          <span className="sr-only">{`the ${side.ranOut.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(side.ranOut.inning)}`}</span>
         </p>
       )}
     </section>

@@ -196,3 +196,12 @@
   line-height: var(--lh-snug);
   color: var(--text-heading);
 }
+
+/* The rank doubles as the row's toggle button (StreakFinderPage). */
+.streaks__toggle {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.streaks__toggle:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }

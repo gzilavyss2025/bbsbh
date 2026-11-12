@@ -33,7 +33,7 @@ export function HeritagePass({ game, artwork = null }) {
     const ro = new ResizeObserver(fit)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [Boolean(model)])
   if (!model) return null
   const seed = stampSeed(game.gamePk)
   return (
