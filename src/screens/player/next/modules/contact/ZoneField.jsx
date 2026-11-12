@@ -1,5 +1,5 @@
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
-import { ZONE_DEPTHS, ZONE_DIRS, fieldOrder, zoneLabelOnLight, zoneLightness } from './contactZones.js'
+import { ZONE_DEPTHS, ZONE_DIRS, fieldOrder, zoneFill, zoneLabelOnLight } from './contactZones.js'
 
 // The Zones view of the spray field (#2975, round 3, Gary 2026-11-12): nine places on the field,
 // pull / center / oppo by infield / shallow / deep, each lit by its share on one fixed scale. The
@@ -8,7 +8,6 @@ import { ZONE_DEPTHS, ZONE_DIRS, fieldOrder, zoneLabelOnLight, zoneLightness } f
 // The bands' radii in SVG feet: the depth edges (150, 250 ft), the outer edge at the fence line.
 const RADII = { infield: [45, 150], shallow: [150, 250], deep: [250, 345] }
 const WEDGE = { pull: [-45, -15], center: [-15, 15], oppo: [15, 45] } // a right-handed hitter
-const HUE = { ground: '--batted-ground', line: '--batted-line', fly: '--batted-fly' }
 
 const at = (deg, ft) => {
   const r = (deg * Math.PI) / 180
@@ -19,8 +18,6 @@ const cellPath = (a0, a1, r0, r1) =>
 // A left-handed hitter pulls to right field: mirror the wedges.
 const angles = (dir, side) => (side === 'L' ? WEDGE[dir].map((a) => -a).reverse() : WEDGE[dir])
 const pct = (x) => (x == null ? '—' : `${Math.round(x * 100)}%`)
-// The fill: the type's hue at the share's lightness (CSS relative colour, Safari 18+).
-const fill = (type, share) => `oklch(from var(${HUE[type] ?? '--zone-all'}) ${zoneLightness(share).toFixed(3)} calc(c * 0.9) h)`
 
 export function ZoneField({ zones, side, type }) {
   const R = RADII.deep[1]
@@ -32,7 +29,7 @@ export function ZoneField({ zones, side, type }) {
         const [lx, ly] = at((a0 + a1) / 2, (r0 + r1) / 2)
         return (
           <g key={`${c.dir}-${c.depth}`}>
-            <path className="fcontact__zone" d={cellPath(a0, a1, r0, r1)} style={{ fill: fill(type, c.share) }} />
+            <path className="fcontact__zone" d={cellPath(a0, a1, r0, r1)} style={{ fill: zoneFill(type, c.share) }} />
             <text className={`fcontact__zlabel${zoneLabelOnLight(c.share) ? ' fcontact__zlabel--dark' : ''}`} x={lx} y={ly}>{pct(c.share)}</text>
           </g>
         )

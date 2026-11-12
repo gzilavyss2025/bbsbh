@@ -87,8 +87,10 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   // its own controls, so the bar never holds three rows at once (Gary, 2026-11-12).
   const zones = useMemo(() => (mode === 'zones' && card ? contactZones(card.balls, zoneType) : null), [mode, card, zoneType])
   // Pull's side of the field: the side most of these balls came from (a switch hitter's majority).
-  const all = card?.balls ?? []
-  const side = all.filter((b) => b.side === 'L').length * 2 > all.length ? 'L' : 'R'
+  const side = useMemo(() => {
+    const all = card?.balls ?? []
+    return all.filter((b) => b.side === 'L').length * 2 > all.length ? 'L' : 'R'
+  }, [card])
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null
@@ -203,7 +205,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
             </svg>
           </div>
           {zones ? (
-            <div className="fcontact__side fcontact__side--zones">
+            <div className="fcontact__side">
               <ZoneTable zones={zones} side={side} />
             </div>
           ) : (

@@ -1,5 +1,6 @@
 import { directionOf, sprayAngle } from '../../../../../api/spray.js'
-import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../../../../../lib/ballpark/hitProjection.js'
+import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
+import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { typeOf } from './contactView.js'
 
 // The spray chart as nine zones (#2975, round 3, Gary 2026-11-12): WHERE each ball went, pull /
@@ -17,8 +18,11 @@ export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF
 export const ZONE_TYPES = [[null, 'Any type'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
 
 const zoneType = (la) => (typeOf(la) === 'pop' ? 'fly' : typeOf(la))
-const feet = (b) =>
-  Math.hypot(b.x - HIT_COORD_ORIGIN.x, HIT_COORD_ORIGIN.y - b.y) * HIT_COORD_FT_PER_UNIT
+// The same projection the dots are drawn with (SVG units are feet), so a dot and its zone agree.
+const feet = (b) => {
+  const p = hitCoordToSvg(b.x, b.y)
+  return Math.hypot(p.x - HOME.x, p.y - HOME.y)
+}
 const depthOf = (ft) => ZONE_DEPTHS.find(([, , edge]) => ft < edge)[0]
 
 export function contactZones(balls, type = null) {
@@ -53,6 +57,16 @@ export function zoneLightness(share) {
   return t < 0.5 ? 0.95 - 0.29 * (t / 0.5) : 0.54 - 0.29 * ((t - 0.5) / 0.5)
 }
 export const zoneLabelOnLight = (share) => zoneLightness(share) > 0.6
+
+// Each filter's hue as OKLCH [chroma, hue°], from its token (--zone-all, --batted-ground/-line/-fly
+// in tokens/colors.css; the test fails if they drift). A plain oklch() fill, not CSS relative
+// colour: relative colour needs Safari 18, and a dropped fill paints the SVG default black.
+const ZONE_HUES = { all: [0.0218, 83.0], ground: [0.1467, 28.5], line: [0.0827, 159.6], fly: [0.036, 250.8] }
+export const zoneHue = (type) => ZONE_HUES[type ?? 'all']
+export function zoneFill(type, share) {
+  const [c, h] = zoneHue(type)
+  return `oklch(${zoneLightness(share).toFixed(3)} ${(c * 0.9).toFixed(4)} ${h})`
+}
 
 // The Zones view for a screen reader: the drawn percentages are bare text, so the field's label
 // carries every zone by name, deep to infield and left field to right field, like the table.

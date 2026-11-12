@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
-import { contactZones, fieldOrder, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
+import { contactZones, fieldOrder, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
 
 // A raw Gameday coordinate `deg` off dead centre (negative = left field), `ft` feet from the plate.
 const at = (deg, ft) => {
@@ -96,10 +96,15 @@ test('every zone label clears 4.5:1 on its fill, for every hue and share', async
   const tok = (name) => css.match(new RegExp(`${name}:\\s*(#[0-9A-Fa-f]{6})`))[1]
   const onLight = hex(tok('--zone-on-light'))
   const onDark = hex(tok('--zone-on-dark'))
-  for (const name of ['--zone-all', '--batted-ground', '--batted-line', '--batted-fly']) {
+  const TOKENS = { all: '--zone-all', ground: '--batted-ground', line: '--batted-line', fly: '--batted-fly' }
+  for (const [type, name] of Object.entries(TOKENS)) {
     const [, c, h] = toOklch(hex(tok(name)))
+    // The hard-coded hue table matches its token, so a token retune cannot silently desync the fill.
+    const [jc, jh] = zoneHue(type === 'all' ? null : type)
+    const hd = ((h * 180) / Math.PI + 360) % 360
+    assert.ok(Math.abs(jc - c) < 0.002 && Math.abs(jh - hd) < 1, `${name}: table [${jc}, ${jh}] vs token [${c.toFixed(4)}, ${hd.toFixed(1)}]`)
     for (let v = 0; v <= 0.6; v += 0.005) {
-      const fill = fromOklch([zoneLightness(v), c * 0.9, h])
+      const fill = fromOklch([zoneLightness(v), jc * 0.9, (jh * Math.PI) / 180])
       const r = ratio(fill, zoneLabelOnLight(v) ? onLight : onDark)
       assert.ok(r >= 4.5, `${name} at ${(v * 100).toFixed(1)}%: ${r.toFixed(2)}`)
     }
@@ -115,4 +120,9 @@ test('zoneSummary reads the nine shares for a screen reader, deep to infield, in
   assert.match(s, /infield pull 50%/)
   assert.match(zoneSummary(contactZones([ball(0, 300, 20)], 'line'), 'L', 'line'), /^Line drives, 1 placed: deep outfield oppo 0%/)
   assert.equal(zoneSummary(contactZones([], 'fly'), 'R', 'fly'), 'Fly balls: none placed.')
+})
+
+test('zoneFill is a plain oklch() colour, not relative colour syntax', () => {
+  assert.match(zoneFill('line', 0.2), /^oklch\(0\.\d{3} 0\.\d{4} 159\.6\)$/)
+  assert.doesNotMatch(zoneFill(null, 0), /from|var\(/)
 })
