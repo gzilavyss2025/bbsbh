@@ -622,7 +622,7 @@ screen: a revealed play card, or the Final box score's Insights card inside its 
   included, have a p95 of 520 days (no-hitters), 440 (cycles) and 297 (triple plays; p99 370). A
   year is where a gap crosses a whole offseason with no feat: about 5% of no-hitters and cycles,
   about 1% of triple plays. Re-measure with the data in `public/data/notable/`.
-- **rarityCount** — "The 10th natural cycle since 1950, the Brewers' 1st." A natural cycle or an
+- **rarityCount** — "The 9th natural cycle since 1950, the Brewers' 1st." A natural cycle or an
   unassisted triple play, in the Final box score's Insights card (`src/api/notable/rarityCount.js`,
   #2968). It counts the rows flagged `natural`/`unassisted`, strictly before tonight, from the
   floor: the first year every later row is flagged (play-by-play starts about 1950). No floor, no note.

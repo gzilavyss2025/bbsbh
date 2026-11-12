@@ -38,13 +38,13 @@ const CLUB_GAP_FULL = 10 // seasons for the full magnitude bonus
 const LEAGUE_GAP_FULL = 3 * LEAGUE_GAP_DAYS
 
 // "Brewers'" and "Red Sox'", but "Athletics'"; every club nickname ends in s or x.
-const possessive = (name) => (/[sx]$/i.test(name) ? `${name}'` : `${name}'s`)
+export const possessive = (name) => (/[sx]$/i.test(name) ? `${name}'` : `${name}'s`)
 const wordOf = (n) => WORDS[n] ?? ordinal(n)
-const yearOf = (iso) => Number(iso.slice(0, 4))
+export const yearOf = (iso) => Number(iso.slice(0, 4))
 const daysBetween = (a, b) => (Date.parse(b) - Date.parse(a)) / 864e5
 
 // The game being annotated; null when the feed does not say when it was played.
-function tonightOf(feed) {
+export function tonightOf(feed) {
   const date = feed?.gameData?.datetime?.officialDate
   if (!date) return null
   return { gamePk: feed.gamePk, date, gameNumber: feed.gameData.game?.gameNumber ?? 1 }
@@ -52,7 +52,7 @@ function tonightOf(feed) {
 
 // Newest first, strictly before tonight. Same-day games order by game number, so game 2 of a
 // doubleheader comes before game 1.
-function priorRows(docs, kind, t) {
+export function priorRows(docs, kind, t) {
   const before = (r) => r.gamePk !== t.gamePk && (r.officialDate < t.date || (r.officialDate === t.date && (r.gameNumber ?? 1) < t.gameNumber))
   const newer = (a, b) => (a.officialDate === b.officialDate ? (b.gameNumber ?? 1) - (a.gameNumber ?? 1) : a.officialDate < b.officialDate ? 1 : -1)
   return (docs?.[kind]?.rows ?? []).filter(before).sort(newer)

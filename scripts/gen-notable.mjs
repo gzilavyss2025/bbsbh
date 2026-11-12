@@ -45,7 +45,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { normalizeArgv, seasonsFromArgs, unknownFlags } from './lib/notable/cli.mjs'
 import {
-  KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc,
+  KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, rowSeason, serializeDoc,
 } from './lib/notable/merge.mjs'
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
@@ -106,7 +106,7 @@ for (const season of seasons) {
     let { rows } = seeded
     // The rarity flags (#2968): this season's cycles and triple plays, seed rows included.
     if (kind === 'cycles' || kind === 'tripleplays') {
-      const mine = (r) => Number(r.officialDate.slice(0, 4)) === season
+      const mine = (r) => rowSeason(r) === season
       const flagged = await flagRows(get, kind, rows.filter(mine))
       let k = 0
       rows = rows.map((r) => (mine(r) ? flagged[k++] : r))

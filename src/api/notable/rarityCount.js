@@ -13,25 +13,33 @@
 // says "since {floor}", never "ever", and with no floor it says nothing: it never invents a count.
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
-import { detectPlayFeat } from '../callout-notes/lastTime.js'
+import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
 import { SCORE_BASE } from '../callout-notes/shared.js'
 
 const HIT_ORDER = ['single', 'double', 'triple', 'home_run']
+// Every triple-play event type (triple_play, grounded_into_triple_play, …), as detectPlayFeat reads it.
+const isTriplePlayEvent = (p) => /triple_play/.test(p.result?.eventType ?? '')
 export const RARITY = {
   cycles: { flag: 'natural', noun: 'natural cycle' },
   tripleplays: { flag: 'unassisted', noun: 'unassisted triple play' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
-// run, in that order (other hits may fall between). null when the feed has no plays.
+// run, in that order (other hits may fall between), among the hits up to the one that completes
+// the cycle. null when the feed has no plays.
 export function isNaturalCycle(allPlays, batterId) {
   const plays = orderedPlays({ allPlays })
   if (!plays.length) return null
+  // Read only up to the hit that completes the cycle: a hit after it cannot make it natural.
   let next = 0
+  const seen = new Set()
   for (const p of plays) {
     if (p.matchup?.batter?.id !== batterId) continue
-    if (p.result?.eventType === HIT_ORDER[next]) next += 1
+    const type = p.result?.eventType
+    if (type === HIT_ORDER[next]) next += 1
     if (next === HIT_ORDER.length) return true
+    if (HIT_ORDER.includes(type)) seen.add(type)
+    if (seen.size === HIT_ORDER.length) return false
   }
   return false
 }
@@ -39,25 +47,25 @@ export function isNaturalCycle(allPlays, batterId) {
 // An unassisted triple play: every putout and assist on the play is one fielder's.
 export function isUnassistedTriplePlay(play) {
   const credits = (play?.runners ?? []).flatMap((r) => r.credits ?? [])
-  const fielders = new Set(credits.filter((c) => c.credit === 'f_putout' || c.credit === 'f_assist').map((c) => c.player?.id))
-  return fielders.size === 1 && credits.some((c) => c.credit === 'f_putout')
+  const fielding = credits.filter((c) => c.credit === 'f_putout' || c.credit === 'f_assist')
+  // A credit with no fielder id names nobody, so it can never make the play one fielder's.
+  if (fielding.some((c) => c.player?.id == null)) return false
+  const fielders = new Set(fielding.map((c) => c.player.id))
+  return fielders.size === 1 && fielding.some((c) => c.credit === 'f_putout')
 }
 
 // The flagged triple play of a game, or null when the feed has no plays: true when one of the
-// game's triple plays by `fieldingSide` is unassisted. `fieldingSide` is null in the generator,
-// whose row already names the side (a game with two triple plays is one row per side).
+// game's triple plays by `fieldingSide` is unassisted. The generator passes its row's `side`
+// (a game with two triple plays is one row per side); null reads every triple play.
 export function gameHasUnassistedTriplePlay(allPlays, fieldingSide = null) {
   const plays = orderedPlays({ allPlays })
   if (!plays.length) return null
   return plays.some((p) => {
-    if (p.result?.eventType !== 'triple_play') return false
+    if (!isTriplePlayEvent(p)) return false
     if (fieldingSide && (p.about?.halfInning === 'top' ? 'home' : 'away') !== fieldingSide) return false
     return isUnassistedTriplePlay(p)
   })
 }
-
-const yearOf = (iso) => Number(iso.slice(0, 4))
-const possessive = (name) => (/[sx]$/i.test(name) ? `${name}'` : `${name}'s`)
 
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
@@ -74,7 +82,7 @@ export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
   const out = []
   for (const p of plays) {
-    if (![...HIT_ORDER, 'triple_play'].includes(p.result?.eventType)) continue
+    if (!HIT_ORDER.includes(p.result?.eventType) && !isTriplePlayEvent(p)) continue
     const battingSide = p.about?.halfInning === 'top' ? 'away' : 'home'
     const feat = detectPlayFeat(feed, p.about?.atBatIndex, battingSide)
     if (feat?.kind === 'cycles' && isNaturalCycle(plays, feat.player.id)) out.push(feat)
@@ -86,16 +94,13 @@ export function detectRareFeats(feed) {
 // One note for a rare feat: "The 9th natural cycle since 1950, the Brewers' 1st." [] when the
 // index has no floor, or tonight is older than it.
 export function buildRarityNotes(docs, feed, feat) {
-  const date = feed?.gameData?.datetime?.officialDate
+  const t = tonightOf(feed)
   const spec = RARITY[feat?.kind]
   const rows = docs?.[feat?.kind]?.rows
-  if (!date || !spec || !rows) return []
+  if (!t || !spec || !rows) return []
   const floor = floorYear(rows, spec.flag)
-  if (floor === null || yearOf(date) < floor) return []
-  const gameNumber = feed.gameData.game?.gameNumber ?? 1
-  const before = (r) =>
-    r.gamePk !== feed.gamePk && (r.officialDate < date || (r.officialDate === date && (r.gameNumber ?? 1) < gameNumber))
-  const prior = rows.filter((r) => r[spec.flag] === true && yearOf(r.officialDate) >= floor && before(r))
+  if (floor === null || yearOf(t.date) < floor) return []
+  const prior = priorRows(docs, feat.kind, t).filter((r) => r[spec.flag] === true && yearOf(r.officialDate) >= floor)
   const club = feed.gameData?.teams?.[feat.side]
   const clubName = club?.teamName ?? club?.name
   const mine = prior.filter((r) => r[r.side]?.id === club?.id).length

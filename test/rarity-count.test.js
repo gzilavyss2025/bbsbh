@@ -25,6 +25,9 @@ test('a natural cycle is single, double, triple, home run in order', () => {
   // a regular cycle is not natural
   assert.equal(isNaturalCycle(hits('home_run', 'triple', 'double', 'single'), BATTER), false)
   assert.equal(isNaturalCycle(hits('double', 'single', 'triple', 'home_run'), BATTER), false)
+  // only the hits up to the one that completes the cycle: HR, 1B, 2B, 3B finishes a regular
+  // cycle on the triple, and a later home run does not make it natural
+  assert.equal(isNaturalCycle(hits('home_run', 'single', 'double', 'triple', 'home_run'), BATTER), false)
   // another batter's hits do not count
   assert.equal(isNaturalCycle([play(0, 'single'), play(1, 'double', { batter: 2 }), play(2, 'triple'), play(3, 'home_run')], BATTER), false)
   // no plays: unknown, never false
@@ -40,6 +43,11 @@ test('an unassisted triple play has one fielder on every putout and assist', () 
   assert.equal(gameHasUnassistedTriplePlay([solo], 'home'), true)
   assert.equal(gameHasUnassistedTriplePlay([solo], 'away'), false)
   assert.equal(gameHasUnassistedTriplePlay([], 'home'), null)
+  // credits with no fielder id name nobody: never one fielder by default
+  const anon = play(0, 'triple_play', { runners: [{ credits: [{ credit: 'f_assist' }, { credit: 'f_putout' }] }, { credits: [{ credit: 'f_putout' }] }] })
+  assert.equal(isUnassistedTriplePlay(anon), false)
+  // every triple-play event type counts, as detectPlayFeat reads it
+  assert.equal(gameHasUnassistedTriplePlay([{ ...solo, result: { eventType: 'grounded_into_triple_play' } }], 'home'), true)
 })
 
 test('flagRow writes the flag only when the play-by-play says', () => {
@@ -112,8 +120,10 @@ test('detectRareFeats finds a natural cycle and an unassisted triple play, and s
 test('the committed index flags known games (slice 1)', () => {
   const cycles = JSON.parse(readFileSync(new URL('../public/data/notable/cycles.json', import.meta.url))).rows
   const tps = JSON.parse(readFileSync(new URL('../public/data/notable/tripleplays.json', import.meta.url))).rows
-  // Ralph Kiner, 1950-06-25: natural. JJ Bleday, 2026-08-22: a cycle, not natural.
-  assert.equal(cycles.find((r) => r.player.name === 'Ralph Kiner' && r.officialDate === '1950-06-25').natural, true)
+  // Jim Hickman, 1963-08-07: natural. Ralph Kiner, 1950-06-25 (HR, 1B, 2B, 3B, then HR): the
+  // cycle completes out of order, so not natural. JJ Bleday, 2026-08-22: not natural.
+  assert.equal(cycles.find((r) => r.player.name === 'Jim Hickman' && r.officialDate === '1963-08-07').natural, true)
+  assert.equal(cycles.find((r) => r.player.name === 'Ralph Kiner' && r.officialDate === '1950-06-25').natural, false)
   assert.equal(cycles.find((r) => r.player.name === 'JJ Bleday').natural, false)
   // Eric Bruntlett, 2009-08-23 (gamePk 246049): unassisted.
   assert.equal(tps.find((r) => r.gamePk === 246049).unassisted, true)

@@ -110,7 +110,7 @@ export function StatcastLeadersCard({ feed, insights }) {
 }
 
 // Every note that fired somewhere in the game (computeGameCalloutNotes, plus a no-hitter's
-// "last time" lines, useRollupNotes). Hidden entirely when nothing fired.
+// "last time" lines and a natural cycle's or unassisted triple play's rarity count, useRollupNotes). Hidden entirely when nothing fired.
 export function InsightsCard({ calloutNotes: rolled, feed }) {
   const calloutNotes = useRollupNotes(feed, rolled)
   const [showAll, setShowAll] = useState(false)
