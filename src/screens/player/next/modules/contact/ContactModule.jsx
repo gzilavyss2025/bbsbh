@@ -60,8 +60,10 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const [pickedView, setView] = useState(null) // null opens on the first view with balls
   const [color, setColor] = useState('result')
   const [mode, setMode] = useState('dots') // Dots / Zones (#2975); starts on Dots, not kept
-  const [zoneType, setZoneType] = useState(null) // the Zones view's ball-type filter; null is All
+  // One ball-type choice for the whole card: the menu cards, the dots and the Zones buttons all read
+  // it, so they never disagree (#2975). Zones fold a pop-up into fly balls.
   const [type, setType] = useState(null)
+  const zoneType = zoneTypeForCard(type)
   const [sel, setSel] = useState(null)
   const [shot, setShot] = useState(0) // counts taps, so a second tap on one ball flies it again
   const [playing, setPlaying] = useState(false)
@@ -160,7 +162,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
             <Segmented
               label="Ball type"
               value={zoneType}
-              onChange={setZoneType}
+              onChange={(k) => pick(setType, k)}
               options={ZONE_TYPES.map(([k, name]) => ({ value: k, label: name }))}
             />
           )}
@@ -235,7 +237,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               figures: <span className="fcontact__mfig">{r.hits} hits · {r.outs} outs</span>,
             }))}
             picked={type}
-            onPick={(k) => { pick(setType, k); setZoneType(zoneTypeForCard(k)) }}
+            onPick={(k) => pick(setType, k)}
             panel={(k) => <TypeFacts row={mix.find((r) => r.key === k)} />}
             backLabel="All batted balls"
           />

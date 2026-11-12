@@ -53,8 +53,7 @@ test('the ball-type pick is a MenuRail; the six averages are its panel', () => {
   assert.match(JSX, /import \{ MenuRail \} from '\.\.\/\.\.\/\.\.\/\.\.\/\.\.\/components\/ui\/control\/MenuRail\.jsx'/)
   assert.match(JSX, /<MenuRail\s+label="Batted ball type"/)
   assert.match(JSX, /backLabel="All batted balls"/)
-  // The pick still resets the dots (pick), and also sets the Zones filter (#2975, Gary 2026-11-12).
-  assert.match(JSX, /onPick=\{\(k\) => \{ pick\(setType, k\); setZoneType\(zoneTypeForCard\(k\)\) \}\}/)
+  assert.match(JSX, /onPick=\{\(k\) => pick\(setType, k\)\}/)
   assert.doesNotMatch(JSX, /Highlight one kind of ball/)
   for (const k of ['Avg exit velo', 'Hard hit', 'Barrels', 'Avg launch angle', 'Avg distance', 'Avg xBA']) {
     assert.ok(JSX.includes(`'${k}'`), k)

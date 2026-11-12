@@ -1,5 +1,6 @@
 /* ==== THE BATTER CONTACT MODULE (#1888) ====
-   ContactModule.jsx: view and color chips, the spray field with the tapped-ball panel beside
+   ContactModule.jsx: a control bar that changes with Dots / Zones (Segmented; Zones at the end of
+   this file), the spray field with the tapped-ball panel beside
    it, then the batted-ball mix (BattedBallMix, 27-player-position-innings.css). The field art
    reuses the spray map's .spray__fence, .spray__foul and .spray__diamond. It reserves its
    height while the balls load. */
