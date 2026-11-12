@@ -127,6 +127,30 @@ test('parksView: a live season after the file extends the runs; a club that move
   assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
 })
 
+// #2959 review: the generator keeps each name's FIRST season only, so a name that came back
+// (Oakland Coliseum -> O.co Coliseum -> Oakland Coliseum) loses its later stint. Dating the old
+// names there would print "O.co Coliseum 2013–2024", so that park lists them without years.
+test('parksView: a park whose old name came back lists its former names without years', () => {
+  const coliseum = parksFor(133).find((p) => p.id === 10)
+  assert.equal(coliseum.name, 'Oakland Coliseum')
+  assert.deepEqual(coliseum.also, ['Oakland-Alameda County Coliseum', 'Network Associates Coliseum', 'McAfee Coliseum', 'O.co Coliseum'])
+  assert.deepEqual(parksFor(114).find((p) => p.id === 3131).also, ['Dunn Field'])
+})
+
+// #2959 review: a temporary home used in two seasons with a gap reads as two runs, not one range.
+test('parksView: a temporary home with a gap in its seasons lists each run', () => {
+  const temp = [{ venueId: 1, name: 'Somewhere Field', seasons: [2005, 2003], note: '' }]
+  const v = parksView({ spans: history(158).spans, mates: {}, through: 2025 }, [], temp)
+  assert.equal(v.find((p) => p.temporary).years, '2003, 2005')
+})
+
+// #2959 review: a span with no venueNamesFrom (a file from before the field) must not date a
+// rename from the span's first season, which printed "Miller Park 2001–2000".
+test('parksView: a renamed park with no first season per name lists the old name without years', () => {
+  const spans = [{ from: 2001, to: 2025, name: 'Milwaukee Brewers', venueId: 32, venueName: 'American Family Field', venueNames: ['Miller Park', 'American Family Field'] }]
+  assert.deepEqual(parksView({ spans, mates: {}, through: 2025 })[0].also, ['Miller Park'])
+})
+
 // #2959: a temporary home from the hand-curated file is its own row, marked, sorted by its last season.
 test('parksView: a temporary home joins the list with its note; the regular parks are unchanged', () => {
   const temp = [{ venueId: 2756, name: 'Sahlen Field', seasons: [2020, 2021], note: 'Buffalo, during the pandemic' }]

@@ -76,8 +76,12 @@ export function parksView(history, live = [], temporary = []) {
     const mine = spans.filter((s) => s.venueId === p.venueId)
     const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
     const end = p.runs[p.runs.length - 1][1]
-    // A former name runs from its first season to the season before the next name (#2959).
-    const also = p.names.flatMap((n, i) => (n === current ? [] : [`${n} ${years(p.from[i], (p.from[i + 1] ?? end + 1) - 1)}`]))
+    // A former name runs from its first season to the season before the next name (#2959). That
+    // holds only when every name has a first season and the one in use is the newest: the data
+    // keeps a name's FIRST season only, so a name that came back (O.co -> Oakland Coliseum) would
+    // date the names after it wrong. Such a park lists its former names without years.
+    const dated = p.from.every((y) => y != null) && p.names[p.names.length - 1] === current
+    const also = p.names.flatMap((n, i) => (n === current ? [] : [dated ? `${n} ${years(p.from[i], (p.from[i + 1] ?? end + 1) - 1)}` : n]))
     return {
       last: end,
       row: {
@@ -91,14 +95,22 @@ export function parksView(history, live = [], temporary = []) {
       },
     }
   })
-  // A temporary home from the hand-curated file: its seasons are part-seasons, so never "on".
+  // A temporary home from the hand-curated file: its seasons are part-seasons, so never "on", and a
+  // gap between them shows as two runs ("2003, 2005").
+  const runsOf = (seasons) =>
+    [...new Set(seasons)].sort((a, b) => a - b).reduce((out, y) => {
+      const last = out[out.length - 1]
+      if (last && y === last[1] + 1) last[1] = y
+      else out.push([y, y])
+      return out
+    }, [])
   const extraParks = temporary.map((t) => ({
     last: Math.max(...t.seasons),
     row: {
       id: `temp-${t.venueId}`,
       name: t.name,
       also: [],
-      years: years(Math.min(...t.seasons), Math.max(...t.seasons)),
+      years: runsOf(t.seasons).map(([a, b]) => years(a, b)).join(', '),
       clubs: [],
       mates: [],
       temporary: true,

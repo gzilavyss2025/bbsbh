@@ -16,7 +16,8 @@ The summary (`franchise/summary/`) reads those same rows, live ones too, and Peo
 1272px and the summary takes a side column (`styles/history/franchise.css`, #2784). The all-time
 leaders card (`franchise/leaders/`, #2785) sits under the ledger: nine headline lists, Career or
 Season, and a door that opens all 26 in place. The Parks card (#2788) reads `franchiseFor`'s spans
-and `parkHistory`, so a one-off neutral site is not in it (#2959).
+and `parkHistory`, so a one-off neutral site is not in it, plus `temporaryParksFor`'s hand-curated
+temporary homes, each marked (#2959).
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared
 mega-fetch. One exception: Ranks also draws `standings/StandingsRankCards.jsx`, which reads

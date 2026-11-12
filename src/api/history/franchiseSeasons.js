@@ -35,7 +35,8 @@ export function nameForSeason(spans, season) {
 // Pure: group spans by venue, oldest first. `runs` are the club's stints there
 // as [from, to] pairs (a park left and returned to has two). `mates` is the
 // file's { venueId: [{ teamId, name, from, to }] }, the other clubs there in the
-// same seasons. `from` holds the first season of each of `names`, index for index (#2959).
+// same seasons. `from` holds the first season of each of `names`, index for index (#2959);
+// null for a rename in a span with no `venueNamesFrom`, whose first season is unknown.
 export function parkHistory(spans, mates) {
   const byVenue = new Map()
   for (const s of [...spans].sort((a, b) => a.from - b.from)) {
@@ -44,7 +45,7 @@ export function parkHistory(spans, mates) {
     ;(s.venueNames ?? [s.venueName]).forEach((n, i) => {
       if (!n || p.names.includes(n)) return
       p.names.push(n)
-      p.from.push(s.venueNamesFrom?.[i] ?? s.from)
+      p.from.push(s.venueNamesFrom?.[i] ?? (i === 0 ? s.from : null))
     })
     const last = p.runs[p.runs.length - 1]
     if (last && s.from === last[1] + 1) last[1] = s.to
