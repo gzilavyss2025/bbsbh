@@ -336,6 +336,14 @@
   --batted-fly:    #1B2A3A; /* navy */
   --batted-pop:    #938C7C; /* graphite-soft */
 
+  /* ---- Spray zones (#2975) ---- ContactModule's Zones view sets each zone's lightness from its
+     share (ZoneField.jsx) and keeps only the hue of a batted-ball token, or of --zone-all for all
+     balls. These fills ignore the theme, so their labels do too: two fixed inks, picked per zone
+     by contactZones.js and checked against every fill by test/contact-zones.test.js. */
+  --zone-all:      #6B6457; /* warm graphite, apart from the fly-ball navy */
+  --zone-on-light: #0F1822;
+  --zone-on-dark:  #FFFFFF;
+
   /* ---- Gameday's stage (#2568 slice 4) ---- the 16-bit field keeps its own bright game
      colours ("B: bright game colours", Gary 2026-10-26); the panels around it stay paper. Only
      the stage reads these (screens/gameday/next/stage/, canvas pixels). The last five are the

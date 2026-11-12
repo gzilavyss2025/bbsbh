@@ -1,5 +1,6 @@
 /* ==== THE BATTER CONTACT MODULE (#1888) ====
-   ContactModule.jsx: view and color chips, the spray field with the tapped-ball panel beside
+   ContactModule.jsx: a control bar that changes with Dots / Zones (Segmented; Zones at the end of
+   this file), the spray field with the tapped-ball panel beside
    it, then the batted-ball mix (BattedBallMix, 27-player-position-innings.css). The field art
    reuses the spray map's .spray__fence, .spray__foul and .spray__diamond. It reserves its
    height while the balls load. */
@@ -417,3 +418,54 @@
 .fcontact__detail > .fcontact__stats { grid-column: 1 / -1; margin-top: var(--space-1h); }
 .fcontact__stats dd,
 .fcontact__stats dt { white-space: nowrap; }
+
+/* ==== ZONES (#2975, round 3) ====
+   ZoneField.jsx: nine places on the field, each filled inline (the share sets the lightness, the
+   ball-type filter the hue). The fills ignore the theme, so the labels take the two fixed inks
+   --zone-on-light/--zone-on-dark; contactZones.js picks one and its test checks every pairing.
+   ZoneTable repeats the shares beside the field on a wide card. */
+.fcontact__zone {
+  stroke: var(--bg-canvas);
+  stroke-width: 3;
+}
+.fcontact__zlabel {
+  font-family: var(--font-mono);
+  font-size: 1.4em;
+  font-weight: var(--w-semibold);
+  fill: var(--zone-on-dark);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-variant-numeric: tabular-nums;
+}
+.fcontact__zlabel--dark { fill: var(--zone-on-light); }
+.fcontact__zdir {
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  fill: var(--text-caption);
+  text-anchor: middle;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.fcontact__ztable {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.fcontact__ztable th,
+.fcontact__ztable td {
+  padding: var(--space-2) var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  text-align: right;
+}
+.fcontact__ztable th:first-child { text-align: left; }
+.fcontact__ztable thead th {
+  font-family: var(--font-display);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.fcontact__ztable td { font-family: var(--font-mono); }
+/* breakpoint-exempt: the stacked side of this card's own 720px two-column step */
+@media (max-width: 719.98px) {
+  .fcontact__ztable { display: none; }
+}

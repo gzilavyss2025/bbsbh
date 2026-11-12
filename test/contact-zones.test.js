@@ -1,0 +1,149 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
+import { batterSide, contactZones, zoneNames, zoneTypeForCard, zoneFill, zoneHue, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
+
+// A raw Gameday coordinate `deg` off dead centre (negative = left field), `ft` feet from the plate.
+const at = (deg, ft) => {
+  const r = (deg * Math.PI) / 180
+  const u = ft / HIT_COORD_FT_PER_UNIT
+  return { x: HIT_COORD_ORIGIN.x + u * Math.sin(r), y: HIT_COORD_ORIGIN.y - u * Math.cos(r) }
+}
+const ball = (deg, ft, la, side = 'R') => ({ ...at(deg, ft), launchAngle: la, side })
+const cell = (z, dir, depth) => z.cells.find((c) => c.dir === dir && c.depth === depth)
+
+test('nine zones by field third and depth: where the ball went, whoever hit it', () => {
+  const z = contactZones([ball(-30, 100, 5), ball(0, 200, 15), ball(30, 320, 35), ball(30, 300, 60)])
+  assert.equal(z.cells.length, 9)
+  assert.equal(z.n, 4)
+  assert.equal(cell(z, 'left', 'infield').n, 1)
+  assert.equal(cell(z, 'center', 'shallow').n, 1)
+  assert.equal(cell(z, 'right', 'deep').n, 2)
+  assert.equal(cell(z, 'right', 'deep').share, 0.5)
+})
+
+test('a switch hitter: each ball stays in the field it went to, from either side', () => {
+  // Pulled from both sides: right-handed to left field, left-handed to right field.
+  const z = contactZones([ball(-30, 300, 30, 'R'), ball(30, 300, 30, 'L')])
+  assert.equal(cell(z, 'left', 'deep').n, 1)
+  assert.equal(cell(z, 'right', 'deep').n, 1)
+})
+
+test('batterSide: his listed side; else one side, or S when the other side has a tenth of the balls', () => {
+  const of = (r, l) => [...Array(r).fill({ side: 'R' }), ...Array(l).fill({ side: 'L' })]
+  assert.equal(batterSide(of(100, 0)), 'R')
+  assert.equal(batterSide(of(0, 50)), 'L')
+  assert.equal(batterSide(of(95, 5)), 'R') // a stray ball from the other box is not a switch hitter
+  assert.equal(batterSide(of(80, 20)), 'S')
+  // His listed side wins: a switch hitter who faced mostly right-handers is still S.
+  assert.equal(batterSide(of(8, 92), 'S'), 'S')
+  assert.equal(batterSide(of(80, 20), 'R'), 'R')
+})
+
+test('zoneNames: Pull/Oppo by side, field names for a switch hitter, always left to right', () => {
+  assert.deepEqual(zoneNames('R'), { left: 'Pull', center: 'Center', right: 'Oppo' })
+  assert.deepEqual(zoneNames('L'), { left: 'Oppo', center: 'Center', right: 'Pull' })
+  assert.deepEqual(zoneNames('S'), { left: 'LF', center: 'CF', right: 'RF' })
+})
+
+test('the type filter keeps only that type; a pop-up counts as a fly ball', () => {
+  const balls = [ball(0, 100, 5), ball(0, 120, 60), ball(0, 300, 35), ball(0, 220, 15)]
+  const fly = contactZones(balls, 'fly')
+  assert.equal(fly.n, 2)
+  assert.equal(cell(fly, 'center', 'infield').n, 1) // the pop-up, caught on the infield
+  assert.equal(cell(fly, 'center', 'deep').n, 1)
+  assert.equal(contactZones(balls, 'line').n, 1)
+})
+
+test('All counts a ball with no launch angle; a type filter cannot place it', () => {
+  const balls = [ball(0, 200, null), ball(0, 200, 15)]
+  assert.equal(contactZones(balls).n, 2)
+  assert.equal(contactZones(balls, 'line').n, 1)
+})
+
+test('a ball with no coordinate is not placed, and no balls gives null shares', () => {
+  const z = contactZones([{ x: null, y: null, launchAngle: 20, side: 'R' }])
+  assert.equal(z.n, 0)
+  assert.ok(z.cells.every((c) => c.n === 0 && c.share === null))
+})
+
+test('darker always means more: lightness falls as the share rises, on one fixed scale', () => {
+  for (let v = 0; v < 0.4; v += 0.01) assert.ok(zoneLightness(v + 0.01) <= zoneLightness(v))
+  assert.ok(zoneLightness(null) > 0.9)
+})
+
+// The fills are computed in the browser (CSS relative colour), so the token contrast lint never
+// sees them. This repeats the browser's maths for every share and every hue, against the two label
+// colours, so a retune of the ramp or a batted-ball token cannot drop a label under WCAG AA.
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+const gam = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055)
+function toOklch([r, g, b]) {
+  ;[r, g, b] = [r, g, b].map(lin)
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s
+  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
+  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+  return [L, Math.hypot(a, bb), Math.atan2(bb, a)]
+}
+function fromOklch([L, C, h]) {
+  const a = C * Math.cos(h)
+  const b = C * Math.sin(h)
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ].map((c) => Math.min(1, Math.max(0, gam(Math.max(0, c)))))
+}
+const lum = (rgb) => { const [r, g, b] = rgb.map(lin); return 0.2126 * r + 0.7152 * g + 0.0722 * b }
+const ratio = (x, y) => { const [a, b] = [lum(x), lum(y)].sort((p, q) => q - p); return (a + 0.05) / (b + 0.05) }
+
+test('every zone label clears 4.5:1 on its fill, for every hue and share', async () => {
+  const { readFileSync } = await import('node:fs')
+  const css = readFileSync(new URL('../src/tokens/colors.css', import.meta.url), 'utf8')
+  const tok = (name) => css.match(new RegExp(`${name}:\\s*(#[0-9A-Fa-f]{6})`))[1]
+  const onLight = hex(tok('--zone-on-light'))
+  const onDark = hex(tok('--zone-on-dark'))
+  const TOKENS = { all: '--zone-all', ground: '--batted-ground', line: '--batted-line', fly: '--batted-fly' }
+  for (const [type, name] of Object.entries(TOKENS)) {
+    const [, c, h] = toOklch(hex(tok(name)))
+    // The hard-coded hue table matches its token, so a token retune cannot silently desync the fill.
+    const [jc, jh] = zoneHue(type === 'all' ? null : type)
+    const hd = ((h * 180) / Math.PI + 360) % 360
+    assert.ok(Math.abs(jc - c) < 0.002 && Math.abs(jh - hd) < 1, `${name}: table [${jc}, ${jh}] vs token [${c.toFixed(4)}, ${hd.toFixed(1)}]`)
+    for (let v = 0; v <= 0.6; v += 0.005) {
+      const fill = fromOklch([zoneLightness(v), jc * 0.9, (jh * Math.PI) / 180])
+      const r = ratio(fill, zoneLabelOnLight(v) ? onLight : onDark)
+      assert.ok(r >= 4.5, `${name} at ${(v * 100).toFixed(1)}%: ${r.toFixed(2)}`)
+    }
+  }
+})
+
+test('zoneSummary reads the nine shares for a screen reader, deep to infield, left to right', () => {
+  const z = contactZones([ball(-30, 100, 5), ball(0, 300, 35)])
+  const s = zoneSummary(z, 'R', null)
+  assert.match(s, /^All balls in play, 2 placed: /)
+  assert.ok(s.indexOf('deep outfield pull') < s.indexOf('infield pull'))
+  assert.match(s, /deep outfield center 50%/)
+  assert.match(s, /infield pull 50%/)
+  assert.match(zoneSummary(contactZones([ball(0, 300, 20)], 'line'), 'L', 'line'), /^Line drives, 1 placed: deep outfield oppo 0%/)
+  assert.match(zoneSummary(z, 'S', null), /infield left field 50%/)
+  assert.equal(zoneSummary(contactZones([], 'fly'), 'R', 'fly'), 'Fly balls: none placed.')
+})
+
+test('zoneFill is a plain oklch() colour, not relative colour syntax', () => {
+  assert.match(zoneFill('line', 0.2), /^oklch\(0\.\d{3} 0\.\d{4} 159\.6\)$/)
+  assert.doesNotMatch(zoneFill(null, 0), /from|var\(/)
+})
+
+test('a ball-type card maps to the zones filter: pop-up folds into fly, the back link clears it', () => {
+  assert.equal(zoneTypeForCard('ground'), 'ground')
+  assert.equal(zoneTypeForCard('line'), 'line')
+  assert.equal(zoneTypeForCard('pop'), 'fly')
+  assert.equal(zoneTypeForCard(null), null)
+})
