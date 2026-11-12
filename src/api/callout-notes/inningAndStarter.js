@@ -1,6 +1,6 @@
 // Pre-half strip builders for inning-run differential, the starter's team
 // record, foul volume, pitch pace, and bullpen health — split out of
-// ../callout-notes.js. Entering-tense (prehalf-callouts.js is the caller);
+// ../callout-notes.js. Entering-tense (callout-notes/surfaces/prehalf.js is the caller);
 // see ../callout-notes.js's header for the two-tenses rule (ADR-0014).
 
 import { pitchCallCode, FOUL_CODES } from '../playbyplay.js'
@@ -12,7 +12,7 @@ import { ordinal } from '../../lib/format.js'
 // --- run differential by inning --------------------------------------------------
 // "The Brewers have outscored opponents 38-14 in the 7th this season" — from
 // the precompute's per-inning runs-for/against tallies (`inningRuns`). Shared
-// by the pre-half strip (entering the inning; prehalf-callouts.js) and the
+// by the pre-half strip (entering the inning; callout-notes/surfaces/prehalf.js) and the
 // box-score roll-up (tonight's half-inning runs folded in via extraF/extraA).
 // Noteworthy only past a real sample, a real margin, AND a dominance ratio —
 // an 88-80 grind or a 9-2 April blip is neither.
@@ -48,7 +48,7 @@ export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA 
 // "The Brewers are 12-5 in his starts this season" — the CLUB's result in a
 // pitcher's starts (see gen-callouts.mjs's teamStarts), independent of his
 // personal W-L. Entering-tense: the pre-half strip's first-inning card
-// (prehalf-callouts.js). The roll-up builds its own folded version below.
+// (callout-notes/surfaces/prehalf.js). The roll-up builds its own folded version below.
 export function buildStarterTeamRecordNote(bundle, side, pitcherId) {
   const rec = bundle?.starterRecords?.[pitcherId]?.teamStarts
   const teamName = bundle?.[side]?.name
@@ -69,7 +69,7 @@ export function buildStarterTeamRecordNote(bundle, side, pitcherId) {
 // norm (bundle.foulRate, from the nightly foul sweep — absent on MiLB
 // bundles, which silently disables the family). Reads only halves strictly
 // BEFORE the one being staged — revealed material under the caller's gate
-// (prehalf-callouts.js), same footing as the times-through-the-order card.
+// (callout-notes/surfaces/prehalf.js), same footing as the times-through-the-order card.
 const FOUL_VOLUME_MIN_PITCHES = 50
 const FOUL_VOLUME_MIN_FOULS = 12
 const FOUL_VOLUME_RATIO = 1.35
@@ -125,7 +125,7 @@ export function buildFoulVolumeNote(feed, bundle, inning, half) {
 // playLog-derived starterRecords[pid].pitchPace; see gen-callouts.mjs). Reads
 // tonight's pitches from the pitcher's STRICTLY-PREVIOUS halves — revealed
 // material — so it shares the times-through card's caller-gate
-// (prehalf-callouts.js restricts it to halfIndex(inning, half) <=
+// (callout-notes/surfaces/prehalf.js restricts it to halfIndex(inning, half) <=
 // revealedThrough + 1). Fires only while that side's starter is the lone
 // pitcher it has seen (a reliever's "through N" pace is meaningless), and only
 // when tonight's count is a notable distance from the norm.

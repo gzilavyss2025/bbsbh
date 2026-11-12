@@ -6,7 +6,7 @@
 //   { gamePk, n, date, awayId, homeId, venueId, venueName, runs: { away, home }, wp }
 //
 // The shard block lives on the callouts bundle of TODAY'S game
-// (public/data/callouts/{MMDDYYYY}/{gamePk}.json, api/callouts.js) as `series`:
+// (public/data/callouts/{MMDDYYYY}/{gamePk}.json, api/callout-notes/surfaces/bundle.js) as `series`:
 //   { id, gamePks: number[], games: Game[], stats?: loadSeriesStats's output }
 // `gamePks` is required: the stats carry no game ids, so it is the only proof of
 // which games they sum. `stats` is optional. Without it the live read supplies
@@ -17,7 +17,7 @@
 // or early file cannot bring today's result in. The caller gives `counted`;
 // nothing else decides which games show.
 
-import { seriesBlockFor as blockOf } from '../../../api/callouts.js'
+import { seriesBlockFor as blockOf } from '../../../api/callout-notes/surfaces/bundle.js'
 import { wpLine } from './wpSpark.js'
 
 export function seriesBlockFor(bundle, seriesId) {

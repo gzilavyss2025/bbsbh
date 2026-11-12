@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildBetweenInnings, CARD_MAX, BETWEEN_INNINGS_ALLOWED_KINDS } from '../src/api/between-innings.js'
+import { buildBetweenInnings, CARD_MAX, BETWEEN_INNINGS_ALLOWED_KINDS } from '../src/api/callout-notes/surfaces/betweenInnings.js'
 import { weekdayFromDate } from '../src/api/callout-notes.js'
 import { buildFeed } from './fixtures/mini-game.js'
 

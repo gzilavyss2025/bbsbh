@@ -27,7 +27,7 @@ the spoiler question, so the rule is now explicit and structural:
   in-progress box-score view stays in entering-tense, and a suspended tie
   folds nothing.
 
-**The pre-half strip** (`buildPreHalfCallouts`, `prehalf-callouts.js`) is a
+**The pre-half strip** (`buildPreHalfCallouts`, `callout-notes/surfaces/prehalf.js`) is a
 third surface with the ADR-0003/0010 contract: it stages the half like the
 pre-pitch change list, rendered outside the seal and caller-gated to a
 reached half (`safeToShowEntering`/`revealed || isNextToReveal`). It used to

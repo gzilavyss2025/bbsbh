@@ -30,9 +30,9 @@ compared with in October.
 | Surface | Module | Tense |
 | --- | --- | --- |
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`), drawn by the old `PlayByPlay` until it was deleted (#2747) | Entering + revealed plays only ("that's No. 16 this season") |
-| Pre-half strip (no screen draws it since the Gameday swap, #2566; the generators still build it) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`), read by `scripts/gen-callouts.mjs` and `audit-callouts.mjs` | Entering; the leading-after + times-through notes restate already-revealed material |
+| Pre-half strip (no screen draws it since the Gameday swap, #2566; the generators still build it) | `buildPreHalfCallouts` (`src/api/callout-notes/surfaces/prehalf.js`), read by `scripts/gen-callouts.mjs` and `audit-callouts.mjs` | Entering; the leading-after + times-through notes restate already-revealed material |
 | Margin Notes (spans both teams' pitchers; an input to Gameday's checkpoint notes since the swap, #2566) | `buildMarginNotes` (`src/api/pitcher/callouts.js`) via InningViewer into the checkpoint | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
-| Between Innings (Gameday's checkpoint Notes page, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `checkpoint/Checkpoint.jsx` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
+| Between Innings (Gameday's checkpoint Notes page, any revealed half) | `buildBetweenInnings` (`src/api/callout-notes/surfaces/betweenInnings.js`) via `checkpoint/Checkpoint.jsx` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
 Margin Notes replaced the old Pitchers-table note list, which used to sit
@@ -216,7 +216,7 @@ Every surface here rebuilds from scratch on every half, and all of them sort on
 the same score. Without a memory, the same high-base note therefore wins the
 same sort every half of the game: a reader who sits through nine innings meets
 the identical card fifteen times, and the three unconditional pushes in
-`between-innings.js` (`starterRec`, `dayOfWeek`, `bullpenThin`) could each
+`callout-notes/surfaces/betweenInnings.js` (`starterRec`, `dayOfWeek`, `bullpenThin`) could each
 print seventeen times. Four rules answer that.
 
 - **The ledger.** `src/hooks/useCalloutLedger.js` remembers, per gamePk, which
@@ -261,8 +261,8 @@ print seventeen times. Four rules answer that.
 
 All four are applied by one pure function, `rankNotes` in
 `callout-notes/shared.js`, at each surface's own sort-and-cap step: the
-pre-half strip (`prehalf-callouts.js`, `maxRecordNotes: 1`), Between Innings
-(`between-innings.js`). (The Arms tab's merge of the strip with Margin Notes left with the old
+pre-half strip (`callout-notes/surfaces/prehalf.js`, `maxRecordNotes: 1`), Between Innings
+(`callout-notes/surfaces/betweenInnings.js`). (The Arms tab's merge of the strip with Margin Notes left with the old
 reference panel, #2566.) The builders stay pure — they
 are HANDED the counts (`shownCounts`) and only read them. A surface records
 what it showed from an effect, on the notes that actually reached the screen:
@@ -278,9 +278,9 @@ the surface applies its own count.
 
 | Constant | Value | Where | What it caps |
 | --- | --- | --- | --- |
-| `PREHALF_MAX` | 2 | `prehalf-callouts.js` | Notes on the pre-half strip |
-| `PREHALF_MAX_RECORDS` | 1 | `prehalf-callouts.js` | `RECORD_KINDS` notes on that strip |
-| `CARD_MAX` | 5 | `between-innings.js` | Cards in one Between Innings set |
+| `PREHALF_MAX` | 2 | `callout-notes/surfaces/prehalf.js` | Notes on the pre-half strip |
+| `PREHALF_MAX_RECORDS` | 1 | `callout-notes/surfaces/prehalf.js` | `RECORD_KINDS` notes on that strip |
+| `CARD_MAX` | 5 | `callout-notes/surfaces/betweenInnings.js` | Cards in one Between Innings set |
 | `INSIGHTS_SHOWN` | 6 | `src/screens/BoxScore.jsx` | Roll-up notes shown before Show more |
 | `VS_TEAM_ROLLUP_MAX` | 3 | roll-up | `vsTeam` notes in the roll-up |
 | `MAGNITUDE_MAX` | 20 | `callout-notes/shared.js` | Every family's magnitude bonus |
@@ -338,7 +338,7 @@ Rules, all in `src/api/callout-notes/rank.js`:
 
 Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
 `public/data/callouts/<MMDDYYYY>/<gamePk>.json`, one file per game (bundle
-shape: `src/api/callouts.js`).
+shape: `src/api/callout-notes/surfaces/bundle.js`).
 "Progress" means `computeCalloutProgress`'s per-play in-game counts.
 
 ### Player, on the play it happens
@@ -630,7 +630,7 @@ screen: a revealed play card, or the Final box score's Insights card inside its 
 - **wsWtaTrailing9** (pre-half strip) — "Teams trailing entering the 9th of a winner-take-all
   game are 3-33." Top of the 9th, for the club that trails after eight (none when level), in
   a winner-take-all game (`bundle.wsEvents.wta`). It reads tonight's score, so it runs inside
-  `prehalf-callouts.js`'s `revealedThrough` gate, the same one `buildAfterInningNote` uses.
+  `callout-notes/surfaces/prehalf.js`'s `revealedThrough` gate, the same one `buildAfterInningNote` uses.
 
 None of the three is in `BETWEEN_INNINGS_ALLOWED_KINDS` or `RECORD_KINDS`.
 

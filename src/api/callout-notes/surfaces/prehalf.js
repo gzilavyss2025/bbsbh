@@ -49,11 +49,11 @@
 // (src/hooks/useCalloutLedger.js) and is optional: without it the strip ranks
 // exactly as it always did.
 
-import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
-import { matchupNotesForHalf } from './matchup/forHalf.js'
-import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
-import { buildWsWtaTrailing9Note } from './callout-notes/worldSeries/events.js'
-import { isWorldSeriesKind } from '../lib/worldSeries/calloutKind.js'
+import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from '../../select.js'
+import { matchupNotesForHalf } from '../../matchup/forHalf.js'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from '../worldSeries/odds.js'
+import { buildWsWtaTrailing9Note } from '../worldSeries/events.js'
+import { isWorldSeriesKind } from '../../../lib/worldSeries/calloutKind.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -70,7 +70,7 @@ import {
   buildFoulVolumeNote,
   buildBullpenThinNote,
   rankNotes,
-} from './callout-notes.js'
+} from '../../callout-notes.js'
 
 const PREHALF_MAX = 2
 // At most one "the club is W-L when X" note per strip. See rankNotes.

@@ -44,7 +44,7 @@ export const isNum = Number.isFinite
 // Every note carries a 0–100 `score` = a per-family base + a magnitude bonus,
 // the callouts counterpart to the three stars' WPA ranking (ADR-0013): the
 // box score's Insights card sorts by it and shows only the top few up front,
-// and the pre-half strip (prehalf-callouts.js) uses it to cap itself. Bases
+// and the pre-half strip (callout-notes/surfaces/prehalf.js) uses it to cap itself. Bases
 // encode how rare/dramatic the family is; bonuses reward how far past its own
 // floor this instance landed. The full rubric — every family, its trigger,
 // its gate, and its score — is docs/callouts.md; tune it there and here

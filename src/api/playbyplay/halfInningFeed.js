@@ -528,7 +528,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         kind: 'atbat',
         batterId: cardBatterId,
         // The play's own identity + result event, for the leader/scoring-first
-        // call-outs (see api/callouts.js): the batter's PA result eventType
+        // call-outs (see api/callout-notes/surfaces/bundle.js): the batter's PA result eventType
         // (home_run, walk, strikeout…) drives which leader note can fire, and
         // atBatIndex lets the caller mark the play that scored the game's first
         // run. Spoiler-free to READ here — this whole module is reveal-only.

@@ -27,6 +27,6 @@ test('the module has the callers it has a gate for, and no others', () => {
   assert.deepEqual(importing(/worldSeries\/events\.js['"]/), [
     'api/callout-notes/liveAtBat.js',
     'api/callout-notes/rollup.js',
-    'api/prehalf-callouts.js',
+    'api/callout-notes/surfaces/prehalf.js',
   ])
 })

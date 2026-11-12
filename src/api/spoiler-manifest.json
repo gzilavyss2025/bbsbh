@@ -142,9 +142,9 @@
       "class": "caller-gated",
       "why": "`lineupEntering` reports the batting order as a half begins, walking pre-pitch substitution events. Safe only for the half the user has reached (ADR-0003/0010)."
     },
-    "between-innings.js": {
+    "callout-notes/surfaces/betweenInnings.js": {
       "class": "caller-gated",
-      "why": "Focus mode's post-half card set (ConsoleBand.jsx/BetweenInnings.jsx) — up to 5 score-free facts, filtered through a hard kind allowlist that excludes every score-reading checkpoint family. Reads the batting side's previous halves' plays via the SAME caller-gated builders prehalf-callouts.js uses (foulVolume/pitchPace/tto/ttoPitches), computed for the half about to be entered next. This module owns that gate (halfIndex(next) <= revealedThrough + 1), same contract as prehalf-callouts.js."
+      "why": "Focus mode's post-half card set (ConsoleBand.jsx/BetweenInnings.jsx) — up to 5 score-free facts, filtered through a hard kind allowlist that excludes every score-reading checkpoint family. Reads the batting side's previous halves' plays via the SAME caller-gated builders callout-notes/surfaces/prehalf.js uses (foulVolume/pitchPace/tto/ttoPitches), computed for the half about to be entered next. This module owns that gate (halfIndex(next) <= revealedThrough + 1), same contract as callout-notes/surfaces/prehalf.js."
     },
     "boxlines/cardFacets.js": {
       "class": "spoiler-free",
@@ -216,7 +216,7 @@
     },
     "callout-notes/checkpoints.js": {
       "class": "caller-gated",
-      "why": "Lead/tied/scoreless-after-inning-N notes. Reading WHO leads is score-revealing, so prehalf-callouts.js only invokes these once every inning through N-1 is at or under the reveal mark."
+      "why": "Lead/tied/scoreless-after-inning-N notes. Reading WHO leads is score-revealing, so callout-notes/surfaces/prehalf.js only invokes these once every inning through N-1 is at or under the reveal mark."
     },
     "callout-notes/heldNotes.js": {
       "class": "reveal-only",
@@ -228,7 +228,7 @@
     },
     "callout-notes/inningAndStarter.js": {
       "class": "caller-gated",
-      "why": "Entering-tense pre-half builders (inning run differential, starter record, foul volume, pitch pace, bullpen health). prehalf-callouts.js owns the gate."
+      "why": "Entering-tense pre-half builders (inning run differential, starter record, foul volume, pitch pace, bullpen health). callout-notes/surfaces/prehalf.js owns the gate."
     },
     "callout-notes/lastTime.js": {
       "class": "reveal-only",
@@ -273,7 +273,7 @@
       "class": "spoiler-free",
       "why": "A hitter's CAREER line against one club — a career fact, not tonight's result."
     },
-    "callouts.js": {
+    "callout-notes/surfaces/bundle.js": {
       "class": "spoiler-free",
       "why": "Static per-date callouts file. Every value is a season aggregate; safety comes from WHERE each note renders, never from this data. An LCS or World Series game's file also has a series block (seriesBlockFor): the runs, win-chance line and stats of the series games that went Final BEFORE the slate date. Heading into a date, never the slate game or a later one; same footing as the bracket (ADR-0087). No SealBox."
     },
@@ -438,7 +438,7 @@
     },
     "gameday/checkpoint.js": {
       "class": "reveal-only",
-      "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). Gameday's checkpoint (screens/gameday/next/checkpoint/checkpointMarkup.js) calls it inside a SealBox reveal function, only for a half at or under the mark once its last step is on screen.",
+      "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (callout-notes/surfaces/betweenInnings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). Gameday's checkpoint (screens/gameday/next/checkpoint/checkpointMarkup.js) calls it inside a SealBox reveal function, only for a half at or under the mark once its last step is on screen.",
       "importers": [
         "screens/gameday/next/checkpoint/checkpointMarkup.js"
       ]
@@ -1114,7 +1114,7 @@
       "class": "spoiler-free",
       "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals. It also folds each counted game's final runs out of those box scores (`runsByGame`) for the series primer's ribbon; the footing is the same, counted games only (ADR-0087)."
     },
-    "prehalf-callouts.js": {
+    "callout-notes/surfaces/prehalf.js": {
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
     },
@@ -1468,7 +1468,7 @@
     },
     "callout-notes/worldSeries/events.js": {
       "class": "mixed",
-      "why": "The World Series \"last time\" notes. buildWsLastTimeNotes (play card) reads only the revealed play, and only calls a play the last of the game once the feed is Final; buildWsWtaTrailing9Note reads tonight's score through the 8th, so prehalf-callouts.js calls it inside the same revealedThrough gate as buildAfterInningNote. buildWsLastTimeGameNotes folds in the final result, so it is reveal-only. Every history lookup is cut strictly before the game's date by lib/worldSeries/lastBefore.js (ADR-0087).",
+      "why": "The World Series \"last time\" notes. buildWsLastTimeNotes (play card) reads only the revealed play, and only calls a play the last of the game once the feed is Final; buildWsWtaTrailing9Note reads tonight's score through the 8th, so callout-notes/surfaces/prehalf.js calls it inside the same revealedThrough gate as buildAfterInningNote. buildWsLastTimeGameNotes folds in the final result, so it is reveal-only. Every history lookup is cut strictly before the game's date by lib/worldSeries/lastBefore.js (ADR-0087).",
       "revealOnlyExports": [
         "buildWsLastTimeGameNotes"
       ],
@@ -1490,7 +1490,7 @@
     },
     "nuggets/nuggets.js": {
       "class": "cutoff-gated",
-      "why": "The nugget store's reader (#2809): the day a player's season total met a named threshold, with the count that day. No score, but the DATE is a game date, so on a scoring surface the cut is the gate: nuggetsForGame returns only nuggets dated strictly before the game's own date, within the card's 7-day window, and test/nugget-notes.test.js pins it. Its one scoring-surface caller is between-innings.js."
+      "why": "The nugget store's reader (#2809): the day a player's season total met a named threshold, with the count that day. No score, but the DATE is a game date, so on a scoring surface the cut is the gate: nuggetsForGame returns only nuggets dated strictly before the game's own date, within the card's 7-day window, and test/nugget-notes.test.js pins it. Its one scoring-surface caller is callout-notes/surfaces/betweenInnings.js."
     },
     "callout-notes/nugget.js": {
       "class": "spoiler-free",

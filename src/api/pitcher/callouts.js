@@ -1,7 +1,7 @@
 // Per-pitcher in-progress notes — the "Margin Notes" digest (MarginNotes.jsx),
 // a ranked surface fed by every pitcher who's appeared so far this game (both
 // sides), same worthiness-scoring pattern as the pre-half strip
-// (prehalf-callouts.js): each candidate carries a `score`, sorted highest
+// (callout-notes/surfaces/prehalf.js): each candidate carries a `score`, sorted highest
 // first; MarginNotes.jsx caps how many render up front and reveals the rest
 // on tap (the InsightsCard "Show N more" pattern), so the
 // builder itself doesn't truncate. This used to be an UNSCORED plain-string
@@ -46,7 +46,7 @@ import { ordinal } from '../../lib/format.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
-// family didn't exist there, and prehalf-callouts.js sets the precedent of a
+// family didn't exist there, and callout-notes/surfaces/prehalf.js sets the precedent of a
 // self-contained scoring table rather than reaching into that file's
 // internals). Health notes (laboring, velo decay) lead — they're the most
 // actionable, tonight-specific read on a pitcher, ahead of season aggregates.

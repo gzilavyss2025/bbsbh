@@ -11,7 +11,7 @@ import test from 'node:test'
 import { bracket2025, results, skeleton } from './fixtures.js'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import { foldSeriesStats } from '../../src/api/postseason/archive/series.js'
-import { seriesBlockFor } from '../../src/api/callouts.js'
+import { seriesBlockFor } from '../../src/api/callout-notes/surfaces/bundle.js'
 import { seriesBlockFor as primerBlockFor } from '../../src/lib/postseason/primer/primerGames.js'
 import { seriesBlock } from '../../src/lib/postseason/primer/seriesBlock.js'
 

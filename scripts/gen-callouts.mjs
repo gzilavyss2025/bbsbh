@@ -113,7 +113,7 @@
 // this is still ~hundreds of statsapi calls (a roster + a full-season linescore
 // sweep per club, a game log + splits pull per player) — far too heavy for a
 // phone page load. So .github/workflows/update-nightly-data.yml runs this on a
-// nightly cron, commits the small shaped file, and the app (src/api/callouts.js)
+// nightly cron, commits the small shaped file, and the app (src/api/callout-notes/surfaces/bundle.js)
 // reads it same-origin and degrades to nothing when it's absent (MiLB games, an
 // un-generated date, a failed run). Everything written here is a SEASON
 // AGGREGATE — spoiler-free; the app's spoiler-safety comes entirely from WHERE
@@ -237,7 +237,7 @@ const GAME_TYPES = 'R,F,D,L,W'
 const season = target.getUTCFullYear()
 const [ty, tm, td] = targetApi.split('-')
 // One directory per slate date, one file per game inside it — the shape
-// api/callouts.js reads (a lineup page wants ONE game, never the slate).
+// api/callout-notes/surfaces/bundle.js reads (a lineup page wants ONE game, never the slate).
 const urlDate = `${tm}${td}${ty}`
 const outDateDir = join(outDir, urlDate)
 
@@ -371,7 +371,7 @@ const COMEBACK_MIN_GAMES = 5
 // Per-inning run tallies ("outscored opponents 38-14 in the 7th") cover the
 // regulation innings only — extras are a different animal (ghost runners) and
 // already have their own extra-inning record note. No noteworthiness gate at
-// the data layer: the note layer (callout-notes.js / prehalf-callouts.js)
+// the data layer: the note layer (callout-notes.js / callout-notes/surfaces/prehalf.js)
 // judges the differential against the games sampled, so it needs the raw
 // numbers either way.
 const INNING_RUNS_MAX = 9

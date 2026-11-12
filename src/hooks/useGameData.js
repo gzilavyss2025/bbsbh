@@ -15,7 +15,7 @@ import { generateScorebookWeather } from '../api/weather.js'
 import { selectGameSeason, selectHasStarted } from '../api/select.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData, rookiesForGameSeason } from '../api/rookies.js'
-import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
+import { fetchCallouts, calloutsForGame } from '../api/callout-notes/surfaces/bundle.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { loadCareerMatchups } from '../api/careerMatchups.js'
@@ -282,7 +282,7 @@ export function useGameData(game, activeStep = null) {
 
   // Season-context call-outs for the play-by-play — the leader / streak /
   // situational-record notes, precomputed nightly to a static per-game file (see
-  // api/callouts.js). Season aggregates (no seal), same feed-derived tier
+  // api/callout-notes/surfaces/bundle.js). Season aggregates (no seal), same feed-derived tier
   // as prospect badges. Covers MLB and the four full-season MiLB levels alike
   // (the set carries every level's slate since the phase-3 generator; a MiLB
   // gamePk on an older date simply resolves to no bundle). Keyed on gamePk,

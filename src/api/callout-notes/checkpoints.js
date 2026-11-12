@@ -1,6 +1,6 @@
 // Entering-tense, checkpoint-based season-record notes (lead/tied/scoreless
 // after inning N, day-of-week) — split out of ../callout-notes.js. These are
-// the pre-half strip's (prehalf-callouts.js) caller-gated builders: reading
+// the pre-half strip's (callout-notes/surfaces/prehalf.js) caller-gated builders: reading
 // WHO leads or that the game is tied is score-revealing, so the caller only
 // invokes these once every inning through N-1 is at or under the reveal mark.
 // See ../callout-notes.js's header for the two-tenses rule (ADR-0014); the
@@ -23,7 +23,7 @@ import { withRank, rankOf, rankClause } from './rank.js'
 // in that partial frame, so it must be detected from the play data instead:
 // the game's last play, in the bottom half, with fewer than 3 outs recorded.
 // Shared by every whole-game, checkpoint-based note below, and by the
-// pre-half strip's "leading after the 8th" note (prehalf-callouts.js), whose
+// pre-half strip's "leading after the 8th" note (callout-notes/surfaces/prehalf.js), whose
 // caller-gating contract is what keeps THAT read spoiler-safe.
 export function cumulativeInnings(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
@@ -143,7 +143,7 @@ export function buildLeadReversalNote(feed, bundle) {
 //      is a different object and carries three times the information.
 //   2. Its SELECTION discloses nothing. The single-branch notes have to read
 //      tonight's score to decide which one to build — safe today only because
-//      prehalf-callouts.js will not call them until the inning is revealed.
+//      callout-notes/surfaces/prehalf.js will not call them until the inning is revealed.
 //      This one is built the same way whatever the score is, so the score is
 //      never consulted and there is nothing for that gate to protect. The gate
 //      stays (it is defence in depth, and ADR-0002's re-seal contract still
@@ -186,7 +186,7 @@ export function buildAfterInningNote(bundle, side, inning) {
 // gen-callouts.mjs's scorelessThroughFull). Numbers-only in the bundle, so the
 // box-score sibling below can fold tonight in; here it stays entering-tense.
 // CALLER-GATED like buildAfterInningNote: knowing a club is scoreless through N
-// restates tonight's already-revealed score, so prehalf-callouts.js only fires
+// restates tonight's already-revealed score, so callout-notes/surfaces/prehalf.js only fires
 // it once inning N is revealed. A run drought skews hard toward losing, so it
 // only earns a card once the record is genuinely one-sided — SCORELESS_LOPSIDED
 // keeps an ordinary early-inning ~.500 record (scoreless through the 1st means
