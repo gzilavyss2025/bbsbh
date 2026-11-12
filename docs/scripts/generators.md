@@ -322,6 +322,9 @@ don't run these by hand.
   Triple plays: each club's fielding game log, one call for the regular season and one for each
   postseason type the club played (the log takes one `gameType` at a time). Cycles:
   `sports/1/players`, then batched `people` hydrates of 100 with `gameType=[R,F,D,L,W]`.
+  Rarity flags (#2968): each swept cycle row gets `natural` and each triple play row `unassisted`,
+  from one `playByPlay` call per game (`lib/notable/flags.mjs`, detectors shared with
+  `src/api/notable/rarityCount.js`). A game with no play-by-play (most before 1950) gets no flag.
   Each run REPLACES every row of each season it swept, in all three files (a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play

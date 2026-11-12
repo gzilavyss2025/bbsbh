@@ -235,6 +235,7 @@
       "why": "The 'last time' lines for a triple play, cycle or no-hitter, built from the feat index (ADR-0101). It names results, so hooks/callouts/useLastTime.js calls it only for a revealed play card or inside the box score's reveal.",
       "importers": [
         "api/gameday/moments/moments.js",
+        "api/notable/rarityCount.js",
         "hooks/callouts/useLastTime.js"
       ]
     },
@@ -698,6 +699,13 @@
     "notebook.js": {
       "class": "spoiler-free",
       "why": "The offseason page's two notebook notes. The age note is a season aggregate and a date of birth, which have opened live since ADR-0034. The at-bat note names games — a batter, a pitcher, a date and a pitch count — and stores no result, no inning and no score: a twelve-pitch at-bat is a LENGTH, true of it whoever won, and the game it links to opens sealed under the same revealedThrough mark as any other (ADR-0081)."
+    },
+    "notable/rarityCount.js": {
+      "class": "reveal-only",
+      "why": "The rarity count of a natural cycle or unassisted triple play (#2968): 'the Nth since {floor}' names a result, so hooks/callouts/useLastTime.js calls it only inside the box score's reveal, for a Final game. Its two pure detectors are shared with scripts/gen-notable.mjs.",
+      "importers": [
+        "hooks/callouts/useLastTime.js"
+      ]
     },
     "notable/notable.js": {
       "class": "reveal-only",
