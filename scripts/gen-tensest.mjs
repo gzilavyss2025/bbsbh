@@ -29,7 +29,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
-import { gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
+import { gameNumbers, gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
 import { cutoffsFromHist, emptyHist, foldHist, histOrNull } from './lib/tensest/cutoffs.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
 
@@ -55,7 +55,9 @@ const state = await readJsonOr(STATE, null)
 const carried = prev?.season === season && state?.season === season && histOrNull(state.hist) !== null && Array.isArray(prev.plays)
 const done = new Set(carried ? state.done : [])
 let hist = carried ? state.hist : emptyHist()
-let plays = carried ? prev.plays : []
+// Rows carried from a file written before `gn`/`sg` existed take them from tonight's schedule.
+const byPk = new Map(finals.map((g) => [g.gamePk, g]))
+let plays = (carried ? prev.plays : []).map((r) => (byPk.has(r.pk) ? { ...r, ...gameNumbers(byPk.get(r.pk)) } : r))
 
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
@@ -63,7 +65,7 @@ if (todo.length === 0) {
   // Restamp both files anyway: the freshness guard reads the stamp, and the nightly
   // commit drops a stamp-only change (nightly/drop-stamp-only.mjs), so this commits nothing.
   if (carried) {
-    await writeJsonAtomic(OUT, { ...prev, generatedAt: new Date().toISOString() })
+    await writeJsonAtomic(OUT, { ...prev, plays, generatedAt: new Date().toISOString() })
     await writeCutoffs(cutoffsFromHist(hist))
   }
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
