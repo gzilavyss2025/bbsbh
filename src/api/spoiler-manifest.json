@@ -593,7 +593,7 @@
       "class": "spoiler-free",
       "why": "Builds the leader-board pool for a scope. Season aggregates — an open surface (ADR-0034)."
     },
-    "levelTenure.js": {
+    "prospects/levelTenure.js": {
       "class": "spoiler-free",
       "why": "Static level-tenure-benchmark reader — how much playing time a typical prospect accumulates at a MiLB level before promotion, from a historical debut cohort. Season aggregate, not game state."
     },
@@ -709,7 +709,7 @@
         "screens/boxscore/FeatLabel.jsx"
       ]
     },
-    "minorsLeaders.js": {
+    "prospects/minorsLeaders.js": {
       "class": "spoiler-free",
       "why": "Static pre-ranked all-minors leaderboard. Season aggregates."
     },
@@ -1118,11 +1118,11 @@
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
     },
-    "prospectTrend.js": {
+    "prospects/trend.js": {
       "class": "spoiler-free",
       "why": "Static prospect-trend reader — a level-relative OPS/ERA percentile computed from season stat splits. Season aggregate, not game state."
     },
-    "prospects.js": {
+    "prospects/top100.js": {
       "class": "spoiler-free",
       "why": "Static top-prospects reader. Rankings, not game state."
     },
@@ -1170,7 +1170,7 @@
       "class": "spoiler-free",
       "why": "Static tensest.json: the season's tensest at-bats by MLB leverage index. A standalone page outside the four scoring surfaces; a stat line is not a score (ADR-0034)."
     },
-    "rookies.js": {
+    "prospects/rookies.js": {
       "class": "spoiler-free",
       "why": "Static rookies.json — debut dates and rookie windows."
     },

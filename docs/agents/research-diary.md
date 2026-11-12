@@ -105,7 +105,7 @@ the research data or its write-ups:
 - `docs/level-tenure-benchmark.md`, `docs/team-movement-windows.md`,
   `docs/homegrown-dependence.md`, `docs/prospect-traits.md`
 - `scripts/gen-level-tenure-benchmark.mjs`,
-  `public/data/level-tenure-benchmark.json`, `src/api/levelTenure.js`
+  `public/data/level-tenure-benchmark.json`, `src/api/prospects/levelTenure.js`
 - anything under `.scratch/level-benchmarks/` or `.scratch/prospect-traits/`
 
 It is advisory: it writes one line to stderr, always exits 0, and stays quiet

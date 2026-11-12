@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { benchmarkFor, tenureFact } from '../src/api/levelTenure.js'
+import { benchmarkFor, tenureFact } from '../src/api/prospects/levelTenure.js'
 
 const SNAPSHOT = {
   levels: {

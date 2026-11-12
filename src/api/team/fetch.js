@@ -169,7 +169,7 @@ export async function fetchTeamRosterEntries(teamId, rosterType = 'active') {
 // resolution (see the Minors tab's loadMinors) passes '40Man' instead, so an injured prospect
 // still resolves to his real affiliate — 'active' alone was dropping any
 // prospect on a 7-/60-day IL to the scraped level text with no logo (see
-// prospects.js). Derives from fetchTeamRosterEntries' shared cache rather
+// prospects/top100.js). Derives from fetchTeamRosterEntries' shared cache rather
 // than fetching/caching its own copy of the same roster. Degrades to [].
 export async function fetchTeamRosterIds(teamId, rosterType = 'active') {
   try {

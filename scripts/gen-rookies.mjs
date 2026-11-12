@@ -3,7 +3,7 @@
 // 50 innings pitched, cumulative, MLB only). Feeds RookiePill (a "still
 // rookie-eligible" pill on the roster/lineup surfaces) and the player page's
 // Transactions timeline ("Lost Rookie Status" once closed) — see
-// src/api/rookies.js.
+// src/api/prospects/rookies.js.
 //
 // rookies.json is the MASTER record and is not fetched by the app. After every
 // write this script derives public/data/rookies/ from it — a compact

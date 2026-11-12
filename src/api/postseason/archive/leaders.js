@@ -17,7 +17,7 @@
 // category-map contract ({ id, name, teamId, display, value } per category
 // key — see api/team/leaders.js) so the page can reuse that component (and
 // its Featured-leader/chasers layout) instead of a bespoke render, same as
-// minorsLeaders.js does for the all-minors board.
+// prospects/minorsLeaders.js does for the all-minors board.
 //
 // Degrades to an empty shape before the file exists or on any failure. Only a
 // good read is cached, so a failure is retried on the next visit.

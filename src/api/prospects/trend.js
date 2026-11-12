@@ -3,7 +3,7 @@
 // level-relative OPS/ERA percentile, NOT a Major League Equivalency and not
 // third-party (it is bbsbh's own number computed straight from statsapi
 // splits). Meant
-// to complement the weekly-refreshed rank in prospects.js, not replace it.
+// to complement the weekly-refreshed rank in prospects/top100.js, not replace it.
 // ProspectTrendPill (src/components/badges/ProspectTrendPill.jsx) is the
 // only consumer, wired onto /prospects.
 
@@ -63,7 +63,7 @@ export function unpackProspectTrend(raw) {
   }
 }
 
-// Session-memoized, same pattern as fetchTopProspects (prospects.js). Degrades to an empty snapshot on any
+// Session-memoized, same pattern as fetchTopProspects (prospects/top100.js). Degrades to an empty snapshot on any
 // failure (404 before the first nightly run, network, malformed JSON) — no
 // caller needs its own try/catch.
 let trendPromise = null
@@ -158,7 +158,7 @@ export const LEVEL_STANDING_BANDS = ['All', ...Object.values(TIER_LABELS)]
 // Sample-size honesty for every level-relative standing: the same
 // qualification floor (40 PA / 30 IP-outs, scripts/lib/prospectPercentile.mjs
 // — mirrored here rather than imported, same cross-boundary-constant
-// convention prospects.js's rate3/num2 already use, since scripts/ isn't part
+// convention prospects/top100.js's rate3/num2 already use, since scripts/ isn't part
 // of the client bundle) gates whether a percentile exists at all; THIS scales
 // how much confidence the sample supports once a percentile exists. The UI
 // states this in text; marker fill does not carry a second meaning.
@@ -228,7 +228,7 @@ export function ageEdgeFact(ageYears, levelAverageAge) {
 // just how he's performing in it) — pure, so
 // the component only ever renders what this returns rather than re-deriving
 // any of it inline. `tenure` is the caller's own `tenureFact` result
-// (src/api/levelTenure.js) or null; passed through untouched since it's
+// (src/api/prospects/levelTenure.js) or null; passed through untouched since it's
 // already a plain view object.
 //
 //   'none'        — no trend row at all (entry == null): off the board,

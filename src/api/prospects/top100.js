@@ -4,10 +4,10 @@
 // MLB Stats API (mlb.js's territory) or a shaping of a /people response
 // (person.js's territory), so it gets its own small file.
 
-import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from './team/fetch.js'
-import { loadCombinedPoolForTeams, sumHitting, sumPitching } from './statsLevels.js'
-import { SPORT_LABEL } from '../lib/teams.js'
-import { rate3 as sharedRate3 } from './person/shared.js'
+import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from '../team/fetch.js'
+import { loadCombinedPoolForTeams, sumHitting, sumPitching } from '../statsLevels.js'
+import { SPORT_LABEL } from '../../lib/teams.js'
+import { rate3 as sharedRate3 } from '../person/shared.js'
 
 const SNAPSHOT_URL = '/data/top-prospects.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, source: null, count: 0, players: [], orgProspects: [] }

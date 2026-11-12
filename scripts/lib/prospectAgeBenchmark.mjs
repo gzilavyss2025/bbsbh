@@ -14,7 +14,7 @@
 // one request.
 import { getPeople } from './statsapi.mjs'
 import { qualifiedPlayerIds } from './prospectPercentile.mjs'
-import { decimalAge } from '../../src/api/prospectTrend.js'
+import { decimalAge } from '../../src/api/prospects/trend.js'
 
 async function fetchBirthDates(ids) {
   // A failed batch leaves those players out of the average.

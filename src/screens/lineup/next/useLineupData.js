@@ -68,7 +68,7 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
 
   // The parent org of each club, so a prospect badge is checked against the roster the
-  // player is on today (prospectBadge, api/prospects.js).
+  // player is on today (prospectBadge, api/prospects/top100.js).
   const { data: teamIdentity } = useAsync(() => fetchTeam(meta.id), [meta.id])
   const { data: oppTeamIdentity } = useAsync(() => fetchTeam(oppMeta.id), [oppMeta.id])
   const orgTeamId = teamIdentity?.parentOrgId ?? meta.id

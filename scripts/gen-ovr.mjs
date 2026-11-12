@@ -14,7 +14,7 @@ import { join } from 'node:path'
 import { writeShards } from './lib/io.js'
 import { FLD_MIN_PA, buildRatings, loadInputs } from './lib/ovr/build.mjs'
 import { mergeHistory, seedRows } from './lib/ovr/history.mjs'
-import { unpackProspectTrend } from '../src/api/prospectTrend.js'
+import { unpackProspectTrend } from '../src/api/prospects/trend.js'
 import { CONSTANTS } from '../src/api/ovr/rating.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 

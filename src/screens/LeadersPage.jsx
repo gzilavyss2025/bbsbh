@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fetchTeam } from '../api/team/fetch.js'
 import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope, isMultiLevelScope } from '../api/leaders.js'
-import { fetchMinorsLeaders } from '../api/minorsLeaders.js'
-import { fetchTopProspects } from '../api/prospects.js'
+import { fetchMinorsLeaders } from '../api/prospects/minorsLeaders.js'
+import { fetchTopProspects } from '../api/prospects/top100.js'
 import { ALL_CATEGORIES } from '../api/team/leaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -34,7 +34,7 @@ import { isoToday } from '../lib/dates.js'
 async function loadLeaders(scope, orgId, asOf) {
   const season = Number((asOf || isoToday()).slice(0, 4))
   // The all-minors board is served pre-ranked from a static file (too heavy to
-  // rank live — see api/minorsLeaders.js); every other scope ranks a live pool.
+  // rank live — see api/prospects/minorsLeaders.js); every other scope ranks a live pool.
   if (scope === 'minors') {
     const [{ leaders }, snapshot] = await Promise.all([fetchMinorsLeaders(), fetchTopProspects()])
     return { precomputed: leaders, snapshot, org: null }

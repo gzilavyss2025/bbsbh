@@ -11,7 +11,7 @@
 import { getJson } from '../statsapi.js'
 import { fetchPersonBatched } from './personBatch.js'
 import { fetchPlayerContract } from '../person/contracts.js'
-import { fetchTopProspects } from '../prospects.js'
+import { fetchTopProspects } from '../prospects/top100.js'
 import { CALLS, FULL_SEASON } from './templates.js'
 import { isMlbTeamId } from '../../lib/teams.js'
 import { shiftDays } from '../../lib/time/standingsDates.js'

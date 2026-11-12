@@ -36,7 +36,7 @@ import { fetchPersonStats, fetchTransactions } from '../src/api/person-fetch.js'
 import { draftInfo, pitcherRole, signedFallback } from '../src/api/person.js'
 import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 import { MILB_LEVELS } from '../src/lib/teams.js'
-import { prospectBadge } from '../src/api/prospects.js'
+import { prospectBadge } from '../src/api/prospects/top100.js'
 
 // The browser client this file used to import capped every call at 15 s; keep
 // that cap on the shared client, whose own default is none.

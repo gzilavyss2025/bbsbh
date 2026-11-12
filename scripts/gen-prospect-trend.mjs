@@ -45,7 +45,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
-import { packProspectTrend } from '../src/api/prospectTrend.js'
+import { packProspectTrend } from '../src/api/prospects/trend.js'
 import { buildPopulations, snapshotRow, movementSince, historyRow } from './lib/prospectPercentile.mjs'
 import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup, repeatsPrevious } from './lib/db.js'

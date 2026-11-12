@@ -1,7 +1,7 @@
 // Coverage for the pure combine/sum helpers in src/api/statsLevels.js —
 // sumHitting/sumPitching (rate stats recomputed from summed components, not
 // averaged) and combineToPool's raw hittingSplits/pitchingSplits passthrough,
-// which prospects.js's resolveCurrentLevels relies on to re-partition a
+// which prospects/top100.js's resolveCurrentLevels relies on to re-partition a
 // player's splits by level (MLB vs. every MiLB level combined) for the
 // /prospects "Line" column's (MLB)/(MiLB) split.
 import { test } from 'node:test'

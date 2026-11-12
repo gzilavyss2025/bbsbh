@@ -17,8 +17,8 @@
 // before the file exists or on any failure — a friendly empty state, not a broken
 // page. Cached in-memory for the session since the file only changes once a day.
 
-import { MILB_LEVELS } from '../lib/teams.js'
-import { staticJson } from './staticJson.js'
+import { MILB_LEVELS } from '../../lib/teams.js'
+import { staticJson } from '../staticJson.js'
 
 export const fetchMinorsLeaders = staticJson('/data/minors-leaders.json', {
   // `season` is carried because a caller that names a season on screen has to

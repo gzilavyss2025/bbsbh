@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { fetchTopProspects, resolveCurrentLevels, isPitcher } from '../api/prospects.js'
-import { fetchProspectTrend, prospectTrendById, levelTier, LEVEL_STANDING_BANDS } from '../api/prospectTrend.js'
+import { fetchTopProspects, resolveCurrentLevels, isPitcher } from '../api/prospects/top100.js'
+import { fetchProspectTrend, prospectTrendById, levelTier, LEVEL_STANDING_BANDS } from '../api/prospects/trend.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
