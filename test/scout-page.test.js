@@ -9,7 +9,7 @@ import { scoutPath } from '../src/lib/scout/path.js'
 import { canHit, canPitch, stanceFor } from '../src/lib/scout/roles.js'
 import { ROUND_TAG, resultShort } from '../src/lib/scout/format.js'
 import { MAX_TYPES, USAGE_FLOOR, boardRow, mapOf, pitcherBoard } from '../src/screens/scout/board.js'
-import { MIN_COMMAND_PITCHES } from '../src/api/commandMap.js'
+import { MIN_COMMAND_PITCHES } from '../src/api/command/map.js'
 import { expectedAll, expectedOn, hitterMap, hitterSide, metricsFor, sumCounters } from '../src/screens/scout/hitterBoard.js'
 
 const skubal = { id: 669373, name: 'Tarik Skubal' }

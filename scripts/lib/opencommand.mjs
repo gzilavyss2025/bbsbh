@@ -9,7 +9,7 @@
 // Nothing else public measures target-vs-actual, which is why this app reaches
 // outside statsapi for it at all. CC BY-NC-SA 4.0: attribution is required and
 // commercial use is not permitted, so every surface that renders it carries a
-// visible credit line (see src/api/targetCommand.js's ATTRIBUTION).
+// visible credit line (see src/api/command/target.js's ATTRIBUTION).
 //
 // WHAT THIS FILE TOUCHES, AND WHAT IT REFUSES TO. Only the three flat, final
 // tables per season:
@@ -54,7 +54,7 @@ export function datasetUrl(season, file) {
 }
 
 // Below this many pitches a median miss says more about the sample than the
-// pitcher. Deliberately the same figure as commandMap.js's MIN_COMMAND_PITCHES:
+// pitcher. Deliberately the same figure as command/map.js's MIN_COMMAND_PITCHES:
 // both are "enough pitches of one kind to have a shape", the two cards sit on
 // the same tab, and a reader who sees a pitch type on the command map should
 // not find it silently missing from the strip beside it.

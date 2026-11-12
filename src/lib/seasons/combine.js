@@ -223,7 +223,7 @@ export function combineArsenalEntries(slices) {
   }
 }
 
-// --- pitch command (src/api/commandMap.js) ----------------------------------
+// --- pitch command (src/api/command/map.js) ----------------------------------
 // `{ throws, mlb: { code: { stand: { field: [25 counts] } } }, aaa: … }`. Every
 // field is a 25-cell count grid, so two entries (two seasons, or a regular
 // season and a postseason, ADR-0094) add cell by cell. A field one part lacks

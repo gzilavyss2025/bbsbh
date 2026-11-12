@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MIN_COMMAND_PITCHES } from '../../../api/commandMap.js'
+import { MIN_COMMAND_PITCHES } from '../../../api/command/map.js'
 import { arsenalFor } from '../../../api/matchup/savant.js'
 import { METRICS } from '../../../lib/scout/metrics.js'
 import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'

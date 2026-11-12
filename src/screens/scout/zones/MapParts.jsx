@@ -1,4 +1,4 @@
-import { MIN_COMMAND_PITCHES } from '../../../api/commandMap.js'
+import { MIN_COMMAND_PITCHES } from '../../../api/command/map.js'
 import { METRICS, fmtValue } from '../../../lib/scout/metrics.js'
 import { regionLabel, sidesInOrder } from '../../../lib/zone/regions.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'

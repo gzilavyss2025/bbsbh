@@ -1,7 +1,7 @@
 import '../../styles/26g-command-received.css'
 import { useState } from 'react'
-import { CAUSATION_NOTE, commandReceivedFor } from '../../api/commandReceived.js'
-import { attributionFor } from '../../api/targetCommand.js'
+import { CAUSATION_NOTE, commandReceivedFor } from '../../api/command/received.js'
+import { attributionFor } from '../../api/command/target.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
@@ -17,7 +17,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // THE FOOTER IS THE POINT, NOT A DISCLAIMER. A list of pitchers under a
 // catcher's name reads as a catcher's skill unless something says otherwise,
 // and this figure is mostly the PITCHER's own aim. So the sentence naming that
-// is required copy (api/commandReceived.js's CAUSATION_NOTE) and it is printed,
+// is required copy (api/command/received.js's CAUSATION_NOTE) and it is printed,
 // not tucked into a tooltip nobody on a phone can open.
 //
 // THE BAR IS THE CATCHER'S OWN SEASON, not the league. Each row's mark sits

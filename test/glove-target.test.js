@@ -1,4 +1,4 @@
-// Unit coverage for the Glove Target card's reading layer (src/api/gloveTarget.js).
+// Unit coverage for the Glove Target card's reading layer (src/api/command/glove.js).
 //
 // WHAT IS WORTH PINNING HERE. The card's whole claim is that the glove is at
 // the centre and the dashed ring halves the cloud. Three things can break that
@@ -13,7 +13,7 @@ import {
   RIM_IN,
   gloveTargetBias,
   gloveTargetView,
-} from '../src/api/gloveTarget.js'
+} from '../src/api/command/glove.js'
 
 const entry = {
   ALL: { n: 2203, miss: 8.47, dots: [[1, 2], [-3, 4], [0, -6]] },

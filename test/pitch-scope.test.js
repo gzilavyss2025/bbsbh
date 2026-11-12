@@ -3,7 +3,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { combineCommandEntries } from '../src/lib/seasons/combine.js'
-import { commandView } from '../src/api/commandMap.js'
+import { commandView } from '../src/api/command/map.js'
 import { absChallengesPath, parseRoute } from '../src/lib/route.js'
 
 const cells = (n) => Array.from({ length: 25 }, (_, i) => (i === 12 ? n : 0))

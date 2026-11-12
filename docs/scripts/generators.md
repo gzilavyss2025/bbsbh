@@ -969,7 +969,7 @@ don't run these by hand.
 - `gen-command.mjs` → `public/data/target-command.json` — TARGET COMMAND: each
   pitcher's median distance, in inches, between where the catcher set up and
   where the pitch actually crossed, per pitch type, for one season. Read by
-  `src/api/targetCommand.js` for the player page's Analytics tab
+  `src/api/command/target.js` for the player page's Analytics tab
   (its `TargetCommand.jsx` strip was deleted as unused; no surface reads it now).
   **The only generator here that reads an OUTSIDE dataset.** The source is
   [OpenCommand](https://huggingface.co/datasets/tomdoyo/open-command) — catcher
@@ -995,11 +995,11 @@ don't run these by hand.
   by about 1.8in more than a sinker league-wide (2026: 11.0in against 9.2in), so
   one pooled distribution would tell a curveball specialist he has poor command
   of a pitch he throws better than anyone. Floors: `MIN_COMMAND_PITCHES` (50,
-  deliberately the same figure `commandMap.js` uses) for a row to appear, and 20
+  deliberately the same figure `command/map.js` uses) for a row to appear, and 20
   pitchers throwing a type before it is ranked at all.
 - `gen-command-zone.mjs` → `public/data/glove-target/{NN}.json` (per-pitcher
   buckets on `personId % 100`) — GLOVE TARGET: the cloud behind the figures
-  `gen-command.mjs` writes. One dot per pitch, read by `src/api/gloveTarget.js`
+  `gen-command.mjs` writes. One dot per pitch, read by `src/api/command/glove.js`
   for `GloveTarget.jsx` on the Analytics tab, directly under the Target Command
   strip whose numbers it draws. Same OpenCommand source, same shared helper,
   same licence and credit line.
@@ -1036,7 +1036,7 @@ don't run these by hand.
   reading "no consistent direction" on nineteen cards in twenty.
 - `gen-command-received.mjs` → `public/data/command-received.json` — COMMAND
   RECEIVED: per catcher, the pitchers who threw to him this season ranked by
-  median miss from his target. Read by `src/api/commandReceived.js` for
+  median miss from his target. Read by `src/api/command/received.js` for
   `CommandReceivedCard.jsx`, which renders in its own **Catching** section on the
   Analytics tab — added ALONGSIDE a catcher's hitting block, never replacing it.
   **The catcher is entirely bbsbh's own join.** OpenCommand carries no catcher

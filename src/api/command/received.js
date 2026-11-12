@@ -1,4 +1,4 @@
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 // COMMAND RECEIVED — the pitchers who threw to a catcher this season, ranked by
 // how close they finished to his target while he was the one holding it.
@@ -22,7 +22,7 @@ import { staticJson } from './staticJson.js'
 // granularity. The substitution replay that BUILT it is spoiler-adjacent and
 // stays caller-gated where it lives (catcherOfRecord.js); what survives into
 // this file is an aggregate with the timing washed out of it. Same footing as
-// targetCommand.js beside it on the player page, an open surface (ADR-0034).
+// command/target.js beside it on the player page, an open surface (ADR-0034).
 //
 // OpenCommand data, CC BY-NC-SA 4.0 — the card carries the credit line.
 export const fetchCommandReceived = staticJson('/data/command-received.json', {
@@ -58,7 +58,7 @@ export function commandReceivedFor(data, personId, season) {
       // Where he sits against the catcher's own season, so a reader can see at a
       // glance which arms were sharper than the rest of the staff and which
       // were not. Not a league rank: that is the pitcher's own card's job
-      // (api/targetCommand.js), and printing one here would invite reading this
+      // (api/command/target.js), and printing one here would invite reading this
       // list as a ranking of pitchers rather than of one catcher's battery.
       better: miss < entry.miss,
     })),

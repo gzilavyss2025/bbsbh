@@ -159,14 +159,14 @@ test("an umpire's 'all' joins his seasons' games; a year reads that year's summa
 })
 
 test("the command map takes one season: 'all' is null, with no fetch", async () => {
-  const { fetchCommandFor } = await import('../src/api/commandMap.js')
+  const { fetchCommandFor } = await import('../src/api/command/map.js')
   const { value, urls } = await urlsOf(() => fetchCommandFor(404, { seasonYear: 'all' }))
   assert.equal(value, null)
   assert.deepEqual(urls, [])
 })
 
 test("the command league block (#2004) sits in the season's folder", async () => {
-  const { fetchCommandLeague } = await import('../src/api/commandMap.js')
+  const { fetchCommandLeague } = await import('../src/api/command/map.js')
   const one = await urlsOf(() => fetchCommandLeague({ seasonYear: 2026 }))
   assert.deepEqual(one.urls, ['/data/pitch-command/2026/league.json'])
   assert.equal(one.value.season, 2026)

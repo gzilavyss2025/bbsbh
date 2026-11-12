@@ -6,7 +6,7 @@
 // about the dataset, its licence and its files is documented once in
 // scripts/lib/opencommand.mjs. This script is only the shaping: join the rollup
 // to this app's player id space, rank each pitcher against his own season, and
-// write the small static file src/api/targetCommand.js reads.
+// write the small static file src/api/command/target.js reads.
 //
 // Runs nightly via .github/workflows/update-nightly-data.yml, never at request
 // time — same build-time-fetch pattern as every other public/data set
@@ -121,7 +121,7 @@ for (const [id, entry] of byPitcher) {
       : null
     // [pitches, median miss in inches, percentile] — a fixed triple rather than
     // three named keys, which is what keeps this file to a couple of hundred KB
-    // across ~800 pitchers and their pitch types. src/api/targetCommand.js is
+    // across ~800 pitchers and their pitch types. src/api/command/target.js is
     // the only reader and unpacks it in one place.
     packed[pitchType] = [n, Number(inferred.toFixed(2)), pct]
   }

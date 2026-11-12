@@ -177,7 +177,7 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
   points. **Inference:** these are a starting point; tune them on real data.
 - Floors: 10 plate-appearance-ending pitches for xwOBA, 10 swings for whiff %,
   10 pitches for swing % (Gary, item 3). The pitcher map uses
-  `MIN_COMMAND_PITCHES` (50) from `src/api/commandMap.js`: under it, every
+  `MIN_COMMAND_PITCHES` (50) from `src/api/command/map.js`: under it, every
   region is hatched and prints its count.
 
 ### Rejected
