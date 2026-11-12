@@ -25,7 +25,8 @@
 .tensest__vs {
   white-space: nowrap;
 }
-.tensest__post {
+.tensest__post,
+.tensest .what {
   color: var(--text-muted);
 }
 
@@ -112,7 +113,7 @@
   .tensest .inn { grid-area: inn; }
   .tensest .game { grid-area: game; }
   .tensest .batter { grid-area: batter; }
-  .tensest .what { grid-area: what; color: var(--text-muted); }
+  .tensest .what { grid-area: what; }
   /* A bigger thumb target on the game and the names: padding grows the tap area, the
      negative margin keeps the card's lines where they were. With the row gap above,
      two stacked targets meet but never overlap. */

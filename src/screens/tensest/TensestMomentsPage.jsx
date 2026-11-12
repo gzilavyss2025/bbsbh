@@ -17,6 +17,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 
@@ -60,11 +61,11 @@ function TensestTable({ rows, teamId, label }) {
       <tbody>
         {rows.map((r) => (
           <tr key={`${r.pk}:${r.i}`}>
-            <td className="rank">{rankLabel(r, rows)}</td>
+            <td className="rank"><span className="sr-only">Rank </span>{rankLabel(r, rows)}</td>
             {/* The meter spreads this board's own range (boardBars), not the season's: on the
                 season scale every row here is full. The number beside it is what a screen
                 reader hears, so the meter is decorative. */}
-            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> {r.li.toFixed(2)}</td>
+            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> <span className="sr-only">Pressure </span>{r.li.toFixed(2)}</td>
             <td className="date">{monthDay(r.d) || DASH}</td>
             <td className="game">
               <a className="tensest__gamelink" {...routeLink(boxPath(r))}>{gameLabel(r, teamId)}</a>
@@ -125,12 +126,16 @@ export function TensestMomentsPage() {
         <h1 className="topbar__title">Pressure Moments{data?.season ? `, ${data.season}` : ''}</h1>
       </header>
 
-      <p className="hint">
-        MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
-        the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more; the
-        meter runs from 4 (one bar) to 9.99 (full). These are the season’s tensest: each club’s top 25 batting and pitching,
-        and the league’s top 50, which you can narrow by batter, pitcher, park or club. Ties are included and marked T.
-        Postseason games are included and marked with their round and game.
+      {/* One line up front; the explanation is opt-in, behind the (i) (src/styles/CLAUDE.md). */}
+      <p className="hint infopop-row">
+        The season’s tensest at-bats, by MLB’s pressure score.{' '}
+        <InfoPopover label="About pressure moments" className="infopop--paper infopop--down">
+          MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
+          the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more;
+          the meter runs from 4 (one bar) to 9.99 (full). Each club’s top 25 batting and pitching are here, and
+          the league’s top 50, which you can narrow by batter, pitcher, park or club. Ties are marked T, and
+          postseason games carry their round and game.
+        </InfoPopover>
       </p>
 
       <AsyncStatus
