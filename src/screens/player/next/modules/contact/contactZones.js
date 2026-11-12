@@ -10,19 +10,22 @@ import { typeOf } from './contactView.js'
 // launch angle, not a place, so it is a filter over the nine, never a ring of them; a pop-up
 // folds into fly ball. A ball with no coordinate cannot be placed; one with no launch angle is
 // placed under All but not under a type.
-export const ZONE_DIRS = [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Oppo']]
+export const ZONE_DIRS = { pull: 'Pull', center: 'Center', oppo: 'Oppo' }
 // Outer edge of each band in feet (Inference: about the infield's edge, then shallow vs. deep).
 export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF', 250], ['deep', 'Deep OF', Infinity]]
 // Short labels so the four fit one row at 390 px. "Any type", not "All": the row above already
 // has an All (every ball in play), and two Alls a row apart read as one choice.
 export const ZONE_TYPES = [[null, 'Any type'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
 
-// The zones' type for a module type key: a pop-up is a fly ball here.
-const foldPop = (t) => (t === 'pop' ? 'fly' : t)
-const zoneType = (la) => foldPop(typeOf(la))
-// A ball-type card under "How contact ends" also sets the Zones filter (Gary, 2026-11-12), so the
-// cards and the buttons above the field never disagree. Null (the rail's back link) is Any type.
-export const zoneTypeForCard = (key) => foldPop(key ?? null)
+// The zones' type for a module type key (a card, or a ball's typeOf): a pop-up is a fly ball here.
+// The card menu's pick drives the Zones filter through this (Gary, 2026-11-12); null is Any type.
+export const zoneTypeForCard = (t) => (t === 'pop' ? 'fly' : t)
+const zoneType = (la) => zoneTypeForCard(typeOf(la))
+// A point `ft` feet from the plate, `deg` off dead centre, in the field's SVG space: [x, y] strings.
+export const polar = (deg, ft) => {
+  const r = (deg * Math.PI) / 180
+  return [HOME.x + ft * Math.sin(r), HOME.y - ft * Math.cos(r)].map((v) => v.toFixed(1))
+}
 // The same projection the dots are drawn with (SVG units are feet), so a dot and its zone agree.
 const feet = (b) => {
   const p = hitCoordToSvg(b.x, b.y)
@@ -42,12 +45,13 @@ export function contactZones(balls, type = null) {
     n++
   }
   const cells = ZONE_DEPTHS.flatMap(([depth]) =>
-    ZONE_DIRS.map(([dir]) => {
+    Object.keys(ZONE_DIRS).map((dir) => {
       const c = counts.get(`${dir}:${depth}`) ?? 0
       return { dir, depth, n: c, share: n ? c / n : null }
     }),
   )
-  return { cells, n }
+  // `byKey['pull:deep']`: the same cells, for readers that walk them in another order.
+  return { cells, n, byKey: Object.fromEntries(cells.map((c) => [`${c.dir}:${c.depth}`, c])) }
 }
 
 // The thirds as they sit on the field, left field to right field, so a table beside the field
@@ -82,7 +86,7 @@ export function zoneSummary(zones, side, type) {
   if (!zones.n) return `${head}: none placed.`
   const parts = [...ZONE_DEPTHS].reverse().flatMap(([depth]) =>
     fieldOrder(side).map((dir) => {
-      const c = zones.cells.find((x) => x.dir === dir && x.depth === depth)
+      const c = zones.byKey[`${dir}:${depth}`]
       return `${DEPTH_NAMES[depth]} ${dir} ${Math.round(c.share * 100)}%`
     }),
   )

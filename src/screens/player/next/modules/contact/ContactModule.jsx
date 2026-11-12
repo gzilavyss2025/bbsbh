@@ -18,7 +18,7 @@ import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFligh
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { ZoneField, ZoneTable } from './ZoneField.jsx'
-import { ZONE_TYPES, contactZones, zoneSummary, zoneTypeForCard } from './contactZones.js'
+import { ZONE_TYPES, contactZones, polar, zoneSummary, zoneTypeForCard } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -34,10 +34,7 @@ const VIEWBOX = '0 20 620 525'
 const ZONES_VIEWBOX = '40 105 540 420'
 const FOUL_FT = 330
 const FENCE_FT = 400
-const pt = (deg, ft) => {
-  const r = (deg * Math.PI) / 180
-  return `${(HOME.x + ft * Math.sin(r)).toFixed(1)} ${(HOME.y - ft * Math.cos(r)).toFixed(1)}`
-}
+const pt = (deg, ft) => polar(deg, ft).join(' ')
 // Fence: 330 ft at the lines easing to 400 ft in center, the nameless park of the spray map.
 const FENCE = `M ${Array.from({ length: 31 }, (_, i) => {
   const d = -45 + 3 * i
@@ -150,28 +147,22 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
         <div className="fcontact__bar">
           <Segmented label="Draw as" value={mode} onChange={(m) => pick(setMode, m)} options={[{ value: 'dots', label: 'Dots' }, { value: 'zones', label: 'Zones' }]} />
-          {mode === 'dots' && (
-            <Segmented
-              label="Which balls"
-              value={view}
-              onChange={(k) => pick(setView, k)}
-              options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
-            />
-          )}
-          {mode === 'zones' && (
-            <Segmented
-              label="Ball type"
-              value={zoneType}
-              onChange={(k) => pick(setType, k)}
-              options={ZONE_TYPES.map(([k, name]) => ({ value: k, label: name }))}
-            />
-          )}
-          {mode === 'dots' && (
-            <div className="fcontact__chips" role="group" aria-label="Color by">
-              {COLORS.map(([k, name]) => (
-                <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
-              ))}
-            </div>
+          {mode === 'dots' ? (
+            <>
+              <Segmented
+                label="Which balls"
+                value={view}
+                onChange={(k) => pick(setView, k)}
+                options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
+              />
+              <div className="fcontact__chips" role="group" aria-label="Color by">
+                {COLORS.map(([k, name]) => (
+                  <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <Segmented label="Ball type" value={zoneType} onChange={(k) => pick(setType, k)} options={ZONE_TYPES.map(([k, name]) => ({ value: k, label: name }))} />
           )}
         </div>
         <div className="fcontact__grid">
@@ -206,16 +197,16 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               {!zones && <FlightLayer />}
             </svg>
           </div>
-          {zones ? (
-            <div className="fcontact__side">
+          <div className="fcontact__side">
+            {zones ? (
               <ZoneTable zones={zones} side={side} />
-            </div>
-          ) : (
-            <div className="fcontact__side">
-              <ContactDetail cur={cur} detail={detail} />
-              <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
-            </div>
-          )}
+            ) : (
+              <>
+                <ContactDetail cur={cur} detail={detail} />
+                <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
+              </>
+            )}
+          </div>
         </div>
       </FlightClock>
       {mix && (
