@@ -23,7 +23,7 @@
 // player record needs the same treatment.
 //
 // NOT IMPORTED HERE, DELIBERATELY: linescore.js, derive.js, boxscore.js,
-// gameStory.js (all reveal-only), and the caller-gated staging selectors
+// game/story.js (all reveal-only), and the caller-gated staging selectors
 // (lineupEntering/defenseEntering/selectPrePitchChanges) — a poster has no
 // half-inning to be "entering", so selectLineup's posted card is the only
 // correct source. See src/api/CLAUDE.md and spoiler-manifest.json.
@@ -37,8 +37,8 @@ import {
   selectLineup,
   selectOfficials,
   selectTeamMeta,
-} from './select.js'
-import { splitName } from '../lib/teamSplits.js'
+} from '../select.js'
+import { splitName } from '../../lib/teamSplits.js'
 
 // "2026-08-12" -> { weekday: 'Wednesday', monthDay: 'August 12', year: '2026' }.
 // Parsed as parts rather than `new Date(iso)`, which reads a bare date as UTC
@@ -103,7 +103,7 @@ function clubFor(feed, side, started) {
 }
 
 // A probable starter, joined to the season line the caller already fetched
-// (game.js's fetchPitcherSeasonLine / fetchPitcherLastGame, both season or
+// (game/fetch.js's fetchPitcherSeasonLine / fetchPitcherLastGame, both season or
 // already-final aggregates — never this game's). `line` is null until that
 // fetch lands, which is why every consumer treats it as optional.
 function starterFor(feed, side, line) {

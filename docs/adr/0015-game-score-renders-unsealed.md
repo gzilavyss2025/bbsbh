@@ -42,7 +42,7 @@ to the raw result:
   to decide whether to show a number.
 
 Deliberately excluded from the formula: win probability (`winProbability` is
-MLB-only — see `game.js` — and this needs to work at every MiLB level too) and
+MLB-only — see `game/fetch.js` — and this needs to work at every MiLB level too) and
 anything requiring a lookup that could reverse-engineer to one specific score.
 
 The visibility toggle (`useGameScoreVisible`, off by default, set from

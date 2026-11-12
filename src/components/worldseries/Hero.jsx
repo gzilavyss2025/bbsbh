@@ -1,7 +1,7 @@
 import '../../styles/worldseries/hero.css'
 import '../../styles/worldseries/decided.css'
 import { useEffect, useRef, useState } from 'react'
-import { fetchTeamHighlights } from '../../api/gamehighlights.js'
+import { fetchTeamHighlights } from '../../api/game/teamHighlights.js'
 import { fetchSpotlightPool } from '../../api/postseason/worldseries/spotlightPool.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { firstPitchText, monthDayName } from '../../lib/dates.js'

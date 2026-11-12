@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/history/highlights.css'
-import { fetchTeamHighlights, flattenPositiveClips } from '../../../../../api/gamehighlights.js'
+import { fetchTeamHighlights, flattenPositiveClips } from '../../../../../api/game/teamHighlights.js'
 import { HighlightSheet } from '../../../../../components/playbyplay/HighlightSheet.jsx'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'

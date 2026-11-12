@@ -3,7 +3,7 @@
 // only through winprob.js' reveal clamp (ADR-0001).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { WIN_PROB_FIELDS } from '../src/api/game.js'
+import { WIN_PROB_FIELDS } from '../src/api/game/fetch.js'
 import { selectWinProbBigPlays, selectWinProbPath } from '../src/api/winprob.js'
 import { halfIndex } from '../src/api/select.js'
 

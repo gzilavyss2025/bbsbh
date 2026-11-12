@@ -1,4 +1,4 @@
-import { formatClipDuration, highlightPoster } from '../../api/highlights.js'
+import { formatClipDuration, highlightPoster } from '../../api/game/highlights.js'
 import { CornerBadge } from '../ui/frame/CornerBadge.jsx'
 
 // One card on the reel: a clip (16:9, play badge, runtime) or a photographer's

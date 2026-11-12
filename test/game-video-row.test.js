@@ -1,4 +1,4 @@
-// Coverage for the box score's video row selectors (src/api/highlights.js):
+// Coverage for the box score's video row selectors (src/api/game/highlights.js):
 // picking MLB's condensed game out of the content package, ordering this
 // game's own reel, and formatting a runtime for the kraft tab. These feed
 // GameVideoRow.jsx, which renders inside the box score's seal.
@@ -9,7 +9,7 @@
 // the usual interviews/data-viz/field-view remainder.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { formatClipDuration, selectCondensedGame, selectGameClips } from '../src/api/highlights.js'
+import { formatClipDuration, selectCondensedGame, selectGameClips } from '../src/api/game/highlights.js'
 
 const kw = (taxonomy) => taxonomy.map((value) => ({ type: 'taxonomy', value }))
 

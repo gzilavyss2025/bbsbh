@@ -237,7 +237,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `jerseyWearDates` joins it to a dated team schedule — neither half carries
   what the other has — for `/identity-lab`'s per-tile links into a real game's
   photo gallery.
-- `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
+- `game/fetch.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
   **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
   live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call
   for per-play WPA — the sole source of the box score's three stars and the
@@ -260,7 +260,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   gamePk, `gameNumber`, `gameType`, both clubs and, for a postseason game,
   `seriesGameNumber` (one `/schedule?gamePk=` call — the split has none). It
   returns no decision (W/L/SV/HLD, `isWin`).
-- `highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
+- `game/highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
   joined to a specific play by matching a clip's `guid` to the terminal pitch
   event's `playId` in `feed/live` (the only reliable join key; verified live
   against both batted-ball and strikeout-ending plays — see
@@ -292,7 +292,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   turns the feed's `"00:12:20"` into the `(12:20)` the kraft tab says.
   The card's POSTER is not MLB's own — that is always the same designed
   "CONDENSED GAME" plate over both clubs' marks. `GameVideoRow` runs
-  `gamePhotos.js`'s `pickHeroPhoto` over the items it already holds and shows
+  `game/photos.js`'s `pickHeroPhoto` over the items it already holds and shows
   the still it returns, which is the identical pick the nightly sweep stores
   for the slate's own condensed print (`GameResultFace`), so the two surfaces
   cannot disagree about a game's photograph. Computed live rather than read
@@ -316,7 +316,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   result) — so `HighlightSheet.jsx` can stay the one consumer for both the
   box score's raw per-play item and a rail's precomputed clip, with neither
   rail re-deriving playback URLs by hand.
-- `gamehighlights.js` — the reader half of the cascade: the static per-team
+- `game/teamHighlights.js` — the reader half of the cascade: the static per-team
   archive `scripts/gen-highlights.mjs` precomputes
   (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
   and the player page's rail. Build-time-fetch pattern (below), same
@@ -335,7 +335,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   (`src/components/highlights/`) for each clip — purely presentational, no
   fetching of its own — so a clip object only ever needs shaping once, here,
   regardless of which rail is reading it. `highlightPlaybacks`
-  (`highlights.js` above) also had to grow a second branch for this cascade —
+  (`game/highlights.js` above) also had to grow a second branch for this cascade —
   a shipped clip's `playbacks` field is already the resolved `{hls, mp4}`
   object the generator wrote, not the raw MLB array of named sources
   `HighlightSheet.jsx`'s box-score caller passes, so the function now accepts
@@ -416,7 +416,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   same way `gen-run-expectancy.mjs`/`gen-umpire-accuracy.mjs` do, then calls
   `src/lib/euz.js`'s `estimateGameConsistency` and `src/lib/runExpectancy.js`'s
   `pitchFavor`. `fetchRunExpectancy()` (the static `run-expectancy.json` table)
-  is safe to fetch EAGERLY like `vsTeamSplits.js`/`highlights.js` — it carries no
+  is safe to fetch EAGERLY like `vsTeamSplits.js`/`game/highlights.js` — it carries no
   game/score info of its own — wired into `useGameData`'s deferred
   `enrichmentReady` tier and threaded down to `StatBox` as a prop; only the
   selector combining it with this game's plays runs inside the `SealBox` reveal.

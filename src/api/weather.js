@@ -16,7 +16,7 @@
 // the game-data path: MLB Stats API for coordinates + roofType, and Open-Meteo
 // (free, key-less, CORS-enabled) for the outdoor reading at first pitch.
 
-import { fetchVenue } from './game.js'
+import { fetchVenue } from './game/fetch.js'
 import {
   parkCfBearing,
   windRelativeToField,

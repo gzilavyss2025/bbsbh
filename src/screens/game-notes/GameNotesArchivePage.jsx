@@ -1,6 +1,6 @@
 import '../../styles/report/game-notes.css'
 import { useMemo, useState } from 'react'
-import { fetchArchiveShard } from '../../api/gameNotes.js'
+import { fetchArchiveShard } from '../../api/game/notes.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'

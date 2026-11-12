@@ -1,10 +1,10 @@
 // Regenerates public/data/highlights/{teamId}.json — one small file per MLB
 // club holding that club's per-play video highlights, game by game, newest
-// first. Read by src/api/gamehighlights.js for the Team hub's Games tab rail
+// first. Read by src/api/game/teamHighlights.js for the Team hub's Games tab rail
 // and the player page's rail (see .scratch/highlights-cascade/PRD.md).
 //
 // WHY PRECOMPUTED. The box score already fetches a single game's clips live at
-// reveal time (src/api/highlights.js) and keeps doing so — that surface is
+// reveal time (src/api/game/highlights.js) and keeps doing so — that surface is
 // unaffected by this script. The RAILS can't work that way: a full-season sweep
 // for one regular found real 12-day gaps with zero credited clips, so a
 // "last 10 games" window would render an empty rail on a day when 48 real clips
@@ -29,9 +29,9 @@
 // contains clips already past the abs/challenge exclusion, the non-play-content
 // gate, and the hand-maintained blocklist, so the rails stay dumb readers with
 // no policy of their own to keep in sync. All three live in
-// src/api/highlights.js + scripts/lib/highlights.mjs.
+// src/api/game/highlights.js + scripts/lib/highlights.mjs.
 //
-// MLB only (sportId 1), same as highlights.js today — an off-MLB game returns
+// MLB only (sportId 1), same as game/highlights.js today — an off-MLB game returns
 // no content, so MiLB team/player pages simply show no rail.
 //
 // Runs on a cron (.github/workflows/update-nightly-data.yml); also by hand:

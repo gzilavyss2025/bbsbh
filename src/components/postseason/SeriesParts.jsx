@@ -6,8 +6,8 @@
 // changes here.
 import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { fetchHighlights, classifyHighlight, isEligibleForPositiveFilter } from '../../api/highlights.js'
-import { fetchGameFeed } from '../../api/game.js'
+import { fetchHighlights, classifyHighlight, isEligibleForPositiveFilter } from '../../api/game/highlights.js'
+import { fetchGameFeed } from '../../api/game/fetch.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
 import { splitDisplayName } from '../../api/person.js'

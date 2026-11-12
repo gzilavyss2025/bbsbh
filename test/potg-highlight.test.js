@@ -13,8 +13,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computePlayOfTheGame } from '../src/api/boxscore.js'
-import { WIN_PROB_FIELDS } from '../src/api/game.js'
-import { eligibleHighlightForPlay, highlightForPlay } from '../src/api/highlights.js'
+import { WIN_PROB_FIELDS } from '../src/api/game/fetch.js'
+import { eligibleHighlightForPlay, highlightForPlay } from '../src/api/game/highlights.js'
 
 // One /winProbability row, shaped like the real endpoint's (see winprob.test.js).
 // `homeTeamWinProbabilityAdded` is the per-play DELTA the ranking sorts on.

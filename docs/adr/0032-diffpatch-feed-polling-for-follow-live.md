@@ -61,7 +61,7 @@ a straight full-feed fetch at the same tick.
   poll, silently freezing every reveal-only derivation at its pre-merge
   state. `src/lib/jsonPatch.js`'s `applyJsonPatch` clones the base once
   before applying any ops (even a zero-entry patch array still clones — see
-  its test coverage), and `src/api/game.js`'s `mergeFeedDiff` never returns
+  its test coverage), and `src/api/game/fetch.js`'s `mergeFeedDiff` never returns
   the caller's `base` by reference under any code path.
 - **Session-only cache, keyed on gamePk, never persisted.** The last-resolved
   feed + its `metaData.timeStamp` live in a `useRef` inside `useGameData`

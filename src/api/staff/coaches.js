@@ -3,14 +3,14 @@ import { getJson } from '../statsapi.js'
 // A club's coaching staff for one season — the team page's Coaching staff card.
 // Who is on a staff says nothing about a score (open surface, ADR-0034).
 //
-// `/api/v1/teams/{id}/coaches` is the endpoint fetchManager (game.js) reads for the manager.
+// `/api/v1/teams/{id}/coaches` is the endpoint fetchManager (game/fetch.js) reads for the manager.
 // It returns one row per JERSEY NUMBER a person wore, not one per job (verified live,
 // 2026 Brewers: Pat Murphy is listed as #00 and #49), so a person is one card however many rows. `title` is the specific role ("Lead Hitting Coach"); `job` is only its group
 // ("Hitting Coach"), so the title wins and the job is the fallback.
 //
 // The manager is matched by jobId, not by name: 'MNGR' or the fill-in 'NTRM'. An
 // 'Associate Manager' (jobId 'ASSM') is a senior advisor, not a second skipper. An active
-// interim replaces the permanent manager, the same call fetchManager makes (game.js).
+// interim replaces the permanent manager, the same call fetchManager makes (game/fetch.js).
 const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
 export function coachingStaffFrom(roster) {

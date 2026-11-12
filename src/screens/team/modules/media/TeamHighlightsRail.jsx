@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useScrollRail } from '../../../../hooks/scroll/useScrollRail.js'
-import { fetchTeamHighlights, flattenPositiveClips } from '../../../../api/gamehighlights.js'
+import { fetchTeamHighlights, flattenPositiveClips } from '../../../../api/game/teamHighlights.js'
 import { HighlightSheet } from '../../../../components/playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../../../../components/highlights/HighlightClipCard.jsx'
 import { monthDayName } from '../../../../lib/dates.js'

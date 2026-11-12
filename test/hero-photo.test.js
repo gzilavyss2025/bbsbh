@@ -1,11 +1,11 @@
-// Coverage for pickHeroPhoto (src/api/gamePhotos.js): which still, if any,
+// Coverage for pickHeroPhoto (src/api/game/photos.js): which still, if any,
 // stands in for MLB's "CONDENSED GAME" graphic poster on the box score's video
 // row. The fixtures reuse the same title/taxonomy cases test/game-photos.test.js
 // pins for classifyPhotoAsset, since a hero-photo regression here is the same
 // classification bug wearing a different hat.
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { pickHeroPhoto } from '../src/api/gamePhotos.js'
+import { pickHeroPhoto } from '../src/api/game/photos.js'
 
 function withShapeProbe(shapes, run) {
   let probes = 0

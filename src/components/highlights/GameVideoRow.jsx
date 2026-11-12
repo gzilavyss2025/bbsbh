@@ -4,8 +4,8 @@ import {
   highlightPoster,
   selectCondensedGame,
   selectGameClips,
-} from '../../api/highlights.js'
-import { pickHeroPhoto } from '../../api/gamePhotos.js'
+} from '../../api/game/highlights.js'
+import { pickHeroPhoto } from '../../api/game/photos.js'
 import { HighlightClipCard } from './HighlightClipCard.jsx'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 
@@ -85,7 +85,7 @@ export function GameVideoRow({ items }) {
 // Cloudinary shape probes (see its header). Null is ordinary — a MiLB park, or
 // a game MLB shot nothing usable at — and simply leaves MLB's own poster up.
 //
-// SPOILER RULE: gamePhotos.js is spoiler-free and this effect runs only from
+// SPOILER RULE: game/photos.js is spoiler-free and this effect runs only from
 // inside the box score's SealBox reveal, like the rest of this component. The
 // probe fires no earlier than the render that mounted it, so nothing is fetched
 // before the tap.

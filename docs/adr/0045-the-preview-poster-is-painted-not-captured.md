@@ -109,7 +109,7 @@ starter's season line, an umpire's season accuracy — and none of it moves when
 the game does. That is why a preview of a game already played renders exactly
 the same, with no score on it.
 
-The rule is kept structurally rather than carefully. **`api/gamePreview.js`
+The rule is kept structurally rather than carefully. **`api/game/preview.js`
 assembles every value the poster can print, and the painter is handed that
 object and nothing else** — no feed, no linescore, no gamePk. Auditing the
 poster is reading one file. It is classified `spoiler-free` in

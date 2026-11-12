@@ -38,8 +38,9 @@
 //
 // ONE IMPLEMENTATION NOTE worth keeping. Unlike its sibling guards, this one
 // RESOLVES import specifiers to real paths instead of substring-matching a
-// basename. That is not tidiness: `highlights.js` is a substring of
-// `gamehighlights.js`, and those two modules have opposite classifications —
+// basename. That is not tidiness: `highlights.js` was a substring of
+// `gamehighlights.js` (now game/highlights.js and game/teamHighlights.js, #3069),
+// and those two modules have opposite classifications —
 // a basename match reports the Team hub's highlight rail as an importer of the
 // reveal-only join it has never touched. Relative sibling imports ('./x.js')
 // also defeat any path-tail match. Resolve, don't grep.

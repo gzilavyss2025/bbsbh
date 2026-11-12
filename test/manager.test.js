@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchManager } from '../src/api/game.js'
+import { fetchManager } from '../src/api/game/fetch.js'
 
 const response = (body) => ({
   ok: true,

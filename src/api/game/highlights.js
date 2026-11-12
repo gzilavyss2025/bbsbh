@@ -11,7 +11,7 @@
 // safe to do eagerly (nothing here enters the DOM yet), but the RESULT must
 // only be looked up and rendered from inside an already-revealed play — never
 // render a clip's title, description, or a poster/thumbnail before that.
-import { getJson } from './statsapi.js'
+import { getJson } from '../statsapi.js'
 
 export async function fetchHighlights(gamePk) {
   try {

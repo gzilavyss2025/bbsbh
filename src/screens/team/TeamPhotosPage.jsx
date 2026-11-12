@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { fetchTeamPhotoBatch } from '../../api/gamePhotos.js'
+import { fetchTeamPhotoBatch } from '../../api/game/photos.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate, AsyncStatus } from '../../components/ui/AsyncGate.jsx'
@@ -32,10 +32,10 @@ const PHOTO_GROW_STEP = 20
 //
 // Deliberately NOT part of the spoiler-safe scored-game flow (root
 // CLAUDE.md), for the same reason `/photos` (GamePhotosPage.jsx) and
-// gamePhotos.js itself aren't: a recap or celebration photo narrates the
+// game/photos.js itself aren't: a recap or celebration photo narrates the
 // outcome just by being visible, so this page carries the same "Unsealed"
 // notice rather than a SealBox. It goes one step further than every other
-// gamePhotos.js consumer by including a LIVE game, not just decided ones —
+// game/photos.js consumer by including a LIVE game, not just decided ones —
 // a deliberate product call (there's no expectation of spoiler coverage on
 // a photo-browsing page reached by its own explicit door), not an oversight
 // of the usual `won != null` invariant the rest of the app holds to.

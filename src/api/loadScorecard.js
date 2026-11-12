@@ -14,12 +14,12 @@
 //   scorecardView       — pre-pitch staging only: lineup, defensive alignment,
 //                         umpire crew, starters, header write-in fields
 //
-// Managers and uniforms aren't in the live feed (see api/game.js +
+// Managers and uniforms aren't in the live feed (see api/game/fetch.js +
 // api/uniforms.js), so they ride their own fetches alongside it; both degrade
 // to null/'' and the sheet just shows a blank write-in line, same as the
 // empty template.
 
-import { fetchGameFeed, fetchManager, managerLabel } from './game.js'
+import { fetchGameFeed, fetchManager, managerLabel } from './game/fetch.js'
 import { fetchGameUniforms, uniformSummary } from './uniforms.js'
 import {
   selectLineup,

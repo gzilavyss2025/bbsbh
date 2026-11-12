@@ -263,7 +263,7 @@ for each generator; the reader modules:
   `fetchVsTeamSplitsForPlayer(id)` the player page — both return the ORIGINAL
   whole-file shape, so every pure consumer is unchanged. Kept OUT of the PWA
   precache and fetched at runtime (see `vite.config.js`).
-- `gameNotes.js` — the lineup page's Game notes button: each MLB club's pre-game
+- `game/notes.js` — the lineup page's Game notes button: each MLB club's pre-game
   press-notes PDF, resolved to the game's date. TWO sources, one shape: the LIVE
   feed at `dapi.mlbinfra.com` (CORS-open, keyed by `teamid-{n}`) for the game being
   staged, and a static `public/data/game-notes/{teamId}.json` archive for older
@@ -806,7 +806,7 @@ for each generator; the reader modules:
   `scope` 'reg' (the default), 'post' or 'all', one file each
   (`abs-challenges-post.json`, `abs-challenges-all.json`); every file carries
   `postGames` per level, and the page offers Postseason only for a level whose
-  count is above 0 (#1514). `fetchRoundShort(gamePk)` (`src/api/game.js`) reads one schedule row for
+  count is above 0 (#1514). `fetchRoundShort(gamePk)` (`src/api/game/fetch.js`) reads one schedule row for
   the "ALDS • G1" under the biggest postseason overturn (MLB only).
   MLB and Triple-A are separate levels on the page,
   never blended: two different leagues of hitters, catchers and umpires, and
@@ -1261,8 +1261,8 @@ for each generator; the reader modules:
   qualified and early-sample states — it's most useful in the early state,
   where it explains WHY the sample is still small rather than just saying so.
 
-- `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
-  finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
+- `game/photos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
+  finder, from the same `/api/v1/game/{gamePk}/content` endpoint `game/highlights.js`
   uses for video. MLB serves every editorial photo through img.mlbstatic.com
   with a Cloudinary resize transform baked into the URL path;
   `fetchGamePhotos` strips each URL's transform segment back to the

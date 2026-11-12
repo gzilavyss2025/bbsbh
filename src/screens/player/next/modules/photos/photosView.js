@@ -1,5 +1,5 @@
 // The Photos card's pure view (#2021). No React, no fetch.
-// A photo's headline can read the result (gamePhotos.js), so a game still being played never
+// A photo's headline can read the result (game/photos.js), so a game still being played never
 // contributes one: `finals` is fetchFinalScores' map, which holds only a Final, scored game. A game
 // played today shows its photos once it is over (ADR-0117, which retired ADR-0110).
 import { monthDay, photoGameRows } from '../../../../../lib/dates.js'

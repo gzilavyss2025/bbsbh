@@ -13,7 +13,7 @@ import {
   exposureFor,
 } from '../../api/around-the-game/absExposure.js'
 import { loadClubs } from '../../api/around-the-game/clubs.js'
-import { fetchRoundShort } from '../../api/game.js'
+import { fetchRoundShort } from '../../api/game/fetch.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { groupLabelFor } from '../../lib/reportPages.js'
 import { useAsync } from '../../hooks/useAsync.js'

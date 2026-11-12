@@ -1,5 +1,5 @@
 // High-res photos for a single game, from the same content-package endpoint
-// highlights.js uses for video (`/api/v1/game/{gamePk}/content`). MLB serves
+// game/highlights.js uses for video (`/api/v1/game/{gamePk}/content`). MLB serves
 // every editorial photo through img.mlbstatic.com with Cloudinary-style resize
 // instructions baked into the URL path (`.../upload/w_1920,h_1080,.../mlb/{id}.jpg`);
 // stripping everything between `upload/` and the trailing `mlb/{id}` segment
@@ -47,7 +47,7 @@
 // Taxonomy keywords describe the VIDEO, not the image (a clip tagged
 // `data-visualization` can still carry a broadcast still as its thumbnail), so
 // they only ever break a tie between two 16:9 assets — never override a shape.
-import { getJson } from './statsapi.js'
+import { getJson } from '../statsapi.js'
 
 const CDN_PREFIX = 'https://img.mlbstatic.com/mlb-images/image/upload/'
 // Matches any mlbstatic upload URL, capturing the trailing `mlb/{id}[.ext]`

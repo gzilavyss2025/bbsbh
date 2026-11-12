@@ -31,7 +31,7 @@ matches
 - It trips 11 of the 192 spoiler-free modules, which is workable.
 - Of the 67 `reveal-only`, `reveal-gated`, `mixed`, `progress-only` and `caller-gated`
   modules, **13 escape both containment and the tripwire**: `expresslane/runners.js`,
-  `gameStory.js`, `heritage/records.js`, `highlights.js` (mixed), `matchup/forHalf.js`
+  `game/story.js`, `heritage/records.js`, `game/highlights.js` (mixed), `matchup/forHalf.js`
   (caller-gated), `notable/notable.js`, `performanceScore.js`,
   `playbyplay/entriesView.js`, `playbyplay/scorebookCode.js`, `savant/attackAngle.js`,
   `savant/gameFeed.js`, `scorecard/alignment.js` (caller-gated) and `umpireFavor.js`. The

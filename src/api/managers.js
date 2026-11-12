@@ -50,7 +50,7 @@ async function load(personId) {
   return shards.get(key)
 }
 
-// Same jobId convention as fetchManager (game.js) and the generator: a
+// Same jobId convention as fetchManager (game/fetch.js) and the generator: a
 // permanent skipper is 'MNGR', a fill-in 'NTRM' (Interim Manager) — matched
 // by jobId, not a job-NAME match, since the coaches endpoint also has an
 // 'Associate Manager' role (jobId 'ASSM') that isn't a second team manager.
@@ -130,7 +130,7 @@ export function groupManagerialRecord(stints) {
   }
   for (const s of mgr) {
     // By jobId, never by the job NAME — the same rule MANAGER_JOB_IDS states
-    // above and fetchManager (game.js) follows. A name match reads as correct
+    // above and fetchManager (game/fetch.js) follows. A name match reads as correct
     // and silently isn't: it makes every title that is not exactly 'Manager'
     // interim, which is the whole reason jobId is the key here.
     const interim = s.jobId === 'NTRM'
@@ -181,7 +181,7 @@ export function groupManagerialRecord(stints) {
 // the array — this used to take the last stored row, which handed the header
 // whatever order /coaches happened to return (Boston's 2026 interim bench
 // coach read as "First Base Coach"). Interim manager outranks manager for the
-// reason fetchManager (game.js) already encodes and test/manager.test.js
+// reason fetchManager (game/fetch.js) already encodes and test/manager.test.js
 // pins: an interim row means the permanent one beside it is stale. Any
 // manager job outranks an assistant one; among assistants the last row wins,
 // as before.

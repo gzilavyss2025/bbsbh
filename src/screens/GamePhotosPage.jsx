@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchGamePhotos, withoutGraphics } from '../api/gamePhotos.js'
+import { fetchGamePhotos, withoutGraphics } from '../api/game/photos.js'
 import { fetchTeamSchedule } from '../api/schedule/fetch.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -24,7 +24,7 @@ function monthDay(iso) {
 
 // A personal tool for pulling MLB's full-resolution, watermark-free editorial
 // photos for a specific game — pick a club and a game, then open or save any
-// photo MLB's content package carries for it. See api/gamePhotos.js for how
+// photo MLB's content package carries for it. See api/game/photos.js for how
 // the CDN's resize transforms get stripped back to the photographer's original
 // upload.
 //
@@ -33,7 +33,7 @@ function monthDay(iso) {
 // visualizations, bullpen/lineup availability, GAME HIGHLIGHTS recap art — and
 // `withoutGraphics` drops those, since they're the least interesting thing here
 // and the ones that print the final score in the artwork. The classification
-// and the per-photo subject both come from gamePhotos.js; that module's header
+// and the per-photo subject both come from game/photos.js; that module's header
 // documents the evidence behind each signal.
 //
 // Deliberately NOT part of the spoiler-safe scored-game flow (root
@@ -222,7 +222,7 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
                       <span className="gamephotos__expand" aria-hidden="true">⤢</span>
                     </a>
                     {/* Who the photo is OF, per the feed's own player/team tags
-                        — the subject, not everyone in frame (gamePhotos.js).
+                        — the subject, not everyone in frame (game/photos.js).
                         Left out entirely rather than shown blank when a photo
                         carries no tags, which is most often a stray swept up
                         from outside the highlight items. */}

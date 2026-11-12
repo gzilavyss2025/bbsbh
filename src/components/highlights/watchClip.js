@@ -3,7 +3,7 @@
 // Two sources, and they are not the same thing:
 //
 //   1. THE PACKAGE — MLB's own edited highlight from the `content` endpoint,
-//      joined to the play on `guid === playId` (api/highlights.js). It is a
+//      joined to the play on `guid === playId` (api/game/highlights.js). It is a
 //      produced cut with a title, a blurb and more than one angle. It exists
 //      for about 7% of plays: 23 clips against 327 pitches on gamePk 824634.
 //   2. THE RAW CLIP — roughly 7.5 seconds of the one pitch, keyed on the same

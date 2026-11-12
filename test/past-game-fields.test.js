@@ -1,4 +1,4 @@
-// REGRESSION GUARD on PAST_GAME_FEED_FIELDS (game.js) — the `fields=`
+// REGRESSION GUARD on PAST_GAME_FEED_FIELDS (game/fetch.js) — the `fields=`
 // allowlist usePastGameSignals prunes the past-game feed with. Same rationale
 // as test/winprob.test.js's guard on WIN_PROB_FIELDS: statsapi's filter is
 // name-based at every depth, so a name missing from the list arrives
@@ -13,7 +13,7 @@
 // PAST_GAME_FEED_FIELDS *and* to the read-set below.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { PAST_GAME_FEED_FIELDS, fetchGameFeed } from '../src/api/game.js'
+import { PAST_GAME_FEED_FIELDS, fetchGameFeed } from '../src/api/game/fetch.js'
 
 // The signals path's read-set, one entry per dereferenced path — parent and
 // leaf names both, since `fields=` needs every level present.

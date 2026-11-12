@@ -1,4 +1,4 @@
-import { eligibleHighlightForPlay } from '../../api/highlights.js'
+import { eligibleHighlightForPlay } from '../../api/game/highlights.js'
 import { DASH } from '../../api/person/shared.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'

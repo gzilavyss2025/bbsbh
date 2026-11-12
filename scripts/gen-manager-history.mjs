@@ -7,7 +7,7 @@
 // became Brewers manager (teamId 158), and both should show up here.
 //
 // Source: GET /api/v1/teams/{teamId}/coaches?season={year} — the same
-// endpoint src/api/game.js's fetchManager already calls per-game (that
+// endpoint src/api/game/fetch.js's fetchManager already calls per-game (that
 // function only keeps the Manager row + name; this sweeps every job row,
 // every team, every season). Returns a `roster` array of
 // `{ person: {id, fullName}, jerseyNumber, job, jobId, title }`.

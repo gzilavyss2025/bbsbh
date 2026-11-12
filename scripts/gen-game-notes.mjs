@@ -1,6 +1,6 @@
 // Regenerates public/data/game-notes/{teamId}.json — a slim, ACCUMULATING
 // archive of each MLB club's official pre-game "Game Notes" PDF (title, date,
-// url), so the lineup-page button (src/api/gameNotes.js) can still reach a
+// url), so the lineup-page button (src/api/game/notes.js) can still reach a
 // game's notes long after mlb.com de-lists it.
 //
 // ONE FILE PER CLUB. The lineup page and the team page each ask about ONE club,
@@ -65,7 +65,7 @@ async function fetchMlbTeams() {
 // a note posted on a game's evening ET is already the next calendar day in UTC,
 // so slicing the UTC string would tag an evening game's note a day late and let
 // it read as the NEXT day's note. The ET date recovers the true game date and
-// lines up with the game's ET-based officialDate. See src/api/gameNotes.js.
+// lines up with the game's ET-based officialDate. See src/api/game/notes.js.
 const ET_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
 const etDate = (iso) => (iso ? ET_DATE.format(new Date(iso)) : '')
 

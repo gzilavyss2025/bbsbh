@@ -3,7 +3,7 @@ import { revealStampFacts } from '../../api/linescore.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../../api/winprob.js'
 import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../../api/derive.js'
 import { computeGameCalloutNotes } from '../../api/callout-notes.js'
-import { eligibleHighlightForPlay } from '../../api/highlights.js'
+import { eligibleHighlightForPlay } from '../../api/game/highlights.js'
 import { selectBattedBalls } from '../../api/hitchart.js'
 import { computeScoringSummary } from '../../api/boxscore/scoringSummary.js'
 

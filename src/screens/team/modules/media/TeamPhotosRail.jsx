@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
 import { jumpScrollLeft, useScrollRail } from '../../../../hooks/scroll/useScrollRail.js'
-import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
+import { fetchTeamPhotoBatch } from '../../../../api/game/photos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
 import { Door } from '../../../../components/ui/control/Door.jsx'
@@ -15,7 +15,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // predictable cost for a caller that wants a taste rather than the whole rail.
 
 // Team Page's Photos rail — professional camera stills only
-// (`onlyPhotographer`, gamePhotos.js; drops both TV broadcast frame grabs and
+// (`onlyPhotographer`, game/photos.js; drops both TV broadcast frame grabs and
 // rendered graphic cards like Statcast darkroom cards or ABS challenge result
 // cards) whose subject is this club (`photosForTeam`). Walks `games`
 // backward from the newest game. Unlike the AllGames grid, the data isn't
@@ -23,7 +23,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // "scroll back" here grows the window by fetching more games on demand
 // rather than slicing an array already in memory.
 //
-// Spoiler footing: gamePhotos.js is deliberately NOT reveal-only (a
+// Spoiler footing: game/photos.js is deliberately NOT reveal-only (a
 // recap/celebration photo narrates the outcome just by looking at it, same
 // risk as a highlight clip's title — see that module's header). Every other
 // consumer gets away with that because it's scoped to decided games only —

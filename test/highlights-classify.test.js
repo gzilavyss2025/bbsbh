@@ -1,5 +1,5 @@
 // Coverage for the highlights CASCADE's pure classification layer
-// (src/api/highlights.js): the keywordsAll extraction, the eligibility gate
+// (src/api/game/highlights.js): the keywordsAll extraction, the eligibility gate
 // that decides what counts as a per-play action highlight, and the poster
 // resolver. This is the filter policy the generator writes into
 // public/data/highlights/{teamId}.json — the rails downstream do no filtering
@@ -14,7 +14,7 @@ import {
   classifyHighlight,
   highlightPoster,
   isEligibleForPositiveFilter,
-} from '../src/api/highlights.js'
+} from '../src/api/game/highlights.js'
 
 const kw = ({ player, team, taxonomy = [] }) => [
   ...(player ? [{ type: 'player_id', value: String(player) }] : []),

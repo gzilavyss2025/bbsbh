@@ -1,4 +1,4 @@
-import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.js'
+import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game/fetch.js'
 import { fetchPitcherPostseasonCareer } from '../../../api/postseason/pitcherCareer.js'
 import { fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitcher/arsenal.js'
 import { useAsync } from '../../../hooks/useAsync.js'

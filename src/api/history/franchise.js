@@ -1,5 +1,5 @@
 import { fetchSeasonVenue, fetchStandings, fetchTeam } from '../team/fetch.js'
-import { fetchManager } from '../game.js'
+import { fetchManager } from '../game/fetch.js'
 import { getJson } from '../statsapi.js'
 import { franchiseLedger } from './franchiseLedger.js'
 import { summarizeFranchise } from './franchiseSummary.js'

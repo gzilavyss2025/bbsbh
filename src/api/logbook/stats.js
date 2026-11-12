@@ -39,7 +39,7 @@
 // many are still resolving instead of quietly reporting a smaller total as if
 // it were the whole book.
 
-import { POSTSEASON_TYPES } from '../game.js'
+import { POSTSEASON_TYPES } from '../game/fetch.js'
 
 // A game is a blowout at this margin or wider. Five is the conventional line —
 // it is where a game stops being one swing away in the ninth — and it sits well

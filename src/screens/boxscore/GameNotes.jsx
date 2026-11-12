@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { highlightPoster } from '../../api/highlights.js'
+import { highlightPoster } from '../../api/game/highlights.js'
 import { ordinal } from '../../lib/format.js'
 import { HighlightSheet } from '../../components/playbyplay/HighlightSheet.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'

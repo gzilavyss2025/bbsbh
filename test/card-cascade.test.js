@@ -1334,7 +1334,7 @@ const C5_SEAL = {
   'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
   'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/game/GameStoryCard.jsx': { reveal: ['gameStory.js'], sealBoxes: 0, revealedThrough: 0 },
+  'components/game/GameStoryCard.jsx': { reveal: ['game/story.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/InningTally.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/player/PerformerCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'screens/AwardsHistoryPage.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },

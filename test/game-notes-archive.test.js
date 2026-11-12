@@ -13,7 +13,7 @@ import {
   defaultClub,
   pageRows,
 } from '../src/lib/gameNotes/archive.js'
-import { fetchArchiveShard, resolveGameNotes } from '../src/api/gameNotes.js'
+import { fetchArchiveShard, resolveGameNotes } from '../src/api/game/notes.js'
 
 // Pure helpers behind the /game-notes archive page (#1258). Nothing here fetches:
 // the page hands in the shards it loaded and a name lookup.

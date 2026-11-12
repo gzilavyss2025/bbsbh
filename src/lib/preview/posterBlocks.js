@@ -290,7 +290,7 @@ export function drawCards(ctx, box, model, art, palette) {
 // This is the card that says what kind of team each of them is: a club that is
 // 49-0 when it leads after eight is a different problem from one that is 6-44
 // when it trails. Four fixed rows, the same four for both clubs — see
-// RECORD_ROWS in api/gamePreview.js for why they are fixed rather than picked.
+// RECORD_ROWS in api/game/preview.js for why they are fixed rather than picked.
 function drawRecordsCard(ctx, box, model, art, palette) {
   const inner = { x: box.x + PAD, width: box.width - PAD * 2 }
 

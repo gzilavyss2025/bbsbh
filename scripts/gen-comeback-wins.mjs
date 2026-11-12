@@ -22,7 +22,7 @@
 // wins (winner) into the running per-team totals (SQLite, docs/adr/0021). A
 // Final game's win-prob history never changes, so an already-ingested game is
 // never refetched (guarded by comeback_ingested_games). MLB only (sportId 1) —
-// the winProbability endpoint is MLB-only (see src/api/game.js) and a league
+// the winProbability endpoint is MLB-only (see src/api/game/fetch.js) and a league
 // rank needs the whole 30-team pool anyway; MiLB parks have no endpoint.
 //
 // Run by hand:

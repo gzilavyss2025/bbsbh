@@ -1,7 +1,7 @@
 // Paint one game-preview poster onto a canvas.
 //
 // This is the single entry point: the screen hands it a model
-// (api/gamePreview.js), the art it has loaded, and which blocks are on; it
+// (api/game/preview.js), the art it has loaded, and which blocks are on; it
 // returns nothing and touches nothing else. Keeping the whole paint in one
 // synchronous pass matters for the export — toBlob() must run against a
 // FINISHED canvas, and an await between two draw calls is how you end up
