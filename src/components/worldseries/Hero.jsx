@@ -268,9 +268,8 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   )
 }
 
-// A decided Series (#2562; layout A, Gary 2026-10-27): this card replaces the result banner. It names
-// the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
-// one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
+// The MVP's five-stat line, held empty and hidden while the award or the Series log loads, so
+// the schedule under the hero does not jump when the real line lands (#2984).
 function MvpStatsHold() {
   return (
     <dl className="ww-hero__mvpstats ww-hero__mvpstats--pending" aria-hidden="true">
@@ -284,6 +283,9 @@ function MvpStatsHold() {
   )
 }
 
+// A decided Series (#2562; layout A, Gary 2026-10-27): this card replaces the result banner. It names
+// the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
+// one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
 // Series MVP is the only player drawn (`mvp`, the finished page's); a side with none, or a page with
 // no MVP known, keeps its club's mono mark. With an MVP, his cut-out stands on his club's side and his
 // action photo fills the other side, where his tag, name, club and line from this Series (`stats`,

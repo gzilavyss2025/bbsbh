@@ -137,7 +137,7 @@ function view(input, s, load) {
   const levels = winterBall.tabVisible || winterGuess
     ? [...LEVELS, { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId }]
     : LEVELS
-  const stops = ladderStops({ levels, counts: s.counts, sportId, winterGames: winterBall.games })
+  const stops = ladderStops({ levels, counts: s.counts, sportId, winterGames: winterGuess ? null : winterBall.games })
 
   // Hold the cards until the affiliates answer too: the pinned card re-sorts to the top (CLS 0.31).
   const affLoading = s.affiliates === undefined

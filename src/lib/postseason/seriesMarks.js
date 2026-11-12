@@ -11,11 +11,14 @@
 // says in words. It carries no score, so it needs no seal.
 //
 // Files: public/postseason-marks/{season}/, each cropped to the mark alone
-// (no sponsor or network line) at a 192px height, width floating per mark. Each
-// entry is [file, width in px]; SeriesMark sizes the <img> from it before the file
-// loads, so nothing beside a mark moves when it lands (#2984).
+// (no sponsor or network line) at a MARK_FILE_HEIGHT (192px) height, width floating
+// per mark. Each entry is [file, width in px]; SeriesMark hands both to the <img> as
+// its width/height attributes, so the browser reserves the box before the file loads
+// and nothing beside a mark moves when it lands (#2984).
 
 import { leaguePhase } from './bracketDisplay.js'
+
+export const MARK_FILE_HEIGHT = 192
 
 const FILES = {
   2026: {
@@ -50,7 +53,7 @@ export function seriesMark(series) {
   const key = round === 'worldseries' ? round : `${round}:${league}`
   if (!table[key]) return null
   const [file, width] = table[key]
-  return { src: `/postseason-marks/${Number(season)}/${file}.png`, alt: altFor(round, league), width }
+  return { src: `/postseason-marks/${Number(season)}/${file}.png`, alt: altFor(round, league), width, height: MARK_FILE_HEIGHT }
 }
 
 // A game's live feed: its game type and season, and the home club's league
