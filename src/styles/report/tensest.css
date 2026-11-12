@@ -122,7 +122,10 @@
     padding-block: var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border-rule);
   }
-  .tensest tbody td {
+  .tensest tbody td,
+  .tensest .what,
+  .tensest .game,
+  .tensest .batter {
     padding: 0 var(--space-3);
     border: 0;
     text-align: left;
@@ -143,6 +146,14 @@
     display: inline-block;
     padding-block: var(--space-2);
     margin-block: calc(var(--space-2) * -1);
+  }
+}
+
+/* The hidden "Rank " / "Pressure " cues stand in for the column heads the phone cards
+   hide; on a wide screen the heads are there, so the cues stay silent. */
+@media (min-width: 740px) {
+  .tensest__cue {
+    display: none;
   }
 }
 

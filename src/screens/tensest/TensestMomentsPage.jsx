@@ -71,17 +71,19 @@ function TensestTable({ rows, teamId, label }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => (
+        {rows.map((r) => {
+          const round = postseasonLabel(r)
+          return (
           <tr key={`${r.pk}:${r.i}`}>
-            <td className="rank"><span className="sr-only">Rank </span>{rankLabel(r, rows)}</td>
+            <td className="rank"><span className="sr-only tensest__cue">Rank </span>{rankLabel(r, rows)}</td>
             {/* The meter spreads this board's own range (boardBars), not the season's: on the
                 season scale every row here is full. The number beside it is what a screen
                 reader hears, so the meter is decorative. */}
-            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> <span className="sr-only">Pressure </span>{r.li.toFixed(2)}</td>
+            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> <span className="sr-only tensest__cue">Pressure </span>{r.li.toFixed(2)}</td>
             <td className="date">{monthDay(r.d) || DASH}</td>
             <td className="game">
               <a className="tensest__gamelink" {...routeLink(boxPath(r))}><GameLabel row={r} teamId={teamId} /></a>
-              {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
+              {round && <span className="tensest__post"> · {round}</span>}
             </td>
             {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
             <td className="inn" aria-label={`${r.top ? 'Top' : 'Bottom'} ${r.inn}`}>
@@ -97,7 +99,8 @@ function TensestTable({ rows, teamId, label }) {
             </td>
             <td className="what">{r.what}</td>
           </tr>
-        ))}
+          )
+        })}
       </tbody>
     </Table>
   )

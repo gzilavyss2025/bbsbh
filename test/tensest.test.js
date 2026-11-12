@@ -3,9 +3,9 @@
 // slicing the flat list are in test/tensest-slices.test.js (#2981).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { describePlay, gameRowsOrThrow, isPlayedFinal, playRows } from '../scripts/lib/tensest/tensest.mjs'
+import { describePlay, gameNumbers, gameRowsOrThrow, isPlayedFinal, playRows } from '../scripts/lib/tensest/tensest.mjs'
 import { rankTop } from '../src/api/tensest/rank.js'
-import { isPostseason, rankLabel } from '../src/api/tensest/tensest.js'
+import { boardBars, isPostseason, postseasonLabel, rankLabel } from '../src/api/tensest/tensest.js'
 
 const play = (event, description, extra = {}) => ({
   result: { event, description },
@@ -82,10 +82,6 @@ test('isPlayedFinal: a cancelled or postponed game is not read, a played Final i
   assert.equal(isPlayedFinal(status('D')), false)
   assert.equal(isPlayedFinal(status('I', 'L')), false)
 })
-
-import { postseasonLabel } from '../src/api/tensest/tensest.js'
-import { gameNumbers } from '../scripts/lib/tensest/tensest.mjs'
-
 test('postseasonLabel names the round, league and game', () => {
   assert.equal(postseasonLabel({ gt: 'D', aw: 135, d: '2026-10-04', sg: 2 }), 'NLDS G2')
   assert.equal(postseasonLabel({ gt: 'W', aw: 147, d: '2026-10-28', sg: 7 }), 'WS G7')
@@ -98,8 +94,6 @@ test('gameNumbers keeps a doubleheader game 2 and a postseason series game', () 
   assert.deepEqual(gameNumbers({ gameType: 'R', gameNumber: 2 }), { gn: 2 })
   assert.deepEqual(gameNumbers({ gameType: 'D', gameNumber: 1, seriesGameNumber: 1 }), { sg: 1 })
 })
-
-import { boardBars } from '../src/api/tensest/tensest.js'
 
 test('boardBars spreads the page\'s range (4 to 9.99) over the 10 bars', () => {
   assert.equal(boardBars(9.99), 10)
