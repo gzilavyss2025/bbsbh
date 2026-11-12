@@ -1,6 +1,6 @@
 import '../../styles/report/tensest.css'
 import { useMemo, useState } from 'react'
-import { loadTensest, rankLabel, isPostseason } from '../../api/tensest/tensest.js'
+import { loadTensest, rankLabel, postseasonLabel } from '../../api/tensest/tensest.js'
 import { clubTop, filterOptions, filterPlays, leagueTop } from '../../api/tensest/slices.js'
 import { loadCutoffs, tenseBars } from '../../api/tensest/tenseBars.js'
 import { PressureMeter } from '../../components/charts/PressureMeter.jsx'
@@ -11,6 +11,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { PINNED_TEAM_ID, teamAbbr, teamFullName } from '../../lib/teams.js'
 import { monthDayName } from '../../lib/dates.js'
+import { gamePath, playerPath } from '../../lib/route.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
@@ -35,6 +36,8 @@ function gameLabel(row, teamId) {
   const home = teamAbbr({ id: row.hm })
   return hasScore ? `${away} ${row.as}, ${home} ${row.hs}` : `${away} at ${home}`
 }
+
+const boxPath = (r) => gamePath(r.d, teamAbbr({ id: r.aw }), teamAbbr({ id: r.hm }), 'boxscore', r.gn ?? 1)
 
 const countOf = (rows) => (rows?.length ? `${rows.length} at-bats` : undefined)
 
@@ -61,14 +64,16 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
             <td className="tensest__pressure">{cutoffs && <PressureMeter bars={tenseBars(r.li, cutoffs)} cutoffs={cutoffs} />} {r.li.toFixed(2)}</td>
             <td>{monthDayName(r.d) || DASH}</td>
             <td className="game">
-              {gameLabel(r, teamId)}
-              {isPostseason(r) && <span className="tensest__post"> · postseason</span>}
+              <a href={boxPath(r)}>{gameLabel(r, teamId)}</a>
+              {postseasonLabel(r) && <span className="tensest__post"> · {postseasonLabel(r)}</span>}
             </td>
-            <td>
-              {r.top ? 'Top' : 'Bottom'} {r.inn}
+            {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
+            <td aria-label={`${r.top ? 'Top' : 'Bottom'} ${r.inn}`}>
+              {r.top ? '▲' : '▼'}
+              {r.inn}
             </td>
             <td className="batter">
-              {r.bn} vs {r.pn}
+              <a href={playerPath(r.bid, { name: r.bn })}>{r.bn}</a> vs <a href={playerPath(r.pid, { name: r.pn })}>{r.pn}</a>
             </td>
             <td className="what">{r.what}</td>
           </tr>
@@ -119,7 +124,7 @@ export function TensestMomentsPage() {
         the runners. A normal at-bat is 1.0 and the scale stops at 9.99. The meter shows where each one ranks
         among every at-bat of the season. These are the season’s tensest: each club’s top 25 batting and pitching,
         and the league’s top 50, which you can narrow by batter, pitcher, park or club. Ties are included and marked T.
-        Postseason games are included and marked.
+        Postseason games are included and marked with their round and game.
       </p>
 
       <AsyncStatus

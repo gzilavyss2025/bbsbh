@@ -103,6 +103,16 @@ export const describePlay = (play) => {
 
 // One game's plays -> the rows worth keeping. `game` is a schedule row
 // ({ gamePk, gameType, officialDate, teams: { away, home } }).
+// The game's numbers the page links and labels with: `gn` the doubleheader game (only when
+// past 1, as the box score's URL needs it) and `sg` the game of a postseason series
+// ("NLDS G1"). Kept off the row when absent, so the file stays small.
+export function gameNumbers(game) {
+  const out = {}
+  if (game?.gameNumber > 1) out.gn = game.gameNumber
+  if (game?.gameType !== 'R' && game?.seriesGameNumber > 0) out.sg = game.seriesGameNumber
+  return out
+}
+
 export function playRows(game, plays) {
   const rows = []
   const away = game.teams.away
@@ -115,6 +125,7 @@ export function playRows(game, plays) {
       i,
       d: game.officialDate,
       gt: game.gameType,
+      ...gameNumbers(game),
       aw: away.team.id,
       hm: home.team.id,
       as: away.score ?? null,

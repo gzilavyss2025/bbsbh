@@ -82,3 +82,19 @@ test('isPlayedFinal: a cancelled or postponed game is not read, a played Final i
   assert.equal(isPlayedFinal(status('D')), false)
   assert.equal(isPlayedFinal(status('I', 'L')), false)
 })
+
+import { postseasonLabel } from '../src/api/tensest/tensest.js'
+import { gameNumbers } from '../scripts/lib/tensest/tensest.mjs'
+
+test('postseasonLabel names the round, league and game', () => {
+  assert.equal(postseasonLabel({ gt: 'D', aw: 135, d: '2026-10-04', sg: 2 }), 'NLDS G2')
+  assert.equal(postseasonLabel({ gt: 'W', aw: 147, d: '2026-10-28', sg: 7 }), 'WS G7')
+  assert.equal(postseasonLabel({ gt: 'L', aw: 147, d: '2026-10-14' }), 'ALCS')
+  assert.equal(postseasonLabel({ gt: 'R', aw: 147, d: '2026-06-01' }), '')
+})
+
+test('gameNumbers keeps a doubleheader game 2 and a postseason series game', () => {
+  assert.deepEqual(gameNumbers({ gameType: 'R', gameNumber: 1, seriesGameNumber: 3 }), {})
+  assert.deepEqual(gameNumbers({ gameType: 'R', gameNumber: 2 }), { gn: 2 })
+  assert.deepEqual(gameNumbers({ gameType: 'D', gameNumber: 1, seriesGameNumber: 1 }), { sg: 1 })
+})

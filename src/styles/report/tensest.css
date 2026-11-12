@@ -9,6 +9,10 @@
 .tensest .game,
 .tensest .batter {
   text-align: left;
+  /* The Table's cells are nowrap; these three are prose and wrap, so the table fits the
+     card on desktop instead of scrolling sideways. */
+  white-space: normal;
+  min-width: 9rem;
 }
 .tensest thead th {
   white-space: normal;
@@ -62,4 +66,10 @@
 .tensest .tensest__pressure {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* The game, batter and pitcher are links (to the box score and the player pages), in ink. */
+.tensest .game a,
+.tensest .batter a {
+  color: var(--text-body);
 }

@@ -12,6 +12,7 @@
 // a friendly empty state, not a broken page.
 
 import { staticJson } from '../staticJson.js'
+import { roundTag } from '../../lib/postseason/roundTag.js'
 
 const EMPTY = { season: null, generatedAt: null, through: null, plays: [] }
 
@@ -34,3 +35,11 @@ export function rankLabel(row, rows) {
 
 // A postseason game is any game type but the regular season ('R').
 export const isPostseason = (row) => row.gt !== 'R'
+
+// A postseason row's round and game, as a scorer writes it: "NLDS G1", "WS G7". '' for the
+// regular season; the round alone when the file has no game number for it.
+export function postseasonLabel(row) {
+  if (!isPostseason(row)) return ''
+  const round = roundTag(row.gt, row.aw, row.d)
+  return row.sg ? `${round} G${row.sg}` : round
+}
