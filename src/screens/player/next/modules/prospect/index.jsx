@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { fetchProspectTrend } from '../../../../../api/prospectTrend.js'
-import { fetchLevelTenure } from '../../../../../api/levelTenure.js'
+import { fetchProspectTrend } from '../../../../../api/prospects/trend.js'
+import { fetchLevelTenure } from '../../../../../api/prospects/levelTenure.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { inMinors } from '../innings/inningsView.js'
 import { prospectView } from './prospectView.js'

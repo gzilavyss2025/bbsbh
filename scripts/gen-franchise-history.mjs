@@ -4,7 +4,7 @@
 //
 // Source: GET /api/v1/teams?sportId=1&season={Y}&hydrate=venue, one call a season
 // (~125). A relocated club keeps its team id there (the Brewers' 1969 row is the
-// Seattle Pilots), so no id mapping is needed. Reader: src/api/franchiseHistory.js.
+// Seattle Pilots), so no id mapping is needed. Reader: src/api/history/franchiseSeasons.js.
 //
 // HAND-RUN, immutable: `node scripts/gen-franchise-history.mjs [--through 2025]`.
 // Re-run only to fold in a new season. The files carry no clock, so a re-run with

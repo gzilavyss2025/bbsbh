@@ -110,7 +110,7 @@ test('no hand-rolled toFixed(3) rate formatter is left beside the shared rate3 (
   for (const path of [
     '../src/api/boxlines/fold.js',
     '../src/api/team/leaders.js',
-    '../src/api/prospects.js',
+    '../src/api/prospects/top100.js',
     '../src/api/tradeDeadline.js',
     '../src/screens/team/data/loadMinors.js',
     '../scripts/gen-vs-team-splits.mjs',

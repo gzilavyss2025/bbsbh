@@ -7,7 +7,7 @@
 //
 // scripts/gen-awards-history.mjs builds it: a hand-run full regenerate, plus a
 // `--nightly` run from October to February that folds in the season in play
-// (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js/rehab.js (see
+// (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js and rehab/assignments.js (see
 // docs/data-enrichment.md §5). Historical award winners carry no individual
 // game's score — same footing as the (ungated) League Leaders/WAR/Milestone
 // Watch pages — so this file needs no as-of cutoff.
@@ -19,10 +19,10 @@
 // friendly empty state, not a broken page. The file read is cached in memory for
 // the session (staticJson); a new night's file arrives on the next load.
 
-import { staticJson } from './staticJson.js'
-import { getJson } from './statsapi.js'
-import { MAJOR_AWARDS } from './person/awards.js'
-import { teamFullName } from '../lib/teams.js'
+import { staticJson } from '../staticJson.js'
+import { getJson } from '../statsapi.js'
+import { MAJOR_AWARDS } from '../person/awards.js'
+import { teamFullName } from '../../lib/teams.js'
 
 export const loadAwardsHistory = staticJson('/data/awards-history.json', {
   shape: (d) => ({

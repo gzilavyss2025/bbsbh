@@ -14,7 +14,7 @@ to, and the wire hands out two dates for every row:
 | `effectiveDate` | The day the move TOOK effect. Often absent. |
 
 The rest of the app already picked one. `txnDate(t)` in
-`src/api/rehab-policy.js` returns `effectiveDate || date`, and every consumer of
+`src/api/rehab/policy.js` returns `effectiveDate || date`, and every consumer of
 the transaction pipeline buckets by it — the team page's Transactions card, the
 player career register, `groupIntoStories`. Nothing had to choose before now,
 because none of those surfaces is a window: a club's card shows a season, so a

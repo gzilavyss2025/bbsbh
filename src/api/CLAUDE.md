@@ -61,7 +61,7 @@ generator (`milb-history`, `mono-ink`, the highlight blocklist) you **edit the
 seed, never the output**. And **a static file is sized against the ONE surface
 that opens it, not against the dataset**: the whole-league file is the easy
 generator output, but a game page paying a 3 MB parse to print one line is the
-bug that shape hides. `rookies.js` and `vsTeamSplits.js` are the two worked
+bug that shape hides. `prospects/rookies.js` and `vsTeamSplits.js` are the two worked
 examples — sharded by the key their callers actually hold (the club) or split
 by role when no id key fits (the pills need a compact whole-league answer; only
 the player page wants dates). `docs/api/static-data.md` has both.
@@ -154,8 +154,8 @@ The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
 `expresslane/`, `gameday/`, and `transactions/`. `person/`, `playbyplay/`, and `callout-notes/` carry
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
-directory's shared footing. `callout-notes/surfaces/` holds the per-game callouts reader and the two strips built from it (pre-half, between innings). `boxscore/`, `command/` (pitch command: the season command map, target command, glove-target misses, command received by a catcher), `game/` (per-game fetchers, Game Notes, photos, preview poster, MLB.com story, highlights), `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `milb/` (MiLB affiliate history, the offseason game pool, minor-league season lines), `notable/` (the feat index: the feat label, the callout and the `/notable` shelf), `pitcher/` (pitcher lines, health, split, arsenal, callouts), `player/`, `postseason/`
-(`docs/api/postseason.md`), `schedule/` (slate and team-schedule fetchers, post-fetch filters, schedule shape), `score/` (Season Score, Season Grade, Team Score; `docs/season-score.md`, `docs/season-grade.md`), `scorecard/`, and `team/` (team identity/roster/standings fetchers, team leaderboards, the six-degrees team-seasons file) have only their file headers and the
+directory's shared footing. `callout-notes/surfaces/` holds the per-game callouts reader and the two strips built from it (pre-half, between innings). `awards/` (All-Star rosters and legacy, awards history), `boxscore/`, `command/` (pitch command: the season command map, target command, glove-target misses, command received by a catcher), `game/` (per-game fetchers, Game Notes, photos, preview poster, MLB.com story, highlights), `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `milb/` (MiLB affiliate history, the offseason game pool, minor-league season lines), `notable/` (the feat index: the feat label, the callout and the `/notable` shelf), `pitcher/` (pitcher lines, health, split, arsenal, callouts), `player/`, `postseason/`
+(`docs/api/postseason.md`), `prospects/` (Top-100 snapshot, prospect trend, rookie status, all-minors leaders, level tenure), `rehab/` (the Rehab Assignments reader and the rehab-or-demotion policy the generators share), `schedule/` (slate and team-schedule fetchers, post-fetch filters, schedule shape), `score/` (Season Score, Season Grade, Team Score; `docs/season-score.md`, `docs/season-grade.md`), `scorecard/`, and `team/` (team identity/roster/standings fetchers, team leaderboards, the six-degrees team-seasons file) have only their file headers and the
 manifest.
 
 Related research docs, worth reading before wiring a NEW source:

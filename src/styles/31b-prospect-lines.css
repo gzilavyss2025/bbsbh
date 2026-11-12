@@ -4,7 +4,7 @@
    documents; cascades right after it since both extend .prospecttable.
    A cell splits into two of these — one MLB, one MiLB combined — for a
    player with a stat line at both this season (see resolveCurrentLevels,
-   api/prospects.js). Stacked rather than sat side by side: the
+   api/prospects/top100.js). Stacked rather than sat side by side: the
    "(MLB)"/"(MiLB)" tag plus a full three-figure line is already the width of
    the single-line case, so a second column would widen the cell instead of
    just growing its row. */

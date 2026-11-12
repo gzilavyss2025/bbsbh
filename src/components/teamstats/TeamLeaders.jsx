@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { prospectBadge } from '../../api/prospects.js'
+import { prospectBadge } from '../../api/prospects/top100.js'
 import { SPORT_LABEL, isMlbTeamId } from '../../lib/teams.js'
 import { takeBoardIn } from '../../lib/motion/boardIn.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
@@ -134,7 +134,7 @@ function LeaderCategory({
 // `precomputed`: a { categoryKey: entries[] } map of ALREADY-RANKED rows
 // (computeLeaders' output shape) — passed instead of `pool` when the ranking
 // was baked at build time (the static all-minors board, too heavy to rank
-// live; see api/minorsLeaders.js). When set, pool/qualifier are unused and
+// live; see api/prospects/minorsLeaders.js). When set, pool/qualifier are unused and
 // entries are just sliced to `limit`. `favoriteTeamId`: highlights any row
 // whose leader plays for that club — LeadersPage passes it for the league/
 // level scopes only (not 'org', not the single-team pages), since a team's

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { nameForSeason } from '../src/api/franchiseHistory.js'
+import { nameForSeason } from '../src/api/history/franchiseSeasons.js'
 
 // The club's name by season, from the spans of public/data/franchise-history (#2590). The team
 // id never changes; the name does (the 1969 Seattle Pilots are club 158, the 2000 Expos club 120).

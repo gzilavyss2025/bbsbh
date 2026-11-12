@@ -2,12 +2,12 @@
 // (public/data/level-tenure-benchmark.json, gen-level-tenure-benchmark.mjs) —
 // how much playing time a typical prospect accumulates at a MiLB level
 // before promotion. Season-aggregate, historical-cohort data, same footing
-// as prospectTrend.js; complements it rather than replacing it — that module
+// as prospects/trend.js; complements it rather than replacing it — that module
 // says how well a prospect is hitting/pitching, this one says how long he's
 // been AT the level relative to a typical stay. See
 // docs/level-tenure-benchmark.md for the cohort and reconstruction rule.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 const EMPTY_SNAPSHOT = { levels: {} }
 
@@ -30,7 +30,7 @@ export function benchmarkFor(snapshot, sportId, group) {
 }
 
 // The Prospect Card's tenure fact: how far a player's CURRENT sample (PA for
-// a hitter, OUTS for a pitcher — the same units prospectTrend.js's
+// a hitter, OUTS for a pitcher — the same units prospects/trend.js's
 // `sampleSize` already carries, so callers pass entry.sampleSize straight
 // through with no conversion) sits relative to a typical stay at this level,
 // expressed as a percent of the MEDIAN — the framing this feature exists to

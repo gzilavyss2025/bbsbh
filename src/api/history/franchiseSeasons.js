@@ -1,4 +1,4 @@
-import { staticJsonBy } from './staticJson.js'
+import { staticJsonBy } from '../staticJson.js'
 
 // A club's history by season: one name, league and ballpark per run of seasons,
 // from public/data/franchise-history/{teamId}.json (hand-run

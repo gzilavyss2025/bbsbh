@@ -15,7 +15,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { levelOffseasonPhase, levelOpeningDay } from '../src/lib/time/seasonPhase.js'
-import { movedUpAt } from '../src/api/minorsLeaders.js'
+import { movedUpAt } from '../src/api/prospects/minorsLeaders.js'
 
 // High-A, 2025 / 2026 / 2027: South Atlantic, Midwest, Northwest.
 const HIGH_A_2025 = [

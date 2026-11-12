@@ -9,7 +9,7 @@ import {
   rookieShardKey,
   rookiesForGameSeason,
   showRookiePill,
-} from '../src/api/rookies.js'
+} from '../src/api/prospects/rookies.js'
 
 const DATA = {
   generatedAt: '2026-07-01',

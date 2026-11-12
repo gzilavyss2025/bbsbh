@@ -3,7 +3,7 @@
 // under the file-size cap. Season lines only. See ../../person.js's header for
 // the module's overall as-of footing.
 import { SPORT_LABEL, MILB_LEVELS } from '../../../lib/teams.js'
-import { meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP } from '../../rehab-policy.js'
+import { meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP } from '../../rehab/policy.js'
 import { ipToOuts } from '../../../lib/math/innings.js'
 import { DASH, num } from '../shared.js'
 import { levelSeasonStat, CAREER_ORDER } from '../careerRegister.js'

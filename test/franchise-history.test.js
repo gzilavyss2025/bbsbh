@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { collapseSeasons, venueMates } from '../scripts/lib/franchise-history.mjs'
-import { parkHistory, venueForSeason } from '../src/api/franchiseHistory.js'
+import { parkHistory, venueForSeason } from '../src/api/history/franchiseSeasons.js'
 
 // A hand-made 1968-1999 club: a rename (1969 Pilots -> 1970 Brewers), a league move
 // (1998 AL -> NL) and a park move (1996, venue 23 -> 99). 1968 has no row, and

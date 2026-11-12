@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { fetchTopProspects } from '../../../../../api/prospects.js'
+import { fetchTopProspects } from '../../../../../api/prospects/top100.js'
 import { fetchProspectRankHistory } from '../../../../../api/player/prospectRankHistory.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { prospectsView } from './prospectsView.js'

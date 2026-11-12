@@ -137,7 +137,7 @@ function statLineFor(entry) {
 // mistaken for this app's own SPORT_LABEL scheme (src/lib/teams.js) — it's
 // the scraped sportAbbrev string, display-only (the app resolves a player's
 // actual current affiliate by cross-referencing live rosters, not this
-// string — see prospectAffiliateMap in src/api/prospects.js).
+// string — see prospectAffiliateMap in src/api/prospects/top100.js).
 function slim(entry, rankKey, jerseyNumbers = null) {
   return {
     [rankKey]: entry.rank,

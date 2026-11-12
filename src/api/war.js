@@ -42,7 +42,7 @@ export function warByTeamFor(personId, group, current) {
 // finished season's WAR never changes. Degrades to empty like the current-season
 // file.
 //
-// Sharded on `personId % 100`, the same bucketing rookies.js uses (and for the
+// Sharded on `personId % 100`, the same bucketing prospects/rookies.js uses (and for the
 // same reason — see src/lib/shardKey.js): a player page wants ONE career's
 // worth, at most a couple of dozen numbers, out of 416 KB of league-seasons.
 export const warShardKey = shardKey100

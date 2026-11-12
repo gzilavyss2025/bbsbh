@@ -18,7 +18,7 @@ import {
   historyRow,
 } from '../scripts/lib/prospectPercentile.mjs'
 import { combineToPool } from '../src/api/statsLevels.js'
-import { tenureFact } from '../src/api/levelTenure.js'
+import { tenureFact } from '../src/api/prospects/levelTenure.js'
 
 const hitSplit = (ops, plateAppearances, id) => ({ stat: { ops, plateAppearances }, player: { id } })
 const pitSplit = (era, outs, id) => ({ stat: { era, outs }, player: { id } })

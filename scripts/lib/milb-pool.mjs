@@ -6,7 +6,7 @@
 import { MILB_LEVELS } from '../../src/lib/teams.js'
 
 // Low to high, ROK through AAA — the app's own order, so "up" means the same
-// thing here as it does on the page that reads the board (api/minorsLeaders.js).
+// thing here as it does on the page that reads the board (api/prospects/minorsLeaders.js).
 const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 
 // WHICH SEASON THE POOL IS DRAWN FROM: the most recent one that is OVER.
@@ -71,7 +71,7 @@ export function selectPool(games, { sportId, season, cap, max }) {
 }
 
 // Everyone on the season's leader boards whose season ENDED above where it
-// began — the same one question api/minorsLeaders.js asks, asked here across
+// began — the same one question api/prospects/minorsLeaders.js asks, asked here across
 // every level at once because a game's roster does not care which board a
 // player is on. An entry missing either end is left out rather than guessed at.
 export function movedUpIds(leaders) {

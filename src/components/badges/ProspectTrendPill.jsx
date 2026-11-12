@@ -1,9 +1,9 @@
-import { confidenceLabel, confidenceState, levelTier, movementState, tierLabel } from '../../api/prospectTrend.js'
+import { confidenceLabel, confidenceState, levelTier, movementState, tierLabel } from '../../api/prospects/trend.js'
 import { outsToIp } from '../../lib/math/innings.js'
 import { ordinal } from '../../lib/format.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
-// level-relative OPS/ERA percentile (src/api/prospectTrend.js,
+// level-relative OPS/ERA percentile (src/api/prospects/trend.js,
 // gen-prospect-trend.mjs) — meant to sit next to the weekly-refreshed
 // Pipeline rank without reading as a second, competing rank. It lives in a
 // plain table cell, so it stays a static line — Ledger's rows are
@@ -46,7 +46,7 @@ function sampleLabel(entry) {
   return entry.group === 'pitching' ? `${outsToIp(entry.sampleSize)} IP` : `${entry.sampleSize} PA`
 }
 
-// `entry` comes from prospectTrendById (prospectTrend.js). Two distinct
+// `entry` comes from prospectTrendById (prospects/trend.js). Two distinct
 // empty states, on purpose: `entry == null` is bbsbh's own data gap (no
 // current-level line at all — off the board, injured all season, a fresh
 // promotion the generator hasn't caught up to yet), same em dash every other

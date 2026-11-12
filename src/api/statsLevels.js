@@ -212,7 +212,7 @@ export function sumPitching(splits) {
   const ip = t.outs / 3
   t.inningsPitched = outsToIp(t.outs)
   // null, not 0, at no outs: a pitcher with no out has no ERA, and a 0 would rank
-  // him first. Readers check for it (team/leaders.js, prospects.js, loadMinors.js).
+  // him first. Readers check for it (team/leaders.js, prospects/top100.js, loadMinors.js).
   t.era = eraOf(t.earnedRuns, t.outs)
   t.whip = whipOf(t.baseOnBalls, t.hits, t.outs)
   t.avg = rate(t.hits, t.atBats)
@@ -264,7 +264,7 @@ export function combineToPool(hittingSplits, pitchingSplits) {
       // split still carrying its own `sport.id` — kept alongside the sum
       // rather than only exposing the collapsed total, so a caller that
       // needs a level-scoped cut (the /prospects "vs. Level" MLB-line /
-      // MiLB-line split, prospects.js's resolveCurrentLevels) can re-sum a
+      // MiLB-line split, prospects/top100.js's resolveCurrentLevels) can re-sum a
       // subset with sumHitting/sumPitching instead of re-fetching.
       hittingSplits: e.hitting,
       pitchingSplits: e.pitching,

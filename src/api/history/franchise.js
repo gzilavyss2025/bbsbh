@@ -7,7 +7,7 @@ import { pennantsFor } from './leaguePennants.js'
 import { hallOfFamersFor } from './franchiseHof.js'
 import { retiredNumbersFor } from './retiredNumbers.js'
 import { franchiseLeaders } from './franchiseLeaders.js'
-import { franchiseFor } from '../franchiseHistory.js'
+import { franchiseFor } from './franchiseSeasons.js'
 import { isoToday } from '../../lib/dates.js'
 
 // The franchise page's data (#2763, #3036): the club, its stored ledger (finished seasons,

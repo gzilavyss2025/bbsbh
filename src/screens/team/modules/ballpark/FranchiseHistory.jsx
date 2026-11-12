@@ -6,12 +6,12 @@ import { Door } from '../../../../components/ui/control/Door.jsx'
 import { leagueLogoUrl } from '../../../../lib/teams.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { teamSeasonPath, teamTabPath } from '../../../../lib/route.js'
-import { eraSeason } from '../../../../api/franchiseHistory.js'
+import { eraSeason } from '../../../../api/history/franchiseSeasons.js'
 
 // The club's history under the Ballpark card, one module: a strip of names,
 // leagues and parks by season, then a line for each park. Open
 // (names and parks, no game). The data starts in 1901, so a park line says
-// "seasons in this data", never "opened" (src/api/franchiseHistory.js).
+// "seasons in this data", never "opened" (src/api/history/franchiseSeasons.js).
 // MLB only: a MiLB id has no file, `spans` is empty, and nothing renders.
 
 // The league's own mark in place of its name (Gary, 2026-10-30); any other league stays a word.

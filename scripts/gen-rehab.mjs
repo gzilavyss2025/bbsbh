@@ -1,6 +1,6 @@
 // Regenerates public/data/rehab.json — the players currently on a major-league
 // rehab assignment, league-wide, already shaped for the Rehab Assignments page
-// (src/api/rehab.js just reads this file). Keyed by MLB Stats API personId.
+// (src/api/rehab/assignments.js just reads this file). Keyed by MLB Stats API personId.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at request
 // time. Building the list is expensive: the transaction feed tells us who STARTS
@@ -20,7 +20,7 @@
 import { join } from 'node:path'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { isoToday } from '../src/lib/dates.js'
-import { txnDate, isRehabTxn, rehabListRow } from '../src/api/rehab-policy.js'
+import { txnDate, isRehabTxn, rehabListRow } from '../src/api/rehab/policy.js'
 import { getJson, getPeople } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
@@ -46,7 +46,7 @@ const currentSeason = () => new Date().getUTCFullYear()
 
 // --- transaction pass: who is on a rehab assignment right now -----------------
 // The stint rule — when one starts, what ends it, the 30-day cap, the
-// same-day tie — is rehabListRow / openRehabStint in src/api/rehab-policy.js,
+// same-day tie — is rehabListRow / openRehabStint in src/api/rehab/policy.js,
 // the ONE rule the player page's banner also calls, so the two agree (#1362).
 
 // The players with a rehab leg in the league-wide window: the candidates.

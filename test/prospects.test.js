@@ -8,7 +8,7 @@ import {
   orgProspectsForTeam,
   prospectAffiliateMap,
   resolveCurrentLevels,
-} from '../src/api/prospects.js'
+} from '../src/api/prospects/top100.js'
 
 const SNAPSHOT = {
   generatedAt: '2026-08-01',

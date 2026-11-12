@@ -1,5 +1,5 @@
-import { prospectTrendById, prospectCardFor, confidenceLabel, movementState } from '../../../../../api/prospectTrend.js'
-import { tenureFact } from '../../../../../api/levelTenure.js'
+import { prospectTrendById, prospectCardFor, confidenceLabel, movementState } from '../../../../../api/prospects/trend.js'
+import { tenureFact } from '../../../../../api/prospects/levelTenure.js'
 import { outsToIp } from '../../../../../lib/math/innings.js'
 import { ordinal, ordinalSuffix } from '../../../../../lib/format.js'
 import { SPORT_LABEL } from '../../../../../lib/teams.js'

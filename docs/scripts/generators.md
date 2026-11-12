@@ -120,7 +120,7 @@ don't run these by hand.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. A 40-day league scan finds the candidates; each candidate's WHOLE feed then
   decides his stint through `rehabListRow` / `openRehabStint` in
-  `src/api/rehab-policy.js` — the one stint rule (start, end, same-day tie, 30-day
+  `src/api/rehab/policy.js` — the one stint rule (start, end, same-day tie, 30-day
   cap) that `person.js`'s `detectRehabAssignment` also calls (#1362). Then each is
   verified against his game log + club's schedule; that 7-club-games rule stays here.
 - `gen-nuggets.mjs` → `public/data/nuggets/{season}.json` + `nuggets/index.json` — the nugget store (#2809,
@@ -1334,7 +1334,7 @@ don't run these by hand.
   (debut date + the date, if any, his career crossed the rookie limit: 130 at-bats
   or 50 innings pitched — AB/IP only, not MLB's full official rule, which also has
   a 45-active-roster-days clause). Feeds `RookiePill` + the player page's "Lost
-  Rookie Status" timeline row (`src/api/rookies.js`). Same `fullRoster` scan as
+  Rookie Status" timeline row (`src/api/prospects/rookies.js`). Same `fullRoster` scan as
   `gen-milestones.mjs`, but APPEND-ONLY/incremental like `gen-game-notes.mjs`, not
   a full rebuild: a closed record is a frozen historical fact the timeline already
   shows, so this script only ever adds a new debut or closes a still-open one —
@@ -1501,8 +1501,8 @@ don't run these by hand.
   Depends on
   `top-prospects.json` already existing; skips (not a failure) if that
   snapshot is missing/empty. Writes the file packed
-  (`packProspectTrend`, `src/api/prospectTrend.js`; shape in `docs/api/static-data.md`).
-  App reads it via `src/api/prospectTrend.js`.
+  (`packProspectTrend`, `src/api/prospects/trend.js`; shape in `docs/api/static-data.md`).
+  App reads it via `src/api/prospects/trend.js`.
 
 - `gen-where-from.mjs` → `public/data/from/` (`index.json`, `lookup/`, `college/`, `high-school/`,
   `hometown/`, `country/`) and the cache `scripts/data/from/players.json` — the places behind
@@ -1668,7 +1668,7 @@ Re-run only to fold in a new season.
   complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).
   Run by hand: `node scripts/gen-franchise-history.mjs [--through 2025]`. About 125
   calls (`/teams?sportId=1&season=Y&hydrate=venue`, one a season). Pure half:
-  `scripts/lib/franchise-history.mjs`. Reader: `src/api/franchiseHistory.js`.
+  `scripts/lib/franchise-history.mjs`. Reader: `src/api/history/franchiseSeasons.js`.
   Three rules. **A relocated club keeps its id** in this feed, but a few
   early franchises do not: the 1901-02 Baltimore Orioles (id 298) are the Yankees'
   first two seasons, and the Yankees' file starts in 1903. **A row with no league
@@ -1716,7 +1716,7 @@ Re-run only to fold in a new season.
   — for each full-season MiLB level, how much playing time (PA for hitters,
   outs for pitchers) a typical prospect accumulates there before promotion.
   Feeds the Prospect Card's "X% of a typical stay" fact
-  (`src/api/levelTenure.js`). Cohort: every MLB debutant in a sliding 5-year
+  (`src/api/prospects/levelTenure.js`). Cohort: every MLB debutant in a sliding 5-year
   debut window (ending 3 years before today, so `rookieUntil` has had time to
   resolve) whose career crossed `rookies.json`'s real-graduation threshold.
   Reconstructs each player's first-ascent level history from `yearByYear`
@@ -1838,7 +1838,7 @@ Re-run only to fold in a new season.
   this page can't drift from what the player page's own Awards section counts as
   hardware) × season through `GET /api/v1/awards/{awardId}/recipients?season=YYYY`.
   An award not yet decided answers HTTP 404, which the generator reads as no recipients.
-  App reads it via `src/api/awardsHistory.js`, which also reads the season in play live
+  App reads it via `src/api/awards/history.js`, which also reads the season in play live
   for the "so far" block on the page.
 - `gen-all-star-rosters.mjs` → `public/data/all-star-rosters.json` — every MLB
   All-Star Game roster, year over year back to 1933. Loops
@@ -1864,7 +1864,7 @@ Re-run only to fold in a new season.
   before 1962) and `venues[season]` (the venue name off the same schedule row, plus
   a best-effort host-team id resolved against a ONE-TIME fetch of the 30 current
   MLB teams' home parks — an older/relocated venue just carries no team match).
-  App reads it via `src/api/allStarRosters.js`.
+  App reads it via `src/api/awards/allStarRosters.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
   club-name history for every AAA/AA/A+/A affiliate, plus Rookie/complex-level clubs
   (sportId 16) as of issue #856 — investigated and widened rather than left excluded,

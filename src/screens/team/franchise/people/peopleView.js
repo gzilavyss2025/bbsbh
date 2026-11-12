@@ -1,4 +1,4 @@
-import { parkHistory } from '../../../../api/franchiseHistory.js'
+import { parkHistory } from '../../../../api/history/franchiseSeasons.js'
 
 // People and places on the franchise page (#2784), shaped for the cards. Pure: no fetch, no clock.
 import { seasonRuns } from '../../../../components/team/ladder/layout.js'

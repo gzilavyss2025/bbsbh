@@ -17,7 +17,7 @@
 // friendly empty state, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
 
-import { staticJson } from './staticJson.js'
+import { staticJson } from '../staticJson.js'
 
 export const loadRehabAssignments = staticJson('/data/rehab.json', {
   shape: (d) => ({ players: d.players ?? [], generatedAt: d.generatedAt ?? null }),

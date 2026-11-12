@@ -1,5 +1,5 @@
-import { shardKey100 } from '../lib/shardKey.js'
-import { staticJson, staticJsonBy } from './staticJson.js'
+import { shardKey100 } from '../../lib/shardKey.js'
+import { staticJson, staticJsonBy } from '../staticJson.js'
 
 // Rookie status, read from static same-origin files under public/data/rookies/
 // rather than computed live. Those files are derived from the append-only

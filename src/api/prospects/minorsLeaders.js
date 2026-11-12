@@ -7,7 +7,7 @@
 // to combine — far too heavy for a phone page load. So scripts/gen-minors-
 // leaders.mjs precomputes it on a daily cron (see
 // .github/workflows/update-nightly-data.yml) and this module just reads it.
-// Same build-time-fetch pattern as war.js / rehab.js; still season
+// Same build-time-fetch pattern as war.js / rehab/assignments.js; still season
 // aggregates only.
 //
 // The file stores PRE-RANKED top rows per category ({ leaders: { catKey:
@@ -17,8 +17,8 @@
 // before the file exists or on any failure — a friendly empty state, not a broken
 // page. Cached in-memory for the session since the file only changes once a day.
 
-import { MILB_LEVELS } from '../lib/teams.js'
-import { staticJson } from './staticJson.js'
+import { MILB_LEVELS } from '../../lib/teams.js'
+import { staticJson } from '../staticJson.js'
 
 export const fetchMinorsLeaders = staticJson('/data/minors-leaders.json', {
   // `season` is carried because a caller that names a season on screen has to

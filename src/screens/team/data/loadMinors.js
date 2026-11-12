@@ -5,9 +5,9 @@ import {
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
 } from '../../../api/team/fetch.js'
-import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, isPitcher } from '../../../api/prospects.js'
-import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospectTrend.js'
-import { loadRehabAssignments } from '../../../api/rehab.js'
+import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, isPitcher } from '../../../api/prospects/top100.js'
+import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospects/trend.js'
+import { loadRehabAssignments } from '../../../api/rehab/assignments.js'
 import { parentOrgHistory } from '../../../api/milb/history.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
@@ -18,7 +18,7 @@ import { DIRECT } from './sources.js'
 
 const DASH = '—'
 
-// Same rate-stat formatting prospects.js's own statLineFrom uses: the shared
+// Same rate-stat formatting prospects/top100.js's own statLineFrom uses: the shared
 // rate3 (three decimals, no leading zero, half up as MLB rounds, #1356), with
 // null and not the dash when there is no value.
 function rate3(v) {
@@ -70,7 +70,7 @@ const POSITION_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'DH
 // FanGraphs' own Board keeps them separate, and this mirrors that). Scouting
 // is this org's existing ranked pool (`orgRank`, already resolved above);
 // Performance is the same pool re-sorted by bbsbh's own level-relative
-// percentile (prospectTrend.js) — the two orders are free to disagree, and
+// percentile (prospects/trend.js) — the two orders are free to disagree, and
 // when they do that IS the finding, not noise to resolve. Positions with no
 // prospect at all in the ranked pool simply don't appear as a pill.
 export function buildDepthChart(prospects) {

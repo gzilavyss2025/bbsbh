@@ -102,11 +102,11 @@ for each generator; the reader modules:
   with no curated art in `public/team-logos/`) falls back to `'base'` via
   `TeamLogo`'s own fallback chain, never a broken image. Spoiler-free: a
   jersey choice, not game state.
-- `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
+- `rehab/assignments.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
   calls. `gen-rehab.mjs` (daily cron) imports the one stint rule (`rehabListRow` /
-  `openRehabStint` in `rehab-policy.js`) that `person.js`'s `detectRehabAssignment`
+  `openRehabStint` in `rehab/policy.js`) that `person.js`'s `detectRehabAssignment`
   also calls, so the list and the banner agree on every day (#1362).
 - `nuggets/nuggets.js` — the nugget store, `public/data/nuggets/{season}.json` (#2809, ADR-0129), for Between Innings'
   `nugget` notes. Cost-driven: dating a crossing needs a game log per player. Cutoff-gated: `nuggetsForGame`
@@ -141,7 +141,7 @@ for each generator; the reader modules:
   no `SealBox`; the player-page card still only shows its projection on a bare
   current-day view (`asOf` unset) since the precompute can't be retrofit to an old
   game's cutoff.
-- `rookies.js` — `RookiePill` (roster/lineup surfaces) + the player page's
+- `prospects/rookies.js` — `RookiePill` (roster/lineup surfaces) + the player page's
   "Lost Rookie Status" timeline row. Rule is AB/IP thresholds only (130
   career at-bats or 50 innings pitched) — not MLB's full official rookie rule,
   which also has a 45-active-roster-days clause, deliberately left out. A
@@ -280,7 +280,7 @@ for each generator; the reader modules:
   download per club. The page's pure half is
   `src/lib/gameNotes/archive.js`; `scripts/download-game-notes.mjs` saves the same
   archive's PDFs to a gitignored folder.
-- `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
+- `prospects/minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
   `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is
   eight full-level stat pulls (~4,700 players), so `gen-minors-leaders.mjs` (daily
   cron) precomputes it. Stores PRE-RANKED top rows per category (via the app's own
@@ -352,7 +352,7 @@ for each generator; the reader modules:
   are about 300 KB raw and 34 KB gzipped (2026-10-06). Not precached; `vite.config.js` caches them
   NetworkFirst in `bbsbh-record-shards`, so a box score opened offline keeps its label.
   `test/notable-feats.test.js`.
-- `allStarRosters.js` — the All-Star Rosters page, from
+- `awards/allStarRosters.js` — the All-Star Rosters page, from
   `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
   season's roster is decided once and never changes. Every named selectee,
   including one who withdrew and never played, since the source is the official
@@ -422,7 +422,7 @@ for each generator; the reader modules:
   committed dump lean. Entries are pre-shaped into `team/leaders.js`'s
   `precomputed` category-map contract so `PostseasonLeadersPage.jsx` reuses
   `TeamLeaders` (Featured-leader/chasers layout) for the batting/pitching
-  sections, same as `minorsLeaders.js` does for the all-minors board; the
+  sections, same as `prospects/minorsLeaders.js` does for the all-minors board; the
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
 - `callout-notes/surfaces/bundle.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
@@ -1052,7 +1052,7 @@ for each generator; the reader modules:
   names, except the pitcher's strikeouts, `pitchingStrikeouts`. Regular season only. Keyed by the
   current team id, so 158 holds the 1969 Pilots. Rate stats are the feed's qualified lists. MLB only;
   a MiLB id reads empty. No screen reads it yet.
-- `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
+- `history/franchiseSeasons.js` — a club's names, leagues and ballparks by season, from
   `public/data/franchise-history/{teamId}.json` (hand-run
   `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.
@@ -1203,7 +1203,7 @@ for each generator; the reader modules:
   whole file is one fetch, memoized, and it holds no search logic. The `credit` lines
   print beside any chain built from it. Empty on a missing file. Spoiler-free:
   history about people, no game state.
-- `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
+- `prospects/trend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —
   purely "how does his OPS/ERA compare to every other qualified player at his
@@ -1246,13 +1246,13 @@ for each generator; the reader modules:
   same names. Higher is always better: `percentileRank` inverts ERA before the
   UI receives it. A move under five percentile points reads as `Steady` on both
   surfaces because one game can cause a small percentile wobble.
-- `levelTenure.js` — bbsbh's OWN level-tenure benchmark, from
+- `prospects/levelTenure.js` — bbsbh's OWN level-tenure benchmark, from
   `public/data/level-tenure-benchmark.json` (`gen-level-tenure-benchmark.mjs`,
   hand-run — see the generator catalog and `docs/level-tenure-benchmark.md`).
-  Answers a different question than `prospectTrend.js`: not how well a
+  Answers a different question than `prospects/trend.js`: not how well a
   prospect is hitting/pitching, but how far his current sample sits into a
   TYPICAL STAY at his level — `tenureFact` compares his current PA/outs
-  (the same count `prospectTrend.js`'s `sampleSize` already carries, so the
+  (the same count `prospects/trend.js`'s `sampleSize` already carries, so the
   two never disagree) against the historical cohort's median, expressed as a
   plain percent ("about 62% of a typical AA stay"). That count is his line at
   his primary level alone, not his season summed over every level (#1279).

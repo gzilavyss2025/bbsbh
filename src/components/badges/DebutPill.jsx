@@ -5,7 +5,7 @@ import { leagueLogoUrl } from '../../lib/teams.js'
 // among prospects/rookies reads at a glance as already-debuted. Sibling to
 // ProspectPill/RookiePill/MilestonePill (same shape/weight), renders nothing
 // for an undebuted player so callers can splice it in unconditionally.
-// `debuted` comes from hasDebuted (src/api/rookies.js), reading the same
+// `debuted` comes from hasDebuted (src/api/prospects/rookies.js), reading the same
 // rookies precompute RookiePill uses.
 export function DebutPill({ debuted }) {
   if (!debuted) return null

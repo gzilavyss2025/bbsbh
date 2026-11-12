@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { loadRehabAssignments } from '../api/rehab.js'
+import { loadRehabAssignments } from '../api/rehab/assignments.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
@@ -21,7 +21,7 @@ const DASH = '—'
 // Every big leaguer currently on a minor-league rehab assignment, league-wide, as
 // a grid of player cards — a headshot header, the player's name + position, then
 // the move itself (MLB club → the affiliate he's rehabbing at) and that
-// affiliate's name with a level badge. The list is small (see api/rehab.js,
+// affiliate's name with a level badge. The list is small (see api/rehab/assignments.js,
 // which verifies each stint is still live against the player's game log), so a
 // card per player reads better than a dense table and scales to more columns as
 // the viewport widens. Data is a live read of the public transactions + game-log

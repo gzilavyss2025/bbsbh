@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { franchiseFor } from '../../../../api/franchiseHistory.js'
+import { franchiseFor } from '../../../../api/history/franchiseSeasons.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useDialogFocus } from '../../../../hooks/dialog/useDialogFocus.js'
 import { IconButton } from '../../../../components/ui/control/IconButton.jsx'

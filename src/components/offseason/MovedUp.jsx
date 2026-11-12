@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { fetchMinorsLeaders, movedUpAt } from '../../api/minorsLeaders.js'
-import { fetchTopProspects, prospectBadge } from '../../api/prospects.js'
+import { fetchMinorsLeaders, movedUpAt } from '../../api/prospects/minorsLeaders.js'
+import { fetchTopProspects, prospectBadge } from '../../api/prospects/top100.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
@@ -26,7 +26,7 @@ import { Table } from '../ui/table/Table.jsx'
 // two ends of his season — `fromLevel`/`toLevel`, the fields that say he moved
 // UP rather than merely moved, which the nightly generator establishes in bulk
 // so this page does not have to (issue #1122). The derivation over all three is
-// movedUpAt in src/api/minorsLeaders.js. The Top-100 snapshot
+// movedUpAt in src/api/prospects/minorsLeaders.js. The Top-100 snapshot
 // beside it is session-memoized and the slate has already asked for it on any
 // MiLB tab (GameSelect), so the pills are free here too.
 //

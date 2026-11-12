@@ -16,7 +16,7 @@ import {
   prospectCardFor,
   packProspectTrend,
   unpackProspectTrend,
-} from '../src/api/prospectTrend.js'
+} from '../src/api/prospects/trend.js'
 
 const SNAPSHOT = {
   generatedAt: '2026-08-10',

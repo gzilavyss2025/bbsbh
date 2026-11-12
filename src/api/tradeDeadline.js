@@ -13,7 +13,7 @@
 // Completed trades and their dates carry no score, so nothing here is
 // reveal-only.
 
-import { txnDate } from './rehab-policy.js'
+import { txnDate } from './rehab/policy.js'
 import { rate3 } from './person/shared.js'
 import { ordinal } from '../lib/format.js'
 
