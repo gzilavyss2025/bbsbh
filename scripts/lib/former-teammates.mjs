@@ -10,7 +10,7 @@
 //   - how many rows one shard may carry (the 40 KB hot-path ceiling).
 //
 // test/former-teammates.test.js pins all four. Pure: no fetching.
-import { meetsStintCap } from '../../src/api/rehab-policy.js'
+import { meetsStintCap } from '../../src/api/rehab/policy.js'
 import { isWinterSport } from '../../src/lib/winter/leagues.js'
 import { num } from '../../src/lib/math/number.js'
 
@@ -57,7 +57,7 @@ export function careerRequests() {
 // any level outside CAREER_SPORT_IDS is dropped, whatever request brought it
 // back, so a winter stint can never enter the set. Post-debut minor-league
 // seasons below REHAB_CAP are dropped (rehab/shuttle noise, see
-// src/api/rehab-policy.js).
+// src/api/rehab/policy.js).
 export function reduceCareer(results, debutYear) {
   const pairs = new Set()
   const clubs = new Map()

@@ -12,7 +12,7 @@ import {
   mentionsInjuredList,
   injuredListDays,
   isIlPlacementOrTransferTxn,
-} from '../rehab-policy.js'
+} from '../rehab/policy.js'
 import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
 import { aggregateSplits, milbCareerStat, hitterTiles, pitcherTiles, splitsView } from './stats.js'
@@ -36,7 +36,7 @@ import { careerRegisterView, levelSeasonStat, LEVEL_ORDER_DESC } from './careerR
 // demotion.
 //
 // Which stint is open, when it started, and when the 30-day cap closes it:
-// openRehabStint (rehab-policy.js), the ONE rule the league-wide Rehab
+// openRehabStint (rehab/policy.js), the ONE rule the league-wide Rehab
 // Assignments list (gen-rehab.mjs) also calls, so the banner and the list
 // agree on every day (#1362). That rule also keeps a stint from carrying
 // across a season boundary: an uncaptured closing row from a prior season must
@@ -66,7 +66,7 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
 // Aaron Judge from the 10-day injured list" is a phantom reinstatement generated
 // by an injured player's All-Star selection — he's still hurt).
 //
-// The list NAME test is mentionsInjuredList (rehab-policy.js), shared so the
+// The list NAME test is mentionsInjuredList (rehab/policy.js), shared so the
 // pre-2019 "disabled list" era can't go missing from one consumer and not
 // another. The RESERVE list is the third name that can close a stint, and it is
 // the reason an injured All-Star used to stay flagged hurt all year: a selection
@@ -360,7 +360,7 @@ export function ilStintRow(s, levelByTeamId) {
 // (each stint has to be verified against the player's game log to drop ones that
 // have really ended), so it's precomputed on a cron into public/data/rehab.json.
 // See scripts/gen-rehab.mjs (which imports the transaction tests and the 30-day
-// cap from rehab-policy.js) and src/api/rehab.js.
+// cap from rehab/policy.js) and src/api/rehab/assignments.js.
 
 // ---------------------------------------------------------------------------
 // Promoted other-level tiles — the current season's line at each level the

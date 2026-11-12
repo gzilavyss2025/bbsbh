@@ -7,7 +7,7 @@
 // to combine — far too heavy for a phone page load. So scripts/gen-minors-
 // leaders.mjs precomputes it on a daily cron (see
 // .github/workflows/update-nightly-data.yml) and this module just reads it.
-// Same build-time-fetch pattern as war.js / rehab.js; still season
+// Same build-time-fetch pattern as war.js / rehab/assignments.js; still season
 // aggregates only.
 //
 // The file stores PRE-RANKED top rows per category ({ leaders: { catKey:

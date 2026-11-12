@@ -110,7 +110,7 @@ These have one home, and every other caller imports it. I found no copy.
 - **Bullpen thresholds.** `gen-workload.mjs` imports `clubPenCounts` from `src/api/workload.js`.
 - **Pitch codes.** `WHIFF_CODES`, `FOUL_CODES`, `BALL_CODES` in `src/api/playbyplay/pitchInfo.js`.
 - **K% and BB%.** Every home divides by PA (BF for a pitcher).
-- **Rehab transaction test.** `src/api/rehab-policy.js`. (The 30-day cap is shared too, since A6. The 7-club-games stale rule is not: it needs game logs.)
+- **Rehab transaction test.** `src/api/rehab/policy.js`. (The 30-day cap is shared too, since A6. The 7-club-games stale rule is not: it needs game logs.)
 - **Hit coordinates.** `HIT_COORD_ORIGIN` in `src/lib/ballpark/hitProjection.js`. Savant's `hc_x`/`hc_y` projection is different, and `gen-spray.mjs` says so.
 - **Win probability.** It comes from MLB's endpoint. The repo does not compute it.
 
@@ -119,7 +119,7 @@ These have one home, and every other caller imports it. I found no copy.
 These have one home each, so they are not in the buckets. No issue was opened.
 
 - **Rookie limit: reach or exceed.** `scripts/lib/rookie-crossing.mjs` (`findCrossingSeason`, `crossingDateFromGameLog`) ends rookie status at `>= 130` AB or `>= 150` outs. MLB's rule says "exceeded" 130 AB or 50 IP, and `src/api/person/transactions.js` prints "Exceeded". A player with exactly 130 AB splits them. The 45-day active-roster clause is not modelled.
-- **`docs/scripts/generators.md` is stale on `gen-rehab.mjs`.** It says the script keeps its own copy of the transaction scan. It imports `rehab-policy.js` now. (Named in #1280.)
+- **`docs/scripts/generators.md` is stale on `gen-rehab.mjs`.** It says the script keeps its own copy of the transaction scan. It imports `rehab/policy.js` now. (Named in #1280.)
 - **`averageAge` in `scripts/lib/youngest-regulars.mjs`** averages ages that `ageOnJune30` already rounded to 0.1. The error is 0.05 years at most.
 
 ## Comments to add

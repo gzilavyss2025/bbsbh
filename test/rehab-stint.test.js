@@ -19,7 +19,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { detectRehabAssignment } from '../src/api/person.js'
-import { isRehabEndingTxn, openRehabStint, rehabListRow } from '../src/api/rehab-policy.js'
+import { isRehabEndingTxn, openRehabStint, rehabListRow } from '../src/api/rehab/policy.js'
 
 const rows = (person, list) => list.map((t) => ({ ...t, person }))
 const MLB_IDS = new Set([118, 119, 158])

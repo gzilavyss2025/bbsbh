@@ -120,7 +120,7 @@ don't run these by hand.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. A 40-day league scan finds the candidates; each candidate's WHOLE feed then
   decides his stint through `rehabListRow` / `openRehabStint` in
-  `src/api/rehab-policy.js` — the one stint rule (start, end, same-day tie, 30-day
+  `src/api/rehab/policy.js` — the one stint rule (start, end, same-day tie, 30-day
   cap) that `person.js`'s `detectRehabAssignment` also calls (#1362). Then each is
   verified against his game log + club's schedule; that 7-club-games rule stays here.
 - `gen-nuggets.mjs` → `public/data/nuggets/{season}.json` + `nuggets/index.json` — the nugget store (#2809,

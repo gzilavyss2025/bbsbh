@@ -15,13 +15,13 @@
 //
 // Roster moves and their dates carry no score, so nothing here is reveal-only.
 
-import { mentionsInjuredList } from '../rehab-policy.js'
+import { mentionsInjuredList } from '../rehab/policy.js'
 
 // ---------------------------------------------------------------------------
 // The injured list, and the three lists that are not it
 // ---------------------------------------------------------------------------
 
-// Mirrors rehab-policy.js's isIlPlacementOrTransferTxn and person/activity.js's
+// Mirrors rehab/policy.js's isIlPlacementOrTransferTxn and person/activity.js's
 // isIlEndingTxn keyword logic, split into
 // THREE disjoint categories (placement / activation / IL-to-IL transfer)
 // rather than person.js's two — the story grouper needs to tell a transfer
@@ -31,7 +31,7 @@ import { mentionsInjuredList } from '../rehab-policy.js'
 // convention as gen-rehab.mjs mirroring detectRehabAssignment).
 //
 // The one thing NOT copied is the list-NAME test: that's mentionsInjuredList
-// (rehab-policy.js), shared with person.js so the pre-2019 "disabled list"
+// (rehab/policy.js), shared with person.js so the pre-2019 "disabled list"
 // wording can't be repaired in one consumer and left broken in the other.
 // Only the verb frames below stay local. Today's generated files start at
 // 2026, so the disabled-list era is out of range in practice — this keeps the
@@ -62,7 +62,7 @@ export function isIlEndingTxn(t) {
 
 // The three lists that are NOT the injured list. Each takes a player off the
 // ACTIVE roster exactly as an IL placement does, and each is reversed by an
-// activation the same way — but `mentionsInjuredList` (rehab-policy.js, the
+// activation the same way — but `mentionsInjuredList` (rehab/policy.js, the
 // shared pre-2019 "disabled list" test) matches none of them, so the SC gate
 // in filterStoryworthy dropped all three in BOTH directions. 47 MLB-touching
 // rows over a 60-day live window, split almost evenly between placements and

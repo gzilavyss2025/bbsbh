@@ -8,7 +8,7 @@
 // projection by how often the player actually plays — dozens of statsapi
 // calls per team, hundreds league-wide. scripts/gen-milestones.mjs does it on
 // a cron and commits the shaped result (see .github/workflows/update-nightly-data.yml);
-// this module just reads it. Same build-time-fetch pattern as rehab.js/war.js
+// this module just reads it. Same build-time-fetch pattern as rehab/assignments.js and war.js
 // (see docs/data-enrichment.md §5). Counting-stat totals and projections carry
 // no individual game's score — same footing as the (ungated) League Leaders
 // and WAR pages — so this file needs no as-of cutoff.

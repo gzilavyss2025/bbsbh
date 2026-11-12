@@ -32,7 +32,7 @@
 //
 // Roster moves and their dates carry no score, so nothing here is reveal-only.
 
-import { txnDate } from '../rehab-policy.js'
+import { txnDate } from '../rehab/policy.js'
 import {
   STORY_TYPE_RANK,
   dedupeTransactions,
