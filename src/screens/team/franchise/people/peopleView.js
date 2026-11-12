@@ -16,7 +16,7 @@ export function hofHeading(teamName, names) {
 }
 
 // summarizeFranchise's `managers` -> the card's rows, newest first (by his last season, then his
-// first). A season listed with no split on file (a shared one, or the live season) still shows its
+// first). A season listed with no split on file (the live season, or a shared one not yet seeded) still shows its
 // year and marks him `partial`: his W-L leaves it out. `best` is the summary's winningest id.
 export function managersView(managers, best) {
   return [...(managers ?? [])]

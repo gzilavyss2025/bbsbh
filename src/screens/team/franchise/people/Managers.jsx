@@ -6,8 +6,8 @@ import { managerPath } from '../../../../lib/route.js'
 import { managersView } from './peopleView.js'
 
 // Every manager on the ledger, newest first, with his seasons, W-L and pct (#2784). The winningest
-// (the summary's pick) wears a tag. A season he shared with no split on file is left out of his
-// W-L, marked † with one footnote. Manager data starts in 1969 (managersFrom).
+// (the summary's pick) wears a tag. A season with no split on file (the live season, or a shared one
+// not yet seeded) is left out of his W-L, marked † with one footnote. Manager data starts in 1969 (managersFrom).
 export function Managers({ managers, best }) {
   const link = useRouteLink()
   const list = managersView(managers, best)
@@ -49,8 +49,8 @@ export function Managers({ managers, best }) {
         <p className="hint frl__hint infopop-row">
           † a season with no split on file{' '}
           <InfoPopover label="About the dagger" className="infopop--paper">
-            This season, before the offseason ledger run, has no W-L split on file for him, so his W-L
-            leaves it out.
+            A season with no W-L split on file for him, such as the current one before the offseason
+            ledger run, is left out of his W-L.
           </InfoPopover>
         </p>
       )}

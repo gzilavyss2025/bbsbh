@@ -55,7 +55,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
-import { teamSeasonGames, seedSegments, segmentRecords, managerStintIndex } from './lib/records/manager-split.mjs'
+import { teamSeasonGames, seedSegments, segmentRecords, managerStintIndex, collapseManagerStints } from './lib/records/manager-split.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -274,6 +274,8 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
       if (stint) stint.sharedSeason = true
     }
   }
+
+  collapseManagerStints(byPersonId, MANAGER_JOB_IDS)
 
   return unresolved
 }

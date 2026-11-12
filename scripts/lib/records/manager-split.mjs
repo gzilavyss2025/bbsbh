@@ -179,3 +179,19 @@ export function managerStintIndex(byPersonId, managerJobIds) {
   }
   return index
 }
+
+// A person with two manager-job stints in one club-season (a bench coach named interim carries
+// 'MNGR' and 'NTRM') keeps the one holding the record (else the first); the bare twin would
+// read as a shared season with no W-L on the manager page (#2958 review). Mutates byPersonId.
+export function collapseManagerStints(byPersonId, managerJobIds) {
+  for (const [personId, stints] of byPersonId) {
+    const keep = new Map()
+    for (const s of stints) {
+      if (!managerJobIds.has(s.jobId)) continue
+      const k = `${s.teamId}:${s.season}`
+      const prev = keep.get(k)
+      if (!prev || (!prev.record && s.record)) keep.set(k, s)
+    }
+    byPersonId.set(personId, stints.filter((s) => !managerJobIds.has(s.jobId) || keep.get(`${s.teamId}:${s.season}`) === s))
+  }
+}
