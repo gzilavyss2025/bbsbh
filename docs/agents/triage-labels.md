@@ -16,7 +16,7 @@ Edit the right-hand column to match whatever vocabulary you actually use.
 
 ## Kind labels
 
-Every new issue also gets one **kind** label, so Gary can pick work by type. Apply it
+Every new issue also gets a **kind** label, so Gary can pick work by type. Apply it
 with the triage label, at filing time.
 
 | Label    | Use when the work is mostly…                                                  |
@@ -24,5 +24,5 @@ with the triage label, at filing time.
 | `data`   | feeds, `src/api/`, stores, generators, crons, stats logic, field paths         |
 | `design` | layout, CSS, tokens, copy, visual or interaction changes to a screen           |
 
-If an issue has both halves, pick the larger half. Tooling, CI, and docs work gets
+If an issue needs real work on both sides (a new store or field *and* a new screen or wireframe), give it both labels. Tooling, CI, and docs work gets
 neither label.
