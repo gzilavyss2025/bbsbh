@@ -45,10 +45,11 @@ import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { normalizeArgv, seasonsFromArgs, unknownFlags } from './lib/notable/cli.mjs'
 import {
-  KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc,
+  KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, rowSeason, serializeDoc,
 } from './lib/notable/merge.mjs'
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
+import { flagRows } from './lib/notable/flags.mjs'
 
 const root = join(import.meta.dirname, '..')
 const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json' }
@@ -100,7 +101,16 @@ for (const season of seasons) {
   const counts = []
   for (const kind of KINDS) {
     const merged = mergeRows(kind, docs[kind].rows, [season], swept.rows[kind])
-    const { rows, applied } = applySeed(kind, merged, seed[kind], gameMaps)
+    const seeded = applySeed(kind, merged, seed[kind], gameMaps)
+    const { applied } = seeded
+    let { rows } = seeded
+    // The rarity flags (#2968): this season's cycles and triple plays, seed rows included.
+    if (kind === 'cycles' || kind === 'tripleplays') {
+      const mine = (r) => rowSeason(r) === season
+      const flagged = await flagRows(get, kind, rows.filter(mine))
+      let k = 0
+      rows = rows.map((r) => (mine(r) ? flagged[k++] : r))
+    }
     docs[kind] = { coverage: mergeCoverage(docs[kind].coverage, [season], swept.through), rows }
     await write(kind)
     counts.push(`${swept.rows[kind].length + applied} ${kind}`)

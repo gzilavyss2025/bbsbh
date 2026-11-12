@@ -15,8 +15,9 @@ export const ALLOWED_KEYS = {
     // every kind
     'gamePk', 'officialDate', 'gameType', 'gameNumber', 'away', 'home',
     // the kind's own: no-hitter (side, pitchers, shortened, lost), cycle (player, side),
-    // triple play (side)
-    'side', 'pitchers', 'shortened', 'lost', 'player',
+    // triple play (side); the rarity flags, cycle (natural) and triple play (unassisted),
+    // only where the play-by-play says (lib/notable/flags.mjs, #2968)
+    'side', 'pitchers', 'shortened', 'lost', 'player', 'natural', 'unassisted',
   ],
   club: ['id', 'abbr', 'name', 'runs'],
   person: ['id', 'name'],
