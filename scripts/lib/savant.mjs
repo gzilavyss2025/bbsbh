@@ -336,3 +336,12 @@ export function rankPercentiles(values, { lowerIsBetter = false } = {}) {
   }
   return out
 }
+
+// The pool one ranked board ranked its metric in: every id it gave a percentile, counted off the
+// board itself, so a `fillOnly` merge that skips a player Savant already ranked still counts him
+// (#3064). null when the board is missing or came back empty, so the card falls back rather than
+// printing "of 0".
+export function rankedPool(ranked, key) {
+  const n = Object.keys(ranked.find((b) => b.key === key)?.pct ?? {}).length
+  return n > 0 ? n : null
+}
