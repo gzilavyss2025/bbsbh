@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { HIT_COORD_FT_PER_UNIT, HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
-import { contactZones, fieldOrder, zoneLightness, zoneLabelOnLight } from '../src/screens/player/next/modules/contact/contactZones.js'
+import { contactZones, fieldOrder, zoneLightness, zoneLabelOnLight, zoneSummary } from '../src/screens/player/next/modules/contact/contactZones.js'
 
 // A raw Gameday coordinate `deg` off dead centre (negative = left field), `ft` feet from the plate.
 const at = (deg, ft) => {
@@ -104,4 +104,15 @@ test('every zone label clears 4.5:1 on its fill, for every hue and share', async
       assert.ok(r >= 4.5, `${name} at ${(v * 100).toFixed(1)}%: ${r.toFixed(2)}`)
     }
   }
+})
+
+test('zoneSummary reads the nine shares for a screen reader, deep to infield, in field order', () => {
+  const z = contactZones([ball(-30, 100, 5), ball(0, 300, 35)])
+  const s = zoneSummary(z, 'R', null)
+  assert.match(s, /^All balls in play, 2 placed: /)
+  assert.ok(s.indexOf('deep outfield pull') < s.indexOf('infield pull'))
+  assert.match(s, /deep outfield center 50%/)
+  assert.match(s, /infield pull 50%/)
+  assert.match(zoneSummary(contactZones([ball(0, 300, 20)], 'line'), 'L', 'line'), /^Line drives, 1 placed: deep outfield oppo 0%/)
+  assert.equal(zoneSummary(contactZones([], 'fly'), 'R', 'fly'), 'Fly balls: none placed.')
 })

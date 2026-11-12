@@ -25,7 +25,7 @@ const fill = (type, share) => `oklch(from var(${HUE[type] ?? '--zone-all'}) ${zo
 export function ZoneField({ zones, side, type }) {
   const R = RADII.deep[1]
   return (
-    <g className="fcontact__zones">
+    <g className="fcontact__zones" aria-hidden="true">
       {zones.cells.map((c) => {
         const [a0, a1] = angles(c.dir, side)
         const [r0, r1] = RADII[c.depth]

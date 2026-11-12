@@ -18,7 +18,7 @@ import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFligh
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { ZoneField, ZoneTable } from './ZoneField.jsx'
-import { ZONE_TYPES, contactZones } from './contactZones.js'
+import { ZONE_TYPES, contactZones, zoneSummary } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -82,13 +82,13 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const mix = useMemo(() => card && mixRows(card.balls), [card])
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
   const marks = useMemo(() => byDate(shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p)), [shown])
-  // Zones read the view's balls with their own type filter, not the menu's (which narrows the dots).
-  const zones = useMemo(
-    () => (mode === 'zones' && card ? contactZones(pickBalls(card.balls, view, null), zoneType) : null),
-    [mode, card, view, zoneType],
-  )
+  // Zones read every ball in play with their own type filter: HR / Hits / All and the menu's type
+  // narrow the dots only (a nine-way split of a dozen home runs says nothing). Each mode shows only
+  // its own controls, so the bar never holds three rows at once (Gary, 2026-11-12).
+  const zones = useMemo(() => (mode === 'zones' && card ? contactZones(card.balls, zoneType) : null), [mode, card, zoneType])
   // Pull's side of the field: the side most of these balls came from (a switch hitter's majority).
-  const side = shown.filter((b) => b.side === 'L').length * 2 > shown.length ? 'L' : 'R'
+  const all = card?.balls ?? []
+  const side = all.filter((b) => b.side === 'L').length * 2 > all.length ? 'L' : 'R'
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null
@@ -146,12 +146,14 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
         <div className="fcontact__bar">
           <Segmented label="Draw as" value={mode} onChange={(m) => pick(setMode, m)} options={[{ value: 'dots', label: 'Dots' }, { value: 'zones', label: 'Zones' }]} />
-          <Segmented
-            label="Which balls"
-            value={view}
-            onChange={(k) => pick(setView, k)}
-            options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
-          />
+          {mode === 'dots' && (
+            <Segmented
+              label="Which balls"
+              value={view}
+              onChange={(k) => pick(setView, k)}
+              options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
+            />
+          )}
           {mode === 'zones' && (
             <Segmented
               label="Ball type"
@@ -170,7 +172,9 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         </div>
         <div className="fcontact__grid">
           <div className="fcontact__plot">
-            <svg className="fcontact__field" viewBox={zones ? ZONES_VIEWBOX : VIEWBOX} role="group" aria-label={`Spray field of ${shown.length} balls in play`}>
+            <svg className="fcontact__field" viewBox={zones ? ZONES_VIEWBOX : VIEWBOX} role={zones ? 'img' : 'group'}
+              aria-label={zones ? zoneSummary(zones, side, zoneType) : `Spray field of ${shown.length} balls in play`}
+            >
               <g className="spray__art" aria-hidden="true">
                 {!zones && <path className="spray__fence" d={FENCE} />}
                 <path className="spray__foul" d={LINES} />

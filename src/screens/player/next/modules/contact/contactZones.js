@@ -12,8 +12,9 @@ import { typeOf } from './contactView.js'
 export const ZONE_DIRS = [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Oppo']]
 // Outer edge of each band in feet (Inference: about the infield's edge, then shallow vs. deep).
 export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF', 250], ['deep', 'Deep OF', Infinity]]
-// Short labels so the four fit one row at 390 px beside the other controls.
-export const ZONE_TYPES = [[null, 'All'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
+// Short labels so the four fit one row at 390 px. "Any type", not "All": the row above already
+// has an All (every ball in play), and two Alls a row apart read as one choice.
+export const ZONE_TYPES = [[null, 'Any type'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
 
 const zoneType = (la) => (typeOf(la) === 'pop' ? 'fly' : typeOf(la))
 const feet = (b) =>
@@ -52,3 +53,19 @@ export function zoneLightness(share) {
   return t < 0.5 ? 0.95 - 0.29 * (t / 0.5) : 0.54 - 0.29 * ((t - 0.5) / 0.5)
 }
 export const zoneLabelOnLight = (share) => zoneLightness(share) > 0.6
+
+// The Zones view for a screen reader: the drawn percentages are bare text, so the field's label
+// carries every zone by name, deep to infield and left field to right field, like the table.
+const TYPE_NAMES = { ground: 'Ground balls', line: 'Line drives', fly: 'Fly balls' }
+const DEPTH_NAMES = { infield: 'infield', shallow: 'shallow outfield', deep: 'deep outfield' }
+export function zoneSummary(zones, side, type) {
+  const head = TYPE_NAMES[type] ?? 'All balls in play'
+  if (!zones.n) return `${head}: none placed.`
+  const parts = [...ZONE_DEPTHS].reverse().flatMap(([depth]) =>
+    fieldOrder(side).map((dir) => {
+      const c = zones.cells.find((x) => x.dir === dir && x.depth === depth)
+      return `${DEPTH_NAMES[depth]} ${dir} ${Math.round(c.share * 100)}%`
+    }),
+  )
+  return `${head}, ${zones.n} placed: ${parts.join(', ')}.`
+}
