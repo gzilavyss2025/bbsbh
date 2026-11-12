@@ -13,3 +13,16 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
 Edit the right-hand column to match whatever vocabulary you actually use.
+
+## Kind labels
+
+Every new issue also gets one **kind** label, so Gary can pick work by type. Apply it
+with the triage label, at filing time.
+
+| Label    | Use when the work is mostly…                                                  |
+| -------- | ----------------------------------------------------------------------------- |
+| `data`   | feeds, `src/api/`, stores, generators, crons, stats logic, field paths         |
+| `design` | layout, CSS, tokens, copy, visual or interaction changes to a screen           |
+
+If an issue has both halves, pick the larger half. Tooling, CI, and docs work gets
+neither label.
