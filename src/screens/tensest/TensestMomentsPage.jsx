@@ -76,7 +76,11 @@ function TensestTable({ rows, teamId, label, cutoffs }) {
               {r.inn}
             </td>
             <td className="batter">
-              <PlayerLink id={r.bid}>{r.bn}</PlayerLink> vs <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
+              <PlayerLink id={r.bid}>{r.bn}</PlayerLink>{' '}
+              {/* "vs" rides with the pitcher, so a wrap never leaves it dangling. */}
+              <span className="tensest__vs">
+                vs <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
+              </span>
             </td>
             <td className="what">{r.what}</td>
           </tr>

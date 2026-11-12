@@ -20,6 +20,11 @@
 .tensest .rank {
   font-weight: var(--w-semibold);
 }
+.tensest__gamelink,
+.tensest__post,
+.tensest__vs {
+  white-space: nowrap;
+}
 .tensest__post {
   color: var(--text-muted);
 }
@@ -91,6 +96,7 @@
       'batter batter batter batter'
       'what what what what';
     column-gap: var(--space-2);
+    row-gap: var(--space-2);
     padding-block: var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border-rule);
   }
@@ -107,4 +113,13 @@
   .tensest .game { grid-area: game; }
   .tensest .batter { grid-area: batter; }
   .tensest .what { grid-area: what; color: var(--text-muted); }
+  /* A bigger thumb target on the game and the names: padding grows the tap area, the
+     negative margin keeps the card's lines where they were. With the row gap above,
+     two stacked targets meet but never overlap. */
+  .tensest__gamelink,
+  .tensest .plink {
+    display: inline-block;
+    padding-block: var(--space-2);
+    margin-block: calc(var(--space-2) * -1);
+  }
 }
