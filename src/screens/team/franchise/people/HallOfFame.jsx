@@ -27,7 +27,7 @@ export function HallOfFame({ team, hof, names }) {
     <Card frame="stamped" label="Hall of Famers" labelAs="h3" count={String(inducted.length + also.length)} className="frpeople">
       {inducted.length > 0 && (
         <>
-          <h4 className="frpeople__group t-label t-label--bold">{hofHeading(team.name, names)}</h4>
+          <h4 className="frpeople__group t-label t-label--bold">{hofHeading(team.name, inducted, names)}</h4>
           <ul className="frpeople__list">{inducted.map((p) => row(p, null))}</ul>
         </>
       )}

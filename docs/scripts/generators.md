@@ -2037,6 +2037,9 @@ Re-run only to fold in a new season.
   `team` or no playing stats (an executive, a Negro Leagues pioneer) never stops the run. Keyed by the
   current team id. 55 KB in all. The files carry no clock, so a re-run on the same feeds writes the same
   bytes. The pure half is `scripts/lib/franchise/hof.mjs`. Reader: `src/api/history/franchiseHof.js`.
+  A second, hand-kept input, `scripts/franchise/hof-plaques.json` (#2966: id -> plaque club + source URL,
+  from baseballhall.org "Primary Team"), becomes `plaqueClub` on each `inductedAs` entry. The run prints
+  the inductees with no entry: add each new one by hand after an induction.
 - `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
   players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
   register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet

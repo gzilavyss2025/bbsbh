@@ -99,3 +99,12 @@ test('no player is in a club\'s inductedAs and its alsoPlayed; seasons are sorte
 test('hallOfFamersFor is empty, not an error, for a club with no file', async () => {
   assert.deepEqual(await hallOfFamersFor(999999), { inductedAs: [], alsoPlayed: [] })
 })
+
+test('buildHof: a hand-kept plaque club rides on the "inducted as" entry; none leaves the entry alone (#2966)', () => {
+  const recipients = [{ id: 1, name: 'A', year: 2003, teamId: 120 }, { id: 2, name: 'B', year: 2004, teamId: 120 }]
+  const hof = buildHof({ recipients, careers: new Map(), clubIds: [120], plaques: { 1: { club: 'Montreal Expos' } } })
+  assert.deepEqual(hof.get(120).inductedAs, [
+    { id: 1, name: 'A', year: 2003, plaqueClub: 'Montreal Expos' },
+    { id: 2, name: 'B', year: 2004 },
+  ])
+})
