@@ -7,7 +7,7 @@ import { monthDayName } from '../../../../../lib/dates.js'
 // (api/spray.js) with the contact store joined on, so each carries launch angle, distance and
 // the stored xBA. An open surface (ADR-0034): decided games only, no gate.
 
-export const VIEWS = [['hr', 'Home runs'], ['hit', 'Hits'], ['all', 'All balls']]
+export const VIEWS = [['hr', 'HR'], ['hit', 'Hits'], ['all', 'All']]
 export const COLORS = [['result', 'Result'], ['type', 'Ball type']]
 const RESULT_NAMES = { out: 'Out', single: 'Single', double: 'Double', triple: 'Triple', hr: 'Home run' }
 const TYPES = [['ground', 'Ground ball'], ['line', 'Line drive'], ['fly', 'Fly ball'], ['pop', 'Pop-up']]

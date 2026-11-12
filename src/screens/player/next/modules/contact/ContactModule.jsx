@@ -5,6 +5,7 @@ import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { fetchSprayFor, sprayView } from '../../../../../api/spray.js'
 import { rate3 } from '../../../../../api/person/shared.js'
 import { BattedBallMix } from '../../../../../components/charts/BattedBallMix.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
@@ -16,6 +17,8 @@ import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFlight.jsx'
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
+import { ZoneField, ZoneTable } from './ZoneField.jsx'
+import { contactZones } from './contactZones.js'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
 import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
@@ -54,6 +57,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const { data, error } = useAsync(() => load(bio.id, season), [bio.id, season])
   const [pickedView, setView] = useState(null) // null opens on the first view with balls
   const [color, setColor] = useState('result')
+  const [mode, setMode] = useState('dots') // Dots / Zones (#2975); starts on Dots, not kept
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
   const [shot, setShot] = useState(0) // counts taps, so a second tap on one ball flies it again
@@ -75,6 +79,9 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const mix = useMemo(() => card && mixRows(card.balls), [card])
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
   const marks = useMemo(() => byDate(shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p)), [shown])
+  const zones = useMemo(() => (mode === 'zones' ? contactZones(shown) : null), [mode, shown])
+  // Pull's side of the field: the side most of these balls came from (a switch hitter's majority).
+  const side = shown.filter((b) => b.side === 'L').length * 2 > shown.length ? 'L' : 'R'
   const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null
@@ -131,18 +138,20 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
       <FlightClock shot={shot} model={model} land={curMark?.p} dotR={cur ? dotR(cur) : 0} hr={cur?.result === 'hr'}>
         <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
         <div className="fcontact__bar">
-          <div className="fcontact__chips" role="group" aria-label="Which balls">
-            {VIEWS.map(([k, name]) => (
-              <button key={k} type="button" className="pnext-pick" aria-pressed={k === view} disabled={!card.counts[k]} onClick={() => pick(setView, k)}>
-                {name} {card.counts[k]}
-              </button>
-            ))}
-          </div>
-          <div className="fcontact__chips" role="group" aria-label="Color by">
-            {COLORS.map(([k, name]) => (
-              <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
-            ))}
-          </div>
+          <Segmented label="Draw as" value={mode} onChange={(m) => pick(setMode, m)} options={[{ value: 'dots', label: 'Dots' }, { value: 'zones', label: 'Zones' }]} />
+          <Segmented
+            label="Which balls"
+            value={view}
+            onChange={(k) => pick(setView, k)}
+            options={VIEWS.map(([k, name]) => ({ value: k, label: name, count: card.counts[k], disabled: !card.counts[k] }))}
+          />
+          {mode === 'dots' && (
+            <div className="fcontact__chips" role="group" aria-label="Color by">
+              {COLORS.map(([k, name]) => (
+                <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="fcontact__grid">
           <div className="fcontact__plot">
@@ -152,7 +161,8 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                 <path className="spray__foul" d={LINES} />
                 <path className="spray__diamond" d={DIAMOND} />
               </g>
-              <g className={dotsCls}>
+              {zones && <ZoneField zones={zones} side={side} />}
+              {!zones && <g className={dotsCls}>
                 {marks.map(({ b, p }, i) => (
                   <FlightDot
                     key={i}
@@ -169,14 +179,21 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(i, false) } }}
                   />
                 ))}
-              </g>
-              <FlightLayer />
+              </g>}
+              {!zones && <FlightLayer />}
             </svg>
           </div>
-          <div className="fcontact__side">
-          <ContactDetail cur={cur} detail={detail} />
-          <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
-          </div>
+          {zones ? (
+            <div className="fcontact__side fcontact__side--zones">
+              <ZoneTable zones={zones} />
+              {zones.leftOut > 0 && <p className="hint">{zones.leftOut} {zones.leftOut === 1 ? 'ball' : 'balls'} left out: no launch angle.</p>}
+            </div>
+          ) : (
+            <div className="fcontact__side">
+              <ContactDetail cur={cur} detail={detail} />
+              <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
+            </div>
+          )}
         </div>
       </FlightClock>
       {mix && (

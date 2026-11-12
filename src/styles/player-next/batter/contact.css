@@ -417,3 +417,54 @@
 .fcontact__detail > .fcontact__stats { grid-column: 1 / -1; margin-top: var(--space-1h); }
 .fcontact__stats dd,
 .fcontact__stats dt { white-space: nowrap; }
+
+/* ==== ZONES (#2975, design A) ====
+   ZoneField.jsx: nine cells on the field, inked by share (the opacity rides inline); ZoneTable
+   repeats them as a table in the side column on a wide card. */
+.fcontact__zone {
+  fill: var(--text-heading);
+  stroke: var(--bg-canvas);
+  stroke-width: 3;
+}
+.fcontact__zlabel {
+  font-family: var(--font-mono);
+  font-size: 1.4em;
+  font-weight: var(--w-semibold);
+  fill: var(--bg-canvas);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-variant-numeric: tabular-nums;
+}
+.fcontact__zlabel--dark { fill: var(--text-heading); }
+.fcontact__zdir {
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  fill: var(--text-caption);
+  text-anchor: middle;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.fcontact__ztable {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.fcontact__ztable th,
+.fcontact__ztable td {
+  padding: var(--space-2) var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  text-align: right;
+}
+.fcontact__ztable th:first-child { text-align: left; }
+.fcontact__ztable thead th {
+  font-family: var(--font-display);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.fcontact__ztable td { font-family: var(--font-mono); }
+.fcontact__ztable .fcontact__swatch { display: inline-block; width: 0.75em; height: 0.75em; margin-right: var(--space-2); vertical-align: -1px; }
+/* breakpoint-exempt: the stacked side of this card's own 720px two-column step */
+@media (max-width: 719.98px) {
+  .fcontact__ztable { display: none; }
+}
