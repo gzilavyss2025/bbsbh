@@ -132,6 +132,14 @@ test('the hitter pool is the file\'s batPool, whatever boards the bat map holds'
   assert.equal(percentileView(d, 668930, 'hitting', 2026).pool, '612 hitters')
 })
 
+// A file from before batPool (served from the offline cache) still leaves board-only players out.
+test('a file without batPool counts only the percentile board\'s rows', () => {
+  const { batPool, ...old } = data
+  const d = { ...old, bat: { ...data.bat, 900: { pop: 80, framing: 60, bsr: 40 }, 901: { bsr: 10 } } }
+  assert.equal(batPool, 612)
+  assert.equal(percentileView(d, 668930, 'hitting', 2026).pool, '612 hitters')
+})
+
 // #3023: a catcher's arm comes off the pop-time board, ranked among catchers only.
 test('a catcher arm row names the catcher pool, an outfielder arm the hitter pool', () => {
   const d = {

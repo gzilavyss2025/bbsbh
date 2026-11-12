@@ -40,9 +40,10 @@ export function percentileView(data, id, role, season) {
       : count(ranks.filter((r) => r?.[key] != null).length, noun)
   // The headline pool is Savant's percentile board, sized by the generator (batPool, #3065). A
   // player only on its ranked boards keeps his Glove/Legs card but is not counted (#3023). A file
-  // from before batPool falls back to every id in bat.
-  const onBoard = data.batPool ?? Object.keys(data.bat ?? {}).length
-  const pool = role === 'pitching' ? 'all pitchers' : `${onBoard} hitters`
+  // from before batPool (an offline cache) counts the rows the percentile board wrote: each carries
+  // every board key, null or not, and a board-only row has none of them.
+  const onBoard = data.batPool ?? ranks.filter((r) => r && 'xwoba' in r).length
+  const pool = role === 'pitching' ? 'all pitchers' : count(onBoard, noun)
   const rows = bare.map((r) => {
     const value = r.value ?? DASH
     const baseline = withMedian.find((m) => m.key === r.key)?.baseline ?? DASH
