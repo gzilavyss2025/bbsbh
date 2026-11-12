@@ -316,8 +316,11 @@ export function StandingsPage({ seasonYear }) {
         {/* Every date control on this page is hidden in the winter — the
             season's record is the record, and each of these would ask the
             endpoint for a day nobody played and come back with an empty
-            table (see the `final` reading above). */}
-        {!final && (
+            table (see the `final` reading above). Nothing below the as-of
+            line draws until the season row answers (`ready`): until then
+            `final` is a guess, and a row drawn on that guess and then
+            taken away moved everything under it (#2984). */}
+        {ready && !final && (
           <Cluster
             gap="tight"
             className="standings-jumps standings-jumps--scroll"
@@ -354,7 +357,7 @@ export function StandingsPage({ seasonYear }) {
           </Cluster>
         )}
 
-        {hasWildCard && (
+        {ready && hasWildCard && (
         <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings board">
             <button
               type="button"
@@ -375,7 +378,7 @@ export function StandingsPage({ seasonYear }) {
           </Cluster>
         )}
 
-        {!isWide && (
+        {ready && !isWide && (
           <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings column detail">
             <button
               type="button"
@@ -389,13 +392,13 @@ export function StandingsPage({ seasonYear }) {
         )}
       </Stack>
 
-      <AsyncStatus
+      {ready && <AsyncStatus
         loading={loading}
         error={error}
         hasData={shown.length > 0}
         errorMessage="Couldn’t load standings. Try again."
         emptyMessage="No standings available for this date."
-      />
+      />}
 
       {/* First load: hold the page's height so the footer doesn't jump when the tables land (#2987). */}
       <div className={`standings-body${refreshing ? ' is-refreshing' : ''}${loading && !shown.length ? ' is-loading' : ''}`}>
