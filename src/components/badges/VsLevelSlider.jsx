@@ -1,4 +1,4 @@
-import { LEVEL_STANDING_BANDS } from '../../api/prospectTrend.js'
+import { LEVEL_STANDING_BANDS } from '../../api/prospects/trend.js'
 
 // A discrete, labeled filter over the same five standing bands used by the
 // board and Prospect Card — not a level-of-play filter

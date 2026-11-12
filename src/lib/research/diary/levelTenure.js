@@ -79,7 +79,7 @@ export const levelTenureEntry = {
   technical: [
     'Cohort: 881 players, MLB debuts 2019–2023, filtered on the existing 130 AB / 50 IP rookie threshold. Levels are sportIds 11–14; sportId 16 excluded.',
     'Per-level accumulation reconstructed from yearByYear hitting/pitching splits, sorted chronologically, same-season ties broken by ascending level rank. 240 of 881 players have at least one ambiguous season (63% involve Triple-A); the wire confirms the ascending assumption in 71% of resolvable cases; dropping all 240 moves every level median by single digits.',
-    'Shipped as scripts/gen-level-tenure-benchmark.mjs → public/data/level-tenure-benchmark.json → src/api/levelTenure.js, surfaced on the prospect card.',
+    'Shipped as scripts/gen-level-tenure-benchmark.mjs → public/data/level-tenure-benchmark.json → src/api/prospects/levelTenure.js, surfaced on the prospect card.',
     'Table values are medians with the interquartile range (p25–p75) in parentheses. Per-level cell counts run 318–437.',
     'Windows considered and rejected: 2015–2023 gives n≈1,600 but straddles the 2021 affiliate reorganization (forty clubs eliminated); 2021–2023 clears the COVID-affected seasons but falls to n≈500, at which point the per-level medians become unstable.',
     'Folklore tests: promotion rate in the 14 days after the All-Star break is indistinguishable from the 14 days before. Calendar-year heuristic: only 7–15% of level stays, depending on level, fall near a 365-day span.',

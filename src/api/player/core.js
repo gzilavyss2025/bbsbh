@@ -11,7 +11,7 @@
 
 import { fetchAllStarRosterIds, isProbableStarterToday } from '../person-fetch.js'
 import { lastPlayedSeason, pitcherRole } from '../person.js'
-import { fetchTopProspects, prospectRankById, orgProspectRankById } from '../prospects.js'
+import { fetchTopProspects, prospectRankById, orgProspectRankById } from '../prospects/top100.js'
 import { currentSeasonFor, playerContext, yearByYearFor } from './context.js'
 
 export async function loadPlayerCore(id, asOf) {

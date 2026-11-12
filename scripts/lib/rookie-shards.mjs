@@ -17,11 +17,11 @@
 // personIds at once, which would touch nearly every shard. The DATES are only
 // ever wanted one player at a time (the player page's timeline), so those keep
 // the full record and ARE id-sharded, on the same personId % 100 buckets the
-// reader computes (rookieShardKey, src/api/rookies.js — imported, never
+// reader computes (rookieShardKey, src/api/prospects/rookies.js — imported, never
 // re-implemented here, since the two must agree exactly).
 import { join } from 'node:path'
 import { writeJsonAtomic } from './io.js'
-import { rookieShardKey } from '../../src/api/rookies.js'
+import { rookieShardKey } from '../../src/api/prospects/rookies.js'
 
 export async function writeRookieShards(dataDir, master) {
   const outDir = join(dataDir, 'rookies')

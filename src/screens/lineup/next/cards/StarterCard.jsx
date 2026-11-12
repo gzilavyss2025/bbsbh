@@ -1,5 +1,5 @@
-import { prospectBadge } from '../../../../api/prospects.js'
-import { showRookiePill, hasDebuted } from '../../../../api/rookies.js'
+import { prospectBadge } from '../../../../api/prospects/top100.js'
+import { showRookiePill, hasDebuted } from '../../../../api/prospects/rookies.js'
 import { milestoneTextFor } from '../../../../api/callout-notes/surfaces/bundle.js'
 import { splitDisplayName } from '../../../../api/person.js'
 import { vsTeamDoorLabel } from '../../../../api/vsTeamSplits.js'

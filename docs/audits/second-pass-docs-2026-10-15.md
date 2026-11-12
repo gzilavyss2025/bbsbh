@@ -141,7 +141,7 @@ tries `src/` and `scripts/` prefixes for short forms. Result: 36 truly missing.
    `src/api/careerTimeline.js:79, 114`. **measured**.
 6. **`docs/duplicate-derivations.md:60`** (row A4) cites
    `src/api/player/analytics.js`. It does not exist. The comment in
-   `src/api/prospectTrend.js:281` has the same dead path. The current callers
+   `src/api/prospects/trend.js:281` has the same dead path. The current callers
    are `overview.js` and the other `src/api/player/` files. **measured**.
 7. **`docs/lineup-redesign.md:5, 48`** says `TeamInfo.jsx` "is deleted". That
    is correct history. **Keep.** Likewise `docs/api-audit.md:131, 357`
@@ -300,7 +300,7 @@ Overlap by topic is real (**inferred**):
 | 2 | Mark `enhancement-proposals.md` historical; 16 dead paths | `docs/enhancement-proposals.md:1` | measured |
 | 3 | Fix 7 stale `loadPlayer.js` and `TeamInfo.jsx` cites in the data catalog | `docs/api/static-data.md:78,140,165,213,229,383,494` | measured |
 | 4 | Replace `src/api/player/stats.js` | `docs/player-redesign-data.md:78,90,103` | measured |
-| 5 | Replace `src/api/player/analytics.js` in the doc and in the code comment | `docs/duplicate-derivations.md:60`, `src/api/prospectTrend.js:281` | measured |
+| 5 | Replace `src/api/player/analytics.js` in the doc and in the code comment | `docs/duplicate-derivations.md:60`, `src/api/prospects/trend.js:281` | measured |
 | 6 | Fix the 11-or-12 count and the U1, U11, U12 rows | `docs/duplicate-derivations.md:24-30, 83-98` | measured |
 | 7 | Move the status banner to the top in 0030, 0035, 0046; link 0027 | `docs/adr/0030:77`, `0035:3`, `0046:81`, `0027:3` | measured |
 | 8 | Fix `og-image.jpg`, `blockage-exit-reason-join.md`, `loadPlayer.js` in `milb-historical-logos.md` | `generators.md:2022`, `team-success-exit-reason-mix.md:94`, `milb-historical-logos.md:86,90` | measured |

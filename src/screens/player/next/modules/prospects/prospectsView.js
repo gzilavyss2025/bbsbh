@@ -1,5 +1,5 @@
 import { prospectRankView } from '../../../../../api/player/prospectRankHistory.js'
-import { prospectBadge } from '../../../../../api/prospects.js'
+import { prospectBadge } from '../../../../../api/prospects/top100.js'
 import { teamClubName } from '../../../../../lib/teams.js'
 
 // The Prospect rankings board's rows (#1927). Pure. The list history, the debut row's place and the

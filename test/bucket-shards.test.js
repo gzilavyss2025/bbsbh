@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { shardKey100 } from '../src/lib/shardKey.js'
-import { rookieShardKey } from '../src/api/rookies.js'
+import { rookieShardKey } from '../src/api/prospects/rookies.js'
 import { warShardKey } from '../src/api/war.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 

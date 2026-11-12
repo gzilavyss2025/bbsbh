@@ -12,8 +12,8 @@ import { splitPitchingStaff } from '../../../api/pitcher/split.js'
 import { rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../../../api/person.js'
 import { splitDisplayName } from '../../../api/person/identity.js'
 import { lastName } from '../../../api/select.js'
-import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
-import { fetchRookiesData, showRookiePill } from '../../../api/rookies.js'
+import { fetchTopProspects, prospectBadge } from '../../../api/prospects/top100.js'
+import { fetchRookiesData, showRookiePill } from '../../../api/prospects/rookies.js'
 import { SPORT_IDS } from '../../../lib/teams.js'
 import {
   parentOrgIdOf,
@@ -56,7 +56,7 @@ export async function loadRoster(id, asOf, src = DIRECT) {
   // The org a prospect badge should match against: this club's own id when
   // it's already the MLB parent, else its live parent org — never the
   // affiliate's own id, since orgProspects rows are always keyed by parent
-  // (see prospectBadge, api/prospects.js). parentOrgIdOf, not a bare
+  // (see prospectBadge, api/prospects/top100.js). parentOrgIdOf, not a bare
   // `team.parentOrgId`, so a winter club falls back to its own id rather than
   // matching prospects against the Office of the Commissioner (#1143).
   const currentOrgId = parentOrgIdOf(team) ?? id

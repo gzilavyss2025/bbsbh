@@ -61,7 +61,7 @@ generator (`milb-history`, `mono-ink`, the highlight blocklist) you **edit the
 seed, never the output**. And **a static file is sized against the ONE surface
 that opens it, not against the dataset**: the whole-league file is the easy
 generator output, but a game page paying a 3 MB parse to print one line is the
-bug that shape hides. `rookies.js` and `vsTeamSplits.js` are the two worked
+bug that shape hides. `prospects/rookies.js` and `vsTeamSplits.js` are the two worked
 examples — sharded by the key their callers actually hold (the club) or split
 by role when no id key fits (the pills need a compact whole-league answer; only
 the player page wants dates). `docs/api/static-data.md` has both.

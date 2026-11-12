@@ -91,7 +91,7 @@ async function resolveScopeTeams(scope, orgId) {
 // affiliates into one row, so a prospect promoted mid-season ranks on his
 // A+ + AA total. (The league-wide all-minors 'minors' board is the same idea
 // but far heavier, so it's precomputed to a static file and read separately —
-// see api/minorsLeaders.js — not produced here.)
+// see api/prospects/minorsLeaders.js — not produced here.)
 export async function loadLeaderPool(scope, orgId, season) {
   const teams = await resolveScopeTeams(scope, orgId)
   if (teams.length === 0) return []
