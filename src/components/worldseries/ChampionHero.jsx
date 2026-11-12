@@ -21,7 +21,7 @@ export function ChampionHero({ bracket }) {
   const mode = seriesMode(ws)
   const season = bracket.season
   const { data: award, loading } = useAsync(() => fetchSeasonAward('WSMVP', season), [season])
-  const { data: log } = useSeriesLog(ws?.games ?? [])
+  const { data: log, loading: logLoading } = useSeriesLog(ws?.games ?? [])
   if (!mode) return null
   const mvp = award?.recipients?.[0] ?? null
   const pick = MVP_PHOTOS[season]
@@ -30,7 +30,7 @@ export function ChampionHero({ bracket }) {
   const photoClub = pick && ids.includes(pick.club) && (loading || ids.includes(mvp?.teamId)) ? pick.club : null
   return (
     <div className="ww-champhero">
-      <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? mvpPhotoUrl(pick.id) : null} photoSrcSet={photoClub ? mvpPhotoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
+      <DecidedHero mode={mode} mvp={mvp} mvpPending={loading} statsPending={logLoading} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} washBehind photo={photoClub ? mvpPhotoUrl(pick.id) : null} photoSrcSet={photoClub ? mvpPhotoSrcSet(pick.id) : undefined} photoTeamId={photoClub} stripe={stripeFor(photoClub ?? mvp?.teamId)} markHeight={64} scheduleTitle="An October to remember" />
     </div>
   )
 }

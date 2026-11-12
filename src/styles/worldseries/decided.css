@@ -113,3 +113,7 @@
 @media (hover: hover) and (pointer: fine) {
   .ww-cal__day--link:hover { background: var(--surface-stamped-tint); }
 }
+
+/* The MVP block's place while the award or the Series log loads (Hero.jsx). */
+.ww-hero__mvp--pending,
+.ww-hero__mvpstats--pending { visibility: hidden; }

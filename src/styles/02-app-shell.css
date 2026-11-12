@@ -26,3 +26,12 @@
   letter-spacing: var(--ls-num);
 }
 
+
+/* While the page is loading, the footer starts below the fold. Without this it drew
+   right under the loader, then the data pushed it off screen: a layout shift of about
+   0.5 on most report pages in the field (#2984). The space goes BELOW the loader (or
+   the block holding one), so the spinner stays put, and it goes away with the loader,
+   so a loaded page keeps no blank screen above its footer. */
+.screen > :has(+ .sitefooter):is(.loader, :has(.loader)) {
+  margin-bottom: 100dvh;
+}
