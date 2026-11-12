@@ -1,7 +1,7 @@
 // scripts/lib/records/manager-split.mjs: the change date a source W-L implies (#2761).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { findSplit, parseRecord, teamSeasonGames, pickManagers, seedSegments, findSplits, pickOrder, findReturn, segmentRecords } from '../scripts/lib/records/manager-split.mjs'
+import { findSplit, parseRecord, teamSeasonGames, pickManagers, seedSegments, findSplits, pickOrder, findReturn, segmentRecords, managerStintIndex } from '../scripts/lib/records/manager-split.mjs'
 
 const g = (date, won) => ({ date, won })
 const games = [g('2015-05-01', false), g('2015-05-02', true), g('2015-05-03', false), g('2015-05-04', true), g('2015-05-05', true)]
@@ -177,4 +177,20 @@ test('seedSegments: noRecord alone gives the one remaining feed manager the whol
 test('seedSegments: noRecord beside transitions leaves the transitions alone', () => {
   const e = { transitionDate: '2000-05-01', outgoingManagerId: 1, incomingManagerId: 2, noRecord: [3] }
   assert.deepEqual(seedSegments(e, [1, 2, 3]).map((s) => s.managerId), [1, 2])
+})
+
+// #2958: Dale Sveum was the 2008 Brewers' third base coach, then manager. Indexing every stint
+// let the coach row win, so the record landed there and the ledger read a manager with no W-L.
+test('a record attaches to the manager stint, not a coach stint of the same season', () => {
+  const byPersonId = new Map([[123011, [
+    { teamId: 158, season: 2008, job: 'Manager', jobId: 'MNGR' },
+    { teamId: 158, season: 2008, job: 'Third Base Coach', jobId: 'COA3' },
+  ]]])
+  const stint = managerStintIndex(byPersonId, new Set(['MNGR', 'NTRM'])).get('123011:158:2008')
+  assert.equal(stint.jobId, 'MNGR')
+})
+
+test('a coach with no manager stint that season is not indexed', () => {
+  const byPersonId = new Map([[1, [{ teamId: 158, season: 2008, jobId: 'COA3' }]]])
+  assert.equal(managerStintIndex(byPersonId, new Set(['MNGR'])).size, 0)
 })

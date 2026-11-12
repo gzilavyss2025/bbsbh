@@ -165,3 +165,17 @@ export function parseRecord(s) {
   const m = /^(\d+)-(\d+)$/.exec(s ?? '')
   return m ? { w: Number(m[1]), l: Number(m[2]) } : null
 }
+
+// (personId:teamId:season) -> that person's MANAGER-job stint, for attaching a record. Indexing
+// every stint let a later coach stint of the same season (a bench or hitting coach who then took
+// over) overwrite the manager one, so the record landed on the coach row and the franchise ledger
+// and manager page, which read manager jobs only, showed no W-L (#2958).
+export function managerStintIndex(byPersonId, managerJobIds) {
+  const index = new Map()
+  for (const [personId, stints] of byPersonId) {
+    for (const stint of stints) {
+      if (managerJobIds.has(stint.jobId)) index.set(`${personId}:${stint.teamId}:${stint.season}`, stint)
+    }
+  }
+  return index
+}

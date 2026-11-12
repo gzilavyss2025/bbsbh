@@ -49,8 +49,8 @@ export function Managers({ managers, best }) {
         <p className="hint frl__hint infopop-row">
           † a season with no split on file{' '}
           <InfoPopover label="About the dagger" className="infopop--paper">
-            A season he shared with another manager, or this season before the offseason ledger run, has
-            no W-L split on file, so his W-L leaves it out.
+            This season, before the offseason ledger run, has no W-L split on file for him, so his W-L
+            leaves it out.
           </InfoPopover>
         </p>
       )}
