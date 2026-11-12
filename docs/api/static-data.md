@@ -375,9 +375,11 @@ for each generator; the reader modules:
   (~650 KB) and fetched at runtime, like the `war-history/` shards.
 - `history/franchiseHof.js` — a club's Hall of Famers, from `public/data/franchise-hof/{teamId}.json`
   (hand-run `scripts/franchise/gen-franchise-hof.mjs`, #2597). `hallOfFamersFor(teamId)` returns
-  `{ inductedAs: [{ id, name, year }], alsoPlayed: [{ id, name, year, seasons }] }`: the club on the
+  `{ inductedAs: [{ id, name, year, plaqueClub? }], alsoPlayed: [{ id, name, year, seasons }] }`: the club on the
   plaque (`awards/MLBHOF/recipients`) and everyone else who played for it, with his seasons there
-  (`yearByYear`). `year` is the induction year. A player is in a club's `inductedAs` or its
+  (`yearByYear`). `year` is the induction year. `plaqueClub` is the club name on the plaque (#2966), merged from the
+  hand-kept `scripts/franchise/hof-plaques.json` (baseballhall.org "Primary Team", crawled once, a
+  source URL on each entry; 10 inductees unmatched have none). A player is in a club's `inductedAs` or its
   `alsoPlayed`, never both. Keyed by the current team id. MLB only; a MiLB id reads empty. No screen
   reads it yet.
 - `history/retiredNumbers.js` — a club's retired numbers, from `public/data/retired-numbers.json`, hand-curated

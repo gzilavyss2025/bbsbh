@@ -78,7 +78,7 @@ export function TeamFranchisePage({ id }) {
                 People and places
               </SectionHead>
               <div className="frpage__cards">
-                {people && <HallOfFame team={team} hof={people.hof} names={summary?.names} />}
+                {people && <HallOfFame team={team} hof={people.hof} />}
                 {people && <RetiredNumbers retired={people.retired} hof={people.hof} leaders={people.leaders} />}
                 <Managers managers={summary?.managers} best={summary?.winningestManager?.id ?? null} />
                 {people && <Parks history={people.history} live={people.venues} temporary={people.temporary} />}

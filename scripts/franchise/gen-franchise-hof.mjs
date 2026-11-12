@@ -10,6 +10,7 @@
 // HAND-RUN: `node scripts/franchise/gen-franchise-hof.mjs`. Re-run after each induction (late July).
 // Any failed call aborts the run (strict). The files carry no clock, so a re-run on the same feeds
 // writes the same bytes.
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ALL_MLB_TEAM_IDS } from '../../src/lib/teams.js'
 import { writeShards } from '../lib/io.js'
@@ -17,6 +18,7 @@ import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { buildHof, inducteesFrom } from '../lib/franchise/hof.mjs'
 
+const plaques = JSON.parse(readFileSync(join(import.meta.dirname, 'hof-plaques.json'), 'utf8')) // #2966: Hall of Fame site "Primary Team", one-time crawl; plaques never change
 const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'franchise-hof')
 
 const recipients = inducteesFrom((await getJson('/api/v1/awards/MLBHOF/recipients')).awards)
@@ -28,7 +30,7 @@ const people = await mapConcurrent(
 )
 const careers = new Map(recipients.map((r, i) => [r.id, people[i]]))
 
-const hof = buildHof({ recipients, careers, clubIds: ALL_MLB_TEAM_IDS })
+const hof = buildHof({ recipients, careers, clubIds: ALL_MLB_TEAM_IDS, plaques })
 await writeShards(outDir, ALL_MLB_TEAM_IDS.map((id) => [id, hof.get(id)]))
 
 const noClub = recipients.filter((r) => !ALL_MLB_TEAM_IDS.includes(r.teamId))

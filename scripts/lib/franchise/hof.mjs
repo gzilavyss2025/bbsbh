@@ -33,17 +33,19 @@ export function seasonsByTeam(person) {
   return out
 }
 
+// plaques: hand-kept {id: {club, source}} (franchise/hof-plaques.json, #2966): the club NAME on the plaque,
+// which the feed lacks (it gives only the current franchise). Stored as `plaqueClub`.
 // recipients: inducteesFrom's list. careers: Map(personId -> people response person). clubIds: the
 // clubs to write. -> Map(clubId -> { teamId, inductedAs: [{ id, name, year }],
 // alsoPlayed: [{ id, name, year, seasons }] }). `year` is the induction year. A player inducted as a
 // club is not repeated in that club's alsoPlayed (once, under "inducted as"). A recipient inducted
 // under a club outside `clubIds` (no club on the plaque, a Negro League or 1800s club) appears only
 // under the current clubs he played for.
-export function buildHof({ recipients, careers, clubIds }) {
+export function buildHof({ recipients, careers, clubIds, plaques = {} }) {
   const out = new Map(clubIds.map((teamId) => [teamId, { teamId, inductedAs: [], alsoPlayed: [] }]))
   for (const r of recipients) {
     const as = out.get(r.teamId)
-    if (as) as.inductedAs.push({ id: r.id, name: r.name, year: r.year })
+    if (as) as.inductedAs.push({ id: r.id, name: r.name, year: r.year, ...(plaques[r.id] && { plaqueClub: plaques[r.id].club }) })
     for (const [teamId, seasons] of seasonsByTeam(careers.get(r.id))) {
       const club = out.get(teamId)
       if (!club || teamId === r.teamId) continue

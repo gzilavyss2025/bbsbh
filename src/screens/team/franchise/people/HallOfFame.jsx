@@ -7,7 +7,7 @@ import { hofHeading } from './peopleView.js'
 // The club's Hall of Famers in two labelled groups (#2784, store #2597): the plaques that name the
 // club, then everyone else who played here, with his seasons here. A group with no one is left out;
 // a club with neither draws nothing.
-export function HallOfFame({ team, hof, names }) {
+export function HallOfFame({ team, hof }) {
   const link = useRouteLink()
   const inducted = hof?.inductedAs ?? []
   const also = hof?.alsoPlayed ?? []
@@ -27,7 +27,7 @@ export function HallOfFame({ team, hof, names }) {
     <Card frame="stamped" label="Hall of Famers" labelAs="h3" count={String(inducted.length + also.length)} className="frpeople">
       {inducted.length > 0 && (
         <>
-          <h4 className="frpeople__group t-label t-label--bold">{hofHeading(team.name, names)}</h4>
+          <h4 className="frpeople__group t-label t-label--bold">{hofHeading(team.name, inducted)}</h4>
           <ul className="frpeople__list">{inducted.map((p) => row(p, null))}</ul>
         </>
       )}
