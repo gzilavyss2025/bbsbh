@@ -48,6 +48,7 @@ export const MAX_AGE_HOURS = 20
 // an entry can never be a silent shrug.
 export const EXCEPT = {
   'all-star-rosters.json': 'hand-run once per All-Star break',
+  'eliminated.json': 'hand-run once a year after the regular season (gen-eliminated.mjs); finished seasons never change',
   'awards-history.json': 'nightly only from October to February, and only when an award row changed (gen-awards-history.mjs --nightly, #2510); a stamp would age all spring',
   'first-scorebook.json': 'hand-run retrospective of one scored game',
   'hof-pace.json': 'hand-run once a year after the late-July induction (gen-hof-pace.mjs, #1857)',
