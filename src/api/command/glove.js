@@ -1,9 +1,9 @@
-import { shardKey100 } from '../lib/shardKey.js'
-import { staticJsonBy } from './staticJson.js'
+import { shardKey100 } from '../../lib/shardKey.js'
+import { staticJsonBy } from '../staticJson.js'
 
 // GLOVE TARGET — which way a pitcher misses, not just how far.
 //
-// The Target Command strip (api/targetCommand.js) prints one number per pitch
+// The Target Command strip (api/command/target.js) prints one number per pitch
 // type: the median inches between the catcher's glove and where the ball
 // crossed. This is the cloud behind that number. Each dot is one pitch's MISS
 // VECTOR — actual minus target — so the glove sits at the origin for every dot
@@ -18,8 +18,8 @@ import { staticJsonBy } from './staticJson.js'
 // above it, which already plots where a pitcher's pitches go. The full argument,
 // and the sampling that follows from it, is in scripts/gen-command-zone.mjs.
 //
-// NO SCORE, no SealBox, same as targetCommand.js and
-// commandMap.js beside it: a season's worth of offsets in inches, over games
+// NO SCORE, no SealBox, same as command/target.js and
+// command/map.js beside it: a season's worth of offsets in inches, over games
 // already final, carrying no line and no per-game result. The dots are
 // deliberately unordered and undated — nothing here can be read back to a
 // particular game.

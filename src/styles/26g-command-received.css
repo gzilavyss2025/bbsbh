@@ -2,7 +2,7 @@
    COMMAND RECEIVED — components/playerstats/CommandReceivedCard.jsx
 
    The staff that threw to one catcher, ranked by how close they finished
-   to his target (src/api/commandReceived.js).
+   to his target (src/api/command/received.js).
 
    A RULED LIST, in the scorebook's own hand — the same grammar the
    percentile strip uses one card up: rank at the left, the name, a track,

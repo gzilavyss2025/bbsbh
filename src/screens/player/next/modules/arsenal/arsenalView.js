@@ -1,4 +1,4 @@
-import { commandPitchMarks } from '../../../../../api/commandMap.js'
+import { commandPitchMarks } from '../../../../../api/command/map.js'
 import { arsenalLevelOf, pitchArsenalFor, physOf } from '../../../../../api/pitcher/arsenal.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { flightPath, markFeet } from './flightView.js'

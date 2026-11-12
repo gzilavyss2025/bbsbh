@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { fetchCommandReceived, commandReceivedFor } from '../../../../../api/commandReceived.js'
+import { fetchCommandReceived, commandReceivedFor } from '../../../../../api/command/received.js'
 import { CommandReceivedCard } from '../../../../../components/playerstats/CommandReceivedCard.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 

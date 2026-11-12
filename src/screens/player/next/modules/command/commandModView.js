@@ -1,7 +1,7 @@
 // The Command card's pure view (#2014). One pitcher's pitch-command entry, the picked hand, pitch
 // and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells from the
 // catcher's side, the pitch marks and the readout out. No React, no fetch.
-import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank, commandTypes, commandView } from '../../../../../api/commandMap.js'
+import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank, commandTypes, commandView } from '../../../../../api/command/map.js'
 import { pitchLabel } from '../../../../../api/pitcher/arsenal.js'
 import { ordinal } from '../../../../../lib/format.js'
 import { GRID } from '../../../../../lib/zone/zoneGeometry.js'

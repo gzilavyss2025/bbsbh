@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import '../../../../../styles/player-next/pitcher/arsenal.css'
-import { fetchCommandFor } from '../../../../../api/commandMap.js'
+import { fetchCommandFor } from '../../../../../api/command/map.js'
 import { arsenalXwobaFor, fetchSavantMatchup } from '../../../../../api/matchup/savant.js'
 import { fetchPitchArsenalFor } from '../../../../../api/pitcher/arsenal.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'

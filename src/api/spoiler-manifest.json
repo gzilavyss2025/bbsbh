@@ -298,7 +298,7 @@
       "class": "spoiler-free",
       "why": "Static comeback-wins.json — a Final-games season aggregate, same footing as WAR. No SealBox."
     },
-    "commandMap.js": {
+    "command/map.js": {
       "class": "spoiler-free",
       "why": "The season command map's shard reader — a count of a pitcher's pitches per zone cell, and what those pitches earned, over games already final. A cell count is not a line and not a running score; same footing as the pitch arsenal it is swept beside, and as WAR. The player page is an open surface (ADR-0034), so no SealBox and no cutoff."
     },
@@ -1252,7 +1252,7 @@
     },
     "scout/hitterGrid.js": {
       "class": "spoiler-free",
-      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches, the xwOBA (est.) numerator), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
+      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches, the xwOBA (est.) numerator), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as command/map.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
     },
     "scout/pitchByPitch.js": {
       "class": "cutoff-gated",
@@ -1446,21 +1446,21 @@
       "class": "spoiler-free",
       "why": "Static workload.json — completed appearances only. All bucket math is relative to a caller-supplied asOfDate."
     },
-    "targetCommand.js": {
+    "command/target.js": {
       "class": "spoiler-free",
-      "why": "Static target-command.json — OpenCommand's season median distance between the catcher's target and where the pitch crossed, per pitch type, over games already final. A distance in inches carries no line, no running score and no per-game granularity; same footing as savantPercentiles.js and commandMap.js beside it on the player page, which is an open surface (ADR-0034)."
+      "why": "Static target-command.json — OpenCommand's season median distance between the catcher's target and where the pitch crossed, per pitch type, over games already final. A distance in inches carries no line, no running score and no per-game granularity; same footing as savantPercentiles.js and command/map.js beside it on the player page, which is an open surface (ADR-0034)."
     },
-    "gloveTarget.js": {
+    "command/glove.js": {
       "class": "spoiler-free",
-      "why": "Static glove-target/{NN}.json — one dot per pitch giving the OFFSET, in inches, between the catcher's target and where the pitch crossed, over a season of games already final. A miss vector carries no location, no line, no score and no date: the dots are unordered and undated, so nothing here reads back to a particular game. Same footing as targetCommand.js and commandMap.js on the player page, an open surface (ADR-0034)."
+      "why": "Static glove-target/{NN}.json — one dot per pitch giving the OFFSET, in inches, between the catcher's target and where the pitch crossed, over a season of games already final. A miss vector carries no location, no line, no score and no date: the dots are unordered and undated, so nothing here reads back to a particular game. Same footing as command/target.js and command/map.js on the player page, an open surface (ADR-0034)."
     },
     "catcherOfRecord.js": {
       "class": "caller-gated",
       "why": "Who was catching as a half begins — asks defense.js's own chain a narrower question and inherits its gate whole, passing revealedThrough straight through (ADR-0003/0010). Substitution TIMING is the risk, exactly as for defenseEntering. Its only consumer today is the nightly precompute (scripts/gen-command-received.mjs) over games already final, which reads the whole game the way BoxScore.jsx does from inside its own seal; a live surface must gate it as it would gate defenseEntering."
     },
-    "commandReceived.js": {
+    "command/received.js": {
       "class": "spoiler-free",
-      "why": "Static command-received.json — per catcher, a season median distance from his target for each pitcher who threw to him, over games already final. The substitution replay that BUILT it is caller-gated where it lives (catcherOfRecord.js); what survives into this reader is an aggregate with the timing washed out — no line, no score, no per-game granularity. Same footing as targetCommand.js on the player page, an open surface (ADR-0034)."
+      "why": "Static command-received.json — per catcher, a season median distance from his target for each pitcher who threw to him, over games already final. The substitution replay that BUILT it is caller-gated where it lives (catcherOfRecord.js); what survives into this reader is an aggregate with the timing washed out — no line, no score, no per-game granularity. Same footing as command/target.js on the player page, an open surface (ADR-0034)."
     },
     "worldSeries/history.js": {
       "class": "cutoff-gated",

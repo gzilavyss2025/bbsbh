@@ -14,10 +14,10 @@
 // personId % 100 like the mix. Counters are 25-value arrays over the 5x5
 // command grid (src/lib/zone/zoneGeometry.js), whose middle nine cells are the
 // strike zone's own thirds.
-import { shardKey100 } from '../lib/shardKey.js'
-import { seasonFolderOf, staticJsonBy } from './staticJson.js'
-import { GRID, inHeart, inZone } from '../lib/zone/zoneGeometry.js'
-import { combineCommandEntries } from '../lib/seasons/combine.js'
+import { shardKey100 } from '../../lib/shardKey.js'
+import { seasonFolderOf, staticJsonBy } from '../staticJson.js'
+import { GRID, inHeart, inZone } from '../../lib/zone/zoneGeometry.js'
+import { combineCommandEntries } from '../../lib/seasons/combine.js'
 
 export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${key}.json`, {
   fallback: null,

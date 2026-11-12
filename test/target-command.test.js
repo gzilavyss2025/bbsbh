@@ -1,6 +1,6 @@
 // Unit coverage for the OpenCommand reading layer — the pure helpers in
 // scripts/lib/opencommand.mjs that every one of the three generators leans on,
-// and src/api/targetCommand.js's row builder, which is what a reader actually
+// and src/api/command/target.js's row builder, which is what a reader actually
 // sees.
 //
 // WHY THESE PIECES. The dataset itself is an outside file this repo does not
@@ -17,7 +17,7 @@ import {
   median,
   percentileLowerIsBetter,
 } from '../scripts/lib/opencommand.mjs'
-import { targetCommandFor, targetCommandRows } from '../src/api/targetCommand.js'
+import { targetCommandFor, targetCommandRows } from '../src/api/command/target.js'
 import { pitchLabel } from '../src/api/pitcher/arsenal.js'
 
 // ---------------------------------------------------------------------------

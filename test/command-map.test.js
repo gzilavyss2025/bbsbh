@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync, readdirSync } from 'node:fs'
 import { isDeepStrictEqual } from 'node:util'
-import { COMMAND_LEAGUE_MIN, commandLeague, commandRank, commandView, fetchCommandLeague } from '../src/api/commandMap.js'
+import { COMMAND_LEAGUE_MIN, commandLeague, commandRank, commandView, fetchCommandLeague } from '../src/api/command/map.js'
 
 // One pitcher: `inZone` of `n` pitches in the heart cell (12), the rest off the plate (0).
 const arm = (n, inZone) => {

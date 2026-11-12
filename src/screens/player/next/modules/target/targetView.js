@@ -1,7 +1,7 @@
 // The Target command module's pure view (#2015). The ledger rows and the miss cloud as plain data.
 // No React, no fetch. Both files hold one season of completed games, so nothing here is a score.
-import { REFERENCE_RINGS, gloveTargetBias, gloveTargetView } from '../../../../../api/gloveTarget.js'
-import { attributionFor, targetCommandRows } from '../../../../../api/targetCommand.js'
+import { REFERENCE_RINGS, gloveTargetBias, gloveTargetView } from '../../../../../api/command/glove.js'
+import { attributionFor, targetCommandRows } from '../../../../../api/command/target.js'
 import { ordinal } from '../../../../../lib/format.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 

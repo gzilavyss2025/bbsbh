@@ -1,6 +1,6 @@
 // Unit coverage for the catcher-side half of the OpenCommand work: the
 // catcher-of-record selector (src/api/catcherOfRecord.js) and the card's reader
-// (src/api/commandReceived.js).
+// (src/api/command/received.js).
 //
 // THE SELECTOR IS PINNED ON A REAL GAME, not a synthetic feed, and that is the
 // point of the fixture. OpenCommand carries no catcher identity anywhere, so
@@ -30,7 +30,7 @@ import {
   fieldingSideFor,
   halvesPlayed,
 } from '../src/api/catcherOfRecord.js'
-import { CAUSATION_NOTE, commandReceivedFor } from '../src/api/commandReceived.js'
+import { CAUSATION_NOTE, commandReceivedFor } from '../src/api/command/received.js'
 
 const feed = JSON.parse(
   readFileSync(new URL('./fixtures/game-822740.trimmed.json', import.meta.url), 'utf8'),

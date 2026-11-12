@@ -1,4 +1,4 @@
-import { RIM_IN } from '../../../../../api/gloveTarget.js'
+import { RIM_IN } from '../../../../../api/command/glove.js'
 import { glyphD } from '../arsenal/PitchGlyph.jsx'
 
 // One plot, 320 units wide and capped at 320px, so a unit is a CSS pixel and the ring labels keep their token size.

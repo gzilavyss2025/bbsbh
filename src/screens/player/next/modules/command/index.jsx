@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/pitcher/command.css'
-import { fetchCommandFor, fetchCommandLeague } from '../../../../../api/commandMap.js'
+import { fetchCommandFor, fetchCommandLeague } from '../../../../../api/command/map.js'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { StatTile } from '../../../../../components/ui/frame/StatTile.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'

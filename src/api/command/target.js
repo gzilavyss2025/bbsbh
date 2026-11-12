@@ -1,5 +1,5 @@
-import { pitchLabel } from './pitcher/arsenal.js'
-import { staticJson } from './staticJson.js'
+import { pitchLabel } from '../pitcher/arsenal.js'
+import { staticJson } from '../staticJson.js'
 
 // TARGET COMMAND — how close a pitcher puts the ball to where his catcher asked
 // for it, per pitch type, over a season.
@@ -15,7 +15,7 @@ import { staticJson } from './staticJson.js'
 // NO SCORE, and it needs no SealBox. Every figure is a
 // season median over games already final: a distance in inches, carrying no
 // line, no running score and no per-game granularity at all. Same footing as
-// the Statcast percentiles this renders beside and as commandMap.js. The player
+// the Statcast percentiles this renders beside and as command/map.js. The player
 // page is an open surface (ADR-0034).
 //
 // THE DATA IS AN OUTSIDE DATASET, which is unusual here and carries two

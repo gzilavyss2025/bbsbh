@@ -10,7 +10,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
 import { WHIFF_CODES, FOUL_CODES } from '../src/api/playbyplay/pitchInfo.js'
-import { commandPitchMarks } from '../src/api/commandMap.js'
+import { commandPitchMarks } from '../src/api/command/map.js'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
 
 const TOP = 3.4

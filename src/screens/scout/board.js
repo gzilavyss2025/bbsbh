@@ -1,4 +1,4 @@
-import { MIN_COMMAND_PITCHES } from '../../api/commandMap.js'
+import { MIN_COMMAND_PITCHES } from '../../api/command/map.js'
 import { pitchTiles } from '../../lib/pitcherCard/card.js'
 import { REGIONS, rollUp } from '../../lib/zone/regions.js'
 
