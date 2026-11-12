@@ -148,5 +148,18 @@ test('a catcher arm row names the catcher pool, an outfielder arm the hitter poo
     rawBat: { ...data.rawBat, 800: { arm: 85.1, pop: 1.9, framing: 3 }, 801: { arm: 80, pop: 2.0 } },
   }
   assert.match(row(percentileView(d, 800, 'hitting', 2026), 'arm').detail, /of 2 catchers$/)
-  assert.match(row(percentileView(d, 802, 'hitting', 2026), 'arm').detail, /of 3 hitters$/)
+  // Savant ranked 802 without the pop-board catchers 800 and 801 (#3064 review).
+  assert.match(row(percentileView(d, 802, 'hitting', 2026), 'arm').detail, /of 1 hitter$/)
+})
+
+// #3064: the catcher arm pool is the size the generator ranked in (armPool), not the rawBat
+// ids that kept an arm — Savant filling some catchers' arm drops them from rawBat.arm.
+test('a catcher arm row counts the file\'s armPool, whatever rawBat holds', () => {
+  const d = {
+    ...data,
+    armPool: 94,
+    bat: { ...data.bat, 800: { xwoba: 50, arm: 92, pop: 70 } },
+    rawBat: { ...data.rawBat, 800: { arm: 85.1, pop: 1.9 } },
+  }
+  assert.match(row(percentileView(d, 800, 'hitting', 2026), 'arm').detail, /of 94 catchers$/)
 })

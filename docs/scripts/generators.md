@@ -1271,7 +1271,9 @@ don't run these by hand.
   `custom`'s, so comparing against `rawBat`'s full count would warn every
   night for no reason. `batPool` is the hitter count the percentile card prints:
   Savant's percentile board only, counted before the ranked boards (bsr, pop,
-  arm, framing) add their board-only players (#3065). The file also carries `midBat`/`midPit` — the pctstrip's
+  arm, framing) add their board-only players (#3065).
+  `armPool` is the catcher count the arm row prints: every catcher the pop-time
+  board ranked, including any whose arm Savant filled itself (#3064). The file also carries `midBat`/`midPit` — the pctstrip's
   league-BASELINE figure, per metric: the MEDIAN raw rate over the population
   that has both a percentile rank and a raw value for that metric (`scripts/
   lib/savant.mjs`'s `medianRates`), not an unweighted leaderboard mean —

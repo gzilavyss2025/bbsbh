@@ -16,7 +16,7 @@
 // Run by hand: node scripts/gen-savant-percentiles.mjs
 import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
-import { METRICS, fetchPercentiles, fetchSavantCsv, num, parseCsv, medianRates, rankPercentiles } from './lib/savant.mjs'
+import { METRICS, fetchPercentiles, fetchSavantCsv, num, parseCsv, medianRates, rankPercentiles, rankedPool } from './lib/savant.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = import.meta.dirname
@@ -252,6 +252,10 @@ const [bat, pit, rawBat, rawPit, batTracking, ...ranked] = await Promise.all([
 // before the ranked boards below add their board-only players (#3023, #3065).
 const batPool = Object.keys(bat).length
 
+// The catcher arm pool the card prints ("of 94 catchers"): every catcher the pop-time board ranked
+// arm among, even one whose arm Savant filled itself and `fillOnly` skips below (#3064).
+const armPool = rankedPool(ranked, 'arm')
+
 // Merge the ranked boards into bat (percentile) and rawBat (raw value). A
 // catcher missing from the percentile board still gets an entry here.
 for (const { key, fillOnly, raw, pct } of ranked) {
@@ -323,6 +327,7 @@ await writeJsonAtomic(out, {
   season,
   generatedAt: new Date().toISOString(),
   batPool,
+  armPool,
   bat,
   pit,
   rawBat,

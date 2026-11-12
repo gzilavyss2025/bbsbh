@@ -33,11 +33,17 @@ export function percentileView(data, id, role, season) {
   const noun = role === 'pitching' ? 'pitcher' : 'hitter'
   const count = (n, word) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`
   // A catcher's arm is ranked among catchers off the pop-time board, and only that board gives a raw arm.
+  // The generator sizes that pool (armPool, #3064). A file from before it counts the raw arms,
+  // which undercounts any catcher whose arm Savant filled itself; the next nightly file fixes it.
+  // Savant ranks an outfielder's arm without those pop-board catchers, so his pool leaves them out.
   const catcherArm = role !== 'pitching' && raw?.arm != null
+  const popArm = (id) => data.rawBat?.[id]?.arm != null
   const poolOf = (key) =>
     key === 'arm' && catcherArm
-      ? count(Object.values(data.rawBat ?? {}).filter((r) => r?.arm != null).length, 'catcher')
-      : count(ranks.filter((r) => r?.[key] != null).length, noun)
+      ? count(data.armPool ?? Object.keys(data.rawBat ?? {}).filter(popArm).length, 'catcher')
+      : key === 'arm' && role !== 'pitching'
+        ? count(Object.entries(data.bat ?? {}).filter(([id, r]) => r?.arm != null && !popArm(id)).length, noun)
+        : count(ranks.filter((r) => r?.[key] != null).length, noun)
   // The headline pool is Savant's percentile board, sized by the generator (batPool, #3065). A
   // player only on its ranked boards keeps his Glove/Legs card but is not counted (#3023). A file
   // from before batPool (an offline cache) counts the rows the percentile board wrote: each carries
