@@ -1,25 +1,32 @@
 import '../../styles/report/research.css'
-import { useMemo, useState } from 'react'
-import { ASKS, buildQuery, parseQuery, unsupported } from '../../api/research/filters.js'
+import { useMemo, useRef, useState } from 'react'
+import { ASKS, FILTER_BY_KEY, buildQuery, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
 import { answer } from '../../api/research/answer.js'
 import { coverage, fetchIndex, fetchStore } from '../../api/research/store.js'
 import { isRealDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
+import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
-import { Chips } from '../../components/ui/control/Chips.jsx'
-import { Notice } from '../../components/ui/state/Notice.jsx'
+import { Button } from '../../components/ui/control/Button.jsx'
+import { Door } from '../../components/ui/control/Door.jsx'
+import { IconButton } from '../../components/ui/control/IconButton.jsx'
+import { Pill } from '../../components/ui/control/Pill.jsx'
+import { Segmented } from '../../components/ui/control/Segmented.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
-import { AnswerView } from './AnswerView.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
+import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
 
-// RESEARCH (/research, #2234): ask a question of past plays. Pick a question, narrow
-// it with filter chips, read the answer. The query lives in the URL (filters.js), so
-// an answer can be shared. An open page (ADR-0034): the store holds only games before
-// the day it was built, and `?d=` holds out that day and later. No SealBox.
-//
-// FIRST SLICE: the 2026 season, Savant's pitch-level data, read from Vercel Blob.
-// Presets, film, RE24 and the Retrosheet history store are later slices.
+// RESEARCH (/research, #2234): ask a question of past plays. The page reads ANSWER
+// FIRST (Gary, 2026-11-13, wireframe "/research, answer first"): the question, then
+// the answer, then one filter bar, then the matches. On a phone the bar's Edit opens
+// the filters in a sheet; at the wide step they sit in a left column.
+// The query lives in the URL (filters.js), so an answer can be shared. An open page
+// (ADR-0034): the store holds only games before the day it was built, and `?d=`
+// holds out that day and later. No SealBox.
 
 const PRESETS = [
   { label: 'Oppo homer off a lefty’s sinker, inner third', search: '?res=home_run&fld=oppo&pt=SI&loc=inner&bh=L&ph=L' },
@@ -33,8 +40,24 @@ function readUrl() {
   return { q: parseQuery(window.location.search), cutoff: isRealDate(d) ? d : null }
 }
 
+// The filter bar's pills: one per active filter, in words.
+function pillsOf(q, people) {
+  const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
+  const out = Object.entries(q.chips).map(([k, c]) => {
+    const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
+    return `${c.inv ? 'Not ' : ''}${c.vals.map((v) => labels[v]).join(' / ')}`
+  })
+  if (q.batter) out.push(people[q.batter] ?? 'Batter')
+  if (q.pitcher) out.push(`vs ${people[q.pitcher] ?? 'pitcher'}`)
+  if (q.team) out.push(`${q.team} batting`)
+  if (q.park) out.push(`at ${q.park}`)
+  return out
+}
+
 export function ResearchPage() {
   useDocumentTitle('Research')
+  const wide = useMediaQuery(WIDE_QUERY)
+  const sheet = useRef(null)
   const [{ q, cutoff }, setState] = useState(readUrl)
   const [progress, setProgress] = useState(null)
   const setQ = (next) => {
@@ -49,32 +72,70 @@ export function ResearchPage() {
   const data = store.data
   const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort() : []), [data])
   const blocked = data?.cover.first ? unsupported(data.cover.first) : []
-  const result = useMemo(() => (data ? answer(data.pas, q, cutoff) : null), [data, q, cutoff])
+  const blank = isBlank(q)
+  const result = useMemo(() => (data && !blank ? answer(data.pas, q, cutoff) : null), [data, q, cutoff, blank])
+  const pills = data ? pillsOf(q, data.people) : []
+  const bar = data && <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
+
+  const main = (
+    <Stack>
+      <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />
+      {store.error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
+      {!data && !store.error && <p className="t-label t-label--nocaps">Loading plays{progress ? ` · month ${progress.n} of ${progress.of}` : ''}…</p>}
+      {data && blank && (
+        <Card frame="stamped" label="Start with a question">
+          <Stack gap="tight">
+            {PRESETS.map((p) => <Door key={p.search} layout="block" onClick={() => setQ(parseQuery(p.search))}>{p.label}</Door>)}
+            {!wide && <Door layout="block" onClick={() => sheet.current?.showModal()}>Build your own</Door>}
+          </Stack>
+        </Card>
+      )}
+      {result && <AnswerCard ask={q.ask} a={result} people={data.people} />}
+      {data && !wide && (
+        <Cluster className="research__bar">
+          <span className="t-label t-label--bold">Filters · {pills.length}</span>
+          {pills.map((p, i) => <Pill key={i}>{p}</Pill>)}
+          <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
+        </Cluster>
+      )}
+      {data && (
+        <p className="t-label t-label--nocaps">
+          {data.cover.first === data.cover.last ? data.cover.first : `${data.cover.first}–${data.cover.last}`} MLB · through {data.cover.through}
+          {cutoff ? ` · before ${cutoff}` : ''} · Baseball Savant
+          {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
+        </p>
+      )}
+      {result && <AskTables ask={q.ask} a={result} people={data.people} />}
+      {result && <MatchList key={JSON.stringify(q)} a={result} people={data.people} wide={wide} />}
+    </Stack>
+  )
 
   return (
-    <div className="screen">
+    <div className="screen research">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Research</h1>
       </header>
-      <Stack>
-        <Chips label="Question" layout="wrap" options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />
-        <Chips label="Presets" layout="wrap" options={PRESETS.map((p) => ({ value: p.search, label: p.label }))} value={null} onChange={(search) => setQ(parseQuery(search))} />
-        {store.error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
-        {!data && !store.error && <p className="t-label t-label--nocaps">Loading plays{progress ? ` · month ${progress.n} of ${progress.of}` : ''}…</p>}
-        {data && (
-          <>
-            <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
-            <p className="t-label t-label--nocaps">
-              {data.cover.first === data.cover.last ? data.cover.first : `${data.cover.first}–${data.cover.last}`} MLB, regular season and postseason, through {data.cover.through}
-              {cutoff ? `, before ${cutoff}` : ''}. Source: Baseball Savant.
-              {blocked.length > 0 && ` Not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}.`}
-              {' '}Inner third: the third of the plate nearest the batter. Opp field: more than 15° from center toward the opposite side.
-            </p>
-            <AnswerView key={JSON.stringify(q)} ask={q.ask} a={result} people={data.people} />
-          </>
-        )}
-      </Stack>
+      {wide && data ? (
+        <div className="research__cols">
+          <aside className="research__rail">{bar}</aside>
+          {main}
+        </div>
+      ) : main}
+      {!wide && data && (
+        <dialog ref={sheet} className="research__sheet" aria-label="Filters" onClick={(e) => e.target === sheet.current && sheet.current.close()}>
+          <Stack>
+            <Cluster className="research__sheethead">
+              <span className="t-label t-label--bold">Filters</span>
+              <IconButton label="Close filters" onClick={() => sheet.current.close()}>✕</IconButton>
+            </Cluster>
+            {bar}
+            <Button size="tap" skin="ink" onClick={() => sheet.current.close()}>
+              {result ? `Show ${result.matches.length.toLocaleString()} ${result.matches.length === 1 ? 'match' : 'matches'}` : 'Done'}
+            </Button>
+          </Stack>
+        </dialog>
+      )}
     </div>
   )
 }

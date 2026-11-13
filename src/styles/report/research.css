@@ -19,6 +19,96 @@
   inline-size: 100%;
 }
 .research__answer {
-  font-size: var(--fs-ui);
+}
+.research__answer {
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+}
+.research__summary {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.research__bar {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  padding-block: var(--space-2);
+}
+.research__edit {
+  margin-inline-start: auto;
+}
+.research__cardhead {
+  align-items: center;
+}
+.research__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.research__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* layout-exempt: a two-line match row, date and result over the people and the ordinal */
+.research__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-2);
+  padding-block: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-small);
+}
+.research__date {
+  font-family: var(--font-mono);
+}
+.research__result {
+  font-weight: var(--w-semibold);
+  text-align: right;
+}
+.research__ord {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+  text-align: right;
+}
+/* layout-exempt: the wide step's filter rail beside the answer column */
+.research__cols {
+  display: grid;
+  grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.research__rail {
+  position: sticky;
+  top: var(--space-3);
+}
+.research__sheet {
+  inline-size: 100%;
+  max-inline-size: var(--app-width);
+  max-block-size: 85dvh;
+  margin: auto auto 0;
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  background: var(--surface-card);
   color: var(--text-body);
+  box-shadow: var(--shadow-raised);
+}
+.research__sheet::backdrop {
+  background: rgba(22, 34, 47, 0.44);
+}
+.research__sheethead {
+  justify-content: space-between;
+  align-items: center;
+}
+.research__table th,
+.research__table td {
+  text-align: start;
+}
+.research__table .research__num {
+  text-align: end;
 }

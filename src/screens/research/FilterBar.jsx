@@ -1,7 +1,9 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { FILTERS, FILTER_BY_KEY } from '../../api/research/filters.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
+import { IconButton } from '../../components/ui/control/IconButton.jsx'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
@@ -10,6 +12,9 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // filter" picker for the rest, and the people and club pickers. It holds no state:
 // the query lives in the URL and comes in as `q`; every change calls onChange(q).
 // A card the season range cannot answer is listed under `blocked` and stays off.
+// A long card shows the picked chips and the first few, then "+N more" (FIRST_CHIPS).
+
+const FIRST_CHIPS = 4
 
 function Field({ label, children }) {
   const id = useId()
@@ -60,6 +65,43 @@ function ClubField({ label, value, clubs, onChange }) {
   )
 }
 
+function FilterCard({ f, chip, onChip }) {
+  const [open, setOpen] = useState(false)
+  const options = f.options.map(([value, label]) => ({ value, label }))
+  const shown = open || options.length <= FIRST_CHIPS + 1 ? options : options.filter((o, i) => i < FIRST_CHIPS || chip.vals.includes(o.value))
+  const hidden = options.length - shown.length
+  return (
+    <Card frame="ledger">
+      <Stack gap="tight">
+        <Cluster className="research__cardhead">
+          <span className="t-label t-label--bold">{f.label}</span>
+          {f.info && (
+            <InfoPopover label={`About ${f.label}`} className="infopop--paper infopop--down">{f.info}</InfoPopover>
+          )}
+          {!f.single && (
+            <Button size="control" pressed={chip.inv} onClick={() => onChip({ ...chip, inv: !chip.inv })}>
+              Invert
+            </Button>
+          )}
+          <IconButton label={`Remove ${f.label}`} mark="sm" onClick={() => onChip(null)}>✕</IconButton>
+        </Cluster>
+        <Chips
+          label={f.label}
+          layout="wrap"
+          multiple={!f.single}
+          options={shown}
+          value={f.single ? chip.vals[0] : chip.vals}
+          onChange={(v) => {
+            const vals = f.single ? [v] : v
+            onChip(vals.length ? { ...chip, vals } : null)
+          }}
+        />
+        {hidden > 0 && <Button size="control" skin="ghost" onClick={() => setOpen(true)}>+{hidden} more</Button>}
+      </Stack>
+    </Card>
+  )
+}
+
 export function FilterBar({ q, people, clubs, blocked, onChange }) {
   const addId = useId()
   const setChip = (key, chip) => {
@@ -79,36 +121,9 @@ export function FilterBar({ q, people, clubs, blocked, onChange }) {
         <ClubField label="Batting club" value={q.team} clubs={clubs} onChange={(team) => onChange({ ...q, team })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
-      {active.map((key) => {
-        const f = FILTER_BY_KEY[key]
-        const chip = q.chips[key]
-        return (
-          <Card key={key} frame="ledger">
-            <Stack gap="tight">
-              <Cluster>
-                <span className="t-label t-label--bold">{f.label}</span>
-                {!f.single && (
-                  <Button size="control" pressed={chip.inv} onClick={() => setChip(key, { ...chip, inv: !chip.inv })}>
-                    Invert
-                  </Button>
-                )}
-                <Button size="control" skin="ghost" onClick={() => setChip(key, null)}>Remove</Button>
-              </Cluster>
-              <Chips
-                label={f.label}
-                layout="wrap"
-                multiple={!f.single}
-                options={f.options.map(([value, label]) => ({ value, label }))}
-                value={f.single ? chip.vals[0] : chip.vals}
-                onChange={(v) => {
-                  const vals = f.single ? [v] : v
-                  setChip(key, vals.length ? { ...chip, vals } : null)
-                }}
-              />
-            </Stack>
-          </Card>
-        )
-      })}
+      {active.map((key) => (
+        <FilterCard key={key} f={FILTER_BY_KEY[key]} chip={q.chips[key]} onChip={(chip) => setChip(key, chip)} />
+      ))}
       {addable.length > 0 && (
         <Stack gap="tight" className="research__field">
           <label className="t-label" htmlFor={addId}>Add a filter</label>
