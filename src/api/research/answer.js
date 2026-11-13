@@ -43,10 +43,13 @@ function leaders(matches, who) {
 }
 
 function outcomes(matches) {
+  // Label by the PA result card's own grouping, so a fielders_choice_out reads as
+  // "Fielder's choice", the chip a reader would tap, not as its raw event code.
   const labels = Object.fromEntries(FILTERS[0].options)
   const counts = new Map()
   for (const m of matches) {
-    const label = labels[m.event] ?? m.event.replaceAll('_', ' ')
+    const key = FILTERS[0].values(m)[0]
+    const label = labels[key] ?? key.replaceAll('_', ' ')
     counts.set(label, (counts.get(label) ?? 0) + 1)
   }
   return [...counts].map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n)
