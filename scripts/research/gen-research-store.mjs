@@ -41,6 +41,7 @@ import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 import { SAVANT_DAY_CAP, mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../lib/research/store.mjs'
 import { baseballToday } from '../../src/lib/time/standingsDates.js'
 import { decodePlateAppearances, encodeMonth } from '../../src/api/research/shard.js'
+import { coverage } from '../../src/api/research/store.js'
 
 const PREFIX = 'research/v1/'
 const SPACING_MS = 400
@@ -87,22 +88,39 @@ if (upload) {
   // merged and written back would drop a month. A query the CDN has not seen asks the
   // origin. (Inference: Blob's CDN keys on the query string; checked on the first run.)
   const found = (await blob.list({ prefix: `${PREFIX}index.json` })).blobs[0]
-  if (found) index = await (await fetch(`${found.url}?t=${Date.now()}`, { cache: 'no-store' })).json()
+  if (found) {
+    const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: 'no-store' })
+    if (!res.ok) throw new Error(`index.json HTTP ${res.status}`)
+    index = await res.json()
+  } else if (args.recent) {
+    // The nightly run only refreshes months; with no index to merge into it would
+    // write one holding just those months and drop the rest. A first build is by hand.
+    throw new Error('no research/v1/index.json in Blob: build the season by hand first')
+  }
 } else {
   index = await readFile(join(out, 'index.json'), 'utf8').then(JSON.parse, () => null)
 }
 
 let refused = 0
 let changed = 0
+let failed = 0
 for (const { season, month } of targets) {
   const days = monthDays(season, month, today).slice(0, maxDays)
   if (!days.length) continue
   const rows = []
-  for (const day of days) {
-    const got = await fetchDay(day)
-    console.log(`${day}: ${got.length} rows`)
-    rows.push(...got)
-    await sleep(SPACING_MS)
+  // A day that still fails after the retries skips this month only: a month already
+  // uploaded above still reaches the index below.
+  try {
+    for (const day of days) {
+      const got = await fetchDay(day)
+      console.log(`${day}: ${got.length} rows`)
+      rows.push(...got)
+      await sleep(SPACING_MS)
+    }
+  } catch (err) {
+    console.error(`${season}-${month}: NOT written: ${err.message}`)
+    failed++
+    continue
   }
   if (!rows.length) {
     console.log(`${season}-${month}: no games, nothing written`)
@@ -133,8 +151,8 @@ if (index && changed) {
   await writeFile(join(out, 'index.json'), body)
   if (put) console.log(`uploaded ${(await put('index.json', body)).url}`)
   if (stampFile) {
-    const through = Object.values(index.seasons).flatMap((x) => Object.values(x.months).map((m) => m.through)).sort().at(-1)
+    const { through } = coverage(index)
     await writeFile(stampFile, `${JSON.stringify({ generatedAt: index.built, through }, null, 2)}\n`)
   }
 }
-if (refused) process.exit(1)
+if (refused || failed) process.exit(1)
