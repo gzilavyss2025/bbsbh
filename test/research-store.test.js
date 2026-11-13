@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
-import { basesOf, buildQuery, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
+import { basesOf, buildQuery, clubName, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
 import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
@@ -163,4 +163,16 @@ test('runners: one chip per base state, and old links still parse', () => {
   assert.deepEqual(parseQuery('?run=risp.loaded').chips.run.vals, ['-2-', '--3', '12-', '1-3', '-23', '123'])
   assert.deepEqual(parseQuery('?run=empty.first').chips.run.vals, ['---', '1--'])
   assert.deepEqual(basesOf('1-3'), { first: true, second: false, third: true })
+})
+
+test('pitching club filters the fielding side, and every club code has a full name', () => {
+  // The fixture's top halves: CHC bats, MIL pitches.
+  assert.deepEqual(pas.filter(matcher(parseQuery('?pteam=MIL'))).length, 4)
+  assert.deepEqual(pas.filter(matcher(parseQuery('?pteam=CHC'))).length, 0)
+  assert.equal(parseQuery(buildQuery(parseQuery('?pteam=MIL'))).pitchTeam, 'MIL')
+  assert.equal(isBlank(parseQuery('?pteam=MIL')), false)
+  assert.equal(clubName('MIL'), 'Milwaukee Brewers')
+  assert.equal(clubName('AZ'), 'Arizona Diamondbacks')
+  assert.equal(clubName('ATH'), 'Athletics')
+  assert.equal(clubName('ZZZ'), 'ZZZ', 'an unknown code shows as itself')
 })

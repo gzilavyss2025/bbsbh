@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { FILTERS, FILTER_BY_KEY, basesOf } from '../../api/research/filters.js'
+import { FILTERS, FILTER_BY_KEY, basesOf, clubName } from '../../api/research/filters.js'
 import { BaseState } from '../../components/scoring/BaseState.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
@@ -60,7 +60,7 @@ function ClubField({ label, value, clubs, onChange }) {
       {(id) => (
         <select id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
           <option value="">Any</option>
-          {clubs.map((c) => <option key={c} value={c}>{c}</option>)}
+          {clubs.map((c) => <option key={c} value={c}>{clubName(c)}</option>)}
         </select>
       )}
     </Field>
@@ -133,6 +133,7 @@ export function FilterBar({ q, people, clubs, blocked, onChange }) {
         <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />
         <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />
         <ClubField label="Batting club" value={q.team} clubs={clubs} onChange={(team) => onChange({ ...q, team })} />
+        <ClubField label="Pitching club" value={q.pitchTeam} clubs={clubs} onChange={(pitchTeam) => onChange({ ...q, pitchTeam })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
       {active.map((key) => (

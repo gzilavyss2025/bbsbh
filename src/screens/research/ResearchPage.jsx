@@ -1,6 +1,6 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
-import { ASKS, FILTER_BY_KEY, buildQuery, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
+import { ASKS, FILTER_BY_KEY, buildQuery, clubName, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
 import { answer } from '../../api/research/answer.js'
 import { coverage, fetchIndex, fetchStore } from '../../api/research/store.js'
 import { isRealDate } from '../../lib/dates.js'
@@ -57,8 +57,9 @@ function pillsOf(q, people) {
   })
   if (q.batter) out.push(people[q.batter] ?? 'Batter')
   if (q.pitcher) out.push(`vs ${people[q.pitcher] ?? 'pitcher'}`)
-  if (q.team) out.push(`${q.team} batting`)
-  if (q.park) out.push(`at ${q.park}`)
+  if (q.team) out.push(`${clubName(q.team)} batting`)
+  if (q.pitchTeam) out.push(`${clubName(q.pitchTeam)} pitching`)
+  if (q.park) out.push(`at ${clubName(q.park)}`)
   return out
 }
 
@@ -78,7 +79,7 @@ export function ResearchPage() {
     return { ...data, cover: coverage(index) }
   }, [])
   const data = store.data
-  const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort() : []), [data])
+  const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [data])
   const blocked = useMemo(() => (data?.cover.first ? unsupported(data.cover.first) : []), [data])
   // A chip the store's seasons cannot answer stays in the URL but out of the query.
   const live = useMemo(() => {

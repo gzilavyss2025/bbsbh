@@ -19,6 +19,12 @@
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
+import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
+
+// Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
+// so a code finds its full name through teams.js. An unknown code shows as itself.
+const CLUB_NAMES = Object.fromEntries(ALL_MLB_TEAM_IDS.map((id) => [teamAbbr({ id }), teamFullName(id)]))
+export const clubName = (code) => CLUB_NAMES[code] ?? code
 
 const HALF_PLATE = 17 / 12 / 2
 const THIRD = (17 / 12) / 3
@@ -115,7 +121,8 @@ export const FILTERS = [
 export const FILTER_BY_KEY = Object.fromEntries(FILTERS.map((f) => [f.key, f]))
 
 // Parse / build the URL. A multi card is `res=home_run.double`, inverted `res=!home_run`.
-// People and clubs: `bat`, `pit` (ids), `team` (batting club), `park` (home club).
+// People and clubs: `bat`, `pit` (ids), `team` (batting club), `pteam` (pitching club),
+// `park` (home club).
 export function parseQuery(search) {
   const p = new URLSearchParams(search)
   const chips = {}
@@ -130,7 +137,7 @@ export function parseQuery(search) {
   }
   const id = (k) => (/^\d+$/.test(p.get(k) ?? '') ? Number(p.get(k)) : null)
   const club = (k) => (/^[A-Z]{2,3}$/.test(p.get(k) ?? '') ? p.get(k) : null)
-  return { chips, batter: id('bat'), pitcher: id('pit'), team: club('team'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
+  return { chips, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -143,6 +150,7 @@ export function buildQuery(q, keep = {}) {
   if (q.batter) p.set('bat', q.batter)
   if (q.pitcher) p.set('pit', q.pitcher)
   if (q.team) p.set('team', q.team)
+  if (q.pitchTeam) p.set('pteam', q.pitchTeam)
   if (q.park) p.set('park', q.park)
   for (const [k, v] of Object.entries(keep)) if (v) p.set(k, v)
   const s = p.toString()
@@ -157,7 +165,7 @@ export const ASKS = [
 ]
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
-export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.park
+export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
 
 // The predicate for a whole query. `cutoff` ('YYYY-MM-DD', optional) holds out that day and later.
 export function matcher(q, cutoff) {
@@ -170,6 +178,7 @@ export function matcher(q, cutoff) {
   if (q.batter) tests.push((pa) => pa.batter === q.batter)
   if (q.pitcher) tests.push((pa) => pa.pitcher === q.pitcher)
   if (q.team) tests.push((pa) => pa.batTeam === q.team)
+  if (q.pitchTeam) tests.push((pa) => pa.fieldTeam === q.pitchTeam)
   if (q.park) tests.push((pa) => pa.home === q.park)
   if (cutoff) tests.push((pa) => pa.date < cutoff)
   return (pa) => tests.every((t) => t(pa))
