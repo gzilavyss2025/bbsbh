@@ -31,18 +31,6 @@ export function splitName(full) {
   return i === -1 ? ['', name] : [name.slice(0, i), name.slice(i + 1)]
 }
 
-// The feed can list one winner twice (the 2026 AL Comeback Player answered
-// Yordan Alvarez two times); a player and position pair prints once.
-export function uniqueWinners(recipients) {
-  const seen = new Set()
-  return (recipients ?? []).filter((r) => {
-    const id = `${r.playerId}-${r.position ?? ''}-${r.league ?? ''}`
-    if (seen.has(id)) return false
-    seen.add(id)
-    return true
-  })
-}
-
 function columnKeyOf(recipient) {
   return recipient.league || 'MLB'
 }
@@ -79,7 +67,7 @@ export function pastWinners(family, skipSeason = null) {
     .sort((a, b) => b - a)
     .map((year) => {
       const cells = Object.fromEntries(columns.map((c) => [c.key, []]))
-      for (const r of uniqueWinners(family.years[year])) cells[columnKeyOf(r)]?.push(r)
+      for (const r of family.years[year]) cells[columnKeyOf(r)]?.push(r)
       return { year, cells }
     })
   return { columns, rows }
@@ -92,7 +80,7 @@ export function seasonRows(families) {
     key: f.key,
     label: f.label,
     split: f.awards.some((a) => a.league),
-    cells: f.awards.map((a) => ({ id: a.id, league: a.league, status: a.status, recipients: uniqueWinners(a.recipients) })),
+    cells: f.awards.map((a) => ({ id: a.id, league: a.league, status: a.status, recipients: a.recipients ?? [] })),
   }))
 }
 

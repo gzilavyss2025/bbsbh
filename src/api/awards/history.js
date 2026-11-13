@@ -62,9 +62,19 @@ function leagueOf(awardId) {
   return null
 }
 
+// The feed can list one winner twice (checked 2026-11-13: ALCPOY 2026 answered
+// Yordan Alvarez two times), so a player and position pair is kept once (#3094).
+// The nightly generator builds the static file from this too.
 export function recipientsOf(awardId, data) {
+  const seen = new Set()
   return (data.awards ?? [])
     .filter((a) => a.player?.id)
+    .filter((a) => {
+      const key = `${a.player.id}-${a.player.primaryPosition?.abbreviation ?? ''}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
     .map((a) => ({
       league: leagueOf(awardId),
       playerId: a.player.id,

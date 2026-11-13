@@ -92,14 +92,3 @@ test('seasonRows marks league splits and countAnnounced counts whole families', 
   assert.equal(rows[0].cells[1].status, 'pending')
   assert.equal(countAnnounced(families), 1)
 })
-
-test('a winner the feed lists twice prints once', () => {
-  // The live 2026 AL Comeback Player feed returned Yordan Alvarez twice.
-  const dup = { name: 'Yordan Alvarez', league: 'AL', playerId: 670541, position: 'DH', teamId: 117 }
-  const rows = seasonRows([{ key: 'Comeback Player', label: 'Comeback Player', awards: [
-    { id: 'ALCPOY', league: 'AL', status: 'announced', recipients: [dup, { ...dup }] },
-  ] }])
-  assert.equal(rows[0].cells[0].recipients.length, 1)
-  const past = pastWinners({ key: 'Comeback Player', years: { 2025: [dup, { ...dup }] } })
-  assert.equal(past.rows[0].cells.AL.length, 1)
-})
