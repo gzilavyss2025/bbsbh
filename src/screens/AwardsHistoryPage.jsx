@@ -26,6 +26,9 @@ import { monthDayName } from '../lib/dates.js'
 // so no winner prints twice. AL and NL keep their filled league banners.
 
 const BANNER_CLASS = { AL: 'awardhistory__leaguetag--al', NL: 'awardhistory__leaguetag--nl' }
+// The white knockout league marks gen-mono-logos.mjs writes for Standings' bars
+// (159 American League, 160 National League; ADR-0031: art, never a CSS filter).
+const LEAGUE_MARK = { AL: { id: 159, name: 'American League' }, NL: { id: 160, name: 'National League' } }
 
 // One winner: logo, first name on a small line, last name, then club (and position
 // for a roster award). The reader's club gets --surface-mine.
@@ -63,9 +66,17 @@ function Winners({ recipients, favoriteTeamId }) {
 }
 
 function Banner({ league, children }) {
+  const mark = LEAGUE_MARK[league]
   return (
     <th scope="col" className={`awardhistory__leaguetag ${BANNER_CLASS[league] ?? 'awardhistory__leaguetag--plain'}`}>
-      {children}
+      {mark ? (
+        <>
+          <TeamLogo teamId={mark.id} name={mark.name} variant="mono" size={22} />
+          <span className="sr-only">{mark.name}</span>
+        </>
+      ) : (
+        children
+      )}
     </th>
   )
 }
