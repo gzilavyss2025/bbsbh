@@ -40,3 +40,26 @@ export function mergeIndex(index, season, month, shard, pas, built) {
   next.seasons[season] = s
   return next
 }
+
+// The nightly window: the months of the `days` days before `today`, each rebuilt
+// WHOLE (a shard is built only from the days a run fetches, so a 3-day fetch would
+// replace a month with 3 days). On the 1st to 3rd that is last month and this one.
+// Only March to November, the months a season can have. [{ season, month }].
+export function recentMonths(today, days = 3) {
+  const out = []
+  for (let i = days; i >= 1; i--) {
+    const d = shiftDays(today, -i)
+    const month = d.slice(5, 7)
+    if (month < '03' || month > '11') continue
+    if (!out.some((m) => m.season === Number(d.slice(0, 4)) && m.month === month)) out.push({ season: Number(d.slice(0, 4)), month })
+  }
+  return out
+}
+
+// Why a rebuilt month may not replace the stored one, or null when it may. A month
+// only grows: fewer pitches than the copy on file means Savant answered a day thinly
+// (late rows, an outage that still says 200), so the old copy stays.
+export function shrinkReason(prev, pitches) {
+  if (!prev || pitches >= prev.pitches) return null
+  return `${pitches} pitches, fewer than the ${prev.pitches} on file`
+}

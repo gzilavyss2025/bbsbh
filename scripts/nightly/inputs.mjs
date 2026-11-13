@@ -51,6 +51,7 @@ export const GATES = {
   'glove-target': { when: 'finals', datasets: ['glove-target/'] },
   'command-received': { when: 'finals', datasets: ['command-received.json'] },
   spray: { when: 'finals', datasets: ['spray/'] },
+  'research-store': { when: 'finals', datasets: ['research-store.json'] },
   attendance: { when: 'finals', datasets: ['attendance.json'] },
   gate: { when: 'finals', datasets: ['gate.json'] },
   doubleheaders: { when: 'finals', datasets: ['doubleheaders.json'] },
