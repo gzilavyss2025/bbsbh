@@ -146,6 +146,13 @@
       "St. Lucie Mets"
     ]
   },
+  "cocacolapark": {
+    "venue": "Coca-Cola Park",
+    "venueId": 3230,
+    "teams": [
+      "Lehigh Valley IronPigs"
+    ]
+  },
   "constellationfield": {
     "venue": "Constellation Field",
     "venueId": 5421,
@@ -419,13 +426,6 @@
       "Lansing Lugnuts"
     ]
   },
-  "cocacolapark": {
-    "venue": "Jefferson Park",
-    "venueId": 3230,
-    "teams": [
-      "Lehigh Valley IronPigs"
-    ]
-  },
   "josephprileyjrballpark": {
     "venue": "Joseph P. Riley, Jr. Ballpark",
     "venueId": 2540,
@@ -615,13 +615,6 @@
       "Iowa Cubs"
     ]
   },
-  "segrapark": {
-    "venue": "Prisma Health Park",
-    "venueId": 4980,
-    "teams": [
-      "Columbia Fireflies"
-    ]
-  },
   "publixfieldatjokermarchantstadium": {
     "venue": "Publix Field at Joker Marchant Stadium",
     "venueId": 2511,
@@ -677,6 +670,13 @@
     "venueId": 2728,
     "teams": [
       "Inland Empire 66ers"
+    ]
+  },
+  "segrapark": {
+    "venue": "Segra Park",
+    "venueId": 4980,
+    "teams": [
+      "Columbia Fireflies"
     ]
   },
   "segrastadium": {
