@@ -646,6 +646,26 @@ jobs:
         if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-spray.mjs
+      # The /research store (#2234): Savant pitch rows, uploaded to Vercel Blob, not
+      # committed. Rebuilds the month or two its trailing 3 days fall in, whole
+      # (scripts/research/gen-research-store.mjs's header). Two steps on purpose:
+      # @vercel/blob installs with NO token in its environment and with install scripts
+      # off, and only the build step sees BLOB_READ_WRITE_TOKEN. It runs before the
+      # logo step, whose `npm install --prefix scripts sharp` may prune this package.
+      # The only committed output is public/data/research-store.json, a stamp written
+      # after the index upload, so freshness sees a run that reached Blob.
+      - name: Research store install
+        id: research-store-install
+        if: steps.inputs.outputs.finals != 'false'
+        continue-on-error: true
+        run: npm install --no-save --no-audit --no-fund --ignore-scripts --prefix scripts @vercel/blob@^2.8.2
+      - name: Research store
+        id: research-store
+        if: steps.inputs.outputs.finals != 'false' && steps.research-store-install.outcome == 'success'
+        continue-on-error: true
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: node scripts/research/gen-research-store.mjs --recent --upload --stamp=public/data/research-store.json
       # The Ballpark card's own attendance file. Stateless like the Gate step
       # below and off the same hydrated schedule feed — it used to fetch a
       # boxscore per game (~1,900 requests, SQLite, an ingested-games table)

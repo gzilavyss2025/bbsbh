@@ -1,8 +1,10 @@
 name: Research store
 
 # Builds the /research store (#2234) from Baseball Savant and uploads it to Vercel
-# Blob (research/v1/). Hand-run only for now: run it once, check the files, then the
-# upload joins update-nightly-data.yml. Writes nothing to the repo.
+# Blob (research/v1/). The nightly job keeps the recent months current
+# (update-nightly-data.yml, "Research store"); this one is for a backfill or a full
+# rebuild. Writes nothing to the repo. A month that came back smaller than the stored
+# copy is refused unless `force` is ticked.
 # Needs the BLOB_READ_WRITE_TOKEN repo secret (Settings > Secrets and variables > Actions).
 on:
   workflow_dispatch:
@@ -15,6 +17,15 @@ on:
         description: 'Season'
         type: string
         default: '2026'
+      force:
+        description: 'Upload a month even if it has fewer pitches than the stored copy'
+        type: boolean
+        default: false
+
+# Two hand runs never write index.json at once.
+concurrency:
+  group: research-store
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -40,9 +51,10 @@ jobs:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
           MONTHS: ${{ inputs.months || '' }}
           SEASON: ${{ inputs.season || '2026' }}
+          FORCE: ${{ inputs.force && '--force' || '' }}
         run: |
           set -o pipefail
-          node scripts/research/gen-research-store.mjs --season="$SEASON" ${MONTHS:+--months="$MONTHS"} --upload | tee build.log
+          node scripts/research/gen-research-store.mjs --season="$SEASON" ${MONTHS:+--months="$MONTHS"} $FORCE --upload | tee build.log
       # The header test #2501 deferred: does Blob gzip the JSON, and does it allow CORS?
       - name: Check the served headers
         run: |

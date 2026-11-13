@@ -56,6 +56,13 @@ sleep of its own.
 Precomputed because they're too heavy (COST) to build on a page load. Normally you
 don't run these by hand.
 
+- `research/gen-research-store.mjs` → Vercel Blob `research/v1/` (NOT `public/data`), the /research
+  store (#2234): one pitch-level month shard per month of a season from Savant's daily
+  CSV, plus `index.json`. Nightly with `--recent` (step "Research store" in
+  `update-nightly-data.yml`, `finals` gate; stamp `public/data/research-store.json`), and by
+  hand through `.github/workflows/research-store.yml` for a backfill. Reads only days before
+  today (US Pacific); a month that comes back smaller than the stored one is refused.
+  Layout, the two runs and the guards: `docs/research-store.md`.
 - `wire/gen-notable-players.mjs` → `public/data/notable-players.json` — two id lists for the
   winter wire's major/minor rule (`src/api/transactions/major.js`): `star` (4+ WAR in one
   of the last three seasons, or an All-Star or award in the last five) and `notable`
@@ -1556,11 +1563,6 @@ don't run these by hand.
 
 ## Own-cadence generators (not the nightly batch)
 
-- `research/gen-research-store.mjs` → Vercel Blob `research/v1/` (NOT `public/data`), the /research
-  store (#2234): one pitch-level month shard per month of a season from Savant's daily
-  CSV, plus `index.json`. Hand-dispatched by `.github/workflows/research-store.yml` until
-  the first upload is checked; then it joins the nightly batch. Reads only days before
-  today (US Pacific). Layout and filter definitions: `docs/research-store.md`.
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
   no entry in the nightly commit step). Runs in `update-nightly-data.yml`
   alongside the generators above, but is the one script here that calls

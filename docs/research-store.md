@@ -12,9 +12,26 @@ Vercel Blob, outside git (Gary, 2026-11-02), public, under `research/v1/`:
 - `{season}/{MM}.json`: one month, pitch rows in column arrays. The layout is in
   `src/api/research/shard.js`, the one file the writer and the reader share.
 
-`scripts/research/gen-research-store.mjs` builds and uploads it. For now it runs only by hand,
-through `.github/workflows/research-store.yml` (needs the `BLOB_READ_WRITE_TOKEN` repo
-secret). The reader is `src/api/research/store.js`. In dev, point `VITE_RESEARCH_STORE`
+`scripts/research/gen-research-store.mjs` builds and uploads it (needs the
+`BLOB_READ_WRITE_TOKEN` repo secret). Two workflows run it:
+
+- **Nightly** (`update-nightly-data.yml`, step "Research store", gated on an MLB game going
+  Final): `--recent` rebuilds the month or two that the last 3 days fall in, WHOLE. A shard
+  holds only the days a run fetched, so a 3-day fetch would shrink a month to 3 days. About
+  31 Savant requests a night, 62 on the 1st to 3rd (estimate). After the index upload it
+  writes `public/data/research-store.json` (`generatedAt`, `through`), the stamp
+  `check-data-freshness.mjs` reads. The page does not read the stamp.
+- **By hand** (`research-store.yml`, dispatch): any months, for a backfill or a rebuild.
+
+**A month only grows.** A rebuilt month with fewer pitches than the index has for it is not
+uploaded and the run exits 1 (Savant can answer a late or broken day with a 200 and fewer
+rows). The trailing window refills it the next night; `--force` (the `force` box on the
+manual workflow) overrides.
+
+**Known gaps.** The nightly gate closes about two nights after the season's last Final, so
+rows Savant posts later than that need one hand run. The index is read back with a query
+that should miss the one-hour CDN cache (not yet confirmed on a run). The manual workflow has
+a concurrency group; it does not share one with the nightly job, which runs at 08:17 UTC. The reader is `src/api/research/store.js`. In dev, point `VITE_RESEARCH_STORE`
 at a local copy:
 
 ```bash

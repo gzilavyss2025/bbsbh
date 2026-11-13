@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
 import { buildQuery, fieldOf, horizontalThird, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
-import { mergeIndex, monthDays, savantDayUrl, seasonMonths } from '../scripts/lib/research/store.mjs'
+import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
 // One Savant CSV row, with only the columns the store reads.
 const row = (o) => ({
@@ -127,4 +127,22 @@ test('the index keeps the months it already had', () => {
   assert.deepEqual(Object.keys(two.seasons[2026].months), ['05', '06'])
   assert.equal(two.seasons[2026].months['06'].pitches, 5)
   assert.equal(two.built, 't2')
+})
+
+test('the nightly window rebuilds the month or two its last 3 days fall in, whole', () => {
+  assert.deepEqual(recentMonths('2026-06-15'), [{ season: 2026, month: '06' }])
+  assert.deepEqual(recentMonths('2026-07-02'), [{ season: 2026, month: '06' }, { season: 2026, month: '07' }])
+  assert.deepEqual(recentMonths('2026-04-01'), [{ season: 2026, month: '03' }])
+  assert.deepEqual(recentMonths('2026-11-01'), [{ season: 2026, month: '10' }])
+  assert.deepEqual(recentMonths('2026-11-03'), [{ season: 2026, month: '10' }, { season: 2026, month: '11' }])
+  assert.deepEqual(recentMonths('2027-01-02'), [], 'no season month in the window')
+  assert.deepEqual(recentMonths('2026-03-01'), [], 'February is not a season month')
+  assert.deepEqual(recentMonths('2026-03-02'), [{ season: 2026, month: '03' }])
+})
+
+test('a rebuilt month may grow or hold, never shrink', () => {
+  assert.equal(shrinkReason(undefined, 10), null, 'a new month is fine')
+  assert.equal(shrinkReason({ pitches: 100 }, 100), null)
+  assert.equal(shrinkReason({ pitches: 100 }, 120), null)
+  assert.match(shrinkReason({ pitches: 100 }, 99), /fewer than the 100 on file/)
 })
