@@ -90,13 +90,16 @@
   max-inline-size: var(--app-width);
   max-block-size: 85dvh;
   margin: auto auto 0;
-  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+  padding: 0;
   border: var(--bw-hair) solid var(--border-rule);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
   background: var(--surface-card);
   color: var(--text-body);
   box-shadow: var(--shadow-raised);
+}
+.research__sheetbody {
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 .research__sheet::backdrop {
   background: rgba(22, 34, 47, 0.44);

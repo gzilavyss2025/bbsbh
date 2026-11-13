@@ -34,6 +34,7 @@ function PersonField({ label, value, people, onChange }) {
       {(id) => (
         <>
           <input
+            key={value ?? 'anyone'}
             id={id}
             list={listId}
             defaultValue={value ? people[value] ?? '' : ''}

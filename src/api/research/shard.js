@@ -27,6 +27,12 @@
 // (the generator's rule); the page also drops games on or after `?d=`.
 
 import { numOrNull } from '../../lib/math/number.js'
+import { NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
+
+// An event that ends no plate appearance: truncated_pa marks a cut-short at-bat (the
+// batter bats again under a new at_bat_number), and the baserunning set ends an
+// inning without a result. Same set as scout/headToHead.js's NOT_A_PA.
+const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
 export const SHARD_VERSION = 1
 
@@ -149,7 +155,7 @@ export function decodePlateAppearances(shard) {
       px: unscale('px', cols.px[j]),
     })
     const ev = dict.ev[cols.ev[j]]
-    if (ev) {
+    if (ev && !NOT_A_PA.has(ev)) {
       cur.event = ev
       cur.hcX = unscale('hx', cols.hx[j])
       cur.hcY = unscale('hy', cols.hy[j])

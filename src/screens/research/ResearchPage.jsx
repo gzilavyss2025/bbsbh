@@ -71,10 +71,16 @@ export function ResearchPage() {
   }, [])
   const data = store.data
   const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort() : []), [data])
-  const blocked = data?.cover.first ? unsupported(data.cover.first) : []
-  const blank = isBlank(q)
-  const result = useMemo(() => (data && !blank ? answer(data.pas, q, cutoff) : null), [data, q, cutoff, blank])
-  const pills = data ? pillsOf(q, data.people) : []
+  const blocked = useMemo(() => (data?.cover.first ? unsupported(data.cover.first) : []), [data])
+  // A chip the store's seasons cannot answer stays in the URL but out of the query.
+  const live = useMemo(() => {
+    const chips = { ...q.chips }
+    for (const b of blocked) delete chips[b.key]
+    return { ...q, chips }
+  }, [q, blocked])
+  const blank = isBlank(live)
+  const result = useMemo(() => (data && !blank ? answer(data.pas, live, cutoff) : null), [data, live, cutoff, blank])
+  const pills = data ? pillsOf(live, data.people) : []
   const bar = data && <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
 
   const main = (
@@ -124,7 +130,7 @@ export function ResearchPage() {
       ) : main}
       {!wide && data && (
         <dialog ref={sheet} className="research__sheet" aria-label="Filters" onClick={(e) => e.target === sheet.current && sheet.current.close()}>
-          <Stack>
+          <Stack className="research__sheetbody">
             <Cluster className="research__sheethead">
               <span className="t-label t-label--bold">Filters</span>
               <IconButton label="Close filters" onClick={() => sheet.current.close()}>✕</IconButton>

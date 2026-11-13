@@ -44,6 +44,16 @@ test('a month shard round-trips to plate appearances', () => {
   assert.equal(pas[1].stand, 'R')
 })
 
+test('a truncated plate appearance or a baserunning event is not a plate appearance', () => {
+  const rows = [
+    row({ at_bat_number: '7', events: 'truncated_pa', description: 'ball' }),
+    row({ at_bat_number: '8', events: 'caught_stealing_2b', description: 'ball' }),
+    row({ at_bat_number: '9', events: 'single', description: 'hit_into_play' }),
+  ]
+  const got = decodePlateAppearances(encodeMonth(rows, { season: 2026, month: '06' }))
+  assert.deepEqual(got.map((p) => p.event), ['single'])
+})
+
 test('the later of two same-day games between the same clubs is game 2', () => {
   assert.equal(pas[0].gameNumber, 1)
   assert.equal(pas[2].gameNumber, 2)

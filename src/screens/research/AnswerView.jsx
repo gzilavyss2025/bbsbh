@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ASKS, FILTER_BY_KEY } from '../../api/research/filters.js'
 import { rate3 } from '../../api/person/shared.js'
 import { gamePath, playerPath } from '../../lib/route.js'
+import { ordinal as nth } from '../../lib/format.js'
+import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
@@ -15,11 +17,6 @@ import { Table } from '../../components/ui/table/Table.jsx'
 
 const PAGE = 20
 const resultLabel = (ev) => Object.fromEntries(FILTER_BY_KEY.res.options)[ev] ?? ev.replaceAll('_', ' ')
-const nth = (n) => {
-  const teen = n % 100 >= 11 && n % 100 <= 13
-  return `${n}${teen ? 'th' : { 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`
-}
-const shortDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
