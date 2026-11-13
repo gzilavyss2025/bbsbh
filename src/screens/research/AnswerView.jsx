@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { ASKS, FILTER_BY_KEY } from '../../api/research/filters.js'
+import { ASKS, resultName } from '../../api/research/filters.js'
 import { rate3 } from '../../api/person/shared.js'
-import { gamePath, playerPath } from '../../lib/route.js'
+import { gamePath } from '../../lib/route.js'
+import { useRouteLink } from '../../lib/nav.js'
+import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { ordinal as nth } from '../../lib/format.js'
 import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
 import { Button } from '../../components/ui/control/Button.jsx'
@@ -16,12 +18,20 @@ import { Table } from '../../components/ui/table/Table.jsx'
 // player page. Nothing here computes: `a` is answer.js's result.
 
 const PAGE = 20
-const resultLabel = (ev) => Object.fromEntries(FILTER_BY_KEY.res.options)[ev] ?? ev.replaceAll('_', ' ')
+
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
+// A name opens the player page the app's own way (PlayerLink: the canonical
+// /player/{name-id} address, in-app navigation, the desktop hover card).
 function Name({ id, people }) {
-  return <a href={playerPath(id)}>{people[id] ?? `#${id}`}</a>
+  return <PlayerLink id={id} name={people[id] ?? ''}>{people[id] ?? `#${id}`}</PlayerLink>
+}
+
+// A date opens that game's box score, sealed (ADR-0101), without a full page load.
+function BoxDate({ m, children }) {
+  const link = useRouteLink()
+  return <a {...link(boxHref(m))}>{children}</a>
 }
 
 function Sentence({ ask, a, people }) {
@@ -31,7 +41,7 @@ function Sentence({ ask, a, people }) {
   if (ask === 'last') {
     return (
       <>
-        <Name id={last.batter} people={people} /> off <Name id={last.pitcher} people={people} />, <a href={boxHref(last)}>{shortDate(last.date)}</a>
+        <Name id={last.batter} people={people} /> off <Name id={last.pitcher} people={people} />, <BoxDate m={last}>{shortDate(last.date)}</BoxDate>
       </>
     )
   }
@@ -77,8 +87,8 @@ function Rows({ rows, people }) {
     <ul className="research__rows">
       {rows.map((m) => (
         <li key={m.key} className="research__row">
-          <a className="research__date" href={boxHref(m)}>{shortDate(m.date)}</a>
-          <span className="research__result">{resultLabel(m.event)}</span>
+          <span className="research__date"><BoxDate m={m}>{shortDate(m.date)}</BoxDate></span>
+          <span className="research__result">{resultName(m.event)}</span>
           <span><Name id={m.batter} people={people} /> v <Name id={m.pitcher} people={people} /> · {m.top ? '▲' : '▼'}{m.inning}</span>
           <span className="research__ord">{nth(m.ordinal)} in {m.date.slice(0, 4)}</span>
         </li>
@@ -94,10 +104,10 @@ function MatchTable({ rows, people }) {
       <tbody>
         {rows.map((m) => (
           <tr key={m.key}>
-            <td><a href={boxHref(m)}>{shortDate(m.date)}</a></td>
+            <td><BoxDate m={m}>{shortDate(m.date)}</BoxDate></td>
             <td><Name id={m.batter} people={people} /></td>
             <td><Name id={m.pitcher} people={people} /></td>
-            <td>{resultLabel(m.event)}</td>
+            <td>{resultName(m.event)}</td>
             <td>{m.top ? '▲' : '▼'}{m.inning}</td>
             <td className="research__num">{nth(m.ordinal)} in {m.date.slice(0, 4)}</td>
           </tr>

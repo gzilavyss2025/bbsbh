@@ -18,7 +18,7 @@ const BASE_SIZE = 7.3
 const REACH = 7.6 // center-to-center distance from the shared middle
 const CENTER = { second: [17, 17 - REACH], first: [17 + REACH, 17], third: [17 - REACH, 17] }
 
-function BaseSquare({ cx, cy, filled }) {
+function BaseSquare({ cx, cy, filled, ink }) {
   const half = BASE_SIZE / 2
   return (
     <rect
@@ -27,14 +27,16 @@ function BaseSquare({ cx, cy, filled }) {
       width={BASE_SIZE}
       height={BASE_SIZE}
       transform={`rotate(45 ${cx} ${cy})`}
-      fill={filled ? 'var(--surface-inset)' : 'transparent'}
-      stroke="var(--surface-inset)"
+      fill={filled ? ink : 'transparent'}
+      stroke={ink}
       strokeWidth="1.6"
     />
   )
 }
 
-export function BaseState({ bases = { first: false, second: false, third: false }, size = 32 }) {
+// `ink` is the squares' colour: the scorebug's light ink on its dark plate by default.
+// /research's Runners chips pass currentColor, so a pressed (ink-filled) chip inverts it.
+export function BaseState({ bases = { first: false, second: false, third: false }, size = 32, ink = 'var(--surface-inset)' }) {
   return (
     <svg
       className="basestate"
@@ -43,9 +45,9 @@ export function BaseState({ bases = { first: false, second: false, third: false 
       viewBox="0 0 34 34"
       aria-hidden="true"
     >
-      <BaseSquare cx={CENTER.second[0]} cy={CENTER.second[1]} filled={bases.second} />
-      <BaseSquare cx={CENTER.first[0]} cy={CENTER.first[1]} filled={bases.first} />
-      <BaseSquare cx={CENTER.third[0]} cy={CENTER.third[1]} filled={bases.third} />
+      <BaseSquare cx={CENTER.second[0]} cy={CENTER.second[1]} filled={bases.second} ink={ink} />
+      <BaseSquare cx={CENTER.first[0]} cy={CENTER.first[1]} filled={bases.first} ink={ink} />
+      <BaseSquare cx={CENTER.third[0]} cy={CENTER.third[1]} filled={bases.third} ink={ink} />
     </svg>
   )
 }

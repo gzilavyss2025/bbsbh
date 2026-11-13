@@ -143,3 +143,37 @@
   border-top: var(--bw-heavy) solid var(--border-stamped);
   padding-top: var(--space-2);
 }
+
+/* ---- the design pass (Gary, 2026-11-13): square corners, ink links, room to read.
+   Square like the rest of Tally's ledger look: the cards, the tables and the preset
+   doors drop their radius on this page only. */
+.research .card {
+  --card-radius: 0;
+}
+.research .table--sheet,
+.research .door--block {
+  border-radius: 0;
+}
+/* Names and dates are links, but they read as ink in a ledger, not as blue web links:
+   the underline comes back on hover and focus, so they still say they go somewhere. */
+.research__answer :is(a, .plink),
+.research__table :is(a, .plink),
+.research__rows :is(a, .plink) {
+  color: inherit;
+  text-decoration: none;
+}
+.research__answer :is(a, .plink):hover,
+.research__table :is(a, .plink):hover,
+.research__rows :is(a, .plink):hover,
+.research__answer :is(a, .plink):focus-visible,
+.research__table :is(a, .plink):focus-visible,
+.research__rows :is(a, .plink):focus-visible {
+  text-decoration: underline;
+}
+/* At the wide step the page takes the slate's wide measure, so the filter column and a
+   six-column match table sit side by side with no sideways scroll. */
+@media (min-width: 740px) {
+  .screen.research {
+    max-width: 1272px;
+  }
+}

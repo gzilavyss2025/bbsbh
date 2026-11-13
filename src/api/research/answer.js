@@ -6,7 +6,7 @@
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { totalsOf } from '../scout/headToHead.js'
-import { FILTERS, matcher } from './filters.js'
+import { matcher, resultName } from './filters.js'
 
 const LEADER_ROWS = 10
 
@@ -43,10 +43,9 @@ function leaders(matches, who) {
 }
 
 function outcomes(matches) {
-  const labels = Object.fromEntries(FILTERS[0].options)
   const counts = new Map()
   for (const m of matches) {
-    const label = labels[m.event] ?? m.event.replaceAll('_', ' ')
+    const label = resultName(m.event)
     counts.set(label, (counts.get(label) ?? 0) + 1)
   }
   return [...counts].map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n)

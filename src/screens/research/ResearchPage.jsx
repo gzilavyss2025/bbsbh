@@ -1,6 +1,6 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
-import { ASKS, FILTER_BY_KEY, buildQuery, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
+import { ASKS, FILTER_BY_KEY, buildQuery, clubName, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
 import { answer } from '../../api/research/answer.js'
 import { coverage, fetchIndex, fetchStore } from '../../api/research/store.js'
 import { isRealDate } from '../../lib/dates.js'
@@ -38,7 +38,7 @@ const PRESETS = [
   { ask: 'last', label: 'Oppo homer, lefty v lefty sinker, inner third', search: '?res=home_run&fld=oppo&pt=SI&loc=inner&bh=L&ph=L' },
   { ask: 'last', label: 'A triple play', search: '?res=triple_play' },
   { ask: 'often', label: 'Lefty homers off lefties', search: '?ask=often&res=home_run&bh=L&ph=L' },
-  { ask: 'often', label: 'Hits with RISP, 9th or later', search: '?ask=often&inn=9.x&run=risp.loaded&res=single.double.triple.home_run', wideOnly: true },
+  { ask: 'often', label: 'Hits with RISP, 9th or later', search: '?ask=often&inn=9.x&run=-2-.--3.12-.1-3.-23.123&res=single.double.triple.home_run', wideOnly: true },
   { ask: 'most', label: 'Homers after an 0-2 count', search: '?ask=most&cnt=0-2&res=home_run' },
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]
@@ -51,14 +51,15 @@ function readUrl() {
 // The filter bar's pills: one per active filter, in words.
 function pillsOf(q, people) {
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
-  const out = Object.entries(q.chips).map(([k, c]) => {
+  const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
     return `${c.inv ? 'Not ' : ''}${c.vals.map((v) => labels[v]).join(' / ')}`
   })
   if (q.batter) out.push(people[q.batter] ?? 'Batter')
   if (q.pitcher) out.push(`vs ${people[q.pitcher] ?? 'pitcher'}`)
-  if (q.team) out.push(`${q.team} batting`)
-  if (q.park) out.push(`at ${q.park}`)
+  if (q.team) out.push(`${clubName(q.team)} batting`)
+  if (q.pitchTeam) out.push(`${clubName(q.pitchTeam)} pitching`)
+  if (q.park) out.push(`at ${clubName(q.park)}`)
   return out
 }
 
@@ -78,7 +79,7 @@ export function ResearchPage() {
     return { ...data, cover: coverage(index) }
   }, [])
   const data = store.data
-  const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort() : []), [data])
+  const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [data])
   const blocked = useMemo(() => (data?.cover.first ? unsupported(data.cover.first) : []), [data])
   // A chip the store's seasons cannot answer stays in the URL but out of the query.
   const live = useMemo(() => {
@@ -86,26 +87,31 @@ export function ResearchPage() {
     for (const b of blocked) delete chips[b.key]
     return { ...q, chips }
   }, [q, blocked])
+  // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
+  // open, so the page shows the start screen (presets). An emptied card keeps the page
+  // out of the start screen until its ✕ (Gary, 2026-11-13), so on a phone the filter bar
+  // stays one tap away.
   const blank = isBlank(live)
+  const start = blank && !Object.keys(q.chips).length
   const result = useMemo(() => (data && !blank ? answer(data.pas, live, cutoff) : null), [data, live, cutoff, blank])
   const pills = data ? pillsOf(live, data.people) : []
   const bar = data && <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
 
   const main = (
     <Stack>
-      {!blank && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
+      {!start && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
       {store.error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
       {data && (
         <p className="t-label t-label--nocaps">
-          {blank ? 'Ask about ' : ''}
+          {start ? 'Ask about ' : ''}
           {data.cover.first === data.cover.last ? data.cover.first : `${data.cover.first}–${data.cover.last}`}
-          {blank ? `’s ${data.cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(data.cover.through)}
+          {start ? `’s ${data.cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(data.cover.through)}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
           {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
         </p>
       )}
       {!data && !store.error && <p className="t-label t-label--nocaps">Loading plays{progress ? ` · month ${progress.n} of ${progress.of}` : ''}…</p>}
-      {blank && (
+      {start && (
         <Card frame="stamped" label="Try one">
           <div className="research__try">
             {ASKS.map((x) => {
@@ -123,7 +129,7 @@ export function ResearchPage() {
         </Card>
       )}
       {result && <AnswerCard ask={q.ask} a={result} people={data.people} />}
-      {data && !wide && !blank && (
+      {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
           {pills.map((p, i) => <Pill key={i}>{p}</Pill>)}

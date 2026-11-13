@@ -19,6 +19,12 @@
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
+import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
+
+// Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
+// so a code finds its full name through teams.js. An unknown code shows as itself.
+const CLUB_NAMES = Object.fromEntries(ALL_MLB_TEAM_IDS.map((id) => [teamAbbr({ id }), teamFullName(id)]))
+export const clubName = (code) => CLUB_NAMES[code] ?? code
 
 const HALF_PLATE = 17 / 12 / 2
 const THIRD = (17 / 12) / 3
@@ -76,7 +82,24 @@ const RESULTS = [
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
 const lastPitch = (pa) => pa.pitches[pa.pitches.length - 1]
-const runnersTag = (r) => (r === 0 ? 'empty' : r === 7 ? 'loaded' : r & 6 ? 'risp' : 'first')
+// Runners: one value per base state, the bases spelled in order ('1-3' = first and
+// third). The card draws each as the scorebug's BaseState. The four values the first
+// slice used still parse (LEGACY_RUNNERS), so an old link keeps its meaning.
+const RUNNER_STATES = [
+  ['---', 'Bases empty'],
+  ['1--', 'Runner on 1st'],
+  ['-2-', 'Runner on 2nd'],
+  ['--3', 'Runner on 3rd'],
+  ['12-', '1st and 2nd'],
+  ['1-3', '1st and 3rd'],
+  ['-23', '2nd and 3rd'],
+  ['123', 'Bases loaded'],
+]
+const runnersTag = (r) => `${r & 1 ? '1' : '-'}${r & 2 ? '2' : '-'}${r & 4 ? '3' : '-'}`
+const LEGACY_RUNNERS = { empty: ['---'], first: ['1--'], risp: ['-2-', '--3', '12-', '1-3', '-23'], loaded: ['123'] }
+
+// '1-3' -> { first, second, third }, for BaseState.
+export const basesOf = (v) => ({ first: v[0] === '1', second: v[1] === '2', third: v[2] === '3' })
 
 // Each card: key (URL), label, options [[value, label]], test(pa) -> the PA's value(s),
 // `since` the first season the card can answer (the coverage line), and `multi`.
@@ -91,14 +114,23 @@ export const FILTERS = [
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
   { key: 'cnt', label: 'Count (passed through)', options: ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2'].map((c) => [c, c]), values: (pa) => pa.pitches.map((p) => `${p.balls}-${p.strikes}`) },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
-  { key: 'run', label: 'Runners', options: [['empty', 'Bases empty'], ['first', 'Runner on 1st only'], ['risp', 'Scoring position'], ['loaded', 'Loaded']], values: (pa) => [runnersTag(pa.runners)] },
+  { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'inn', label: 'Inning', options: [...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [String(i), `${i}`]), ['x', 'Extras']], values: (pa) => [pa.inning > 9 ? 'x' : String(pa.inning)] },
 ]
 
 export const FILTER_BY_KEY = Object.fromEntries(FILTERS.map((f) => [f.key, f]))
 
+// An event's name as the PA result card groups it (fielders_choice_out reads
+// "Fielder's choice"), for the outcome table and the match rows.
+const RESULT_NAMES = Object.fromEntries(RESULTS)
+export function resultName(event) {
+  const key = FILTER_BY_KEY.res.values({ event })[0]
+  return RESULT_NAMES[key] ?? key.replaceAll('_', ' ')
+}
+
 // Parse / build the URL. A multi card is `res=home_run.double`, inverted `res=!home_run`.
-// People and clubs: `bat`, `pit` (ids), `team` (batting club), `park` (home club).
+// People and clubs: `bat`, `pit` (ids), `team` (batting club), `pteam` (pitching club),
+// `park` (home club).
 export function parseQuery(search) {
   const p = new URLSearchParams(search)
   const chips = {}
@@ -106,12 +138,14 @@ export function parseQuery(search) {
     const raw = p.get(f.key)
     if (!raw) continue
     const inv = raw.startsWith('!')
-    const vals = (inv ? raw.slice(1) : raw).split('.').filter((v) => f.options.some(([o]) => o === v))
+    const parts = (inv ? raw.slice(1) : raw).split('.')
+    const expanded = f.key === 'run' ? [...new Set(parts.flatMap((v) => LEGACY_RUNNERS[v] ?? [v]))] : parts
+    const vals = expanded.filter((v) => f.options.some(([o]) => o === v))
     if (vals.length) chips[f.key] = { vals, inv: inv && !f.single }
   }
   const id = (k) => (/^\d+$/.test(p.get(k) ?? '') ? Number(p.get(k)) : null)
   const club = (k) => (/^[A-Z]{2,3}$/.test(p.get(k) ?? '') ? p.get(k) : null)
-  return { chips, batter: id('bat'), pitcher: id('pit'), team: club('team'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
+  return { chips, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -124,6 +158,7 @@ export function buildQuery(q, keep = {}) {
   if (q.batter) p.set('bat', q.batter)
   if (q.pitcher) p.set('pit', q.pitcher)
   if (q.team) p.set('team', q.team)
+  if (q.pitchTeam) p.set('pteam', q.pitchTeam)
   if (q.park) p.set('park', q.park)
   for (const [k, v] of Object.entries(keep)) if (v) p.set(k, v)
   const s = p.toString()
@@ -138,11 +173,12 @@ export const ASKS = [
 ]
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
-export const isBlank = (q) => !Object.keys(q.chips ?? {}).length && !q.batter && !q.pitcher && !q.team && !q.park
+export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
 
 // The predicate for a whole query. `cutoff` ('YYYY-MM-DD', optional) holds out that day and later.
 export function matcher(q, cutoff) {
-  const tests = Object.entries(q.chips ?? {}).map(([k, c]) => {
+  // A card with nothing picked stays on screen until its ✕, and filters nothing.
+  const tests = Object.entries(q.chips ?? {}).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const f = FILTER_BY_KEY[k]
     const want = new Set(c.vals)
     return (pa) => f.values(pa).some((v) => want.has(v)) !== Boolean(c.inv)
@@ -150,6 +186,7 @@ export function matcher(q, cutoff) {
   if (q.batter) tests.push((pa) => pa.batter === q.batter)
   if (q.pitcher) tests.push((pa) => pa.pitcher === q.pitcher)
   if (q.team) tests.push((pa) => pa.batTeam === q.team)
+  if (q.pitchTeam) tests.push((pa) => pa.fieldTeam === q.pitchTeam)
   if (q.park) tests.push((pa) => pa.home === q.park)
   if (cutoff) tests.push((pa) => pa.date < cutoff)
   return (pa) => tests.every((t) => t(pa))

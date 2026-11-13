@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
-import { FILTERS, FILTER_BY_KEY } from '../../api/research/filters.js'
+import { FILTERS, FILTER_BY_KEY, basesOf, clubName } from '../../api/research/filters.js'
+import { BaseState } from '../../components/scoring/BaseState.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
@@ -59,7 +60,7 @@ function ClubField({ label, value, clubs, onChange }) {
       {(id) => (
         <select id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
           <option value="">Any</option>
-          {clubs.map((c) => <option key={c} value={c}>{c}</option>)}
+          {clubs.map((c) => <option key={c} value={c}>{clubName(c)}</option>)}
         </select>
       )}
     </Field>
@@ -68,8 +69,18 @@ function ClubField({ label, value, clubs, onChange }) {
 
 function FilterCard({ f, chip, onChip }) {
   const [open, setOpen] = useState(false)
-  const options = f.options.map(([value, label]) => ({ value, label }))
-  const shown = open || options.length <= FIRST_CHIPS + 1 ? options : options.filter((o, i) => i < FIRST_CHIPS || chip.vals.includes(o.value))
+  // The Runners card draws each base state as the scorebug does; the words are its name.
+  const options = f.options.map(([value, label]) => ({
+    value,
+    label: f.glyphs ? (
+      <span role="img" aria-label={label}>
+        <BaseState bases={basesOf(value)} size={28} ink="currentColor" />
+      </span>
+    ) : (
+      label
+    ),
+  }))
+  const shown = open || f.glyphs || options.length <= FIRST_CHIPS + 1 ? options : options.filter((o, i) => i < FIRST_CHIPS || chip.vals.includes(o.value))
   const hidden = options.length - shown.length
   return (
     <Card frame="ledger">
@@ -93,8 +104,10 @@ function FilterCard({ f, chip, onChip }) {
           options={shown}
           value={f.single ? chip.vals[0] : chip.vals}
           onChange={(v) => {
-            const vals = f.single ? [v] : v
-            onChip(vals.length ? { ...chip, vals } : null)
+            // Unpicking the last chip (or the picked one of a pick-one card) leaves
+            // the card open and empty; only its ✕ removes it.
+            const vals = f.single ? (chip.vals[0] === v ? [] : [v]) : v
+            onChip({ ...chip, vals })
           }}
         />
         {hidden > 0 && <Button size="control" skin="ghost" onClick={() => setOpen(true)}>+{hidden} more</Button>}
@@ -120,6 +133,7 @@ export function FilterBar({ q, people, clubs, blocked, onChange }) {
         <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />
         <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />
         <ClubField label="Batting club" value={q.team} clubs={clubs} onChange={(team) => onChange({ ...q, team })} />
+        <ClubField label="Pitching club" value={q.pitchTeam} clubs={clubs} onChange={(pitchTeam) => onChange({ ...q, pitchTeam })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
       {active.map((key) => (
