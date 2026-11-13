@@ -18,7 +18,8 @@ Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc previ
 without explicit maintainer authorization. The maintainer gave the orchestrator standing
 authorization to merge each green child PR after its own `/code-review`, or to stack
 PRs through `/stack-prs` when that helps (`.claude/skills/orchestrate/`, "Landing"). When the maintainer says "merge the
-pr", the `merge-pr` skill merges that one PR on green CI, with no stack and no review. Merging to `main` is the production
+pr", the `merge-pr` skill merges that one PR on green CI, with no stack and no review. When the maintainer runs `/work-issue N`, that skill merges
+the one PR it opened for issue N after `/code-review high` and green CI. Merging to `main` is the production
 deployment trigger, so only the maintainer and those standing authorizations merge.
 
 ## Cloud sessions (claude.ai/code)
