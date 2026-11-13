@@ -40,6 +40,7 @@ export const ROUTE_TABLE = [
   { name: 'postseason-history', path: '/postseason-history' },
   { name: 'nine-keys', path: '/nine-keys' },
   { name: 'classics', path: '/classics' },
+  { name: 'research', path: '/research' },
   { name: 'notable', path: '/notable' },
   { name: 'postseason-leaders', path: '/postseason-leaders' },
   { name: 'all-star-rosters', path: '/all-star-rosters' },

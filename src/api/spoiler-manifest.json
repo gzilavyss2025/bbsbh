@@ -1246,6 +1246,22 @@
         "screens/gameday/next/hero/SavantFacts.jsx"
       ]
     },
+    "research/answer.js": {
+      "class": "spoiler-free",
+      "why": "/research's answer (#2234): the match list, summary line, leaders and outcome spread over the research store's plate appearances. Pure; an open page (ADR-0034)."
+    },
+    "research/filters.js": {
+      "class": "spoiler-free",
+      "why": "/research's filter definitions, predicates and URL format (#2234). Pure; the `?d=` cutoff drops games on or after that day."
+    },
+    "research/shard.js": {
+      "class": "spoiler-free",
+      "why": "The research store's month-shard layout (#2234), shared by the generator and the reader. Holds only games dated before the day the store was built."
+    },
+    "research/store.js": {
+      "class": "spoiler-free",
+      "why": "Reads the research store from Vercel Blob (#2234): Savant pitch rows for games dated before the build day only, never a live read. An open page (ADR-0034)."
+    },
     "scout/headToHead.js": {
       "class": "spoiler-free",
       "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."

@@ -1,0 +1,24 @@
+/* ---------------------------------------------------------------- research
+   The /research page (#2234): the pickers share the Streak Finder's square,
+   ink-edged look; Stack and Cluster own the spacing. */
+.research__field {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.research__field select,
+.research__field input {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  min-width: 0;
+  inline-size: 100%;
+}
+.research__answer {
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+}
