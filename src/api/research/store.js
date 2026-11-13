@@ -49,9 +49,12 @@ export async function fetchStore(index, onProgress = () => {}) {
   return { pas: shards.flatMap(decodePlateAppearances), people }
 }
 
-// The coverage line's facts: first and last season, and the newest game date.
+// The coverage line's facts: first and last season, the newest game date, and the
+// pitches on file.
 export function coverage(index) {
   const seasons = Object.keys(index.seasons).map(Number).sort()
-  const through = Object.values(index.seasons).flatMap((s) => Object.values(s.months).map((m) => m.through)).sort().at(-1) ?? null
-  return { first: seasons[0] ?? null, last: seasons.at(-1) ?? null, through }
+  const months = Object.values(index.seasons).flatMap((s) => Object.values(s.months))
+  const through = months.map((m) => m.through).sort().at(-1) ?? null
+  const pitches = months.reduce((n, m) => n + (m.pitches ?? 0), 0)
+  return { first: seasons[0] ?? null, last: seasons.at(-1) ?? null, through, pitches }
 }
