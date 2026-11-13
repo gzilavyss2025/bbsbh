@@ -70,7 +70,9 @@ import { listSheets } from './lib/walk.mjs'
 // 102 -> 101: a rule for a class no component draws went in the PurgeCSS sweep.
 // 99 -> 98: the intro chain went (#2856).
 // 98 -> 97: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
-const BUDGET = 96
+// 96 -> 94: the Awards page's cards became tables (#2546); its head and name lines
+// moved to --fs-label and --fs-small, the club line to .t-label.
+const BUDGET = 94
 
 const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw }))
 
