@@ -87,26 +87,31 @@ export function ResearchPage() {
     for (const b of blocked) delete chips[b.key]
     return { ...q, chips }
   }, [q, blocked])
+  // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
+  // open, so the page shows the start screen (presets). An emptied card keeps the page
+  // out of the start screen until its ✕ (Gary, 2026-11-13), so on a phone the filter bar
+  // stays one tap away.
   const blank = isBlank(live)
+  const start = blank && !Object.keys(q.chips).length
   const result = useMemo(() => (data && !blank ? answer(data.pas, live, cutoff) : null), [data, live, cutoff, blank])
   const pills = data ? pillsOf(live, data.people) : []
   const bar = data && <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
 
   const main = (
     <Stack>
-      {!blank && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
+      {!start && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
       {store.error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
       {data && (
         <p className="t-label t-label--nocaps">
-          {blank ? 'Ask about ' : ''}
+          {start ? 'Ask about ' : ''}
           {data.cover.first === data.cover.last ? data.cover.first : `${data.cover.first}–${data.cover.last}`}
-          {blank ? `’s ${data.cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(data.cover.through)}
+          {start ? `’s ${data.cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(data.cover.through)}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
           {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
         </p>
       )}
       {!data && !store.error && <p className="t-label t-label--nocaps">Loading plays{progress ? ` · month ${progress.n} of ${progress.of}` : ''}…</p>}
-      {blank && (
+      {start && (
         <Card frame="stamped" label="Try one">
           <div className="research__try">
             {ASKS.map((x) => {
@@ -124,7 +129,7 @@ export function ResearchPage() {
         </Card>
       )}
       {result && <AnswerCard ask={q.ask} a={result} people={data.people} />}
-      {data && !wide && !blank && (
+      {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
           {pills.map((p, i) => <Pill key={i}>{p}</Pill>)}
