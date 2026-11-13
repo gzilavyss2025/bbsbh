@@ -13,8 +13,9 @@ maintainer looks at the combined change before it lands.
 **Invoking this skill is the maintainer's explicit yes to merge to `main`.** The
 orchestrator may also invoke it under the maintainer's standing permission
 (`.claude/skills/orchestrate/`, "Stacking"); it then passes explicit PR numbers. It is
-the only merge the maintainer pre-approves. (`merge-pr` merges one PR when he
-asks for that PR by name; it is not a standing permission.) The gates in step 7 still apply. If
+the only standing merge permission. (`merge-pr` merges one PR when he asks for that
+PR by name, and `/work-issue N` merges the PR it opened when he runs it; neither is a
+standing permission.) The gates in step 7 still apply. If
 one gate fails, stop and report. Never merge around a gate.
 
 The maintainer is not a technical user. Pick the sensible default, say what you

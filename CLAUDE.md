@@ -48,7 +48,7 @@ fails, move content out; do not raise the cap. After structural work, update the
 **All sessions use task branches and pull requests. Never push directly to `main`
 or trigger a Vercel deployment.** Exceptions: `/stack-prs` run by Gary; the
 orchestrator, which under his standing permission merges each green child PR after its
-own review, or stacks when that helps (`.claude/skills/orchestrate/`, "Landing"); and
+own review, or stacks when that helps (`.claude/skills/orchestrate/`, "Landing");
 `merge-pr` when Gary says "merge the pr" (green CI only, no stack); and
 `/work-issue N`, which merges its own PR after `/code-review high` and green CI. Keep
 work-in-progress off `main` (Vercel Pro since 2026-10-29). `claude/**` branches get **no** Vercel preview (cost,
