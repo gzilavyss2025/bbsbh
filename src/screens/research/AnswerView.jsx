@@ -28,8 +28,8 @@ function sentence(ask, a, people) {
   const last = a.matches[0]
   if (ask === 'last') return `Last: ${people[last.batter] ?? 'a batter'} against ${people[last.pitcher] ?? 'a pitcher'}, ${shortDate(last.date)}.`
   if (ask === 'often') {
-    const share = a.base ? ` That is ${((100 * n) / a.base).toFixed(1)}% of ${a.base.toLocaleString()} plate appearances with the same filters and any result.` : ''
-    return `${n.toLocaleString()} times in ${a.games.toLocaleString()} games.${share}`
+    const share = a.base ? ` That is ${((100 * n) / a.base).toFixed(1)}% of ${a.base.toLocaleString()} plate ${a.base === 1 ? 'appearance' : 'appearances'} with the same filters and any result.` : ''
+    return `${n.toLocaleString()} ${n === 1 ? 'time' : 'times'} in ${a.games.toLocaleString()} ${a.games === 1 ? 'game' : 'games'}.${share}`
   }
   if (ask === 'most') return `${people[a.batters[0].id] ?? 'One batter'} leads with ${a.batters[0].n}.`
   return `${a.outcomes[0].label} is the most common result: ${a.outcomes[0].n} of ${n.toLocaleString()}.`
