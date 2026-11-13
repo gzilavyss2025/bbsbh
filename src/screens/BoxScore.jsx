@@ -1,3 +1,4 @@
+import '../styles/48-stamp-strip.css'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'

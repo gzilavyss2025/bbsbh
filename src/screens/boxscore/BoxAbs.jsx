@@ -1,3 +1,4 @@
+import '../../styles/box-score/abs-strip.css'
 import { selectChallengeState, gameHasAbs } from '../../api/challenges.js'
 import { ordinal } from '../../lib/format.js'
 

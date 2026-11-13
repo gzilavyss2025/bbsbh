@@ -1,3 +1,4 @@
+import '../../styles/48-stamp-strip.css'
 import { useEffect, useRef, useState } from 'react'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 import { useBooks } from '../../hooks/useBooks.js'
