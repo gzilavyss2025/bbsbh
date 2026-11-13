@@ -1,6 +1,6 @@
 import '../../styles/heritage/pass.css'
 import '@fontsource/bungee/latin-400.css'
-import { useId, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { factsRecord, heritagePassModel, passCity, yearRecordThrough } from '../../lib/heritage/pass.js'
 import { fetchClubSeason } from '../../api/heritage/records.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -20,11 +20,25 @@ export function HeritagePass({ game, artwork = null }) {
   const { favoriteTeamId } = useFavoriteTeam()
   const model = heritagePassModel(game, favoriteTeamId)
   const records = { away: useClubRecord(game, 'away'), home: useClubRecord(game, 'home') }
+  // The frame is drawn at the ticket's TRUE proportions: 360 units wide and as
+  // tall as the ticket really is. A fixed 560 stretched to fit pulled every cut
+  // corner taller than wide, and unevenly (Gary, 2026-11-12).
+  const ref = useRef(null)
+  const [h, setH] = useState(560)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+    const fit = () => el.offsetWidth && setH(Math.round((360 * el.offsetHeight) / el.offsetWidth))
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [Boolean(model)])
   if (!model) return null
   const seed = stampSeed(game.gamePk)
   return (
-    <figure className="heritagepass" aria-label="Souvenir ticket">
-      <svg className="heritagepass__frame" viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true">
+    <figure ref={ref} className="heritagepass" aria-label="Souvenir ticket">
+      <svg className="heritagepass__frame" viewBox={`0 0 360 ${h}`} preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <filter id={`${id}-grain`}>
             <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed={seed} />
@@ -37,16 +51,16 @@ export function HeritagePass({ game, artwork = null }) {
             <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="2" seed={seed + 19} result="wear" />
             <feComposite in="wear" in2="pressure" operator="arithmetic" k1="0" k2="0.82" k3="0.18" k4="0" result="unevenWear" />
             <feColorMatrix in="unevenWear" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" />
-            <feComponentTransfer result="wornInk"><feFuncA type="linear" slope="24" intercept="-15.6" /></feComponentTransfer>
+            <feComponentTransfer result="wornInk"><feFuncA type="linear" slope="24" intercept="-16.1" /></feComponentTransfer>
             <feComposite in="impression" in2="wornInk" operator="out" />
           </filter>
         </defs>
         <g filter={`url(#${id}-press)`}>
-          <rect x="1" y="1" width="358" height="558" rx="25" fill="none" stroke="currentColor" strokeWidth="0.6" />
-          <path d="M26 13 H334 L347 26 V534 L334 547 H26 L13 534 V26 Z" fill="none" stroke="currentColor" strokeWidth="5" />
-          <path d="M28 21 H332 L339 28 V532 L332 539 H28 L21 532 V28 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <rect x="1" y="1" width="358" height={h - 2} rx="25" fill="none" stroke="currentColor" strokeWidth="0.6" />
+          <path d={`M26 13 H334 L347 26 V${h - 26} L334 ${h - 13} H26 L13 ${h - 26} V26 Z`} fill="none" stroke="currentColor" strokeWidth="5" />
+          <path d={`M28 21 H332 L339 28 V${h - 28} L332 ${h - 21} H28 L21 ${h - 28} V28 Z`} fill="none" stroke="currentColor" strokeWidth="1.5" />
         </g>
-        <rect className="heritagepass__grain" x="4" y="4" width="352" height="552" rx="22" filter={`url(#${id}-grain)`} opacity="0.16" />
+        <rect className="heritagepass__grain" x="4" y="4" width="352" height={h - 8} rx="22" filter={`url(#${id}-grain)`} opacity="0.16" />
       </svg>
       <div className="heritagepass__body" style={{ filter: `url(#${id}-press)` }}>
         <PassHeader game={game} model={model} records={records} />
@@ -62,7 +76,12 @@ export function HeritagePass({ game, artwork = null }) {
         </div>
         <PassVenue key={artwork?.src ?? 'no-art'} artwork={artwork} />
         <figcaption className="heritagepass__foot">
-          {model.date && <time dateTime={game.date}>{model.date}</time>}
+          {model.date && (
+            <time dateTime={game.gameDate || game.date}>
+              {model.date}
+              {model.time && <><span className="heritagepass__dot" aria-hidden="true"> · </span>{model.time}</>}
+            </time>
+          )}
           {game.venue && <span className="heritagepass__park">{game.venue}</span>}
         </figcaption>
       </div>
@@ -122,10 +141,14 @@ function PassScore({ team }) {
 function CrossedBats() {
   return (
     <svg viewBox="0 0 64 64">
-      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+      {/* Each bat is filled with the ticket's paper, so the bat on top hides the
+          one under it where they cross (Gary, 2026-11-12). Each grain line is
+          drawn with its own bat, before the next bat covers it. */}
+      <g className="heritagepass__bat" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
         <path d="M9 5 Q6 4 6 8 L7 12 L51 54 L53 58 L58 53 L54 51 L12 7 Z" />
+        <path d="M9 8 L27 26" fill="none" />
         <path d="M55 5 Q58 4 58 8 L57 12 L13 54 L11 58 L6 53 L10 51 L52 7 Z" />
-        <path d="M9 8 L27 26 M55 8 L37 26" />
+        <path d="M55 8 L37 26" fill="none" />
       </g>
     </svg>
   )

@@ -30,7 +30,7 @@ import { recordAfterGame } from '../../lib/stamp/stamps.js'
 // The same call api/stamps.js makes server-side, so the two produce byte-equal
 // facts. `hydrate=team` is what supplies `abbreviation` and `sport.id`, which
 // the bare schedule row does not carry.
-const HYDRATE = 'linescore,decisions,venue,team'
+const HYDRATE = 'linescore,decisions,venue(timezone),team'
 
 // statsapi accepts a comma-separated `gamePks` (verified live, 2026-08-04:
 // two pks in one call returned both games hydrated). Batched rather than one
@@ -80,6 +80,9 @@ export function stampGameFacts(game) {
     // The home club's league, so a postseason stamp can name its round (stampArt.js).
     leagueId: game.teams?.home?.team?.league?.id ?? null,
     venue: game.venue?.name ?? '',
+    // First pitch (UTC) and the park's own time zone, for the ticket's stub line.
+    gameDate: game.gameDate ?? '',
+    timeZone: game.venue?.timeZone?.id ?? null,
     innings: rows.length,
     scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,
     homeBattedLast,

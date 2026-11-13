@@ -1,3 +1,4 @@
+import '../styles/48-stamp-strip.css'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
@@ -10,7 +11,7 @@ import { stepToSection } from '../lib/route.js'
 import { boxScoreOpensByDate } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
-import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
+import { BoxAbs } from './boxscore/BoxAbs.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { useEventHistory } from '../hooks/postseason/useWsEvents.js'
 import { SealBox } from '../components/SealBox.jsx'
@@ -19,7 +20,6 @@ import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { HitChartCard } from './boxscore/HitChartCard.jsx'
 import { FeatLabel } from './boxscore/FeatLabel.jsx'
-import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { GameStoryCard } from '../components/game/GameStoryCard.jsx'
 import { StampGameButton } from '../components/logbook/StampGameButton.jsx'
 import { HeritagePass } from '../components/heritage/HeritagePass.jsx'
@@ -260,6 +260,8 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
+  // Where the win-prob chart draws its Tensest moments (the card in the left column).
+  const [tenseSlot, setTenseSlot] = useState(null)
 
   // Each crew member's id, by role — `selectOfficials` (spoiler-free; umpire
   // assignments carry no score) is the one place with ids, since box.umpires
@@ -372,7 +374,17 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             page's SealBox reveal render, which is the whole client-side
             guarantee, and that is a render-function boundary, not a position
             on the page. */}
-        <StampGameButton game={stampFacts} />
+        {/* Wide: the stamp and the souvenir ticket share the head of the sheet,
+            half each (Gary, 2026-11-12). A phone keeps the stamp first and the
+            ticket last (styles/48-stamp-strip.css). */}
+        <div className="bs__souvenirs">
+          <StampGameButton game={stampFacts} />
+          {stampFacts?.status === 'Final' && (
+            <section className="heritagepass-box" aria-label="Game souvenir">
+              <PassViewer game={stampFacts} artwork={heritageArt(stampFacts.venue)} />
+            </section>
+          )}
+        </div>
         <FeatLabel gamePk={feed?.gamePk} />
         <h2 className="bs__sectionTitle">Highlights</h2>
         {/* Wide: totals over the scoring summary beside decisions over the
@@ -381,6 +393,13 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
             <ScoringSummary groups={scoringSummary} box={box} filmEligible={filmCanExist(feed)} />
+            {/* The win-prob chart's Tensest moments, in a card of their own
+                (Gary, 2026-11-12): the chart portals its list into this slot,
+                so a row still picks its play on the chart. Hidden while empty. */}
+            <Card as="section" body="flush" className="bs__tense" aria-label="Tensest moments">
+              <SectionMasthead as="h3" title="Tensest moments" />
+              <div ref={setTenseSlot} />
+            </Card>
           </div>
           <div className="bs__col">
             <Decisions decisions={box.decisions} />
@@ -399,6 +418,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
               highlights={highlights}
               filmEligible={filmCanExist(feed)}
               final={selectIsFinal(feed)}
+              tenseSlot={tenseSlot}
             />
           </div>
         </div>
@@ -424,13 +444,13 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             <TeamBlock side={box.away} theme={awayTheme} />
             {/* Each own independent card, outside the batting/pitching card
                 above — not nested tail sections of it (see BoxAbs/BoxDefense). */}
-            <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} theme={awayTheme} />
+            <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} />
             <BoxDefense feed={feed} sideKey="away" theme={awayTheme} />
           </div>
           <div className="bs__col bs__col--home">
             <InfoCard fields={homeFields} />
             <TeamBlock side={box.home} theme={homeTheme} />
-            <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} theme={homeTheme} />
+            <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} />
             <BoxDefense feed={feed} sideKey="home" theme={homeTheme} />
           </div>
         </div>
@@ -458,12 +478,6 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
         <ThreeStars stars={stars} />
       </section>
 
-      {stampFacts?.status === 'Final' && (
-        <section className="heritagepass-box" aria-label="Game souvenir">
-          <h2>Souvenir ticket</h2>
-          <HeritagePass game={stampFacts} artwork={heritageArt(stampFacts.venue)} />
-        </section>
-      )}
       {modalId != null && <UmpireAccuracyModal id={modalId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
     </div>
   )
@@ -676,33 +690,6 @@ function TeamBlock({ side, theme }) {
   )
 }
 
-// This club's whole-game ABS (Automated Ball-Strike) challenge tally — the
-// same AbsRow StatBox shows one half at a time (src/api/challenges.js),
-// walked through the whole game (Infinity — same "entering a half that never
-// comes" sentinel BoxDefense uses below) since the box score is already
-// behind its own seal. Previously this data only reached the page as raw
-// feed text buried in the Pitching notes ("ABS Challenge: ATL 1-2…"); this is
-// the same StatBox pip row instead of a second copy of it. Renders only where
-// the feed says the game runs the challenge system (gameHasAbs) — every MLB
-// and Triple-A game, the Florida State League parks that run it, nothing at
-// the levels that run no challenges. Its own independent card below the
-// team's batting/pitching card (BoxScoreBody), not a tail section of it —
-// bs__abscard scopes the attached-header + card-frame treatment (see
-// index.css) to just this copy of the shared .abs/.abs__title markup; the
-// innings view's own AbsChallengesCard (StatBox.jsx) keeps its own look.
-function BoxAbs({ feed, sideKey, abbr, theme }) {
-  if (!gameHasAbs(feed)) return null
-  const side = selectChallengeState(feed, Infinity, 'bottom')[sideKey]
-  return (
-    <div className={`abs bs__abscard ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <span className="abs__title sectionhead--band">ABS Challenges</span>
-      <div className="abs__rows">
-        <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} remaining={side.remaining} showOpenPips={false} />
-      </div>
-    </div>
-  )
-}
-
 // The team's complete defensive alignment for the game — the same scorebook
 // diamond as the innings view (api/defense.js), but with every substitution
 // through the game's final play folded in (or, for a game still in progress
@@ -850,5 +837,31 @@ function Scoreboard({ away, home, innings, onSection, treatments, officialDate }
         </tbody>
       </Table>
     </Card>
+  )
+}
+
+// The souvenir ticket, small beside the stamp; a tap opens it full size in a
+// modal dialog (Gary, 2026-11-12). Native <dialog>: Escape, focus return and
+// the inert page come with showModal(). Still inside the revealed sheet, the one
+// place a pass may render (check-stamp-surfaces.mjs).
+function PassViewer({ game, artwork }) {
+  const ref = useRef(null)
+  return (
+    <>
+      <button type="button" className="heritagepass-open" aria-label="Open the souvenir ticket" onClick={() => ref.current?.showModal()}>
+        <HeritagePass game={game} artwork={artwork} />
+      </button>
+      <dialog
+        ref={ref}
+        className="heritagepass-dialog"
+        aria-label="Souvenir ticket"
+        onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
+      >
+        <HeritagePass game={game} artwork={artwork} />
+        <button type="button" className="btn btn--ghost heritagepass-dialog__close" onClick={() => ref.current?.close()}>
+          Close
+        </button>
+      </dialog>
+    </>
   )
 }

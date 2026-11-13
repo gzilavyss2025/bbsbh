@@ -23,9 +23,14 @@ export function PassHeader({ game, model, records }) {
       </div>
       {occasion && (
         <div className="heritagepass__ribbon">
-          <svg viewBox="0 0 310 38" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M16 2 H294 L303 10 L309 19 L303 28 L294 36 H16 L7 28 L1 19 L7 10 Z" fill="var(--bg-canvas)" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M18 6 H292 M18 32 H292" fill="none" stroke="currentColor" strokeWidth="0.4" />
+          {/* A banner (Gary, 2026-11-12): swallow-tail ends folded behind a cream
+              band with a fine inner border; the folds are the only solid ink. */}
+          <svg viewBox="0 0 320 44" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M1 12 H30 V42 H1 L12 27 Z" fill="var(--bg-canvas)" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M319 12 H290 V42 H319 L308 27 Z" fill="var(--bg-canvas)" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M18 36 L30 42 V36 Z M302 36 L290 42 V36 Z" fill="currentColor" />
+            <rect x="18" y="2" width="284" height="34" fill="var(--bg-canvas)" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="22.5" y="6.5" width="275" height="25" fill="none" stroke="currentColor" strokeWidth="0.75" />
           </svg>
           <p className="heritagepass__occasion">
             {occasion}{(model.seriesGame ?? model.seasonGame) && ` · Game ${model.seriesGame ?? model.seasonGame}`}

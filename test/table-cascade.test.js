@@ -270,7 +270,7 @@ const T3 = [
       '../api/defense.js',
       '../api/select.js',
       '../api/umpires.js',
-      '../api/challenges.js',
+      // challenges.js moved with the ABS strip to screens/boxscore/BoxAbs.jsx (2026-11-12).
       '../components/logbook/StampGameButton.jsx',
       '../hooks/useStamps.js',
     ],

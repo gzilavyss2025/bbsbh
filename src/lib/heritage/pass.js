@@ -9,10 +9,22 @@ import { roundNameAt, isFullSeasonMilb } from '../postseason/roundTag.js'
  */
 
 const DATE = new Intl.DateTimeFormat('en-US', {
-  month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
 })
 // Long-form ticket lettering for the existing classification labels.
 const LEVEL_NAME = { AAA: 'Triple-A', AA: 'Double-A', 'A+': 'High-A', A: 'Single-A', ROK: 'Rookie' }
+
+// First pitch in the park's own clock ("1:05 PM"), or '' when the time is unknown.
+// A game with no park time zone reads in the viewer's.
+export function passTime(gameDate, timeZone) {
+  const value = new Date(gameDate ?? '')
+  if (!gameDate || !Number.isFinite(value.getTime())) return ''
+  try {
+    return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', ...(timeZone ? { timeZone } : {}) }).format(value)
+  } catch {
+    return ''
+  }
+}
 
 export function passDate(date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) return ''
@@ -62,6 +74,7 @@ export function heritagePassModel(game, favoriteTeamId = null) {
     seriesGame,
     seasonGame,
     date: passDate(game.date),
+    time: passTime(game.gameDate, game.timeZone),
   }
 }
 

@@ -373,3 +373,19 @@
 /* Every column sits centred, the club's included (Gary, 2026-10-28). */
 .bs__totalsCard .bs__grid--totals :is(th, td) { text-align: center; }
 .bs__totalsCard .bs__grid--totals :is(th, td).bs__nameCol { text-align: center !important; } /* the club sits centred in its column too, so the edges match; !important answers .bs__nameCol's own (21-box-score.css) */
+
+/* The club column matches the innings (Gary, 2026-11-12): a fixed narrow column
+   (the table no longer hands it the spare width), each tile framed by the same
+   hairline right and bottom edges as an inning box, and the head cell blank
+   paper with the same edges. */
+.bs__grid--board { table-layout: fixed; }
+.bs__grid.bs__grid--board .bs__boardName {
+  width: 44px;
+  border: 0 solid var(--border-hairline);
+  border-width: 0 var(--bw-hair) var(--bw-hair) 0;
+}
+.bs__grid.bs__grid--board thead .bs__boardName { border-top-width: var(--bw-hair); }
+/* Fixed layout: only the club column has a set width; the innings and R/H/E
+   split the rest evenly, as before. */
+.bs__grid.bs__grid--board .bs__boardInn,
+.bs__grid.bs__grid--board .bs__boardFinal { width: auto; }

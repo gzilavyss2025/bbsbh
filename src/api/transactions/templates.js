@@ -242,9 +242,9 @@ function prospectPhrase(p) {
 // season he just had, where he had it. A trade's note adds that it was his
 // first big-league season when it was; a player with no big-league games in
 // the season gets his minor-league line (one extra read, playerFacts.js).
-export function seasonSentence(facts, moveDate = null) {
+export function seasonSentence(facts, moveDate = null, { named = false } = {}) {
   const rank = prospectPhrase(facts.prospect)
-  const lead = nameAge(facts, variant(facts, moveDate, 2))
+  const lead = nameAge(facts, named ? 0 : variant(facts, moveDate, 2))
   const who = rank ? `${lead.replace(/,$/, '')}, ${rank},` : lead
   // A thin big-league season with a minor-league one: lead with where he
   // spent most of the year.
@@ -641,7 +641,7 @@ export function factLines(template, facts, ctx = {}) {
   if (!facts || template === 'fallback') return []
   if (template === 'minor-deal' || template === 'trade') {
     const origin = facts.debut ? null : originSentence(facts, facts.lastName ?? 'He', ctx.moveDate)
-    return [seasonSentence(facts, ctx.moveDate), origin].filter(Boolean)
+    return [seasonSentence(facts, ctx.moveDate, { named: true }), origin].filter(Boolean) // a trade names two: lead with the last name
   }
   if (template === 'free-agency' || template === 'signing') {
     return [freeAgentStory(facts, ctx.moveDate)]

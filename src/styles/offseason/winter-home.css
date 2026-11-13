@@ -429,3 +429,16 @@
   text-underline-offset: 2px;
 }
 
+
+/* Revisit the season: doors to the season's boards, two rows of four (one column pair on a phone). */
+.oseason__revisit { margin-top: var(--space-5); }
+/* layout-exempt: the revisit doors, two then four across */
+.oseason__revisitgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+@media (min-width: 740px) {
+  /* layout-exempt: the revisit doors, two then four across */
+  .oseason__revisitgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

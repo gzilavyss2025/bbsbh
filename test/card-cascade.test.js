@@ -182,7 +182,9 @@ test('every band in the innings view and the box score wears the band paint', ()
   // carry .sectionhead--band in its markup, or it draws no band at all now.
   const heads = {
     'components/charts/WinProbChart.jsx': ['winprob__head'],
-    'screens/BoxScore.jsx': ['abs__title', 'halfdefense__title'],
+    // The ABS card's band went with the card (2026-11-12): the challenges are a
+    // strip at the foot of the team card now (BoxScore.jsx's BoxAbs), not a card.
+    'screens/BoxScore.jsx': ['halfdefense__title'],
   }
   for (const [rel, classes] of Object.entries(heads)) {
     const code = readFileSync(join(SRC, rel), 'utf8')
@@ -898,7 +900,10 @@ const C4_SEAL = {
   'api/gameday/engine/halfReport.js': { reveal: ['playbyplay.js'], sealBoxes: 0, revealedThrough: 0 },
   'api/gameday/engine/engineLive.js': { reveal: ['boxscore.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 7 },
   'components/charts/WinProbChart.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 0 },
-  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  // challenges.js moved with the ABS strip into boxscore/BoxAbs.jsx (2026-11-12),
+  // which renders only inside BoxScore.jsx's revealed body.
+  'screens/BoxScore.jsx': { reveal: [], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/BoxAbs.jsx': { reveal: ['challenges.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
@@ -1259,7 +1264,8 @@ test('C5: a three-stars tile is a list row below 740px and a ledger tile from 74
   assert.equal(decl(strip, 'overflow'), 'visible', "the row's 2px side inset must not clip the name link's focus ring")
   const wide = found.filter(([media]) => media === '@media (min-width: 740px)').map(([, , body]) => body)
   assert.equal(wide.length, 1)
-  assert.equal(decl(wide[0], 'padding'), 'var(--space-3)')
+  // No padding on the photo's side: the headshot runs the tile's full height (Gary, 2026-11-12).
+  assert.equal(decl(wide[0], 'padding'), '0 var(--space-3) 0 0')
   assert.deepEqual(frameDecls(wide[0]), [], 'from 740px the Card draws the frame')
 })
 
@@ -1331,7 +1337,10 @@ test('C5: the design lab draws the performer tile on the ledger frame', () => {
 // approved re-pinning the two new files. The containment test below keeps
 // them reachable only from that render site.
 const C5_SEAL = {
-  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  // challenges.js moved with the ABS strip into boxscore/BoxAbs.jsx (2026-11-12),
+  // which renders only inside BoxScore.jsx's revealed body.
+  'screens/BoxScore.jsx': { reveal: [], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/BoxAbs.jsx': { reveal: ['challenges.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameStoryCard.jsx': { reveal: ['game/story.js'], sealBoxes: 0, revealedThrough: 0 },

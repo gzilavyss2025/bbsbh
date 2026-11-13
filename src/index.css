@@ -195,7 +195,6 @@
    the switch. After system/button.css and 07 on purpose: .btn--block redraws .btn's
    display at the same specificity, so it must win on order. */
 @import './styles/system/report/controls.css';
-@import './styles/48-stamp-strip.css';
 @import './styles/52-highlight-clip-card.css';
 @import './styles/54-my-tally.css';
 @import './styles/55-my-tally-account.css';

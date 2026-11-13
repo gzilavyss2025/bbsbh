@@ -359,6 +359,41 @@
   outline-offset: 2px;
 }
 
+/* The polish pass (Gary, 2026-11-12): the photos run the full width and the
+   arrows float over the strip's edges as round chevron buttons (Gameday's
+   scroll cue), not tall boxes beside it. A photo lifts a touch on hover. */
+.photostrip__wrap { position: relative; }
+/* layout-exempt: the chevron centred in its round button */
+.photostrip__nav {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  width: var(--space-8);
+  height: var(--space-8);
+  margin-top: calc(-0.5 * var(--space-8));
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}
+.photostrip__nav--left { left: calc(-1 * var(--space-2)); }
+.photostrip__nav:not(.photostrip__nav--left) { right: calc(-1 * var(--space-2)); }
+.photostrip__thumb {
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.photostrip__thumb:hover {
+  transform: translateY(calc(-1 * var(--bw-heavy)));
+  box-shadow: var(--shadow-card);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photostrip__thumb { transition: none; }
+  .photostrip__thumb:hover { transform: none; }
+}
+
 /* (i) info popover — a lightweight hover/tap tip (InfoPopover.jsx), not a
    modal: opens on hover/focus (CSS below) and on click (aria-expanded), closes
    on Escape / outside-click (JS). Lives in the navy bar, so the button inks in

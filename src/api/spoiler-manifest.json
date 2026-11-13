@@ -292,7 +292,7 @@
       "importers": [
         "api/gameday/reviews.js",
         "api/playbyplay/pitchInfo.js",
-        "screens/BoxScore.jsx"
+        "screens/boxscore/BoxAbs.jsx"
       ]
     },
     "comebackWins.js": {

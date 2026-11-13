@@ -24,15 +24,18 @@
 .heritagepass__body {
   position: relative;
   min-height: 590px;
-  padding: var(--space-6) var(--space-6) var(--space-10);
+  padding: var(--space-6) var(--space-6) var(--space-8);
   display: flex;
   flex-direction: column;
 }
 .heritagepass__head {
-  margin: 0 calc(-1 * var(--space-1));
-  padding: var(--space-1) var(--space-1) 0;
+  /* Up under the frame's inner rule (y 21 of 360 wide): no paper sliver above the band. */
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) 0;
+  padding: var(--space-2) var(--space-1) 0;
   background: currentColor;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  /* Cut corners, like the frame's, instead of round ones (Gary, 2026-11-12). */
+  border-radius: 0;
+  clip-path: polygon(var(--space-2) 0, calc(100% - var(--space-2)) 0, 100% var(--space-2), 100% 100%, 0 100%, 0 var(--space-2));
 }
 /* layout-exempt: two small secondary marks frame the league emblem */
 .heritagepass__league {
@@ -71,7 +74,7 @@
 }
 .heritagepass__league-emblem::before { left: 0; }
 .heritagepass__league-emblem::after { right: 0; }
-.heritagepass__ribbon { position: relative; margin-bottom: calc(-1 * var(--space-2)); }
+.heritagepass__ribbon { position: relative; margin: 0 var(--space-1) calc(-1 * var(--space-2)); }
 .heritagepass__ribbon svg {
   position: absolute;
   inset: 0;
@@ -81,10 +84,13 @@
 .heritagepass__occasion {
   position: relative;
   margin: 0;
-  padding: var(--space-2) var(--space-3);
+  /* Centred in the band (the top 36 of the banner's 44), clear of the tails. */
+  padding: var(--space-2) var(--space-5) var(--space-3);
   text-align: center;
   font-family: var(--font-read);
-  font-size: var(--fs-ui);
+  /* Scales with the ticket, so a short label holds one line at any size; a long
+     postseason round may still wrap. */
+  font-size: clamp(var(--fs-caption), 3.6cqw, var(--fs-ui));
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-display);
   line-height: var(--lh-compact);
@@ -174,6 +180,7 @@
 }
 .heritagepass__score[data-long] { font-size: clamp(var(--fs-h1), 13cqw, var(--fs-display-lg)); }
 .heritagepass__bats svg { display: block; width: 100%; }
+.heritagepass__bat { fill: var(--bg-canvas); }
 /* layout-exempt: the art slot grows into the ticket's spare height and sits on the stub */
 .heritagepass__venue { flex: 1; display: flex; flex-direction: column; justify-content: end; min-height: 64px; }
 /* Artwork meets the inner blue rule (x 22 of the 360-unit frame) without
@@ -187,9 +194,10 @@
 }
 /* layout-exempt: date and venue share the two compartments of the ticket stub */
 .heritagepass__foot {
+  /* Two lines (Gary, 2026-11-12): date and first pitch, then the park. */
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
+  justify-items: center;
+  row-gap: var(--space-1);
   min-height: 54px;
   margin-top: var(--space-1);
   padding: var(--space-2) var(--space-1);
@@ -199,9 +207,8 @@
 .heritagepass__foot time {
   min-width: 0;
   white-space: nowrap;
-  padding-right: var(--space-2);
   font-family: "Big Shoulders Display", var(--font-display);
-  font-size: clamp(var(--fs-title-sm), 6cqw, var(--fs-title-lg));
+  font-size: clamp(var(--fs-h3), 7.2cqw, var(--fs-title-lg));
   font-weight: var(--w-black);
   letter-spacing: var(--ls-title);
   line-height: var(--lh-ui);
@@ -209,16 +216,14 @@
 .heritagepass__park {
   display: block;
   min-width: 0;
-  padding-left: var(--space-2);
-  border-left: 1px solid currentColor;
   overflow-wrap: anywhere;
   font-family: var(--font-display);
-  font-size: clamp(var(--fs-label), 4.7cqw, var(--fs-h3));
+  font-size: clamp(var(--fs-label), 5.6cqw, var(--fs-h2));
   font-weight: var(--w-bold);
   line-height: var(--lh-title);
   letter-spacing: var(--ls-label);
 }
-.heritagepass__foot > :only-child { grid-column: 1 / -1; border-left: 0; padding-inline: 0; }
+.heritagepass__dot { opacity: 0.6; }
 .heritagepasses { margin-block: var(--space-4); }
 .heritagepasses__head { justify-content: space-between; }
 .heritagepasses__head h2 { font-family: var(--font-display); font-size: var(--fs-h2); }

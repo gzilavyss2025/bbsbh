@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { buildFeed } from './fixtures/mini-game.js'
-import { challengesForPlay, challengesLeft, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
+import { challengesForPlay, challengesLeft, ranOutAt, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
 
 // A field-trimmed snapshot of statsapi's /api/v1.1/game/815863/feed/live —
 // Buffalo at Rochester, 2026-08-26, a real TRIPLE-A game with three real ABS
@@ -540,4 +540,21 @@ test('selectChallengeState: the row has its extra-inning challenge back (gamePk 
   // The box score's whole game (Infinity) ends where the feed's own count does.
   const whole = selectChallengeState(feed, Infinity, 'bottom')
   for (const side of ['away', 'home']) assert.equal(whole[side].remaining, feed.gameData.absChallenges[side].remaining)
+})
+
+// ------------------------------------------------- ranOutAt (the box score's
+// "Ran out of ABS challenges in ▲9", Gary 2026-11-12): the challenge that spent
+// the club's last one, read with challengesLeft's own rule.
+test('ranOutAt: the second failure is where a club runs out; a success spends nothing', () => {
+  const o = (inning, half, outcome) => ({ inning, half, outcome })
+  assert.equal(ranOutAt([]), null)
+  assert.equal(ranOutAt([o(2, 'top', 'fail'), o(5, 'top', 'success')]), null)
+  assert.deepEqual(ranOutAt([o(2, 'bottom', 'fail'), o(4, 'top', 'success'), o(9, 'top', 'fail')]), { inning: 9, half: 'top' })
+  // An in-progress review has no outcome yet, so it spends nothing.
+  assert.equal(ranOutAt([o(2, 'top', 'fail'), { inning: 6, half: 'top', outcome: 'fail', inProgress: true }]), null)
+})
+
+test('ranOutAt: the first time out stands, even after extras hand one back', () => {
+  const o = (inning, half) => ({ inning, half, outcome: 'fail' })
+  assert.deepEqual(ranOutAt([o(3, 'top'), o(7, 'bottom'), o(10, 'top')], { regulation: 9 }), { inning: 7, half: 'bottom' })
 })

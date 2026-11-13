@@ -47,7 +47,8 @@
    (.lfld__name, lineup-next/field.css). */
 .defdiamond__spot.defdiamond__spot--park {
   transform: translate(-50%, -50%);
-  max-width: 78px; /* the lineup page's label cap: long surnames ellipsize rather than collide */
+  /* Sized to its longest line (Gary, 2026-11-12): the old 78px cap clipped "Bauers (7th)".
+     The spot rule below still caps it at 40% of the field. */
   padding: var(--space-1) var(--space-1h);
   border: var(--bw-hair) solid var(--border-stamped);
 }
@@ -122,6 +123,11 @@
   color: var(--accent-negative);
   font-weight: var(--w-bold);
 }
+/* The inning a sub came in, a size down from the name so the label stays
+   narrow (Gary, 2026-11-12). Same condensed face: mono measured 38% WIDER. */
+.defdiamond__spot--park .defdiamond__enter { font-size: var(--fs-cell); }
+/* Set small, the inning reads as a note without its brackets. */
+.defdiamond__spot--park .defdiamond__paren { display: none; }
 
 .defdiamond__name .ilmark {
   font-size: var(--fs-caption);

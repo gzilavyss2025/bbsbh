@@ -320,6 +320,32 @@ body:has(.wirelab) {
     grid-column: 1 / -1;
   }
 
+  /* A long scoring summary ends level with the win-probability card and
+     scrolls inside its own card (Gary, 2026-11-12). The columns stretch to one
+     height; the summary takes what is left of the left column and adds nothing
+     to the row's height (contain: size), so the right column sets it. A short
+     summary is unaffected. Wide only: a phone keeps one column, no inner scroll. */
+  .bs__duo:has(> .bs__col > .bs__scoring):has(.winprob) { align-items: stretch; }
+  /* The COLUMN adds no height to the row (contain: size), so the right column
+     sets it; the card inside sizes to its plays and only shrinks (and scrolls)
+     when they run past that height. A short summary ends at its last play. */
+  /* Only beside a win-prob chart: with none (a park with no feed) the right column
+     is just Decisions, and the summary keeps its natural height. */
+  .bs__duo:has(.winprob) > .bs__col:has(> .bs__scoring) { contain: size; min-height: 360px; }
+  /* Only the summary gives way; the totals above it keep their height. */
+  .bs__duo:has(.winprob) > .bs__col:has(> .bs__scoring) > :not(.bs__scoring) { flex-shrink: 0; }
+  /* layout-exempt: the summary card shrinks and its list scrolls inside it */
+  .bs__duo:has(.winprob) > .bs__col:has(> .bs__scoring) > .bs__scoring {
+    flex: 0 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The scroll box is Gameday's ScrollCue (gameday-next/scroll.css): its own
+     scorebook scrollbar and the bouncing chevron. Here it only fills the card. */
+  .bs__scoring .scoresum__scroll { flex: 1 1 auto; min-height: 0; }
+  .bs__scoring .scoresum__scroll .gdscroll__in { overflow-x: hidden; }
+
   .bs__col {
     display: flex;
     flex-direction: column;

@@ -340,3 +340,24 @@
     repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
     repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
 }
+
+/* THE BROADCAST GLOSS (Gary, 2026-11-12): a 2008-2014 sports-graphics tile. Glass
+   shine over the top half with a hard cut, a chrome rim, and an angled light streak,
+   drawn OVER the mark. Where the streak and the cut fall varies per club
+   (TeamTreatmentMark's --gloss-*), so no two tiles shine alike. Ripple rings were
+   tried first and showed through open marks like the Reds' C. */
+.masthead__logobox::before {
+  z-index: 2;
+  -webkit-mask-image: none;
+  mask-image: none;
+  /* raw-value-exempt: white and black light on any club colour, the same in both themes */
+  background:
+    linear-gradient(var(--gloss-a, 115deg), transparent calc(var(--gloss-x, 60%) - 4%), rgb(255 255 255 / 0.28) var(--gloss-x, 60%), rgb(255 255 255 / 0.05) calc(var(--gloss-x, 60%) + 8%), transparent calc(var(--gloss-x, 60%) + 10%)),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.42) 0%, rgb(255 255 255 / 0.14) var(--gloss-cut, 46%), transparent calc(var(--gloss-cut, 46%) + 1%), transparent 70%, rgb(0 0 0 / 0.22) 100%);
+  /* raw-value-exempt: the chrome rim's light and shade */
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    inset 0 2px 0 1px rgb(255 255 255 / 0.35),
+    inset 0 -2px 0 1px rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(0 0 0 / 0.55);
+}

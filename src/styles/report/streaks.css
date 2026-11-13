@@ -117,3 +117,91 @@
 .streaks .opp { width: 22%; }
 .streaks .total { width: 10%; }
 .streaks .games { width: 33%; }
+
+/* A row opens to its games (StretchGames): a ledger tucked under its row,
+   hung off a club-ink rule on the left so it reads as that row's own. */
+.streaks__row { cursor: pointer; }
+.streaks__row:hover > td { background: var(--surface-row-hover); }
+.streaks__row--open > td { background: var(--surface-inset); }
+.streaks__detail > td {
+  padding: 0;
+  background: var(--surface-inset);
+}
+.streaks__games {
+  inline-size: 100%;
+  border-collapse: collapse;
+  background: var(--surface-inset);
+  font-variant-numeric: tabular-nums;
+}
+/* A navy band heads the games so the drilldown never reads as more report rows. */
+.streaks__games th {
+  text-align: left;
+  background: var(--surface-band);
+  color: var(--text-on-band);
+  padding: var(--space-1h) var(--space-3);
+  vertical-align: middle;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.streaks__games td {
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  white-space: nowrap;
+}
+.streaks__games tbody tr:first-child td { border-top: 0; }
+/* Indented under the row's rank, so the list reads as that row's own. */
+.streaks__games :is(th, td):first-child { padding-inline-start: var(--space-6); }
+.streaks__gopp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.streaks__gside {
+  min-inline-size: 1.5em;
+  color: var(--text-caption);
+}
+.streaks__gres--W { color: var(--text-heading); }
+.streaks__gres--L { color: var(--text-muted); }
+.streaks__gbox { text-align: right; }
+.streaks__gbox a {
+  color: var(--text-body);
+  text-decoration: none;
+}
+.streaks__gbox a:hover { text-decoration: underline; }
+
+/* On a phone the streak table scrolls sideways; the opened games stay pinned to
+   the visible width so Box score never slides off the edge. */
+.table:has(> .streaks) { container-type: inline-size; }
+.streaks__games {
+  position: sticky;
+  inset-inline-start: 0;
+  inline-size: 100cqi;
+}
+@media (max-width: 739px) {
+  .streaks__games :is(th, td) { padding-inline: var(--space-2); }
+  .streaks__games :is(th, td):first-child { padding-inline-start: var(--space-3); }
+  .streaks__gopp .teamlogo { display: none; }
+}
+
+/* A phone row has no room for the game-by-game run; tapping the row opens it. */
+@media (max-width: 739px) {
+  .streaks .games { display: none; }
+}
+
+/* The one sentence that says what the table holds (StreakFinderPage): set as
+   the page's heading face, so it reads as the results' title. */
+.streaks__summary {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  color: var(--text-heading);
+}
+
+/* The rank doubles as the row's toggle button (StreakFinderPage). */
+.streaks__toggle {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.streaks__toggle:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }

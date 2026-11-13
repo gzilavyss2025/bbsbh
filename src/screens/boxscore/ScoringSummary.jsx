@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
+import { ScrollCue } from '../gameday/next/ScrollCue.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
@@ -32,6 +33,10 @@ export function ScoringSummary({ groups, box, filmEligible = true }) {
   return (
     <Card as="div" body="flush" className="bs__scoring">
       <SectionMasthead as="h3" title="Scoring summary" />
+      {/* Gameday's scroll box (Gary, 2026-11-12): on a wide screen a long list
+          scrolls in the card, with the bouncing chevron at its foot while more
+          runs are below. A phone never caps the card, so it never scrolls. */}
+      <ScrollCue label="More scoring plays below" className="scoresum__scroll">
       <ol className="scoresum__plays">
         {groups.flatMap((g) =>
           g.plays.map((p) => (
@@ -46,6 +51,7 @@ export function ScoringSummary({ groups, box, filmEligible = true }) {
           )),
         )}
       </ol>
+      </ScrollCue>
     </Card>
   )
 }

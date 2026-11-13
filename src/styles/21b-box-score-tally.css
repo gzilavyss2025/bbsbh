@@ -230,3 +230,48 @@
     width: 36px;
   }
 }
+
+/* ---- the polish pass (Gary, 2026-11-12) -------------------------------------
+   The head is a navy band like the box score's other cards, its club switch
+   drawn for a dark ground (cream outline; the pressed one filled cream). Each
+   measure's name is the box score's navy tag (box-score/abs-strip.css), rows
+   get a touch more air, and Total sits as its own column on an inset ground.
+   The pencil wash itself is unchanged: one hue, magnitude only (above). */
+.bs__tally { --card-radius: var(--radius-square); }
+.bs__tallyHead {
+  background: var(--surface-band);
+  padding: var(--space-2) var(--space-3h);
+}
+.bs__tallyHead .bs__insightsTitle {
+  color: var(--text-on-band);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--ls-label);
+}
+.bs__tallyHead .bs__tallyScopebtn {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--text-on-band) 45%, transparent);
+  color: var(--text-on-band);
+  box-shadow: none;
+}
+.bs__tallyHead .bs__tallyScopebtn:hover {
+  background: color-mix(in srgb, var(--text-on-band) 14%, transparent);
+  border-color: var(--text-on-band);
+}
+.bs__tallyHead .bs__tallyScopebtn[aria-pressed='true'] {
+  background: var(--text-on-band);
+  border-color: var(--text-on-band);
+  color: var(--surface-band);
+}
+.bs__tallyBody { border-top: 0; padding-top: var(--space-2); }
+.bs__tallyTag {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-band);
+  color: var(--text-on-band);
+}
+.bs__tallyCell { height: 26px; }
+.bs__tallyTotal {
+  background: var(--surface-inset);
+  border-left: var(--bw-hair) solid var(--border-rule) !important;
+  text-align: center !important;
+}

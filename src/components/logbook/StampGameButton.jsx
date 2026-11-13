@@ -1,3 +1,4 @@
+import '../../styles/48-stamp-strip.css'
 import { useEffect, useRef, useState } from 'react'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 import { useBooks } from '../../hooks/useBooks.js'
@@ -117,14 +118,37 @@ export function StampGameButton({ game }) {
             pressed into it. Un-minted it is a dashed well holding a pale
             preview of what you'd keep; minted, the well goes solid and the
             stamp comes up to the winning club's ink (lib/stamp/stampInk.js). */}
-        <div className={`stampstrip__mount${existing ? '' : ' stampstrip__mount--empty'}`}>
-          <GameStamp game={game} instanceId={`bs-${game.gamePk}`} />
+        {/* The stamp IS the control (Gary, 2026-11-12): grey until pressed; a tap
+            stamps it (with the burst), a second tap lifts it again. */}
+        <button
+          type="button"
+          className={`stampstrip__mount${existing ? '' : ' stampstrip__mount--empty'}`}
+          aria-pressed={Boolean(existing)}
+          aria-label={existing ? 'Remove this game’s stamp' : 'Stamp this game'}
+          disabled={!existing && !hasAction}
+          onClick={() => {
+            if (existing) {
+              setNoteDraft(null)
+              setDetailsOpen(false)
+              unstamp(game.gamePk)
+            } else save({ mode: 'watched', note: '' })
+          }}
+        >
+          {/* Keyed on the press, so each mint replays the landing (49-passport-book.css's
+              press, from a fresh angle each time); un-stamping fades back to the proof. */}
+          <span
+            key={`ink-${burst}`}
+            className={`stampstrip__ink${burst > 0 ? (existing ? ' stampstrip__ink--landing' : ' stampstrip__ink--lifting') : ''}`}
+            style={burst > 0 ? { '--land-from': `${((burst * 37) % 24) - 12}deg` } : undefined}
+          >
+            <GameStamp game={game} instanceId={`bs-${game.gamePk}`} />
+          </span>
           {burst > 0 && (
             <span key={burst} className="stampstrip__burst" aria-hidden="true">
               {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ '--i': i }} />)}
             </span>
           )}
-        </div>
+        </button>
 
         <div className="stampstrip__say">
           <span className="stampstrip__eyebrow t-label t-label--nocaps">Game Log</span>

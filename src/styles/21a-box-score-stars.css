@@ -150,9 +150,11 @@
     grid-column: 2;
     grid-row: 1;
   }
-  .stars3__stat {
+  .stars3__stat,
+  .stars3__card--hero .stars3__stat {
     grid-column: 2;
     grid-row: 2;
+    /* The hero's 38% cap (above) outranked this and broke its line into three. */
     max-width: none;
     text-align: left;
   }
@@ -173,20 +175,29 @@
    now shares one photo size and one type scale, so the top mover's panel
    background is the only thing marking it as the headline entry. */
 @media (min-width: 740px) {
+  /* Side by side, the phone's "row after the hero" rule (6px drop, no top edge)
+     only knocked the middle card out of line with its neighbours. */
+  .stars3__card--hero + .stars3__card {
+    margin-top: 0;
+    border-top: var(--bw-hair) solid var(--border-rule);
+  }
   .stars3__row {
     flex-direction: row;
     justify-content: center;
     align-items: stretch;
     gap: var(--space-3);
   }
+  /* Trading-card read (Gary, 2026-11-12): the photo runs the card's full height
+     in its first column, with no top padding above it. */
   .stars3__card {
     flex: 0 1 300px;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: var(--shot-lg-w) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
     column-gap: var(--space-3);
-    row-gap: var(--space-1);
-    align-items: center;
-    padding: var(--space-3);
+    row-gap: 0;
+    align-items: end;
+    padding: 0 var(--space-3) 0 0;
   }
   .shot.stars3__shot {
     grid-row: 1 / 3;
@@ -212,5 +223,58 @@
   .stars3__card--hero .stars3__stat {
     font-size: var(--fs-caption);
     max-width: none;
+  }
+}
+
+/* ---- the polish pass (Gary, 2026-11-12), wide only --------------------------
+   Trading-card read: the headshot sits flush in the card's bottom-left corner
+   (no frame of its own), the stars are a gold rank mark, the name leads, and
+   the stat line is its own ruled footer in heading ink. The first star wears
+   the same soft gold wash it has on a phone. */
+@media (min-width: 740px) {
+  .shot.stars3__shot {
+    grid-row: 1 / 3;
+    align-self: stretch;
+    height: auto;
+    min-height: var(--shot-lg-h);
+    border: 0;
+    border-right: var(--bw-hair) solid var(--border-rule);
+    background: var(--surface-inset);
+  }
+  .stars3__copy {
+    align-self: center;
+    gap: var(--space-1);
+    padding-top: var(--space-3);
+  }
+  .stars3__marks,
+  .stars3__card--hero .stars3__marks {
+    color: var(--marker);
+    font-size: var(--fs-h3);
+    letter-spacing: var(--ls-label);
+    line-height: var(--lh-solid);
+  }
+  .stars3__card .stars3__name,
+  .stars3__card--hero .stars3__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--w-bold);
+    line-height: var(--lh-snug);
+  }
+  .stars3__stat,
+  .stars3__card--hero .stars3__stat {
+    align-self: stretch;
+    margin-top: var(--space-2);
+    padding: var(--space-2) 0;
+    border-top: var(--bw-hair) solid var(--border-hairline);
+    color: var(--text-heading);
+    font-size: var(--fs-cell); /* a figure line, the mono face's role */
+    font-weight: var(--w-semibold);
+  }
+  /* The first star: a gold rule along the top, not a wash. MLB's headshots carry
+     their grey studio backdrop, which fought a gold gradient behind them. */
+  .stars3__card--hero {
+    box-shadow: none;
+    border-top: var(--space-1) solid var(--marker);
+    background: var(--surface-card);
   }
 }
