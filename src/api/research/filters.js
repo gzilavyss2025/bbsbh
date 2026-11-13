@@ -120,6 +120,14 @@ export const FILTERS = [
 
 export const FILTER_BY_KEY = Object.fromEntries(FILTERS.map((f) => [f.key, f]))
 
+// An event's name as the PA result card groups it (fielders_choice_out reads
+// "Fielder's choice"), for the outcome table and the match rows.
+const RESULT_NAMES = Object.fromEntries(RESULTS)
+export function resultName(event) {
+  const key = FILTER_BY_KEY.res.values({ event })[0]
+  return RESULT_NAMES[key] ?? key.replaceAll('_', ' ')
+}
+
 // Parse / build the URL. A multi card is `res=home_run.double`, inverted `res=!home_run`.
 // People and clubs: `bat`, `pit` (ids), `team` (batting club), `pteam` (pitching club),
 // `park` (home club).

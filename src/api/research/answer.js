@@ -6,7 +6,7 @@
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { totalsOf } from '../scout/headToHead.js'
-import { FILTERS, matcher } from './filters.js'
+import { matcher, resultName } from './filters.js'
 
 const LEADER_ROWS = 10
 
@@ -43,13 +43,9 @@ function leaders(matches, who) {
 }
 
 function outcomes(matches) {
-  // Label by the PA result card's own grouping, so a fielders_choice_out reads as
-  // "Fielder's choice", the chip a reader would tap, not as its raw event code.
-  const labels = Object.fromEntries(FILTERS[0].options)
   const counts = new Map()
   for (const m of matches) {
-    const key = FILTERS[0].values(m)[0]
-    const label = labels[key] ?? key.replaceAll('_', ' ')
+    const label = resultName(m.event)
     counts.set(label, (counts.get(label) ?? 0) + 1)
   }
   return [...counts].map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n)
