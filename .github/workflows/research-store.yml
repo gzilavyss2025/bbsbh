@@ -5,6 +5,11 @@ name: Research store
 # upload joins update-nightly-data.yml. Writes nothing to the repo.
 # Needs the BLOB_READ_WRITE_TOKEN repo secret (Settings > Secrets and variables > Actions).
 on:
+  # TEMPORARY (remove before merge): dispatch needs the file on main, so the first run
+  # rides a push to the PR branch.
+  push:
+    branches: [claude/awesome-lamport-ko6ahv]
+    paths: [.github/workflows/research-store.yml]
   workflow_dispatch:
     inputs:
       months:
@@ -38,8 +43,8 @@ jobs:
       - name: Build and upload
         env:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
-          MONTHS: ${{ inputs.months }}
-          SEASON: ${{ inputs.season }}
+          MONTHS: ${{ inputs.months || '' }}
+          SEASON: ${{ inputs.season || '2026' }}
         run: |
           set -o pipefail
           node scripts/research/gen-research-store.mjs --season="$SEASON" ${MONTHS:+--months="$MONTHS"} --upload | tee build.log
