@@ -49,6 +49,8 @@ const PATHS_BEFORE_GROUPING = [
   '/fouls',
   '/prospects',
   '/rehab',
+  // Added with the page itself (#2234): questions about past plays.
+  '/research',
   '/milestones',
   '/umpires',
   // The ABS Challenge System board, filed beside Umpire Rankings.

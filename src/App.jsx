@@ -319,6 +319,7 @@ const BARE_ROUTES = {
   'postseason-history': PostseasonHistoryPage,
   'nine-keys': NineKeysPage,
   classics: ClassicsPage,
+  research: lazyNamed(() => import('./screens/research/ResearchPage.jsx'), 'ResearchPage'),
   notable: NotablePage,
   'postseason-leaders': PostseasonLeadersPage,
   'postseason-race': PostseasonRacePage,

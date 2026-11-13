@@ -1556,6 +1556,11 @@ don't run these by hand.
 
 ## Own-cadence generators (not the nightly batch)
 
+- `research/gen-research-store.mjs` → Vercel Blob `research/v1/` (NOT `public/data`), the /research
+  store (#2234): one pitch-level month shard per month of a season from Savant's daily
+  CSV, plus `index.json`. Hand-dispatched by `.github/workflows/research-store.yml` until
+  the first upload is checked; then it joins the nightly batch. Reads only days before
+  today (US Pacific). Layout and filter definitions: `docs/research-store.md`.
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
   no entry in the nightly commit step). Runs in `update-nightly-data.yml`
   alongside the generators above, but is the one script here that calls
