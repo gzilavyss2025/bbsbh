@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchSeasonAward, loadSeasonAwards, awardsSeasonInPlay } from '../src/api/awards/history.js'
+import { fetchSeasonAward, loadSeasonAwards, awardsSeasonInPlay, recipientsOf } from '../src/api/awards/history.js'
 
 const row = { id: 592450, nameFirstLast: 'Aaron Judge', primaryPosition: { abbreviation: 'OF' } }
 const announced = { awards: [{ player: row, team: { id: 147 } }] }
@@ -45,4 +45,12 @@ test('the block runs October through February only', () => {
   assert.equal(awardsSeasonInPlay(new Date(2026, 9, 22)), 2026)
   assert.equal(awardsSeasonInPlay(new Date(2027, 0, 15)), 2026)
   assert.equal(awardsSeasonInPlay(new Date(2026, 6, 4)), null)
+})
+
+test('recipientsOf lists a winner the feed repeats once', () => {
+  // Checked 2026-11-13: ALCPOY 2026 answered Yordan Alvarez two times.
+  const entry = { player: { id: 670541, nameFirstLast: 'Yordan Alvarez', primaryPosition: { abbreviation: 'DH' } }, team: { id: 117 } }
+  const out = recipientsOf('ALCPOY', { awards: [entry, structuredClone(entry)] })
+  assert.equal(out.length, 1)
+  assert.equal(out[0].playerId, 670541)
 })
