@@ -68,8 +68,8 @@ function leagueOf(awardId) {
 export function recipientsOf(awardId, data) {
   const seen = new Set()
   return (data.awards ?? [])
-    .filter((a) => a.player?.id)
     .filter((a) => {
+      if (!a.player?.id) return false
       const key = `${a.player.id}-${a.player.primaryPosition?.abbreviation ?? ''}`
       if (seen.has(key)) return false
       seen.add(key)
