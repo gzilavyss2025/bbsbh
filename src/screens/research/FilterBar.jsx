@@ -13,6 +13,7 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // filter" picker for the rest, and the people and club pickers. It holds no state:
 // the query lives in the URL and comes in as `q`; every change calls onChange(q).
 // A card the season range cannot answer is listed under `blocked` and stays off.
+// The Seasons card (`yr`) sits first when open.
 // A long card shows the picked chips and the first few, then "+N more" (FIRST_CHIPS).
 
 const FIRST_CHIPS = 4
@@ -116,7 +117,43 @@ function FilterCard({ f, chip, onChip }) {
   )
 }
 
-export function FilterBar({ q, people, clubs, blocked, onChange }) {
+// The Seasons card: a From and a To season. Absent, "Last time" searches every season
+// and the other questions read the latest (filters.js seasonsFor).
+function SeasonsCard({ years, seasons, onYears }) {
+  const pick = (label, i) => (
+    <Field label={label}>
+      {(id) => (
+        <select
+          id={id}
+          value={years[i]}
+          onChange={(e) => {
+            const next = [...years]
+            next[i] = Number(e.target.value)
+            onYears(next.sort((a, b) => a - b))
+          }}
+        >
+          {seasons.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      )}
+    </Field>
+  )
+  return (
+    <Card frame="ledger">
+      <Stack gap="tight">
+        <Cluster className="research__cardhead">
+          <span className="t-label t-label--bold">Seasons</span>
+          <IconButton label="Remove Seasons" mark="sm" onClick={() => onYears(null)}>✕</IconButton>
+        </Cluster>
+        <Cluster>
+          {pick('From', 0)}
+          {pick('To', 1)}
+        </Cluster>
+      </Stack>
+    </Card>
+  )
+}
+
+export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange }) {
   const addId = useId()
   const setChip = (key, chip) => {
     const chips = { ...q.chips }
@@ -136,21 +173,24 @@ export function FilterBar({ q, people, clubs, blocked, onChange }) {
         <ClubField label="Pitching club" value={q.pitchTeam} clubs={clubs} onChange={(pitchTeam) => onChange({ ...q, pitchTeam })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
+      {q.years && <SeasonsCard years={q.years} seasons={seasons} onYears={(years) => onChange({ ...q, years })} />}
       {active.map((key) => (
         <FilterCard key={key} f={FILTER_BY_KEY[key]} chip={q.chips[key]} onChip={(chip) => setChip(key, chip)} />
       ))}
-      {addable.length > 0 && (
+      {(addable.length > 0 || (!q.years && seasons.length > 1)) && (
         <Stack gap="tight" className="research__field">
           <label className="t-label" htmlFor={addId}>Add a filter</label>
           <select
             id={addId}
             value=""
             onChange={(e) => {
+              if (e.target.value === 'yr') return onChange({ ...q, years: [latest, latest] })
               const f = FILTER_BY_KEY[e.target.value]
               if (f) setChip(f.key, { vals: [f.options[0][0]], inv: false })
             }}
           >
             <option value="">Choose…</option>
+            {!q.years && seasons.length > 1 && <option value="yr">Seasons</option>}
             {addable.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
         </Stack>

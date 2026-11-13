@@ -1,11 +1,8 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
-import { ASKS, FILTER_BY_KEY, buildQuery, clubName, isBlank, parseQuery, unsupported } from '../../api/research/filters.js'
-import { answer } from '../../api/research/answer.js'
-import { coverage, fetchIndex, fetchStore } from '../../api/research/store.js'
+import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery } from '../../api/research/filters.js'
 import { isRealDate } from '../../lib/dates.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
-import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
@@ -20,6 +17,7 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
 import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
+import { useResearch } from './useResearch.js'
 
 // RESEARCH (/research, #2234): ask a question of past plays. The page reads ANSWER
 // FIRST (Gary, 2026-11-13, wireframe "/research, answer first"): the question, then
@@ -60,6 +58,7 @@ function pillsOf(q, people) {
   if (q.team) out.push(`${clubName(q.team)} batting`)
   if (q.pitchTeam) out.push(`${clubName(q.pitchTeam)} pitching`)
   if (q.park) out.push(`at ${clubName(q.park)}`)
+  if (q.years) out.push(q.years[0] === q.years[1] ? `${q.years[0]}` : `${q.years[0]}–${q.years[1]}`)
   return out
 }
 
@@ -68,49 +67,47 @@ export function ResearchPage() {
   const wide = useMediaQuery(WIDE_QUERY)
   const sheet = useRef(null)
   const [{ q, cutoff }, setState] = useState(readUrl)
-  const [progress, setProgress] = useState(null)
   const setQ = (next) => {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${buildQuery(next, { d: cutoff })}`)
     setState({ q: next, cutoff })
   }
-  const store = useAsync(async () => {
-    const index = await fetchIndex()
-    const data = await fetchStore(index, (n, of) => setProgress({ n, of }))
-    return { ...data, cover: coverage(index) }
-  }, [])
-  const data = store.data
-  const clubs = useMemo(() => (data ? [...new Set(data.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [data])
-  const blocked = useMemo(() => (data?.cover.first ? unsupported(data.cover.first) : []), [data])
-  // A chip the store's seasons cannot answer stays in the URL but out of the query.
-  const live = useMemo(() => {
-    const chips = { ...q.chips }
-    for (const b of blocked) delete chips[b.key]
-    return { ...q, chips }
-  }, [q, blocked])
+  const { error, head, onFile, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
+  const data = head
+  const people = run?.people ?? head?.people ?? {}
+  const clubs = useMemo(() => (head ? [...new Set(head.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
   // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
   // open, so the page shows the start screen (presets). An emptied card keeps the page
   // out of the start screen until its ✕ (Gary, 2026-11-13), so on a phone the filter bar
-  // stays one tap away.
-  const blank = isBlank(live)
-  const start = blank && !Object.keys(q.chips).length
-  const result = useMemo(() => (data && !blank ? answer(data.pas, live, cutoff) : null), [data, live, cutoff, blank])
-  const pills = data ? pillsOf(live, data.people) : []
-  const bar = data && <FilterBar q={q} people={data.people} clubs={clubs} blocked={blocked} onChange={setQ} />
+  // stays one tap away. A Seasons range counts as a card.
+  const start = blank && !Object.keys(q.chips).length && !q.years
+  const result = run?.result ?? null
+  const progress = run?.progress
+  const pills = data ? pillsOf(live, people) : []
+  const bar = data && <FilterBar q={q} people={people} clubs={clubs} seasons={onFile} latest={latest} blocked={blocked} onChange={setQ} />
 
   const main = (
     <Stack>
       {!start && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
-      {store.error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
-      {data && (
+      {error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
+      {data && cover && (
         <p className="t-label t-label--nocaps">
           {start ? 'Ask about ' : ''}
-          {data.cover.first === data.cover.last ? data.cover.first : `${data.cover.first}–${data.cover.last}`}
-          {start ? `’s ${data.cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(data.cover.through)}
+          {cover.first === cover.last ? cover.first : `${cover.first}–${cover.last}`}
+          {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
+          {run?.stopped ? ' · stopped' : ''}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
           {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
         </p>
       )}
-      {!data && !store.error && <p className="t-label t-label--nocaps">Loading plays{progress ? ` · month ${progress.n} of ${progress.of}` : ''}…</p>}
+      {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
+      {progress && (
+        <Cluster>
+          <p className="t-label t-label--nocaps" role="status">
+            Searching {progress.season}{progress.of > 1 ? ` · season ${progress.n} of ${progress.of}` : ''}…
+          </p>
+          {progress.of > 1 && <Button size="control" onClick={stop}>Stop</Button>}
+        </Cluster>
+      )}
       {start && (
         <Card frame="stamped" label="Try one">
           <div className="research__try">
@@ -128,7 +125,7 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && <AnswerCard ask={q.ask} a={result} people={data.people} />}
+      {result && <AnswerCard ask={q.ask} a={result} people={people} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -136,8 +133,8 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
-      {result && <AskTables ask={q.ask} a={result} people={data.people} />}
-      {result && <MatchList key={JSON.stringify(q)} a={result} people={data.people} wide={wide} />}
+      {result && <AskTables ask={q.ask} a={result} people={people} />}
+      {result && <MatchList key={JSON.stringify(q)} a={result} people={people} wide={wide} />}
     </Stack>
   )
 

@@ -19,6 +19,7 @@
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
+import { countBit } from './shard.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
@@ -81,7 +82,7 @@ const RESULTS = [
 ]
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
-const lastPitch = (pa) => pa.pitches[pa.pitches.length - 1]
+const COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2']
 // Runners: one value per base state, the bases spelled in order ('1-3' = first and
 // third). The card draws each as the scorebug's BaseState. The four values the first
 // slice used still parse (LEGACY_RUNNERS), so an old link keeps its meaning.
@@ -107,12 +108,12 @@ export const basesOf = (v) => ({ first: v[0] === '1', second: v[1] === '2', thir
 export const FILTERS = [
   { key: 'res', label: 'PA result', options: RESULTS, values: (pa) => [Object.keys(RESULT_GROUPS).find((k) => RESULT_GROUPS[k].includes(pa.event)) ?? pa.event] },
   { key: 'gt', label: 'Game type', options: [['R', 'Regular season'], ['P', 'Postseason']], values: (pa) => [pa.gameType === 'R' ? 'R' : 'P'] },
-  { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [lastPitch(pa).type], since: 2008 },
-  { key: 'loc', label: 'Horizontal location', options: [['inner', 'Inner third'], ['middle', 'Middle third'], ['outer', 'Outer third']], values: (pa) => [horizontalThird(lastPitch(pa).px, pa.stand)], since: 2008, info: 'Thirds of the 17-inch plate, from the batter’s side. Inner third is the third nearest the batter. A pitch off the plate is in no third. Reads the last pitch of the plate appearance.' },
+  { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [pa.pitchType], since: 2008 },
+  { key: 'loc', label: 'Horizontal location', options: [['inner', 'Inner third'], ['middle', 'Middle third'], ['outer', 'Outer third']], values: (pa) => [horizontalThird(pa.px, pa.stand)], since: 2008, info: 'Thirds of the 17-inch plate, from the batter’s side. Inner third is the third nearest the batter. A pitch off the plate is in no third. Reads the last pitch of the plate appearance.' },
   { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2008, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
-  { key: 'cnt', label: 'Count (passed through)', options: ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2'].map((c) => [c, c]), values: (pa) => pa.pitches.map((p) => `${p.balls}-${p.strikes}`) },
+  { key: 'cnt', label: 'Count (passed through)', options: COUNTS.map((c) => [c, c]), values: (pa) => COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2]))) },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
   { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'inn', label: 'Inning', options: [...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [String(i), `${i}`]), ['x', 'Extras']], values: (pa) => [pa.inning > 9 ? 'x' : String(pa.inning)] },
@@ -130,7 +131,7 @@ export function resultName(event) {
 
 // Parse / build the URL. A multi card is `res=home_run.double`, inverted `res=!home_run`.
 // People and clubs: `bat`, `pit` (ids), `team` (batting club), `pteam` (pitching club),
-// `park` (home club).
+// `park` (home club). Seasons: `yr=2019` or `yr=2015-2019` (the Seasons card), oldest first.
 export function parseQuery(search) {
   const p = new URLSearchParams(search)
   const chips = {}
@@ -145,7 +146,9 @@ export function parseQuery(search) {
   }
   const id = (k) => (/^\d+$/.test(p.get(k) ?? '') ? Number(p.get(k)) : null)
   const club = (k) => (/^[A-Z]{2,3}$/.test(p.get(k) ?? '') ? p.get(k) : null)
-  return { chips, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
+  const yr = /^(\d{4})(?:-(\d{4}))?$/.exec(p.get('yr') ?? '')
+  const years = yr ? [Number(yr[1]), Number(yr[2] ?? yr[1])].sort((a, b) => a - b) : null
+  return { chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last' }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -155,6 +158,7 @@ export function buildQuery(q, keep = {}) {
     const c = q.chips?.[f.key]
     if (c?.vals?.length) p.set(f.key, `${c.inv ? '!' : ''}${c.vals.join('.')}`)
   }
+  if (q.years) p.set('yr', q.years[0] === q.years[1] ? `${q.years[0]}` : q.years.join('-'))
   if (q.batter) p.set('bat', q.batter)
   if (q.pitcher) p.set('pit', q.pitcher)
   if (q.team) p.set('team', q.team)
@@ -195,4 +199,23 @@ export function matcher(q, cutoff) {
 // Cards a season range cannot answer: [{ key, label, since }].
 export function unsupported(firstSeason) {
   return FILTERS.filter((f) => f.since && firstSeason < f.since).map(({ key, label, since }) => ({ key, label, since }))
+}
+
+// THE SEASONS A QUERY SEARCHES (Gary, 2026-11-13, scope #2), newest first. `seasons`: the
+// seasons on file. A season after `?d=`'s year is out. With a Seasons range, its seasons.
+// Without one, "Last time" searches every season (newest first, until Stop) and the other
+// three questions read the latest season, so a rate or a leader board is one season's.
+export function seasonsFor(q, seasons, cutoff) {
+  const open = seasons.filter((s) => !cutoff || s <= Number(cutoff.slice(0, 4))).sort((a, b) => b - a)
+  if (q.years) return open.filter((s) => s >= q.years[0] && s <= q.years[1])
+  return q.ask === 'last' ? open : open.slice(0, 1)
+}
+
+// Can `season` hold a match? Only a PA result card answers from the index alone: with
+// result counts on file (`events`, { event: n }) and none of the picked results among
+// them, the season is skipped unfetched. No counts (an older index) means maybe.
+export function mayMatch(q, events) {
+  const res = q.chips?.res
+  if (!events || !res?.vals.length || res.inv) return true
+  return Object.entries(events).some(([ev, n]) => n > 0 && res.vals.includes(FILTER_BY_KEY.res.values({ event: ev })[0]))
 }

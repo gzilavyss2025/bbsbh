@@ -4,8 +4,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
-import { basesOf, buildQuery, clubName, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
+import { basesOf, buildQuery, clubName, fieldOf, horizontalThird, isBlank, matcher, mayMatch, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
+import { coverage, seasonEvents, seasonsOnFile } from '../src/api/research/store.js'
 import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
 // One Savant CSV row, with only the columns the store reads.
@@ -36,8 +37,10 @@ test('a month shard round-trips to plate appearances', () => {
   assert.equal(pas.length, 4)
   const hr = pas[0]
   assert.equal(hr.event, 'home_run')
-  assert.equal(hr.pitches.length, 2)
-  assert.equal(hr.pitches[1].px, 0.6)
+  assert.equal(hr.nPitches, 2)
+  assert.equal(hr.px, 0.6, 'px is the last pitch')
+  assert.equal(hr.pitchType, 'SI')
+  assert.equal(hr.counts, (1 << 0) | (1 << 3), 'passed through 0-0 and 1-0')
   assert.equal(hr.launchSpeed, 101.3)
   assert.equal(hr.batTeam, 'CHC')
   assert.equal(pas[1].runners, 2)
@@ -122,8 +125,8 @@ test('the generator never asks Savant with the ignored hand params, and never fo
 })
 
 test('the index keeps the months it already had', () => {
-  const one = mergeIndex(null, 2026, '05', { through: '2026-05-31', cols: { g: [0, 0] } }, 1, 't1')
-  const two = mergeIndex(one, 2026, '06', shard, 4, 't2')
+  const one = mergeIndex(null, 2026, '05', { through: '2026-05-31', cols: { g: [0, 0] } }, [{ event: 'single' }], 't1')
+  const two = mergeIndex(one, 2026, '06', shard, pas, 't2')
   assert.deepEqual(Object.keys(two.seasons[2026].months), ['05', '06'])
   assert.equal(two.seasons[2026].months['06'].pitches, 5)
   assert.equal(two.built, 't2')
@@ -175,4 +178,39 @@ test('pitching club filters the fielding side, and every club code has a full na
   assert.equal(clubName('AZ'), 'Arizona Diamondbacks')
   assert.equal(clubName('ATH'), 'Athletics')
   assert.equal(clubName('ZZZ'), 'ZZZ', 'an unknown code shows as itself')
+})
+
+test('the index counts each month\'s results, and a season with none of a picked result is skipped', () => {
+  const ix = mergeIndex(null, 2026, '06', shard, pas, 't')
+  assert.deepEqual(ix.seasons[2026].months['06'].events, { home_run: 2, strikeout: 1, walk: 1 })
+  assert.equal(ix.seasons[2026].months['06'].pas, 4)
+  const events = seasonEvents(ix, 2026)
+  assert.equal(mayMatch(parseQuery('?res=home_run'), events), true)
+  assert.equal(mayMatch(parseQuery('?res=triple_play'), events), false)
+  assert.equal(mayMatch(parseQuery('?res=!triple_play'), events), true, 'an inverted result card can match anything')
+  assert.equal(mayMatch(parseQuery('?res=triple_play'), null), true, 'no counts on file: maybe')
+  assert.equal(seasonEvents({ seasons: { 2025: { months: { '06': { pas: 3 } } } } }, 2025), null, 'a month built before the counts')
+})
+
+test('the seasons a query searches: a range, every season for Last time, else the latest', () => {
+  const on = [2015, 2016, 2017, 2025, 2026]
+  assert.deepEqual(seasonsFor(parseQuery('?res=triple_play'), on, null), [2026, 2025, 2017, 2016, 2015])
+  assert.deepEqual(seasonsFor(parseQuery('?ask=often&res=home_run'), on, null), [2026])
+  assert.deepEqual(seasonsFor(parseQuery('?ask=often&yr=2016-2015'), on, null), [2016, 2015], 'a reversed range is put in order')
+  assert.deepEqual(seasonsFor(parseQuery('?res=walk'), on, '2025-06-01'), [2025, 2017, 2016, 2015], '?d= holds out later seasons')
+  assert.deepEqual(seasonsFor(parseQuery('?ask=most&yr=2026'), on, '2025-06-01'), [], 'a range wholly after ?d= reads nothing')
+})
+
+test('the Seasons range round-trips in the URL, and a range alone is still blank', () => {
+  assert.equal(buildQuery(parseQuery('?yr=2019-2015&res=walk')), '?res=walk&yr=2015-2019')
+  assert.equal(buildQuery(parseQuery('?yr=2020')), '?yr=2020')
+  assert.equal(parseQuery('?yr=20x0').years, null)
+  assert.equal(isBlank(parseQuery('?yr=2020')), true)
+})
+
+test('the coverage line reads only the seasons asked, and a season with no plays is not on file', () => {
+  const ix = { seasons: { 2015: { months: { '04': { through: '2015-04-30', pitches: 10, pas: 3 } } }, 2026: { months: { '04': { through: '2026-04-30', pitches: 20, pas: 5 } } }, 2027: { months: { '03': { through: '', pitches: 0, pas: 0 } } } } }
+  assert.deepEqual(seasonsOnFile(ix), [2015, 2026])
+  assert.deepEqual(coverage(ix, [2015]), { first: 2015, last: 2015, through: '2015-04-30', pitches: 10 })
+  assert.equal(coverage(ix).pitches, 30)
 })

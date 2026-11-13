@@ -128,8 +128,8 @@ for (const { season, month } of targets) {
   }
   const shard = encodeMonth(rows, { season, month, names: await namesFor(rows) })
   const body = JSON.stringify(shard)
-  const pas = decodePlateAppearances(shard).length
-  console.log(`${season}-${month}: ${shard.cols.g.length} pitches, ${pas} PAs, ${(body.length / 1e6).toFixed(1)} MB raw, ${(gzipSync(body).length / 1e6).toFixed(2)} MB gzip`)
+  const pas = decodePlateAppearances(shard)
+  console.log(`${season}-${month}: ${shard.cols.g.length} pitches, ${pas.length} PAs, ${(body.length / 1e6).toFixed(1)} MB raw, ${(gzipSync(body).length / 1e6).toFixed(2)} MB gzip`)
   const shrink = shrinkReason(index?.seasons?.[season]?.months?.[month], shard.cols.g.length)
   if (shrink && !force) {
     console.error(`${season}-${month}: NOT written: ${shrink}. Rerun later, or pass --force.`)
