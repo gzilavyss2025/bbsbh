@@ -38,7 +38,7 @@ const PRESETS = [
   { ask: 'last', label: 'Oppo homer, lefty v lefty sinker, inner third', search: '?res=home_run&fld=oppo&pt=SI&loc=inner&bh=L&ph=L' },
   { ask: 'last', label: 'A triple play', search: '?res=triple_play' },
   { ask: 'often', label: 'Lefty homers off lefties', search: '?ask=often&res=home_run&bh=L&ph=L' },
-  { ask: 'often', label: 'Hits with RISP, 9th or later', search: '?ask=often&inn=9.x&run=risp.loaded&res=single.double.triple.home_run', wideOnly: true },
+  { ask: 'often', label: 'Hits with RISP, 9th or later', search: '?ask=often&inn=9.x&run=-2-.--3.12-.1-3.-23.123&res=single.double.triple.home_run', wideOnly: true },
   { ask: 'most', label: 'Homers after an 0-2 count', search: '?ask=most&cnt=0-2&res=home_run' },
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]

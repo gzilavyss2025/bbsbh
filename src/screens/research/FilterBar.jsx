@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
-import { FILTERS, FILTER_BY_KEY } from '../../api/research/filters.js'
+import { FILTERS, FILTER_BY_KEY, basesOf } from '../../api/research/filters.js'
+import { BaseState } from '../../components/scoring/BaseState.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
@@ -68,8 +69,18 @@ function ClubField({ label, value, clubs, onChange }) {
 
 function FilterCard({ f, chip, onChip }) {
   const [open, setOpen] = useState(false)
-  const options = f.options.map(([value, label]) => ({ value, label }))
-  const shown = open || options.length <= FIRST_CHIPS + 1 ? options : options.filter((o, i) => i < FIRST_CHIPS || chip.vals.includes(o.value))
+  // The Runners card draws each base state as the scorebug does; the words are its name.
+  const options = f.options.map(([value, label]) => ({
+    value,
+    label: f.glyphs ? (
+      <span role="img" aria-label={label}>
+        <BaseState bases={basesOf(value)} size={28} ink="currentColor" />
+      </span>
+    ) : (
+      label
+    ),
+  }))
+  const shown = open || f.glyphs || options.length <= FIRST_CHIPS + 1 ? options : options.filter((o, i) => i < FIRST_CHIPS || chip.vals.includes(o.value))
   const hidden = options.length - shown.length
   return (
     <Card frame="ledger">

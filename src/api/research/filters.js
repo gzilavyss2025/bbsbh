@@ -76,7 +76,24 @@ const RESULTS = [
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
 const lastPitch = (pa) => pa.pitches[pa.pitches.length - 1]
-const runnersTag = (r) => (r === 0 ? 'empty' : r === 7 ? 'loaded' : r & 6 ? 'risp' : 'first')
+// Runners: one value per base state, the bases spelled in order ('1-3' = first and
+// third). The card draws each as the scorebug's BaseState. The four values the first
+// slice used still parse (LEGACY_RUNNERS), so an old link keeps its meaning.
+const RUNNER_STATES = [
+  ['---', 'Bases empty'],
+  ['1--', 'Runner on 1st'],
+  ['-2-', 'Runner on 2nd'],
+  ['--3', 'Runner on 3rd'],
+  ['12-', '1st and 2nd'],
+  ['1-3', '1st and 3rd'],
+  ['-23', '2nd and 3rd'],
+  ['123', 'Bases loaded'],
+]
+const runnersTag = (r) => `${r & 1 ? '1' : '-'}${r & 2 ? '2' : '-'}${r & 4 ? '3' : '-'}`
+const LEGACY_RUNNERS = { empty: ['---'], first: ['1--'], risp: ['-2-', '--3', '12-', '1-3', '-23'], loaded: ['123'] }
+
+// '1-3' -> { first, second, third }, for BaseState.
+export const basesOf = (v) => ({ first: v[0] === '1', second: v[1] === '2', third: v[2] === '3' })
 
 // Each card: key (URL), label, options [[value, label]], test(pa) -> the PA's value(s),
 // `since` the first season the card can answer (the coverage line), and `multi`.
@@ -91,7 +108,7 @@ export const FILTERS = [
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
   { key: 'cnt', label: 'Count (passed through)', options: ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2'].map((c) => [c, c]), values: (pa) => pa.pitches.map((p) => `${p.balls}-${p.strikes}`) },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
-  { key: 'run', label: 'Runners', options: [['empty', 'Bases empty'], ['first', 'Runner on 1st only'], ['risp', 'Scoring position'], ['loaded', 'Loaded']], values: (pa) => [runnersTag(pa.runners)] },
+  { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'inn', label: 'Inning', options: [...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [String(i), `${i}`]), ['x', 'Extras']], values: (pa) => [pa.inning > 9 ? 'x' : String(pa.inning)] },
 ]
 
@@ -106,7 +123,9 @@ export function parseQuery(search) {
     const raw = p.get(f.key)
     if (!raw) continue
     const inv = raw.startsWith('!')
-    const vals = (inv ? raw.slice(1) : raw).split('.').filter((v) => f.options.some(([o]) => o === v))
+    const parts = (inv ? raw.slice(1) : raw).split('.')
+    const expanded = f.key === 'run' ? [...new Set(parts.flatMap((v) => LEGACY_RUNNERS[v] ?? [v]))] : parts
+    const vals = expanded.filter((v) => f.options.some(([o]) => o === v))
     if (vals.length) chips[f.key] = { vals, inv: inv && !f.single }
   }
   const id = (k) => (/^\d+$/.test(p.get(k) ?? '') ? Number(p.get(k)) : null)

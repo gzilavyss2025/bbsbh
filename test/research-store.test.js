@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
-import { buildQuery, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
+import { basesOf, buildQuery, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
 import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
@@ -152,4 +152,15 @@ test('a filter card with nothing picked stays open and filters nothing', () => {
   assert.equal(pas.filter(matcher(q)).length, pas.length)
   assert.equal(isBlank(q), true)
   assert.equal(pas.filter(matcher({ chips: { res: { vals: [], inv: true } } })).length, pas.length, 'an inverted empty card filters nothing either')
+})
+
+test('runners: one chip per base state, and old links still parse', () => {
+  const run = (v) => pas.filter(matcher(parseQuery(`?run=${v}`))).map((p) => p.key)
+  assert.deepEqual(run('---'), ['1-1', '2-1', '3-1'], 'bases empty')
+  assert.deepEqual(run('-2-'), ['1-2'], 'runner on second only')
+  assert.deepEqual(run('1--'), [], 'nobody stood on first alone')
+  assert.deepEqual(parseQuery('?run=risp').chips.run.vals, ['-2-', '--3', '12-', '1-3', '-23'])
+  assert.deepEqual(parseQuery('?run=risp.loaded').chips.run.vals, ['-2-', '--3', '12-', '1-3', '-23', '123'])
+  assert.deepEqual(parseQuery('?run=empty.first').chips.run.vals, ['---', '1--'])
+  assert.deepEqual(basesOf('1-3'), { first: true, second: false, third: true })
 })
