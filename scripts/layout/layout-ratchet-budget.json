@@ -157,8 +157,8 @@
     "wrap": 1
   },
   "src/styles/33-awards-history.css": {
-    "column": 6,
-    "grid": 3
+    "column": 2,
+    "grid": 0
   },
   "src/styles/34-postseason.css": {
     "column": 7,

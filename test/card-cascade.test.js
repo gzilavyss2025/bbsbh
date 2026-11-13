@@ -1106,7 +1106,7 @@ const C5 = [
   {
     css: '22-box-score-tables.css',
     sel: '.playerline',
-    jsx: ['components/player/PerformerCard.jsx', 'screens/AwardsHistoryPage.jsx'],
+    jsx: ['components/player/PerformerCard.jsx'],
     ns: 'playerline',
     frame: 'ledger',
     as: 'li',

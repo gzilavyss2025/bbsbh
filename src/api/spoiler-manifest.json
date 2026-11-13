@@ -138,6 +138,10 @@
       "class": "spoiler-free",
       "why": "Static awards-history.json reader — who won what, by season — plus the live current-season awards/recipients read (an award is not a game result)."
     },
+    "awards/ledger.js": {
+      "class": "spoiler-free",
+      "why": "Pure reshaping of the awards history and the live season into the Awards page's tables (an award is not a game result)."
+    },
     "battingorder.js": {
       "class": "caller-gated",
       "why": "`lineupEntering` reports the batting order as a half begins, walking pre-pitch substitution events. Safe only for the half the user has reached (ADR-0003/0010)."
