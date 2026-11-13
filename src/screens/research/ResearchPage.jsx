@@ -51,7 +51,7 @@ function readUrl() {
 // The filter bar's pills: one per active filter, in words.
 function pillsOf(q, people) {
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
-  const out = Object.entries(q.chips).map(([k, c]) => {
+  const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
     return `${c.inv ? 'Not ' : ''}${c.vals.map((v) => labels[v]).join(' / ')}`
   })

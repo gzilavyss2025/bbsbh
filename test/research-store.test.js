@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
-import { buildQuery, fieldOf, horizontalThird, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
+import { buildQuery, fieldOf, horizontalThird, isBlank, matcher, parseQuery, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
 import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
@@ -145,4 +145,11 @@ test('a rebuilt month may grow or hold, never shrink', () => {
   assert.equal(shrinkReason({ pitches: 100 }, 100), null)
   assert.equal(shrinkReason({ pitches: 100 }, 120), null)
   assert.match(shrinkReason({ pitches: 100 }, 99), /fewer than the 100 on file/)
+})
+
+test('a filter card with nothing picked stays open and filters nothing', () => {
+  const q = { chips: { ph: { vals: [], inv: false } } }
+  assert.equal(pas.filter(matcher(q)).length, pas.length)
+  assert.equal(isBlank(q), true)
+  assert.equal(pas.filter(matcher({ chips: { res: { vals: [], inv: true } } })).length, pas.length, 'an inverted empty card filters nothing either')
 })

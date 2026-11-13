@@ -138,11 +138,12 @@ export const ASKS = [
 ]
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
-export const isBlank = (q) => !Object.keys(q.chips ?? {}).length && !q.batter && !q.pitcher && !q.team && !q.park
+export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.park
 
 // The predicate for a whole query. `cutoff` ('YYYY-MM-DD', optional) holds out that day and later.
 export function matcher(q, cutoff) {
-  const tests = Object.entries(q.chips ?? {}).map(([k, c]) => {
+  // A card with nothing picked stays on screen until its ✕, and filters nothing.
+  const tests = Object.entries(q.chips ?? {}).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const f = FILTER_BY_KEY[k]
     const want = new Set(c.vals)
     return (pa) => f.values(pa).some((v) => want.has(v)) !== Boolean(c.inv)

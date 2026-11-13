@@ -93,8 +93,10 @@ function FilterCard({ f, chip, onChip }) {
           options={shown}
           value={f.single ? chip.vals[0] : chip.vals}
           onChange={(v) => {
-            const vals = f.single ? [v] : v
-            onChip(vals.length ? { ...chip, vals } : null)
+            // Unpicking the last chip (or the picked one of a pick-one card) leaves
+            // the card open and empty; only its ✕ removes it.
+            const vals = f.single ? (chip.vals[0] === v ? [] : [v]) : v
+            onChip({ ...chip, vals })
           }}
         />
         {hidden > 0 && <Button size="control" skin="ghost" onClick={() => setOpen(true)}>+{hidden} more</Button>}
