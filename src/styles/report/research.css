@@ -115,3 +115,31 @@
 .research__table .research__num {
   text-align: end;
 }
+/* layout-exempt: the blank state's four question groups, two columns at the wide step */
+.research__try {
+  display: grid;
+  gap: var(--space-3) var(--space-5);
+}
+@media (min-width: 740px) {
+  .research__try {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.research__trygroup:nth-child(n + 2) {
+  border-top: var(--bw-hair) solid var(--border-rule);
+  padding-top: var(--space-2);
+}
+@media (min-width: 740px) {
+  .research__trygroup:nth-child(2) {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+.research__preset {
+  text-align: start;
+}
+.research__own {
+  margin-top: var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  padding-top: var(--space-2);
+}
