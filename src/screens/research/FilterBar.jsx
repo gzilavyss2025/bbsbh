@@ -132,7 +132,8 @@ function SeasonsCard({ years, seasons, onYears }) {
             onYears(next.sort((a, b) => a - b))
           }}
         >
-          {seasons.map((s) => <option key={s} value={s}>{s}</option>)}
+          {/* A linked year not on file stays listed, so the picker shows what the URL asks. */}
+          {[...new Set([...seasons, ...years])].sort((a, b) => a - b).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       )}
     </Field>

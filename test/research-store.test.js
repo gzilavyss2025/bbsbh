@@ -3,7 +3,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
+import { countBit, decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
 import { basesOf, buildQuery, clubName, fieldOf, horizontalThird, isBlank, matcher, mayMatch, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
 import { answer } from '../src/api/research/answer.js'
 import { coverage, seasonEvents, seasonsOnFile } from '../src/api/research/store.js'
@@ -213,4 +213,10 @@ test('the coverage line reads only the seasons asked, and a season with no plays
   assert.deepEqual(seasonsOnFile(ix), [2015, 2026])
   assert.deepEqual(coverage(ix, [2015]), { first: 2015, last: 2015, through: '2015-04-30', pitches: 10 })
   assert.equal(coverage(ix).pitches, 30)
+})
+
+test('a pitch with no count on file passes through no count', () => {
+  assert.equal(countBit(null, null), 0, 'a null count is not 0-0')
+  assert.equal(countBit(0, 0), 1)
+  assert.equal(countBit(4, 2), 0, 'off the grid')
 })

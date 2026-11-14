@@ -62,7 +62,7 @@ export function useResearch(q, cutoff) {
     const step = (season, i, extra) => setRun({ key, result: bySeason && found.length ? summarize([...found]) : null, people: { ...people }, searched: [...searched], progress: { season, n: i + 1, of: targets.length }, ...extra })
     ;(async () => {
       for (const [i, season] of targets.entries()) {
-        if (ctrl.signal.aborted) break
+        if (ctrl.signal.aborted) return
         if (bySeason && !mayMatch(live, seasonEvents(index, season))) {
           searched.push(season)
           continue
@@ -72,7 +72,9 @@ export function useResearch(q, cutoff) {
         Object.assign(people, data.people)
         searched.push(season)
         if (bySeason) {
-          found.push(...answer(data.pas, live, cutoff).matches)
+          // A loop, not push(...): a broad card (count 0-0) matches 100k+ PAs a season, past
+          // Safari's argument cap.
+          for (const m of answer(data.pas, live, cutoff).matches) found.push(m)
           if (season !== latest) dropSeason(season)
         } else pools.unshift(data.pas)
       }
@@ -80,8 +82,11 @@ export function useResearch(q, cutoff) {
       const result = bySeason ? summarize(found) : answer(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
       setRun({ key, result, people, searched, progress: null })
     })().catch((e) => {
-      if (e.name !== 'AbortError') setError(e)
-      else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: summarize([...found]), people, searched, progress: null, stopped: true })
+      // A failed run ends its progress line and keeps its error to its own query.
+      if (e.name !== 'AbortError') setRun({ key, result: null, people, searched, progress: null, error: e })
+      // Stopped: "Last time" shows what it found so far; a one-pass search found nothing
+      // yet, so it shows no answer (an empty one would read "nothing matches").
+      else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: bySeason ? summarize([...found]) : null, people, searched, progress: null, stopped: true })
     })
     return () => ctrl.abort()
     // `key` stands for live, cutoff and targets.
@@ -98,5 +103,5 @@ export function useResearch(q, cutoff) {
   }
 
   const cover = index && (run?.searched?.length || targets.length) ? coverage(index, run?.searched?.length && !run.progress ? run.searched : targets) : null
-  return { index, error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
+  return { index, error: error ?? run?.error ?? null, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
 }

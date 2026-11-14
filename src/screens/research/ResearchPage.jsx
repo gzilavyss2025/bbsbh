@@ -71,7 +71,7 @@ export function ResearchPage() {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${buildQuery(next, { d: cutoff })}`)
     setState({ q: next, cutoff })
   }
-  const { error, head, onFile, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
+  const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   const data = head
   const people = run?.people ?? head?.people ?? {}
   const clubs = useMemo(() => (head ? [...new Set(head.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
@@ -100,6 +100,7 @@ export function ResearchPage() {
         </p>
       )}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
+      {data && !targets.length && <p className="t-label t-label--nocaps">No season on file in this range{cutoff ? ` before ${labelDate(cutoff)}` : ''}.</p>}
       {progress && (
         <Cluster>
           <p className="t-label t-label--nocaps" role="status">

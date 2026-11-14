@@ -36,8 +36,9 @@ const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
 export const SHARD_VERSION = 1
 
-// A count's bit in a PA's `counts` mask; 0 for a count off the 4x3 grid.
-export const countBit = (balls, strikes) => (balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
+// A count's bit in a PA's `counts` mask; 0 for a count off the 4x3 grid or not on file
+// (null, which `>= 0` would read as 0).
+export const countBit = (balls, strikes) => (Number.isInteger(balls) && Number.isInteger(strikes) && balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
 
 const SCALE = { px: 100, hx: 100, hy: 100, ls: 10 }
 const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd']
