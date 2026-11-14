@@ -11,7 +11,9 @@ import { matcher, resultName } from './filters.js'
 const LEADER_ROWS = 10
 
 // pas: every plate appearance on file, oldest first. Returns the whole answer.
-export function answer(pas, q, cutoff) {
+// `matchesOnly`: just the matches (newest first, with ordinals), no share or tables, for
+// "Last time" across seasons, which summarizes once over every season's matches.
+export function answer(pas, q, cutoff, { matchesOnly = false } = {}) {
   const isMatch = matcher(q, cutoff)
   const seen = new Map()
   const matches = []
@@ -23,6 +25,7 @@ export function answer(pas, q, cutoff) {
     matches.push({ ...pa, ordinal })
   }
   matches.reverse()
+  if (matchesOnly) return { matches }
 
   // "How often": against the same query with no result chip, when one is set.
   let base = null
@@ -32,6 +35,13 @@ export function answer(pas, q, cutoff) {
     base = pas.reduce((n, pa) => n + (isBase(pa) ? 1 : 0), 0)
   }
 
+  return summarize(matches, base)
+}
+
+// The answer for a list of matches, newest first. "Last time" across seasons joins each
+// season's matches (newest season first) and calls this with base null: a share is
+// never computed from part of a search.
+export function summarize(matches, base = null) {
   const games = new Set(matches.map((m) => m.gamePk)).size
   return { matches, totals: totalsOf(matches), games, base, batters: leaders(matches, 'batter'), pitchers: leaders(matches, 'pitcher'), outcomes: outcomes(matches) }
 }

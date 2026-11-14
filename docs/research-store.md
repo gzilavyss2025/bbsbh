@@ -62,3 +62,22 @@ day and later. No SealBox.
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,
 location and batted-ball location from 2008. The coverage line under the bar lists any
 card the store's seasons cannot answer. With 2026 only, every card works.
+
+## Seasons (scope #2, Gary 2026-11-13)
+
+The store holds Savant seasons from 2015 (built by hand, one season per dispatch of
+`research-store.yml`). `filters.js` `seasonsFor` decides what a query reads:
+
+- A **Seasons** card (`yr=2015-2019`) reads its range.
+- With no range, **Last time** searches every season, newest first, with a progress line
+  and a Stop. A season whose `index.json` result counts (`events` per month) hold none of
+  a picked result is skipped without a fetch. Each searched season is freed once read.
+- With no range, **How often**, **Who most** and **What happens** read the latest season,
+  so a rate or a leader board is one season's.
+
+A decoded plate appearance is compact: the last pitch's type and `plate_x`, a 12-bit mask
+of the counts it passed through, and its pitch count (`shard.js`). No pitch list.
+
+**Pitch-clock rows.** From 2023 a pitch-clock violation is a row with no `plate_x` and no
+pitch type. The shard drops it unless it ends the plate appearance, so a PA that ends on
+one has a null last pitch type and location, and matches no pitch-type or location chip.

@@ -36,6 +36,10 @@ const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
 export const SHARD_VERSION = 1
 
+// A count's bit in a PA's `counts` mask; 0 for a count off the 4x3 grid or not on file
+// (null, which `>= 0` would read as 0).
+export const countBit = (balls, strikes) => (Number.isInteger(balls) && Number.isInteger(strikes) && balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
+
 const SCALE = { px: 100, hx: 100, hy: 100, ls: 10 }
 const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd']
 
@@ -102,7 +106,9 @@ export function encodeMonth(rows, { season, month, names = {} }) {
 }
 
 // Shard -> plate appearances, oldest first. One entry per PA that ended in an event.
-// Each carries its pitches (oldest first) so a count filter can ask "passed through".
+// COMPACT (2015 onward is twelve seasons): a PA keeps no pitch list, only what the
+// filters read. `pitchType` and `px` are the last pitch's; `counts` is a 12-bit mask of
+// the counts the PA passed through (bit balls*3 + strikes, countBit below); `nPitches`.
 export function decodePlateAppearances(shard) {
   const { games, dict, cols } = shard
   const n = cols.g.length
@@ -141,19 +147,17 @@ export function decodePlateAppearances(shard) {
         outs: cols.o[j],
         runners: cols.r[j],
         margin: cols.sd[j],
-        pitches: [],
+        counts: 0,
+        nPitches: 0,
         event: '',
       }
       cur.batTeam = cur.top ? cur.away : cur.home
       cur.fieldTeam = cur.top ? cur.home : cur.away
     }
-    cur.pitches.push({
-      balls: cols.b[j],
-      strikes: cols.s[j],
-      type: cols.pt[j] == null ? null : dict.pt[cols.pt[j]],
-      call: cols.call[j] == null ? null : dict.call[cols.call[j]],
-      px: unscale('px', cols.px[j]),
-    })
+    cur.counts |= countBit(cols.b[j], cols.s[j])
+    cur.nPitches++
+    cur.pitchType = cols.pt[j] == null ? null : dict.pt[cols.pt[j]]
+    cur.px = unscale('px', cols.px[j])
     const ev = dict.ev[cols.ev[j]]
     if (ev && !NOT_A_PA.has(ev)) {
       cur.event = ev

@@ -32,11 +32,15 @@ export function seasonMonths(season, today) {
   return ['03', '04', '05', '06', '07', '08', '09', '10', '11'].filter((m) => `${season}-${m}-01` < today)
 }
 
-// Fold one month's summary into the index (see src/api/research/store.js).
+// Fold one month's summary into the index (see src/api/research/store.js). `pas`: the
+// month's decoded plate appearances; `events` counts their results, so the page can skip
+// a season that holds none of a picked result (filters.js mayMatch).
 export function mergeIndex(index, season, month, shard, pas, built) {
+  const events = {}
+  for (const pa of pas) events[pa.event] = (events[pa.event] ?? 0) + 1
   const next = { v: 1, built, seasons: { ...(index?.seasons ?? {}) } }
   const s = { months: { ...(next.seasons[season]?.months ?? {}) } }
-  s.months[month] = { through: shard.through, pitches: shard.cols.g.length, pas }
+  s.months[month] = { through: shard.through, pitches: shard.cols.g.length, pas: pas.length, events }
   next.seasons[season] = s
   return next
 }
