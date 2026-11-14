@@ -220,3 +220,11 @@ test('a pitch with no count on file passes through no count', () => {
   assert.equal(countBit(0, 0), 1)
   assert.equal(countBit(4, 2), 0, 'off the grid')
 })
+
+test('a matches-only answer has the same matches and no share or tables', () => {
+  const q = parseQuery('?res=home_run')
+  const full = answer(pas, q, null)
+  const lean = answer(pas, q, null, { matchesOnly: true })
+  assert.deepEqual(lean.matches, full.matches)
+  assert.deepEqual(Object.keys(lean), ['matches'])
+})

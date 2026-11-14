@@ -59,7 +59,9 @@ export function useResearch(q, cutoff) {
     const searched = []
     const found = []
     const pools = []
-    const step = (season, i, extra) => setRun({ key, result: bySeason && found.length ? summarize([...found]) : null, people: { ...people }, searched: [...searched], progress: { season, n: i + 1, of: targets.length }, ...extra })
+    let inflight = null
+    let interim = null
+    const step = (season, i, extra) => setRun({ key, result: interim, people: { ...people }, searched: [...searched], progress: { season, n: i + 1, of: targets.length }, ...extra })
     ;(async () => {
       for (const [i, season] of targets.entries()) {
         if (ctrl.signal.aborted) return
@@ -68,18 +70,26 @@ export function useResearch(q, cutoff) {
           continue
         }
         step(season, i)
+        inflight = season
         const data = await raceAbort(loadSeason(index, season), ctrl.signal)
+        inflight = null
         Object.assign(people, data.people)
         searched.push(season)
         if (bySeason) {
           // A loop, not push(...): a broad card (count 0-0) matches 100k+ PAs a season, past
           // Safari's argument cap.
-          for (const m of answer(data.pas, live, cutoff).matches) found.push(m)
+          const before = found.length
+          for (const m of answer(data.pas, live, cutoff, { matchesOnly: true }).matches) found.push(m)
+          // The progress answer is rebuilt only when this season added matches.
+          if (found.length > before) interim = summarize([...found])
           if (season !== latest) dropSeason(season)
         } else pools.unshift(data.pas)
       }
-      if (!bySeason) dropSeasonsExcept([...targets, latest])
       const result = bySeason ? summarize(found) : answer(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
+      // Free every season but the latest once answered (Gary, 2026-11-14): re-asking a
+      // range downloads it again rather than holding twelve seasons on a phone.
+      pools.length = 0
+      dropSeasonsExcept([latest])
       setRun({ key, result, people, searched, progress: null })
     })().catch((e) => {
       // A failed run ends its progress line and keeps its error to its own query.
@@ -88,7 +98,12 @@ export function useResearch(q, cutoff) {
       // yet, so it shows no answer (an empty one would read "nothing matches").
       else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: bySeason ? summarize([...found]) : null, people, searched, progress: null, stopped: true })
     })
-    return () => ctrl.abort()
+    // A replaced search frees the season it was still downloading (not the latest), so a
+    // season the new search skips does not stay in memory for the visit.
+    return () => {
+      ctrl.abort()
+      if (inflight != null && inflight !== latest) dropSeason(inflight)
+    }
     // `key` stands for live, cutoff and targets.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, index, head, latest])
