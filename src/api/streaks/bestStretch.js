@@ -92,7 +92,7 @@ export function bestStretch(games, n, measure, group = 'hitting') {
 
 // ---- One club only (Club Stretch, and Best Stretch's ?club=). A run counts his games for the
 // club, crosses seasons, and ends at a game for another club; a return starts a new run. AVG and
-// OPS need 3.1 plate appearances per game (the batting-title rule).
+// OPS need 3.1 plate appearances per game (the batting-title rule); pitching has no floor.
 const PA_PER_GAME = 3.1
 const RATES = new Set(['avg', 'ops'])
 
@@ -121,18 +121,25 @@ export function stintsFor(games, teamId) {
 
 // One player's best run with the club, or null when no stint is long enough (or none
 // clears the rate floor).
-export const playerBest = (games, teamId, n, measure) => bestInStints(stintsFor(games, teamId), n, measure)
+export const playerBest = (games, teamId, n, measure, group = 'hitting') => bestInStints(stintsFor(games, teamId), n, measure, group)
 
 // The same over stints already split, so a caller ranking many stats splits them once.
-export function bestInStints(stints, n, measure) {
-  const m = flooredMeasure(measure, n)
+// Pitching has no rate floor (Gary, 2026-11-16): a run of starts or relief outings is long
+// enough as it is, and a lower ERA or WHIP wins.
+export function bestInStints(stints, n, measure, group = 'hitting') {
+  const m = group === 'hitting' ? flooredMeasure(measure, n) : measure
   let best = null
   for (const stint of stints) {
-    const b = bestStretch(stint, n, m)
-    if (b && b.value !== -Infinity && (!best || b.value > best.value)) best = b
+    const b = bestStretch(stint, n, m, group)
+    if (b && b.value !== -Infinity && (!best || (m.lower ? b.value < best.value : b.value > best.value))) best = b
   }
   return best
 }
+
+// Club Stretch's pitching lengths: 32 counts his starts, 65 his relief outings. The other
+// kind of outing is set aside first, so it neither counts nor ends a run.
+export const CLUB_PITCH_LENGTHS = { starts: 32, relief: 65 }
+export const clubPitchPool = (games, n) => games.filter((g) => (n === CLUB_PITCH_LENGTHS.relief ? !(g.gamesStarted > 0) : g.gamesStarted > 0))
 
 // The club he played the most of the window for: the card wears its colours.
 function mostCommon(ids) {

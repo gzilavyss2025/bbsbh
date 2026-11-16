@@ -378,7 +378,7 @@
     },
     "streaks/clubStretch.js": {
       "class": "spoiler-free",
-      "why": "Static club-stretch shards: a club's best 162 and 154 games in a row by one player, six stats, through the last complete season. Totals over past games, no game."
+      "why": "Static club-stretch shards: a club's best 162 and 154 games (and 32 starts, 65 relief outings) in a row by one player, through the last complete season. Totals over past games, no game."
     },
     "history/franchiseLeaders.js": {
       "class": "spoiler-free",

@@ -78,6 +78,8 @@ export const PAGE_GROUPS = [
       { label: 'Research', path: pathOf('research') },
       // A player's best stretch in a row (162 games, 32 starts, 65 relief outings), across seasons.
       { label: 'Best Stretch', path: pathOf('best-stretch') },
+      // A club's best 162 games (or 32 starts, 65 relief outings) in a row by one player.
+      { label: 'Club Stretch', path: pathOf('club-stretch') },
       // Games each club played after it was mathematically out, by season span.
       { label: 'Games After Elimination', path: pathOf('eliminated') },
       // Money, read across the league: who is paid the most, what each club
