@@ -311,7 +311,7 @@ don't run these by hand.
   2021–2026 is about 14.6k calls at concurrency 20; `--from=2021 --to=2026` runs that backfill.
   Incremental, with the scan at `scripts/data/outfield-outs-scan.json`. The default season is
   `fetchSeasonInPlay()`, not the calendar year (#1465).
-- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays}.json` — the
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate}.json` — the
   games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
   THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
@@ -332,6 +332,12 @@ don't run these by hand.
   Rarity flags (#2968): each swept cycle row gets `natural` and each triple play row `unassisted`,
   from one `playByPlay` call per game (`lib/notable/flags.mjs`, detectors shared with
   `src/api/notable/rarityCount.js`). A game with no play-by-play (most before 1950) gets no flag.
+  Immaculate innings (#2968, `lib/notable/immaculate.mjs`): one `playByPlay` call per game from
+  `IMMACULATE_FLOOR` on (earlier feeds hold made-up minimal counts, not pitches), about 2,400
+  calls a season; floor 2001. The nightly run re-reads the last 3 days before the file's `through`
+  and every game after it, replacing those rows; a hand run (`--season`, `--from`, `--to`) reads
+  every game and replaces those seasons' rows. A game with
+  no pitch sequences past the floor is logged, never counted.
   Each run REPLACES every row of each season it swept, in all three files (a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play
@@ -1494,6 +1500,11 @@ don't run these by hand.
   so `test/salaries.test.js` can pin it, and the money rule it enforces (an
   out-year code is a status, never an amount) is ADR-0052. App reads it via
   `src/api/salaries.js`.
+- `fetch-top-prospects.mjs` also appends → `public/data/top-prospects-history.json`
+  — one dated Top-100 snapshot per ISO week (`{ snapshots: [{ date, ranks }] }`),
+  written only after the scrape's validation gates pass; frozen-append, no back-fill
+  (#2970). Pure half: `scripts/lib/milb/top100-history.mjs`. Reader:
+  `src/api/prospects/top100History.js`. Detail: `docs/top-prospects.md`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

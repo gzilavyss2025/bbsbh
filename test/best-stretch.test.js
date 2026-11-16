@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, loadCareerLog, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -91,6 +91,23 @@ test('each measure prints in its usual form; an infinite ERA is a dash', () => {
   assert.equal(dec2(Infinity), '—')
 })
 
+test('career log fetches one season at a time, never the slow whole-career range', async () => {
+  const paths = []
+  const signal = new AbortController().signal
+  const get = async (path, opts) => {
+    assert.equal(opts?.signal, signal)
+    paths.push(path)
+    if (path.includes('yearByYear')) return { stats: [{ splits: [{ season: '2006' }, { season: '2007' }, { season: '2007' }] }] }
+    const season = path.match(/season=(\d+)/)[1]
+    return { stats: [{ splits: [{ date: `${season}-05-01`, player: { fullName: 'Prince Fielder' }, game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4 } }] }] }
+  }
+  const log = await loadCareerLog(429664, signal, 'hitting', get)
+  assert.equal(log.name, 'Prince Fielder')
+  assert.deepEqual(log.games.map((g) => g.date), ['2006-05-01', '2007-05-01'])
+  assert.ok(paths.every((p) => !p.includes('startDate')))
+  assert.equal(paths.length, 3)
+})
+
 test('club filter: the best run counts only that club, and a stint ends at another club', async () => {
   const { playerBest } = await import('../src/api/streaks/bestStretch.js')
   const g = (i, team, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: team }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -99,12 +116,4 @@ test('club filter: the best run counts only that club, and a stint ends at anoth
   assert.equal(bestStretch(games, 3, measureByKey('hr')).homeRuns, 6)
   assert.equal(playerBest(games, 158, 3, measureByKey('hr')).homeRuns, 3)
   assert.equal(playerBest(games, 158, 6, measureByKey('hr')), null)
-})
-
-test('careerSeasons: debut through last game, an active player through this year, none without a debut', async () => {
-  const { careerSeasons } = await import('../src/api/streaks/bestStretch.js')
-  assert.deepEqual(careerSeasons({ mlbDebutDate: '1969-09-15', lastPlayedDate: '1971-06-20' }, 2026), [1969, 1970, 1971])
-  assert.deepEqual(careerSeasons({ mlbDebutDate: '2024-07-23' }, 2026), [2024, 2025, 2026])
-  assert.deepEqual(careerSeasons({ fullName: 'Prospect' }, 2026), [])
-  assert.deepEqual(careerSeasons(undefined, 2026), [])
 })

@@ -710,7 +710,7 @@
     },
     "notable/rarityCount.js": {
       "class": "reveal-only",
-      "why": "The rarity count of a natural cycle or unassisted triple play (#2968): 'the Nth since {floor}' names a result, so hooks/callouts/useLastTime.js calls it only inside the box score's reveal, for a Final game. Its two pure detectors are shared with scripts/gen-notable.mjs.",
+      "why": "The rarity count of a natural cycle, unassisted triple play or immaculate inning (#2968): 'the Nth since {floor}' names a result, so hooks/callouts/useLastTime.js calls it only inside the box score's reveal, for a Final game. Its pure detectors are shared with scripts/gen-notable.mjs.",
       "importers": [
         "hooks/callouts/useLastTime.js"
       ]
@@ -852,6 +852,13 @@
         "screens/InningViewer.jsx"
       ]
     },
+    "pitcher/gameCard.js": {
+      "class": "reveal-only",
+      "why": "The pitcher game card (#2969): one pitcher's box line, pitch mix, arsenal rates, barrels and hard-hit balls for one game. All of it is a result, so it is called only inside the box score's SealBox reveal render. Its one importer is the sheet that opens from a pitcher row in the revealed box score (screens/boxscore/PitcherGameCardSheet.jsx), which mounts only on a tap inside that reveal.",
+      "importers": [
+        "screens/boxscore/PitcherGameCardSheet.jsx"
+      ]
+    },
     "pitcher/health.js": {
       "class": "reveal-gated",
       "why": "The laboring index and velo-decay flag. Walks only plays in revealed half-innings; deliberately not sealed, because a still-active pitcher needs partial-outing granularity (ADR-0009).",
@@ -951,8 +958,9 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal. Gameday's subSteps.js reaches AUTOMATIC_CODES directly, because the same call is a sub-step on one surface and a card dot on the other; it is itself reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function. Gameday's hero (screens/gameday/next/hero/GamedayHero.jsx) calls hasPitchLocations on a revealed at-bat card's pitchDetails, inside the hero's SealBox reveal render, to decide whether its pitch columns open the strike zone. The offseason page's longest at-bats card (components/offseason/LongAtBatDetail.jsx) shapes a finished season's at-bat with pitchCardInfo: an open surface, outside the four scoring surfaces (ADR-0034), so it needs no seal.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal. Gameday's subSteps.js reaches AUTOMATIC_CODES directly, because the same call is a sub-step on one surface and a card dot on the other; it is itself reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function. Gameday's hero (screens/gameday/next/hero/GamedayHero.jsx) calls hasPitchLocations on a revealed at-bat card's pitchDetails, inside the hero's SealBox reveal render, to decide whether its pitch columns open the strike zone. The offseason page's longest at-bats card (components/offseason/LongAtBatDetail.jsx) shapes a finished season's at-bat with pitchCardInfo: an open surface, outside the four scoring surfaces (ADR-0034), so it needs no seal. The pitcher game card (api/pitcher/gameCard.js, #2969) reads pitchDotCategory to sort a night's pitches into swings and whiffs; it is reveal-only itself.",
       "importers": [
+        "api/pitcher/gameCard.js",
         "components/offseason/LongAtBatDetail.jsx",
         "api/gameday/subSteps.js",
         "api/playbyplay.js",
@@ -960,6 +968,14 @@
         "screens/gameday/next/hero/GamedayHero.jsx",
         "screens/gameday/next/hero/heroModel.js",
         "screens/gameday/next/zonemap/zonePitches.js"
+      ]
+    },
+    "playbyplay/runExpectancyLine.js": {
+      "class": "reveal-only",
+      "why": "The innings viewer's run-expectancy line (#2973): the base-out state a play left is that play's result. runExpectancyLine is read only inside the Gameday hero's SealBox reveal render function, for the newest revealed at-bat (heroMarkup.js result). fetchRunExpectancy loads the RE24 table, which is not a score, so GamedayHero.jsx may call it eagerly.",
+      "importers": [
+        "screens/gameday/next/hero/GamedayHero.jsx",
+        "screens/gameday/next/hero/heroMarkup.js"
       ]
     },
     "playbyplay/runnerNotes.js": {
@@ -1133,6 +1149,10 @@
     "callout-notes/surfaces/prehalf.js": {
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
+    },
+    "prospects/top100History.js": {
+      "class": "spoiler-free",
+      "why": "Static weekly Top-100 rank history reader (#2970) — a scout's ranking per week, not game state."
     },
     "prospects/trend.js": {
       "class": "spoiler-free",

@@ -91,8 +91,8 @@
   padding: var(--space-1h) var(--space-1h) var(--space-2);
 }
 /* The pitch in flight washes its tile in a soft tint of its own colour (--pitch,
-   set inline from pitchMark). The ink underline stays: a pale pitch such as the
-   knuckleball would not show as a tint alone. */
+   set inline from pitchMark). The ink underline stays: colour never works alone
+   (docs/pitch-types.md, rule 3). */
 .pcard__tile.is-active {
   border-color: var(--border-hairline);
   background: color-mix(in srgb, var(--pitch, var(--text-caption)) 28%, var(--surface-stamped-event));
@@ -101,8 +101,7 @@
 
 /* A tile's head: the pitch's mark, then its code. Colour never works alone, so the
    code rides beside the mark (docs/pitch-types.md, rule 3). The mark is the
-   fill with an ink outline, as on the player page's arsenal, so a pale pitch
-   colour still reads on paper. */
+   fill with an ink outline, as on the player page's arsenal. */
 .pcard__tilehead {
   display: flex;
   align-items: center;

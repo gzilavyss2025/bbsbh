@@ -358,7 +358,7 @@ test('the seed file holds the one triple play the API misses, and a row per kind
 test('no committed file carries a key outside the allowlist, at any depth', () => {
   const dir = join(ROOT, 'public', 'data', 'notable')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort()
-  assert.deepEqual(files, ['cycles.json', 'nohitters.json', 'tripleplays.json'])
+  assert.deepEqual(files, ['cycles.json', 'immaculate.json', 'nohitters.json', 'tripleplays.json'])
 
   for (const file of files) {
     const kind = file.replace('.json', '')
@@ -392,10 +392,10 @@ test('no committed file carries a key outside the allowlist, at any depth', () =
       assert.ok(['home', 'away'].includes(r.side))
       assert.ok(doc.coverage.seasons.includes(Number(r.officialDate.slice(0, 4))), `${file} row outside its coverage`)
       assert.ok(['R', 'F', 'D', 'L', 'W'].includes(r.gameType))
-      if (kind === 'cycles') assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
+      if (kind === 'cycles' || kind === 'immaculate') assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
       if (kind === 'nohitters') assert.ok(r.pitchers.length > 0 && r.pitchers.every((p) => Object.keys(p).length === 2))
       if (kind !== 'nohitters') assert.ok(!('pitchers' in r) && !('shortened' in r) && !('lost' in r))
-      if (kind !== 'cycles') assert.ok(!('player' in r))
+      if (kind !== 'cycles' && kind !== 'immaculate') assert.ok(!('player' in r))
       // newest first
       if (prev) assert.ok(prev.officialDate >= r.officialDate, `${file} is not newest first`)
       prev = r

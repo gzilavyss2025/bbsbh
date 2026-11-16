@@ -152,7 +152,9 @@ step 4.
    and pushed — `gh run list --workflow=update-nightly-data.yml --limit 3`. A
    silent cron failure has happened before and stales the site's data without
    any visible error (see the 2026-07 README-regen incident). Flag a failed or
-   missing run prominently.
+   missing run prominently. A **cancelled** run is normal: the gate cancels a
+   run that skips because the night's work is already done (2026-11-16), so look
+   for one successful run today.
 
    `update-nightly-data.yml` is the ONLY data cron — the three weekly ones
    folded into it on 2026-08-28. A **missing** run matters as much as a failed

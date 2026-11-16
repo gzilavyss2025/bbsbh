@@ -176,7 +176,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.
-  The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`. **The feat label** (`boxscore/FeatLabel.jsx`) renders only inside that same reveal and fetches after it (ADR-0101).
+  The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`. **The feat label** (`boxscore/FeatLabel.jsx`) renders only inside that same reveal and fetches after it (ADR-0101). **The pitcher game card** (`boxscore/PitcherGameCardSheet.jsx`, #2969) opens from a pitcher row's stat cells, inside that same reveal; the name stays the player link.
 - **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
 - **Clip posters**: no poster builder exists. A clip frame carries the broadcast scorebug burned
   into the pixels, so any poster may render only inside an already-revealed play, never as the

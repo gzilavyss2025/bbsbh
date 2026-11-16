@@ -15,7 +15,7 @@ export const ALLOWED_KEYS = {
     // every kind
     'gamePk', 'officialDate', 'gameType', 'gameNumber', 'away', 'home',
     // the kind's own: no-hitter (side, pitchers, shortened, lost), cycle (player, side),
-    // triple play (side); the rarity flags, cycle (natural) and triple play (unassisted),
+    // triple play (side), immaculate inning (player, side); the rarity flags, cycle (natural) and triple play (unassisted),
     // only where the play-by-play says (lib/notable/flags.mjs, #2968)
     'side', 'pitchers', 'shortened', 'lost', 'player', 'natural', 'unassisted',
   ],
@@ -25,9 +25,9 @@ export const ALLOWED_KEYS = {
 export const ALL_ALLOWED_KEYS = new Set(Object.values(ALLOWED_KEYS).flat())
 
 // One feat is one row. A no-hitter or a triple play is kept once for each gamePk and
-// side. A cycle is kept once for each gamePk and player.
+// side. A cycle or an immaculate inning (immaculate.mjs) is kept once for each gamePk and player.
 export function rowKey(kind, row) {
-  return kind === 'cycles' ? `${row.gamePk}:${row.player?.id}` : `${row.gamePk}:${row.side}`
+  return kind === 'cycles' || kind === 'immaculate' ? `${row.gamePk}:${row.player?.id}` : `${row.gamePk}:${row.side}`
 }
 
 export const rowSeason = (row) => Number(String(row.officialDate).slice(0, 4))
@@ -49,7 +49,7 @@ export function sortRows(kind, rows) {
 // after the fact: a game scored again, a player credited to the other club, a feat the
 // feed drops. A per-key merge would keep the old row beside the corrected one for ever
 // (a ghost row, the gen-umpire-accuracy.mjs incident). So a run drops every row of each
-// season it swept, in all three files, and writes what it found. Seasons it did not
+// season it swept, in all three files (immaculate.json keeps its own rule, immaculate.mjs), and writes what it found. Seasons it did not
 // sweep stay as they were.
 export function mergeRows(kind, prevRows, seasons, freshRows) {
   const swept = new Set(seasons)

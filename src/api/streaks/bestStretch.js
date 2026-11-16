@@ -156,28 +156,15 @@ export const showsHolds = (t) => t.holds > t.saves
 // Starter or reliever: a starter if at least half his outings were starts.
 export const isStarter = (games) => games.filter((g) => g.gamesStarted > 0).length * 2 >= games.length
 
-// The seasons to ask for: MLB debut through the last game played (an active player has no
-// lastPlayedDate yet, so through this year). No debut is no MLB games: nothing to ask for.
-export function careerSeasons(person, thisYear) {
-  const from = Number(person?.mlbDebutDate?.slice(0, 4))
-  if (!from) return []
-  const to = Number(person.lastPlayedDate?.slice(0, 4)) || thisYear
-  return Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => from + i)
-}
-
-// The player's whole MLB regular-season log for one group ('hitting' or 'pitching'),
-// ONE SEASON PER CALL, four at a time. A career's log in a single call can take the feed
-// 40 s to build for a player it has not cached; season by season the same games take about
-// a second (measured 2026-11-16, scripts/franchise/gen-club-stretch.mjs). { name, games }.
-export async function loadCareerLog(playerId, signal, group = 'hitting') {
-  const p = await getJson(`/api/v1/people/${playerId}?fields=people,fullName,mlbDebutDate,lastPlayedDate`, { signal })
-  const person = p.people?.[0]
-  const seasons = careerSeasons(person, new Date().getFullYear())
-  const logs = []
-  for (let i = 0; i < seasons.length; i += 4) {
-    logs.push(...(await Promise.all(seasons.slice(i, i + 4).map((y) =>
-      getJson(`/api/v1/people/${playerId}/stats?stats=gameLog&group=${group}&sportId=1&gameType=R&season=${y}`, { signal })
-        .then((d) => d.stats?.[0]?.splits ?? [])))))
-  }
-  return { name: person?.fullName ?? '', games: logs.flat().map((x) => toGame(x, group)) }
+// The player's whole MLB regular-season log for one group ('hitting' or
+// 'pitching'). One season per request: the single career-range query takes
+// ~45 s cold at MLB and blew our timeout, while a season answers in under a
+// second. The season list comes from yearByYear. { name, games }.
+export async function loadCareerLog(playerId, signal, group = 'hitting', get = getJson) {
+  const base = `/api/v1/people/${playerId}/stats?group=${group}&sportId=1&gameType=R`
+  const years = await get(`${base}&stats=yearByYear`, { signal })
+  const seasons = [...new Set((years.stats?.[0]?.splits ?? []).map((x) => x.season))].sort()
+  const logs = await Promise.all(seasons.map((season) => get(`${base}&stats=gameLog&season=${season}`, { signal })))
+  const splits = logs.flatMap((data) => data.stats?.[0]?.splits ?? [])
+  return { name: splits[0]?.player?.fullName ?? '', games: splits.map((x) => toGame(x, group)) }
 }

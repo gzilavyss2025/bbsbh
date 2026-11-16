@@ -31,7 +31,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `charts/` | `WinProbChart`, `HitChart`, `BallFlight` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
 | `game/` | `GameCard`, `GameFinder`, `GameResultFace`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
-| `gamehud/` | `HeaderBug`, `ScorebugMount`, `StatBox` (`Stat`, `AbsRow`) | Live-game heads-up widgets. Gameday's band draws through `ScorebugMount` |
+| `gamehud/` | `HeaderBug`, `ScorebugMount`, `StatBox` (`CountBlink`, `Stat`) | Live-game heads-up widgets. Gameday's band draws through `ScorebugMount` |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |
 | `honors/` | `LeaguePennant`, `PennantRow` | Flat league-champion artwork for team and player pages. Draw-only; callers supply verified season honors. Rules: `honors/CLAUDE.md` |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |

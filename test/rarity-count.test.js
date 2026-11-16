@@ -4,9 +4,10 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, isNaturalCycle, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, immaculateInnings, isNaturalCycle, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
+import { fetchImmaculate, gamesToRead, mergeWindow, readFrom } from '../scripts/lib/notable/immaculate.mjs'
 
 const BATTER = 1
 const play = (i, eventType, { batter = BATTER, half = 'top', runners = [] } = {}) => ({
@@ -127,4 +128,126 @@ test('the committed index flags known games (slice 1)', () => {
   assert.equal(cycles.find((r) => r.player.name === 'JJ Bleday').natural, false)
   // Eric Bruntlett, 2009-08-23 (gamePk 246049): unassisted.
   assert.equal(tps.find((r) => r.gamePk === 246049).unassisted, true)
+})
+
+// ---- immaculate inning (slice 3) ----
+const PITCHER = { id: 50, fullName: 'Sam Arm' }
+const k = (i, { half = 'top', inning = 1, pitches = 3, pitcher = PITCHER, eventType = 'strikeout', runners = [] } = {}) => ({
+  about: { atBatIndex: i, halfInning: half, inning },
+  result: { eventType },
+  matchup: { batter: { id: 100 + i }, pitcher },
+  playEvents: Array.from({ length: pitches }, () => ({ isPitch: true })).concat([{ isPitch: false }]),
+  runners,
+})
+// One real 1-1 count elsewhere in the game, so the game reads as one with real pitch sequences.
+const SEQ = {
+  about: { atBatIndex: 99, halfInning: 'bottom', inning: 9 }, result: { eventType: 'single' },
+  matchup: { pitcher: { id: 9 } }, playEvents: [{ isPitch: true, count: { balls: 1, strikes: 1 } }],
+}
+
+test('an immaculate inning is three strikeouts on nine pitches by one pitcher', () => {
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1), k(2)]), [{ side: 'home', player: { id: 50, name: 'Sam Arm' } }])
+  // a bottom half is the away club pitching
+  assert.deepEqual(immaculateInnings([SEQ, k(0, { half: 'bottom' }), k(1, { half: 'bottom' }), k(2, { half: 'bottom' })]).map((f) => f.side), ['away'])
+  // ten pitches is not immaculate
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { pitches: 4 }), k(2)]), [])
+  // a fourth batter, or an out that is not a strikeout, is not
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1), k(2), k(3)]), [])
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { eventType: 'field_out' }), k(2)]), [])
+  // two pitchers in the half is not
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { pitcher: { id: 51 } }), k(2)]), [])
+  // a reliever who comes in with the bases loaded and no outs and strikes out three on nine
+  // pitches counts (Brad Boxberger, gamePk 381051, 2014-05-08)
+  const starter = { id: 60, fullName: 'Pat Start' }
+  const onBase = (i) => k(i, { pitcher: starter, eventType: 'single', runners: [{ movement: { start: null, end: '1B' } }] })
+  const held = (i) => k(i, { runners: [{ movement: { start: null, end: null } }, { movement: { start: '1B', end: '1B' } }] })
+  assert.deepEqual(immaculateInnings([SEQ, onBase(0), onBase(1), onBase(2), held(3), held(4), held(5)]).map((f) => f.player.id), [50])
+  // a strikeout batter who reached base is not an out
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { runners: [{ movement: { start: null, end: '1B' } }] }), k(2)]), [])
+  // no plays: unknown
+  assert.equal(immaculateInnings([]), null)
+})
+
+test('a made-up inning of nine swinging strikes with no pitch speed is unknown, not immaculate', () => {
+  // The 1990s feeds fill a missing extra inning with S, S, S for each strikeout (gamePk 2342,
+  // 1999-07-10, the 10th) inside a game of real sequences. A real one carries other codes or a speed.
+  const ev = (code, speed) => ({ isPitch: true, details: { code }, ...(speed ? { pitchData: { startSpeed: speed } } : {}) })
+  const swing = (i, speed) => ({ ...k(i), playEvents: [ev('S', speed), ev('S', speed), ev('S', speed)] })
+  assert.deepEqual(immaculateInnings([SEQ, swing(0), swing(1), swing(2)]), [])
+  assert.equal(immaculateInnings([SEQ, swing(0, 95), swing(1, 95), swing(2, 95)]).length, 1)
+  assert.equal(immaculateInnings([SEQ, { ...swing(0), playEvents: [ev('C'), ev('S'), ev('S')] }, swing(1), swing(2)]).length, 1)
+})
+
+test('a game of stub pitches (before about 1988) is unknown, never immaculate', () => {
+  // The old feeds make up a minimal count for every plate appearance: three strikes for a
+  // strikeout, four balls for a walk. No pitch ever has both a ball and a strike on the count.
+  const stub = [k(0), k(1), k(2), { ...k(3, { half: 'bottom', eventType: 'walk' }) }]
+  assert.equal(immaculateInnings(stub), null)
+  // one real 1-1 count anywhere in the game marks it as a game with real sequences
+  const real = [...stub, { ...k(4, { half: 'bottom', eventType: 'single' }), playEvents: [{ isPitch: true, count: { balls: 1, strikes: 1 } }] }]
+  assert.equal(immaculateInnings(real).length, 1)
+})
+
+test('the immaculate count runs from the first swept season, with the club tally', () => {
+  const r = (gamePk, date, teamId) => ({ gamePk, officialDate: date, gameNumber: 1, away: { id: 999 }, home: { id: teamId }, side: 'home', player: { id: gamePk } })
+  const idx = { immaculate: { coverage: { seasons: Array.from({ length: 37 }, (_, i) => 1990 + i) }, rows: [r(1, '1990-05-01', 158), r(2, '2001-05-01', 140), r(6, '2026-08-01', 158)] } }
+  const night = { gamePk: 6, gameData: { datetime: { officialDate: '2026-08-01' }, game: { gameNumber: 1 }, teams: { home: { id: 158, teamName: 'Brewers' } } } }
+  const [note] = buildRarityNotes(idx, night, { kind: 'immaculate', side: 'home', player: PITCHER })
+  assert.equal(note.text, "The 3rd immaculate inning since 1990, the Brewers' 2nd.")
+  assert.deepEqual(buildRarityNotes({ immaculate: { coverage: { seasons: [] }, rows: [] } }, night, { kind: 'immaculate', side: 'home' }), [])
+})
+
+test('detectRareFeats finds an immaculate inning', () => {
+  const feats = detectRareFeats({ liveData: { plays: { allPlays: [k(0), k(1), k(2), SEQ] } } })
+  assert.deepEqual(feats.map((f) => [f.kind, f.side, f.player.id]), [['immaculate', 'home', 50]])
+})
+
+test('the generator reads only games after `through` on an incremental run, and logs stub games', async () => {
+  const game = (gamePk, officialDate) => ({
+    gamePk, officialDate, gameType: 'R', gameNumber: 1,
+    away: { id: 1, abbr: 'A', name: 'Away', runs: 0 }, home: { id: 2, abbr: 'H', name: 'Home', runs: 1 },
+  })
+  const map = new Map([[1, game(1, '2026-05-01')], [2, game(2, '2026-05-02')], [3, game(3, '2026-05-03')]])
+  assert.deepEqual(gamesToRead(map, '2026-05-02').map((g) => g.gamePk), [2, 3])
+  assert.equal(gamesToRead(map).length, 3)
+  const pbp = { 2: { allPlays: [k(0), k(1), k(2), SEQ] }, 3: { allPlays: [k(0), k(1), k(2)] } }
+  const calls = []
+  const get = async (path) => (calls.push(path), pbp[Number(/game\/(\d+)\//.exec(path)[1])])
+  const { rows, unknown } = await fetchImmaculate(get, gamesToRead(map, '2026-05-02'))
+  assert.equal(calls.length, 2)
+  assert.deepEqual(rows.map((r) => [r.gamePk, r.side, r.player.id]), [[2, 'home', 50]])
+  assert.deepEqual(unknown, [3]) // stub pitches: never counted
+})
+
+test('only a run with no season flags is incremental, and it re-reads the last three days', () => {
+  const cov = { seasons: [2025, 2026], through: '2026-06-10' }
+  // a game still going when `through` was set is read again the next nights
+  assert.equal(readFrom({}, cov, 2026), '2026-06-07')
+  // a hand run reads every game: --season, --from with or without --to
+  assert.equal(readFrom({ season: '2026' }, cov, 2026), '')
+  assert.equal(readFrom({ from: '2001' }, cov, 2026), '')
+  // a season the file has never swept is read whole
+  assert.equal(readFrom({}, { seasons: [2025], through: '2025-10-01' }, 2026), '')
+})
+
+test('the re-read window replaces its rows, so a corrected row leaves no ghost', () => {
+  const r = (gamePk, officialDate, id) => ({ gamePk, officialDate, side: 'home', player: { id } })
+  const prev = [r(1, '2026-06-01', 7), r(2, '2026-06-09', 8)]
+  // game 2 re-read: the pitcher credit moved to 9
+  assert.deepEqual(mergeWindow(prev, '2026-06-07', [r(2, '2026-06-09', 9)]).map((x) => x.player.id), [9, 7])
+  assert.deepEqual(mergeWindow(prev, '', [r(3, '2026-06-02', 5)]).map((x) => x.gamePk), [3])
+})
+
+test("a reliever's count holds only his own pitches", () => {
+  // he comes in at 0-2 and fans the batter on one pitch, then two more on three each: 7 of his own
+  const sub = { isPitch: false, details: { eventType: 'pitching_substitution' } }
+  const mid = { ...k(0), playEvents: [{ isPitch: true }, { isPitch: true }, sub, { isPitch: true }] }
+  assert.deepEqual(immaculateInnings([SEQ, mid, k(1), k(2)]), [])
+})
+
+test('the floor is the first season of an unbroken run to the newest', () => {
+  const r = { gamePk: 1, officialDate: '2026-05-01', gameNumber: 1, away: { id: 999 }, home: { id: 158 }, side: 'home', player: { id: 1 } }
+  const night = { gamePk: 6, gameData: { datetime: { officialDate: '2026-08-01' }, game: { gameNumber: 1 }, teams: { home: { id: 158, teamName: 'Brewers' } } } }
+  const [note] = buildRarityNotes({ immaculate: { coverage: { seasons: [2001, 2025, 2026] }, rows: [r] } }, night, { kind: 'immaculate', side: 'home' })
+  assert.equal(note.text, "The 2nd immaculate inning since 2025, the Brewers' 2nd.")
 })

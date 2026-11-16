@@ -121,3 +121,15 @@ test('a strikeout reads SO in the box and its K in the diamond (Gary, 2026-10-28
   // Other outs keep their split: the kind in the box, the fielders in the diamond.
   assert.deepEqual(splitCode('6-3', 'out'), { box: 'GO', mid: '6-3' })
 })
+
+// #2973: the run-expectancy line, under the newest revealed at-bat only.
+const RE = JSON.parse(readFileSync(new URL('../public/data/run-expectancy.json', import.meta.url)))
+test('hero: the run-expectancy line shows under the newest revealed at-bat, never sealed or on a replay', () => {
+  const all = half(F824, 2, 'top')
+  const cap = all.indexOf(at(all, 12)) + 1
+  const last = live(half(F824, 2, 'top', cap), cap)
+  assert.match(html({ last, re: RE }), /class="gdhero__re">About \.\d runs expected\.</)
+  assert.ok(!html({ last: null, re: RE }).includes('gdhero__re'), 'a sealed half has no line')
+  assert.ok(!html({ last, re: null }).includes('gdhero__re'), 'no table, no line')
+  assert.ok(!html({ last, re: RE, replay: 12, step: cap }).includes('gdhero__re'), 'a replayed chip has no line')
+})

@@ -49,6 +49,7 @@ export const MAX_AGE_HOURS = 20
 // output that section lists is missing here (#3075).
 export const EXCEPT = {
   'all-star-rosters.json': 'hand-run once per All-Star break',
+  'top-prospects-history.json': 'nightly run, but it appends only once per ISO week (fetch-top-prospects.mjs, #2970); a stamp ages up to seven days',
   'eliminated.json': 'hand-run once a year after the regular season (gen-eliminated.mjs); finished seasons never change',
   'awards-history.json': 'nightly only from October to February, and only when an award row changed (gen-awards-history.mjs --nightly, #2510); a stamp would age all spring',
   'first-scorebook.json': 'hand-run retrospective of one scored game',

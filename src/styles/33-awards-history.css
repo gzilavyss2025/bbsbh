@@ -101,3 +101,45 @@ thead .awardhistory__year {
   align-items: center;
   gap: var(--space-1h);
 }
+
+/* The wide layout (#3095): at 740px+ (WIDE_QUERY) the live card becomes a grid of
+   award tiles and Past winners becomes one award × year matrix. */
+.awardhistory__tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.awardhistory__tile {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.awardhistory__tile .awardhistory__award {
+  width: auto;
+  margin: 0;
+}
+.awardhistory__matrix td .awardhistory__winners + .awardhistory__winners {
+  margin-top: var(--space-2);
+}
+/* The tag floats left; the name and club lines are flex boxes, so they sit beside it. */
+.awardhistory__lg {
+  float: left;
+  min-width: 2.25em;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+.awardhistory__lg--al {
+  color: var(--clay-deep);
+}
+.awardhistory__lg--nl {
+  color: var(--allstar-blue-deep);
+}
+.awardhistory__matrix .awardhistory__award {
+  width: 10rem;
+}
+/* Year heads here split the rest evenly, not the phone table's fixed 52px. */
+.awardhistory__matrix .awardhistory__year {
+  width: auto;
+}

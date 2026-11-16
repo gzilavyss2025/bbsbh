@@ -93,6 +93,9 @@
 .gdhero__scroll .gdscroll__in { padding-right: var(--space-1); }
 /* A long play (GamedayHero.jsx PlayLine): the smaller size, tighter lines, before it has to scroll. */
 .gdhero__line.is-tight { font-size: var(--fs-cell); line-height: var(--lh-title); }
+/* The run-expectancy line (#2973): one quiet line under the newest revealed play, above a dotted rule. */
+.gdhero__re { flex: none; margin: var(--space-1) 0 0; padding-top: var(--space-1); border-top: var(--bw-hair) dotted var(--text-muted);
+  font: var(--w-medium) var(--fs-cell) / var(--lh-snug) var(--font-body); color: var(--text-muted); }
 /* Exit velo, launch angle and distance as a stamped three-cell card, the labels over the numbers. */
 /* layout-exempt: one cell per number, a ground ball has two */
 .gdhero__contact { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: auto 0 0; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }

@@ -50,6 +50,14 @@ auto-deploy, no separate publish step and no second deployment.
    re-fetches live stats via statsapi for any player it renders. `statLine`
    (`".301 AVG"` / `"3.12 ERA"`) is precomputed here so the app never needs
    to know the raw batting/pitching stat shape.
+5. **Weekly history (#2970).** After the snapshot is written, the Top 100's
+   ranks are appended to `public/data/top-prospects-history.json`
+   (`{ snapshots: [{ date, ranks: { [playerId]: rank } }] }`) at most once per
+   ISO week; a second run in the same week adds nothing. Frozen-append, no
+   back-fill: history starts the week this shipped. Pure half:
+   `scripts/lib/milb/top100-history.mjs`. The player page's Prospect rankings
+   card lists a player's dated weekly ranks under the current-list row once
+   two weeks exist (`src/api/prospects/top100History.js`).
 
 ## Why `playerId`/`teamId` just work
 

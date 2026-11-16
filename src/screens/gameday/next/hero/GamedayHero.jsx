@@ -14,9 +14,19 @@ import { BatterFallbackContext, BattingUniformContext, GameUniformsContext } fro
 import { fallbackFigureUrls } from '../../../../api/uniforms.js'
 import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
 import { ordinal } from '../../../../lib/format.js'
+import { useAsync } from '../../../../hooks/useAsync.js'
+import { selectGameSeason } from '../../../../api/select.js'
+import { fetchRunExpectancy } from '../../../../api/playbyplay/runExpectancyLine.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
-export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, ...props })
+export function GamedayHero(props) {
+  // The run-expectancy table (#2973) is not a score: it loads eagerly; heroMarkup reads it inside the reveal.
+  // The game's own season's table (#3115); none before 1960 or off MLB (a feed with no sport id counts as off MLB).
+  const season = selectGameSeason(props.feed)
+  const sportId = props.feed?.gameData?.teams?.home?.sport?.id ?? null
+  const re = useAsync(() => fetchRunExpectancy(season, sportId), [season, sportId]).data ?? null
+  return heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, re, ...props })
+}
 export const GamedayEventCard = (props) => eventCardMarkup(createElement, { SealBox, ...props })
 
 // The play's words at the normal size; past their space, the smaller size; past that too, they scroll

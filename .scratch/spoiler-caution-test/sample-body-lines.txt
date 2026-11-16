@@ -1,0 +1,71 @@
+### #2521 World Series home: Roster scouting card (direction A)
+  - Files: `src/api/scout/rosterStats.js` (new: reads, memoized per player and set), `src/lib/postseason/worldseries/scouting/roster.js` (new: sections, starter rule, stat cells), `src/components/worlds
+  - **Spoiler footing:** an open surface with no seal. Every byDateRange read ends at `dayBefore(slateDate)`. The career line is the `yearByYear` seasons before this one plus this season's date-bounded 
+### #2520 Hide the headshot log button behind a flag
+
+### #2502 Hold the game loader for at least 1.5 seconds
+
+### #2500 Redesign the home-page bracket rail in the World Series design
+
+### #2499 Old MiLB logos: file 39 from Drive, add a Former level, and link same-nickname eras to MLB marks
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. It is static identity art and a dev-only tool.
+  - [ ] It does, and no score-revealing value reaches the DOM before reveal
+### #2498 Eras tab: upload old logos for renamed MiLB clubs
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. It is a dev-only identity tool and static identity data.
+  - [ ] It does, and no score-revealing value reaches the DOM before reveal
+### #2497 World Series bullpen card: every reliever, whole postseason
+
+### #2495 Stack: mint cap 503 and old report cards cleanup (#2493, #2494)
+
+### #2490 Stack: park fit, /classics page, Look A, crosswalk builders, Retrosheet spike
+  Overlap: none. All six merges were clean and `src/api/spoiler-manifest.json` parses. #2485 and #2486 together clear the leftover old-path grep for #2288.
+### #2489 Clear the name tab inside every named flush card
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. CSS spacing and one class name.
+### #2484 Park fit: count the wall's height in the carry estimate; floor of 20; simplify pass
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. Park fit is on the World Series home, an open surface (ADR-0034). It reads regular-season balls in play from games already Final, 
+  - [ ] It does, and no score-revealing value reaches the DOM before reveal
+### #2483 Stack: name-tab clearance, the rest of #2480
+
+### #2475 Stack: mint 503, classic card, public/data shape
+  Overlap: none. The merge was clean and `src/api/spoiler-manifest.json` parses.
+### #2470 Stack: pair ledger + /outliers report
+  Overlap: the two PRs share no file. The merge was clean and `src/api/spoiler-manifest.json` parses.
+### #2468 Stack: HoF pace comps rule + classics deck
+  Overlap: both PRs add one entry to `src/api/spoiler-manifest.json`. The merge was clean; the file parses.
+### #2442 Hot and cold: where each season ended (#1855, slice 3)
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. Past seasons' final lines are on an open surface (ADR-0034). The player's own line still holds back today's games.
+### #2440 League pennants on the team page and the player page
+  - `src/api/history/leaguePennants.js`: spoiler-free reader (`pennantsFor`, `pennantFile`).
+  - Guard and doc entries: spoiler manifest, `check-data-freshness`, `scripts` dir budget 134 → 135, `docs/pennants.md`, `docs/scripts/generators.md`, `docs/api/static-data.md`, the honors and component
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. The team and player pages are open surfaces (ADR-0034). The data is pennants already won, with no game score.
+### #2433 Hot and cold callouts: the rule, the league tails and the Standing out card (#1855, slices 1 and 2)
+    - Spoiler-manifest entries for the three modules.
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. It is an open surface (ADR-0034). statsapi's game log carries a game in progress with no status, so the rule counts only rows date
+  - `src/api/spoiler-manifest.json`
+### #2430 World Series hero: the versus Overview card
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. The World Series home is an open surface (ADR-0087), but the card still holds no score:
+### #2429 Link a player's birthplace and schools to Where they're from
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. The player page is an open surface (ADR-0034), and the links come from the player's bio, not from a game.
+### #2423 Docs: build package for "Where they're from" (#1526)
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. Scratch notes and scripts only. The planned pages are standalone open surfaces (ADR-0034).
+### #2422 World Series scouting: EDGE_BAND .020 and an 8 AB floor for hitter edges
+  Docs updated: `src/components/worldseries/CLAUDE.md` and `docs/world-series-scouting.md` ("Rules") now say which thresholds are chosen and which are still placeholders. Spoiler rule unchanged: open su
+### #2421 Stack: hero TBD start time, no-standout Matchup edges, Glove and legs column heads (#2416, #2417, #2418)
+  Hand checks: no `SealBox`, reveal-only module or `boxreveal` key; `HubTabBar.jsx` and `spy.js` untouched; the series primer's `MatchupEdges` is unchanged by #2417.
+  - `test/postseason/upcoming-games.test.js`: the read no longer bans the field name `status`, because `status,startTimeTBD` is now requested. This relaxes a spoiler guard (the read must carry no game s
+### #2419 Film room: the box score's own look
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. The Film room reads past games only and imports no reveal-only module (ADR-0087, ADR-0117 addendum). A clip's burned-in scorebug s
+### #2404 Matchup Edge backtest (#1688, plan step 2)
+  ## Spoiler-safety
+  - [x] This change doesn't touch any sealed/reveal-gated game surface. Scratch scripts and notes only, no app code.

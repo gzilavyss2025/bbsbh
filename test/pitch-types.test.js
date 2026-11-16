@@ -41,3 +41,21 @@ test('a code is case-blind and an unknown code gets the hollow hexagon', () => {
     assert.deepEqual([m.code, m.shape, m.ring], ['UN', 'hexagon', true])
   }
 })
+
+// #2974: even brightness, 3:1 on light and dark paper. Grounds are the shipped
+// --surface-card / --surface-inset hexes in each theme (src/tokens/colors.css).
+import { auditPitchPalette } from '../src/lib/pitch/pitchLuminance.js'
+const GROUNDS = { 'light card': '#FBF6E9', 'light inset': '#FFFDF6', 'dark card': '#121212', 'dark inset': '#1C1C1C' }
+
+test('the shipped palette is even in brightness and clears 3:1 on both papers', () => {
+  assert.deepEqual(auditPitchPalette(GROUNDS), [])
+})
+
+test('the audit catches a pale pitch, a loud pitch and a loud UN', () => {
+  const swap = (code, color) => PITCH_TYPES.map((t) => (t.code === code ? { ...t, color } : t))
+  const pale = auditPitchPalette(GROUNDS, swap('KN', '#EEF2F7'))
+  assert.ok(pale.some((f) => f.startsWith('KN #EEF2F7')), 'KN fails 3:1 on light paper')
+  assert.ok(pale.some((f) => f.startsWith('luminance spread')), 'KN breaks the band')
+  assert.ok(auditPitchPalette(GROUNDS, swap('SL', '#2266EE')).some((f) => f.startsWith('luminance spread')))
+  assert.ok(auditPitchPalette(GROUNDS, undefined, { code: 'UN', color: '#FA1400' }).some((f) => f.startsWith('UN')))
+})

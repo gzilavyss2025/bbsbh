@@ -237,15 +237,10 @@ button.boxlines__back:active {
   overflow: hidden;
 }
 
-/* The cells give up their own frames to the grid's, the same trade
-   .player__statgrid makes: twelve bordered, shadowed chips inside a sheet is
-   noise, and the 1px gaps already say where one figure stops. */
+/* The cells carry no frame (the base .stat has none since #1775); the 1px gaps
+   say where one figure stops. */
 .boxlines__stats .stat {
   padding: var(--space-2) 3px;
-  background: var(--surface-card);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 .boxlines__stats .stat__v {

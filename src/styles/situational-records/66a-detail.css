@@ -87,9 +87,7 @@
 .trrank__boardcontrols,
 .trrank__related {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .trrank__controltitle,
 .trrank__related > span {
