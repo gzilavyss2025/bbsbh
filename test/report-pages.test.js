@@ -36,6 +36,7 @@ const PATHS_BEFORE_GROUPING = [
   '/streaks',
   // A player's best N games in a row, beside the Streak Finder.
   '/best-stretch',
+  '/club-stretch',
   '/leaders',
   '/situational-records',
   '/pressure-moments',
