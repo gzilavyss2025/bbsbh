@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { rateLeaders } from '../../api/research/answer.js'
-import { ASKS, resultName } from '../../api/research/filters.js'
+import { ASKS, parseMin, resultName } from '../../api/research/filters.js'
 import { rate3 } from '../../api/person/shared.js'
 import { gamePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -86,8 +86,8 @@ export function AnswerCard({ ask, q, a, people }) {
   )
 }
 
-function Leaders({ title, rows, rate, people }) {
-  if (!rows.length) return null
+function Leaders({ title, rows, rate, min, people }) {
+  if (!rows.length) return <p className="t-label t-label--nocaps">{title}: none with {plural(min, 'PA', 'PAs')} here.</p>
   return (
     <Table label={title} className="research__table">
       <thead><tr><th>{title}</th>{rate ? <><th className="research__num">Rate</th><th className="research__num">Of PA</th></> : <th className="research__num">Times</th>}</tr></thead>
@@ -107,9 +107,11 @@ function Leaders({ title, rows, rate, people }) {
 function RankBar({ q, onChange }) {
   const id = useId()
   const [draft, setDraft] = useState(String(q.min))
-  const setMin = (v) => {
-    setDraft(v)
-    if (/^\d+$/.test(v) && Number(v) > 0) onChange({ ...q, min: Number(v) })
+  // The minimum applies on blur or Enter, not per keystroke: typing 120 never ranks by 1 or 12.
+  const commit = () => {
+    const min = parseMin(draft)
+    if (min && min !== q.min) onChange({ ...q, min })
+    setDraft(String(min ?? q.min))
   }
   return (
     <Cluster className="research__rank">
@@ -117,7 +119,7 @@ function RankBar({ q, onChange }) {
       {q.rank === 'rate' && (
         <span className="research__min">
           <label className="t-label" htmlFor={id}>Min PA</label>
-          <input id={id} type="number" inputMode="numeric" min="1" value={draft} onChange={(e) => setMin(e.target.value)} onBlur={() => setDraft(String(q.min))} />
+          <input id={id} type="number" inputMode="numeric" min="1" value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && commit()} />
         </span>
       )}
     </Cluster>
@@ -182,8 +184,8 @@ export function AskTables({ ask, q, a, people, onChange }) {
     return (
       <>
         {a.baseBy && <RankBar q={q} onChange={onChange} />}
-        <Leaders title="Batters" rows={leaderRows(q, a, 'batter')} rate={rate} people={people} />
-        <Leaders title="Pitchers" rows={leaderRows(q, a, 'pitcher')} rate={rate} people={people} />
+        <Leaders title="Batters" rows={leaderRows(q, a, 'batter')} rate={rate} min={q.min} people={people} />
+        <Leaders title="Pitchers" rows={leaderRows(q, a, 'pitcher')} rate={rate} min={q.min} people={people} />
       </>
     )
   }

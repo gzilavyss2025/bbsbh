@@ -32,16 +32,19 @@ export function answer(pas, q, cutoff, { matchesOnly = false } = {}) {
 
   // "How often": against the same query with no result chip, when one is set. The same
   // pass counts each batter's and pitcher's PAs in it, the base of a "Who most" rate.
+  // An emptied result card (kept on screen until its ✕) filters nothing, so it has no base.
   let base = null
   let baseBy = null
-  if (q.chips?.res) {
+  if (q.chips?.res?.vals.length) {
     const { res, ...rest } = q.chips // eslint-disable-line no-unused-vars
     const isBase = matcher({ ...q, chips: rest }, cutoff)
     base = 0
-    baseBy = { batter: new Map(), pitcher: new Map() }
+    // Only "Who most" reads the per-player PAs; a question change re-runs the search.
+    if (q.ask === 'most') baseBy = { batter: new Map(), pitcher: new Map() }
     for (const pa of pas) {
       if (!isBase(pa)) continue
       base++
+      if (!baseBy) continue
       baseBy.batter.set(pa.batter, (baseBy.batter.get(pa.batter) ?? 0) + 1)
       baseBy.pitcher.set(pa.pitcher, (baseBy.pitcher.get(pa.pitcher) ?? 0) + 1)
     }

@@ -149,7 +149,7 @@ export function parseQuery(search) {
   const yr = /^(\d{4})(?:-(\d{4}))?$/.exec(p.get('yr') ?? '')
   const years = yr ? [Number(yr[1]), Number(yr[2] ?? yr[1])].sort((a, b) => a - b) : null
   // "Who most" ranking (#3147): `rank=rate` and its PA minimum `min` (50 when absent).
-  const min = /^\d+$/.test(p.get('min') ?? '') && Number(p.get('min')) > 0 ? Number(p.get('min')) : RATE_MIN
+  const min = parseMin(p.get('min')) ?? RATE_MIN
   return { chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
 }
 
@@ -175,6 +175,8 @@ export function buildQuery(q, keep = {}) {
 
 // "Who most" by rate drops a player under this many PAs in the situation (#3147).
 export const RATE_MIN = 50
+// A PA minimum as typed or in the URL: a whole number above 0, else null.
+export const parseMin = (v) => (/^\d+$/.test(v ?? '') && Number(v) > 0 ? Number(v) : null)
 
 export const ASKS = [
   { key: 'last', label: 'Last time' },
@@ -182,6 +184,10 @@ export const ASKS = [
   { key: 'most', label: 'Who most' },
   { key: 'what', label: 'What happens' },
 ]
+
+// The query as the search reads it: the "Who most" rank and minimum only re-rank the
+// answer on the page, so changing them never re-runs a search or resets the match list.
+export const searchKey = ({ rank, min, ...q }) => JSON.stringify(q) // eslint-disable-line no-unused-vars
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
 export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park

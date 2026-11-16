@@ -267,3 +267,11 @@ test('the rank and the minimum ride the URL', () => {
   assert.deepEqual([plain.rank, plain.min], ['count', 50])
   assert.equal(buildQuery({ ...plain, min: 75 }), '?ask=most&res=home_run', 'no minimum without rate')
 })
+
+test('an emptied result card gives no rate base', () => {
+  const q = parseQuery('?ask=most&res=home_run')
+  q.chips.res.vals = []
+  const a = answer(ratePas([[1, 5, 100]]), q)
+  assert.equal(rateLeaders(a, 'batter'), null, 'not every player at 100%')
+  assert.equal(a.base, null)
+})

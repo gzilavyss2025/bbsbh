@@ -1,6 +1,6 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
-import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery } from '../../api/research/filters.js'
+import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
 import { isRealDate } from '../../lib/dates.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -135,7 +135,7 @@ export function ResearchPage() {
         </Cluster>
       )}
       {result && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
-      {result && <MatchList key={JSON.stringify(q)} a={result} people={people} wide={wide} />}
+      {result && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} />}
     </Stack>
   )
 
