@@ -60,7 +60,7 @@ export function ClubStretchPage() {
         <Stack gap="tight">
           <h2 className="cstretch__title">Best {picks.n} games with the {club}</h2>
           {data?.through && (
-            <p className="hint">
+            <p className="hint infopop-row">
               Through the {data.through} season · {data.firstSeason}–{data.through}{' '}
               <InfoPopover label="How a run is counted" className="infopop--paper infopop--down">
                 His games played, in a row, with this club. A run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.
