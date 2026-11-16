@@ -64,9 +64,8 @@
   color: var(--text-body);
 }
 
-/* Playing-career tile grid — reuses the shared .stat tile (see PlayerPage's
-   .player__statgrid) but at 4 columns, since a hitting/pitching line runs 8–9
-   headline stats rather than the player page's 5. */
+/* Playing-career grid — the shared .stat cell at 4 columns, since a
+   hitting/pitching line runs 8–9 headline stats. */
 .mgrpage__statgrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
