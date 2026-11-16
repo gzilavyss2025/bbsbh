@@ -12,7 +12,8 @@
 //   node scripts/gen-notable.mjs --from=1901 --to=2025
 // The nightly cron runs it with no flags, which sweeps only the season in play
 // (lib/time/season-in-play.mjs) so the callout never says "first since 2019" after a
-// triple play in May. A season costs about 50 calls.
+// triple play in May. A season costs about 50 calls, plus the play-by-play reads of the
+// immaculate innings and the four straight home runs (generators.md).
 //   node scripts/gen-notable.mjs --season=2025       # one season (also: --season 2025)
 //   node scripts/gen-notable.mjs --from=1950 --to=1960
 //   node scripts/gen-notable.mjs --season=1956 --out=DIR   # write to DIR: a measuring run

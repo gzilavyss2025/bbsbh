@@ -319,7 +319,7 @@ don't run these by hand.
   names the player and his side; a triple play names the fielding side. AL and NL games only
   (D6), regular season and postseason (D13). The reader is `src/api/notable/notable.js`
   (`docs/api/static-data.md`), behind the box score's feat label; the shelf has no page yet. **The nightly run refreshes only the season in play**
-  (`lib/time/season-in-play.mjs`), about 70 calls. **The full history, 1901 to now, is a hand
+  (`lib/time/season-in-play.mjs`), about 70 calls plus the play-by-play reads below. **The full history, 1901 to now, is a hand
   run**: `node scripts/gen-notable.mjs --from=1901 --to=2025` (the space form,
   `--from 1901 --to 2025`, works too). `--season=Y` runs one season, `--out=DIR` writes to DIR
   for a measuring run. The spine is one schedule call per season (game types `R,F,D,L,W`,
@@ -343,7 +343,8 @@ don't run these by hand.
   Four straight home runs (#2968, `lib/notable/fourstraight.mjs`, `fourstraight.json`): each club's
   hitting game log (one call per club and game type), then one `playByPlay` call per game where a
   club hit 4 or more; whole seasons, from `FOURSTRAIGHT_FLOOR` (the first season whose four-homer
-  club games all have plays). A candidate with no plays past the floor is logged, never counted.
+  club games all have plays, 1967). A candidate with no plays past the floor is logged, never counted.
+  The nightly run re-reads every candidate of the season in play: about 30 logs and up to 400 games.
   Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play

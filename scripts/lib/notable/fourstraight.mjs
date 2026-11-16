@@ -4,7 +4,9 @@
 // of a game where a club hit 4 or more (the team hitting game log, one call per club and game
 // type, as the triple plays read the fielding log). The detector is the page's own
 // (src/api/notable/rarityCount.js, one spelling). Its own file, public/data/notable/fourstraight.json:
-// a row is the game's head plus `side` (the batting club). The merge replaces whole seasons.
+// a row is the game's head plus `side` (the batting club), one per gamePk and side: two runs by one
+// club in one game (never seen) would be one row. The merge replaces whole seasons, so the nightly
+// run re-reads every candidate of the season in play (about 30 logs and 300 to 400 games late in a season).
 //
 // THE FLOOR. Old feeds hold no plays. A season is swept only from FOURSTRAIGHT_FLOOR on, the first
 // season from which every candidate game has plays (measured 2026-11-16), so the first season of the
@@ -12,7 +14,7 @@
 // floor with no plays is logged by the generator, never counted.
 import { fourStraightHomers } from '../../../src/api/notable/rarityCount.js'
 import { mapConcurrent } from '../concurrency.mjs'
-import { gameHead, sideOfClub } from './games.mjs'
+import { gameHead } from './games.mjs'
 import { logsToFetch } from './sweep.mjs'
 
 // Measured 2026-11-16 over 1901 to 2026: candidates with no plays in every season to 1957, then
@@ -39,7 +41,7 @@ export async function fetchFourStraight(get, gameMap, season, concurrency = 4) {
   const logs = await mapConcurrent(logsToFetch(gameMap), concurrency, async ({ clubId, type }) => {
     const gameType = type === 'R' ? '' : `&gameType=${type}`
     const data = await get(`/api/v1/teams/${clubId}/stats?stats=gameLog&group=hitting&season=${season}${gameType}&fields=${LOG_FIELDS}`)
-    return candidateGames(data?.stats?.[0]?.splits, gameMap).filter((pk) => sideOfClub(gameMap.get(pk), clubId))
+    return candidateGames(data?.stats?.[0]?.splits, gameMap)
   }, { strict: true })
   const games = [...new Set(logs.flat())].map((pk) => gameMap.get(pk))
   const per = await mapConcurrent(games, concurrency, async (g) => [g, fourStraightRows(g, await get(fourStraightPbpUrl(g.gamePk)))], { strict: true })
