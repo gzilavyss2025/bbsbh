@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { contextLine, headline } from '../src/lib/gamecard/cardText.js'
+import { contextLine, headline, decisionWord } from '../src/lib/gamecard/cardText.js'
 import { buildPitcherGameCard } from '../src/api/pitcher/gameCard.js'
 
 const feed = JSON.parse(readFileSync(new URL('./fixtures/game-813024.yamamoto.json', import.meta.url)))
@@ -37,4 +37,12 @@ test('context: a game not final shows no result, only the opponent', () => {
 test('headline: H, R (ER when it differs), BB, K, and HR only when he allowed one', () => {
   assert.equal(headline({ h: 4, r: 2, er: 2, bb: 1, k: 4, hr: 1 }), '4 H · 2 R · 1 BB · 4 K · 1 HR')
   assert.equal(headline({ h: 1, r: 3, er: 1, bb: 0, k: 2, hr: 0 }), '1 H · 3 R (1 ER) · 0 BB · 2 K')
+})
+
+test('the pitcher\'s decision is a word, so it cannot be read as the club\'s W/L in the band', () => {
+  assert.equal(decisionWord('W'), 'Win')
+  assert.equal(decisionWord('L'), 'Loss')
+  assert.equal(decisionWord('S'), 'Save')
+  assert.equal(decisionWord(''), '')
+  assert.equal(decisionWord(undefined), '')
 })

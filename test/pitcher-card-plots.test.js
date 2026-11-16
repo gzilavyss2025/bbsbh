@@ -65,7 +65,12 @@ test('movement range: fits his biggest break plus a margin, never under 12 in or
   assert.equal(movementRange(pitches, new Map()), 17)
   assert.equal(movementRange([{ pfxX: 2, pfxZ: 3 }], new Map()), 12)
   assert.equal(movementRange([{ pfxX: 40, pfxZ: 0 }], new Map()), MOVE_RANGE)
-  assert.equal(movementRange([{ pfxX: 2, pfxZ: 3 }], new Map([['FF', { pfxX: -16, pfxZ: 10 }]])), 19)
+  assert.equal(movementRange([{ type: 'FF', pfxX: 2, pfxZ: 3 }], new Map([['FF', { pfxX: -16, pfxZ: 10 }]])), 19)
+})
+
+test('movement range: a season pitch he did not throw tonight (no ring drawn) does not widen the plot', () => {
+  const season = new Map([['FF', { pfxX: 4, pfxZ: 9 }], ['ST', { pfxX: 20, pfxZ: 1 }]])
+  assert.equal(movementRange([{ type: 'FF', pfxX: 5, pfxZ: 8 }], season), 12)
 })
 
 test('movement scale takes the fitted range: its edge is that range, not the cap', () => {

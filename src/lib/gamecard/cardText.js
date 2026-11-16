@@ -22,3 +22,9 @@ export function contextLine(card) {
   }
   return [game.round, game.date, opp, result].filter(Boolean).join(' · ')
 }
+
+// The pitcher's own decision spelled out ("Win", not "W"), so on the image it
+// cannot be read as his club's result, which the band's context line carries.
+export function decisionWord(dec) {
+  return { W: 'Win', L: 'Loss', S: 'Save' }[dec] ?? '' // the box score's three decisions (api/boxscore.js)
+}

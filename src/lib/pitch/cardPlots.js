@@ -31,7 +31,7 @@ export function locationScale(w, h) {
 }
 
 // The movement plot's half-width in inches, fitted to this night: his biggest
-// break (tonight's pitches or a season ring) plus a margin, at least 12 in and at
+// break (tonight's pitches, or the season ring of a pitch he threw) plus a margin, at least 12 in and at
 // most the 24 in cap. A fixed 24 left most of the box empty for a sinkerballer.
 export function movementRange(pitches, seasonByCode) {
   let max = 0
@@ -39,9 +39,11 @@ export function movementRange(pitches, seasonByCode) {
     if (p.pfxX != null) max = Math.max(max, Math.abs(p.pfxX))
     if (p.pfxZ != null) max = Math.max(max, Math.abs(p.pfxZ))
   }
-  for (const s of seasonByCode?.values?.() ?? []) {
-    if (s.pfxX != null) max = Math.max(max, Math.abs(s.pfxX))
-    if (s.pfxZ != null) max = Math.max(max, Math.abs(s.pfxZ))
+  // Only the season rings that get drawn: pitch types he threw tonight.
+  for (const code of new Set(pitches.map((p) => p.type))) {
+    const s = seasonByCode?.get?.(code)
+    if (s?.pfxX != null) max = Math.max(max, Math.abs(s.pfxX))
+    if (s?.pfxZ != null) max = Math.max(max, Math.abs(s.pfxZ))
   }
   return Math.min(MOVE_RANGE, Math.max(MOVE_FLOOR, Math.ceil(max + MOVE_MARGIN)))
 }

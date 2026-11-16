@@ -5,7 +5,7 @@ import { fetchPitchArsenalFor, PHYS_FIELDS } from '../../api/pitcher/arsenal.js'
 import { selectGameSeason } from '../../api/select.js'
 import { seasonByCode, veloDelta } from '../../lib/pitch/cardPlots.js'
 import { paintGameCard, cardFilename } from '../../lib/gamecard/paintGameCard.js'
-import { contextLine, headline } from '../../lib/gamecard/cardText.js'
+import { contextLine, headline, decisionWord } from '../../lib/gamecard/cardText.js'
 import { loadPosterImages } from '../../lib/preview/posterImages.js'
 import { realHeadshotUrl } from '../../lib/teams/headshots.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -90,7 +90,7 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
       if (!live) return
       paintGameCard(canvasRef.current, {
         card, name, season,
-        role: `${role}${pitcher.dec ? ` · ${pitcher.dec}` : ''}`,
+        role: [role, decisionWord(pitcher.dec)].filter(Boolean).join(' · '),
         ctxLine: contextLine(card),
         headline: headline(card.line),
         sub: `${card.line.pitches} pitches, ${card.line.strikes} strikes`,
