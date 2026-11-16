@@ -52,3 +52,26 @@ test('a state the table has no sample of gets no line, not "About .0"', () => {
   assert.equal(runExpectancyLine(play(1), { re24: {} }), null)
   assert.equal(runExpectancyLine(play(1), { re24: { '0-1': { sum: 0, n: 0 } } }), null)
 })
+
+// #3115: the table a game reads is its season's. 2024 on: the current table; 1960-2023: that
+// decade's era table; before 1960 or a non-MLB game: no table, so no line.
+import { runExpectancyUrl } from '../src/api/playbyplay/runExpectancyLine.js'
+
+test('a 1985 game reads the 1980s era table, and its re24 value', () => {
+  assert.equal(runExpectancyUrl('1985-06-01', 1), '/data/run-expectancy-eras/1980s.json')
+  const era = JSON.parse(readFileSync(new URL('../public/data/run-expectancy-eras/1980s.json', import.meta.url)))
+  const c = era.re24['2-1']
+  assert.equal(runExpectancyLine(play(1, { postOnSecond: on }), era), `About ${runsWord(c.sum / c.n)} runs expected.`)
+})
+
+test('a 2025 game reads the current table', () => {
+  assert.equal(runExpectancyUrl('2025-04-10', 1), '/data/run-expectancy.json')
+  assert.equal(runExpectancyUrl('2024-03-28', 1), '/data/run-expectancy.json')
+  assert.equal(runExpectancyUrl('2023-09-30', 1), '/data/run-expectancy-eras/2020s.json')
+})
+
+test('before 1960, a MiLB game, or no date: no table', () => {
+  assert.equal(runExpectancyUrl('1955-07-04', 1), null)
+  assert.equal(runExpectancyUrl('2025-04-10', 11), null)
+  assert.equal(runExpectancyUrl(undefined, 1), null)
+})

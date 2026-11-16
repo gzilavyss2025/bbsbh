@@ -1,5 +1,5 @@
-import { staticJson } from '../staticJson.js'
-import { isTerminalOuts, re24Key } from '../../lib/runExpectancy.js'
+import { staticJsonBy } from '../staticJson.js'
+import { ERA_LAST, eraDecade, isTerminalOuts, re24Key } from '../../lib/runExpectancy.js'
 
 // The innings viewer's run-expectancy line (#2973): one muted line under the newest revealed
 // at-bat, "About .8 runs expected.", the runs the batting side can expect from the base-out state
@@ -9,7 +9,23 @@ import { isTerminalOuts, re24Key } from '../../lib/runExpectancy.js'
 // SealBox reveal render function only (spoiler-manifest.json). The table itself is not a score, so
 // fetchRunExpectancy may run eagerly.
 
-export const fetchRunExpectancy = staticJson('/data/run-expectancy.json', { fallback: null })
+// The table for a game's season (#3115): 2024 on, the current table; 1960-2023, that decade's era
+// table (re24 only is read here, so the pre-1990 count-cell caveat does not apply); before 1960, or any
+// game that is not MLB (sportId 1), none. `date` is gameData.datetime.officialDate. -> a url or null.
+export function runExpectancyUrl(date, sportId) {
+  if (sportId !== 1) return null
+  const year = Number(String(date ?? '').slice(0, 4))
+  if (year > ERA_LAST) return '/data/run-expectancy.json'
+  const decade = eraDecade(year)
+  return decade ? `/data/run-expectancy-eras/${decade}.json` : null
+}
+
+const fetchByUrl = staticJsonBy((url) => url, { fallback: null })
+// One fetch per file, memoized; null for a game with no table.
+export const fetchRunExpectancy = (date, sportId) => {
+  const url = runExpectancyUrl(date, sportId)
+  return url ? fetchByUrl(url) : Promise.resolve(null)
+}
 
 // Runs to one decimal, the leading zero dropped as a scorer writes it: .8, 1.0, 2.3.
 export const runsWord = (v) => v.toFixed(1).replace(/^0(?=\.)/, '')
