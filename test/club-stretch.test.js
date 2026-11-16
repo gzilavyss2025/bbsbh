@@ -98,3 +98,9 @@ test('pitching: a run with a game missing earned runs has no ERA, but keeps its 
   const ok = Array.from({ length: 33 }, (_, k) => start(k, k === 0 ? {} : { earnedRuns: 3 }))
   assert.equal(playerRows({ id: 7, name: 'Later', games: ok }, 158, 'pitching')['32:era'].value, '3.00')
 })
+
+test('a pitching cache line from before the earned-run rule is not read', () => {
+  const old = `${JSON.stringify({ through: 2026, group: 'pitching', id: 8, rows: {} })}\n`
+  assert.deepEqual([...readCache(old + cacheLine(2026, 9, {}, 'pitching'), 2026, 'pitching').keys()], [9])
+  assert.deepEqual([...readCache(`${JSON.stringify({ through: 2026, id: 1, rows: {} })}\n`, 2026).keys()], [1])
+})

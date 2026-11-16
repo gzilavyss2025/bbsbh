@@ -2161,6 +2161,8 @@ Re-run only to fold in a new season.
   which Best Stretch's `?club=` shares. `--group pitching` writes `public/data/club-stretch-pitching/`
   instead: 32 starts or 65 relief outings in a row (the other kind is set aside, not a break), in
   ERA, WHIP, K and K-BB, no innings floor; a pitcher qualifies with 32 club starts or 65 relief outings.
+  A run with any game whose log has no `earnedRuns` (some seasons before 1912–13) gets no ERA, so it
+  is left off the ERA board but still ranks on WHIP. A cache line from before that rule is not read.
   Give each group its own `--cache` file.
 
 - `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of

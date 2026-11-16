@@ -59,7 +59,7 @@ const searches = new WeakMap()
 // counts starts at 32 and relief outings at 65 (clubPitchPool), as the board does; any other
 // length keeps the role's pool.
 function cachedSearch(games, startsOnly, n, by, group, club) {
-  if (!games) return { pool: null, best: null }
+  if (!games) return { pool: null, best: null, noEra: false }
   let entry = searches.get(games)
   if (!entry) searches.set(games, (entry = { pools: new Map(), bests: new Map() }))
   if (!entry.pools.has(startsOnly)) entry.pools.set(startsOnly, startsOnly ? games.filter((g) => g.gamesStarted > 0) : games)
@@ -68,9 +68,12 @@ function cachedSearch(games, startsOnly, n, by, group, club) {
   const measure = measureByKey(by, group)
   if (!entry.bests.has(key)) {
     const clubPool = club && group === 'pitching' && Object.values(CLUB_PITCH_LENGTHS).includes(n) ? clubPitchPool(games, n) : pool
-    entry.bests.set(key, !pool.length ? null : club ? playerBest(clubPool, club, n, measure, group) : bestStretch(pool, n, measure, group))
+    const search = (m) => (!pool.length ? null : club ? playerBest(clubPool, club, n, m, group) : bestStretch(pool, n, m, group))
+    const best = search(measure)
+    // No ERA run, but a WHIP run of the same games: the log is long enough, it lacks earned runs.
+    entry.bests.set(key, { best, noEra: !best && by === 'era' && !!search(measureByKey('whip', group)) })
   }
-  return { pool, best: entry.bests.get(key) }
+  return { pool, ...entry.bests.get(key) }
 }
 
 // The picks ride the query so a link opens the same card.
@@ -122,7 +125,7 @@ export function BestStretchPage() {
   const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
   // A starter's window counts starts only; a reliever's counts every outing.
-  const { pool: games, best } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
+  const { pool: games, best, noEra } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
   const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key, club: null }) }
   // An emptied box keeps the length in effect rather than snapping to the default.
   const commitN = () => { if (nDraft !== '') update({ n: int(nDraft, 5, 500, picks.n) }) }
@@ -196,7 +199,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{picks.by === 'era' && games.length >= n ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{noEra ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (
