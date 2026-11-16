@@ -135,7 +135,7 @@
 .pgc__fig b {
   display: block;
   font-family: var(--font-mono);
-  font-size: var(--fs-title-lg);
+  font-size: var(--fs-title-md);
   color: var(--text-heading);
 }
 .pgc__mix {
@@ -266,10 +266,6 @@
   stroke: var(--border-stamped);
   stroke-width: 1.4;
 }
-.pgc__axis {
-  stroke: var(--border-hairline);
-  stroke-width: 1;
-}
 .pgc__dot {
   fill: var(--pitch, var(--text-muted));
   fill-opacity: 0.85;
@@ -279,11 +275,16 @@
   stroke: var(--pitch, var(--text-muted));
   stroke-width: 1.4;
 }
-.pgc__ring {
+.pgc__spray svg {
+  aspect-ratio: 120 / 140;
+}
+.pgc__ball {
   fill: none;
-  stroke: var(--pitch, var(--text-muted));
-  stroke-width: 1.4;
-  stroke-dasharray: 2 2;
+  stroke: var(--border-stamped);
+  stroke-width: 4;
+}
+.pgc__ball--hit {
+  fill: var(--marker);
 }
 .pgc__delta {
   color: var(--text-muted);

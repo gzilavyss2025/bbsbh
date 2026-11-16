@@ -1,10 +1,13 @@
 import { glyphD } from '../../lib/pitch/pitchGlyph.js'
 import { pitchMark } from '../../lib/pitch/pitchTypes.js'
-import { locationScale, movementScale } from '../../lib/pitch/cardPlots.js'
+import { locationScale, BALL_R } from '../../lib/pitch/cardPlots.js'
+import { BallparkDiagram } from '../../components/ballpark/BallparkDiagram.jsx'
 
-// The pitcher game card's location and movement plots (#2969 slice 4). Every
-// pitch is its pitchMark (docs/pitch-types.md); the geometry is
-// lib/pitch/cardPlots.js, which the saved PNG paints from too. Rendered only
+// The pitcher game card's two plots (#2969): where every pitch crossed the
+// plate, and where the balls put in play off him landed on this park's field.
+// Pitches are their pitchMark (docs/pitch-types.md); the location geometry is
+// lib/pitch/cardPlots.js and the field is the box score hit chart's own drawing
+// (components/ballpark/), both of which the saved PNG paints too. Rendered only
 // inside the game card sheet, which mounts only after the box score's reveal.
 
 const W = 120
@@ -22,12 +25,12 @@ function Mark({ code, x, y, r = 3.6 }) {
   )
 }
 
-export function GameCardPlots({ pitches, mix, season }) {
+export function GameCardPlots({ pitches, park }) {
   const loc = locationScale(W, H)
-  const mv = movementScale(W, H)
   const placed = pitches.filter((p) => p.loc)
-  const moved = pitches.filter((p) => p.pfxX != null && p.pfxZ != null)
-  if (!placed.length && !moved.length) return null
+  const balls = pitches.filter((p) => p.ball)
+  if (!placed.length && !balls.length) return null
+  const hits = balls.filter((p) => p.hit).length
   return (
     <div className="pgc__plots">
       <figure className="pgc__plot">
@@ -37,19 +40,20 @@ export function GameCardPlots({ pitches, mix, season }) {
         </svg>
         <figcaption>{"Where · catcher's view"}</figcaption>
       </figure>
-      <figure className="pgc__plot">
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="How each pitch moved, with his season average ringed">
-          <line className="pgc__axis" x1={W / 2} y1="0" x2={W / 2} y2={H} />
-          <line className="pgc__axis" x1="0" y1={H / 2} x2={W} y2={H / 2} />
-          {moved.map((p, i) => <Mark key={i} code={p.type} x={mv.x(p.pfxX)} y={mv.y(p.pfxZ)} r={3.2} />)}
-          {mix.map((m) => {
-            const s = season?.get(m.type)
-            if (s?.pfxX == null || s?.pfxZ == null) return null
-            return <circle key={m.type} className="pgc__ring" cx={mv.x(s.pfxX)} cy={mv.y(s.pfxZ)} r="7" style={{ '--pitch': pitchMark(m.type).color }} />
-          })}
-        </svg>
-        <figcaption>{season?.size ? 'Movement · ring = his season' : 'Movement'}</figcaption>
-      </figure>
+      {park && balls.length > 0 && (
+        <figure className="pgc__plot pgc__spray">
+          <BallparkDiagram layout={park} label={`Where the ${balls.length} balls in play off him landed: ${hits} ${hits === 1 ? 'hit' : 'hits'}`}>
+            {balls.map((p, i) =>
+              p.hit ? (
+                <circle key={i} className="pgc__ball pgc__ball--hit" cx={p.ball.x} cy={p.ball.y} r={BALL_R.hit} />
+              ) : (
+                <circle key={i} className="pgc__ball" cx={p.ball.x} cy={p.ball.y} r={BALL_R.out} />
+              ),
+            )}
+          </BallparkDiagram>
+          <figcaption>In play · ● hit ○ out</figcaption>
+        </figure>
+      )}
     </div>
   )
 }
