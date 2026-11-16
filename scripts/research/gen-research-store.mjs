@@ -18,6 +18,11 @@
 // not uploaded (Savant answers a late or broken day with a 200 and fewer rows), and the
 // run exits 1 so the step goes red. `--force` uploads it anyway.
 //
+// BATTING ORDER (#3140). Each game's lineup comes from its MLB box score, once: a rebuilt
+// month keeps the lineups of the shard already on file (Blob, or --out without --upload)
+// and fetches only the games it lacks. A box score that fails is left out and tried
+// again on the next build.
+//
 // THE STAMP. `--stamp=<file>` writes { generatedAt, through } there AFTER the index
 // upload, so check-data-freshness.mjs sees a run that reached Blob, not one that only
 // started. The page does not read it; it reads index.json.
@@ -36,9 +41,9 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { parseArgs, strOpt } from '../lib/args.mjs'
 import { withRetry } from '../lib/net/retry.mjs'
 import { csvObjects } from '../lib/savant.mjs'
-import { getPeople } from '../lib/statsapi.mjs'
+import { getJson, getPeople } from '../lib/statsapi.mjs'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
-import { SAVANT_DAY_CAP, mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../lib/research/store.mjs'
+import { BOXSCORE_FIELDS, SAVANT_DAY_CAP, keptLineups, lineupOf, mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../lib/research/store.mjs'
 import { baseballToday } from '../../src/lib/time/standingsDates.js'
 import { decodePlateAppearances, encodeMonth } from '../../src/api/research/shard.js'
 import { coverage } from '../../src/api/research/store.js'
@@ -78,6 +83,36 @@ async function namesFor(rows) {
   return Object.fromEntries(people.map((p) => [p.id, p.fullName]))
 }
 
+// The shard on file for a month, or null. Read through `?t=` for the same reason as the index.
+let storeUrl = null
+async function previousShard(season, month) {
+  try {
+    if (storeUrl) {
+      const res = await fetch(`${storeUrl}${season}/${month}.json?t=${Date.now()}`, { cache: 'no-store' })
+      return res.ok ? await res.json() : null
+    }
+    return JSON.parse(await readFile(join(out, String(season), `${month}.json`), 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+async function lineupsFor(rows, prev) {
+  const order = { ...keptLineups(prev) }
+  const missing = [...new Set(rows.map((r) => Number(r.game_pk)))].filter((pk) => !order[pk])
+  for (const pk of missing) {
+    try {
+      const box = await getJson(`/api/v1/game/${pk}/boxscore?fields=${BOXSCORE_FIELDS}`, { timeoutMs: 30_000 })
+      const lineup = lineupOf(box)
+      if (Object.keys(lineup).length) order[pk] = lineup
+    } catch (err) {
+      console.error(`boxscore ${pk}: ${err.message}`)
+    }
+  }
+  console.log(`lineups: ${missing.length} fetched, ${Object.keys(order).length} on hand`)
+  return order
+}
+
 let put = null
 let index = null
 if (upload) {
@@ -89,6 +124,7 @@ if (upload) {
   // origin. (Inference: Blob's CDN keys on the query string; checked on the first run.)
   const found = (await blob.list({ prefix: `${PREFIX}index.json` })).blobs[0]
   if (found) {
+    storeUrl = found.url.replace(/index\.json$/, '')
     const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: 'no-store' })
     if (!res.ok) throw new Error(`index.json HTTP ${res.status}`)
     index = await res.json()
@@ -126,7 +162,8 @@ for (const { season, month } of targets) {
     console.log(`${season}-${month}: no games, nothing written`)
     continue
   }
-  const shard = encodeMonth(rows, { season, month, names: await namesFor(rows) })
+  const order = await lineupsFor(rows, await previousShard(season, month))
+  const shard = encodeMonth(rows, { season, month, names: await namesFor(rows), order })
   const body = JSON.stringify(shard)
   const pas = decodePlateAppearances(shard)
   console.log(`${season}-${month}: ${shard.cols.g.length} pitches, ${pas.length} PAs, ${(body.length / 1e6).toFixed(1)} MB raw, ${(gzipSync(body).length / 1e6).toFixed(2)} MB gzip`)

@@ -10,8 +10,9 @@
 //   { v, season, month, through,           'YYYY-MM-DD' of the newest game in the shard
 //     games:  [[gamePk, date, gameType, home, away], ...]   Savant club abbreviations
 //     people: { id: 'First Last' }          every batter and pitcher in the shard
-//     dict:   { pt: [...], call: [...], ev: ['', ...] }
-//     cols:   { g, ab, pn, b, s, o, r, i, t, bat, pit, h, pt, call, ev, px, hx, hy, ls, la, sd } }
+//     order:  { gamePk: { batterId: slot } } batting order slot 1-9, from the MLB box score (v2)
+//     dict:   { pt: [...], call: [...], ev: ['', ...], bb: [...] }
+//     cols:   { g, ab, pn, b, s, o, r, i, t, bat, pit, h, pt, call, ev, px, hx, hy, ls, la, sd, rs, bb } }
 //
 //   g    index into games          ab   at_bat_number      pn  pitch_number
 //   b/s  balls/strikes BEFORE the pitch                    o   outs when up
@@ -19,6 +20,11 @@
 //   h    hands: bit 0 batter stands R, bit 1 pitcher throws R
 //   px   plate_x (ft, catcher's view), hx/hy hc_x/hc_y (Savant's frame, NOT the feed's:
 //        see gen-spray.mjs), ls launch_speed (mph), la launch_angle, sd bat_score_diff
+//   rs   runs the batting club scored on the pitch (post_bat_score - bat_score)   (v2)
+//   bb   bb_type, an index into dict.bb (ground_ball, line_drive, fly_ball, popup) (v2)
+//
+// VERSIONS. v2 (#3140) added rs, bb and order. A v1 shard still decodes: those read as
+// null, and the cards that need them are blocked for its season (filters.js `v`).
 //
 // A pitch-clock row with no plate_x is dropped unless it ends the plate appearance
 // (the same rule as scout/headToHead.js's parser).
@@ -34,14 +40,21 @@ import { NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
 // inning without a result. Same set as scout/headToHead.js's NOT_A_PA.
 const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
-export const SHARD_VERSION = 1
+export const SHARD_VERSION = 2
 
 // A count's bit in a PA's `counts` mask; 0 for a count off the 4x3 grid or not on file
 // (null, which `>= 0` would read as 0).
 export const countBit = (balls, strikes) => (Number.isInteger(balls) && Number.isInteger(strikes) && balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
 
 const SCALE = { px: 100, hx: 100, hy: 100, ls: 10 }
-const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd']
+const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd', 'rs', 'bb']
+
+// Runs the batting club scored on a pitch; null with either score missing.
+const runsOn = (r) => {
+  const before = numOrNull(r.bat_score)
+  const after = numOrNull(r.post_bat_score)
+  return before == null || after == null ? null : after - before
+}
 
 const scaled = (v, k) => {
   const n = numOrNull(v)
@@ -50,11 +63,12 @@ const scaled = (v, k) => {
 
 // Savant CSV rows (objects, csvObjects) for one month -> the shard object.
 // `names` maps a person id to a display name; ids with no name are left out.
-export function encodeMonth(rows, { season, month, names = {} }) {
+// `order` ({ gamePk: { batterId: slot } }) is kept for the shard's games only.
+export function encodeMonth(rows, { season, month, names = {}, order = {} }) {
   const games = []
   const gameIdx = new Map()
-  const dict = { pt: [], call: [], ev: [''] }
-  const dictIdx = { pt: new Map(), call: new Map(), ev: new Map([['', 0]]) }
+  const dict = { pt: [], call: [], ev: [''], bb: [] }
+  const dictIdx = { pt: new Map(), call: new Map(), ev: new Map([['', 0]]), bb: new Map() }
   const code = (k, v) => {
     const s = v || ''
     if (k !== 'ev' && !s) return null
@@ -98,19 +112,26 @@ export function encodeMonth(rows, { season, month, names = {} }) {
       ls: scaled(r.launch_speed, 'ls'),
       la: scaled(r.launch_angle, 'la'),
       sd: numOrNull(r.bat_score_diff),
+      rs: runsOn(r),
+      bb: code('bb', r.bb_type),
     }
     for (const c of COLS) cols[c].push(row[c])
     for (const id of [row.bat, row.pit]) if (id != null && names[id]) people[id] = names[id]
   }
-  return { v: SHARD_VERSION, season, month, through, games, people, dict, cols }
+  const keptOrder = Object.fromEntries(games.filter(([pk]) => order[pk]).map(([pk]) => [pk, order[pk]]))
+  return { v: SHARD_VERSION, season, month, through, games, people, order: keptOrder, dict, cols }
 }
 
 // Shard -> plate appearances, oldest first. One entry per PA that ended in an event.
 // COMPACT (2015 onward is twelve seasons): a PA keeps no pitch list, only what the
 // filters read. `pitchType` and `px` are the last pitch's; `counts` is a 12-bit mask of
 // the counts the PA passed through (bit balls*3 + strikes, countBit below); `nPitches`.
+// `count` ([balls, strikes]) is the count the last pitch was thrown in. From v2:
+// `marginAfter` (the batting club's margin after the last pitch), `bbType`, `slot`
+// (batting order 1-9); null on a v1 shard. `first` / `last`: the game's first or last PA.
 export function decodePlateAppearances(shard) {
   const { games, dict, cols } = shard
+  const order = shard.order ?? {}
   const n = cols.g.length
   const pas = []
   let cur = null
@@ -155,6 +176,7 @@ export function decodePlateAppearances(shard) {
       cur.fieldTeam = cur.top ? cur.home : cur.away
     }
     cur.counts |= countBit(cols.b[j], cols.s[j])
+    cur.count = [cols.b[j], cols.s[j]]
     cur.nPitches++
     cur.pitchType = cols.pt[j] == null ? null : dict.pt[cols.pt[j]]
     cur.px = unscale('px', cols.px[j])
@@ -165,8 +187,18 @@ export function decodePlateAppearances(shard) {
       cur.hcY = unscale('hy', cols.hy[j])
       cur.launchSpeed = unscale('ls', cols.ls[j])
       cur.launchAngle = cols.la[j]
+      const rs = cols.rs?.[j]
+      cur.marginAfter = rs == null || cols.sd[j] == null ? null : cols.sd[j] + rs
+      cur.marginLast = cols.sd[j]
+      cur.bbType = cols.bb?.[j] == null ? null : dict.bb[cols.bb[j]]
+      cur.slot = order[cur.gamePk]?.[cur.batter] ?? null
+      const prev = pas.at(-1)
+      cur.first = prev?.gamePk !== cur.gamePk
+      cur.last = false
+      if (prev && prev.gamePk !== cur.gamePk) prev.last = true
       pas.push(cur)
     }
   }
+  if (pas.length) pas.at(-1).last = true
   return pas
 }

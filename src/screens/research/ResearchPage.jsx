@@ -96,7 +96,7 @@ export function ResearchPage() {
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
-          {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
+          {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
         </p>
       )}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}

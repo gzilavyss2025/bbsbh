@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
-import { coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile } from '../../api/research/store.js'
+import { coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
@@ -39,7 +39,7 @@ export function useResearch(q, cutoff) {
 
   const targets = useMemo(() => seasonsFor(q, onFile, cutoff), [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
-  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets)) : []), [targets])
+  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]

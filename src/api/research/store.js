@@ -24,7 +24,8 @@ async function getJson(path, signal) {
   return r.json()
 }
 
-// index: { v, built, seasons: { '2026': { months: { '04': { through, pitches, pas, events } } } } }
+// index: { v, built, seasons: { '2026': { months: { '04': { v, through, pitches, pas, events } } } } }
+// A month's `v` is its shard's version; absent on a month built before #3140 (v1).
 // `events` ({ event: n }) is absent on a month built before 2026-11-13.
 export function fetchIndex() {
   indexP ??= getJson('index.json').catch((e) => {
@@ -45,6 +46,13 @@ export function seasonEvents(index, season) {
   const out = {}
   for (const m of months) for (const [ev, n] of Object.entries(m.events)) out[ev] = (out[ev] ?? 0) + n
   return out
+}
+
+// The lowest store version (shard.js SHARD_VERSION) among the months of `seasons`. A
+// month the index gives no `v` was built before v2 (#3140), so it reads as 1.
+export function storeVersion(index, seasons) {
+  const vs = seasons.flatMap((s) => Object.values(index.seasons[s]?.months ?? {}).map((m) => m.v ?? 1))
+  return vs.length ? Math.min(...vs) : Infinity
 }
 
 const seasonCache = new Map()
