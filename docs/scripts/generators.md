@@ -340,7 +340,7 @@ don't run these by hand.
   no pitch sequences past the floor is logged, never counted.
   Four-homer games (#2968, `fourhr.json`): a player's game line with 4 or more home runs, read off
   the same `people` hitting logs as the cycles (no extra call); whole seasons, from 1901.
-  Each run REPLACES every row of each season it swept, in all three files (a corrected
+  Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play
   that only the box score text holds); a seed row for a season a run did not sweep waits, and

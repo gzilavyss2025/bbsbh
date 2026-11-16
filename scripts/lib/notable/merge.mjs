@@ -3,6 +3,8 @@ import { gameHead } from './games.mjs'
 import { GAME_TYPES, LEAGUE_NAMES } from './rules.mjs'
 
 export const KINDS = ['nohitters', 'cycles', 'tripleplays']
+// The kinds whose row names one player, keyed on the gamePk and that player.
+export const PLAYER_KINDS = new Set(['cycles', 'immaculate', 'fourhr'])
 
 // EVERY KEY A FILE MAY CARRY, in one place. test/notable.test.js reads the committed
 // files and fails on any key at any depth that is not here. The score is in a row on
@@ -27,7 +29,7 @@ export const ALL_ALLOWED_KEYS = new Set(Object.values(ALLOWED_KEYS).flat())
 // One feat is one row. A no-hitter or a triple play is kept once for each gamePk and
 // side. A cycle, an immaculate inning (immaculate.mjs) or a four-homer game is kept once for each gamePk and player.
 export function rowKey(kind, row) {
-  return ['cycles', 'immaculate', 'fourhr'].includes(kind) ? `${row.gamePk}:${row.player?.id}` : `${row.gamePk}:${row.side}`
+  return PLAYER_KINDS.has(kind) ? `${row.gamePk}:${row.player?.id}` : `${row.gamePk}:${row.side}`
 }
 
 export const rowSeason = (row) => Number(String(row.officialDate).slice(0, 4))
@@ -49,7 +51,7 @@ export function sortRows(kind, rows) {
 // after the fact: a game scored again, a player credited to the other club, a feat the
 // feed drops. A per-key merge would keep the old row beside the corrected one for ever
 // (a ghost row, the gen-umpire-accuracy.mjs incident). So a run drops every row of each
-// season it swept, in all three files (immaculate.json keeps its own rule, immaculate.mjs), and writes what it found. Seasons it did not
+// season it swept, in every file, fourhr.json included (immaculate.json keeps its own rule, immaculate.mjs), and writes what it found. Seasons it did not
 // sweep stay as they were.
 export function mergeRows(kind, prevRows, seasons, freshRows) {
   const swept = new Set(seasons)

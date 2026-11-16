@@ -10,7 +10,7 @@ import {
   battedInnings, cycleRows, fourHomerRows, isCycle, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows,
 } from '../scripts/lib/notable/kinds.mjs'
 import {
-  ALL_ALLOWED_KEYS, ALLOWED_KEYS, KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc, sortRows,
+  ALL_ALLOWED_KEYS, ALLOWED_KEYS, KINDS, PLAYER_KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc, sortRows,
 } from '../scripts/lib/notable/merge.mjs'
 import { normalizeArgv, seasonsFromArgs, unknownFlags } from '../scripts/lib/notable/cli.mjs'
 import { sweepSeason } from '../scripts/lib/notable/sweep.mjs'
@@ -405,10 +405,10 @@ test('no committed file carries a key outside the allowlist, at any depth', () =
       assert.ok(['home', 'away'].includes(r.side))
       assert.ok(doc.coverage.seasons.includes(Number(r.officialDate.slice(0, 4))), `${file} row outside its coverage`)
       assert.ok(['R', 'F', 'D', 'L', 'W'].includes(r.gameType))
-      if (['cycles', 'immaculate', 'fourhr'].includes(kind)) assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
+      if (PLAYER_KINDS.has(kind)) assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
       if (kind === 'nohitters') assert.ok(r.pitchers.length > 0 && r.pitchers.every((p) => Object.keys(p).length === 2))
       if (kind !== 'nohitters') assert.ok(!('pitchers' in r) && !('shortened' in r) && !('lost' in r))
-      if (!['cycles', 'immaculate', 'fourhr'].includes(kind)) assert.ok(!('player' in r))
+      if (!PLAYER_KINDS.has(kind)) assert.ok(!('player' in r))
       // newest first
       if (prev) assert.ok(prev.officialDate >= r.officialDate, `${file} is not newest first`)
       prev = r

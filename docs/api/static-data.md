@@ -344,8 +344,8 @@ for each generator; the reader modules:
   rather than by trust. Both readers carry the file's `season` for the same reason
   `milb/pool.js` does.
 - `notable/notable.js` — the feat index behind the box score's feat label, the callout's "last time" lines and the `/notable` shelf, from `public/data/notable/`
-  (`nohitters.json`, `cycles.json`, `tripleplays.json`; `gen-notable.mjs`, row keys in
-  `ALLOWED_KEYS`, `scripts/lib/notable/merge.mjs`). `fetchNotable()` loads the three files
+  (`nohitters.json`, `cycles.json`, `tripleplays.json`, and for the rarity count only `immaculate.json` and `fourhr.json`; `gen-notable.mjs`, row keys in
+  `ALLOWED_KEYS`, `scripts/lib/notable/merge.mjs`). `fetchNotable()` loads the five files
   through `staticJson` and returns them keyed by kind; a file that fails to load is `null`.
   `featsForGame(docs, gamePk)` is pure and returns that game's label lines, no-hitters first:
   `No-hitter: {pitcher}`, or `Combined no-hitter: {pitchers}` for more than one, with

@@ -18,7 +18,7 @@
 //   node scripts/gen-notable.mjs --season=1956 --out=DIR   # write to DIR: a measuring run
 // Nightly: .github/workflows/update-nightly-data.yml
 //
-// EACH RUN REPLACES EVERY ROW OF EACH SEASON IT SWEPT, in all three files, and keeps
+// EACH RUN REPLACES EVERY ROW OF EACH SEASON IT SWEPT, in every file, and keeps
 // every other season (lib/notable/merge.mjs says why: a corrected upstream row must not
 // leave a ghost row). It writes after each season, so an interrupted history run keeps
 // what it finished. A season with no games writes nothing.
@@ -100,7 +100,8 @@ for (const season of seasons) {
   }
   const gameMaps = new Map([[season, swept.gameMap]])
   const counts = []
-  for (const kind of KINDS) {
+  // Four-homer games (#2968) ride the cycles' hitting logs (no call of their own) and merge as the kinds do.
+  for (const kind of [...KINDS, 'fourhr']) {
     const merged = mergeRows(kind, docs[kind].rows, [season], swept.rows[kind])
     const seeded = applySeed(kind, merged, seed[kind], gameMaps)
     const { applied } = seeded
@@ -116,10 +117,6 @@ for (const season of seasons) {
     await write(kind)
     counts.push(`${swept.rows[kind].length + applied} ${kind}`)
   }
-  // Four-homer games (#2968): read off the cycles' hitting logs, so they cost no call. Whole seasons, as the kinds.
-  docs.fourhr = { coverage: mergeCoverage(docs.fourhr.coverage, [season], swept.through), rows: mergeRows('fourhr', docs.fourhr.rows, [season], swept.rows.fourhr) }
-  await write('fourhr')
-  counts.push(`${swept.rows.fourhr.length} fourhr`)
   // Immaculate innings (#2968, lib/notable/immaculate.mjs): every game's play-by-play from the
   // floor on. The nightly run (no flags) re-reads the last few days and replaces them; a hand run
   // reads the whole season and replaces its rows.
