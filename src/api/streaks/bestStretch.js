@@ -156,14 +156,28 @@ export const showsHolds = (t) => t.holds > t.saves
 // Starter or reliever: a starter if at least half his outings were starts.
 export const isStarter = (games) => games.filter((g) => g.gamesStarted > 0).length * 2 >= games.length
 
-// The player's whole MLB regular-season log for one group ('hitting' or
-// 'pitching'). The endpoint takes one date range for a career, so this is a
-// single request. { name, games }.
+// The seasons to ask for: MLB debut through the last game played (an active player has no
+// lastPlayedDate yet, so through this year). No debut is no MLB games: nothing to ask for.
+export function careerSeasons(person, thisYear) {
+  const from = Number(person?.mlbDebutDate?.slice(0, 4))
+  if (!from) return []
+  const to = Number(person.lastPlayedDate?.slice(0, 4)) || thisYear
+  return Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => from + i)
+}
+
+// The player's whole MLB regular-season log for one group ('hitting' or 'pitching'),
+// ONE SEASON PER CALL, four at a time. A career's log in a single call can take the feed
+// 40 s to build for a player it has not cached; season by season the same games take about
+// a second (measured 2026-11-16, scripts/franchise/gen-club-stretch.mjs). { name, games }.
 export async function loadCareerLog(playerId, signal, group = 'hitting') {
-  const data = await getJson(
-    `/api/v1/people/${playerId}/stats?stats=gameLog&group=${group}&sportId=1&gameType=R&startDate=1871-01-01&endDate=${new Date().getFullYear()}-12-31`,
-    { signal },
-  )
-  const splits = data.stats?.[0]?.splits ?? []
-  return { name: splits[0]?.player?.fullName ?? '', games: splits.map((x) => toGame(x, group)) }
+  const p = await getJson(`/api/v1/people/${playerId}?fields=people,fullName,mlbDebutDate,lastPlayedDate`, { signal })
+  const person = p.people?.[0]
+  const seasons = careerSeasons(person, new Date().getFullYear())
+  const logs = []
+  for (let i = 0; i < seasons.length; i += 4) {
+    logs.push(...(await Promise.all(seasons.slice(i, i + 4).map((y) =>
+      getJson(`/api/v1/people/${playerId}/stats?stats=gameLog&group=${group}&sportId=1&gameType=R&season=${y}`, { signal })
+        .then((d) => d.stats?.[0]?.splits ?? [])))))
+  }
+  return { name: person?.fullName ?? '', games: logs.flat().map((x) => toGame(x, group)) }
 }

@@ -100,3 +100,11 @@ test('club filter: the best run counts only that club, and a stint ends at anoth
   assert.equal(playerBest(games, 158, 3, measureByKey('hr')).homeRuns, 3)
   assert.equal(playerBest(games, 158, 6, measureByKey('hr')), null)
 })
+
+test('careerSeasons: debut through last game, an active player through this year, none without a debut', async () => {
+  const { careerSeasons } = await import('../src/api/streaks/bestStretch.js')
+  assert.deepEqual(careerSeasons({ mlbDebutDate: '1969-09-15', lastPlayedDate: '1971-06-20' }, 2026), [1969, 1970, 1971])
+  assert.deepEqual(careerSeasons({ mlbDebutDate: '2024-07-23' }, 2026), [2024, 2025, 2026])
+  assert.deepEqual(careerSeasons({ fullName: 'Prospect' }, 2026), [])
+  assert.deepEqual(careerSeasons(undefined, 2026), [])
+})
