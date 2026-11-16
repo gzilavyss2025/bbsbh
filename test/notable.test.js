@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildGameMap, gameFromRow, lastPlayedDate } from '../scripts/lib/notable/games.mjs'
 import {
-  battedInnings, cycleRows, fourHomerRows, isCycle, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows,
+  battedInnings, cycleRows, fourHomerRows, isCycle, noHitSides, noHitterRow, pitchersFromBox, sixDoublePlayRows, triplePlayRows,
 } from '../scripts/lib/notable/kinds.mjs'
 import {
   ALL_ALLOWED_KEYS, ALLOWED_KEYS, KINDS, PLAYER_KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc, sortRows,
@@ -230,6 +230,15 @@ test('triple play: the club in the log is the fielding side, and a log with 0 is
   assert.deepEqual(triplePlayRows(hit, 5, map), []) // a club that was not in the game
 })
 
+test('six-plus double plays: the fielding log with 6 or more is a row for that side, 5 is not (#2968)', () => {
+  const map = mapOf(row({ gamePk: 531236, away: club(112, 'CHC'), home: club(134, 'PIT') }))
+  const log = (doublePlays) => [{ game: { gamePk: 531236 }, stat: { doublePlays, triplePlays: 0 } }]
+  assert.deepEqual(sixDoublePlayRows(log(7), 112, map).map((r) => r.side), ['away'])
+  assert.deepEqual(sixDoublePlayRows(log(6), 134, map).map((r) => r.side), ['home'])
+  assert.deepEqual(sixDoublePlayRows(log(5), 112, map), [])
+  assert.deepEqual(triplePlayRows(log(7), 112, map), []) // a double play is not a triple play
+})
+
 // ---- the sweep: calls ----
 
 test('sweep: one fielded call per need, game types as measured, no call for a dropped club', async () => {
@@ -252,6 +261,7 @@ test('sweep: one fielded call per need, game types as measured, no call for a dr
   assert.equal(swept.rows.nohitters.length, 1)
   assert.equal(swept.rows.nohitters[0].pitchers[0].name, 'Don Larsen')
   assert.deepEqual(swept.rows.fourhr, [])
+  assert.deepEqual(swept.rows.sixdp, [])
   assert.equal(swept.through, '2025-06-01')
   assert.ok(urls.every((u) => u.includes('fields=')), 'every call is fielded')
   assert.ok(urls[0].includes('gameType=R,F,D,L,W'))
@@ -260,6 +270,8 @@ test('sweep: one fielded call per need, game types as measured, no call for a dr
   // Two clubs: one regular-season log each, and one World Series log each. Never a list.
   assert.equal(teamLogs.length, 4)
   assert.ok(teamLogs.every((u) => !/gameType=[^&]*,/.test(u) && !u.includes('gameType=[')))
+  // the six-plus double play rows (#2968) ride this call: without the field they silently vanish
+  assert.ok(teamLogs.every((u) => /fields=[^&]*\bdoublePlays\b/.test(u)))
   assert.ok(!urls.some((u) => /\/teams\/43[01]\//.test(u)), 'a Negro league club gets no call')
 })
 
@@ -371,7 +383,7 @@ test('the seed file holds the one triple play the API misses, and a row per kind
 test('no committed file carries a key outside the allowlist, at any depth', () => {
   const dir = join(ROOT, 'public', 'data', 'notable')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort()
-  assert.deepEqual(files, ['cycles.json', 'fourhr.json', 'fourstraight.json', 'immaculate.json', 'nohitters.json', 'tripleplays.json'])
+  assert.deepEqual(files, ['cycles.json', 'fourhr.json', 'fourstraight.json', 'immaculate.json', 'nohitters.json', 'sixdp.json', 'tripleplays.json'])
 
   for (const file of files) {
     const kind = file.replace('.json', '')

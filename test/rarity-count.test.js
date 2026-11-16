@@ -1,10 +1,10 @@
-// The rarity count (#2968): natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs:
+// The rarity count (#2968): natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays:
 // src/api/notable/rarityCount.js and the generator's flags (scripts/lib/notable/flags.mjs).
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
 import { candidateGames, fetchFourStraight, fourStraightRows } from '../scripts/lib/notable/fourstraight.mjs'
@@ -332,4 +332,43 @@ test('the committed four-straight index matches the published list from the floo
   // Wikipedia, single-game records (10 through 2020, three before 1967) plus the Cardinals, 2022-07-02.
   assert.deepEqual(runs, ['2006-09-18 LAD', '2007-04-22 BOS', '2008-08-14 CWS', '2010-08-11 AZ', '2017-07-27 WSH', '2019-06-09 WSH', '2020-08-16 CWS', '2022-07-02 STL'])
   assert.equal(doc.coverage.seasons[0], 1967)
+})
+
+// ---- six or more double plays by one club (slice 6) ----
+
+test('six-plus double plays: every double-play event counts for the fielding club, once a game', () => {
+  const dp = (i, eventType, half) => play(i, eventType, { batter: 10 + i, half })
+  // the 2018 Cubs at Pittsburgh (gamePk 531236): 6 GIDP and 1 DP fielded in the bottom halves
+  const cubs = [0, 1, 2, 3, 4, 5].map((i) => dp(i, 'grounded_into_double_play', 'bottom'))
+  const plays = [...cubs, dp(6, 'strikeout_double_play', 'bottom'), dp(7, 'double_play', 'top'), dp(8, 'triple_play', 'top')]
+  assert.deepEqual(sixDoublePlays(plays), [{ side: 'away' }])
+  assert.deepEqual(sixDoublePlays(cubs.slice(1)), []) // five is not six
+  assert.equal(sixDoublePlays([]), null)
+  assert.deepEqual(detectRareFeats({ liveData: { plays: { allPlays: plays } } }), [{ kind: 'sixdp', side: 'away' }])
+})
+
+test('six-plus double plays: a double play inside another event counts, two separate outs do not', () => {
+  const out = (playIndex) => ({ movement: { isOut: true }, details: { playIndex } })
+  const gidp = (i) => play(i, 'grounded_into_double_play', { batter: 10 + i, half: 'bottom' })
+  // gamePk 23759 (2005): a single where the batter is doubled off rounding second, eventType 'single'
+  const singleDp = play(5, 'single', { half: 'bottom', runners: [out(0), out(0)] })
+  assert.deepEqual(sixDoublePlays([0, 1, 2, 3, 4].map(gidp).concat(singleDp)), [{ side: 'away' }])
+  // a pickoff, then a strikeout in the same plate appearance: two outs, two events, no double play
+  const twoOuts = play(5, 'strikeout', { half: 'bottom', runners: [out(1), out(4)] })
+  assert.deepEqual(sixDoublePlays([0, 1, 2, 3, 4].map(gidp).concat(twoOuts)), [])
+})
+
+test('the six-plus double play count runs from the first swept season, tonight not counted twice', () => {
+  const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', away: { id: club }, home: { id: 1 } })
+  const idx = { sixdp: { coverage: { seasons: Array.from({ length: 126 }, (_, i) => 1901 + i) }, rows: [r(1, '1942-08-14', 147), r(2, '1990-05-01', 158), r(6, '2026-08-01', 158)] } }
+  const [note] = buildRarityNotes(idx, feed, { kind: 'sixdp', side: 'away' })
+  assert.equal(note.text, "The 3rd game with six or more double plays since 1901, the Brewers' 2nd.")
+})
+
+test('the committed six-plus double play index holds the 7-DP games (slice 6)', () => {
+  const doc = JSON.parse(readFileSync(new URL('../public/data/notable/sixdp.json', import.meta.url)))
+  const games = doc.rows.map((r) => `${r.officialDate} ${r[r.side].abbr}`)
+  // ESPN (#2968 sources): three clubs turned 7 in a nine-inning game.
+  for (const g of ['1942-08-14 NYY', '1969-05-04 HOU', '2018-08-17 CHC']) assert.ok(games.includes(g), g)
+  assert.equal(doc.coverage.seasons[0], 1901)
 })
