@@ -93,13 +93,15 @@ test('each measure prints in its usual form; an infinite ERA is a dash', () => {
 
 test('career log fetches one season at a time, never the slow whole-career range', async () => {
   const paths = []
-  const get = async (path) => {
+  const signal = new AbortController().signal
+  const get = async (path, opts) => {
+    assert.equal(opts?.signal, signal)
     paths.push(path)
     if (path.includes('yearByYear')) return { stats: [{ splits: [{ season: '2006' }, { season: '2007' }, { season: '2007' }] }] }
     const season = path.match(/season=(\d+)/)[1]
     return { stats: [{ splits: [{ date: `${season}-05-01`, player: { fullName: 'Prince Fielder' }, game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4 } }] }] }
   }
-  const log = await loadCareerLog(429664, undefined, 'hitting', get)
+  const log = await loadCareerLog(429664, signal, 'hitting', get)
   assert.equal(log.name, 'Prince Fielder')
   assert.deepEqual(log.games.map((g) => g.date), ['2006-05-01', '2007-05-01'])
   assert.ok(paths.every((p) => !p.includes('startDate')))
