@@ -80,10 +80,12 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
   const seasonYear = selectGameSeason(feed)
   const arsenal = useAsync(() => fetchPitchArsenalFor(pitcher.id, { seasonYear, strict: true }), [pitcher.id, seasonYear])
   const season = useMemo(() => {
-    const byCode = seasonByCode(arsenal.data?.pit?.[String(pitcher.id)], PHYS_FIELDS)
+    // The arsenal tracks MLB and Triple-A only; any other level compares to nothing.
+    const level = { 1: 'mlb', 11: 'aaa' }[feed?.gameData?.teams?.home?.sport?.id ?? 1]
+    const byCode = level ? seasonByCode(arsenal.data?.pit?.[String(pitcher.id)], PHYS_FIELDS, level) : new Map()
     const deltas = new Map(card?.mix.map((m) => [m.type, veloDelta(m.velo, byCode.get(m.type)?.velo)]) ?? [])
     return { byCode, deltas }
-  }, [arsenal.data, pitcher.id, card])
+  }, [arsenal.data, pitcher.id, card, feed])
   const name = card?.line.name || pitcher.name
   const [first, ...rest] = name.split(' ')
   const role = [teamAbbr, pitcher.hand && `${pitcher.hand}HP`, card?.line.role].filter(Boolean).join(' · ')

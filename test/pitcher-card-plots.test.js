@@ -32,7 +32,7 @@ test('movement: zero is the centre, up is up, and a wild reading clamps to the e
   assert.equal(m.y(-MOVE_RANGE * 3), 100)
 })
 
-test('season by code: MLB rows first, pfx read by field name, missing stays null', () => {
+test('season by code: MLB rows by default, pfx read by field name, missing stays null', () => {
   const entry = {
     mlb: [{ code: 'FF', avgVelo: 96.1, phys: [-1.8, 5.3, -5.3, 9.3, 6.6, 0.39, 2251] }, { code: 'CU', avgVelo: 77 }],
     aaa: [{ code: 'FF', avgVelo: 90 }],
@@ -40,8 +40,15 @@ test('season by code: MLB rows first, pfx read by field name, missing stays null
   const m = seasonByCode(entry, PHYS)
   assert.deepEqual(m.get('FF'), { velo: 96.1, pfxX: -5.3, pfxZ: 9.3 })
   assert.deepEqual(m.get('CU'), { velo: 77, pfxX: null, pfxZ: null })
-  assert.equal(seasonByCode({ aaa: [{ code: 'SL', avgVelo: 85 }] }, PHYS).get('SL').velo, 85)
+  assert.equal(seasonByCode({ aaa: [{ code: 'SL', avgVelo: 85 }] }, PHYS, 'aaa').get('SL').velo, 85)
   assert.equal(seasonByCode(null, PHYS).size, 0)
+})
+
+test('season by code: a Triple-A game compares against his Triple-A rows, never his MLB ones', () => {
+  const entry = { mlb: [{ code: 'FF', avgVelo: 96 }], aaa: [{ code: 'FF', avgVelo: 94 }] }
+  assert.equal(seasonByCode(entry, PHYS, 'aaa').get('FF').velo, 94)
+  assert.equal(seasonByCode(entry, PHYS, 'mlb').get('FF').velo, 96)
+  assert.equal(seasonByCode({ mlb: [{ code: 'FF', avgVelo: 96 }] }, PHYS, 'aaa').size, 0)
 })
 
 test('velo delta: signed tenths, a real minus sign, and nothing when a side is missing', () => {

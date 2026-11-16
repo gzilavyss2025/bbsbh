@@ -38,10 +38,12 @@ export function movementScale(w, h) {
 
 // The season figures a card compares against, by pitch code, from one
 // pitcher's arsenal entry (api/pitcher/arsenal.js: `{ mlb: [...], aaa: [...] }`,
-// each pitch `{ code, avgVelo, phys }` with phys in PHYS_FIELDS order). His MLB
-// rows when he has them. A missing field stays null; the card then shows nothing.
-export function seasonByCode(entry, physFields) {
-  const rows = entry?.mlb?.length ? entry.mlb : (entry?.aaa ?? [])
+// each pitch `{ code, avgVelo, phys }` with phys in PHYS_FIELDS order). `level`
+// is the GAME's ('mlb' or 'aaa'): a Triple-A night is measured against his
+// Triple-A season, never his MLB one. A missing field stays null; the card then
+// shows nothing.
+export function seasonByCode(entry, physFields, level = 'mlb') {
+  const rows = entry?.[level] ?? []
   const ix = physFields.indexOf('pfxX')
   const iz = physFields.indexOf('pfxZ')
   const out = new Map()
