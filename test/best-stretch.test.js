@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, loadCareerLog, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, boardRole, loadCareerLog, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -131,4 +131,13 @@ test('career log keeps at most four season requests in flight', async () => {
   }
   await loadCareerLog(1, undefined, 'hitting', get)
   assert.ok(peak <= 4, `peak ${peak}`)
+})
+
+// A Club Stretch link sets a pitcher's role from the board's length, so a mostly-starter's run
+// of 65 relief outings is labelled relief, not "65 starts".
+test('boardRole: a board link names the outings its length counts', () => {
+  assert.equal(boardRole(158, 65), 'reliever')
+  assert.equal(boardRole('mlb', 32), 'starter')
+  assert.equal(boardRole(null, 65), null)
+  assert.equal(boardRole(158, 10), null)
 })
