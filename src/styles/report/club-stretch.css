@@ -1,44 +1,12 @@
 /* ---------------------------------------------------------------- club stretch
-   ClubStretchPage: a row of club logos (the club filter), the 162/154 switch and
-   the stat chips, then one ranked board of ten rows. The logo row scrolls sideways
-   on a phone and wraps on a wide screen. */
+   ClubStretchPage: the shared TeamFilterStrip (the club filter), the 162/154 switch
+   and the stat chips, then one ranked board of ten rows. */
 
 .cstretch__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-h2);
   color: var(--text-heading);
-}
-
-/* layout-exempt: club-stretch board geometry */
-.cstretch__clubs {
-  display: flex;
-  gap: var(--space-2);
-  overflow-x: auto;
-  padding-block: var(--space-1);
-}
-@media (min-width: 740px) {
-  /* layout-exempt: logo row wraps when wide */
-  .cstretch__clubs {
-    flex-wrap: wrap;
-    overflow-x: visible;
-  }
-}
-/* layout-exempt: club-stretch board geometry */
-.cstretch__club {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  inline-size: var(--tap-min);
-  block-size: var(--tap-min);
-  padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  cursor: pointer;
-}
-.cstretch__club[aria-pressed='true'] {
-  border: var(--bw-heavy) solid var(--text-heading);
 }
 
 .cstretch__board {

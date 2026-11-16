@@ -1,5 +1,5 @@
 import '../../styles/report/club-stretch.css'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { clubStretch } from '../../api/streaks/clubStretch.js'
 import { BAT_MEASURES } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -10,7 +10,7 @@ import { pathOf } from '../../lib/route/table.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
-import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
+import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
@@ -20,7 +20,6 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // Club Stretch (/club-stretch, wireframe approved by Gary 2026-11-16): a club's best 162 or
 // 154 games in a row by one player, in six stats, top ten. Static, computed once per season.
 // Not a scoring surface, so nothing is sealed (ADR-0034).
-const CLUBS = [...ALL_MLB_TEAM_IDS].sort((a, b) => teamFullName(a).localeCompare(teamFullName(b)))
 const CHIP = { ops: 'OPS', avg: 'AVG', hr: 'HR', h: 'Hits', rbi: 'RBI', sb: 'SB' }
 const LENGTHS = [{ value: '162', label: '162 games' }, { value: '154', label: '154 games' }]
 const shortDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })
@@ -29,7 +28,7 @@ function readQuery(fallbackTeam) {
   const q = new URLSearchParams(window.location.search)
   const team = Number(q.get('team'))
   return {
-    team: CLUBS.includes(team) ? team : CLUBS.includes(fallbackTeam) ? fallbackTeam : 158,
+    team: ALL_MLB_TEAM_IDS.includes(team) ? team : ALL_MLB_TEAM_IDS.includes(fallbackTeam) ? fallbackTeam : 158,
     n: q.get('n') === '154' ? '154' : '162',
     by: BAT_MEASURES.some((m) => m.key === q.get('by')) ? q.get('by') : 'hr',
   }
@@ -44,13 +43,6 @@ export function ClubStretchPage() {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}?${new URLSearchParams({ team: next.team, n: next.n, by: next.by })}`)
   }
   const link = useRouteLink()
-  // On a phone the logo row scrolls sideways: bring the picked club into view, row only.
-  const picked = useRef(null)
-  useEffect(() => {
-    const el = picked.current
-    const row = el?.parentElement
-    if (row) row.scrollLeft = el.offsetLeft - row.offsetLeft - (row.clientWidth - el.offsetWidth) / 2
-  }, [picks.team])
   const club = teamFullName(picks.team)
   useDocumentTitle(`Club Stretch · ${club}`)
   const { data, loading, error, reload } = useAsync(() => clubStretch(picks.team), [picks.team])
@@ -69,13 +61,7 @@ export function ClubStretchPage() {
           {data?.through && <p className="hint">Through the {data.through} season · {data.firstSeason}–{data.through}, every city</p>}
         </Stack>
 
-        <div role="group" aria-label="Club" className="cstretch__clubs">
-          {CLUBS.map((id) => (
-            <button key={id} ref={id === picks.team ? picked : null} type="button" className="cstretch__club" aria-pressed={id === picks.team} aria-label={teamFullName(id)} title={teamFullName(id)} onClick={() => update({ team: id })}>
-              <TeamLogo teamId={id} name={teamFullName(id)} size={32} />
-            </button>
-          ))}
-        </div>
+        <TeamFilterStrip selectedTeamId={picks.team} onSelect={(id) => id != null && update({ team: id })} ariaLabel="Club" showMlbPin={false} />
 
         <Cluster className="cstretch__controls">
           <Segmented label="Games in a row" value={picks.n} onChange={(n) => update({ n })} options={LENGTHS} />
