@@ -390,9 +390,7 @@
 
 .bookmgmt__confirm {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-inset);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 .bookmgmt__confirm p {

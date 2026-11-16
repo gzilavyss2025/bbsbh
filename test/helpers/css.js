@@ -1,4 +1,7 @@
 // Helpers for tests that read a stylesheet as source text.
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+import postcss from 'postcss'
 
 export const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 
@@ -18,4 +21,29 @@ export function ruleBody(css, selector) {
     if (css[i] !== '{') continue
     return css.slice(i + 1, css.indexOf('}', i))
   }
+}
+
+// Every .css file under `dir`, as paths relative to it.
+export function sheets(dir, prefix = '') {
+  return readdirSync(dir).flatMap((f) => {
+    const abs = join(dir, f)
+    if (statSync(abs).isDirectory()) return sheets(abs, `${prefix}${f}/`)
+    return f.endsWith('.css') ? [`${prefix}${f}`] : []
+  })
+}
+
+// Every rule under `stylesDir` whose selector ends on `cls`, with its declared
+// property names, so a box put back by a later rule, a media query or another
+// partial is found too. The design lab's own sheets are prototypes and skipped.
+export function rulesEndingIn(stylesDir, cls) {
+  const tail = new RegExp(`\\.${cls}(?![\\w-])[^\\s>+~]*$`)
+  const found = []
+  for (const rel of sheets(stylesDir).filter((f) => !f.startsWith('designlab/'))) {
+    postcss.parse(readFileSync(join(stylesDir, rel), 'utf8')).walkRules((rule) => {
+      if (!rule.selectors.some((sel) => tail.test(sel.trim()))) return
+      const props = rule.nodes.filter((n) => n.type === 'decl').map((d) => d.prop.toLowerCase())
+      found.push({ where: `${rel}: ${rule.selector}`, props })
+    })
+  }
+  return found
 }

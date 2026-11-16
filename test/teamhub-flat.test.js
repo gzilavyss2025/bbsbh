@@ -5,44 +5,21 @@
 // noticing a box inside a box again.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import postcss from 'postcss'
-import { stripComments, ruleBody } from './helpers/css.js'
+import { stripComments, ruleBody, rulesEndingIn } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const css = (rel) => stripComments(readFileSync(join(SRC, 'styles', rel), 'utf8'))
 
 const CHROME = /(^|;)\s*(background|border|border-radius|box-shadow)\s*:/
 
-function sheets(dir, prefix = '') {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return sheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css') ? [`${prefix}${f}`] : []
-  })
-}
 
-// Every rule in src/styles/ whose selector ends on `cls`, so a box put back by a
-// later rule, a media query or another partial fails too. The design lab's own
-// sheets are prototypes and are skipped.
-function rulesEndingIn(cls) {
-  const tail = new RegExp(`\\.${cls}(?![\\w-])[^\\s>+~]*$`)
-  const found = []
-  for (const rel of sheets(join(SRC, 'styles')).filter((f) => !f.startsWith('designlab/'))) {
-    postcss.parse(readFileSync(join(SRC, 'styles', rel), 'utf8')).walkRules((rule) => {
-      if (!rule.selectors.some((sel) => tail.test(sel.trim()))) return
-      const props = rule.nodes.filter((n) => n.type === 'decl').map((d) => d.prop.toLowerCase())
-      found.push({ where: `${rel}: ${rule.selector}`, props })
-    })
-  }
-  return found
-}
 
 const BOX = new Set(['background', 'background-color', 'border', 'border-radius', 'box-shadow'])
 const noBoxAnywhere = (cls) => {
-  const rules = rulesEndingIn(cls)
+  const rules = rulesEndingIn(join(SRC, 'styles'), cls)
   assert.ok(rules.length > 0, `.${cls} should still have a rule`)
   for (const { where, props } of rules) {
     const box = props.filter((p) => BOX.has(p))
