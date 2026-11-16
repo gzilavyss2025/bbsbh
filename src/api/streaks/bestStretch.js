@@ -152,6 +152,16 @@ export const clubPitchPool = (games, n) => games.filter((g) => (n === CLUB_PITCH
 // through a trade. Best Stretch's ?club=mlb reads the same key.
 export const MLB_SCOPE = 'mlb'
 
+// A pitcher's role on a run linked from a Club Stretch board: the board's length decides it (32
+// is starts, 65 relief outings), not his career mix, so the card names the outings it counts.
+// null when there is no board (a plain search goes by isStarter).
+export function boardRole(club, n) {
+  if (!club) return null
+  if (n === CLUB_PITCH_LENGTHS.starts) return 'starter'
+  if (n === CLUB_PITCH_LENGTHS.relief) return 'reliever'
+  return null
+}
+
 // Best Stretch's search. `club` (a link from Club Stretch) keeps it to the board's rules: a
 // club's runs, or MLB_SCOPE's; a pitcher's run there counts starts at 32 and relief outings at
 // 65 (clubPitchPool). With no club it is the plain best window over `pool`.

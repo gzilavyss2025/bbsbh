@@ -7,7 +7,7 @@
 // failure, and the file keeps its last good rows.
 import { mapConcurrent } from '../concurrency.mjs'
 import { buildGameMap, lastPlayedDate, otherSide, scheduleUrl } from './games.mjs'
-import { cycleRows, fourHomerRows, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows } from './kinds.mjs'
+import { cycleRows, fourHomerRows, noHitSides, noHitterRow, pitchersFromBox, sixDoublePlayRows, triplePlayRows } from './kinds.mjs'
 import { POSTSEASON_TYPES } from './rules.mjs'
 
 export const CONCURRENCY = 4
@@ -15,7 +15,7 @@ export const PLAYERS_PER_CALL = 100
 const strict = { strict: true }
 
 const BOX_FIELDS = 'teams,away,home,pitchers,players,person,fullName'
-const FIELDING_FIELDS = 'stats,splits,stat,triplePlays,game,gamePk'
+const FIELDING_FIELDS = 'stats,splits,stat,triplePlays,doublePlays,game,gamePk'
 const PEOPLE_FIELDS =
   'people,id,fullName,stats,splits,stat,hits,doubles,triples,homeRuns,team,isHome,game,gamePk'
 
@@ -59,7 +59,8 @@ export function logsToFetch(gameMap) {
   return [...wanted].flatMap(([clubId, types]) => [...types].map((type) => ({ clubId, type })))
 }
 
-export async function fetchTriplePlays(get, gameMap, season) {
+// The triple plays and the six-plus double play games (#2968), from the same fielding logs.
+export async function fetchFieldingFeats(get, gameMap, season) {
   const logs = await mapConcurrent(
     logsToFetch(gameMap),
     CONCURRENCY,
@@ -68,11 +69,12 @@ export async function fetchTriplePlays(get, gameMap, season) {
       const data = await get(
         `/api/v1/teams/${clubId}/stats?stats=gameLog&group=fielding&season=${season}${gameType}&fields=${FIELDING_FIELDS}`,
       )
-      return triplePlayRows(data?.stats?.[0]?.splits, clubId, gameMap)
+      const splits = data?.stats?.[0]?.splits
+      return { tripleplays: triplePlayRows(splits, clubId, gameMap), sixdp: sixDoublePlayRows(splits, clubId, gameMap) }
     },
     strict,
   )
-  return logs.flat()
+  return { tripleplays: logs.flatMap((l) => l.tripleplays), sixdp: logs.flatMap((l) => l.sixdp) }
 }
 
 // The cycles and the four-homer games (#2968), from one pass over every player's hitting log.
@@ -95,14 +97,14 @@ export async function fetchCycles(get, gameMap, season) {
   return { cycles: found.flatMap((f) => f.cycles), fourhr: found.flatMap((f) => f.fourhr) }
 }
 
-// One season, all three kinds, and the four-homer games. null when the season has no game to keep.
+// One season, all three kinds, the four-homer games and the six-plus double play games. null when the season has no game to keep.
 export async function sweepSeason(get, season) {
   const gameMap = await fetchGameMap(get, season)
   if (!gameMap) return null
-  const [nohitters, { cycles, fourhr }, tripleplays] = [
+  const [nohitters, { cycles, fourhr }, { tripleplays, sixdp }] = [
     await fetchNoHitters(get, gameMap),
     await fetchCycles(get, gameMap, season),
-    await fetchTriplePlays(get, gameMap, season),
+    await fetchFieldingFeats(get, gameMap, season),
   ]
-  return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr } }
+  return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr, sixdp } }
 }

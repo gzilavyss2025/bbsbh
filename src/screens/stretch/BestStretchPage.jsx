@@ -1,7 +1,7 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, MLB_SCOPE, obp, presetsFor, rate3, searchBest, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, boardRole, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, MLB_SCOPE, obp, presetsFor, rate3, searchBest, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
@@ -111,10 +111,13 @@ export function BestStretchPage() {
     [picks.player?.id, picks.group],
   )
   const pitching = picks.group === 'pitching'
-  const starter = pitching && log ? isStarter(log.games) : false
+  // From a Club Stretch board the board's length sets the role (a starter's 65 relief outings
+  // read as relief); otherwise his career mix does.
+  const linked = pitching ? boardRole(picks.club, picks.n) : null
+  const starter = linked ? linked === 'starter' : pitching && log ? isStarter(log.games) : false
   const unit = pitching ? (starter ? 'starts' : 'appearances') : 'games'
   // Before a pitcher's log loads his role is unknown; the chips assume a starter.
-  const role = pitching ? (log && !starter ? 'reliever' : 'starter') : 'hitter'
+  const role = pitching ? ((linked || log) && !starter ? 'reliever' : 'starter') : 'hitter'
   const presets = presetsFor(role)
   const n = picks.n ?? presets.season
   const [customOpen, setCustomOpen] = useState(false)
