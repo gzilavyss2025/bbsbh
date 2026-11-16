@@ -1,4 +1,4 @@
-import { createElement, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import '../../../../styles/gameday-next/hero.css'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { eventCardMarkup } from '../steps/eventCardMarkup.js'
@@ -14,18 +14,17 @@ import { BatterFallbackContext, BattingUniformContext, GameUniformsContext } fro
 import { fallbackFigureUrls } from '../../../../api/uniforms.js'
 import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
 import { ordinal } from '../../../../lib/format.js'
+import { useAsync } from '../../../../hooks/useAsync.js'
+import { selectGameSeason } from '../../../../api/select.js'
 import { fetchRunExpectancy } from '../../../../api/playbyplay/runExpectancyLine.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
 export function GamedayHero(props) {
   // The run-expectancy table (#2973) is not a score: it loads eagerly; heroMarkup reads it inside the reveal.
-  // The game's own season's table (#3115); none before 1960 or off MLB.
-  const date = props.feed?.gameData?.datetime?.officialDate
-  const sportId = props.feed?.gameData?.teams?.home?.sport?.id ?? 1
-  const key = `${date}|${sportId}`
-  const [loaded, setLoaded] = useState(null) // { key, t }: a table for another game is never shown
-  useEffect(() => { let on = true; fetchRunExpectancy(date, sportId).then((t) => on && setLoaded({ key, t })); return () => { on = false } }, [date, sportId, key])
-  const re = loaded?.key === key ? loaded.t : null
+  // The game's own season's table (#3115); none before 1960 or off MLB (a feed with no sport id counts as off MLB).
+  const season = selectGameSeason(props.feed)
+  const sportId = props.feed?.gameData?.teams?.home?.sport?.id ?? null
+  const re = useAsync(() => fetchRunExpectancy(season, sportId), [season, sportId]).data ?? null
   return heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, re, ...props })
 }
 export const GamedayEventCard = (props) => eventCardMarkup(createElement, { SealBox, ...props })

@@ -11,10 +11,10 @@ import { ERA_LAST, eraDecade, isTerminalOuts, re24Key } from '../../lib/runExpec
 
 // The table for a game's season (#3115): 2024 on, the current table; 1960-2023, that decade's era
 // table (re24 only is read here, so the pre-1990 count-cell caveat does not apply); before 1960, or any
-// game that is not MLB (sportId 1), none. `date` is gameData.datetime.officialDate. -> a url or null.
-export function runExpectancyUrl(date, sportId) {
-  if (sportId !== 1) return null
-  const year = Number(String(date ?? '').slice(0, 4))
+// game that is not MLB (sportId 1), none. `season` is selectGameSeason(feed). -> a url or null.
+export function runExpectancyUrl(season, sportId) {
+  if (sportId !== 1 || season == null) return null
+  const year = Number(season)
   if (year > ERA_LAST) return '/data/run-expectancy.json'
   const decade = eraDecade(year)
   return decade ? `/data/run-expectancy-eras/${decade}.json` : null
@@ -22,8 +22,8 @@ export function runExpectancyUrl(date, sportId) {
 
 const fetchByUrl = staticJsonBy((url) => url, { fallback: null })
 // One fetch per file, memoized; null for a game with no table.
-export const fetchRunExpectancy = (date, sportId) => {
-  const url = runExpectancyUrl(date, sportId)
+export const fetchRunExpectancy = (season, sportId) => {
+  const url = runExpectancyUrl(season, sportId)
   return url ? fetchByUrl(url) : Promise.resolve(null)
 }
 
