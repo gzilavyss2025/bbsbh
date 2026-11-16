@@ -70,10 +70,19 @@
 .mgrpage__statgrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-1);
 }
+/* Rules between the cells only, like a scorebook's ruled block: a short last
+   row leaves blank paper, not a filled gap (#1775). */
 .mgrpage__statgrid .stat {
   padding: var(--space-2h) 3px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+.mgrpage__statgrid .stat:nth-child(-n + 4) {
+  border-top: none;
+}
+.mgrpage__statgrid .stat:nth-child(4n + 1) {
+  border-left: none;
 }
 .mgrpage__statgrid .stat__v {
   font-family: var(--font-mono);

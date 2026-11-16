@@ -80,32 +80,6 @@
   }
 }
 
-/* R/H/E/LOB and the four pitch stats as one 4-column, 2-row seamless grid —
-   same recipe as .factgrid/.umps__list, just with .stat's own --inset-cell
-   shadow (not --shadow-card) since this already sits inside .statbox's own
-   bordered card rather than floating on the page directly. The 1px gap
-   reveals the hairline rule beneath; individual .stat cells (below)
-   contribute only their background, not a border/radius/shadow of their own.
-   All eight cells share one font size (see .stat, no more --big/--small
-   variants here) so the two rows read as one consistent stat line rather
-   than a "hero" row over a secondary one. */
-.statline {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  box-shadow: var(--inset-cell);
-}
-
-.statline .stat {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-}
-
 /* ABS (Automated Ball-Strike) challenges — the card's third row (see
    StatBox's AbsRow). One club per row inside a single inset panel that matches
    the R/H/E and pitch-stat cells above, so ABS reads as another row of the
@@ -794,9 +768,6 @@
   text-align: center;
   padding: var(--space-2) var(--space-1);
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
 }
 
 .stat__v {

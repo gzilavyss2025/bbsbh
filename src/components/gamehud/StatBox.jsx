@@ -24,12 +24,8 @@ export function CountBlink({ before, after }) {
 
 
 
-// One stat cell. Exported because HalfTally.jsx draws the same cells in the
-// same `.statline` grid for focus mode's console band — one recipe, two hosts.
-// `style` is optional and forwarded as-is: HalfTally is the only caller that
-// passes one, an inline `--tally-i` custom property (ADR-0046) that times this
-// cell's ink-in against its neighbors — StatBox's own cells pass nothing and
-// render exactly as they did before.
+// One stat cell: a figure over its caps label, flat on its card. Box Lines'
+// sheet draws these in its 1px-gap grid. `style` is optional and forwarded as-is.
 export function Stat({ k, v, tone, style }) {
   return (
     <div className={`stat ${tone ? `stat--${tone}` : ''}`} style={style}>

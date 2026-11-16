@@ -807,11 +807,6 @@ button.gamehigh-matchup:active {
   gap: 1px;
   background: var(--border-rule);
 }
-.gamehigh-tiles__grid .stat {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-}
 
 /* Best Souvenir Odds (SouvenirGameBoard, FoulTrackerPage.jsx) — ranks GAMES,
    not players, so unlike Single-Game Highs (.gamehigh-row) there's no photo
@@ -839,9 +834,6 @@ button.gamehigh-matchup:active {
   background: var(--border-rule);
 }
 .souvenir-row__tilegrid .stat {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
   padding: var(--space-1h) var(--space-2h);
   min-width: 60px;
 }

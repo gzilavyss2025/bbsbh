@@ -243,9 +243,6 @@ button.boxlines__back:active {
 .boxlines__stats .stat {
   padding: var(--space-2) 3px;
   background: var(--surface-card);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 .boxlines__stats .stat__v {
