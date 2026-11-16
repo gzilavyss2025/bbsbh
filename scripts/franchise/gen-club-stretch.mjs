@@ -26,7 +26,8 @@ const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : now.getUTCFullYear() - (now.getUTCMonth() >= 9 ? 0 : 1)
 if (!Number.isInteger(through) || through < 1901) throw new Error(`bad --through: ${through}`)
 const MIN = Math.min(...LENGTHS)
-// A career log is about 2.8 MB; these fields alone (what toGame reads) cut it to about 0.75 MB.
+// A pooled connection through the proxy can stall with no answer (a run sat 20 minutes on one):
+// each log gets a 45 s timeout, and a timeout retries. A career log is about 2.8 MB; these fields alone (what toGame reads) cut it to about 0.75 MB.
 const FIELDS = 'stats,splits,date,team,id,name,game,gameNumber,stat,atBats,plateAppearances,hits,doubles,triples,homeRuns,runs,rbi,baseOnBalls,hitByPitch,sacFlies,stolenBases,totalBases,strikeOuts'
 
 // teamId -> every player with at least MIN career games for the club.
@@ -57,7 +58,7 @@ await mapConcurrent(
   [...clubsOf.values()],
   4,
   async (p) => {
-    const d = await getJson(`/api/v1/people/${p.id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&startDate=1901-01-01&endDate=${through}-12-31&fields=${FIELDS}`)
+    const d = await getJson(`/api/v1/people/${p.id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&startDate=1901-01-01&endDate=${through}-12-31&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
     const games = (d.stats?.[0]?.splits ?? []).map((s) => toGame(s, 'hitting'))
     for (const teamId of p.clubs) rowsByClub.get(teamId).push(playerRows({ id: p.id, name: p.name, games }, teamId))
     if (++done % 100 === 0) console.log(`${done} / ${clubsOf.size} ${new Date().toISOString().slice(11, 19)}`)
