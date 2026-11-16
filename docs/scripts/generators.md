@@ -2130,12 +2130,16 @@ Re-run only to fold in a new season.
 - `gen-club-stretch.mjs` (in `scripts/franchise/`) → `public/data/club-stretch/{teamId}.json` — each of the
   30 MLB clubs' best runs of 162 and 154 games in a row by one player, in HR, H, RBI, SB, AVG and OPS,
   top ten, one row per player (the Club Stretch page). **Hand-run**, after the regular season ends:
-  `node scripts/franchise/gen-club-stretch.mjs [--through 2026]`. Candidates are the club's career
-  games-played leaders (`stats/leaders`, paged with `offset` until under 154); each one's career game
-  log is read once (about 6,200 logs, two at a time with a pause, strict; `--cache <file>` resumes a stopped run). The feed's per-game logs start in 1901,
-  so every board does. A run counts his games played, crosses seasons, and ends at a game for another
-  club; AVG and OPS need 3.1 PA per game. The pure half is `scripts/lib/franchise/club-stretch.mjs`,
-  which reuses `bestStretch` from `src/api/streaks/bestStretch.js`.
+  `node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache <file>]`. Two passes: one
+  season-stats call per club per season (about 3,800 small calls) gives every player's club lines;
+  then each board fetches career game logs best-first, by the most a player's seasons allow
+  (`ceilingFor`), and stops once the next ceiling cannot reach tenth place, so the boards match
+  fetching every player. A career log can take the feed 40 s to build, so the pruning is the point.
+  `--cache` (outside the repo) keeps fetched players' rows so a stopped run resumes. The feed's
+  per-game logs start in 1901, so every board does. A run counts his games played, crosses
+  seasons, and ends at a game for another club; AVG and OPS need 3.1 PA per game. The pure half is
+  `scripts/lib/franchise/club-stretch.mjs`, which reuses `bestStretch` from
+  `src/api/streaks/bestStretch.js`.
 
 - `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
   the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top
