@@ -265,7 +265,9 @@ locally (no Clerk key).
 
 ## After #1113
 
-- Nested boxes (16 panels, 10 wells) — Q4.
+- Nested boxes (16 panels, 10 wells) — Q4. **Corrected 2026-11-16 (#1775):** the
+  2026-10-01 table had 15 panel rows, so "16" was a miscount. On current `main` the
+  re-run census finds 6 panels and 5 wells still drawn; see `census.md`.
 - `Table` (#1132) takes `.ledger, .standings` and `.prospectboard`.
 - `Notice` (#1132) takes the 7 notice rows.
 - `Stack` (#1180) takes the 41 card margins.

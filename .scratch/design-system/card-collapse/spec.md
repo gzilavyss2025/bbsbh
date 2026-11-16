@@ -225,7 +225,9 @@ the before/after screenshots.
 
 26 card-shaped rules are boxes inside a card: 16 panels (for example `.wcall`,
 `.favormeter`, `.stat` inside the StatBox; `.lineup__list` inside `.lineup`;
-`.thub-roster` inside `.thub-card__body`) and 10 inset wells. A card inside a card
+`.thub-roster` inside `.thub-card__body`) and 10 inset wells. (Corrected 2026-11-16,
+#1775: the table had 15 panel rows, so 25 boxes, not 26. The re-run census on current
+`main` finds 6 panels and 5 wells still drawn.) A card inside a card
 is the "SaaS dashboard" drift the critique names. `Card` does not take them;
 `decisions.md` Q4 asks whether to flatten them later.
 

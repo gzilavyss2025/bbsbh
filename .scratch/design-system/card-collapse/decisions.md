@@ -73,7 +73,7 @@ the app.
 
 ## Q4. Boxes inside boxes: fix them now or later?
 
-26 small boxes sit inside a card. Examples: the "win call" and "umpire favour" boxes
+26 small boxes sit inside a card (corrected 2026-11-16, #1775: 25; 11 still drawn on `main`). Examples: the "win call" and "umpire favour" boxes
 inside the at-bat stat box, the roster list inside the roster card, and the grey
 wells inside the minor-league tiles. A box inside a box is the look that makes a page
 read like a business dashboard and not a scorebook.
