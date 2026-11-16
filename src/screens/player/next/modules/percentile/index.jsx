@@ -4,8 +4,10 @@ import { fetchSavantPercentiles } from '../../../../../api/savantPercentiles.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { percentileView } from './percentileView.js'
 
-// What the loading box reserves, so the card does not shift on load (#3023): a regular hitter
+// The rows the loading state draws, so the card does not shift on load (#3023): a regular hitter
 // draws 12 rows under 3 group headers, a regular catcher 13 (pop time and framing, no OAA), a pitcher 7.
+// A backup catcher still shrinks on load (#3063): most draw only 3-4 rows, but nothing on `bio`
+// tells a backup from a regular, and the percentile file we wait on is the only signal. Accepted.
 const RESERVE = { hitting: [12, 3], catcher: [13, 3], pitching: [7, 0] }
 
 // Percentile rank (#2011): a rank-strip ledger, best at the right edge. Open surface (ADR-0034):
@@ -25,23 +27,30 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
   }, [tag, onCount])
   if (loading) {
     const [rows, groups] = RESERVE[role === 'hitting' && bio.posAbbr === 'C' ? 'catcher' : role] ?? RESERVE.hitting
-    return <div className="pctl pctl--loading" style={{ '--rows': rows, '--groups': groups }} aria-busy="true" />
+    // The real axis, key and foot around empty rows, so the reserve follows the CSS (#3066).
+    const per = Math.ceil(rows / Math.max(groups, 1))
+    return (
+      <div className="pctl" aria-busy="true">
+        <Axis />
+        <ul className="pctl__list" aria-hidden="true">
+          {Array.from({ length: rows }, (_, i) => (
+            <Fragment key={i}>
+              {groups > 0 && i % per === 0 && i / per < groups && <li className="pctl__group mono">{'\u00a0'}</li>}
+              <li className="pctl__row">
+                <span className="pctl__btn" />
+              </li>
+            </Fragment>
+          ))}
+        </ul>
+        <Key />
+        <Foot season={season} />
+      </div>
+    )
   }
   if (empty) return null
   return (
     <div className="pctl">
-      <div className="pctl__axis mono" aria-hidden="true">
-        <span className="pctl__axis-name">Statcast</span>
-        <span className="pctl__axis-scale">
-          <span>Worst</span>
-          <span>
-            <i className="pctl__sq" />
-            <span className="pctl__axis-word"> Median</span>
-          </span>
-          <span>Best</span>
-        </span>
-        <span className="pctl__axis-pct">Pctl</span>
-      </div>
+      <Axis />
       <ul className="pctl__list">
         {view.rows.map((r, i) => (
           <Fragment key={r.key}>
@@ -52,15 +61,42 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
           </Fragment>
         ))}
       </ul>
-      <p className="pctl__key" aria-hidden="true">
-        <span><i className="pctl__swatch pctl__swatch--top" /> ▲ Top third</span>
-        <span><i className="pctl__swatch pctl__swatch--mid" /> Middle</span>
-        <span><i className="pctl__swatch pctl__swatch--low" /> ▼ Bottom third</span>
-        <span>↓ Lower is better</span>
-      </p>
-      <p className="pctl__foot mono">{view.season} season · Baseball Savant</p>
+      <Key />
+      <Foot season={view.season} />
     </div>
   )
+}
+
+function Axis() {
+  return (
+    <div className="pctl__axis mono" aria-hidden="true">
+      <span className="pctl__axis-name">Statcast</span>
+      <span className="pctl__axis-scale">
+        <span>Worst</span>
+        <span>
+          <i className="pctl__sq" />
+          <span className="pctl__axis-word"> Median</span>
+        </span>
+        <span>Best</span>
+      </span>
+      <span className="pctl__axis-pct">Pctl</span>
+    </div>
+  )
+}
+
+function Key() {
+  return (
+    <p className="pctl__key" aria-hidden="true">
+      <span><i className="pctl__swatch pctl__swatch--top" /> ▲ Top third</span>
+      <span><i className="pctl__swatch pctl__swatch--mid" /> Middle</span>
+      <span><i className="pctl__swatch pctl__swatch--low" /> ▼ Bottom third</span>
+      <span>↓ Lower is better</span>
+    </p>
+  )
+}
+
+function Foot({ season }) {
+  return <p className="pctl__foot mono">{season} season · Baseball Savant</p>
 }
 
 function Row({ r, open, onToggle }) {
