@@ -74,7 +74,13 @@ if (cachePath) {
   for (const line of text.split('\n')) if (line) { const e = JSON.parse(line); rowsOf.set(e.id, e.rows) }
 }
 let fetched = 0
-async function rowsFor(id) {
+// Boards run four at a time, so two can want one player at once: share the one request.
+const inFlight = new Map()
+function rowsFor(id) {
+  if (!inFlight.has(id)) inFlight.set(id, fetchRows(id).finally(() => inFlight.delete(id)))
+  return inFlight.get(id)
+}
+async function fetchRows(id) {
   const p = clubsOf.get(id)
   // A cached entry from an older run may lack a club this run needs: fetch it again then.
   if (rowsOf.has(id) && p.clubs.every((t) => t in rowsOf.get(id))) return rowsOf.get(id)
@@ -95,27 +101,27 @@ for (const [teamId, club] of clubs) for (const n of LENGTHS) for (const m of BAT
 console.log(`pass 2: warming ${warm.size} logs`)
 await mapConcurrent([...warm], 4, rowsFor, { strict: true })
 
-const files = []
 const violations = []
-for (const [teamId, club] of clubs) {
-  const boards = {}
-  for (const n of LENGTHS) {
-    boards[n] = {}
-    for (const m of BAT_MEASURES) {
-      const cands = [...club].map(([id, p]) => ({ id, ceiling: ceilingFor(p.seasons, n, m.key) }))
-      const ceilingOf = new Map(cands.map((c) => [c.id, c.ceiling]))
-      const rows = await bestFirst(cands, async (id) => {
-        const r = (await rowsFor(id))[teamId]?.[`${n}:${m.key}`] ?? null
-        // Season lines and game logs are two feeds: a real run over its ceiling means the pruning
-        // could have dropped someone, so say so loudly rather than ship a quiet hole.
-        if (r && !(r.raw <= ceilingOf.get(id) + 1e-9)) violations.push(`${teamId} ${n} ${m.key} ${r.name}: ${r.raw} > ceiling ${ceilingOf.get(id)}`)
-        return r
-      })
-      boards[n][m.key] = rows.map(({ raw, ...r }) => r)
-    }
-  }
-  files.push([String(teamId), { through, firstSeason: firstOf.get(teamId) ?? null, boards }])
-}
+// Each board still fetches best-first, one player at a time in ceiling order, so the answer is the
+// same as one board at a time; four boards run at once to keep four requests going.
+const boardJobs = [...clubs.keys()].flatMap((teamId) => LENGTHS.flatMap((n) => BAT_MEASURES.map((m) => ({ teamId, n, m }))))
+const boardRows = await mapConcurrent(boardJobs, 4, async ({ teamId, n, m }) => {
+  const cands = [...clubs.get(teamId)].map(([id, p]) => ({ id, ceiling: ceilingFor(p.seasons, n, m.key) }))
+  const ceilingOf = new Map(cands.map((c) => [c.id, c.ceiling]))
+  const rows = await bestFirst(cands, async (id) => {
+    const r = (await rowsFor(id))[teamId]?.[`${n}:${m.key}`] ?? null
+    // Season lines and game logs are two feeds: a real run over its ceiling means the pruning
+    // could have dropped someone, so say so loudly rather than ship a quiet hole.
+    if (r && !(r.raw <= ceilingOf.get(id) + 1e-9)) violations.push(`${teamId} ${n} ${m.key} ${r.name}: ${r.raw} > ceiling ${ceilingOf.get(id)}`)
+    return r
+  })
+  return rows.map(({ raw, ...r }) => r)
+}, { strict: true })
+const files = [...clubs.keys()].map((teamId) => {
+  const boards = Object.fromEntries(LENGTHS.map((n) => [n, {}]))
+  boardJobs.forEach((j, i) => { if (j.teamId === teamId) boards[j.n][j.m.key] = boardRows[i] })
+  return [String(teamId), { through, firstSeason: firstOf.get(teamId) ?? null, boards }]
+})
 console.log(`pass 2: ${fetched} logs fetched in all`)
 if (violations.length) {
   console.error(`CEILING VIOLATIONS (${violations.length}): these boards cannot be trusted\n${violations.join('\n')}`)
