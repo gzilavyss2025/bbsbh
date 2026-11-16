@@ -32,7 +32,7 @@ export const PILL_RECIPE = [
 ]
 
 // ---------------------------------------------------------------------------
-// CARDS — 29 blocks.
+// CARDS — 26 blocks.
 export const CARDS = [
   {
     cls: 'card card--sheet',
@@ -41,14 +41,6 @@ export const CARDS = [
     group: 'sheet',
     verdict: 'Canonical',
     note: 'The Card component’s sheet (#1113). The team hub’s card moved onto it first: sixteen modules. Four of them pass a box-less namespace as className (chal, rvclub, depthchart, horizoncard), the variant pattern the hub already used.',
-  },
-  {
-    cls: 'card card--sheet absframe',
-    partial: 'system/card.css',
-    consumers: 1,
-    group: 'sheet',
-    verdict: 'Merged — sheet',
-    note: 'Was the wide ABS card block: the sheet, plus overflow:hidden. It is a Card now (#1113, slice C4), and .absframe keeps only when it shows. Hidden below 740px, so it draws nothing on a phone.',
   },
   {
     cls: 'card card--sheet entering',

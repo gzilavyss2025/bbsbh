@@ -148,9 +148,9 @@ Each pair is indistinguishable apart from being a hair tighter.
   `.debutpill`, all at `padding: 2px 7px`, and they render far outside the wild
   card page. 7px to 6px narrows every one of them by 2px. Shoot a pill-dense
   surface, not only the three here.
-- **Scoring surfaces are in scope.** `12-sealbox.css` carries 9, including
-  `.abs__rowbtn` and `.abs__detail` at 13px. The cover and the ABS rows are the
-  surfaces this app exists for; they want their own shot.
+- **Scoring surfaces are in scope.** `12-sealbox.css` still carries some
+  (the two ABS row rules went in #3128). The cover is a surface this app
+  exists for; it wants its own shot.
 - **Keep the 1-3px nudges out of it.** Rounding the odd band does not touch
   them, and folding the two together would hide a decided change inside an
   undecided one.

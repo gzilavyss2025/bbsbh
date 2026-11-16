@@ -54,7 +54,7 @@
     "grid": 3
   },
   "src/styles/12-sealbox.css": {
-    "column": 6,
+    "column": 5,
     "wrap": 1,
     "grid": 2
   },

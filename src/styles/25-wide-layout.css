@@ -226,41 +226,6 @@ body:has(.wirelab) {
     margin: 0 0 14px;
   }
 
-  /* AbsCard is a flush Card, like .winprob/.marginnotes (#1113 slice C4):
-     system/card.css draws its frame, since it sits as its own sibling card in
-     the ARMS tab rather than nested inside StatBox's card. This rule only
-     shows it. No padding of its own — SealBox's .statgrid wrapper already
-     insets its content 14px, and the title bar below bleeds past exactly that
-     inset to cap the card flush (same masthead recipe as .pitchers__title), so
-     the Card's overflow: hidden clips it to the card's own rounded corners
-     instead of stacking a second, smaller rounded shape inside the card's
-     padding. */
-  .absframe {
-    display: block;
-  }
-  /* SealBox's own .statgrid wrapper
-     paints --surface-inset once revealed, which otherwise shows through as
-     a whiter patch inside this card's own background. */
-  .absframe .statgrid {
-    background: none;
-  }
-  .absframe .abs__title {
-    margin: -14px -14px 8px;
-    border-radius: 0;
-  }
-  .absframe .abs {
-    margin-top: 0;
-  }
-  /* Unlike the base rule's joined-card look (title's bottom corners squared
-     flush against the rows), this context already gives .absframe itself the
-     card chrome and floats the title flush off it via the negative margin
-     above — restore the rows' own full rounded pill/border so they don't
-     read as attached to nothing. */
-  .absframe .abs__rows {
-    border-top: var(--bw-hair) solid var(--border-hairline);
-    border-radius: var(--radius-sm);
-  }
-
   /* Play-by-play pairs each card with its strike zone: the card on the left,
      the zone + pitch list on the right, one grid row per at-bat. The pitch-
      location pane gets the larger share of the row — the batter's-box
