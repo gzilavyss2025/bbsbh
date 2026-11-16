@@ -1,4 +1,4 @@
-// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate}.json: the games behind
+// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr}.json: the games behind
 // the "Notable games" shelf (D4 in .scratch/old-games/decisions.md, ADR-0101 DRAFT).
 // A no-hitter, a cycle and a triple play, from the MLB Stats API alone: every row has a
 // gamePk, so a row opens its game with no join. AL and NL games only (D6); the regular
@@ -18,7 +18,7 @@
 //   node scripts/gen-notable.mjs --season=1956 --out=DIR   # write to DIR: a measuring run
 // Nightly: .github/workflows/update-nightly-data.yml
 //
-// EACH RUN REPLACES EVERY ROW OF EACH SEASON IT SWEPT, in all three files, and keeps
+// EACH RUN REPLACES EVERY ROW OF EACH SEASON IT SWEPT, in every file, and keeps
 // every other season (lib/notable/merge.mjs says why: a corrected upstream row must not
 // leave a ghost row). It writes after each season, so an interrupted history run keeps
 // what it finished. A season with no games writes nothing.
@@ -53,7 +53,7 @@ import { flagRows } from './lib/notable/flags.mjs'
 import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
-const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json' }
+const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
@@ -79,7 +79,7 @@ const get = async (path) => {
 
 const seed = (await readJsonOr(join(root, 'scripts', 'notable-seed.json'), {})) ?? {}
 const docs = {}
-for (const kind of [...KINDS, 'immaculate']) {
+for (const kind of [...KINDS, 'immaculate', 'fourhr']) {
   const prev = await readJsonOr(join(outDir, FILES[kind]), null)
   docs[kind] = prev?.coverage && Array.isArray(prev.rows) ? prev : emptyDoc()
 }
@@ -100,7 +100,8 @@ for (const season of seasons) {
   }
   const gameMaps = new Map([[season, swept.gameMap]])
   const counts = []
-  for (const kind of KINDS) {
+  // Four-homer games (#2968) ride the cycles' hitting logs (no call of their own) and merge as the kinds do.
+  for (const kind of [...KINDS, 'fourhr']) {
     const merged = mergeRows(kind, docs[kind].rows, [season], swept.rows[kind])
     const seeded = applySeed(kind, merged, seed[kind], gameMaps)
     const { applied } = seeded

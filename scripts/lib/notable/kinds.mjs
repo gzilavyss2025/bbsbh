@@ -62,16 +62,19 @@ export function isCycle(stat) {
   return hits >= 4 && singles >= 1 && doubles >= 1 && triples >= 1 && homers >= 1
 }
 
-// The cycle rows of a batch of `people` (the hydrate=stats gameLog response). A cycle
-// counts once for each player and gamePk. A split for a game the map does not hold
-// (not played, not AL or NL, or not a game type we keep) is dropped.
-export function cycleRows(people, gameMap) {
+// A four-homer game (#2968, the rarity count): 4 or more home runs in one game.
+export const isFourHomer = (stat) => count(stat?.homeRuns) >= 4
+
+// The rows of a batch of `people` (the hydrate=stats gameLog response) whose game line
+// passes `test`. A feat counts once for each player and gamePk. A split for a game the map
+// does not hold (not played, not AL or NL, or not a game type we keep) is dropped.
+function gameLogRows(people, gameMap, test) {
   const rows = new Map()
   for (const person of people ?? []) {
     for (const stats of person?.stats ?? []) {
       for (const split of stats?.splits ?? []) {
         const game = gameMap.get(split?.game?.gamePk)
-        if (!game || !isCycle(split.stat)) continue
+        if (!game || !test(split.stat)) continue
         const side =
           sideOfClub(game, split.team?.id) ?? (split.isHome === true ? 'home' : split.isHome === false ? 'away' : null)
         if (!side) continue
@@ -83,6 +86,9 @@ export function cycleRows(people, gameMap) {
   }
   return [...rows.values()]
 }
+
+export const cycleRows = (people, gameMap) => gameLogRows(people, gameMap, isCycle)
+export const fourHomerRows = (people, gameMap) => gameLogRows(people, gameMap, isFourHomer)
 
 // ---- triple plays ----
 

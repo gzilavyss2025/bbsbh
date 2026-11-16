@@ -7,7 +7,7 @@
 // failure, and the file keeps its last good rows.
 import { mapConcurrent } from '../concurrency.mjs'
 import { buildGameMap, lastPlayedDate, otherSide, scheduleUrl } from './games.mjs'
-import { cycleRows, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows } from './kinds.mjs'
+import { cycleRows, fourHomerRows, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows } from './kinds.mjs'
 import { POSTSEASON_TYPES } from './rules.mjs'
 
 export const CONCURRENCY = 4
@@ -75,6 +75,7 @@ export async function fetchTriplePlays(get, gameMap, season) {
   return logs.flat()
 }
 
+// The cycles and the four-homer games (#2968), from one pass over every player's hitting log.
 export async function fetchCycles(get, gameMap, season) {
   const pool = await get(`/api/v1/sports/1/players?season=${season}&fields=people,id`)
   const ids = [...new Set((pool?.people ?? []).map((p) => p.id))].sort((a, b) => a - b)
@@ -87,21 +88,21 @@ export async function fetchCycles(get, gameMap, season) {
     CONCURRENCY,
     async (batch) => {
       const data = await get(`/api/v1/people?personIds=${batch.join(',')}&hydrate=${hydrate}&fields=${PEOPLE_FIELDS}`)
-      return cycleRows(data?.people, gameMap)
+      return { cycles: cycleRows(data?.people, gameMap), fourhr: fourHomerRows(data?.people, gameMap) }
     },
     strict,
   )
-  return found.flat()
+  return { cycles: found.flatMap((f) => f.cycles), fourhr: found.flatMap((f) => f.fourhr) }
 }
 
-// One season, all three kinds. null when the season has no game to keep.
+// One season, all three kinds, and the four-homer games. null when the season has no game to keep.
 export async function sweepSeason(get, season) {
   const gameMap = await fetchGameMap(get, season)
   if (!gameMap) return null
-  const [nohitters, cycles, tripleplays] = [
+  const [nohitters, { cycles, fourhr }, tripleplays] = [
     await fetchNoHitters(get, gameMap),
     await fetchCycles(get, gameMap, season),
     await fetchTriplePlays(get, gameMap, season),
   ]
-  return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays } }
+  return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr } }
 }

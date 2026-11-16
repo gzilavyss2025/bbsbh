@@ -1,5 +1,5 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play or an immaculate inning (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning or a four-homer game (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -11,8 +11,10 @@
 // generator and the page). Old games have no play-by-play, so their rows carry no flag. The count
 // runs from the FLOOR: the year of the oldest flagged row with no unflagged row after it. The line
 // says "since {floor}", never "ever", and with no floor it says nothing: it never invents a count.
-// An immaculate inning has its own file, every row a find, so its floor is the first season the
-// generator swept (IMMACULATE_FLOOR in scripts/lib/notable/immaculate.mjs: the first year with real pitches).
+// An immaculate inning and a four-homer game each have their own file, every row a find, so its floor is the first season the
+// generator swept in an unbroken run: 2001 for immaculate innings (IMMACULATE_FLOOR in
+// scripts/lib/notable/immaculate.mjs, the first year with real pitches), 1901 for four-homer games
+// (fourhr.json, read off the hitting game logs).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -25,6 +27,7 @@ export const RARITY = {
   cycles: { flag: 'natural', noun: 'natural cycle' },
   tripleplays: { flag: 'unassisted', noun: 'unassisted triple play' },
   immaculate: { flag: null, noun: 'immaculate inning' },
+  fourhr: { flag: null, noun: 'four-homer game' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -131,14 +134,21 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play and immaculate inning.
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning and four-homer game.
 // [{ kind, side, player? }]
 export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
   const out = []
+  const homers = new Map() // batter id -> home runs so far
   for (const p of plays) {
     if (!HIT_ORDER.includes(p.result?.eventType) && !isTriplePlayEvent(p)) continue
     const battingSide = p.about?.halfInning === 'top' ? 'away' : 'home'
+    // A four-homer game: the batter's fourth home run of the game (a fifth adds nothing).
+    const batter = p.matchup?.batter
+    if (p.result?.eventType === 'home_run' && batter?.id != null) {
+      homers.set(batter.id, (homers.get(batter.id) ?? 0) + 1)
+      if (homers.get(batter.id) === 4) out.push({ kind: 'fourhr', side: battingSide, player: { id: batter.id, name: batter.fullName ?? '' } })
+    }
     const feat = detectPlayFeat(feed, p.about?.atBatIndex, battingSide)
     if (feat?.kind === 'cycles' && isNaturalCycle(plays, feat.player.id)) out.push(feat)
     if (feat?.kind === 'tripleplays' && isUnassistedTriplePlay(p)) out.push(feat)

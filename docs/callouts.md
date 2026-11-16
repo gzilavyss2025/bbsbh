@@ -145,7 +145,7 @@ saturation is worth changed. The column below names that saturation point, so
 | wsLastTimeGame | 45 | a 25-season gap since the last such game (World Series games only) |
 | lastTimeClub | 40 | a 10-season gap since the club's last one (triple play, cycle, no-hitter) |
 | lastTimePlayer | 45 | a 10-season gap since the player's earlier one (cycle, no-hitter) |
-| rarityCount | 55 | a natural cycle or unassisted triple play: the Nth since the floor (box score Insights, Final) |
+| rarityCount | 55 | a natural cycle, unassisted triple play, immaculate inning or four-homer game: the Nth since the floor (box score Insights, Final) |
 | lastTimeLeague | 50 | a 3-year gap since the league's last one (shows only past 365 days) |
 | wsWtaTrailing9 | 55 | a spotless record (World Series winner-take-all games only) |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
@@ -622,10 +622,12 @@ screen: a revealed play card, or the Final box score's Insights card inside its 
   included, have a p95 of 520 days (no-hitters), 440 (cycles) and 297 (triple plays; p99 370). A
   year is where a gap crosses a whole offseason with no feat: about 5% of no-hitters and cycles,
   about 1% of triple plays. Re-measure with the data in `public/data/notable/`.
-- **rarityCount** — "The 9th natural cycle since 1950, the Brewers' 1st." A natural cycle or an
-  unassisted triple play, in the Final box score's Insights card (`src/api/notable/rarityCount.js`,
-  #2968). It counts the rows flagged `natural`/`unassisted`, strictly before tonight, from the
-  floor: the first year every later row is flagged (play-by-play starts about 1950). No floor, no note.
+- **rarityCount** — "The 9th natural cycle since 1950, the Brewers' 1st." A natural cycle, an
+  unassisted triple play, an immaculate inning or a four-homer game, in the Final box score's Insights
+  card (`src/api/notable/rarityCount.js`, #2968). Cycles and triple plays count from the floor of their
+  flags (the first year every later row is flagged; play-by-play starts about 1950); an immaculate
+  inning (`immaculate.json`, from 2001) and a four-homer game (`fourhr.json`, from 1901) count from the
+  first season of their unbroken swept run. No floor, no note.
 - **Where.** A triple play and a cycle on the play card that completes them (the cycle on the
   hit that finishes it). A no-hitter in the Final roll-up only, never during the game.
 - **The link (#1570).** The date in each line opens that earlier game's `boxscore` (`gamePath`), sealed:

@@ -311,7 +311,7 @@ don't run these by hand.
   2021–2026 is about 14.6k calls at concurrency 20; `--from=2021 --to=2026` runs that backfill.
   Incremental, with the scan at `scripts/data/outfield-outs-scan.json`. The default season is
   `fetchSeasonInPlay()`, not the calendar year (#1465).
-- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate}.json` — the
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr}.json` — the
   games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
   THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
@@ -338,7 +338,9 @@ don't run these by hand.
   and every game after it, replacing those rows; a hand run (`--season`, `--from`, `--to`) reads
   every game and replaces those seasons' rows. A game with
   no pitch sequences past the floor is logged, never counted.
-  Each run REPLACES every row of each season it swept, in all three files (a corrected
+  Four-homer games (#2968, `fourhr.json`): a player's game line with 4 or more home runs, read off
+  the same `people` hitting logs as the cycles (no extra call); whole seasons, from 1901.
+  Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play
   that only the box score text holds); a seed row for a season a run did not sweep waits, and

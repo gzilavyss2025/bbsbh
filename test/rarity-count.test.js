@@ -251,3 +251,28 @@ test('the floor is the first season of an unbroken run to the newest', () => {
   const [note] = buildRarityNotes({ immaculate: { coverage: { seasons: [2001, 2025, 2026] }, rows: [r] } }, night, { kind: 'immaculate', side: 'home' })
   assert.equal(note.text, "The 2nd immaculate inning since 2025, the Brewers' 2nd.")
 })
+
+// ---- four-homer game (slice 4) ----
+
+test('detectRareFeats finds the home run that makes four for one batter, once', () => {
+  const hr = (i, batter = BATTER) => play(i, 'home_run', { batter, half: 'bottom' })
+  const plays = [hr(0), hr(1), play(2, 'single'), hr(3), hr(4), hr(5), hr(6, 2)]
+  const feats = detectRareFeats({ liveData: { plays: { allPlays: plays } } }).filter((f) => f.kind === 'fourhr')
+  assert.deepEqual(feats.map((f) => [f.side, f.player.id]), [['home', BATTER]])
+  assert.deepEqual(detectRareFeats({ liveData: { plays: { allPlays: [hr(0), hr(1), hr(2)] } } }), [])
+})
+
+test('the four-homer count runs from the first swept season, tonight not counted twice', () => {
+  const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', away: { id: club }, home: { id: 1 } })
+  const idx = { fourhr: { coverage: { seasons: Array.from({ length: 126 }, (_, i) => 1901 + i) }, rows: [r(1, '1932-06-03', 158), r(2, '2003-05-01', 140), r(6, '2026-08-01', 158)] } }
+  const [note] = buildRarityNotes(idx, feed, { kind: 'fourhr', side: 'away', player: { id: 77, name: 'Pat Hitter' } })
+  assert.equal(note.text, "The 3rd four-homer game since 1901, the Brewers' 2nd.")
+})
+
+test('the committed four-homer index matches the published list (slice 4)', () => {
+  const doc = JSON.parse(readFileSync(new URL('../public/data/notable/fourhr.json', import.meta.url)))
+  const names = doc.rows.map((r) => r.player.name)
+  for (const n of ['Lou Gehrig', 'Willie Mays', 'Mike Cameron', 'J.D. Martinez']) assert.ok(names.includes(n), n)
+  // 19 four-homer games from 1901 through 2025 (Wikipedia, single-game records: 21 all-time; Lowe 1894 and Delahanty 1896 are before 1901).
+  assert.equal(doc.rows.filter((r) => r.officialDate < '2026').length, 19)
+})
