@@ -2127,6 +2127,16 @@ Re-run only to fold in a new season.
   and `topojson-simplify` are devDependencies, and only this script uses them. The pure half is
   `scripts/lib/from/zones.mjs`. The reader comes with the picker page.
 
+- `gen-club-stretch.mjs` (in `scripts/franchise/`) → `public/data/club-stretch/{teamId}.json` — each of the
+  30 MLB clubs' best runs of 162 and 154 games in a row by one player, in HR, H, RBI, SB, AVG and OPS,
+  top ten, one row per player (the Club Stretch page). **Hand-run**, after the regular season ends:
+  `node scripts/franchise/gen-club-stretch.mjs [--through 2026]`. Candidates are the club's career
+  games-played leaders (`stats/leaders`, paged with `offset` until under 154); each one's career game
+  log is read once (about 6,200 logs, eight at a time, strict). The feed's per-game logs start in 1901,
+  so every board does. A run counts his games played, crosses seasons, and ends at a game for another
+  club; AVG and OPS need 3.1 PA per game. The pure half is `scripts/lib/franchise/club-stretch.mjs`,
+  which reuses `bestStretch` from `src/api/streaks/bestStretch.js`.
+
 - `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
   the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top
   ten with ties kept (#2596). **Hand-run**, after the regular season ends:

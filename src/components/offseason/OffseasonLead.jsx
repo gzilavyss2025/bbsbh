@@ -206,6 +206,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
 const REVISIT = [
   ['Streak Finder', pathOf('streaks')],
   ['Best Stretch', pathOf('best-stretch')],
+  ['Club Stretch', pathOf('club-stretch')],
   ['Pressure Moments', pathOf('tensest')],
   ['Situational Records', '/situational-records'],
   ['League Leaders', '/leaders'],

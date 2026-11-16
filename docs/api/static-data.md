@@ -1046,6 +1046,11 @@ for each generator; the reader modules:
   each with the club's name, label and abbreviation of that season. It starts in 1903, so
   the early pennants are not in it. The team page's About band draws them (`PennantWall`).
   A club with none, a MiLB id, or a missing file reads `[]`. `pennantFile()` returns the whole file; the player page's Team history matches a player's seasons against it.
+- `streaks/clubStretch.js` — a club's best 162 and 154 games in a row by one player, from
+  `public/data/club-stretch/{teamId}.json` (hand-run `scripts/franchise/gen-club-stretch.mjs`).
+  `clubStretch(teamId)` returns `{ through, firstSeason, boards }`; `boards[162|154][hr|h|rbi|sb|avg|ops]`
+  is a top-ten list of `{ id, name, team, first, last, value }` (`team` is the club's name of the time,
+  `value` printed). Read by `/club-stretch` (`screens/stretch/ClubStretchPage.jsx`).
 - `history/franchiseLeaders.js` — a club's all-time leaders, from
   `public/data/franchise-leaders/{teamId}.json` (hand-run `scripts/franchise/gen-franchise-leaders.mjs`,
   #2596). `franchiseLeaders(teamId)` returns `{ through, career, season }`: 26 categories (15 hitting,

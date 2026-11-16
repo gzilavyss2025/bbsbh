@@ -72,7 +72,7 @@ export function TeamFranchisePage({ id }) {
           </aside>
           <div className="frpage__main">
             <Ledger team={team} rows={rows} />
-            {people && <LeadersCard leaders={people.leaders} />}
+            {people && <LeadersCard leaders={people.leaders} teamId={teamId} />}
             <section className="frpage__people" aria-labelledby="frpage-people">
               <SectionHead look="band" house as="h2" titleId="frpage-people">
                 People and places
