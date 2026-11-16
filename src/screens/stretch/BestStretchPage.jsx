@@ -196,7 +196,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{picks.by === 'era' && games.length >= n ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (
