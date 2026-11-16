@@ -73,6 +73,7 @@ export const EXCEPT = {
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'birthplaces/': 'hand-run from Retrosheet, the Chadwick register and GeoNames (ADR-0100, ADR-0106); history, and the files carry no clock',
+  'war-history/': 'hand-run once a year (gen-war-history.mjs); completed seasons only, and the shards carry no clock',
   'savant-history/': 'hand-run once a year (gen-savant-history.mjs, #1717); finished seasons, and the shards carry no clock',
   'league-pennants.json': 'hand-run once a year after the World Series (gen-league-pennants.mjs); a finished season never changes and the file carries no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
@@ -153,7 +154,8 @@ const DEFAULT_KEYS = ['generatedAt']
 // Raised 22 -> 23 for hitter-grid/ (ADR-0096), a sharded season store like
 // pitch-command/ beside it: 101 shards a season, rewritten only when a game
 // lands. Its files arrive with the first 2026 re-walk.
-export const UNSTAMPED_BUDGET = 23
+// Lowered 23 -> 22 when war-history/ moved into EXCEPT (#3075).
+export const UNSTAMPED_BUDGET = 22
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 
