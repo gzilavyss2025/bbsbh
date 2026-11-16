@@ -199,18 +199,20 @@ function ThisSeason({ season, favoriteTeamId, wide }) {
           ) : (
             <SeasonTable rows={main} label={`${season} award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
           )}
-          {roster.length > 0 &&
-            (open ? (
-              <SeasonTable rows={roster} label={`${season} position award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
-            ) : (
-              <Button
-                block
-                hint={rosterFailed ? 'Some couldn’t load' : rosterCount ? `${rosterCount} winners` : 'Not announced yet'}
-                onClick={() => setOpen(true)}
-              >
-                {roster.map((r) => r.label).join(' · ')}
-              </Button>
-            ))}
+          {roster.length > 0 && (
+            <Button
+              block
+              icon="›"
+              aria-expanded={open}
+              hint={rosterFailed ? 'Some couldn’t load' : rosterCount ? `${rosterCount} winners` : 'Not announced yet'}
+              onClick={() => setOpen((o) => !o)}
+            >
+              {roster.map((r) => r.label).join(' · ')}
+            </Button>
+          )}
+          {roster.length > 0 && open && (
+            <SeasonTable rows={roster} label={`${season} position award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
+          )}
         </Stack>
       )}
     </Card>
@@ -301,14 +303,12 @@ function PastMatrix({ families, season, favoriteTeamId }) {
           </tbody>
         </Table>
       )}
-      {roster.length > 0 &&
-        (open ? (
-          <PastByAward families={roster} season={season} favoriteTeamId={favoriteTeamId} />
-        ) : (
-          <Button block onClick={() => setOpen(true)}>
-            {roster.map((f) => f.label).join(' · ')}
-          </Button>
-        ))}
+      {roster.length > 0 && (
+        <Button block icon="›" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          {roster.map((f) => f.label).join(' · ')}
+        </Button>
+      )}
+      {roster.length > 0 && open && <PastByAward families={roster} season={season} favoriteTeamId={favoriteTeamId} />}
     </Stack>
   )
 }
