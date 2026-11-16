@@ -376,6 +376,10 @@
       "class": "spoiler-free",
       "why": "Static franchise-ledger shards: a club's record, rank, runs, managers and postseason result by season, 1901 to the last complete season. Finished seasons only, no game."
     },
+    "streaks/clubStretch.js": {
+      "class": "spoiler-free",
+      "why": "Static club-stretch shards: a club's best 162 and 154 games in a row by one player, six stats, through the last complete season. Totals over past games, no game."
+    },
     "history/franchiseLeaders.js": {
       "class": "spoiler-free",
       "why": "Static franchise-leaders shards: a club's career and single-season leaders in 26 categories, regular season, through the last complete season. Totals by player, no game."

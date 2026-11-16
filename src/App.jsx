@@ -313,6 +313,7 @@ const BARE_ROUTES = {
   infield: InfieldPage,
   streaks: lazyNamed(() => import('./screens/streaks/StreakFinderPage.jsx'), 'StreakFinderPage'),
   'best-stretch': lazyNamed(() => import('./screens/stretch/BestStretchPage.jsx'), 'BestStretchPage'),
+  'club-stretch': lazyNamed(() => import('./screens/stretch/ClubStretchPage.jsx'), 'ClubStretchPage'),
   eliminated: EliminatedPage,
   milestones: MilestoneWatchPage,
   'awards-history': AwardsHistoryPage,

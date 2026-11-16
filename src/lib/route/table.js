@@ -34,6 +34,7 @@ export const ROUTE_TABLE = [
   { name: 'infield', path: '/infield' },
   { name: 'streaks', path: '/streaks' },
   { name: 'best-stretch', path: '/best-stretch' },
+  { name: 'club-stretch', path: '/club-stretch' },
   { name: 'eliminated', path: '/eliminated' },
   { name: 'milestones', path: '/milestones' },
   { name: 'awards-history', path: '/awards' },

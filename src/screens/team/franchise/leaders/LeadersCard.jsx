@@ -4,6 +4,7 @@ import { Segmented } from '../../../../components/ui/control/Segmented.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { playerPath } from '../../../../lib/route.js'
+import { pathOf } from '../../../../lib/route/table.js'
 import { leadersView } from './leadersView.js'
 
 // The all-time franchise leaders (#2785; wireframe approved by Gary 2026-11-05): nine headline
@@ -14,7 +15,7 @@ const MODES = [
   { value: 'season', label: 'Season' },
 ]
 
-export function LeadersCard({ leaders }) {
+export function LeadersCard({ leaders, teamId }) {
   const link = useRouteLink()
   const [mode, setMode] = useState('career')
   const [all, setAll] = useState(false)
@@ -59,6 +60,11 @@ export function LeadersCard({ leaders }) {
       <Door layout="block" className="frlead__door" onClick={toggle} aria-expanded={all}>
         {all ? 'Show fewer' : `Show all ${total} categories`}
       </Door>
+      {teamId && (
+        <Door layout="block" className="frlead__door" {...link(`${pathOf('club-stretch')}?team=${teamId}`)}>
+          Best 162 games in a row
+        </Door>
+      )}
     </Card>
   )
 }
