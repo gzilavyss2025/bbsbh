@@ -82,6 +82,15 @@ birth city, under its own credit line.
 Only players count (a row with `debut_p`), and no deaths are read. The `HOF` column
 holds the word `HOF` on 325 rows and is empty on the rest. The generator does not use it.
 
+## Third dataset: the 1961-2014 history store (#3135)
+
+`scripts/research/gen-retro-store.mjs` writes the play-by-play history store. Two parts of
+the decision above bend for its size (about 46 MB gzip), and only these: it writes to Vercel
+Blob (`retro/v1/`), not `public/data/`, and the hand run is a dispatch workflow
+(`.github/workflows/retro-store.yml`) that downloads the inputs through `download.mjs` and
+builds Chadwick's `cwevent` 0.7.2. The app still never fetches Retrosheet. Detail:
+`docs/research-store.md`, "History store".
+
 ## Consequences
 
 - A new open source follows this shape: a hand-run generator, a pure half in

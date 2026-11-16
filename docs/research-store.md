@@ -81,3 +81,48 @@ of the counts it passed through, and its pitch count (`shard.js`). No pitch list
 **Pitch-clock rows.** From 2023 a pitch-clock violation is a row with no `plate_x` and no
 pitch type. The shard drops it unless it ends the plate appearance, so a PA that ends on
 one has a null last pitch type and location, and matches no pitch-type or location chip.
+
+## History store, 1961-2014 (#3135)
+
+A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from
+Retrosheet play-by-play: one row per plate appearance, no pitch rows. The page does not
+read it yet; a follow-up wires it into `/research`. Decisions: #3135 and its comments
+(Gary, 2026-10-21 and 2026-11-16). Measurements: `.scratch/research-retrosheet-pa/findings.md`.
+
+| Path | What |
+|---|---|
+| `manifest.json` | credit lines; per season: games, PAs, `pitchString` and `knownCount` (% of PAs), and per month `{ pas, through }`. Month keys are not in order in the JSON; sort them. |
+| `pa/{season}/{MM}.json` | the 18 columns below, as column arrays (371 files) |
+| `pitches/{season}/{MM}.json` | `pseq`: Retrosheet's raw pitch string per row, same order as `pa/` (371 files) |
+| `games/{season}.json` | gamePk, date, home and away club ids, Retrosheet park code, venue id, game number, night, DH, pitch info (0 none, 1 count, 2 pitches), final score |
+| `by-park/{code}.json` | every season's rows at one park, the `pa/` columns plus `pseq` (73 files) |
+| `parks.json` | park code → the venue id it holds most games at, its name, first and last season |
+| `people.json` | MLBAM id → name, from the Chadwick register |
+
+The columns, their meaning and the row order are in `scripts/lib/research/retro.mjs` (the
+one place the layout is written). Two points a reader needs:
+
+- **Count.** `balls` and `strikes` are the count before the PA's last pitch, and `null`
+  when Retrosheet does not know it. They do not say the PA passed through a count; that
+  needs the pitch string.
+- **Coverage.** Pitch strings and counts are near-complete from 1988 (90% to 100% a
+  season) and scattered before (0% to 16%; 1961 is 12.5%). `manifest.json` has each
+  season's share. Pitch type, location and batted-ball location do not exist before
+  2015 here; Gary's rule (2026-11-16) blocks those chips for any range that starts
+  before 2015.
+
+**Build.** `scripts/research/gen-retro-store.mjs`, run only by the dispatch workflow
+`.github/workflows/retro-store.yml`. It first runs `scripts/research/retro-header-test.mjs`
+(one throwaway 1 MB file: compression and CORS required, Range reported), then downloads
+the inputs, builds `cwevent`, builds all 54 seasons, and uploads only when every
+Retrosheet game joined a gamePk and every `cwevent` row matched its raw play line.
+`manifest.json` uploads last. Local test (no upload), with the inputs extracted outside
+the repo as in `.scratch/research-retrosheet-pa/findings.md`, "Reproduce":
+
+```bash
+node scripts/research/gen-retro-store.mjs --events=$DL/ev --register=$DL/chad \
+  --cwevent=$DL/cw/bin/cwevent --seasons=1961,1988,2014 --out=$DL/out
+```
+
+Measured on that run (2026-11-16): 1961 109,571 PAs, 1988 159,380, 2014 183,929, the
+research's counts; every game joined; no unbridged person.
