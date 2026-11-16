@@ -2132,7 +2132,7 @@ Re-run only to fold in a new season.
   top ten, one row per player (the Club Stretch page). **Hand-run**, after the regular season ends:
   `node scripts/franchise/gen-club-stretch.mjs [--through 2026]`. Candidates are the club's career
   games-played leaders (`stats/leaders`, paged with `offset` until under 154); each one's career game
-  log is read once (about 6,200 logs, four at a time, strict). The feed's per-game logs start in 1901,
+  log is read once (about 6,200 logs, two at a time with a pause, strict; `--cache <file>` resumes a stopped run). The feed's per-game logs start in 1901,
   so every board does. A run counts his games played, crosses seasons, and ends at a game for another
   club; AVG and OPS need 3.1 PA per game. The pure half is `scripts/lib/franchise/club-stretch.mjs`,
   which reuses `bestStretch` from `src/api/streaks/bestStretch.js`.

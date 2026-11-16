@@ -9,9 +9,10 @@
 // ?stats=gameLog) gives the runs. A player is fetched once for every club he qualifies for.
 // The feed's per-game logs start in 1901, so every board starts there.
 //
-// HAND-RUN: `node scripts/franchise/gen-club-stretch.mjs [--through 2026]`, after the regular season.
-// About 30 x 4 leader calls plus one log per qualifying player (several thousand), four at a
+// HAND-RUN: `node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache /tmp/club-stretch.jsonl]`, after the regular season.
+// About 30 x 4 leader calls plus one log per qualifying player (several thousand), two at a
 // time. Any failed call aborts the run (strict). The files carry no clock.
+import { appendFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { ALL_MLB_TEAM_IDS } from '../../src/lib/teams.js'
 import { toGame } from '../../src/api/streaks/bestStretch.js'
@@ -52,16 +53,39 @@ for (const { teamId, players } of perClub) {
 }
 console.log(`${clubsOf.size} players across ${perClub.length} clubs`)
 
+// --cache <file> (outside the repo) keeps each player's rows as he is done, one JSON line, so a
+// run the feed throttles can stop and pick up where it left off.
+const cacheAt = process.argv.indexOf('--cache')
+const cachePath = cacheAt > 0 ? process.argv[cacheAt + 1] : null
+const cached = new Map()
+if (cachePath) {
+  const text = await readFile(cachePath, 'utf8').catch(() => '')
+  for (const line of text.split('\n')) if (line) { const e = JSON.parse(line); cached.set(e.id, e.rows) }
+}
+
 const rowsByClub = new Map(ALL_MLB_TEAM_IDS.map((id) => [id, []]))
+const todo = []
+for (const p of clubsOf.values()) {
+  if (cached.has(p.id)) for (const [teamId, rows] of Object.entries(cached.get(p.id))) rowsByClub.get(Number(teamId)).push(rows)
+  else todo.push(p)
+}
+console.log(`${cached.size} from the cache, ${todo.length} to fetch`)
+
+// The feed answers a burst with 503s and stalls: two workers, each pausing between calls, keep
+// the pace near two a second.
+const PAUSE_MS = 1000
 let done = 0
 await mapConcurrent(
-  [...clubsOf.values()],
-  4,
+  todo,
+  2,
   async (p) => {
     const d = await getJson(`/api/v1/people/${p.id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&startDate=1901-01-01&endDate=${through}-12-31&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
     const games = (d.stats?.[0]?.splits ?? []).map((s) => toGame(s, 'hitting'))
-    for (const teamId of p.clubs) rowsByClub.get(teamId).push(playerRows({ id: p.id, name: p.name, games }, teamId))
-    if (++done % 100 === 0) console.log(`${done} / ${clubsOf.size} ${new Date().toISOString().slice(11, 19)}`)
+    const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id: p.id, name: p.name, games }, teamId)]))
+    for (const [teamId, r] of Object.entries(rows)) rowsByClub.get(Number(teamId)).push(r)
+    if (cachePath) await appendFile(cachePath, `${JSON.stringify({ id: p.id, rows })}\n`)
+    if (++done % 100 === 0) console.log(`${done} / ${todo.length} ${new Date().toISOString().slice(11, 19)}`)
+    await new Promise((r) => setTimeout(r, PAUSE_MS))
   },
   { strict: true },
 )
