@@ -1,4 +1,4 @@
-// Regenerates public/data/notable/{nohitters,cycles,tripleplays}.json: the games behind
+// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate}.json: the games behind
 // the "Notable games" shelf (D4 in .scratch/old-games/decisions.md, ADR-0101 DRAFT).
 // A no-hitter, a cycle and a triple play, from the MLB Stats API alone: every row has a
 // gamePk, so a row opens its game with no join. AL and NL games only (D6); the regular
@@ -50,9 +50,10 @@ import {
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 import { flagRows } from './lib/notable/flags.mjs'
+import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
-const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json' }
+const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
@@ -78,7 +79,7 @@ const get = async (path) => {
 
 const seed = (await readJsonOr(join(root, 'scripts', 'notable-seed.json'), {})) ?? {}
 const docs = {}
-for (const kind of KINDS) {
+for (const kind of [...KINDS, 'immaculate']) {
   const prev = await readJsonOr(join(outDir, FILES[kind]), null)
   docs[kind] = prev?.coverage && Array.isArray(prev.rows) ? prev : emptyDoc()
 }
@@ -114,6 +115,21 @@ for (const season of seasons) {
     docs[kind] = { coverage: mergeCoverage(docs[kind].coverage, [season], swept.through), rows }
     await write(kind)
     counts.push(`${swept.rows[kind].length + applied} ${kind}`)
+  }
+  // Immaculate innings (#2968, lib/notable/immaculate.mjs): every game's play-by-play from the
+  // floor on. The nightly run (no flags) re-reads the last few days and replaces them; a hand run
+  // reads the whole season and replaces its rows.
+  if (season >= IMMACULATE_FLOOR) {
+    const doc = docs.immaculate
+    const from = readFrom(parsed, doc.coverage, season)
+    const { rows, unknown } = await fetchImmaculate(get, gamesToRead(swept.gameMap, from))
+    if (unknown.length) console.log(`  ${season}: ${unknown.length} games with no pitch sequences, not counted: ${unknown.join(', ')}`)
+    docs.immaculate = {
+      coverage: mergeCoverage(doc.coverage, [season], swept.through),
+      rows: from ? mergeWindow(doc.rows, from, rows) : mergeRows('immaculate', doc.rows, [season], rows),
+    }
+    await write('immaculate')
+    counts.push(`${rows.length} immaculate`)
   }
   console.log(`  ${season}: ${counts.join(', ')} (through ${swept.through})`)
 }

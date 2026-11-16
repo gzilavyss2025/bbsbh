@@ -17,12 +17,14 @@
 import { staticJson } from '../staticJson.js'
 
 export const KINDS = ['nohitters', 'cycles', 'tripleplays']
-const loaders = KINDS.map((kind) => staticJson(`/data/notable/${kind}.json`))
+// immaculate.json feeds only the rarity count (notable/rarityCount.js), not the label or the shelf.
+const FILES = [...KINDS, 'immaculate']
+const loaders = FILES.map((kind) => staticJson(`/data/notable/${kind}.json`))
 
-// All three docs, keyed by kind. A file that fails to load is null.
+// Every doc, keyed by kind. A file that fails to load is null.
 export async function fetchNotable() {
   const docs = await Promise.all(loaders.map((load) => load()))
-  return Object.fromEntries(KINDS.map((kind, i) => [kind, docs[i]]))
+  return Object.fromEntries(FILES.map((kind, i) => [kind, docs[i]]))
 }
 
 // The generator writes '' for a name the feed left out, so a line may carry none.

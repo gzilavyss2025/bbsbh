@@ -369,7 +369,8 @@ jobs:
         run: node scripts/gen-outfield-outs.mjs
       # Notable games: the no-hitters, cycles and triple plays behind /notable (D4,
       # .scratch/old-games). With no flags it sweeps only the season in play, about 70
-      # calls; the full history (1901 to now) is a hand run (docs/scripts/generators.md).
+      # calls, plus play-by-play for the night's new games (immaculate innings, #2968);
+      # the full history (1901 to now) is a hand run (docs/scripts/generators.md).
       # Nothing reads these files yet (ADR-0076). Staged by the `git add -A -- public …`
       # below, and the file states its own coverage, so it has no generatedAt.
       - name: Notable games
