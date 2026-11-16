@@ -88,7 +88,7 @@ export function ClubStretchPage() {
           <ol className="cstretch__board" aria-label={`${club}, best ${picks.n} games by ${measure.label}`}>
             {rows.map((r, i) => (
               <li key={r.id}>
-                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: 'hitting', by: picks.by, n: picks.n, player: r.id, name: r.name })}`)}>
+                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: 'hitting', by: picks.by, n: picks.n, club: picks.team, player: r.id, name: r.name })}`)}>
                   <span className="cstretch__rank">{i + 1}</span>
                   <span className="cstretch__who">
                     <span className="cstretch__name">{r.name}</span>
@@ -101,7 +101,7 @@ export function ClubStretchPage() {
           </ol>
         )}
 
-        <p className="hint">His games played, in a row, with this club; a run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for his Best Stretch.</p>
+        <p className="hint">His games played, in a row, with this club; a run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.</p>
       </Stack>
       <ReportFooter />
     </div>

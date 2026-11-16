@@ -90,3 +90,13 @@ test('each measure prints in its usual form; an infinite ERA is a dash', () => {
   assert.equal(measureByKey('hr').format(61), '61')
   assert.equal(dec2(Infinity), '—')
 })
+
+test('club filter: the best run counts only that club, and a stint ends at another club', async () => {
+  const { playerBest } = await import('../src/api/streaks/bestStretch.js')
+  const g = (i, team, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: team }, stat: { atBats: 4, plateAppearances: 4, ...s } })
+  // His hottest games are for 147; for 158 he hits one HR a game, broken by a game for 147.
+  const games = [...Array.from({ length: 5 }, (_, i) => g(i, 158, { homeRuns: 1 })), g(5, 147, { homeRuns: 4 }), ...Array.from({ length: 3 }, (_, i) => g(6 + i, 158, { homeRuns: 1 }))]
+  assert.equal(bestStretch(games, 3, measureByKey('hr')).homeRuns, 6)
+  assert.equal(playerBest(games, 158, 3, measureByKey('hr')).homeRuns, 3)
+  assert.equal(playerBest(games, 158, 6, measureByKey('hr')), null)
+})

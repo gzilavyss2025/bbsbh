@@ -1,12 +1,13 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, bestStretch, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, bestStretch, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { playerPath } from '../../lib/route.js'
+import { teamFullName } from '../../lib/teams.js'
 import { headerThemeFor, headerThemeStyle } from '../../lib/colors/headerTheme.js'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
@@ -51,14 +52,16 @@ function lineFor(role, t) {
 // not redo it (nor the starts-only filter). Keyed on the log's array, so it is
 // dropped with the log.
 const searches = new WeakMap()
-function cachedSearch(games, startsOnly, n, by, group) {
+// `club` (a hitter only, from Club Stretch) keeps the search to his runs with that club.
+function cachedSearch(games, startsOnly, n, by, group, club) {
   if (!games) return { pool: null, best: null }
   let entry = searches.get(games)
   if (!entry) searches.set(games, (entry = { pools: new Map(), bests: new Map() }))
   if (!entry.pools.has(startsOnly)) entry.pools.set(startsOnly, startsOnly ? games.filter((g) => g.gamesStarted > 0) : games)
   const pool = entry.pools.get(startsOnly)
-  const key = `${startsOnly}:${n}:${by}:${group}`
-  if (!entry.bests.has(key)) entry.bests.set(key, pool.length ? bestStretch(pool, n, measureByKey(by, group), group) : null)
+  const key = `${startsOnly}:${n}:${by}:${group}:${club}`
+  const measure = measureByKey(by, group)
+  if (!entry.bests.has(key)) entry.bests.set(key, !pool.length ? null : club ? playerBest(pool, club, n, measure) : bestStretch(pool, n, measure, group))
   return { pool, best: entry.bests.get(key) }
 }
 
@@ -68,11 +71,13 @@ function readQuery() {
   const id = int(q.get('player'), 1, 1e7, null)
   const group = q.get('group') === 'pitching' ? 'pitching' : 'hitting'
   const n = int(q.get('n'), 5, 500, null)
-  return { player: id ? { id, name: q.get('name') ?? '' } : null, group, n, by: measureByKey(q.get('by'), group).key }
+  const club = group === 'hitting' ? int(q.get('club'), 1, 1e5, null) : null
+  return { player: id ? { id, name: q.get('name') ?? '' } : null, group, n, by: measureByKey(q.get('by'), group).key, club }
 }
-function writeQuery({ player, group, n, by }) {
+function writeQuery({ player, group, n, by, club }) {
   const q = new URLSearchParams({ group, by })
   if (n) q.set('n', n)
+  if (club) q.set('club', club)
   if (player) { q.set('player', player.id); q.set('name', player.name) }
   window.history.replaceState(window.history.state, '', `${window.location.pathname}?${q}`)
 }
@@ -107,8 +112,8 @@ export function BestStretchPage() {
   const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
   // A starter's window counts starts only; a reliever's counts every outing.
-  const { pool: games, best } = cachedSearch(log?.games, starter, n, picks.by, picks.group)
-  const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key }) }
+  const { pool: games, best } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
+  const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key, club: null }) }
   // An emptied box keeps the length in effect rather than snapping to the default.
   const commitN = () => { if (nDraft !== '') update({ n: int(nDraft, 5, 500, picks.n) }) }
   // A preset chip; the season-length one stores no n, so the role's default applies.
@@ -169,7 +174,7 @@ export function BestStretchPage() {
         {searching && (
           <SiteSearchModal
             onClose={() => setSearching(false)}
-            pick={{ label: pitching ? 'Pick a pitcher' : 'Pick a hitter', placeholder: pitching ? 'Search pitchers' : 'Search hitters', accept: pitching ? canPitch : canHit, onPick: (p) => { setSearching(false); update({ player: { id: p.id, name: p.name } }) } }}
+            pick={{ label: pitching ? 'Pick a pitcher' : 'Pick a hitter', placeholder: pitching ? 'Search pitchers' : 'Search hitters', accept: pitching ? canPitch : canHit, onPick: (p) => { setSearching(false); update({ player: { id: p.id, name: p.name }, club: null }) } }}
           />
         )}
 
@@ -189,7 +194,7 @@ export function BestStretchPage() {
             <div className="stretch__band">
               <div className="stretch__shot"><Headshot personId={picks.player.id} name={name} teamId={best.mainTeamId} /></div>
               <Stack gap="tight" className="stretch__who-line">
-                <span className="stretch__kicker">His best {n} {unit}</span>
+                <span className="stretch__kicker">His best {n} {unit}{picks.club ? ` with the ${teamFullName(picks.club)}` : ''}</span>
                 <a className="stretch__name" href={playerPath(picks.player.id, { name })}>{name}</a>
               </Stack>
               {best.mainTeamId && <span className="stretch__mark"><TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" /></span>}
