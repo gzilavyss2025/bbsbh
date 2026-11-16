@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awards/history.js'
-import { ALL_MLB_KEY, countAnnounced, isRosterAward, mergeAllMlb, pastWinners, seasonRows, splitName } from '../api/awards/ledger.js'
+import { ALL_MLB_KEY, countAnnounced, isRosterAward, mergeAllMlb, pastMatrix, pastWinners, seasonRows, splitName } from '../api/awards/ledger.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
@@ -17,6 +17,7 @@ import { Chips } from '../components/ui/control/Chips.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
+import { Grid } from '../components/ui/layout/Grid.jsx'
 import { teamAbbr } from '../lib/teams.js'
 import { monthDayName } from '../lib/dates.js'
 
@@ -25,24 +26,29 @@ import { monthDayName } from '../lib/dates.js'
 // award at a time, a row per year. The season in play shows only in the first card,
 // so no winner prints twice. AL and NL keep their filled league banners.
 
+// The wide layout's league tag and club ink (#3095).
+const TAG_CLASS = { AL: 'awardhistory__lg--al', NL: 'awardhistory__lg--nl', MLB: '' }
+
 const BANNER_CLASS = { AL: 'awardhistory__leaguetag--al', NL: 'awardhistory__leaguetag--nl' }
 // The white knockout league marks gen-mono-logos.mjs writes for Standings' bars
 // (159 American League, 160 National League; ADR-0031: art, never a CSS filter).
 const LEAGUE_MARK = { AL: { id: 159, name: 'American League' }, NL: { id: 160, name: 'National League' } }
 
 // One winner: logo, first name on a small line, last name, then club (and position
-// for a roster award). The reader's club gets --surface-mine.
-function Winner({ r, favoriteTeamId, showPosition }) {
+// for a roster award). The reader's club gets --surface-mine. `league` (the wide
+// layout, #3095) puts an AL/NL/MLB tag first and inks the club in that league.
+function Winner({ r, favoriteTeamId, showPosition, league }) {
   const [first, last] = splitName(r.name)
   const mine = favoriteTeamId != null && r.teamId === favoriteTeamId
   const club = r.teamId ? teamAbbr({ id: r.teamId }) : r.teamName
   return (
-    <li className={`awardhistory__winner${mine ? ' awardhistory__winner--mine' : ''}`}>
+    <li className={`awardhistory__winner${mine ? ' awardhistory__winner--mine' : ''}${league ? ' awardhistory__winner--tagged' : ''}`}>
+      {league && <span className={`awardhistory__lg ${TAG_CLASS[league] ?? ''}`}>{league}</span>}
       <PlayerLink id={r.playerId} name={r.name} className="awardhistory__name">
         {first && <span className="awardhistory__first">{first}</span>}
         <span className="awardhistory__last">{last}</span>
       </PlayerLink>
-      <span className="awardhistory__club t-label">
+      <span className={`awardhistory__club t-label ${league ? (TAG_CLASS[league] ?? '') : ''}`}>
         {r.teamId ? (
           <TeamLink id={r.teamId} ariaLabel={r.teamName}>
             <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
@@ -55,11 +61,11 @@ function Winner({ r, favoriteTeamId, showPosition }) {
 }
 
 // showPosition: a roster award (Gold Glove, All-MLB, ...) names each winner's position.
-function Winners({ recipients, favoriteTeamId, showPosition = false }) {
+function Winners({ recipients, favoriteTeamId, showPosition = false, league }) {
   return (
     <ul className="awardhistory__winners">
       {recipients.map((r, i) => (
-        <Winner key={`${r.playerId}-${r.position}-${i}`} r={r} favoriteTeamId={favoriteTeamId} showPosition={showPosition} />
+        <Winner key={`${r.playerId}-${r.position}-${i}`} r={r} favoriteTeamId={favoriteTeamId} showPosition={showPosition} league={league} />
       ))}
     </ul>
   )
@@ -91,19 +97,40 @@ function RetryButton({ retry }) {
 
 // One live cell: the winners once announced, else the date-free "not announced yet",
 // else an error with a retry of the whole season read.
-function SeasonCell({ cell, favoriteTeamId, retry, colSpan, showPosition }) {
+function SeasonCellBody({ cell, favoriteTeamId, retry, showPosition, league }) {
+  return cell.status === 'announced' ? (
+    <Winners recipients={cell.recipients} favoriteTeamId={favoriteTeamId} showPosition={showPosition} league={league} />
+  ) : cell.status === 'error' ? (
+    <Notice tone="error" size="compact" role="status" action={<RetryButton retry={retry} />}>
+      Couldn’t load.
+    </Notice>
+  ) : (
+    <span className="hint">{league ? `${league} not announced yet` : 'Not announced yet'}</span>
+  )
+}
+
+function SeasonCell({ cell, colSpan, ...rest }) {
   return (
     <td colSpan={colSpan}>
-      {cell.status === 'announced' ? (
-        <Winners recipients={cell.recipients} favoriteTeamId={favoriteTeamId} showPosition={showPosition} />
-      ) : cell.status === 'error' ? (
-        <Notice tone="error" size="compact" role="status" action={<RetryButton retry={retry} />}>
-          Couldn’t load.
-        </Notice>
-      ) : (
-        <span className="hint">Not announced yet</span>
-      )}
+      <SeasonCellBody cell={cell} {...rest} />
     </td>
+  )
+}
+
+// The wide layout's live card (#3095): one tile per award, AL over NL, each winner
+// tagged with its league so no column head is needed.
+function SeasonTiles({ rows, favoriteTeamId, retry }) {
+  return (
+    <Grid as="ul" min="13rem" gap="base" fit className="awardhistory__tiles">
+      {rows.map((row) => (
+        <Stack as="li" gap="tight" key={row.key} className="awardhistory__tile">
+          <h3 className="awardhistory__award">{row.label}</h3>
+          {row.cells.map((cell) => (
+            <SeasonCellBody key={cell.id ?? cell.league} cell={cell} favoriteTeamId={favoriteTeamId} retry={retry} league={cell.league || 'MLB'} />
+          ))}
+        </Stack>
+      ))}
+    </Grid>
   )
 }
 
@@ -166,7 +193,12 @@ function ThisSeason({ season, favoriteTeamId }) {
       {!!data && !allFailed && (
         <Stack>
           <p className="hint">{`${announced} of ${rows.length} awards announced`}</p>
-          <SeasonTable rows={main} label={`${season} award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
+          <div className="awardhistory__narrow">
+            <SeasonTable rows={main} label={`${season} award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
+          </div>
+          <div className="awardhistory__wide">
+            <SeasonTiles rows={main} favoriteTeamId={favoriteTeamId} retry={retry} />
+          </div>
           {roster.length > 0 &&
             (open ? (
               <SeasonTable rows={roster} label={`${season} position award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
@@ -185,48 +217,105 @@ function ThisSeason({ season, favoriteTeamId }) {
   )
 }
 
-function PastWinners({ families, season, favoriteTeamId }) {
+// One award at a time behind a chip rail, a row per year: the phone's Past winners,
+// and on a wide screen the roster awards' in-place view.
+function PastByAward({ families, season, favoriteTeamId }) {
   const [picked, setPicked] = useState(families[0]?.key)
   const family = families.find((f) => f.key === picked) ?? families[0]
   const { columns, rows } = useMemo(() => pastWinners(family, season), [family, season])
   const rosterFamily = isRosterAward(family.key) || family.key === ALL_MLB_KEY
   return (
-    <Card frame="stamped" label="Past winners" className="awardhistory__card">
-      <Stack>
-        <Chips
-          label="Award"
-          layout="rail"
-          options={families.map((f) => ({ value: f.key, label: f.label }))}
-          value={family.key}
-          onChange={setPicked}
-        />
-        {rows.length === 0 ? (
-          <EmptyState size="compact">No past winners on file</EmptyState>
-        ) : (
-          <Table frame="bare" density="keep" label={`${family.label} winners by year`} className="awardhistory__table">
-            <thead>
-              <tr>
-                <th scope="col" className="awardhistory__year">Year</th>
+    <Stack>
+      <Chips
+        label="Award"
+        layout="rail"
+        options={families.map((f) => ({ value: f.key, label: f.label }))}
+        value={family.key}
+        onChange={setPicked}
+      />
+      {rows.length === 0 ? (
+        <EmptyState size="compact">No past winners on file</EmptyState>
+      ) : (
+        <Table frame="bare" density="keep" label={`${family.label} winners by year`} className="awardhistory__table">
+          <thead>
+            <tr>
+              <th scope="col" className="awardhistory__year">Year</th>
+              {columns.map((c) => (
+                <Banner key={c.key} league={c.key}>{c.short}</Banner>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.year}>
+                <th scope="row" className="awardhistory__year">{row.year}</th>
                 {columns.map((c) => (
-                  <Banner key={c.key} league={c.key}>{c.short}</Banner>
+                  <td key={c.key}>
+                    <Winners recipients={row.cells[c.key]} favoriteTeamId={favoriteTeamId} showPosition={rosterFamily} />
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.year}>
-                  <th scope="row" className="awardhistory__year">{row.year}</th>
-                  {columns.map((c) => (
-                    <td key={c.key}>
-                      <Winners recipients={row.cells[c.key]} favoriteTeamId={favoriteTeamId} showPosition={rosterFamily} />
-                    </td>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </Stack>
+  )
+}
+
+// The wide layout's Past winners (#3095): every main award against every past year,
+// AL over NL in a cell. The roster awards open in place below it.
+function PastMatrix({ families, season, favoriteTeamId }) {
+  const { years, rows } = useMemo(() => pastMatrix(families, season), [families, season])
+  const roster = families.filter((f) => isRosterAward(f.key) || f.key === ALL_MLB_KEY)
+  const [open, setOpen] = useState(false)
+  return (
+    <Stack>
+      <Table frame="bare" density="keep" label="Past award winners by year" className="awardhistory__table awardhistory__matrix">
+        <thead>
+          <tr>
+            <th scope="col" className="awardhistory__award">Award</th>
+            {years.map((y) => (
+              <th key={y} scope="col" className="awardhistory__year">{y}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.key}>
+              <th scope="row" className="awardhistory__award">{row.label}</th>
+              {row.cells.map((cell) => (
+                <td key={cell.year}>
+                  {cell.entries.map((e) => (
+                    <Winners key={e.league} recipients={e.recipients} favoriteTeamId={favoriteTeamId} league={e.league} />
                   ))}
-                </tr>
+                </td>
               ))}
-            </tbody>
-          </Table>
-        )}
-      </Stack>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      {roster.length > 0 &&
+        (open ? (
+          <PastByAward families={roster} season={season} favoriteTeamId={favoriteTeamId} />
+        ) : (
+          <Button block onClick={() => setOpen(true)}>
+            {roster.map((f) => f.label).join(' · ')}
+          </Button>
+        ))}
+    </Stack>
+  )
+}
+
+function PastWinners({ families, season, favoriteTeamId }) {
+  return (
+    <Card frame="stamped" label="Past winners" className="awardhistory__card">
+      <div className="awardhistory__narrow">
+        <PastByAward families={families} season={season} favoriteTeamId={favoriteTeamId} />
+      </div>
+      <div className="awardhistory__wide">
+        <PastMatrix families={families} season={season} favoriteTeamId={favoriteTeamId} />
+      </div>
     </Card>
   )
 }

@@ -87,3 +87,21 @@ export function seasonRows(families) {
 export function countAnnounced(families) {
   return families.filter((f) => f.awards.every((a) => a.status === 'announced')).length
 }
+
+// The wide-screen "Past winners" (#3095): the main awards pivoted into a row per
+// award and a column per past year, newest first. Roster awards stay out (they open
+// behind a button). Each cell's entries run AL then NL, or one MLB entry.
+export function pastMatrix(families, skipSeason = null) {
+  const main = families.filter((f) => !isRosterAward(f.key) && f.key !== ALL_MLB_KEY)
+  const tables = main.map((f) => ({ family: f, ...pastWinners(f, skipSeason) }))
+  const years = [...new Set(tables.flatMap((t) => t.rows.map((r) => r.year)))].sort((a, b) => b - a)
+  const rows = tables.map(({ family, columns, rows: byYear }) => ({
+    key: family.key,
+    label: family.label,
+    cells: years.map((year) => {
+      const row = byYear.find((r) => r.year === year)
+      return { year, entries: columns.map((c) => ({ league: c.key, recipients: row?.cells[c.key] ?? [] })) }
+    }),
+  }))
+  return { years, rows }
+}
