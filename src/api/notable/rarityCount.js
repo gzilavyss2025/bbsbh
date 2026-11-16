@@ -1,5 +1,5 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning, a four-homer game or four straight home runs (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs or six-plus double plays by one club (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -15,7 +15,8 @@
 // generator swept in an unbroken run: 2001 for immaculate innings (IMMACULATE_FLOOR in
 // scripts/lib/notable/immaculate.mjs, the first year with real pitches), 1901 for four-homer games
 // (fourhr.json, read off the hitting game logs), FOURSTRAIGHT_FLOOR for four straight home runs
-// (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays).
+// (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays), 1901
+// for six-plus double plays (sixdp.json, read off the team fielding game logs).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -30,6 +31,7 @@ export const RARITY = {
   immaculate: { flag: null, noun: 'immaculate inning' },
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
+  sixdp: { flag: null, noun: 'game with six or more double plays' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -135,6 +137,20 @@ export function fourStraightHomers(allPlays) {
   return out
 }
 
+// Six or more double plays turned by one club in a game: every play whose event type is a double
+// play (double_play, grounded_into_double_play, strikeout_double_play, …), counted for the fielding
+// club. Matches the fielding log's `doublePlays` on gamePk 531236 (the 2018 Cubs, 7). One find per
+// club and game. [{ side (the fielding club) }]; null when the feed has no plays.
+export function sixDoublePlays(allPlays) {
+  const plays = orderedPlays({ allPlays })
+  if (!plays.length) return null
+  const turned = { away: 0, home: 0 }
+  for (const p of plays) {
+    if (/double_play/.test(p.result?.eventType ?? '')) turned[p.about?.halfInning === 'top' ? 'home' : 'away'] += 1
+  }
+  return ['away', 'home'].filter((side) => turned[side] >= 6).map((side) => ({ side }))
+}
+
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
 export function floorYear(rows, flag) {
@@ -153,7 +169,7 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning, four-homer game and run of four straight home runs.
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning, four-homer game, run of four straight home runs and club game of six or more double plays.
 // [{ kind, side, player? }]
 export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
@@ -174,6 +190,7 @@ export function detectRareFeats(feed) {
   }
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
   for (const f of fourStraightHomers(plays) ?? []) out.push({ kind: 'fourstraight', ...f })
+  for (const f of sixDoublePlays(plays) ?? []) out.push({ kind: 'sixdp', ...f })
   return out
 }
 

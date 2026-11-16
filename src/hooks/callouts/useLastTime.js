@@ -11,7 +11,7 @@ import { buildRarityNotes, detectRareFeats } from '../../api/notable/rarityCount
 // feat, and a failed load, fetch and add nothing.
 
 // The box score's Insights notes plus the "last time" lines of a no-hitter and the rarity count
-// of a natural cycle, unassisted triple play, immaculate inning, four-homer game or four straight home runs (Final only, notable/rarityCount.js).
+// of a natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs or six-plus double plays (Final only, notable/rarityCount.js).
 export function useRollupNotes(feed, notes) {
   const final = feed?.gameData?.status?.abstractGameState === 'Final'
   const feats = useMemo(() => detectNoHitters(feed), [feed])

@@ -90,14 +90,15 @@ function gameLogRows(people, gameMap, test) {
 export const cycleRows = (people, gameMap) => gameLogRows(people, gameMap, isCycle)
 export const fourHomerRows = (people, gameMap) => gameLogRows(people, gameMap, isFourHomer)
 
-// ---- triple plays ----
+// ---- triple plays and six-plus double plays ----
 
 // The club in a team fielding game log is the fielding side, so its id says which side
-// turned the play. `triplePlays` greater than 0 for a gamePk is a triple play.
-export function triplePlayRows(splits, clubId, gameMap) {
+// turned the play. `triplePlays` greater than 0 for a gamePk is a triple play; `doublePlays`
+// of 6 or more is a six-plus double play game (#2968, slice 6).
+const fieldingRows = (test) => (splits, clubId, gameMap) => {
   const rows = new Map()
   for (const split of splits ?? []) {
-    if (!(count(split?.stat?.triplePlays) > 0)) continue
+    if (!test(split?.stat)) continue
     const game = gameMap.get(split?.game?.gamePk)
     const side = game ? sideOfClub(game, clubId) : null
     if (!side) continue
@@ -106,3 +107,6 @@ export function triplePlayRows(splits, clubId, gameMap) {
   }
   return [...rows.values()]
 }
+
+export const triplePlayRows = fieldingRows((stat) => count(stat?.triplePlays) > 0)
+export const sixDoublePlayRows = fieldingRows((stat) => count(stat?.doublePlays) >= 6)
