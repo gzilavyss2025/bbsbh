@@ -1,5 +1,5 @@
 import '../../styles/report/club-stretch.css'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clubStretch } from '../../api/streaks/clubStretch.js'
 import { BAT_MEASURES } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -44,6 +44,13 @@ export function ClubStretchPage() {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}?${new URLSearchParams({ team: next.team, n: next.n, by: next.by })}`)
   }
   const link = useRouteLink()
+  // On a phone the logo row scrolls sideways: bring the picked club into view, row only.
+  const picked = useRef(null)
+  useEffect(() => {
+    const el = picked.current
+    const row = el?.parentElement
+    if (row) row.scrollLeft = el.offsetLeft - row.offsetLeft - (row.clientWidth - el.offsetWidth) / 2
+  }, [picks.team])
   const club = teamFullName(picks.team)
   useDocumentTitle(`Club Stretch · ${club}`)
   const { data, loading, error, reload } = useAsync(() => clubStretch(picks.team), [picks.team])
@@ -64,7 +71,7 @@ export function ClubStretchPage() {
 
         <div role="group" aria-label="Club" className="cstretch__clubs">
           {CLUBS.map((id) => (
-            <button key={id} type="button" className="cstretch__club" aria-pressed={id === picks.team} aria-label={teamFullName(id)} title={teamFullName(id)} onClick={() => update({ team: id })}>
+            <button key={id} ref={id === picks.team ? picked : null} type="button" className="cstretch__club" aria-pressed={id === picks.team} aria-label={teamFullName(id)} title={teamFullName(id)} onClick={() => update({ team: id })}>
               <TeamLogo teamId={id} name={teamFullName(id)} size={32} />
             </button>
           ))}
