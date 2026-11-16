@@ -9,11 +9,15 @@ import { CLUB_PITCH_LENGTHS, bestInStints, clubPitchPool, measuresFor, stintsFor
 export const LENGTHS = { hitting: [162, 154], pitching: [CLUB_PITCH_LENGTHS.starts, CLUB_PITCH_LENGTHS.relief] }
 export const TOP = 10
 
-// One player's rows for one club: { "162:hr": row, ... }, a key only where he has a run.
+// The MLB board's scope key (issue 3133): a run counts every MLB game, so it crosses trades.
+export const MLB = 'mlb'
+
+// One player's rows for one club (or MLB): { "162:hr": row, ... }, a key only where he has a run.
 export function playerRows({ id, name, games }, teamId, group = 'hitting') {
   const out = {}
   for (const n of LENGTHS[group]) {
-    const stints = stintsFor(group === 'pitching' ? clubPitchPool(games, n) : games, teamId)
+    const pool = group === 'pitching' ? clubPitchPool(games, n) : games
+    const stints = teamId === MLB ? [pool] : stintsFor(pool, teamId)
     for (const m of measuresFor(group)) {
       const b = bestInStints(stints, n, m, group)
       if (b) out[`${n}:${m.key}`] = { id, name, team: b.teams.join(' / '), first: b.first, last: b.last, raw: Number.isFinite(b.value) ? b.value : 1e9 /* an ERA with no outs: JSON cannot hold Infinity */, value: m.format(b.value) }

@@ -21,6 +21,8 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // Club Stretch (/club-stretch, wireframe approved by Gary 2026-11-16): a club's best 162 or
 // 154 games in a row by one player, in six stats, top ten. Static, computed once per season.
 // Not a scoring surface, so nothing is sealed (ADR-0034).
+// The MLB pin (issue 3133) opens the same boards across MLB, where a run crosses trades.
+const MLB = 'mlb'
 // Counting stats first, so the default (HR) leads the row.
 const CHIPS = {
   hitting: [['hr', 'HR'], ['h', 'Hits'], ['rbi', 'RBI'], ['sb', 'SB'], ['avg', 'AVG'], ['ops', 'OPS']],
@@ -41,11 +43,11 @@ const shortDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', {
 
 function readQuery(fallbackTeam) {
   const q = new URLSearchParams(window.location.search)
-  const team = Number(q.get('team'))
+  const team = q.get('team') === MLB ? MLB : Number(q.get('team'))
   const group = q.get('group') === 'pitching' ? 'pitching' : 'hitting'
   const ns = LENGTHS[group].map((l) => l.value)
   return {
-    team: ALL_MLB_TEAM_IDS.includes(team) ? team : ALL_MLB_TEAM_IDS.includes(fallbackTeam) ? fallbackTeam : 158,
+    team: team === MLB || ALL_MLB_TEAM_IDS.includes(team) ? team : ALL_MLB_TEAM_IDS.includes(fallbackTeam) ? fallbackTeam : 158,
     group,
     n: ns.includes(q.get('n')) ? q.get('n') : ns[0],
     by: CHIPS[group].some(([k]) => k === q.get('by')) ? q.get('by') : CHIPS[group][0][0],
@@ -61,7 +63,8 @@ export function ClubStretchPage() {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}?${new URLSearchParams({ team: next.team, group: next.group, n: next.n, by: next.by })}`)
   }
   const link = useRouteLink()
-  const club = teamFullName(picks.team)
+  const mlb = picks.team === MLB
+  const club = mlb ? 'MLB' : teamFullName(picks.team)
   useDocumentTitle(`Club Stretch · ${club}`)
   const { data, loading, error, reload } = useAsync(() => clubStretch(picks.team, picks.group), [picks.team, picks.group])
   const measure = measuresFor(picks.group).find((m) => m.key === picks.by)
@@ -77,20 +80,20 @@ export function ClubStretchPage() {
       </header>
       <Stack gap="loose" className="cstretch">
         <Stack gap="tight">
-          <h2 className="cstretch__title">Best {picks.n} {unit} with the {club}</h2>
+          <h2 className="cstretch__title">Best {picks.n} {unit} {mlb ? 'in MLB' : `with the ${club}`}</h2>
           {data?.through && (
             <p className="hint infopop-row">
               Through the {data.through} season · {data.firstSeason}–{data.through}{' '}
               <InfoPopover label="How a run is counted" className="infopop--paper infopop--down">
                 {picks.group === 'pitching'
-                  ? 'His starts (or relief outings), in a row, with this club. A run ends when he pitches for another club. One row per player. No innings minimum. Tap a name for that run in Best Stretch.'
-                  : 'His games played, in a row, with this club. A run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.'}
+                  ? `His starts (or relief outings), in a row, ${mlb ? 'for any club. A run goes on through a trade' : 'with this club. A run ends when he pitches for another club'}. One row per player. No innings minimum. Tap a name for that run in Best Stretch.`
+                  : `His games played, in a row, ${mlb ? 'for any club. A run goes on through a trade' : 'with this club. A run ends when he plays for another club'}. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.`}
               </InfoPopover>
             </p>
           )}
         </Stack>
 
-        <TeamFilterStrip selectedTeamId={picks.team} onSelect={(id) => id != null && update({ team: id })} ariaLabel="Club" showMlbPin={false} />
+        <TeamFilterStrip selectedTeamId={mlb ? null : picks.team} onSelect={(id) => update({ team: id ?? MLB })} ariaLabel="Club" />
 
         <Cluster className="cstretch__controls">
           <Segmented label="Batting or pitching" value={picks.group} onChange={setGroup} options={GROUPS} />
@@ -105,13 +108,13 @@ export function ClubStretchPage() {
         </Cluster>
 
         <AsyncStatus loading={loading} error={error} hasData={rows.length > 0} onRetry={reload}
-          errorMessage="Couldn’t load this club’s board. Try again." emptyMessage="No player has a run this long with this club." />
+          errorMessage="Couldn’t load this board. Try again." emptyMessage={mlb ? 'This board isn’t built yet.' : 'No player has a run this long with this club.'} />
 
         {rows.length > 0 && !loading && (
           <ol className="cstretch__board" aria-label={`${club}, best ${picks.n} ${unit} by ${measure.label}`}>
             {rows.map((r, i) => (
               <li key={r.id}>
-                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: picks.group, by: picks.by, n: picks.n, club: picks.team, player: r.id, name: r.name })}`)}>
+                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: picks.group, by: picks.by, n: picks.n, ...(mlb ? {} : { club: picks.team }), player: r.id, name: r.name })}`)}>
                   <span className="cstretch__rank">{rankOf(rows, i)}</span>
                   <span className="cstretch__who">
                     <span className="cstretch__name">{r.name}</span>

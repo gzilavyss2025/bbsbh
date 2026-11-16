@@ -6,7 +6,8 @@ import { staticJsonBy } from '../staticJson.js'
 //   row: { id, name, team, first, last, value }   (team: the club's name of the time;
 //   value: printed as the card prints it, "62" or ".352")
 // Top ten, one row per player. A run counts his games played and ends when he plays for
-// another club. MLB clubs only: any other id reads empty.
+// another club. MLB clubs only: any other id reads empty, except 'mlb' (issue 3133): the
+// same boards across MLB, where a run crosses trades and `team` lists every club in it.
 // Pitching (group 'pitching'): public/data/club-stretch-pitching/{teamId}.json, the same shape
 // with boards { 32: { era, whip, k, kbb }, 65: { ... } } (32 starts, 65 relief outings).
 const fallback = { through: null, firstSeason: null, boards: {} }
