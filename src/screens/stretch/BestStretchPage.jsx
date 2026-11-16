@@ -58,7 +58,7 @@ const searches = new WeakMap()
 // `club` (from Club Stretch) keeps the search to that board's rules: his runs with that club,
 // or across MLB (MLB_SCOPE). searchBest in bestStretch.js holds them, as the board does.
 function cachedSearch(games, startsOnly, n, by, group, club) {
-  if (!games) return { pool: null, best: null }
+  if (!games) return { pool: null, best: null, noEra: false }
   let entry = searches.get(games)
   if (!entry) searches.set(games, (entry = { pools: new Map(), bests: new Map() }))
   if (!entry.pools.has(startsOnly)) entry.pools.set(startsOnly, startsOnly ? games.filter((g) => g.gamesStarted > 0) : games)
@@ -66,9 +66,12 @@ function cachedSearch(games, startsOnly, n, by, group, club) {
   const key = `${startsOnly}:${n}:${by}:${group}:${club}`
   const measure = measureByKey(by, group)
   if (!entry.bests.has(key)) {
-    entry.bests.set(key, !pool.length ? null : searchBest(games, pool, n, measure, group, club))
+    const search = (m) => (!pool.length ? null : searchBest(games, pool, n, m, group, club))
+    const best = search(measure)
+    // No ERA run, but a WHIP run of the same games: the log is long enough, it lacks earned runs.
+    entry.bests.set(key, { best, noEra: !best && by === 'era' && !!search(measureByKey('whip', group)) })
   }
-  return { pool, best: entry.bests.get(key) }
+  return { pool, ...entry.bests.get(key) }
 }
 
 // The picks ride the query so a link opens the same card.
@@ -123,7 +126,7 @@ export function BestStretchPage() {
   const name = log?.name || picks.player?.name || ''
   const measure = measureByKey(picks.by, picks.group)
   // A starter's window counts starts only; a reliever's counts every outing.
-  const { pool: games, best } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
+  const { pool: games, best, noEra } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
   // A club's runs; the MLB board's key words its card as a plain career search.
   const oneClub = picks.club != null && picks.club !== MLB_SCOPE
   const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key, club: null }) }
@@ -199,7 +202,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{oneClub ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{noEra ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : oneClub ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (

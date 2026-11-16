@@ -10,7 +10,10 @@ import { getJson } from '../statsapi.js'
 const BAT = ['atBats', 'plateAppearances', 'hits', 'doubles', 'triples', 'homeRuns', 'runs', 'rbi', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'stolenBases', 'totalBases', 'strikeOuts']
 
 const PITCH = ['outs', 'earnedRuns', 'hits', 'baseOnBalls', 'hitByPitch', 'strikeOuts', 'homeRuns', 'wins', 'losses', 'saves', 'completeGames', 'shutouts', 'gamesStarted', 'saveOpportunities', 'holds', 'blownSaves', 'gamesFinished', 'inheritedRunners', 'inheritedRunnersScored', 'battersFaced']
-const FIELDS = { hitting: BAT, pitching: PITCH }
+// noEarnedRuns counts games whose log leaves earnedRuns out (seen live 2026-11-16: Jack
+// Taylor has it in 1902, not 1903; 1908 and 1911 lack it too). ER was not official before
+// 1912 (NL) and 1913 (AL). Hits, walks and outs were present in every season checked.
+const FIELDS = { hitting: BAT, pitching: [...PITCH, 'noEarnedRuns'] }
 
 // How a rate reads: .352 (no leading zero), 2.12, and an infinite ERA or WHIP
 // (a line with no outs) as a dash, not the word Infinity.
@@ -44,7 +47,8 @@ export const obp = (t) => div(t.hits + t.baseOnBalls + t.hitByPitch, t.atBats + 
 export const slg = (t) => div(t.totalBases, t.atBats)
 // No outs is the worst ERA and WHIP, not a perfect one: Infinity ranks last.
 const perOut = (a, outs) => (outs > 0 ? a / outs : a > 0 ? Infinity : 0)
-export const era = (t) => perOut(t.earnedRuns * 27, t.outs)
+// A window with any game missing earned runs has no ERA (NaN): it is never best, never 0.00.
+export const era = (t) => (t.noEarnedRuns > 0 ? NaN : perOut(t.earnedRuns * 27, t.outs))
 export const whip = (t) => perOut((t.hits + t.baseOnBalls) * 3, t.outs)
 export const kRate = (t) => div(t.strikeOuts, t.battersFaced)
 export const ip = (t) => `${Math.floor(t.outs / 3)}.${t.outs % 3}`
@@ -55,6 +59,7 @@ export function toGame(split, group = 'hitting') {
   // The club's name rides along: teamFullName knows only today's 30 clubs.
   const row = { date: split.date, gameNumber: split.game?.gameNumber ?? 1, teamId: split.team?.id ?? null, teamName: split.team?.name ?? '' }
   for (const k of COUNTS) row[k] = typeof split.stat?.[k] === 'number' ? split.stat[k] : 0
+  if (group === 'pitching') row.noEarnedRuns = typeof split.stat?.earnedRuns === 'number' ? 0 : 1
   return row
 }
 
@@ -75,8 +80,10 @@ export function bestStretch(games, n, measure, group = 'hitting') {
   for (let i = 0; i + n <= sorted.length; i++) {
     const totals = sum(i)
     const value = measure.of(totals)
+    if (Number.isNaN(value)) continue // no data for this measure (an early ERA)
     if (!best || (measure.lower ? value < best.value : value > best.value)) best = { i, value, totals }
   }
+  if (!best) return null
   const window = sorted.slice(best.i, best.i + n)
   return {
     ...best.totals,
