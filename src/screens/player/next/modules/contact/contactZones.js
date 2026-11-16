@@ -28,8 +28,13 @@ export function zoneNames(side) {
   if (side === 'S') return { left: 'LF', center: 'CF', right: 'RF' }
   return side === 'L' ? { left: 'Oppo', center: 'Center', right: 'Pull' } : { left: 'Pull', center: 'Center', right: 'Oppo' }
 }
-// Outer edge of each band in feet (Inference: about the infield's edge, then shallow vs. deep).
-export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF', 250], ['deep', 'Deep OF', Infinity]]
+// Outer edge of each band in feet, one radius in every direction (#3083, Gary 2026-11-16). No
+// published infield / shallow / deep split was found, so the breaks come from the 2026 spray store
+// (236,523 balls in play, measured 2026-11-16 with this file's own projection). Infield balls peak
+// at 100–140 ft and outfield balls at 240–300 ft, with a gap at 160–200 ft: 150 ft is the edge of
+// the infield. The outfield has no gap, so 280 ft is about its median ball (284 ft) and shallow and
+// deep each hold about half of it: 41 / 29 / 30% of all balls (250 ft gave 41 / 18 / 40%).
+export const ZONE_DEPTHS = [['infield', 'Infield', 150], ['shallow', 'Shallow OF', 280], ['deep', 'Deep OF', Infinity]]
 // Short labels so the four fit one row at 390 px. "Any type", not "All": the row above already
 // has an All (every ball in play), and two Alls a row apart read as one choice.
 export const ZONE_TYPES = [[null, 'Any type'], ['ground', 'Ground'], ['line', 'Line'], ['fly', 'Fly']]
