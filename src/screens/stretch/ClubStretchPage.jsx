@@ -19,7 +19,7 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // Club Stretch (/club-stretch, wireframe approved by Gary 2026-11-16): a club's best 162 or
-// 154 games in a row by one player, in six stats, top ten. Static, computed once per season.
+// 154 games in a row by one player, in six stats, top twenty, ten at a time. Static, computed once per season.
 // Not a scoring surface, so nothing is sealed (ADR-0034).
 // The MLB pin (issue 3133) opens the same boards across MLB, where a run crosses trades.
 const MLB = 'mlb'
@@ -71,6 +71,10 @@ export function ClubStretchPage() {
   const unit = unitOf(picks.group, picks.n)
   const setGroup = (group) => update({ group, n: LENGTHS[group][0].value, by: CHIPS[group][0][0] })
   const rows = data?.boards?.[picks.n]?.[picks.by] ?? []
+  // Ten rows, and a button for the next ten; a new board starts at ten again.
+  const boardKey = `${picks.team}:${picks.group}:${picks.n}:${picks.by}`
+  const [moreFor, setMoreFor] = useState(null)
+  const shown = moreFor === boardKey ? rows : rows.slice(0, 10)
 
   return (
     <div className="screen">
@@ -112,12 +116,16 @@ export function ClubStretchPage() {
 
         {rows.length > 0 && !loading && (
           <ol className="cstretch__board" aria-label={`${club}, best ${picks.n} ${unit} by ${measure.label}`}>
-            {rows.map((r, i) => (
+            {shown.map((r, i) => (
               <li key={r.id}>
                 <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: picks.group, by: picks.by, n: picks.n, ...(mlb ? {} : { club: picks.team }), player: r.id, name: r.name })}`)}>
                   <span className="cstretch__rank">{rankOf(rows, i)}</span>
                   <span className="cstretch__who">
-                    <span className="cstretch__name">{r.name}</span>
+                    <span className="cstretch__name">
+                      {r.name}
+                      {/* A run still reaching into the latest season gets a bright tag (Gary, 2026-11-16). */}
+                      {data.through && r.last >= `${data.through}` && <span className="cstretch__now">{data.through}</span>}
+                    </span>
                     <span className="t-label">{r.team} · {shortDate(r.first)} – {shortDate(r.last)}</span>
                   </span>
                   <span className="cstretch__value">{r.value}</span>
@@ -125,6 +133,9 @@ export function ClubStretchPage() {
               </li>
             ))}
           </ol>
+        )}
+        {shown.length < rows.length && !loading && (
+          <Button skin="outline" onClick={() => setMoreFor(boardKey)}>Show {rows.length - shown.length} more</Button>
         )}
       </Stack>
       <ReportFooter />

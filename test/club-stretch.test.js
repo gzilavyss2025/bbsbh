@@ -37,11 +37,11 @@ test('an old log with no PA rebuilds it from AB, BB, HBP and SF', () => {
   assert.equal(playerBest(old, 158, 162, measureByKey('avg')).value, 0.25)
 })
 
-test('boards: one row per player, best first, top ten', () => {
-  const players = Array.from({ length: 12 }, (_, p) => ({ id: p + 1, name: `P${p + 1}`, games: run(0, 170, 158, { homeRuns: p % 3 === 0 ? 1 : 0, hits: 1 }) }))
+test('boards: one row per player, best first, top twenty', () => {
+  const players = Array.from({ length: 22 }, (_, p) => ({ id: p + 1, name: `P${p + 1}`, games: run(0, 170, 158, { homeRuns: p % 3 === 0 ? 1 : 0, hits: 1 }) }))
   const b = rankBoards(players.map((p) => playerRows(p, 158)))
-  assert.equal(b[162].hr.length, 10)
-  assert.equal(new Set(b[162].hr.map((r) => r.id)).size, 10)
+  assert.equal(b[162].hr.length, 20)
+  assert.equal(new Set(b[162].hr.map((r) => r.id)).size, 20)
   assert.equal(b[162].hr[0].value, '162')
   assert.equal(b[162].hr[0].team, 'Club 158')
   assert.ok(b[154].avg[0].value.startsWith('.'))

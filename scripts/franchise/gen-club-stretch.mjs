@@ -1,5 +1,5 @@
 // Writes public/data/club-stretch/{teamId}.json: each of the 30 MLB clubs' best runs of 162
-// and 154 games in a row by one player, in six stats (HR, H, RBI, SB, AVG, OPS), top ten, one
+// and 154 games in a row by one player, in six stats (HR, H, RBI, SB, AVG, OPS), top twenty, one
 // row per player, plus mlb.json, the same boards across MLB. With --group pitching it writes public/data/club-stretch-pitching/{teamId}.json
 // instead: 32 starts or 65 relief outings in a row, in ERA, WHIP, K and K-BB. Keyed by the CURRENT team id, which follows the franchise across moves. Reader:
 // src/api/streaks/clubStretch.js. The pure half (stints, rate floor, ranking):
@@ -10,8 +10,8 @@
 // crosses trades). They name every player long enough for a run and his seasons.
 // (2) Game logs, ONE SEASON PER CALL over his whole career, but only for players who could
 // still make a board: scripts/lib/franchise/club-stretch-ceiling.mjs bounds each player's best
-// run from his season lines, and the loop fetches best ceiling first until every board's 10th
-// exact row beats every unfetched ceiling. So the boards stay exact. A per-season log answers
+// run from his season lines, and the loop fetches best ceiling first until every board's last
+// exact row (TOP) beats every unfetched ceiling. So the boards stay exact. A per-season log answers
 // in about 0.1 s; one career log in a single call took the feed 40 s (measured 2026-11-16:
 // Russ Nixon, 1.5 s against 48 s, same 906 games). The feed's per-game logs start in 1901.
 //
@@ -28,7 +28,7 @@ import { measuresFor, toGame } from '../../src/api/streaks/bestStretch.js'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
-import { LENGTHS, MLB, cacheLine, playerRows, rankBoards, readCache } from '../lib/franchise/club-stretch.mjs'
+import { LENGTHS, MLB, TOP, cacheLine, playerRows, rankBoards, readCache } from '../lib/franchise/club-stretch.mjs'
 import { ceilings, nextFetches } from '../lib/franchise/club-stretch-ceiling.mjs'
 
 const groupAt = process.argv.indexOf('--group')
@@ -126,7 +126,7 @@ async function fetchRows(id) {
 }
 
 const rowOf = (id, scope, key) => rowsOf.get(id)?.[scope]?.[key]
-for (let need; (need = nextFetches(boards, done, rowOf)).size;) await mapConcurrent([...need], 4, fetchRows, { strict: true })
+for (let need; (need = nextFetches(boards, done, rowOf, { top: TOP })).size;) await mapConcurrent([...need], 4, fetchRows, { strict: true })
 console.log(`pass 2: ${fetched} players fetched, of ${playerOf.size}`)
 
 const files = [...scopes].map(([scope, m]) => [
