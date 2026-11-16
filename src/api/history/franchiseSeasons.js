@@ -37,11 +37,19 @@ export function nameForSeason(spans, season) {
 // file's { venueId: [{ teamId, name, from, to }] }, the other clubs there in the
 // same seasons. `from` holds the first season of each of `names`, index for index (#2959);
 // null for a rename in a span with no `venueNamesFrom`, whose first season is unknown.
+// `nameRuns` is every stint of every name, [{ name, from, to }] oldest first, from the spans'
+// `venueNameRuns` (#3089); null when a span has none (a file from before the field).
 export function parkHistory(spans, mates) {
   const byVenue = new Map()
   for (const s of [...spans].sort((a, b) => a.from - b.from)) {
     if (s.venueId == null) continue
-    const p = byVenue.get(s.venueId) ?? { venueId: s.venueId, names: [], from: [], runs: [] }
+    const p = byVenue.get(s.venueId) ?? { venueId: s.venueId, names: [], from: [], runs: [], nameRuns: [] }
+    if (!s.venueNameRuns) p.nameRuns = null
+    for (const r of p.nameRuns ? s.venueNameRuns : []) {
+      const prev = p.nameRuns[p.nameRuns.length - 1]
+      if (prev && prev.name === r.name && r.from === prev.to + 1) prev.to = r.to
+      else p.nameRuns.push({ ...r })
+    }
     ;(s.venueNames ?? [s.venueName]).forEach((n, i) => {
       if (!n || p.names.includes(n)) return
       p.names.push(n)

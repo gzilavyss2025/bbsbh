@@ -16,6 +16,8 @@ function ranges(seasons) {
 // A missing season ends a span. A venue renamed inside a span (PacBell -> SBC ->
 // AT&T) stays one span: `venueNames` keeps every name, `venueName` is the newest, and
 // `venueNamesFrom` holds the first season of each name, index for index (#2959).
+// `venueNameRuns` is every run of each name in order, [{ name, from, to }]; a name that
+// comes back (O.co -> Oakland Coliseum) gets a new run (#3089).
 export function collapseSeasons(rows) {
   const spans = []
   // The feed spells some names with a trailing space (Brooklyn's Washington Park, 3150).
@@ -29,6 +31,9 @@ export function collapseSeasons(rows) {
       r.venueId === last.venueId
     ) {
       last.to = r.season
+      const run = last.venueNameRuns[last.venueNameRuns.length - 1]
+      if (run.name === r.venueName) run.to = r.season
+      else last.venueNameRuns.push({ name: r.venueName, from: r.season, to: r.season })
       if (!last.venueNames.includes(r.venueName)) {
         last.venueNames.push(r.venueName)
         last.venueNamesFrom.push(r.season)
@@ -44,6 +49,7 @@ export function collapseSeasons(rows) {
         venueName: r.venueName,
         venueNames: [r.venueName],
         venueNamesFrom: [r.season],
+        venueNameRuns: [{ name: r.venueName, from: r.season, to: r.season }],
       })
     }
   }
