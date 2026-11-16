@@ -10,7 +10,7 @@
 // The feed's per-game logs start in 1901, so every board starts there.
 //
 // HAND-RUN: `node scripts/franchise/gen-club-stretch.mjs [--through 2026]`, after the regular season.
-// About 30 x 4 leader calls plus one log per qualifying player (several thousand), eight at a
+// About 30 x 4 leader calls plus one log per qualifying player (several thousand), four at a
 // time. Any failed call aborts the run (strict). The files carry no clock.
 import { join } from 'node:path'
 import { ALL_MLB_TEAM_IDS } from '../../src/lib/teams.js'
@@ -55,7 +55,7 @@ const rowsByClub = new Map(ALL_MLB_TEAM_IDS.map((id) => [id, []]))
 let done = 0
 await mapConcurrent(
   [...clubsOf.values()],
-  8,
+  4,
   async (p) => {
     const d = await getJson(`/api/v1/people/${p.id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&startDate=1901-01-01&endDate=${through}-12-31&fields=${FIELDS}`)
     const games = (d.stats?.[0]?.splits ?? []).map((s) => toGame(s, 'hitting'))
