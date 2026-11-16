@@ -55,8 +55,8 @@ with exact values, and the build only follows this record.
    as a literal, so the contrast checker can read it.
 8. **Depth is a lighter surface plus a hairline**, not a shadow: cards `#121212`, raised layers
    `#1C1C1C`, each with a hairline border. This is done once in the `--shadow-*` tokens.
-9. **Paper stays paper.** The Game Log passport pages, printable sheets, the preview poster and
-   stamps stay light in both themes.
+9. **Paper stays paper.** The Game Log passport pages, printable sheets, the preview poster,
+   stamps and souvenir tickets stay light in both themes.
 10. **The raw-colour cleanup never invents a colour.** `check-raw-values.mjs` counts 17 hex
     declarations in `src/styles/` (145 more carry `raw-value-exempt`: stamp art and the like),
     plus about 68 raw `rgba()` values, most of them shadows. A value is swapped for a token only
@@ -87,7 +87,7 @@ with exact values, and the build only follows this record.
     bar sets `--bar-text` from the hand-tuned triad (ADR-0030), or reads `--text-on-band`.
 12. **How the theme is applied.** `<html data-theme="dark">` or `data-theme="light"` forces a
     theme. With no attribute, `@media (prefers-color-scheme: dark)` decides. A subtree with the
-    class `theme-paper` (passport pages, print sheets, the preview poster, stamps) puts the light
+    class `theme-paper` (passport pages, print sheets, the preview poster, stamps, souvenir tickets) puts the light
     values back. `check-contrast.mjs` resolves the dark block as a second pass and checks every
     pair in both themes.
 
