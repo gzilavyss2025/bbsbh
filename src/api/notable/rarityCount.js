@@ -137,16 +137,30 @@ export function fourStraightHomers(allPlays) {
   return out
 }
 
-// Six or more double plays turned by one club in a game: every play whose event type is a double
-// play (double_play, grounded_into_double_play, strikeout_double_play, …), counted for the fielding
-// club. Matches the fielding log's `doublePlays` on gamePk 531236 (the 2018 Cubs, 7). One find per
-// club and game. [{ side (the fielding club) }]; null when the feed has no plays.
+// A double play: a play whose event type says so (double_play, grounded_into_double_play,
+// strikeout_double_play, …), or one where exactly two runners are out on the same event. The feed
+// files some under the batter's hit: gamePk 23759 (2005) has a 'single' where the batter lines into
+// a double play. Two outs on two events (a pickoff, then the strikeout) are not one.
+function isDoublePlay(p) {
+  if (/double_play/.test(p.result?.eventType ?? '')) return true
+  const outs = new Map() // playIndex -> runners out on it
+  for (const r of p.runners ?? []) {
+    if (!r.movement?.isOut) continue
+    const at = r.details?.playIndex
+    outs.set(at, (outs.get(at) ?? 0) + 1)
+  }
+  return [...outs.values()].includes(2)
+}
+
+// Six or more double plays turned by one club in a game, counted for the fielding club. Matches
+// the fielding log's `doublePlays` on every indexed game since 1990 (checked 2026-11-16). One find
+// per club and game. [{ side (the fielding club) }]; null when the feed has no plays.
 export function sixDoublePlays(allPlays) {
   const plays = orderedPlays({ allPlays })
   if (!plays.length) return null
   const turned = { away: 0, home: 0 }
   for (const p of plays) {
-    if (/double_play/.test(p.result?.eventType ?? '')) turned[p.about?.halfInning === 'top' ? 'home' : 'away'] += 1
+    if (isDoublePlay(p)) turned[p.about?.halfInning === 'top' ? 'home' : 'away'] += 1
   }
   return ['away', 'home'].filter((side) => turned[side] >= 6).map((side) => ({ side }))
 }

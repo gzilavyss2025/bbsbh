@@ -60,7 +60,7 @@ export function logsToFetch(gameMap) {
 }
 
 // The triple plays and the six-plus double play games (#2968), from the same fielding logs.
-export async function fetchTriplePlays(get, gameMap, season) {
+export async function fetchFieldingFeats(get, gameMap, season) {
   const logs = await mapConcurrent(
     logsToFetch(gameMap),
     CONCURRENCY,
@@ -104,7 +104,7 @@ export async function sweepSeason(get, season) {
   const [nohitters, { cycles, fourhr }, { tripleplays, sixdp }] = [
     await fetchNoHitters(get, gameMap),
     await fetchCycles(get, gameMap, season),
-    await fetchTriplePlays(get, gameMap, season),
+    await fetchFieldingFeats(get, gameMap, season),
   ]
   return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr, sixdp } }
 }

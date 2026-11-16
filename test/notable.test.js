@@ -270,6 +270,8 @@ test('sweep: one fielded call per need, game types as measured, no call for a dr
   // Two clubs: one regular-season log each, and one World Series log each. Never a list.
   assert.equal(teamLogs.length, 4)
   assert.ok(teamLogs.every((u) => !/gameType=[^&]*,/.test(u) && !u.includes('gameType=[')))
+  // the six-plus double play rows (#2968) ride this call: without the field they silently vanish
+  assert.ok(teamLogs.every((u) => /fields=[^&]*\bdoublePlays\b/.test(u)))
   assert.ok(!urls.some((u) => /\/teams\/43[01]\//.test(u)), 'a Negro league club gets no call')
 })
 
