@@ -117,3 +117,18 @@ test('club filter: the best run counts only that club, and a stint ends at anoth
   assert.equal(playerBest(games, 158, 3, measureByKey('hr')).homeRuns, 3)
   assert.equal(playerBest(games, 158, 6, measureByKey('hr')), null)
 })
+
+test('career log keeps at most four season requests in flight', async () => {
+  let open = 0
+  let peak = 0
+  const get = async (path) => {
+    if (path.includes('yearByYear')) return { stats: [{ splits: Array.from({ length: 25 }, (_, i) => ({ season: String(1980 + i) })) }] }
+    open++
+    peak = Math.max(peak, open)
+    await new Promise((r) => setTimeout(r, 1))
+    open--
+    return { stats: [{ splits: [] }] }
+  }
+  await loadCareerLog(1, undefined, 'hitting', get)
+  assert.ok(peak <= 4, `peak ${peak}`)
+})

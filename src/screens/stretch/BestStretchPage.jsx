@@ -7,7 +7,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
 import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { playerPath } from '../../lib/route.js'
-import { teamFullName } from '../../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, teamFullName } from '../../lib/teams.js'
 import { headerThemeFor, headerThemeStyle } from '../../lib/colors/headerTheme.js'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
@@ -51,6 +51,9 @@ function lineFor(role, t) {
 // The window search, cached per loaded log so a keystroke or a modal toggle does
 // not redo it (nor the starts-only filter). Keyed on the log's array, so it is
 // dropped with the log.
+// The club's names in his log (the club of his time), else its current name.
+const clubNames = (games, club) => [...new Set(games.filter((g) => g.teamId === club).map((g) => g.teamName).filter(Boolean))].join(' / ') || teamFullName(club)
+
 const searches = new WeakMap()
 // `club` (a hitter only, from Club Stretch) keeps the search to his runs with that club.
 function cachedSearch(games, startsOnly, n, by, group, club) {
@@ -71,7 +74,9 @@ function readQuery() {
   const id = int(q.get('player'), 1, 1e7, null)
   const group = q.get('group') === 'pitching' ? 'pitching' : 'hitting'
   const n = int(q.get('n'), 5, 500, null)
-  const club = group === 'hitting' ? int(q.get('club'), 1, 1e5, null) : null
+  // Only an MLB club: any other id would run the filter against a club he never had.
+  const clubId = Number(q.get('club'))
+  const club = group === 'hitting' && ALL_MLB_TEAM_IDS.includes(clubId) ? clubId : null
   return { player: id ? { id, name: q.get('name') ?? '' } : null, group, n, by: measureByKey(q.get('by'), group).key, club }
 }
 function writeQuery({ player, group, n, by, club }) {
@@ -186,7 +191,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{picks.club ? `He has no ${n} games in a row with the ${teamFullName(picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{picks.club ? `He has no ${n} games in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (

@@ -93,14 +93,14 @@ export function bestStretch(games, n, measure, group = 'hitting') {
 // ---- One club only (Club Stretch, and Best Stretch's ?club=). A run counts his games for the
 // club, crosses seasons, and ends at a game for another club; a return starts a new run. AVG and
 // OPS need 3.1 plate appearances per game (the batting-title rule).
-export const PA_PER_GAME = 3.1
+const PA_PER_GAME = 3.1
 const RATES = new Set(['avg', 'ops'])
 
 // Old logs can leave plateAppearances at 0: rebuild it from its parts.
 const paOf = (t) => t.plateAppearances || t.atBats + t.baseOnBalls + t.hitByPitch + t.sacFlies
 
 // A measure with the rate floor: a run short of it ranks below every real one.
-export function flooredMeasure(m, n) {
+function flooredMeasure(m, n) {
   if (!RATES.has(m.key)) return m
   const need = Math.ceil(PA_PER_GAME * n)
   return { ...m, of: (t) => (paOf(t) >= need ? m.of(t) : -Infinity) }
@@ -164,7 +164,12 @@ export async function loadCareerLog(playerId, signal, group = 'hitting', get = g
   const base = `/api/v1/people/${playerId}/stats?group=${group}&sportId=1&gameType=R`
   const years = await get(`${base}&stats=yearByYear`, { signal })
   const seasons = [...new Set((years.stats?.[0]?.splits ?? []).map((x) => x.season))].sort()
-  const logs = await Promise.all(seasons.map((season) => get(`${base}&stats=gameLog&season=${season}`, { signal })))
+  // Four at a time: the feed answers about five requests at once and stalls the rest for ~80 s
+  // (measured 2026-11-16), so a 25-season career sent all together took over a minute.
+  const logs = []
+  for (let i = 0; i < seasons.length; i += 4) {
+    logs.push(...(await Promise.all(seasons.slice(i, i + 4).map((season) => get(`${base}&stats=gameLog&season=${season}`, { signal })))))
+  }
   const splits = logs.flatMap((data) => data.stats?.[0]?.splits ?? [])
   return { name: splits[0]?.player?.fullName ?? '', games: splits.map((x) => toGame(x, group)) }
 }
