@@ -58,23 +58,33 @@ export function loadSeason(index, season, { onMonth = () => {} } = {}) {
     const paths = Object.keys(index.seasons[season]?.months ?? {}).sort().map((m) => `${season}/${m}.json`)
     let loaded = 0
     onMonth(0, paths.length)
-    // The postseason series state (#3141) rides along, one statsapi request a season; a
-    // postseason PA carries its game's `series` (series.js), and a failed fetch leaves none.
-    const series = fetchSeries(season, ctrl.signal)
-    const shards = Promise.all(paths.map((path) => getJson(path, ctrl.signal).then((shard) => {
+    const promise = Promise.all(paths.map((path) => getJson(path, ctrl.signal).then((shard) => {
       onMonth(++loaded, paths.length)
       return { pas: decodePlateAppearances(shard), people: shard.people }
-    })))
-    const promise = Promise.all([shards, series]).then(([parts, byGame]) => {
-      const pas = parts.flatMap((x) => x.pas)
-      if (byGame.size) for (const pa of pas) if (pa.gameType !== 'R' && byGame.has(pa.gamePk)) pa.series = byGame.get(pa.gamePk)
-      return { pas, people: Object.assign({}, ...parts.map((x) => x.people)) }
-    })
+    }))).then((parts) => ({ pas: parts.flatMap((x) => x.pas), people: Object.assign({}, ...parts.map((x) => x.people)) }))
     seasonCache.set(season, { promise, ctrl })
     promise.catch(() => seasonCache.get(season)?.promise === promise && seasonCache.delete(season))
   }
   return seasonCache.get(season).promise
 }
+// THE SERIES GAME CARD'S JOIN (#3141): a postseason PA gains its game's `series`
+// (series.js), once per decoded season, and only when a query asks. A season with no
+// postseason PA fetches nothing. A failure rejects and is forgotten, so the next ask retries.
+const seriesJoins = new WeakMap()
+export function attachSeries(season, pas) {
+  if (!seriesJoins.has(pas)) {
+    const post = pas.filter((pa) => pa.gameType !== 'R' && pa.gameType !== 'A')
+    const join = post.length
+      ? fetchSeries(season).then((byGame) => {
+          for (const pa of post) pa.series = byGame.get(pa.gamePk)
+        })
+      : Promise.resolve()
+    join.catch(() => seriesJoins.delete(pas))
+    seriesJoins.set(pas, join)
+  }
+  return seriesJoins.get(pas)
+}
+
 export function dropSeason(season) {
   seasonCache.get(season)?.ctrl.abort()
   seasonCache.delete(season)
