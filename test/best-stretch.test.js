@@ -141,6 +141,7 @@ test('pitching: a window with a game missing earned runs is skipped for ERA, not
   assert.equal(bestStretch(games.slice(0, 2), 2, measureByKey('era', 'pitching'), 'pitching'), null)
   assert.ok(bestStretch(games.slice(0, 2), 2, measureByKey('whip', 'pitching'), 'pitching'))
   assert.equal(dec2(era(b)), '4.50') // 6 ER over 12 innings
+})
 
 // A Club Stretch link sets a pitcher's role from the board's length, so a mostly-starter's run
 // of 65 relief outings is labelled relief, not "65 starts".
