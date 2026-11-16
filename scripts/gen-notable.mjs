@@ -1,4 +1,4 @@
-// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr}.json: the games behind
+// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight}.json: the games behind
 // the "Notable games" shelf (D4 in .scratch/old-games/decisions.md, ADR-0101 DRAFT).
 // A no-hitter, a cycle and a triple play, from the MLB Stats API alone: every row has a
 // gamePk, so a row opens its game with no join. AL and NL games only (D6); the regular
@@ -50,10 +50,11 @@ import {
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 import { flagRows } from './lib/notable/flags.mjs'
+import { FOURSTRAIGHT_FLOOR, fetchFourStraight } from './lib/notable/fourstraight.mjs'
 import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
-const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json' }
+const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json', fourstraight: 'fourstraight.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
@@ -79,7 +80,7 @@ const get = async (path) => {
 
 const seed = (await readJsonOr(join(root, 'scripts', 'notable-seed.json'), {})) ?? {}
 const docs = {}
-for (const kind of [...KINDS, 'immaculate', 'fourhr']) {
+for (const kind of [...KINDS, 'immaculate', 'fourhr', 'fourstraight']) {
   const prev = await readJsonOr(join(outDir, FILES[kind]), null)
   docs[kind] = prev?.coverage && Array.isArray(prev.rows) ? prev : emptyDoc()
 }
@@ -131,6 +132,18 @@ for (const season of seasons) {
     }
     await write('immaculate')
     counts.push(`${rows.length} immaculate`)
+  }
+  // Four straight home runs (#2968, lib/notable/fourstraight.mjs): the play-by-play of each game
+  // where a club hit 4 or more, from the floor on. The whole season is replaced, as the kinds are.
+  if (season >= FOURSTRAIGHT_FLOOR) {
+    const { rows, unknown } = await fetchFourStraight(get, swept.gameMap, season)
+    if (unknown.length) console.log(`  ${season}: ${unknown.length} four-homer club games with no plays, not counted: ${unknown.join(', ')}`)
+    docs.fourstraight = {
+      coverage: mergeCoverage(docs.fourstraight.coverage, [season], swept.through),
+      rows: mergeRows('fourstraight', docs.fourstraight.rows, [season], rows),
+    }
+    await write('fourstraight')
+    counts.push(`${rows.length} fourstraight`)
   }
   console.log(`  ${season}: ${counts.join(', ')} (through ${swept.through})`)
 }

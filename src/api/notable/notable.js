@@ -17,8 +17,8 @@
 import { staticJson } from '../staticJson.js'
 
 export const KINDS = ['nohitters', 'cycles', 'tripleplays']
-// immaculate.json and fourhr.json feed only the rarity count (notable/rarityCount.js), not the label or the shelf.
-const FILES = [...KINDS, 'immaculate', 'fourhr']
+// immaculate.json, fourhr.json and fourstraight.json feed only the rarity count (notable/rarityCount.js), not the label or the shelf.
+const FILES = [...KINDS, 'immaculate', 'fourhr', 'fourstraight']
 const loaders = FILES.map((kind) => staticJson(`/data/notable/${kind}.json`))
 
 // Every doc, keyed by kind. A file that fails to load is null.

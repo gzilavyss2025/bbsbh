@@ -48,7 +48,7 @@ export async function fetchNoHitters(get, gameMap) {
 // The game types a club played in a season, read off the map. The regular season is
 // always asked for. The team fielding log takes ONE game type at a time (a list falls
 // back to the regular season without a word), so each postseason type is its own call.
-function logsToFetch(gameMap) {
+export function logsToFetch(gameMap) {
   const wanted = new Map() // clubId -> Set of gameTypes
   for (const game of gameMap.values()) {
     for (const club of [game.away, game.home]) {
