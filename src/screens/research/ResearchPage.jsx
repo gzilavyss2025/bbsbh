@@ -126,7 +126,7 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && <AnswerCard ask={q.ask} a={result} people={people} />}
+      {result && <AnswerCard ask={q.ask} q={q} a={result} people={people} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -134,7 +134,7 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
-      {result && <AskTables ask={q.ask} a={result} people={people} />}
+      {result && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
       {result && <MatchList key={JSON.stringify(q)} a={result} people={people} wide={wide} />}
     </Stack>
   )

@@ -47,7 +47,9 @@ export function useResearch(q, cutoff) {
   }, [q, blocked])
   const blank = isBlank(live)
 
-  const key = JSON.stringify([live, cutoff, targets])
+  // The "Who most" rank and minimum re-rank the answer on the page, so they never re-search.
+  const { rank, min, ...searched } = live // eslint-disable-line no-unused-vars
+  const key = JSON.stringify([searched, cutoff, targets])
   const run = lastRun?.key === key && !blank ? lastRun : null
   useEffect(() => {
     // A run is tagged with its key; one from an older query is never shown (below).
