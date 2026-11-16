@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildGameMap, gameFromRow, lastPlayedDate } from '../scripts/lib/notable/games.mjs'
 import {
-  battedInnings, cycleRows, isCycle, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows,
+  battedInnings, cycleRows, fourHomerRows, isCycle, noHitSides, noHitterRow, pitchersFromBox, triplePlayRows,
 } from '../scripts/lib/notable/kinds.mjs'
 import {
   ALL_ALLOWED_KEYS, ALLOWED_KEYS, KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc, sortRows,
@@ -85,6 +85,18 @@ test('dedupe: a cycle and a triple play count once for each gamePk and player or
   const people = [{ id: 7, fullName: 'A Batter', stats: [{ splits: [split, split] }] }]
   assert.equal(cycleRows(people, map).length, 1)
   assert.equal(triplePlayRows([split, split], 1, map).length, 1)
+})
+
+test('four-homer game: a batter with 4 or more home runs in a game, once per gamePk and player (#2968)', () => {
+  const map = mapOf(row({ gamePk: 9 }))
+  const split = (homeRuns) => ({ game: { gamePk: 9 }, team: { id: 1 }, stat: { hits: homeRuns, homeRuns } })
+  const people = [
+    { id: 7, fullName: 'Four Bagger', stats: [{ splits: [split(4), split(4)] }] },
+    { id: 8, fullName: 'Three Bagger', stats: [{ splits: [split(3)] }] },
+  ]
+  const rows = fourHomerRows(people, map)
+  assert.deepEqual(rows.map((r) => r.player.id), [7])
+  assert.ok(['home', 'away'].includes(rows[0].side))
 })
 
 // ---- league and game type ----
@@ -239,6 +251,7 @@ test('sweep: one fielded call per need, game types as measured, no call for a dr
   const swept = await sweepSeason(get, 1956)
   assert.equal(swept.rows.nohitters.length, 1)
   assert.equal(swept.rows.nohitters[0].pitchers[0].name, 'Don Larsen')
+  assert.deepEqual(swept.rows.fourhr, [])
   assert.equal(swept.through, '2025-06-01')
   assert.ok(urls.every((u) => u.includes('fields=')), 'every call is fielded')
   assert.ok(urls[0].includes('gameType=R,F,D,L,W'))
@@ -358,7 +371,7 @@ test('the seed file holds the one triple play the API misses, and a row per kind
 test('no committed file carries a key outside the allowlist, at any depth', () => {
   const dir = join(ROOT, 'public', 'data', 'notable')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort()
-  assert.deepEqual(files, ['cycles.json', 'immaculate.json', 'nohitters.json', 'tripleplays.json'])
+  assert.deepEqual(files, ['cycles.json', 'fourhr.json', 'immaculate.json', 'nohitters.json', 'tripleplays.json'])
 
   for (const file of files) {
     const kind = file.replace('.json', '')
@@ -392,10 +405,10 @@ test('no committed file carries a key outside the allowlist, at any depth', () =
       assert.ok(['home', 'away'].includes(r.side))
       assert.ok(doc.coverage.seasons.includes(Number(r.officialDate.slice(0, 4))), `${file} row outside its coverage`)
       assert.ok(['R', 'F', 'D', 'L', 'W'].includes(r.gameType))
-      if (kind === 'cycles' || kind === 'immaculate') assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
+      if (['cycles', 'immaculate', 'fourhr'].includes(kind)) assert.deepEqual(Object.keys(r.player).sort(), ['id', 'name'])
       if (kind === 'nohitters') assert.ok(r.pitchers.length > 0 && r.pitchers.every((p) => Object.keys(p).length === 2))
       if (kind !== 'nohitters') assert.ok(!('pitchers' in r) && !('shortened' in r) && !('lost' in r))
-      if (kind !== 'cycles' && kind !== 'immaculate') assert.ok(!('player' in r))
+      if (!['cycles', 'immaculate', 'fourhr'].includes(kind)) assert.ok(!('player' in r))
       // newest first
       if (prev) assert.ok(prev.officialDate >= r.officialDate, `${file} is not newest first`)
       prev = r

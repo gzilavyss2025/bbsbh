@@ -11,7 +11,7 @@
 // generator and the page). Old games have no play-by-play, so their rows carry no flag. The count
 // runs from the FLOOR: the year of the oldest flagged row with no unflagged row after it. The line
 // says "since {floor}", never "ever", and with no floor it says nothing: it never invents a count.
-// An immaculate inning has its own file, every row a find, so its floor is the first season the
+// An immaculate inning and a four-homer game (fourhr.json, from the hitting logs, 1901 on) each have their own file, every row a find, so its floor is the first season the
 // generator swept (IMMACULATE_FLOOR in scripts/lib/notable/immaculate.mjs: the first year with real pitches).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
@@ -25,6 +25,7 @@ export const RARITY = {
   cycles: { flag: 'natural', noun: 'natural cycle' },
   tripleplays: { flag: 'unassisted', noun: 'unassisted triple play' },
   immaculate: { flag: null, noun: 'immaculate inning' },
+  fourhr: { flag: null, noun: 'four-homer game' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -131,7 +132,7 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play and immaculate inning.
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning and four-homer game.
 // [{ kind, side, player? }]
 export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
@@ -144,6 +145,16 @@ export function detectRareFeats(feed) {
     if (feat?.kind === 'tripleplays' && isUnassistedTriplePlay(p)) out.push(feat)
   }
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
+  // A four-homer game: the batter's fourth home run of the game (a fifth adds nothing).
+  const homers = new Map()
+  for (const p of plays) {
+    const batter = p.matchup?.batter
+    if (p.result?.eventType !== 'home_run' || batter?.id == null) continue
+    homers.set(batter.id, (homers.get(batter.id) ?? 0) + 1)
+    if (homers.get(batter.id) === 4) {
+      out.push({ kind: 'fourhr', side: p.about?.halfInning === 'top' ? 'away' : 'home', player: { id: batter.id, name: batter.fullName ?? '' } })
+    }
+  }
   return out
 }
 

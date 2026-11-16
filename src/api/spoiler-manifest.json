@@ -706,7 +706,7 @@
     },
     "notable/rarityCount.js": {
       "class": "reveal-only",
-      "why": "The rarity count of a natural cycle, unassisted triple play or immaculate inning (#2968): 'the Nth since {floor}' names a result, so hooks/callouts/useLastTime.js calls it only inside the box score's reveal, for a Final game. Its pure detectors are shared with scripts/gen-notable.mjs.",
+      "why": "The rarity count of a natural cycle, unassisted triple play, immaculate inning or four-homer game (#2968): 'the Nth since {floor}' names a result, so hooks/callouts/useLastTime.js calls it only inside the box score's reveal, for a Final game. Its pure detectors are shared with scripts/gen-notable.mjs.",
       "importers": [
         "hooks/callouts/useLastTime.js"
       ]

@@ -1,4 +1,4 @@
-// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate}.json: the games behind
+// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr}.json: the games behind
 // the "Notable games" shelf (D4 in .scratch/old-games/decisions.md, ADR-0101 DRAFT).
 // A no-hitter, a cycle and a triple play, from the MLB Stats API alone: every row has a
 // gamePk, so a row opens its game with no join. AL and NL games only (D6); the regular
@@ -53,7 +53,7 @@ import { flagRows } from './lib/notable/flags.mjs'
 import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
-const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json' }
+const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
@@ -79,7 +79,7 @@ const get = async (path) => {
 
 const seed = (await readJsonOr(join(root, 'scripts', 'notable-seed.json'), {})) ?? {}
 const docs = {}
-for (const kind of [...KINDS, 'immaculate']) {
+for (const kind of [...KINDS, 'immaculate', 'fourhr']) {
   const prev = await readJsonOr(join(outDir, FILES[kind]), null)
   docs[kind] = prev?.coverage && Array.isArray(prev.rows) ? prev : emptyDoc()
 }
@@ -116,6 +116,10 @@ for (const season of seasons) {
     await write(kind)
     counts.push(`${swept.rows[kind].length + applied} ${kind}`)
   }
+  // Four-homer games (#2968): read off the cycles' hitting logs, so they cost no call. Whole seasons, as the kinds.
+  docs.fourhr = { coverage: mergeCoverage(docs.fourhr.coverage, [season], swept.through), rows: mergeRows('fourhr', docs.fourhr.rows, [season], swept.rows.fourhr) }
+  await write('fourhr')
+  counts.push(`${swept.rows.fourhr.length} fourhr`)
   // Immaculate innings (#2968, lib/notable/immaculate.mjs): every game's play-by-play from the
   // floor on. The nightly run (no flags) re-reads the last few days and replaces them; a hand run
   // reads the whole season and replaces its rows.
