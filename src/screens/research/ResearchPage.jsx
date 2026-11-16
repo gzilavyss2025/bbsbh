@@ -74,7 +74,7 @@ export function ResearchPage() {
   const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   const data = head
   const people = run?.people ?? head?.people ?? {}
-  const clubs = useMemo(() => (head ? [...new Set(head.pas.map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
+  const clubs = useMemo(() => (head ? [...new Set(head.pas.filter((p) => p.gameType !== 'A').map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
   // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
   // open, so the page shows the start screen (presets). An emptied card keeps the page
   // out of the start screen until its ✕ (Gary, 2026-11-13), so on a phone the filter bar

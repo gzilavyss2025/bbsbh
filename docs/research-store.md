@@ -82,6 +82,26 @@ of the counts it passed through, and its pitch count (`shard.js`). No pitch list
 pitch type. The shard drops it unless it ends the plate appearance, so a PA that ends on
 one has a null last pitch type and location, and matches no pitch-type or location chip.
 
+## Postseason detail (#3141, Gary 2026-11-16)
+
+**Series game card** (`sg`): Game 1 to 7, Series-deciding, Sudden death, Potential clinch,
+Potential elimination. The shards hold no series facts. Only when a query has a Series game
+chip, `store.js` `attachSeries` fetches each searched season's postseason schedule from
+statsapi (`gameType=F,D,L,W`, about 10 KB) and `series.js` joins it by gamePk: one listing
+per game (`postseason/fetch.js` `keptGames`; a postponed game is listed twice, 2020), games
+with a winner, in `seriesGameNumber` order, a series won at more than half of
+`gamesInSeries`. An inverted chip still reads only postseason series games.
+Clinch and elimination read from the **batting** club: a Game 6 at 3-2 is a potential
+clinch in the leader's at-bats and a potential elimination in the other club's.
+Series-deciding is the game the series ended in; sudden death is both clubs one win away
+(a one-game wild card counts). A failed fetch is an error on the answer; the next ask retries.
+
+**All-Star games**: the generator asks Savant for game type `A` too (clubs `AL`/`NL`), and
+the Game type card has an All-Star chip. An All-Star PA counts only when that card picks
+All-Star, so a default count or leader board stays official games, and `AL`/`NL` stay out of
+the club pickers.
+A July shard built before 2026-11-16 holds no All-Star game until it is rebuilt.
+
 ## History store, 1961-2014 (#3135)
 
 A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from

@@ -133,6 +133,16 @@ test('career log keeps at most four season requests in flight', async () => {
   assert.ok(peak <= 4, `peak ${peak}`)
 })
 
+test('pitching: a window with a game missing earned runs is skipped for ERA, not read as 0.00', () => {
+  const games = [outing(0, { earnedRuns: undefined }), outing(1, { earnedRuns: 4 }), outing(2, { earnedRuns: 2 })]
+  assert.equal(games[0].noEarnedRuns, 1)
+  const b = bestStretch(games, 2, measureByKey('era', 'pitching'), 'pitching')
+  assert.equal(b.first, games[1].date)
+  assert.equal(bestStretch(games.slice(0, 2), 2, measureByKey('era', 'pitching'), 'pitching'), null)
+  assert.ok(bestStretch(games.slice(0, 2), 2, measureByKey('whip', 'pitching'), 'pitching'))
+  assert.equal(dec2(era(b)), '4.50') // 6 ER over 12 innings
+})
+
 // A Club Stretch link sets a pitcher's role from the board's length, so a mostly-starter's run
 // of 65 relief outings is labelled relief, not "65 starts".
 test('boardRole: a board link names the outings its length counts', () => {
