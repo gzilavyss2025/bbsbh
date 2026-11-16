@@ -18,6 +18,8 @@
 // that half (about.halfInning).
 
 import { pitchDotCategory, pitchCallCode } from '../playbyplay/pitchInfo.js'
+import { roundNameAt } from '../../lib/postseason/roundTag.js'
+import { monthDayNameYear } from '../../lib/dates.js'
 
 const SWING = new Set(['whiff', 'foul', 'inplay'])
 
@@ -46,6 +48,7 @@ function boxLine(feed, pitcherId) {
     if (s && s.battersFaced != null) {
       return {
         name: p.person?.fullName ?? '',
+        role: s.gamesStarted > 0 ? 'Start' : 'Relief',
         ip: s.inningsPitched ?? '',
         h: s.hits ?? 0,
         r: s.runs ?? 0,
@@ -59,6 +62,23 @@ function boxLine(feed, pitcherId) {
     }
   }
   return null
+}
+
+// The game the card names, for a card that is shared on its own: the round
+// ("WS"), the date, and the final line. A result, like everything here.
+function gameFacts(feed) {
+  const g = feed?.gameData
+  const ls = feed?.liveData?.linescore
+  const side = (k) => ({ abbr: g?.teams?.[k]?.abbreviation ?? '', runs: ls?.teams?.[k]?.runs ?? null })
+  const innings = ls?.currentInning ?? null
+  return {
+    round: roundNameAt(g?.game?.type, g?.teams?.home?.sport?.id),
+    date: monthDayNameYear(g?.datetime?.officialDate),
+    away: side('away'),
+    home: side('home'),
+    final: g?.status?.codedGameState === 'F',
+    innings: innings && innings !== 9 ? innings : null,
+  }
 }
 
 // Every pitch this pitcher threw, in order, with what the card needs.
@@ -135,6 +155,7 @@ export function buildPitcherGameCard(feed, pitcherId) {
 
   const batted = pitches.filter((p) => p.ev != null)
   return {
+    game: gameFacts(feed),
     line: {
       ...line,
       swStr: pitches.filter((p) => p.call === 'whiff').length,

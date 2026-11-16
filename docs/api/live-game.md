@@ -685,7 +685,8 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
 
 ## Pitcher game card (`pitcher/gameCard.js`, reveal-only)
 
-`buildPitcherGameCard(feed, pitcherId)` (#2969) shapes one pitcher's night: the box line
+`buildPitcherGameCard(feed, pitcherId)` (#2969) shapes one pitcher's night: the game it names
+(round tag, date, final line and innings, for a card shared on its own), the box line and his role (start or relief),
 (from `boxscore…players.ID{id}.stats.pitching`, so it matches the box score exactly) plus
 swinging strikes, barrels and hard-hit balls; a per-type mix (usage overall and vs RHB/LHB,
 velo, induced vertical and horizontal break, whiffs, zone %, chase %, SwStr %); and every
