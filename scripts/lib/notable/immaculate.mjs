@@ -18,10 +18,10 @@ import { immaculateInnings } from '../../../src/api/notable/rarityCount.js'
 import { mapConcurrent } from '../concurrency.mjs'
 import { gameHead } from './games.mjs'
 
-export const IMMACULATE_FLOOR = 1988
+export const IMMACULATE_FLOOR = 2000
 
 const FIELDS = 'allPlays,about,atBatIndex,inning,halfInning,result,eventType,matchup,pitcher,id,fullName,'
-  + 'playEvents,isPitch,count,balls,strikes,runners,movement,end'
+  + 'playEvents,isPitch,count,balls,strikes,details,code,pitchData,startSpeed,runners,movement,end'
 export const immaculateUrl = (gamePk) => `/api/v1/game/${gamePk}/playByPlay?fields=${FIELDS}`
 
 // The rows of one game's play-by-play, or null when it has no real pitch sequences.

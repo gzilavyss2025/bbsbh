@@ -162,6 +162,16 @@ test('an immaculate inning is three strikeouts on nine pitches by one pitcher', 
   assert.equal(immaculateInnings([]), null)
 })
 
+test('a made-up inning of nine swinging strikes with no pitch speed is unknown, not immaculate', () => {
+  // The 1990s feeds fill a missing extra inning with S, S, S for each strikeout (gamePk 2342,
+  // 1999-07-10, the 10th) inside a game of real sequences. A real one carries other codes or a speed.
+  const ev = (code, speed) => ({ isPitch: true, details: { code }, ...(speed ? { pitchData: { startSpeed: speed } } : {}) })
+  const swing = (i, speed) => ({ ...k(i), playEvents: [ev('S', speed), ev('S', speed), ev('S', speed)] })
+  assert.deepEqual(immaculateInnings([SEQ, swing(0), swing(1), swing(2)]), [])
+  assert.equal(immaculateInnings([SEQ, swing(0, 95), swing(1, 95), swing(2, 95)]).length, 1)
+  assert.equal(immaculateInnings([SEQ, { ...swing(0), playEvents: [ev('C'), ev('S'), ev('S')] }, swing(1), swing(2)]).length, 1)
+})
+
 test('a game of stub pitches (before about 1988) is unknown, never immaculate', () => {
   // The old feeds make up a minimal count for every plate appearance: three strikes for a
   // strikeout, four balls for a walk. No pitch ever has both a ball and a strike on the count.

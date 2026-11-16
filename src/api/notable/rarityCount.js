@@ -92,8 +92,12 @@ export function immaculateInnings(allPlays) {
     if (half.length !== 3 || pitcher?.id == null) continue
     const clean = half.every((p) => p.result?.eventType === 'strikeout' && p.matchup?.pitcher?.id === pitcher.id
       && !(p.runners ?? []).some((r) => r.movement?.end))
-    const pitches = half.reduce((n, p) => n + (p.playEvents ?? []).filter((e) => e.isPitch).length, 0)
-    if (clean && pitches === 9) {
+    const pitches = half.flatMap((p) => (p.playEvents ?? []).filter((e) => e.isPitch))
+    // The 1990s feeds fill a missing inning (often an extra one) with S, S, S for each strikeout,
+    // inside a game of real sequences (gamePk 2342, 1999-07-10, the 10th). Nine swinging strikes
+    // with no pitch speed is that fill, not a find; a modern pitch carries its speed.
+    const madeUp = pitches.every((e) => e.details?.code === 'S' && !e.pitchData?.startSpeed)
+    if (clean && pitches.length === 9 && !madeUp) {
       out.push({ side: half[0].about.halfInning === 'top' ? 'home' : 'away', player: { id: pitcher.id, name: pitcher.fullName ?? '' } })
     }
   }
