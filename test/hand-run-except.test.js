@@ -29,20 +29,21 @@ function datasetName(p) {
   return slash === -1 ? rest : rest.slice(0, slash + 1)
 }
 
-// Each top-level bullet's primary output: the `public/data/...` paths on the
-// bullet's first line, after the arrow. Paths mentioned later in a bullet's
-// prose are inputs or neighbours, not outputs.
+// Each top-level bullet's primary output: the `public/data/...` paths between
+// the arrow and the first ` — `, joined across wrapped lines. Paths in the prose
+// after the dash are inputs or neighbours, not outputs.
 function handRunOutputs(markdown) {
   const start = markdown.indexOf('\n## Hand-run generators')
   assert.ok(start !== -1, 'generators.md has no "## Hand-run generators" section')
   const end = markdown.indexOf('\n## ', start + 1)
   const section = markdown.slice(start, end === -1 ? undefined : end)
   const names = new Set()
-  for (const line of section.split('\n')) {
-    if (!line.startsWith('- ')) continue
-    const arrow = line.indexOf('→')
+  for (const bullet of section.split(/\n(?=- )/)) {
+    if (!bullet.startsWith('- ')) continue
+    const arrow = bullet.indexOf('→')
     if (arrow === -1) continue
-    for (const [, p] of line.slice(arrow).matchAll(/`(public\/data\/[^`]+)`/g)) names.add(datasetName(p))
+    const head = bullet.slice(arrow).split(' — ')[0]
+    for (const [, p] of head.matchAll(/`(public\/data\/[^`]+)`/g)) names.add(datasetName(p))
   }
   return [...names]
 }
@@ -53,18 +54,20 @@ test('datasetName maps a doc path to the freshness guard name', () => {
   assert.equal(datasetName('public/data/from/map/'), 'from/')
 })
 
-test('handRunOutputs reads only the section, and only first-line outputs', () => {
+test('handRunOutputs reads only the section, and only outputs before the dash', () => {
   const md = [
     '## Nightly',
     '- `gen-a.mjs` → `public/data/a.json`',
     '## Hand-run generators (immutable data — NOT on a cron)',
     '- `gen-b.mjs` → `public/data/b/{NN}.json` and `public/data/b/index.json`',
-    '  reads `public/data/c.json`',
+    '  — reads `public/data/c.json`',
+    '- `gen-f.mjs` → `scripts/data/f/` and',
+    '  `public/data/f/{NN}.json` — later prose names `public/data/g.json`',
     '- `gen-d.mjs` → `src/lib/d.js` (not public data)',
     '## Later',
     '- `gen-e.mjs` → `public/data/e.json`',
   ].join('\n')
-  assert.deepEqual(handRunOutputs(md), ['b/'])
+  assert.deepEqual(handRunOutputs(md), ['b/', 'f/'])
 })
 
 test('every hand-run output in generators.md is exempt in EXCEPT', () => {
@@ -81,6 +84,8 @@ test('every hand-run output in generators.md is exempt in EXCEPT', () => {
   )
 })
 
-test('ALSO_NIGHTLY entries are not also exempt', () => {
+test('ALSO_NIGHTLY entries are not also exempt, and are still in the doc section', () => {
+  const outputs = handRunOutputs(readFileSync(DOC, 'utf8'))
+  for (const name of Object.keys(ALSO_NIGHTLY)) assert.ok(outputs.includes(name), `${name} is no longer a hand-run output; drop it from ALSO_NIGHTLY`)
   for (const name of Object.keys(ALSO_NIGHTLY)) assert.ok(!(name in EXCEPT), `${name} is in both EXCEPT and ALSO_NIGHTLY`)
 })

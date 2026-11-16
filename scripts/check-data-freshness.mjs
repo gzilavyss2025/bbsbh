@@ -45,7 +45,8 @@ export const MAX_AGE_HOURS = 20
 // Datasets that legitimately do NOT ride the nightly cron — hand-run backfills
 // and once-a-season snapshots (docs/scripts/generators.md's "Hand-run
 // generators" section). The value is the reason, printed when listing them, so
-// an entry can never be a silent shrug.
+// an entry can never be a silent shrug. test/hand-run-except.test.js fails when an
+// output that section lists is missing here (#3075).
 export const EXCEPT = {
   'all-star-rosters.json': 'hand-run once per All-Star break',
   'eliminated.json': 'hand-run once a year after the regular season (gen-eliminated.mjs); finished seasons never change',
@@ -73,7 +74,7 @@ export const EXCEPT = {
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'birthplaces/': 'hand-run from Retrosheet, the Chadwick register and GeoNames (ADR-0100, ADR-0106); history, and the files carry no clock',
-  'war-history/': 'hand-run once a year (gen-war-history.mjs); completed seasons only, and the shards carry no clock',
+  'war-history/': 'hand-run (gen-war-history.mjs); completed seasons only, and the shards carry no clock',
   'savant-history/': 'hand-run once a year (gen-savant-history.mjs, #1717); finished seasons, and the shards carry no clock',
   'league-pennants.json': 'hand-run once a year after the World Series (gen-league-pennants.mjs); a finished season never changes and the file carries no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
