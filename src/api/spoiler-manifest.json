@@ -848,6 +848,11 @@
         "screens/InningViewer.jsx"
       ]
     },
+    "pitcher/gameCard.js": {
+      "class": "reveal-only",
+      "why": "The pitcher game card (#2969): one pitcher's box line, pitch mix, arsenal rates, barrels and hard-hit balls for one game. All of it is a result, so it is called only inside the box score's SealBox reveal render. No importer yet; the sheet that renders it lands in a later slice and is added here then.",
+      "importers": []
+    },
     "pitcher/health.js": {
       "class": "reveal-gated",
       "why": "The laboring index and velo-decay flag. Walks only plays in revealed half-innings; deliberately not sealed, because a still-active pitcher needs partial-outing granularity (ADR-0009).",
@@ -947,8 +952,9 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal. Gameday's subSteps.js reaches AUTOMATIC_CODES directly, because the same call is a sub-step on one surface and a card dot on the other; it is itself reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function. Gameday's hero (screens/gameday/next/hero/GamedayHero.jsx) calls hasPitchLocations on a revealed at-bat card's pitchDetails, inside the hero's SealBox reveal render, to decide whether its pitch columns open the strike zone. The offseason page's longest at-bats card (components/offseason/LongAtBatDetail.jsx) shapes a finished season's at-bat with pitchCardInfo: an open surface, outside the four scoring surfaces (ADR-0034), so it needs no seal.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal. Gameday's subSteps.js reaches AUTOMATIC_CODES directly, because the same call is a sub-step on one surface and a card dot on the other; it is itself reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function. Gameday's hero (screens/gameday/next/hero/GamedayHero.jsx) calls hasPitchLocations on a revealed at-bat card's pitchDetails, inside the hero's SealBox reveal render, to decide whether its pitch columns open the strike zone. The offseason page's longest at-bats card (components/offseason/LongAtBatDetail.jsx) shapes a finished season's at-bat with pitchCardInfo: an open surface, outside the four scoring surfaces (ADR-0034), so it needs no seal. The pitcher game card (api/pitcher/gameCard.js, #2969) reads pitchDotCategory to sort a night's pitches into swings and whiffs; it is reveal-only itself.",
       "importers": [
+        "api/pitcher/gameCard.js",
         "components/offseason/LongAtBatDetail.jsx",
         "api/gameday/subSteps.js",
         "api/playbyplay.js",

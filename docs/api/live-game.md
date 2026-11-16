@@ -683,6 +683,17 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   `.scratch/gameday-engine/measure-moments.mjs`.
 
 
+## Pitcher game card (`pitcher/gameCard.js`, reveal-only)
+
+`buildPitcherGameCard(feed, pitcherId)` (#2969) shapes one pitcher's night: the box line
+(from `boxscore…players.ID{id}.stats.pitching`, so it matches the box score exactly) plus
+swinging strikes, barrels and hard-hit balls; a per-type mix (usage overall and vs RHB/LHB,
+velo, induced vertical and horizontal break, whiffs, zone %, chase %, SwStr %); and every
+pitch with its location and break for the plots. A pitch belongs to its PA's pitcher of
+record. Zone is `pitchData.zone` 1–9; chase is swings on pitches outside it. Barrels use
+Statcast's launch window (the feed has no flag); hard-hit is 95 mph+. Returns null when the
+pitcher has no line. Test: `test/pitcher-game-card.test.js` on gamePk 813024.
+
 ## Leader boards (live)
 
 - `leaders.js` / `team/leaders.js` / `statsLevels.js` — ranking is pool-agnostic:
