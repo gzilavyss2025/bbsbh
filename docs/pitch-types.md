@@ -57,7 +57,10 @@ paper. One hex serves both themes, so the colours are mid-tones: the pastel pitc
 (CS, SC, KN, EP) keep their hue at lower saturation instead of a lighter tone. `UN`
 sits below the band on purpose (rule 5). `npm run lint` enforces this
 (`src/lib/pitch/pitchLuminance.js`, run from `scripts/check-contrast.mjs`). Retune a
-hex until it passes; do not widen the band or darken a colour in a screen.
+hex until it passes; do not widen the band or darken a colour in a screen. Text on
+the Now Pitching card's active tile (28% of the pitch colour on
+`--surface-stamped-event`) measured 9.16:1 light and 8.66:1 dark, worst case, after
+this retune.
 
 ## Open items
 

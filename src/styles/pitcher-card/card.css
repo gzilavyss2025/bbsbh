@@ -138,7 +138,7 @@
 }
 /* The other pitches: a line and an end ring, in the pitch's own colour (PitchScene sets the
    stroke from the pitch's `color`). Every arc, these and the trail, gets a thin dark edge so
-   a pale pitch colour holds on the ground. */
+   the line holds on any ground. */
 .pscene__ghost polyline {
   fill: none;
   stroke-width: 1.8; /* raw-value-exempt: SVG stroke width in the scene's own units */
