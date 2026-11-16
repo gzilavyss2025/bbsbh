@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
 import { FILTER_BY_KEY, countGroup, matcher, momentValues, parseQuery, scoreValues, unsupported } from '../src/api/research/filters.js'
 import { storeVersion } from '../src/api/research/store.js'
-import { keptLineups, lineupOf, mergeIndex } from '../scripts/lib/research/store.mjs'
+import { gamesNeedingLineups, keptLineups, lineupOf, mergeIndex } from '../scripts/lib/research/store.mjs'
 
 const row = (o) => ({
   game_pk: '1', game_date: '2026-06-01', game_type: 'R', home_team: 'MIL', away_team: 'CHC',
@@ -67,8 +67,9 @@ test('moments: walk-off, go-ahead, tying, and the game\'s first and last PA', ()
   assert.deepEqual(momentValues(leadoff), ['first'])
   assert.deepEqual(momentValues(walkoff), ['ahead', 'walkoff', 'last'])
   assert.deepEqual(momentValues(tying), ['tie', 'first', 'last'], 'the wild pitch run is not the single\'s')
-  assert.deepEqual(momentValues({ marginLast: 0, marginAfter: 1, top: true, inning: 9 }), ['ahead'], 'a top-half go-ahead is no walk-off')
-  assert.deepEqual(momentValues({ marginLast: -1, marginAfter: 2, top: false, inning: 8 }), ['ahead'], 'nor one before the 9th')
+  assert.deepEqual(momentValues({ marginLast: 0, marginAfter: 1, top: true, inning: 9, last: true }), ['ahead', 'last'], 'a top-half go-ahead is no walk-off')
+  assert.deepEqual(momentValues({ marginLast: -1, marginAfter: 2, top: false, inning: 8 }), ['ahead'], 'nor one the game goes on after')
+  assert.deepEqual(momentValues({ marginLast: 0, marginAfter: 1, top: false, inning: 7, last: true }), ['ahead', 'walkoff', 'last'], 'a seven-inning game (2020-21 doubleheaders) walks off in the 7th')
   assert.deepEqual(momentValues({ marginLast: 1, marginAfter: 2 }), [], 'adding to a lead is no moment')
 })
 
@@ -114,4 +115,6 @@ test('a lineup comes from the box score\'s battingOrder, subs in their slot', ()
   assert.deepEqual(keptLineups({ v: 2, order: { 5: { 1: 3 } } }), { 5: { 1: 3 } })
   assert.deepEqual(keptLineups({ v: 1 }), {}, 'a v1 shard has no lineups to keep')
   assert.deepEqual(keptLineups(null), {})
+  const rows = [{ game_pk: '5', batter: '1' }, { game_pk: '5', batter: '2' }, { game_pk: '6', batter: '3' }, { game_pk: '7', batter: '4' }]
+  assert.deepEqual(gamesNeedingLineups(rows, { 5: { 1: 3 }, 6: { 3: 1 } }), [5, 7], 'a lineup missing a batter who batted (a suspended game resumed) is fetched again')
 })

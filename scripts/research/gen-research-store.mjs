@@ -20,8 +20,9 @@
 //
 // BATTING ORDER (#3140). Each game's lineup comes from its MLB box score, once: a rebuilt
 // month keeps the lineups of the shard already on file (Blob, or --out without --upload)
-// and fetches only the games it lacks. A box score that fails is left out and tried
-// again on the next build.
+// and fetches only the games it lacks, or whose lineup lacks a batter who batted. A box
+// score that fails is left out, retried by the next build of that month, and turns the
+// run red (exit 1) so a month outside the nightly window gets a hand run.
 //
 // THE STAMP. `--stamp=<file>` writes { generatedAt, through } there AFTER the index
 // upload, so check-data-freshness.mjs sees a run that reached Blob, not one that only
@@ -43,7 +44,7 @@ import { withRetry } from '../lib/net/retry.mjs'
 import { csvObjects } from '../lib/savant.mjs'
 import { getJson, getPeople } from '../lib/statsapi.mjs'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
-import { BOXSCORE_FIELDS, SAVANT_DAY_CAP, keptLineups, lineupOf, mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../lib/research/store.mjs'
+import { BOXSCORE_FIELDS, SAVANT_DAY_CAP, gamesNeedingLineups, keptLineups, lineupOf, mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../lib/research/store.mjs'
 import { baseballToday } from '../../src/lib/time/standingsDates.js'
 import { decodePlateAppearances, encodeMonth } from '../../src/api/research/shard.js'
 import { coverage } from '../../src/api/research/store.js'
@@ -97,17 +98,25 @@ async function previousShard(season, month) {
   }
 }
 
+// A box score that fails is counted in `lineupGaps`, and the run exits 1 at the end
+// (after uploading), so the step goes red and a hand run can fill the gap.
+let lineupGaps = 0
+const BOX_CONCURRENCY = 4
 async function lineupsFor(rows, prev) {
   const order = { ...keptLineups(prev) }
-  const missing = [...new Set(rows.map((r) => Number(r.game_pk)))].filter((pk) => !order[pk])
-  for (const pk of missing) {
-    try {
-      const box = await getJson(`/api/v1/game/${pk}/boxscore?fields=${BOXSCORE_FIELDS}`, { timeoutMs: 30_000 })
-      const lineup = lineupOf(box)
-      if (Object.keys(lineup).length) order[pk] = lineup
-    } catch (err) {
-      console.error(`boxscore ${pk}: ${err.message}`)
-    }
+  const missing = gamesNeedingLineups(rows, order)
+  for (let i = 0; i < missing.length; i += BOX_CONCURRENCY) {
+    await Promise.all(missing.slice(i, i + BOX_CONCURRENCY).map(async (pk) => {
+      try {
+        const box = await getJson(`/api/v1/game/${pk}/boxscore?fields=${BOXSCORE_FIELDS}`, { timeoutMs: 30_000 })
+        const lineup = lineupOf(box)
+        if (Object.keys(lineup).length) order[pk] = lineup
+        else lineupGaps++
+      } catch (err) {
+        console.error(`boxscore ${pk}: ${err.message}`)
+        lineupGaps++
+      }
+    }))
   }
   console.log(`lineups: ${missing.length} fetched, ${Object.keys(order).length} on hand`)
   return order
@@ -192,4 +201,5 @@ if (index && changed) {
     await writeFile(stampFile, `${JSON.stringify({ generatedAt: index.built, through }, null, 2)}\n`)
   }
 }
-if (refused || failed) process.exit(1)
+if (lineupGaps) console.error(`${lineupGaps} games with no lineup: rerun these months to fill them`)
+if (refused || failed || lineupGaps) process.exit(1)

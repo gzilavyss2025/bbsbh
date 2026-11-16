@@ -28,6 +28,7 @@
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
 import { countBit } from './shard.js'
 import { ordinal } from '../../lib/format.js'
+import { monthName } from '../../lib/time/months.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
@@ -112,7 +113,7 @@ export function momentValues(pa) {
   const { marginLast: before, marginAfter: after } = pa
   if (before != null && after != null) {
     if (before <= 0 && after > 0) out.push('ahead')
-    if (before <= 0 && after > 0 && !pa.top && pa.inning >= 9) out.push('walkoff')
+    if (before <= 0 && after > 0 && !pa.top && pa.last) out.push('walkoff')
     if (before < 0 && after === 0) out.push('tie')
   }
   if (pa.first) out.push('first')
@@ -121,7 +122,7 @@ export function momentValues(pa) {
 }
 const MOMENTS = [['walkoff', 'Walk-off'], ['ahead', 'Go-ahead'], ['tie', 'Tying'], ['first', 'First PA of the game'], ['last', 'Last PA of the game']]
 const BB_TYPES = [['ground_ball', 'Ground ball'], ['line_drive', 'Line drive'], ['fly_ball', 'Fly ball'], ['popup', 'Popup']]
-const MONTHS = [['03', 'March'], ['04', 'April'], ['05', 'May'], ['06', 'June'], ['07', 'July'], ['08', 'August'], ['09', 'September'], ['10', 'October'], ['11', 'November']]
+const MONTHS = ['03', '04', '05', '06', '07', '08', '09', '10', '11'].map((m) => [m, monthName(Number(m) - 1)])
 
 const COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2']
 // Runners: one value per base state, the bases spelled in order ('1-3' = first and
@@ -154,11 +155,11 @@ export const FILTERS = [
   { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2008, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
-  { key: 'cnt', label: 'Count (passed through)', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none.' },
+  { key: 'cnt', label: 'Count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none.' },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
   { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'sc', label: 'Score', options: SCORES, values: (pa) => scoreValues(pa.margin), info: 'The batting club’s margin when the plate appearance began. Up 3+ and Down 3+ are three runs or more.' },
-  { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom of the 9th or later. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found.' },
+  { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom half that ends the game. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found.' },
   { key: 'bb', label: 'Batted ball type', options: BB_TYPES, values: (pa) => [pa.bbType], since: 2008, v: 2, info: 'Statcast’s batted-ball type for the ball put in play.' },
   { key: 'slot', label: 'Batting slot', options: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), `Batting ${ordinal(n)}`]), values: (pa) => [pa.slot == null ? null : String(pa.slot)], v: 2, info: 'The batter’s spot in the order, from the MLB box score. A pinch hitter counts in the slot they batted in.' },
   { key: 'mon', label: 'Month', options: MONTHS, values: (pa) => [pa.date.slice(5, 7)] },

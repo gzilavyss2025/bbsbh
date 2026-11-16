@@ -86,3 +86,11 @@ export function lineupOf(box) {
 // The lineups a rebuilt month can keep from the copy on file (a v2 shard), so a game's
 // box score is fetched once, not every night. { gamePk: { batterId: slot } }.
 export const keptLineups = (prev) => (prev?.v >= 2 && prev.order ? prev.order : {})
+
+// The games whose lineup is not on hand, or lacks a batter who batted (a box score read
+// while a suspended game was still to resume, or one that failed). Game ids, ascending.
+export function gamesNeedingLineups(rows, order) {
+  const need = new Set()
+  for (const r of rows) if (r.batter && !order[r.game_pk]?.[r.batter]) need.add(Number(r.game_pk))
+  return [...need].sort((a, b) => a - b)
+}
