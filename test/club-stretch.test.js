@@ -54,6 +54,12 @@ test('the cache ignores lines from a run with another --through', () => {
   assert.deepEqual(rows.get(2), { 158: { x: 2 } })
 })
 
+test('the cache ignores lines from the other --group', () => {
+  const text = cacheLine(2026, 1, { 158: { x: 1 } }) + cacheLine(2026, 2, { 158: { x: 2 } }, 'pitching')
+  assert.deepEqual([...readCache(text, 2026, 'pitching').keys()], [2])
+  assert.deepEqual([...readCache(text, 2026).keys()], [1])
+})
+
 // Pitching: 32 starts or 65 relief outings in a row, no innings floor, lower ERA and WHIP win.
 const outing = (i, teamId, s = {}) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: teamId, name: `Club ${teamId}` }, stat: { outs: 18, ...s } }, 'pitching')
 

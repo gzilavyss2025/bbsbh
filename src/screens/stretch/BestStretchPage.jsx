@@ -1,7 +1,7 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, bestStretch, clubPitchPool, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, bestStretch, CLUB_PITCH_LENGTHS, clubPitchPool, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
@@ -56,7 +56,8 @@ const clubNames = (games, club) => [...new Set(games.filter((g) => g.teamId === 
 
 const searches = new WeakMap()
 // `club` (from Club Stretch) keeps the search to his runs with that club. A pitcher's club run
-// counts relief outings at n=65, else starts (clubPitchPool), as the board does.
+// counts starts at 32 and relief outings at 65 (clubPitchPool), as the board does; any other
+// length keeps the role's pool.
 function cachedSearch(games, startsOnly, n, by, group, club) {
   if (!games) return { pool: null, best: null }
   let entry = searches.get(games)
@@ -66,7 +67,7 @@ function cachedSearch(games, startsOnly, n, by, group, club) {
   const key = `${startsOnly}:${n}:${by}:${group}:${club}`
   const measure = measureByKey(by, group)
   if (!entry.bests.has(key)) {
-    const clubPool = club && group === 'pitching' ? clubPitchPool(games, n) : pool
+    const clubPool = club && group === 'pitching' && Object.values(CLUB_PITCH_LENGTHS).includes(n) ? clubPitchPool(games, n) : pool
     entry.bests.set(key, !pool.length ? null : club ? playerBest(clubPool, club, n, measure, group) : bestStretch(pool, n, measure, group))
   }
   return { pool, best: entry.bests.get(key) }

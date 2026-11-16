@@ -15,7 +15,7 @@
 //
 // HAND-RUN, after the regular season:
 //   node scripts/franchise/gen-club-stretch.mjs [--group pitching] [--through 2026] [--cache /tmp/club-stretch.jsonl]
-// (a cache file serves one group only: give each group its own)
+// (a cache line records its group, so a line from the other group is not read)
 // --cache (outside the repo) keeps each fetched player's rows, so a stopped run resumes; a line
 // from a run with another --through is ignored. Any
 // failed call aborts the run (strict). The files carry no clock.
@@ -28,7 +28,9 @@ import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { cacheLine, playerRows, rankBoards, readCache } from '../lib/franchise/club-stretch.mjs'
 
-const group = process.argv.includes('--group') && process.argv[process.argv.indexOf('--group') + 1] === 'pitching' ? 'pitching' : 'hitting'
+const groupAt = process.argv.indexOf('--group')
+const group = groupAt > 0 ? process.argv[groupAt + 1] : 'hitting'
+if (group !== 'hitting' && group !== 'pitching') throw new Error(`bad --group: ${group}`)
 const pitching = group === 'pitching'
 const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', pitching ? 'club-stretch-pitching' : 'club-stretch')
 const now = new Date()
@@ -50,7 +52,7 @@ const qualifies = (seasons) => {
   return pitching ? sum('gamesStarted') >= 32 || sum('gamesPlayed') - sum('gamesStarted') >= 65 : sum('gamesPlayed') >= MIN
 }
 
-// Pass 1: club -> player id -> { name, seasons }, for players with at least MIN club games.
+// Pass 1: club -> player id -> { name, seasons }, for players long enough for a run (qualifies).
 const jobs = ALL_MLB_TEAM_IDS.flatMap((teamId) => Array.from({ length: through - 1900 }, (_, i) => ({ teamId, season: 1901 + i })))
 const lines = await mapConcurrent(jobs, 4, async ({ teamId, season }) => {
   const d = await getJson(`/api/v1/stats?stats=season&group=${group}&sportId=1&playerPool=ALL&limit=1000&teamId=${teamId}&season=${season}&fields=${SEASON_FIELDS}`, { timeoutMs: 45000, tries: 5 })
@@ -83,7 +85,7 @@ console.log(`pass 1: ${jobs.length} club seasons, ${clubsOf.size} players with a
 // Pass 2: a player's rows for every club he qualifies for, fetched once (and kept in --cache).
 const cacheAt = process.argv.indexOf('--cache')
 const cachePath = cacheAt > 0 ? process.argv[cacheAt + 1] : null
-const rowsOf = cachePath ? readCache(await readFile(cachePath, 'utf8').catch(() => ''), through) : new Map()
+const rowsOf = cachePath ? readCache(await readFile(cachePath, 'utf8').catch(() => ''), through, group) : new Map()
 let fetched = 0
 async function fetchRows(id) {
   const p = clubsOf.get(id)
@@ -96,7 +98,7 @@ async function fetchRows(id) {
   }
   const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id, name: p.name, games }, teamId, group)]))
   rowsOf.set(id, rows)
-  if (cachePath) await appendFile(cachePath, cacheLine(through, id, rows))
+  if (cachePath) await appendFile(cachePath, cacheLine(through, id, rows, group))
   if (++fetched % 250 === 0) console.log(`${fetched} players fetched ${new Date().toISOString().slice(11, 19)}`)
   return rows
 }
