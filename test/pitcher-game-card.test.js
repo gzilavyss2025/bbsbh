@@ -76,3 +76,26 @@ test('hard-hit is 95 mph and up', () => {
   assert.equal(isHardHit(94.9), false)
   assert.equal(isHardHit(null), false)
 })
+
+test('a pitching change in the middle of a plate appearance splits its pitches', () => {
+  // Starter 1 throws a ball, is pulled mid-count, reliever 2 finishes the PA.
+  const pitch = (code) => ({ isPitch: true, details: { call: { code }, type: { code: 'FF' } } })
+  const line = { battersFaced: 1, inningsPitched: '0.0' }
+  const mini = {
+    liveData: {
+      boxscore: { teams: { home: { players: { ID1: { stats: { pitching: line } }, ID2: { stats: { pitching: line } } } } } },
+      plays: {
+        allPlays: [
+          { about: { halfInning: 'top' }, matchup: { pitcher: { id: 1 }, batSide: { code: 'R' } }, playEvents: [pitch('X')] },
+          {
+            about: { halfInning: 'top' },
+            matchup: { pitcher: { id: 2 }, batSide: { code: 'R' } },
+            playEvents: [pitch('B'), { isPitch: false, details: { eventType: 'pitching_substitution' }, player: { id: 2 } }, pitch('S'), pitch('C')],
+          },
+        ],
+      },
+    },
+  }
+  assert.equal(buildPitcherGameCard(mini, 1).pitches.length, 2)
+  assert.equal(buildPitcherGameCard(mini, 2).pitches.length, 2)
+})

@@ -10,10 +10,12 @@ const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undef
 const allPlays = feed.liveData.plays.allPlays
   .filter((p) => p.matchup.pitcher.id === ID)
   .map((p) => ({
+    about: { halfInning: p.about.halfInning },
     matchup: { pitcher: { id: ID }, batSide: { code: p.matchup.batSide.code } },
     playEvents: p.playEvents.map((e) => ({
       isPitch: e.isPitch,
-      details: { call: e.details?.call, type: e.details?.type },
+      details: { call: e.details?.call, type: e.details?.type, eventType: e.details?.eventType },
+      ...(e.player && { player: { id: e.player.id } }),
       ...(e.pitchData && {
         pitchData: {
           startSpeed: e.pitchData.startSpeed,

@@ -11,10 +11,11 @@
 //   playEvents[].hitData.launchSpeed / .launchAngle
 //   boxscore.teams.{away,home}.players.ID{id}.stats.pitching (the line)
 //
-// A pitch belongs to the play's pitcher of record. A change in the middle of a
-// plate appearance credits that PA's earlier pitches to the reliever; the
-// feed's per-PA matchup is all it gives, and the box line (from the box score
-// itself) stays exact either way.
+// A pitch belongs to whoever was on the mound when it was thrown. The play's
+// matchup names only the pitcher who FINISHED the plate appearance, so a
+// change mid-PA is read from its `pitching_substitution` action event
+// (player.id is the new arm); pitches before it go to the arm already in
+// that half (about.halfInning).
 
 import { pitchDotCategory, pitchCallCode } from '../playbyplay/pitchInfo.js'
 
@@ -63,11 +64,15 @@ function boxLine(feed, pitcherId) {
 // Every pitch this pitcher threw, in order, with what the card needs.
 function pitchesFor(feed, pitcherId) {
   const out = []
+  const onMound = {}
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
-    if (play?.matchup?.pitcher?.id !== pitcherId) continue
-    const bat = play.matchup?.batSide?.code ?? null
-    for (const e of play.playEvents ?? []) {
-      if (!e?.isPitch) continue
+    const half = play?.about?.halfInning
+    const finisher = play?.matchup?.pitcher?.id
+    const bat = play?.matchup?.batSide?.code ?? null
+    let current = onMound[half] ?? finisher
+    for (const e of play?.playEvents ?? []) {
+      if (e?.details?.eventType === 'pitching_substitution' && e.player?.id != null) current = e.player.id
+      if (!e?.isPitch || current !== pitcherId) continue
       const pd = e.pitchData ?? {}
       const zone = pd.zone ?? null
       out.push({
@@ -85,6 +90,7 @@ function pitchesFor(feed, pitcherId) {
         la: e.hitData?.launchAngle ?? null,
       })
     }
+    if (half != null) onMound[half] = finisher
   }
   return out
 }

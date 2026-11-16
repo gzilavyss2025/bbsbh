@@ -689,8 +689,8 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
 (from `boxscore…players.ID{id}.stats.pitching`, so it matches the box score exactly) plus
 swinging strikes, barrels and hard-hit balls; a per-type mix (usage overall and vs RHB/LHB,
 velo, induced vertical and horizontal break, whiffs, zone %, chase %, SwStr %); and every
-pitch with its location and break for the plots. A pitch belongs to its PA's pitcher of
-record. Zone is `pitchData.zone` 1–9; chase is swings on pitches outside it. Barrels use
+pitch with its location and break for the plots. A pitch belongs to the arm on the mound when it
+was thrown (a mid-PA change is read from its `pitching_substitution` event). Zone is `pitchData.zone` 1–9; chase is swings on pitches outside it. Barrels use
 Statcast's launch window (the feed has no flag); hard-hit is 95 mph+. Returns null when the
 pitcher has no line. Test: `test/pitcher-game-card.test.js` on gamePk 813024.
 
