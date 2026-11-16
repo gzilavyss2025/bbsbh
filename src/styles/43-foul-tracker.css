@@ -814,7 +814,7 @@ button.gamehigh-matchup:active {
    score+date badge all sit on ONE flex line (wrapping only if a viewport is
    too narrow to hold it). Both teams are identified once, by the score
    badge's logos — no separate name column, that was pure duplication.
-   Reuses .gamehigh-matchup's date-badge look and .stat's tile look, just not
+   Reuses .gamehigh-matchup's date-badge look and the .stat cell, just not
    GameHighRow's grid shape. */
 .souvenir-row {
   display: flex;

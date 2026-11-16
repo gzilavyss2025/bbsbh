@@ -241,7 +241,6 @@ button.boxlines__back:active {
    say where one figure stops. */
 .boxlines__stats .stat {
   padding: var(--space-2) 3px;
-  background: var(--surface-card);
 }
 
 .boxlines__stats .stat__v {

@@ -82,7 +82,7 @@ const BUDGETS = {
   'src/styles/78-offseason.css': 800, // 706: the winter home page's rows moved to offseason/winter-home.css
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 700, // 800
-  'src/styles/12-sealbox.css': 800, // 790
+  'src/styles/12-sealbox.css': 800, // 786
   'src/styles/14-strike-zone.css': 900, // 898
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200

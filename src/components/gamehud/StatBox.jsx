@@ -25,10 +25,10 @@ export function CountBlink({ before, after }) {
 
 
 // One stat cell: a figure over its caps label, flat on its card. Box Lines'
-// sheet draws these in its 1px-gap grid. `style` is optional and forwarded as-is.
-export function Stat({ k, v, tone, style }) {
+// sheet draws these in its 1px-gap grid.
+export function Stat({ k, v, tone }) {
   return (
-    <div className={`stat ${tone ? `stat--${tone}` : ''}`} style={style}>
+    <div className={`stat ${tone ? `stat--${tone}` : ''}`}>
       <span className="stat__v">{v}</span>
       <span className="stat__k">{k}</span>
     </div>

@@ -777,10 +777,6 @@
   color: var(--text-heading);
 }
 
-.stat--run .stat__v {
-  color: var(--accent-positive);
-}
-
 .stat__k {
   font-family: var(--font-display);
   font-size: var(--fs-label);
