@@ -42,7 +42,7 @@ export function GameCardPlots({ pitches, park }) {
       </figure>
       {park && balls.length > 0 && (
         <figure className="pgc__plot pgc__spray">
-          <BallparkDiagram layout={park} label={`Where the ${balls.length} balls in play off him landed: ${hits} hits`}>
+          <BallparkDiagram layout={park} label={`Where the ${balls.length} balls in play off him landed: ${hits} ${hits === 1 ? 'hit' : 'hits'}`}>
             {balls.map((p, i) =>
               p.hit ? (
                 <circle key={i} className="pgc__ball pgc__ball--hit" cx={p.ball.x} cy={p.ball.y} r={BALL_R.hit} />

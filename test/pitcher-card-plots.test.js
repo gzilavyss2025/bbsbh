@@ -65,3 +65,29 @@ test('every pitch Yamamoto threw in WS G7 has a location, and each of his 7 ball
   assert.equal(balls.length, 7)
   assert.equal(balls.filter((p) => p.hit).length, 1)
 })
+
+test('a tracked foul ball is not a ball in play: only the play-ending tracked event lands on the spray chart', () => {
+  // The batter fouls one off (the park tracked it), then singles.
+  const line = { battersFaced: 1, inningsPitched: '0.0' }
+  const ev = (code, hitData) => ({ isPitch: true, details: { call: { code }, type: { code: 'FF' } }, ...(hitData && { hitData }) })
+  const feed = {
+    liveData: {
+      boxscore: { teams: { home: { players: { ID1: { stats: { pitching: line } } } } } },
+      plays: {
+        allPlays: [{
+          about: { halfInning: 'top' },
+          result: { eventType: 'single' },
+          matchup: { pitcher: { id: 1 }, batSide: { code: 'R' } },
+          playEvents: [
+            ev('F', { coordinates: { coordX: 20, coordY: 150 } }),
+            ev('X', { coordinates: { coordX: 125, coordY: 100 } }),
+          ],
+        }],
+      },
+    },
+  }
+  const balls = buildPitcherGameCard(feed, 1).pitches.filter((p) => p.ball)
+  assert.equal(balls.length, 1)
+  assert.equal(balls[0].hit, true)
+  assert.equal(balls[0].call, 'inplay')
+})

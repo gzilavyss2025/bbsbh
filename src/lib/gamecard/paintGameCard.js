@@ -234,7 +234,11 @@ export function paintGameCard(canvas, model, art, c, f) {
   if (p) {
     const { w, h: ph } = L.plot
     const boxes = [PAD, PAD + w + PLOT_GAP]
-    boxes.forEach((x) => {
+    const balls = card.pitches.filter((q) => q.ball)
+    // The spray box only when there is a field and a ball to put on it, as on
+    // screen; otherwise the image carries no empty frame beside the zone.
+    const spray = Boolean(model.park && c.field && balls.length)
+    ;(spray ? boxes : boxes.slice(0, 1)).forEach((x) => {
       ctx.fillStyle = c.page
       ctx.fillRect(x, p.y + PLOT_TOP, w, ph)
       ctx.strokeStyle = c.rule
@@ -249,8 +253,7 @@ export function paintGameCard(canvas, model, art, c, f) {
     ctx.strokeRect(loc.zone.x, loc.zone.y, loc.zone.w, loc.zone.h)
     card.pitches.forEach((q) => q.loc && mark(ctx, q.type, loc.x(q.loc.xn), loc.y(q.loc.zn), 3.6))
     ctx.restore()
-    const balls = card.pitches.filter((q) => q.ball)
-    if (model.park && c.field && balls.length) {
+    if (spray) {
       ctx.save()
       ctx.translate(boxes[1], p.y + PLOT_TOP)
       ctx.beginPath()
@@ -261,7 +264,7 @@ export function paintGameCard(canvas, model, art, c, f) {
     }
     const cy = p.y + PLOT_TOP + ph + 14
     text(ctx, "WHERE · CATCHER'S VIEW", boxes[0], cy, { font: disp(600, 11), color: c.muted })
-    if (model.park && c.field && balls.length) text(ctx, 'IN PLAY · ● HIT ○ OUT', boxes[1], cy, { font: disp(600, 11), color: c.muted })
+    if (spray) text(ctx, 'IN PLAY · ● HIT ○ OUT', boxes[1], cy, { font: disp(600, 11), color: c.muted })
   }
 
   // Footer

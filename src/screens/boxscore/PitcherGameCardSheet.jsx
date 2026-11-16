@@ -58,7 +58,7 @@ function paletteOf(el) {
     return n ? getComputedStyle(n)[prop] : null
   }
   const field = el.querySelector('.pgc__spray')
-    ? { foul: ink('.bpdiagram__foul'), grass: ink('.bpdiagram__grass'), track: ink('.bpdiagram__track'), dirt: ink('.bpdiagram__dirt'), line: ink('.bpdiagram__line', 'stroke'), wall: ink('.bpdiagram__wall', 'stroke'), bag: ink('rect') }
+    ? { foul: ink('.bpdiagram__foul'), grass: ink('.bpdiagram__grass'), track: ink('.bpdiagram__track'), dirt: ink('.bpdiagram__dirt'), line: ink('.bpdiagram__line', 'stroke'), wall: ink('.bpdiagram__wall', 'stroke') }
     : null
   return [
     {

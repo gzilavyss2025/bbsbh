@@ -31,7 +31,7 @@ const allPlays = feed.liveData.plays.allPlays
     })),
   }))
 const p = feed.liveData.boxscore.teams.away.players[`ID${ID}`]
-const g = feed.gameData // venue: the spray chart's park
+const g = feed.gameData
 const out = {
   gamePk: 813024,
   gameData: {

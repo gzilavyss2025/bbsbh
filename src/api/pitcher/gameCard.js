@@ -94,8 +94,16 @@ function pitchesFor(feed, pitcherId) {
     const finisher = play?.matchup?.pitcher?.id
     const bat = play?.matchup?.batSide?.code ?? null
     const eventType = play?.result?.eventType ?? null
+    // The play's LAST tracked contact is the ball its result describes; a park
+    // can track a foul too (api/hitchart.js, selectPlayBattedBall), and a foul
+    // is not a ball in play.
+    const events = play?.playEvents ?? []
+    let landed = -1
+    events.forEach((e, i) => {
+      if (e?.isPitch && e.hitData) landed = i
+    })
     let current = onMound[half] ?? finisher
-    for (const e of play?.playEvents ?? []) {
+    for (const [i, e] of events.entries()) {
       if (e?.details?.eventType === 'pitching_substitution' && e.player?.id != null) current = e.player.id
       if (!e?.isPitch || current !== pitcherId) continue
       const pd = e.pitchData ?? {}
@@ -117,8 +125,8 @@ function pitchesFor(feed, pitcherId) {
         // Where a ball put in play landed, in the ballpark drawing's own space
         // (lib/ballpark/hitProjection.js, the box score hit chart's projection),
         // and whether the play went for a hit. Null for a pitch not put in play.
-        ball: e.hitData ? hitCoordToSvg(e.hitData.coordinates?.coordX, e.hitData.coordinates?.coordY) : null,
-        hit: e.hitData ? HIT_EVENT_TYPES.has(eventType) : false,
+        ball: i === landed ? hitCoordToSvg(e.hitData.coordinates?.coordX, e.hitData.coordinates?.coordY) : null,
+        hit: i === landed && HIT_EVENT_TYPES.has(eventType),
         ev: e.hitData?.launchSpeed ?? null,
         la: e.hitData?.launchAngle ?? null,
       })
