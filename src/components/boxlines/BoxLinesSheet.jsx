@@ -205,8 +205,7 @@ export function BoxLinesSheet({
           {stats && (
             <div className="boxlines__stats">
               {stats.map((c) => (
-                /* The app's own stat cell, the one the player page's grid above
-                   this sheet is built from — a figure over its name. A null is
+                /* The app's own stat cell — a figure over its name. A null is
                    a rate with no denominator and draws the quiet mark, never a
                    zero. */
                 <Stat key={c.k} k={c.k} v={c.v ?? '·'} tone={c.v == null ? 'nil' : undefined} />

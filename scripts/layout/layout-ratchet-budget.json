@@ -56,7 +56,7 @@
   "src/styles/12-sealbox.css": {
     "column": 6,
     "wrap": 1,
-    "grid": 3
+    "grid": 2
   },
   "src/styles/13-play-by-play.css": {
     "column": 1
@@ -157,8 +157,7 @@
     "wrap": 1
   },
   "src/styles/33-awards-history.css": {
-    "column": 2,
-    "grid": 0
+    "column": 2
   },
   "src/styles/34-postseason.css": {
     "column": 7,

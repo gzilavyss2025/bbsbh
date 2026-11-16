@@ -1841,9 +1841,13 @@ test('C6c: the two tile grids keep their --border-rule ground inside a ledger Ca
       `${ns} holds ${inner} in a Card`,
     )
   }
-  const css = read('43-foul-tracker.css')
-  assert.ok(css.includes('.gamehigh-tiles__grid .stat'), 'the tile cells keep their reset')
-  assert.ok(css.includes('.souvenir-row__tilegrid .stat'), 'the tile cells keep their reset')
+  // The tile cells draw no frame of their own. The base .stat has been flat
+  // since #1775, so the per-grid resets went; this pins the outcome they guarded.
+  const cell = ruleBody(read('12-sealbox.css'), '.stat')
+  assert.ok(cell, 'a .stat rule')
+  for (const prop of ['border', 'border-radius', 'box-shadow']) {
+    assert.equal(decl(cell, prop), undefined, `.stat sets no ${prop}`)
+  }
 })
 
 // The table had no frame. It takes the canonical sheet, which Gary approved on

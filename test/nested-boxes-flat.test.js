@@ -35,3 +35,19 @@ for (const cls of FLAT) {
     }
   })
 }
+
+// The stat cell (#1775's last case). It keeps its paper fill, because the
+// 1px-gap grids it sits in draw their rules with the background behind it, but
+// never a frame of its own. `.statline`, the old StatBox grid, renders nowhere.
+test('.stat is a flat cell, with no frame of its own anywhere', () => {
+  const FRAME = new Set(['border', 'border-radius', 'box-shadow'])
+  const rules = rulesEndingIn(STYLES, 'stat')
+  assert.ok(rules.length > 0, '.stat should still have a rule')
+  for (const { where, props } of rules) {
+    assert.deepEqual(props.filter((p) => FRAME.has(p)), [], `${where} sets a frame`)
+  }
+})
+
+test('the dead .statline grid is gone', () => {
+  assert.deepEqual(rulesEndingIn(STYLES, 'statline'), [])
+})
