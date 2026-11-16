@@ -47,7 +47,8 @@ export function parkHistory(spans, mates) {
     if (!s.venueNameRuns) p.nameRuns = null
     for (const r of p.nameRuns ? s.venueNameRuns : []) {
       const prev = p.nameRuns[p.nameRuns.length - 1]
-      if (prev && prev.name === r.name && r.from === prev.to + 1) prev.to = r.to
+      // The same name on both sides of a stint away (the Rays at Steinbrenner Field in 2025) is one run.
+      if (prev && prev.name === r.name) prev.to = r.to
       else p.nameRuns.push({ ...r })
     }
     ;(s.venueNames ?? [s.venueName]).forEach((n, i) => {

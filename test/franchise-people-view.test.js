@@ -138,6 +138,9 @@ test('parksView: a live season after the file extends the runs; a club that move
     ['Tropicana Field', '1998–2024, 2026 on'],
     ['George M. Steinbrenner Field', '2025'],
   ])
+  // #3089 review: a park left and returned to under the same name has no former name.
+  assert.deepEqual(rays[0].also, [])
+  assert.deepEqual(parksFor(147).find((p) => p.name === 'Yankee Stadium I').also, [])
   const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
   assert.equal(brewers[0].years, '2001 on')
   assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
