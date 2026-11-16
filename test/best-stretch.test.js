@@ -1,7 +1,7 @@
 // Best Stretch (/best-stretch): a hitter's best N games in a row, across seasons.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { bestStretch, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
+import { bestStretch, loadCareerLog, dec2, era, ip, isStarter, kRate, measureByKey, obp, presetsFor, showsHolds, slg, toGame, whip } from '../src/api/streaks/bestStretch.js'
 
 const day = (i) => `20${String(18 + Math.floor(i / 200)).padStart(2, '0')}-${String(4 + Math.floor((i % 200) / 31)).padStart(2, '0')}-${String(((i % 200) % 31) + 1).padStart(2, '0')}`
 const game = (i, s) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4, plateAppearances: 4, ...s } })
@@ -89,4 +89,21 @@ test('each measure prints in its usual form; an infinite ERA is a dash', () => {
   assert.equal(measureByKey('era', 'pitching').format(Infinity), '—')
   assert.equal(measureByKey('hr').format(61), '61')
   assert.equal(dec2(Infinity), '—')
+})
+
+test('career log fetches one season at a time, never the slow whole-career range', async () => {
+  const paths = []
+  const signal = new AbortController().signal
+  const get = async (path, opts) => {
+    assert.equal(opts?.signal, signal)
+    paths.push(path)
+    if (path.includes('yearByYear')) return { stats: [{ splits: [{ season: '2006' }, { season: '2007' }, { season: '2007' }] }] }
+    const season = path.match(/season=(\d+)/)[1]
+    return { stats: [{ splits: [{ date: `${season}-05-01`, player: { fullName: 'Prince Fielder' }, game: { gameNumber: 1 }, team: { id: 158 }, stat: { atBats: 4 } }] }] }
+  }
+  const log = await loadCareerLog(429664, signal, 'hitting', get)
+  assert.equal(log.name, 'Prince Fielder')
+  assert.deepEqual(log.games.map((g) => g.date), ['2006-05-01', '2007-05-01'])
+  assert.ok(paths.every((p) => !p.includes('startDate')))
+  assert.equal(paths.length, 3)
 })
