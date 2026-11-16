@@ -44,7 +44,10 @@ const lines = await mapConcurrent(jobs, 4, async ({ teamId, season }) => {
   return { teamId, season, splits: d.stats?.[0]?.splits ?? [] }
 }, { strict: true })
 const clubs = new Map(ALL_MLB_TEAM_IDS.map((id) => [id, new Map()]))
+// Each club's first season with any batting line: the board's start (1969 for 158, not 1901).
+const firstOf = new Map()
 for (const { teamId, season, splits } of lines) {
+  if (splits.length && !(firstOf.get(teamId) <= season)) firstOf.set(teamId, season)
   for (const sp of splits) {
     const id = sp.player?.id
     if (!id) continue
@@ -93,19 +96,31 @@ console.log(`pass 2: warming ${warm.size} logs`)
 await mapConcurrent([...warm], 4, rowsFor, { strict: true })
 
 const files = []
+const violations = []
 for (const [teamId, club] of clubs) {
   const boards = {}
   for (const n of LENGTHS) {
     boards[n] = {}
     for (const m of BAT_MEASURES) {
       const cands = [...club].map(([id, p]) => ({ id, ceiling: ceilingFor(p.seasons, n, m.key) }))
-      const rows = await bestFirst(cands, async (id) => (await rowsFor(id))[teamId]?.[`${n}:${m.key}`] ?? null)
+      const ceilingOf = new Map(cands.map((c) => [c.id, c.ceiling]))
+      const rows = await bestFirst(cands, async (id) => {
+        const r = (await rowsFor(id))[teamId]?.[`${n}:${m.key}`] ?? null
+        // Season lines and game logs are two feeds: a real run over its ceiling means the pruning
+        // could have dropped someone, so say so loudly rather than ship a quiet hole.
+        if (r && !(r.raw <= ceilingOf.get(id) + 1e-9)) violations.push(`${teamId} ${n} ${m.key} ${r.name}: ${r.raw} > ceiling ${ceilingOf.get(id)}`)
+        return r
+      })
       boards[n][m.key] = rows.map(({ raw, ...r }) => r)
     }
   }
-  files.push([String(teamId), { through, firstSeason: 1901, boards }])
+  files.push([String(teamId), { through, firstSeason: firstOf.get(teamId) ?? null, boards }])
 }
 console.log(`pass 2: ${fetched} logs fetched in all`)
+if (violations.length) {
+  console.error(`CEILING VIOLATIONS (${violations.length}): these boards cannot be trusted\n${violations.join('\n')}`)
+  process.exit(1)
+}
 
 const { written } = await writeShards(outDir, files)
 console.log(`wrote ${written} club files to ${outDir}`)
