@@ -49,6 +49,7 @@ function boxLine(feed, pitcherId) {
     if (s && s.battersFaced != null) {
       return {
         name: p.person?.fullName ?? '',
+        side,
         role: s.gamesStarted > 0 ? 'Start' : 'Relief',
         ip: s.inningsPitched ?? '',
         h: s.hits ?? 0,

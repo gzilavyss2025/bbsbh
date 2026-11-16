@@ -13,7 +13,9 @@
 
 const LOC_X = [-2.6, 2.6]
 const LOC_Z = [-0.9, 1.9]
-export const MOVE_RANGE = 24 // inches each way from the centre
+export const MOVE_RANGE = 24 // the cap, inches each way from the centre
+const MOVE_FLOOR = 12
+const MOVE_MARGIN = 3
 
 const lerp = (v, [a, b], size) => ((v - a) / (b - a)) * size
 
@@ -28,12 +30,28 @@ export function locationScale(w, h) {
   return { x, y, zone: { x: x(-1), y: y(1), w: x(1) - x(-1), h: y(0) - y(1) } }
 }
 
-// { x, y } for a movement in inches, clamped to the box so a wild reading
-// stays on the plot.
-export function movementScale(w, h) {
-  const clamp = (v) => Math.max(-MOVE_RANGE, Math.min(MOVE_RANGE, v))
-  const range = [-MOVE_RANGE, MOVE_RANGE]
-  return { x: (dx) => lerp(clamp(dx), range, w), y: (dz) => h - lerp(clamp(dz), range, h) }
+// The movement plot's half-width in inches, fitted to this night: his biggest
+// break (tonight's pitches or a season ring) plus a margin, at least 12 in and at
+// most the 24 in cap. A fixed 24 left most of the box empty for a sinkerballer.
+export function movementRange(pitches, seasonByCode) {
+  let max = 0
+  for (const p of pitches) {
+    if (p.pfxX != null) max = Math.max(max, Math.abs(p.pfxX))
+    if (p.pfxZ != null) max = Math.max(max, Math.abs(p.pfxZ))
+  }
+  for (const s of seasonByCode?.values?.() ?? []) {
+    if (s.pfxX != null) max = Math.max(max, Math.abs(s.pfxX))
+    if (s.pfxZ != null) max = Math.max(max, Math.abs(s.pfxZ))
+  }
+  return Math.min(MOVE_RANGE, Math.max(MOVE_FLOOR, Math.ceil(max + MOVE_MARGIN)))
+}
+
+// { x, y } for a movement in inches in a w×h box, clamped to `range` so a
+// wild reading stays on the plot.
+export function movementScale(w, h, range = MOVE_RANGE) {
+  const clamp = (v) => Math.max(-range, Math.min(range, v))
+  const r = [-range, range]
+  return { x: (dx) => lerp(clamp(dx), r, w), y: (dz) => h - lerp(clamp(dz), r, h) }
 }
 
 // The season figures a card compares against, by pitch code, from one
@@ -58,10 +76,10 @@ export function seasonByCode(entry, physFields, level = 'mlb') {
   return out
 }
 
-// "+0.4" / "−1.2" / "0.0", or '' when either side is missing.
+// "+0.4" / "−1.2", or '' under 0.3 mph (noise, not a story) or when either side is missing.
 export function veloDelta(tonight, season) {
   if (!Number.isFinite(tonight) || !Number.isFinite(season)) return ''
   const d = Math.round((tonight - season) * 10) / 10
-  if (d === 0) return '0.0'
+  if (Math.abs(d) < 0.3) return ''
   return `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(1)}`
 }

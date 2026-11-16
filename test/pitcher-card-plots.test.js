@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { locationScale, movementScale, seasonByCode, veloDelta, MOVE_RANGE } from '../src/lib/pitch/cardPlots.js'
+import { locationScale, movementScale, movementRange, seasonByCode, veloDelta, MOVE_RANGE } from '../src/lib/pitch/cardPlots.js'
 import { buildPitcherGameCard } from '../src/api/pitcher/gameCard.js'
 
 const PHYS = ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime', 'spinRate']
@@ -51,11 +51,28 @@ test('season by code: a Triple-A game compares against his Triple-A rows, never 
   assert.equal(seasonByCode({ mlb: [{ code: 'FF', avgVelo: 96 }] }, PHYS, 'aaa').size, 0)
 })
 
-test('velo delta: signed tenths, a real minus sign, and nothing when a side is missing', () => {
+test('velo delta: signed tenths, a real minus sign, nothing under 0.3 mph or when a side is missing', () => {
   assert.equal(veloDelta(96.9, 96.1), '+0.8')
-  assert.equal(veloDelta(91.5, 91.6), '−0.1')
-  assert.equal(veloDelta(91.6, 91.6), '0.0')
+  assert.equal(veloDelta(91.2, 91.6), '−0.4')
+  assert.equal(veloDelta(91.3, 91.6), '−0.3')
+  assert.equal(veloDelta(91.5, 91.6), '')
+  assert.equal(veloDelta(91.6, 91.6), '')
   assert.equal(veloDelta(91.6, null), '')
+})
+
+test('movement range: fits his biggest break plus a margin, never under 12 in or over the 24 in cap', () => {
+  const pitches = [{ pfxX: -14, pfxZ: 9 }, { pfxX: 3, pfxZ: -2 }, { pfxX: null, pfxZ: null }]
+  assert.equal(movementRange(pitches, new Map()), 17)
+  assert.equal(movementRange([{ pfxX: 2, pfxZ: 3 }], new Map()), 12)
+  assert.equal(movementRange([{ pfxX: 40, pfxZ: 0 }], new Map()), MOVE_RANGE)
+  assert.equal(movementRange([{ pfxX: 2, pfxZ: 3 }], new Map([['FF', { pfxX: -16, pfxZ: 10 }]])), 19)
+})
+
+test('movement scale takes the fitted range: its edge is that range, not the cap', () => {
+  const m = movementScale(100, 100, 12)
+  assert.equal(m.x(12), 100)
+  assert.equal(m.y(-12), 100)
+  assert.equal(m.x(0), 50)
 })
 
 test('every pitch Yamamoto threw in WS G7 has a location and a movement to plot', () => {

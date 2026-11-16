@@ -1,6 +1,6 @@
 import { glyphD } from '../../lib/pitch/pitchGlyph.js'
 import { pitchMark } from '../../lib/pitch/pitchTypes.js'
-import { locationScale, movementScale } from '../../lib/pitch/cardPlots.js'
+import { locationScale, movementScale, movementRange } from '../../lib/pitch/cardPlots.js'
 
 // The pitcher game card's location and movement plots (#2969 slice 4). Every
 // pitch is its pitchMark (docs/pitch-types.md); the geometry is
@@ -24,7 +24,7 @@ function Mark({ code, x, y, r = 3.6 }) {
 
 export function GameCardPlots({ pitches, mix, season }) {
   const loc = locationScale(W, H)
-  const mv = movementScale(W, H)
+  const mv = movementScale(W, H, movementRange(pitches, season))
   const placed = pitches.filter((p) => p.loc)
   const moved = pitches.filter((p) => p.pfxX != null && p.pfxZ != null)
   if (!placed.length && !moved.length) return null
@@ -45,10 +45,16 @@ export function GameCardPlots({ pitches, mix, season }) {
           {mix.map((m) => {
             const s = season?.get(m.type)
             if (s?.pfxX == null || s?.pfxZ == null) return null
-            return <circle key={m.type} className="pgc__ring" cx={mv.x(s.pfxX)} cy={mv.y(s.pfxZ)} r="7" style={{ '--pitch': pitchMark(m.type).color }} />
+            const at = { cx: mv.x(s.pfxX), cy: mv.y(s.pfxZ), r: 7 }
+            return (
+              <g key={m.type}>
+                <circle className="pgc__ring" {...at} />
+                <circle className="pgc__ring-in" {...at} style={{ '--pitch': pitchMark(m.type).color }} />
+              </g>
+            )
           })}
         </svg>
-        <figcaption>{season?.size ? 'Movement · ring = his season' : 'Movement'}</figcaption>
+        <figcaption>{season?.size ? 'Movement · ring = season' : 'Movement'}</figcaption>
       </figure>
     </div>
   )

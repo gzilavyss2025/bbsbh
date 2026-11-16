@@ -5,6 +5,7 @@ import { fetchPitchArsenalFor, PHYS_FIELDS } from '../../api/pitcher/arsenal.js'
 import { selectGameSeason } from '../../api/select.js'
 import { seasonByCode, veloDelta } from '../../lib/pitch/cardPlots.js'
 import { paintGameCard, cardFilename } from '../../lib/gamecard/paintGameCard.js'
+import { contextLine, headline } from '../../lib/gamecard/cardText.js'
 import { loadPosterImages } from '../../lib/preview/posterImages.js'
 import { realHeadshotUrl } from '../../lib/teams/headshots.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -41,17 +42,6 @@ const TIPS = {
   Whiffs: 'Swings and misses.',
   'Hard-hit': 'Balls in play hit 95 mph or harder.',
   Barrels: 'Balls hit at the speed and angle that most often go for extra bases (Statcast).',
-}
-
-function headline(l) {
-  const runs = l.er === l.r ? `${l.r} R` : `${l.r} R (${l.er} ER)`
-  return [`${l.h} H`, runs, `${l.bb} BB`, `${l.k} K`, l.hr > 0 && `${l.hr} HR`].filter(Boolean).join(' · ')
-}
-
-function finalLine(g) {
-  if (g.away.runs == null || g.home.runs == null) return ''
-  const tail = g.final ? ` · F${g.innings ? `/${g.innings}` : ''}` : ''
-  return `${g.away.abbr} ${g.away.runs} · ${g.home.abbr} ${g.home.runs}${tail}`
 }
 
 // The colours and fonts the image paints with, read off the card as rendered,
@@ -101,11 +91,10 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
       paintGameCard(canvasRef.current, {
         card, name, season,
         role: `${role}${pitcher.dec ? ` · ${pitcher.dec}` : ''}`,
-        ctxLine: [card.game.round, card.game.date].filter(Boolean).join(' · '),
+        ctxLine: contextLine(card),
         headline: headline(card.line),
         sub: `${card.line.pitches} pitches, ${card.line.strikes} strikes`,
         figures: [['Whiffs', card.line.swStr], ['Hard-hit', card.line.hardHit], ['Barrels', card.line.barrels]],
-        final: finalLine(card.game),
       }, art, colours, fonts)
       setPainted(true)
     })
@@ -128,7 +117,7 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
             <article ref={cardRef} className="pgc__card" style={headerThemeStyle(theme)}>
               <header className="pgc__band">
                 <div className="pgc__who">
-                  <p className="pgc__ctx">{[card.game.round, card.game.date].filter(Boolean).join(' · ')}</p>
+                  <p className="pgc__ctx">{contextLine(card)}</p>
                   <h2 className="pgc__name">
                     {rest.length ? <>{first}<br />{rest.join(' ')}</> : name}
                   </h2>
@@ -187,7 +176,6 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
 
               <footer className="pgc__foot">
                 <span className="pgc__brand">Tally Baseball</span>
-                <span>{finalLine(card.game)}</span>
               </footer>
             </article>
 

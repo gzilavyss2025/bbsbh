@@ -10,19 +10,23 @@
 // lib/pitch/cardPlots.js, shared with the SVG.
 import { glyphD } from '../pitch/pitchGlyph.js'
 import { pitchMark } from '../pitch/pitchTypes.js'
-import { locationScale, movementScale } from '../pitch/cardPlots.js'
+import { locationScale, movementScale, movementRange } from '../pitch/cardPlots.js'
 
 export const CARD_W = 360
 export const SCALE = 3 // 1080 px wide
 const PAD = 16
-const BAND_H = 140
-const HERO_H = 64
-const TRIO_H = 56
-const MIX_HEAD = 34
-const MIX_ROW = 30
+// Tightened so a five-pitch card is no taller than 9:16 (a phone story, no crop).
+const BAND_H = 124
+const HERO_H = 54
+const TRIO_H = 46
+const MIX_HEAD = 28
+const MIX_ROW = 26
 const PLOT_GAP = 10
+const PLOT_TOP = 10
 const PLOT_CAPTION = 18
-const FOOT_H = 32
+const FOOT_H = 28
+const SHOT_W = 96
+const SHOT_H = 112
 
 export function cardLayout({ mixRows, hasPlots }) {
   const blocks = []
@@ -37,9 +41,21 @@ export function cardLayout({ mixRows, hasPlots }) {
   if (mixRows > 0) add('mix', MIX_HEAD + mixRows * MIX_ROW + PAD / 2)
   const plotW = (CARD_W - 2 * PAD - PLOT_GAP) / 2
   const plotH = (plotW * 140) / 120
-  if (hasPlots) add('plots', PAD + plotH + PLOT_CAPTION + PAD / 2)
+  if (hasPlots) add('plots', PLOT_TOP + plotH + PLOT_CAPTION + 6)
   add('foot', FOOT_H)
   return { width: CARD_W, height: y, blocks: Object.fromEntries(blocks.map((b) => [b.name, b])), plot: { w: plotW, h: plotH } }
+}
+
+// The source rectangle that fills a boxW×boxH slot at the image's own
+// proportions (CSS object-fit: cover), trimming the sides of a wide photo
+// evenly and the bottom of a tall one, so the face stays. Never stretches.
+export function coverRect(imgW, imgH, boxW, boxH) {
+  const box = boxW / boxH
+  if (imgW / imgH > box) {
+    const sw = imgH * box
+    return { sx: (imgW - sw) / 2, sy: 0, sw, sh: imgH }
+  }
+  return { sx: 0, sy: 0, sw: imgW, sh: imgW / box }
 }
 
 // "yamamoto-ws-g7-2025-11-01.png"-style: the pitcher and the date, safe for any file system.
@@ -74,7 +90,7 @@ function mark(ctx, code, x, y, r) {
   ctx.restore()
 }
 
-// model: { card, name, role, ctxLine, headline, sub, figures: [[label, value]], final, season }
+// model: { card, name, role, ctxLine, headline, sub, figures: [[label, value]], season }
 // art: { headshot } (HTMLImageElement | null). c: colours. f: font stacks { display, mono }.
 export function paintGameCard(canvas, model, art, c, f) {
   const { card } = model
@@ -93,12 +109,16 @@ export function paintGameCard(canvas, model, art, c, f) {
   const b = L.blocks.band
   ctx.fillStyle = c.band
   ctx.fillRect(0, b.y, L.width, b.h)
-  if (art.headshot) ctx.drawImage(art.headshot, L.width - PAD - 96, b.y + b.h - 112, 96, 112)
-  text(ctx, caps(model.ctxLine), PAD, b.y + 26, { font: disp(600, 12), color: c.bandText })
+  const shot = art.headshot
+  if (shot?.naturalWidth) {
+    const r = coverRect(shot.naturalWidth, shot.naturalHeight, SHOT_W, SHOT_H)
+    ctx.drawImage(shot, r.sx, r.sy, r.sw, r.sh, L.width - PAD - SHOT_W, b.y + b.h - SHOT_H, SHOT_W, SHOT_H)
+  }
+  text(ctx, caps(model.ctxLine), PAD, b.y + 22, { font: disp(600, 12), color: c.bandText })
   const [first, ...rest] = model.name.split(' ')
-  text(ctx, caps(rest.length ? first : model.name), PAD, b.y + 62, { font: disp(900, 34), color: c.bandText })
-  if (rest.length) text(ctx, caps(rest.join(' ')), PAD, b.y + 94, { font: disp(900, 34), color: c.bandText })
-  text(ctx, caps(model.role), PAD, b.y + 122, { font: disp(600, 12), color: c.bandText })
+  text(ctx, caps(rest.length ? first : model.name), PAD, b.y + 54, { font: disp(900, 34), color: c.bandText })
+  if (rest.length) text(ctx, caps(rest.join(' ')), PAD, b.y + 86, { font: disp(900, 34), color: c.bandText })
+  text(ctx, caps(model.role), PAD, b.y + 110, { font: disp(600, 12), color: c.bandText })
   ctx.fillStyle = c.bandAccent
   ctx.fillRect(0, b.y + b.h - 3, L.width, 3)
 
@@ -107,16 +127,16 @@ export function paintGameCard(canvas, model, art, c, f) {
   ctx.font = mono(700, 28)
   const ipW = ctx.measureText(card.line.ip).width + 44
   ctx.fillStyle = c.ink
-  ctx.fillRect(PAD, h.y + 12, ipW, 40)
-  text(ctx, card.line.ip, PAD + 10, h.y + 43, { font: mono(700, 28), color: c.marker })
-  text(ctx, 'IP', PAD + ipW - 10, h.y + 43, { font: disp(600, 12), color: c.onInk, align: 'right' })
+  ctx.fillRect(PAD, h.y + 8, ipW, 38)
+  text(ctx, card.line.ip, PAD + 10, h.y + 37, { font: mono(700, 28), color: c.marker })
+  text(ctx, 'IP', PAD + ipW - 10, h.y + 37, { font: disp(600, 12), color: c.onInk, align: 'right' })
   // The headline shrinks to fit (a line with ER and HR runs long), never past 10px.
   const room = L.width - PAD - (PAD + ipW + 12)
   let size = 14
   ctx.font = mono(700, size)
   while (size > 10 && ctx.measureText(caps(model.headline)).width > room) ctx.font = mono(700, --size)
-  text(ctx, caps(model.headline), PAD + ipW + 12, h.y + 30, { font: mono(700, size), color: c.text })
-  text(ctx, caps(model.sub), PAD + ipW + 12, h.y + 47, { font: mono(500, 11), color: c.muted })
+  text(ctx, caps(model.headline), PAD + ipW + 12, h.y + 25, { font: mono(700, size), color: c.text })
+  text(ctx, caps(model.sub), PAD + ipW + 12, h.y + 41, { font: mono(500, 11), color: c.muted })
   ctx.fillStyle = c.rule
   ctx.fillRect(0, h.y + h.h - 1, L.width, 1)
 
@@ -125,8 +145,8 @@ export function paintGameCard(canvas, model, art, c, f) {
   const colW = L.width / model.figures.length
   model.figures.forEach(([label, v], i) => {
     const x = i * colW + PAD
-    text(ctx, String(v), x, t.y + 30, { font: mono(700, 24), color: c.text })
-    text(ctx, caps(label), x, t.y + 46, { font: disp(600, 12), color: c.muted })
+    text(ctx, String(v), x, t.y + 25, { font: mono(700, 20), color: c.text })
+    text(ctx, caps(label), x, t.y + 39, { font: disp(600, 11), color: c.muted })
     if (i > 0) ctx.fillRect(i * colW, t.y, 1, t.h)
   })
   ctx.fillStyle = c.rule
@@ -135,10 +155,10 @@ export function paintGameCard(canvas, model, art, c, f) {
   // Mix
   const m = L.blocks.mix
   if (m) {
-    text(ctx, 'WHAT HE THREW', PAD, m.y + 22, { font: disp(700, 12), color: c.text })
+    text(ctx, 'WHAT HE THREW', PAD, m.y + 19, { font: disp(700, 12), color: c.text })
     // Use, Mph (with the season change in its own slot after it), Whiffs.
     const cols = [L.width - PAD - 136, L.width - PAD - 76, L.width - PAD]
-    ;['USE', 'MPH', 'WHIFFS'].forEach((s, i) => text(ctx, s, cols[i], m.y + 22, { font: disp(600, 11), color: c.muted, align: 'right' }))
+    ;['USE', 'MPH', 'WHIFFS'].forEach((s, i) => text(ctx, s, cols[i], m.y + 19, { font: disp(600, 11), color: c.muted, align: 'right' }))
     card.mix.forEach((row, i) => {
       const y = m.y + MIX_HEAD + i * MIX_ROW
       mark(ctx, row.type, PAD + 5, y + 6, 5)
@@ -148,7 +168,7 @@ export function paintGameCard(canvas, model, art, c, f) {
       const d = model.season?.deltas?.get(row.type) || ''
       text(ctx, pct, cols[0], y + 10, { font: mono(500, 11), color: c.text, align: 'right' })
       text(ctx, velo, cols[1], y + 10, { font: mono(500, 11), color: c.text, align: 'right' })
-      if (d) text(ctx, d, cols[1] + 4, y + 10, { font: mono(500, 9), color: c.muted })
+      if (d) text(ctx, d, cols[1] + 4, y + 10, { font: mono(500, 11), color: c.muted })
       text(ctx, String(row.whiffs), cols[2], y + 10, { font: mono(500, 11), color: c.text, align: 'right' })
       const trackW = L.width - 2 * PAD - 18
       ctx.fillStyle = c.rule
@@ -165,47 +185,51 @@ export function paintGameCard(canvas, model, art, c, f) {
     const boxes = [PAD, PAD + w + PLOT_GAP]
     boxes.forEach((x) => {
       ctx.fillStyle = c.page
-      ctx.fillRect(x, p.y + PAD, w, ph)
+      ctx.fillRect(x, p.y + PLOT_TOP, w, ph)
       ctx.strokeStyle = c.rule
       ctx.lineWidth = 1
-      ctx.strokeRect(x, p.y + PAD, w, ph)
+      ctx.strokeRect(x, p.y + PLOT_TOP, w, ph)
     })
     const loc = locationScale(w, ph)
     ctx.save()
-    ctx.translate(boxes[0], p.y + PAD)
+    ctx.translate(boxes[0], p.y + PLOT_TOP)
     ctx.strokeStyle = c.ink
     ctx.lineWidth = 1.4
     ctx.strokeRect(loc.zone.x, loc.zone.y, loc.zone.w, loc.zone.h)
     card.pitches.forEach((q) => q.loc && mark(ctx, q.type, loc.x(q.loc.xn), loc.y(q.loc.zn), 3.6))
     ctx.restore()
-    const mv = movementScale(w, ph)
+    const mv = movementScale(w, ph, movementRange(card.pitches, model.season?.byCode))
     ctx.save()
-    ctx.translate(boxes[1], p.y + PAD)
+    ctx.translate(boxes[1], p.y + PLOT_TOP)
     ctx.fillStyle = c.rule
     ctx.fillRect(w / 2, 0, 1, ph)
     ctx.fillRect(0, ph / 2, w, 1)
     card.pitches.forEach((q) => q.pfxX != null && q.pfxZ != null && mark(ctx, q.type, mv.x(q.pfxX), mv.y(q.pfxZ), 3.2))
-    ctx.setLineDash([2, 2])
+    // His season, per pitch: a solid ink ring with the pitch's colour inside it,
+    // drawn over the dots so the comparison reads at a glance.
     card.mix.forEach((row) => {
       const s = model.season?.byCode?.get(row.type)
       if (s?.pfxX == null || s?.pfxZ == null) return
-      ctx.strokeStyle = pitchMark(row.type).color
       ctx.beginPath()
       ctx.arc(mv.x(s.pfxX), mv.y(s.pfxZ), 7, 0, Math.PI * 2)
+      ctx.strokeStyle = c.ink
+      ctx.lineWidth = 2.5
+      ctx.stroke()
+      ctx.strokeStyle = pitchMark(row.type).color
+      ctx.lineWidth = 1.2
       ctx.stroke()
     })
     ctx.restore()
-    const cy = p.y + PAD + ph + 13
-    text(ctx, "WHERE · CATCHER'S VIEW", boxes[0], cy, { font: disp(600, 10), color: c.muted })
-    text(ctx, model.season?.byCode?.size ? 'MOVEMENT · RING = HIS SEASON' : 'MOVEMENT', boxes[1], cy, { font: disp(600, 10), color: c.muted })
+    const cy = p.y + PLOT_TOP + ph + 14
+    text(ctx, "WHERE · CATCHER'S VIEW", boxes[0], cy, { font: disp(600, 11), color: c.muted })
+    text(ctx, model.season?.byCode?.size ? 'MOVEMENT · RING = SEASON' : 'MOVEMENT', boxes[1], cy, { font: disp(600, 11), color: c.muted })
   }
 
   // Footer
   const ft = L.blocks.foot
   ctx.fillStyle = c.ink
   ctx.fillRect(0, ft.y, L.width, ft.h)
-  text(ctx, 'TALLY BASEBALL', PAD, ft.y + 21, { font: disp(700, 12), color: c.marker })
-  text(ctx, caps(model.final), L.width - PAD, ft.y + 21, { font: disp(600, 12), color: c.onInk, align: 'right' })
+  text(ctx, 'TALLY BASEBALL', PAD, ft.y + 18, { font: disp(700, 12), color: c.marker })
 
   // The card's ink edge
   ctx.strokeStyle = c.ink

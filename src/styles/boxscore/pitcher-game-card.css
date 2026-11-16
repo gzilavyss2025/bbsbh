@@ -135,7 +135,7 @@
 .pgc__fig b {
   display: block;
   font-family: var(--font-mono);
-  font-size: var(--fs-title-lg);
+  font-size: var(--fs-title-md);
   color: var(--text-heading);
 }
 .pgc__mix {
@@ -279,11 +279,17 @@
   stroke: var(--pitch, var(--text-muted));
   stroke-width: 1.4;
 }
+/* His season, per pitch: a solid ink ring with the pitch's colour inside, over
+   the dots, so the comparison reads at a glance (the PNG paints the same). */
 .pgc__ring {
   fill: none;
+  stroke: var(--border-stamped);
+  stroke-width: 2.5;
+}
+.pgc__ring-in {
+  fill: none;
   stroke: var(--pitch, var(--text-muted));
-  stroke-width: 1.4;
-  stroke-dasharray: 2 2;
+  stroke-width: 1.2;
 }
 .pgc__delta {
   color: var(--text-muted);
