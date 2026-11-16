@@ -2131,15 +2131,16 @@ Re-run only to fold in a new season.
   30 MLB clubs' best runs of 162 and 154 games in a row by one player, in HR, H, RBI, SB, AVG and OPS,
   top ten, one row per player (the Club Stretch page). **Hand-run**, after the regular season ends:
   `node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache <file>]`. Two passes: one
-  season-stats call per club per season (about 3,800 small calls) gives every player's club lines;
-  then each board fetches career game logs best-first, by the most a player's seasons allow
-  (`ceilingFor`), and stops once the next ceiling cannot reach tenth place, so the boards match
-  fetching every player. A career log can take the feed 40 s to build, so the pruning is the point.
-  `--cache` (outside the repo) keeps fetched players' rows so a stopped run resumes. The feed's
-  per-game logs start in 1901, so every board does. A run counts his games played, crosses
-  seasons, and ends at a game for another club; AVG and OPS need 3.1 PA per game. The pure half is
-  `scripts/lib/franchise/club-stretch.mjs`, which reuses `bestStretch` from
-  `src/api/streaks/bestStretch.js`.
+  season-stats call per club per season (about 3,800 small calls) names every player with 154+
+  games for a club; then every one of them gets his game logs ONE SEASON PER CALL, from his first
+  club season to his last, gap years included. Never ask for a career's log in one call: the feed
+  can take 40 s to build one, against about 1 s for the same games season by season (measured
+  2026-11-16). `--cache` (outside the repo) keeps each player's rows so a stopped run resumes.
+  `firstSeason` is each club's first season with a batting line. The feed's per-game logs start in
+  1901. A run counts his games played, crosses seasons, and ends at a game for another club; AVG and
+  OPS need 3.1 PA per game (503 over 162, 478 over 154, rounded up). The pure half is
+  `scripts/lib/franchise/club-stretch.mjs`, over the run rules in `src/api/streaks/bestStretch.js`,
+  which Best Stretch's `?club=` shares.
 
 - `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
   the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top

@@ -1,15 +1,16 @@
 // Writes public/data/club-stretch/{teamId}.json: each of the 30 MLB clubs' best runs of 162
 // and 154 games in a row by one player, in six stats (HR, H, RBI, SB, AVG, OPS), top ten, one
 // row per player. Keyed by the CURRENT team id, which follows the franchise across moves. Reader:
-// src/api/streaks/clubStretch.js. The pure half (stints, rate floor, ceilings, ranking):
+// src/api/streaks/clubStretch.js. The pure half (stints, rate floor, ranking):
 // scripts/lib/franchise/club-stretch.mjs.
 //
 // Two passes. (1) Season lines: one stats call per club per season, 1901 on (about 3,800 small
-// calls), gives every player's line for the club. (2) Game logs, best-first: each board ranks
-// players by the most their seasons allow (ceilingFor) and fetches career logs only until the
-// next ceiling cannot reach tenth place, so the boards match fetching everyone. A career log
-// can take the feed 40 s to build, which is why pass 2 must stay small. The feed's per-game logs
-// start in 1901, so every board does.
+// calls), names every player with 154+ games for a club and the seasons he spent there.
+// (2) Game logs for every one of them, ONE SEASON PER CALL, from his first club season to his
+// last (gap years too, so a game for another club still ends a run). A per-season log answers in
+// about 0.1 s; the same player's career log in one call took the feed 40 s to build (measured
+// 2026-11-16: Russ Nixon, 12 seasons, 1.5 s against 48 s, same 906 games). So fetching everyone
+// is cheap, and the boards are exact by construction. The feed's per-game logs start in 1901.
 //
 // HAND-RUN, after the regular season:
 //   node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache /tmp/club-stretch.jsonl]
@@ -22,15 +23,14 @@ import { toGame } from '../../src/api/streaks/bestStretch.js'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
-import { BAT_MEASURES } from '../../src/api/streaks/bestStretch.js'
-import { LENGTHS, TOP, bestFirst, ceilingFor, playerRows } from '../lib/franchise/club-stretch.mjs'
+import { playerRows, rankBoards } from '../lib/franchise/club-stretch.mjs'
 
 const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'club-stretch')
 const now = new Date()
 const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : now.getUTCFullYear() - (now.getUTCMonth() >= 9 ? 0 : 1)
 if (!Number.isInteger(through) || through < 1901) throw new Error(`bad --through: ${through}`)
-const MIN = Math.min(...LENGTHS)
+const MIN = 154
 // A pooled connection can stall with no answer: each log gets a 45 s timeout, and a timeout
 // retries. These fields alone (what toGame reads) cut a career log from about 2.8 MB to 0.75 MB.
 const FIELDS = 'stats,splits,date,team,id,name,game,gameNumber,stat,atBats,plateAppearances,hits,doubles,triples,homeRuns,runs,rbi,baseOnBalls,hitByPitch,sacFlies,stolenBases,totalBases,strikeOuts'
@@ -60,8 +60,10 @@ for (const club of clubs.values()) for (const [id, p] of club) if (p.seasons.red
 // The clubs each player qualifies for, so one log serves all of them.
 const clubsOf = new Map()
 for (const [teamId, club] of clubs) for (const [id, p] of club) {
-  if (!clubsOf.has(id)) clubsOf.set(id, { id, name: p.name, clubs: [] })
-  clubsOf.get(id).clubs.push(teamId)
+  if (!clubsOf.has(id)) clubsOf.set(id, { id, name: p.name, clubs: [], from: Infinity, to: -Infinity })
+  const e = clubsOf.get(id)
+  e.clubs.push(teamId)
+  for (const s of p.seasons) { e.from = Math.min(e.from, s.season); e.to = Math.max(e.to, s.season) }
 }
 console.log(`pass 1: ${jobs.length} club seasons, ${clubsOf.size} players with ${MIN}+ games for a club`)
 
@@ -74,59 +76,29 @@ if (cachePath) {
   for (const line of text.split('\n')) if (line) { const e = JSON.parse(line); rowsOf.set(e.id, e.rows) }
 }
 let fetched = 0
-// Boards run four at a time, so two can want one player at once: share the one request.
-const inFlight = new Map()
-function rowsFor(id) {
-  if (!inFlight.has(id)) inFlight.set(id, fetchRows(id).finally(() => inFlight.delete(id)))
-  return inFlight.get(id)
-}
 async function fetchRows(id) {
   const p = clubsOf.get(id)
   // A cached entry from an older run may lack a club this run needs: fetch it again then.
   if (rowsOf.has(id) && p.clubs.every((t) => t in rowsOf.get(id))) return rowsOf.get(id)
-  const d = await getJson(`/api/v1/people/${id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&startDate=1901-01-01&endDate=${through}-12-31&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
-  const games = (d.stats?.[0]?.splits ?? []).map((sp) => toGame(sp, 'hitting'))
+  const games = []
+  for (let y = p.from; y <= p.to; y++) {
+    const d = await getJson(`/api/v1/people/${id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&season=${y}&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
+    games.push(...(d.stats?.[0]?.splits ?? []).map((sp) => toGame(sp, 'hitting')))
+  }
   const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id, name: p.name, games }, teamId)]))
   rowsOf.set(id, rows)
   if (cachePath) await appendFile(cachePath, `${JSON.stringify({ id, rows })}\n`)
-  if (++fetched % 50 === 0) console.log(`${fetched} logs fetched ${new Date().toISOString().slice(11, 19)}`)
+  if (++fetched % 250 === 0) console.log(`${fetched} players fetched ${new Date().toISOString().slice(11, 19)}`)
   return rows
 }
-// Warm the logs four at a time: every board's first ten by ceiling, which most boards end on.
-const warm = new Set()
-for (const [teamId, club] of clubs) for (const n of LENGTHS) for (const m of BAT_MEASURES) {
-  const ranked = [...club].map(([id, p]) => ({ id, c: ceilingFor(p.seasons, n, m.key) })).filter((x) => x.c != null).sort((a, b) => b.c - a.c)
-  for (const x of ranked.slice(0, TOP)) warm.add(x.id)
-}
-console.log(`pass 2: warming ${warm.size} logs`)
-await mapConcurrent([...warm], 4, rowsFor, { strict: true })
 
-const violations = []
-// Each board still fetches best-first, one player at a time in ceiling order, so the answer is the
-// same as one board at a time; four boards run at once to keep four requests going.
-const boardJobs = [...clubs.keys()].flatMap((teamId) => LENGTHS.flatMap((n) => BAT_MEASURES.map((m) => ({ teamId, n, m }))))
-const boardRows = await mapConcurrent(boardJobs, 4, async ({ teamId, n, m }) => {
-  const cands = [...clubs.get(teamId)].map(([id, p]) => ({ id, ceiling: ceilingFor(p.seasons, n, m.key) }))
-  const ceilingOf = new Map(cands.map((c) => [c.id, c.ceiling]))
-  const rows = await bestFirst(cands, async (id) => {
-    const r = (await rowsFor(id))[teamId]?.[`${n}:${m.key}`] ?? null
-    // Season lines and game logs are two feeds: a real run over its ceiling means the pruning
-    // could have dropped someone, so say so loudly rather than ship a quiet hole.
-    if (r && !(r.raw <= ceilingOf.get(id) + 1e-9)) violations.push(`${teamId} ${n} ${m.key} ${r.name}: ${r.raw} > ceiling ${ceilingOf.get(id)}`)
-    return r
-  })
-  return rows.map(({ raw, ...r }) => r)
-}, { strict: true })
-const files = [...clubs.keys()].map((teamId) => {
-  const boards = Object.fromEntries(LENGTHS.map((n) => [n, {}]))
-  boardJobs.forEach((j, i) => { if (j.teamId === teamId) boards[j.n][j.m.key] = boardRows[i] })
-  return [String(teamId), { through, firstSeason: firstOf.get(teamId) ?? null, boards }]
-})
-console.log(`pass 2: ${fetched} logs fetched in all`)
-if (violations.length) {
-  console.error(`CEILING VIOLATIONS (${violations.length}): these boards cannot be trusted\n${violations.join('\n')}`)
-  process.exit(1)
-}
+console.log(`pass 2: ${[...clubsOf.keys()].filter((id) => !rowsOf.has(id)).length} players to fetch`)
+await mapConcurrent([...clubsOf.keys()], 4, fetchRows, { strict: true })
+console.log(`pass 2: ${fetched} players fetched`)
 
+const files = [...clubs].map(([teamId, club]) => [
+  String(teamId),
+  { through, firstSeason: firstOf.get(teamId) ?? null, boards: rankBoards([...club.keys()].map((id) => rowsOf.get(id)[teamId])) },
+])
 const { written } = await writeShards(outDir, files)
 console.log(`wrote ${written} club files to ${outDir}`)
