@@ -1,6 +1,11 @@
 /* ---------------------------------------------------------------- club stretch
    ClubStretchPage: the shared TeamFilterStrip (the club filter), the 162/154 switch
-   and the stat chips, then one ranked board of ten rows. */
+   and the stat chips, then one ranked board of ten rows. One column width for all of it,
+   so on desktop the strip, the controls and the board share a right edge. */
+
+.cstretch {
+  max-inline-size: 48rem;
+}
 
 .cstretch__title {
   margin: 0;
@@ -13,7 +18,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  max-inline-size: 48rem;
   border-block-start: var(--bw-heavy) solid var(--text-heading);
 }
 .cstretch__board li {
@@ -22,7 +26,7 @@
 /* layout-exempt: club-stretch board geometry */
 .cstretch__row {
   display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
   gap: var(--space-3);
   align-items: center;
   min-block-size: var(--tap-min);
@@ -50,7 +54,8 @@
 }
 .cstretch__value {
   font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
 }

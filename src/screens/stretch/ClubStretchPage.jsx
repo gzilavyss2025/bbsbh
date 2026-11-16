@@ -21,7 +21,13 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // Club Stretch (/club-stretch, wireframe approved by Gary 2026-11-16): a club's best 162 or
 // 154 games in a row by one player, in six stats, top ten. Static, computed once per season.
 // Not a scoring surface, so nothing is sealed (ADR-0034).
-const CHIP = { ops: 'OPS', avg: 'AVG', hr: 'HR', h: 'Hits', rbi: 'RBI', sb: 'SB' }
+// Counting stats first, so the default (HR) leads the row.
+const CHIPS = [['hr', 'HR'], ['h', 'Hits'], ['rbi', 'RBI'], ['sb', 'SB'], ['avg', 'AVG'], ['ops', 'OPS']]
+// A rank shared with a neighbour on the same value reads T-4, as the leader boards do.
+const rankOf = (rows, i) => {
+  const first = rows.findIndex((r) => r.value === rows[i].value) + 1
+  return rows.filter((r) => r.value === rows[i].value).length > 1 ? `T-${first}` : String(first)
+}
 const LENGTHS = [{ value: '162', label: '162 games' }, { value: '154', label: '154 games' }]
 const shortDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })
 
@@ -74,9 +80,9 @@ export function ClubStretchPage() {
         <Cluster className="cstretch__controls">
           <Segmented label="Games in a row" value={picks.n} onChange={(n) => update({ n })} options={LENGTHS} />
           <Cluster gap="tight" role="group" aria-label="Stat">
-            {BAT_MEASURES.map((m) => (
-              <Button key={m.key} size="control" skin={m.key === picks.by ? 'ink' : 'outline'} aria-pressed={m.key === picks.by} onClick={() => update({ by: m.key })}>
-                {CHIP[m.key]}
+            {CHIPS.map(([key, label]) => (
+              <Button key={key} size="control" skin={key === picks.by ? 'ink' : 'outline'} aria-pressed={key === picks.by} onClick={() => update({ by: key })}>
+                {label}
               </Button>
             ))}
           </Cluster>
@@ -90,7 +96,7 @@ export function ClubStretchPage() {
             {rows.map((r, i) => (
               <li key={r.id}>
                 <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: 'hitting', by: picks.by, n: picks.n, club: picks.team, player: r.id, name: r.name })}`)}>
-                  <span className="cstretch__rank">{i + 1}</span>
+                  <span className="cstretch__rank">{rankOf(rows, i)}</span>
                   <span className="cstretch__who">
                     <span className="cstretch__name">{r.name}</span>
                     <span className="t-label">{r.team} · {shortDate(r.first)} – {shortDate(r.last)}</span>
