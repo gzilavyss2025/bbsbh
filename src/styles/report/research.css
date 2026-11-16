@@ -6,7 +6,8 @@
   min-width: 0;
 }
 .research__field select,
-.research__field input {
+.research__field input,
+.research__min input {
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
   border: var(--bw-heavy) solid var(--border-stamped);
@@ -176,4 +177,17 @@
   .screen.research {
     max-width: 1272px;
   }
+}
+/* "Who most" Count / Rate and the rate's PA minimum (#3147) */
+.research__rank {
+  align-items: center;
+}
+.research__min {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.research__min input {
+  inline-size: 5rem;
+  font-family: var(--font-mono);
 }

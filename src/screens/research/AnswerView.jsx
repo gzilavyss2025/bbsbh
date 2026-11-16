@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { ASKS, resultName } from '../../api/research/filters.js'
+import { useId, useState } from 'react'
+import { rateLeaders } from '../../api/research/answer.js'
+import { ASKS, parseMin, resultName } from '../../api/research/filters.js'
 import { rate3 } from '../../api/person/shared.js'
 import { gamePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -7,7 +8,9 @@ import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { ordinal as nth } from '../../lib/format.js'
 import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 
@@ -20,6 +23,7 @@ import { Table } from '../../components/ui/table/Table.jsx'
 const PAGE = 20
 
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
+const pct = (r) => `${(100 * r).toFixed(1)}%`
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
 // A name opens the player page the app's own way (PlayerLink: the canonical
@@ -34,7 +38,11 @@ function BoxDate({ m, children }) {
   return <a {...link(boxHref(m))}>{children}</a>
 }
 
-function Sentence({ ask, a, people }) {
+// "Who most" ranks by rate only with a PA-result card (#3147): without one every rate is 100%.
+const byRate = (q, a) => q.rank === 'rate' && Boolean(a.baseBy)
+const leaderRows = (q, a, who) => (byRate(q, a) ? rateLeaders(a, who, q.min) : who === 'batter' ? a.batters : a.pitchers)
+
+function Sentence({ ask, q, a, people }) {
   const n = a.matches.length
   if (!n) return 'No plate appearance on file matches.'
   const last = a.matches[0]
@@ -46,12 +54,16 @@ function Sentence({ ask, a, people }) {
     )
   }
   if (ask === 'often') return `${plural(n, 'time', 'times')} in ${plural(a.games, 'game', 'games')}`
-  if (ask === 'most') return <><Name id={a.batters[0].id} people={people} /> leads with {a.batters[0].n}</>
+  if (ask === 'most') {
+    const top = leaderRows(q, a, 'batter')[0]
+    if (!top) return `No batter has ${plural(q.min, 'PA', 'PAs')} here.`
+    return byRate(q, a) ? <><Name id={top.id} people={people} /> leads at {pct(top.rate)}</> : <><Name id={top.id} people={people} /> leads with {top.n}</>
+  }
   return `${a.outcomes[0].label}: ${a.outcomes[0].n} of ${n.toLocaleString()}`
 }
 
 // One result filter gives every match the same event, so its slash line says nothing new.
-function summary(a, ask) {
+function summary(a, ask, q) {
   const n = a.matches.length
   const parts = []
   if (ask !== 'often') parts.push(plural(n, 'match', 'matches'))
@@ -59,26 +71,58 @@ function summary(a, ask) {
   const kinds = new Set(a.matches.map((m) => m.event)).size
   const t = a.totals
   if (kinds > 1) parts.push(`${rate3(t.avg)}/${rate3(t.obp)}/${rate3(t.slg)}`)
+  if (ask === 'most' && byRate(q, a)) parts.push(`rate, min ${plural(q.min, 'PA', 'PAs')}`)
   return parts.join(' · ')
 }
 
-export function AnswerCard({ ask, a, people }) {
+export function AnswerCard({ ask, q, a, people }) {
   return (
     <Card frame="stamped" label={ASKS.find((x) => x.key === ask)?.label}>
       <Stack gap="tight" aria-live="polite">
-        <p className="research__answer"><Sentence ask={ask} a={a} people={people} /></p>
-        {a.matches.length > 0 && <p className="research__summary">{summary(a, ask)}</p>}
+        <p className="research__answer"><Sentence ask={ask} q={q} a={a} people={people} /></p>
+        {a.matches.length > 0 && <p className="research__summary">{summary(a, ask, q)}</p>}
       </Stack>
     </Card>
   )
 }
 
-function Leaders({ title, rows, people }) {
+function Leaders({ title, rows, rate, min, people }) {
+  if (!rows.length) return <p className="t-label t-label--nocaps">{title}: none with {plural(min, 'PA', 'PAs')} here.</p>
   return (
     <Table label={title} className="research__table">
-      <thead><tr><th>{title}</th><th className="research__num">Times</th></tr></thead>
-      <tbody>{rows.map((r) => <tr key={r.id}><td><Name id={r.id} people={people} /></td><td className="research__num">{r.n}</td></tr>)}</tbody>
+      <thead><tr><th>{title}</th>{rate ? <><th className="research__num">Rate</th><th className="research__num">Of PA</th></> : <th className="research__num">Times</th>}</tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <td><Name id={r.id} people={people} /></td>
+            {rate ? <><td className="research__num">{pct(r.rate)}</td><td className="research__num">{r.n} of {r.pa}</td></> : <td className="research__num">{r.n}</td>}
+          </tr>
+        ))}
+      </tbody>
     </Table>
+  )
+}
+
+// Count or Rate, and the rate's PA minimum (#3147). Both live in the URL (rank, min).
+function RankBar({ q, onChange }) {
+  const id = useId()
+  const [draft, setDraft] = useState(String(q.min))
+  // The minimum applies on blur or Enter, not per keystroke: typing 120 never ranks by 1 or 12.
+  const commit = () => {
+    const min = parseMin(draft)
+    if (min && min !== q.min) onChange({ ...q, min })
+    setDraft(String(min ?? q.min))
+  }
+  return (
+    <Cluster className="research__rank">
+      <Segmented label="Rank by" options={[{ value: 'count', label: 'Count' }, { value: 'rate', label: 'Rate' }]} value={q.rank} onChange={(rank) => onChange({ ...q, rank })} />
+      {q.rank === 'rate' && (
+        <span className="research__min">
+          <label className="t-label" htmlFor={id}>Min PA</label>
+          <input id={id} type="number" inputMode="numeric" min="1" value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && commit()} />
+        </span>
+      )}
+    </Cluster>
   )
 }
 
@@ -133,9 +177,18 @@ export function MatchList({ a, people, wide }) {
   )
 }
 
-export function AskTables({ ask, a, people }) {
+export function AskTables({ ask, q, a, people, onChange }) {
   if (!a.matches.length) return null
-  if (ask === 'most') return <><Leaders title="Batters" rows={a.batters} people={people} /><Leaders title="Pitchers" rows={a.pitchers} people={people} /></>
+  if (ask === 'most') {
+    const rate = byRate(q, a)
+    return (
+      <>
+        {a.baseBy && <RankBar q={q} onChange={onChange} />}
+        <Leaders title="Batters" rows={leaderRows(q, a, 'batter')} rate={rate} min={q.min} people={people} />
+        <Leaders title="Pitchers" rows={leaderRows(q, a, 'pitcher')} rate={rate} min={q.min} people={people} />
+      </>
+    )
+  }
   if (ask === 'what') {
     return (
       <Table label="Results" className="research__table">

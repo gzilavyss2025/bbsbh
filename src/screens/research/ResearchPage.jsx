@@ -1,6 +1,6 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
-import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery } from '../../api/research/filters.js'
+import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
 import { isRealDate } from '../../lib/dates.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -126,7 +126,7 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && <AnswerCard ask={q.ask} a={result} people={people} />}
+      {result && <AnswerCard ask={q.ask} q={q} a={result} people={people} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -134,8 +134,8 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
-      {result && <AskTables ask={q.ask} a={result} people={people} />}
-      {result && <MatchList key={JSON.stringify(q)} a={result} people={people} wide={wide} />}
+      {result && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
+      {result && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} />}
     </Stack>
   )
 

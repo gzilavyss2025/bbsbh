@@ -5,7 +5,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { countBit, decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
 import { basesOf, buildQuery, clubName, fieldOf, horizontalThird, isBlank, matcher, mayMatch, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
-import { answer } from '../src/api/research/answer.js'
+import { answer, rateLeaders } from '../src/api/research/answer.js'
 import { coverage, seasonEvents, seasonsOnFile } from '../src/api/research/store.js'
 import { mergeIndex, monthDays, recentMonths, savantDayUrl, seasonMonths, shrinkReason } from '../scripts/lib/research/store.mjs'
 
@@ -227,4 +227,51 @@ test('a matches-only answer has the same matches and no share or tables', () => 
   const lean = answer(pas, q, null, { matchesOnly: true })
   assert.deepEqual(lean.matches, full.matches)
   assert.deepEqual(Object.keys(lean), ['matches'])
+})
+
+// "Who most" by rate (#3147): matches per PA in the same situation (no result card),
+// with a PA minimum. `n` homers in `pa` PAs for batter `id`, all off pitcher 99.
+const ratePas = (rows) => rows.flatMap(([id, n, pa]) => Array.from({ length: pa }, (_, k) => ({
+  batter: id, pitcher: 99, gamePk: k, date: '2026-06-01', event: k < n ? 'home_run' : 'field_out', stand: 'L', throws: 'R',
+})))
+
+test('who most by rate: matches per PA in the situation, highest first', () => {
+  const a = answer(ratePas([[1, 5, 100], [2, 6, 50], [3, 9, 300]]), parseQuery('?ask=most&res=home_run'))
+  assert.deepEqual(a.batters.map((r) => r.id), [3, 2, 1], 'count still ranks by raw count')
+  const rows = rateLeaders(a, 'batter')
+  assert.deepEqual(rows.map((r) => [r.id, r.n, r.pa]), [[2, 6, 50], [1, 5, 100], [3, 9, 300]])
+  assert.equal(rows[0].rate, 0.12)
+  assert.deepEqual(rateLeaders(a, 'pitcher').map((r) => [r.id, r.n, r.pa]), [[99, 20, 450]])
+})
+
+test('who most by rate drops a player below the PA minimum', () => {
+  const a = answer(ratePas([[1, 3, 4], [2, 6, 50], [3, 5, 49]]), parseQuery('?ask=most&res=home_run'))
+  assert.deepEqual(rateLeaders(a, 'batter').map((r) => r.id), [2], 'the default minimum is 50 PA')
+  assert.deepEqual(rateLeaders(a, 'batter', 4).map((r) => r.id), [1, 2, 3])
+  assert.deepEqual(rateLeaders(a, 'batter', 500), [])
+})
+
+test('who most by rate has no base without a result card', () => {
+  const a = answer(ratePas([[1, 5, 100]]), parseQuery('?ask=most&bh=L'))
+  assert.equal(rateLeaders(a, 'batter'), null)
+})
+
+test('the rank and the minimum ride the URL', () => {
+  const q = parseQuery('?ask=most&res=home_run&rank=rate&min=75')
+  assert.equal(q.rank, 'rate')
+  assert.equal(q.min, 75)
+  assert.equal(buildQuery(q), '?ask=most&res=home_run&rank=rate&min=75')
+  assert.deepEqual(parseQuery(buildQuery(q)), q)
+  assert.equal(buildQuery({ ...q, min: 50 }), '?ask=most&res=home_run&rank=rate', 'the default minimum stays out')
+  const plain = parseQuery('?ask=most&res=home_run&rank=nope&min=0')
+  assert.deepEqual([plain.rank, plain.min], ['count', 50])
+  assert.equal(buildQuery({ ...plain, min: 75 }), '?ask=most&res=home_run', 'no minimum without rate')
+})
+
+test('an emptied result card gives no rate base', () => {
+  const q = parseQuery('?ask=most&res=home_run')
+  q.chips.res.vals = []
+  const a = answer(ratePas([[1, 5, 100]]), q)
+  assert.equal(rateLeaders(a, 'batter'), null, 'not every player at 100%')
+  assert.equal(a.base, null)
 })
