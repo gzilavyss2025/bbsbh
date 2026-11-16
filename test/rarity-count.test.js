@@ -1,12 +1,13 @@
-// The rarity count for a natural cycle or an unassisted triple play (#2968):
+// The rarity count (#2968): natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs:
 // src/api/notable/rarityCount.js and the generator's flags (scripts/lib/notable/flags.mjs).
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, immaculateInnings, isNaturalCycle, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
+import { candidateGames, fetchFourStraight, fourStraightRows } from '../scripts/lib/notable/fourstraight.mjs'
 import { fetchImmaculate, gamesToRead, mergeWindow, readFrom } from '../scripts/lib/notable/immaculate.mjs'
 
 const BATTER = 1
@@ -275,4 +276,60 @@ test('the committed four-homer index matches the published list (slice 4)', () =
   for (const n of ['Lou Gehrig', 'Willie Mays', 'Mike Cameron', 'J.D. Martinez']) assert.ok(names.includes(n), n)
   // 19 four-homer games from 1901 through 2025 (Wikipedia, single-game records: 21 all-time; Lowe 1894 and Delahanty 1896 are before 1901).
   assert.equal(doc.rows.filter((r) => r.officialDate < '2026').length, 19)
+})
+
+// ---- four straight home runs (slice 5) ----
+
+test('four straight home runs is four plate appearances of one club in a row, each a home run', () => {
+  const at = (i, eventType, half = 'top') => play(i, eventType, { batter: 10 + i, half })
+  const hr = (i, half) => at(i, 'home_run', half)
+  assert.deepEqual(fourStraightHomers([hr(0), hr(1), hr(2), hr(3)]), [{ side: 'away' }])
+  // a fifth adds nothing; a new run after an out counts again
+  assert.deepEqual(fourStraightHomers([hr(0), hr(1), hr(2), hr(3), hr(4), at(5, 'field_out'), hr(6), hr(7), hr(8), hr(9)]), [{ side: 'away' }, { side: 'away' }])
+  // an out between breaks the run; three is not four
+  assert.deepEqual(fourStraightHomers([hr(0), hr(1), at(2, 'walk'), hr(3), hr(4), hr(5)]), [])
+  // the other club batting between does not break a club's run (it cannot, but the count is per club)
+  assert.deepEqual(fourStraightHomers([hr(0, 'bottom'), hr(1, 'bottom'), hr(2, 'bottom'), hr(3, 'bottom')]), [{ side: 'home' }])
+  assert.equal(fourStraightHomers([]), null)
+})
+
+test('detectRareFeats finds four straight home runs by the batting club', () => {
+  const plays = [0, 1, 2, 3].map((i) => play(i, 'home_run', { batter: 10 + i, half: 'bottom' }))
+  assert.deepEqual(detectRareFeats({ liveData: { plays: { allPlays: plays } } }), [{ kind: 'fourstraight', side: 'home' }])
+})
+
+test('the four-straight count runs from the first swept season, tonight not counted twice', () => {
+  const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', away: { id: club }, home: { id: 1 } })
+  const idx = { fourstraight: { coverage: { seasons: Array.from({ length: 126 }, (_, i) => 1901 + i) }, rows: [r(1, '1961-06-08', 158), r(2, '2006-09-18', 140), r(6, '2026-08-01', 158)] } }
+  const [note] = buildRarityNotes(idx, feed, { kind: 'fourstraight', side: 'away' })
+  assert.equal(note.text, "The 3rd set of four straight home runs since 1901, the Brewers' 2nd.")
+  assert.equal(note.personId, null)
+})
+
+test('the four-straight sweep reads the play-by-play only of a club game with 4 or more home runs', async () => {
+  const game = (pk) => ({ gamePk: pk, officialDate: '2025-05-01', gameType: 'R', gameNumber: 1, away: { id: 1, abbr: 'A', name: 'A', runs: 9 }, home: { id: 2, abbr: 'H', name: 'H', runs: 1 }, innings: [] })
+  const map = new Map([[11, game(11)], [12, game(12)], [13, game(13)]])
+  assert.deepEqual(candidateGames([{ stat: { homeRuns: 4 }, game: { gamePk: 11 } }, { stat: { homeRuns: 3 }, game: { gamePk: 12 } }, { stat: { homeRuns: 5 }, game: { gamePk: 99 } }], map), [11])
+  const hrs = [0, 1, 2, 3].map((i) => play(i, 'home_run', { batter: 10 + i }))
+  const asked = []
+  const get = async (url) => {
+    asked.push(url)
+    if (url.includes('/teams/1/')) return { stats: [{ splits: [{ stat: { homeRuns: 4 }, game: { gamePk: 11 } }, { stat: { homeRuns: 4 }, game: { gamePk: 13 } }] }] }
+    if (url.includes('/teams/')) return { stats: [{ splits: [] }] }
+    if (url.includes('/game/11/')) return { allPlays: hrs }
+    return { allPlays: [] }
+  }
+  const { rows, unknown } = await fetchFourStraight(get, map, 2025)
+  assert.deepEqual(rows.map((r) => [r.gamePk, r.side]), [[11, 'away']])
+  assert.deepEqual(unknown, [13])
+  assert.ok(!asked.some((u) => u.includes('/game/12/')))
+  assert.equal(fourStraightRows(game(11), { allPlays: [] }), null)
+})
+
+test('the committed four-straight index matches the published list from the floor (slice 5)', () => {
+  const doc = JSON.parse(readFileSync(new URL('../public/data/notable/fourstraight.json', import.meta.url)))
+  const runs = doc.rows.map((r) => `${r.officialDate} ${r[r.side].abbr}`).sort()
+  // Wikipedia, single-game records (10 through 2020, three before 1967) plus the Cardinals, 2022-07-02.
+  assert.deepEqual(runs, ['2006-09-18 LAD', '2007-04-22 BOS', '2008-08-14 CWS', '2010-08-11 AZ', '2017-07-27 WSH', '2019-06-09 WSH', '2020-08-16 CWS', '2022-07-02 STL'])
+  assert.equal(doc.coverage.seasons[0], 1967)
 })

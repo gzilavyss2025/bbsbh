@@ -1,5 +1,5 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning or a four-homer game (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning, a four-homer game or four straight home runs (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -14,7 +14,8 @@
 // An immaculate inning and a four-homer game each have their own file, every row a find, so its floor is the first season the
 // generator swept in an unbroken run: 2001 for immaculate innings (IMMACULATE_FLOOR in
 // scripts/lib/notable/immaculate.mjs, the first year with real pitches), 1901 for four-homer games
-// (fourhr.json, read off the hitting game logs).
+// (fourhr.json, read off the hitting game logs), FOURSTRAIGHT_FLOOR for four straight home runs
+// (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -28,6 +29,7 @@ export const RARITY = {
   tripleplays: { flag: 'unassisted', noun: 'unassisted triple play' },
   immaculate: { flag: null, noun: 'immaculate inning' },
   fourhr: { flag: null, noun: 'four-homer game' },
+  fourstraight: { flag: null, noun: 'set of four straight home runs' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -116,6 +118,23 @@ export function immaculateInnings(allPlays) {
   return out
 }
 
+// Four straight home runs by one club: four plate appearances of the club in a row, each a home
+// run. A home run never makes an out, so a run of them can only sit inside one half-inning (or end
+// the game). A fifth adds nothing: one find per run. [{ side (the batting club) }]; null when the
+// feed has no plays.
+export function fourStraightHomers(allPlays) {
+  const plays = orderedPlays({ allPlays })
+  if (!plays.length) return null
+  const run = { away: 0, home: 0 }
+  const out = []
+  for (const p of plays) {
+    const side = p.about?.halfInning === 'top' ? 'away' : 'home'
+    run[side] = p.result?.eventType === 'home_run' ? run[side] + 1 : 0
+    if (run[side] === 4) out.push({ side })
+  }
+  return out
+}
+
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
 export function floorYear(rows, flag) {
@@ -134,7 +153,7 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning and four-homer game.
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning, four-homer game and run of four straight home runs.
 // [{ kind, side, player? }]
 export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
@@ -154,6 +173,7 @@ export function detectRareFeats(feed) {
     if (feat?.kind === 'tripleplays' && isUnassistedTriplePlay(p)) out.push(feat)
   }
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
+  for (const f of fourStraightHomers(plays) ?? []) out.push({ kind: 'fourstraight', ...f })
   return out
 }
 
