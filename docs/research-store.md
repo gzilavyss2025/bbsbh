@@ -81,3 +81,19 @@ of the counts it passed through, and its pitch count (`shard.js`). No pitch list
 **Pitch-clock rows.** From 2023 a pitch-clock violation is a row with no `plate_x` and no
 pitch type. The shard drops it unless it ends the plate appearance, so a PA that ends on
 one has a null last pitch type and location, and matches no pitch-type or location chip.
+
+## Postseason detail (#3141, Gary 2026-11-16)
+
+**Series game card** (`sg`): Game 1 to 7, Series-deciding, Sudden death, Potential clinch,
+Potential elimination. The shards hold no series facts. `loadSeason` fetches that season's
+postseason schedule from statsapi (`gameType=F,D,L,W`, about 10 KB) and `series.js` joins
+it by gamePk: Final games only (a postponed game is listed twice, 2020), in
+`seriesGameNumber` order, a series won at more than half of `gamesInSeries`.
+Clinch and elimination read from the **batting** club: a Game 6 at 3-2 is a potential
+clinch in the leader's at-bats and a potential elimination in the other club's.
+Series-deciding is the game the series ended in; sudden death is both clubs one win away
+(a one-game wild card counts). A failed fetch leaves the card matching nothing.
+
+**All-Star games**: the generator asks Savant for game type `A` too (clubs `AL`/`NL`), and
+the Game type card has an All-Star chip; an All-Star PA no longer reads as Postseason.
+A July shard built before 2026-11-16 holds no All-Star game until it is rebuilt.

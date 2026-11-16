@@ -11,6 +11,7 @@
 // day it was built; the page drops games on or after `?d=` (filters.js `matcher`).
 
 import { decodePlateAppearances } from './shard.js'
+import { fetchSeries } from './series.js'
 
 export const STORE_BASE = import.meta.env?.VITE_RESEARCH_STORE || 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/research/v1/'
 
@@ -57,10 +58,18 @@ export function loadSeason(index, season, { onMonth = () => {} } = {}) {
     const paths = Object.keys(index.seasons[season]?.months ?? {}).sort().map((m) => `${season}/${m}.json`)
     let loaded = 0
     onMonth(0, paths.length)
-    const promise = Promise.all(paths.map((path) => getJson(path, ctrl.signal).then((shard) => {
+    // The postseason series state (#3141) rides along, one statsapi request a season; a
+    // postseason PA carries its game's `series` (series.js), and a failed fetch leaves none.
+    const series = fetchSeries(season, ctrl.signal)
+    const shards = Promise.all(paths.map((path) => getJson(path, ctrl.signal).then((shard) => {
       onMonth(++loaded, paths.length)
       return { pas: decodePlateAppearances(shard), people: shard.people }
-    }))).then((parts) => ({ pas: parts.flatMap((x) => x.pas), people: Object.assign({}, ...parts.map((x) => x.people)) }))
+    })))
+    const promise = Promise.all([shards, series]).then(([parts, byGame]) => {
+      const pas = parts.flatMap((x) => x.pas)
+      if (byGame.size) for (const pa of pas) if (pa.gameType !== 'R' && byGame.has(pa.gamePk)) pa.series = byGame.get(pa.gamePk)
+      return { pas, people: Object.assign({}, ...parts.map((x) => x.people)) }
+    })
     seasonCache.set(season, { promise, ctrl })
     promise.catch(() => seasonCache.get(season)?.promise === promise && seasonCache.delete(season))
   }

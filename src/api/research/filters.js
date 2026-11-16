@@ -20,6 +20,7 @@
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
 import { countBit } from './shard.js'
+import { seriesValues } from './series.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
@@ -82,6 +83,9 @@ const RESULTS = [
 ]
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
+// The Series game card (#3141): values from series.js `seriesValues`.
+const SERIES_GAMES = [...[1, 2, 3, 4, 5, 6, 7].map((n) => [`g${n}`, `Game ${n}`]), ['last', 'Series-deciding'], ['sd', 'Sudden death'], ['clinch', 'Potential clinch'], ['elim', 'Potential elimination']]
+
 const COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2']
 // Runners: one value per base state, the bases spelled in order ('1-3' = first and
 // third). The card draws each as the scorebug's BaseState. The four values the first
@@ -107,7 +111,8 @@ export const basesOf = (v) => ({ first: v[0] === '1', second: v[1] === '2', thir
 // A multi card matches if any selected value is among the PA's values; Invert flips it.
 export const FILTERS = [
   { key: 'res', label: 'PA result', options: RESULTS, values: (pa) => [Object.keys(RESULT_GROUPS).find((k) => RESULT_GROUPS[k].includes(pa.event)) ?? pa.event] },
-  { key: 'gt', label: 'Game type', options: [['R', 'Regular season'], ['P', 'Postseason']], values: (pa) => [pa.gameType === 'R' ? 'R' : 'P'] },
+  { key: 'gt', label: 'Game type', options: [['R', 'Regular season'], ['P', 'Postseason'], ['A', 'All-Star']], values: (pa) => [pa.gameType === 'R' || pa.gameType === 'A' ? pa.gameType : 'P'] },
+  { key: 'sg', label: 'Series game', options: SERIES_GAMES, values: seriesValues, info: 'Postseason games. Potential clinch: the batting club takes the series with a win. Potential elimination: the batting club is out with a loss. Sudden death: both clubs one win from taking it. Series-deciding: the game the series ended in.' },
   { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [pa.pitchType], since: 2008 },
   { key: 'loc', label: 'Horizontal location', options: [['inner', 'Inner third'], ['middle', 'Middle third'], ['outer', 'Outer third']], values: (pa) => [horizontalThird(pa.px, pa.stand)], since: 2008, info: 'Thirds of the 17-inch plate, from the batter’s side. Inner third is the third nearest the batter. A pitch off the plate is in no third. Reads the last pitch of the plate appearance.' },
   { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2008, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
