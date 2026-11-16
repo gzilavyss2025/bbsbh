@@ -1,5 +1,5 @@
-// "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle or
-// an unassisted triple play (#2968), from the feat index (public/data/notable/).
+// "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
+// an unassisted triple play or an immaculate inning (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -11,6 +11,8 @@
 // generator and the page). Old games have no play-by-play, so their rows carry no flag. The count
 // runs from the FLOOR: the year of the oldest flagged row with no unflagged row after it. The line
 // says "since {floor}", never "ever", and with no floor it says nothing: it never invents a count.
+// An immaculate inning has its own file, every row a find, so its floor is the first season the
+// generator swept (IMMACULATE_FLOOR in scripts/lib/notable/rules.mjs: the first year with pitches).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -22,6 +24,7 @@ const isTriplePlayEvent = (p) => /triple_play/.test(p.result?.eventType ?? '')
 export const RARITY = {
   cycles: { flag: 'natural', noun: 'natural cycle' },
   tripleplays: { flag: 'unassisted', noun: 'unassisted triple play' },
+  immaculate: { flag: null, noun: 'immaculate inning' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -67,6 +70,36 @@ export function gameHasUnassistedTriplePlay(allPlays, fieldingSide = null) {
   })
 }
 
+// The immaculate innings of a game: a half-inning of exactly three plate appearances, each a
+// strikeout by one pitcher, no batter reaching, on nine pitches in all. [{ side (the pitching
+// club), player (the pitcher) }]; null when the feed has no plays or no real pitch sequences.
+// Feeds before about 1988 make up a minimal count for each plate appearance (three strikes for a
+// strikeout, four balls for a walk; read on gamePk 188808, 1985), so every three-strikeout inning
+// would read as nine pitches. A real game has some pitch with both a ball and a strike on the count.
+export function immaculateInnings(allPlays) {
+  const plays = orderedPlays({ allPlays })
+  const sequenced = plays.some((p) => (p.playEvents ?? []).some((e) => e.isPitch && e.count?.balls > 0 && e.count?.strikes > 0))
+  if (!sequenced) return null
+  const halves = new Map()
+  for (const p of plays) {
+    const key = `${p.about?.inning}:${p.about?.halfInning}`
+    if (!halves.has(key)) halves.set(key, [])
+    halves.get(key).push(p)
+  }
+  const out = []
+  for (const half of halves.values()) {
+    const pitcher = half[0].matchup?.pitcher
+    if (half.length !== 3 || pitcher?.id == null) continue
+    const clean = half.every((p) => p.result?.eventType === 'strikeout' && p.matchup?.pitcher?.id === pitcher.id
+      && !(p.runners ?? []).some((r) => r.movement?.end))
+    const pitches = half.reduce((n, p) => n + (p.playEvents ?? []).filter((e) => e.isPitch).length, 0)
+    if (clean && pitches === 9) {
+      out.push({ side: half[0].about.halfInning === 'top' ? 'home' : 'away', player: { id: pitcher.id, name: pitcher.fullName ?? '' } })
+    }
+  }
+  return out
+}
+
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
 export function floorYear(rows, flag) {
@@ -76,7 +109,7 @@ export function floorYear(rows, flag) {
   return flagged.some((y) => y >= floor) ? floor : null
 }
 
-// The rare feats a Final game holds: each natural cycle and each unassisted triple play.
+// The rare feats a Final game holds: each natural cycle, unassisted triple play and immaculate inning.
 // [{ kind, side, player? }]
 export function detectRareFeats(feed) {
   const plays = orderedPlays(feed?.liveData?.plays)
@@ -88,6 +121,7 @@ export function detectRareFeats(feed) {
     if (feat?.kind === 'cycles' && isNaturalCycle(plays, feat.player.id)) out.push(feat)
     if (feat?.kind === 'tripleplays' && isUnassistedTriplePlay(p)) out.push(feat)
   }
+  for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
   return out
 }
 
@@ -98,9 +132,11 @@ export function buildRarityNotes(docs, feed, feat) {
   const spec = RARITY[feat?.kind]
   const rows = docs?.[feat?.kind]?.rows
   if (!t || !spec || !rows) return []
-  const floor = floorYear(rows, spec.flag)
+  const seasons = docs[feat.kind].coverage?.seasons ?? []
+  const floor = spec.flag ? floorYear(rows, spec.flag) : seasons.length ? Math.min(...seasons) : null
   if (floor === null || yearOf(t.date) < floor) return []
-  const prior = priorRows(docs, feat.kind, t).filter((r) => r[spec.flag] === true && yearOf(r.officialDate) >= floor)
+  const counted = (r) => (spec.flag ? r[spec.flag] === true : true) && yearOf(r.officialDate) >= floor
+  const prior = priorRows(docs, feat.kind, t).filter(counted)
   const club = feed.gameData?.teams?.[feat.side]
   const clubName = club?.teamName ?? club?.name
   const mine = prior.filter((r) => r[r.side]?.id === club?.id).length
