@@ -1,83 +1,229 @@
 /* The pitcher game card sheet (#2969), opened from the box score's pitching
-   table. A bottom sheet on a phone; centered over the page on a wide screen,
-   as the wireframe has it. */
-@media (min-width: 720px) {
-  .scrim.pgc-scrim {
-    align-items: center;
-    padding: var(--space-4);
-  }
-  .sheet.pgc {
-    max-width: 620px;
-    border-radius: var(--radius-lg);
-  }
-}
+   table. The stamped language (ADR-0112): square, a 2px ink edge, the hard ink
+   offset shadow, ink fills with marker figures. The card's band wears the club's
+   jersey colours (--bar-*, ADR-0030), falling back to the deep band. A bottom
+   sheet on a phone; centered over the page from the wide step. */
 .sheet.pgc {
   max-height: 88vh;
   max-height: 88dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-top: var(--bw-heavy) solid var(--text-heading);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-bottom: 0;
 }
-.pgc__head {
+@media (min-width: 740px) {
+  .scrim.pgc-scrim {
+    align-items: center;
+    padding: var(--space-4);
+  }
+  .sheet.pgc {
+    max-width: 460px;
+    border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  }
+}
+.pgc__bar {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-3);
+  align-items: center;
 }
-.pgc__name {
+
+/* THE CARD — the part that is shared. */
+.pgc__card {
+  min-width: 0;
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+}
+.pgc__band { /* component-reuse-exempt: the card's club panel holds a headshot beside a three-line name block, which a SectionHead band title cannot */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) 0;
+  background: var(--bar-fill, var(--surface-band-deep));
+  color: var(--bar-text, var(--text-on-ink));
+  border-bottom: var(--bw-heavy) solid var(--bar-accent, var(--marker));
+}
+.pgc__who {
+  min-width: 0;
+  padding-bottom: var(--space-3);
+}
+.pgc__ctx,
+.pgc__role {
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.pgc__name {
+  margin: var(--space-1) 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--w-black);
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  color: inherit;
+}
+.shot.pgc__shot {
+  flex: none;
+  width: 96px;
+  height: 112px;
+  border: 0;
+  border-radius: 0;
+}
+.pgc__hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.pgc__ip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+}
+.pgc__ip b {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-sm);
+  line-height: var(--lh-solid);
+  color: var(--marker);
+}
+.pgc__line {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
   color: var(--text-heading);
 }
-.pgc__meta {
-  margin: 0;
-}
-.pgc__body {
-  min-width: 0;
-}
-.pgc__line th,
-.pgc__line td {
-  text-align: center;
-}
-.pgc__chips {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.pgc__chips li {
-  padding: var(--space-1) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-mono);
+.pgc__line span {
+  display: block;
   font-size: var(--fs-cell);
-}
-.pgc__chips span {
+  font-weight: var(--w-medium);
   color: var(--text-muted);
 }
-.pgc__chips b {
+/* layout-exempt: three figures in a fixed row, like a scorebook total box */
+.pgc__trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.pgc__fig {
+  padding: var(--space-2) var(--space-4);
+  border-right: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.pgc__fig:last-child {
+  border-right: 0;
+}
+.pgc__fig b {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-lg);
+  color: var(--text-heading);
+}
+.pgc__mix {
+  padding: var(--space-3) var(--space-4);
+}
+.pgc__label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+/* layout-exempt: the mix row is a fixed set of named columns, mark to whiffs */
+.pgc__mixrow {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) 2.5rem 2.75rem 3rem;
+  row-gap: var(--space-1);
+  gap: var(--space-2);
+  align-items: center;
+  padding-block: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
   color: var(--text-body);
 }
-.pgc__sub {
-  margin: var(--space-2) 0 0;
+.pgc__mixrow > span:nth-child(n + 3) {
+  text-align: right;
 }
-.pgc__mix td:first-child {
+.pgc__mixrow--head span {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.pgc__pitch {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pgc__track {
+  grid-column: 2 / -1;
+  height: 6px;
+  background: var(--border-hairline);
+}
+.pgc__track i {
+  display: block;
+  height: 100%;
+  background: var(--pitch, var(--text-muted));
+  border-right: var(--bw-hair) solid var(--border-stamped);
+}
+.pgc__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.pgc__brand {
+  color: var(--marker);
+  font-weight: var(--w-bold);
+}
+
+/* The detail under the card: in the sheet, not in the image. The bare table's
+   bleed margin is for a padded card; this one is flush. */
+.pgc__detail .table--bare {
+  margin-inline: 0;
+}
+.pgc__table td:first-child,
+.pgc__table th:first-child {
   white-space: nowrap;
   text-align: left;
 }
 
 /* The pitching table's stat cells open the card; the name stays the player
-   page link. The button is for keyboards and screen readers and shows on focus. */
+   page link. A faint dotted rule under the figures says so on a phone too.
+   The button is for keyboards and screen readers and shows on focus. */
 .bs__grid--pit tbody tr[data-card] td:not(.bs__nameCol) {
   cursor: pointer;
-}
-.bs__grid--pit tbody tr[data-card]:hover td:not(.bs__nameCol) {
-  text-decoration: underline dotted;
+  text-decoration: underline dotted var(--text-muted);
+  text-underline-offset: 3px;
 }
 .pgc__open:focus-visible {
   position: static;
@@ -85,7 +231,4 @@
   height: auto;
   clip: auto;
   margin: 0;
-}
-.pgc__mix th:first-child {
-  text-align: left;
 }

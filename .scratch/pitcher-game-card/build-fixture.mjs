@@ -28,9 +28,17 @@ const allPlays = feed.liveData.plays.allPlays
     })),
   }))
 const p = feed.liveData.boxscore.teams.away.players[`ID${ID}`]
+const g = feed.gameData
 const out = {
   gamePk: 813024,
+  gameData: {
+    game: { type: g.game.type },
+    datetime: { officialDate: g.datetime.officialDate },
+    status: { codedGameState: g.status.codedGameState },
+    teams: { away: { abbreviation: g.teams.away.abbreviation }, home: { abbreviation: g.teams.home.abbreviation, sport: { id: g.teams.home.sport?.id } } },
+  },
   liveData: {
+    linescore: { currentInning: feed.liveData.linescore.currentInning, teams: { away: { runs: feed.liveData.linescore.teams.away.runs }, home: { runs: feed.liveData.linescore.teams.home.runs } } },
     boxscore: { teams: { away: { players: { [`ID${ID}`]: { person: p.person, stats: { pitching: p.stats.pitching } } } } } },
     plays: { allPlays },
   },

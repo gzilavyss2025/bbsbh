@@ -99,3 +99,13 @@ test('a pitching change in the middle of a plate appearance splits its pitches',
   assert.equal(buildPitcherGameCard(mini, 1).pitches.length, 2)
   assert.equal(buildPitcherGameCard(mini, 2).pitches.length, 2)
 })
+
+test('the game the card names: WS, Nov 1, 2025, LAD 5 TOR 4 in 11, his role', () => {
+  const g = card.game
+  assert.equal(g.round, 'WS')
+  assert.equal(g.date, 'Nov 1, 2025')
+  assert.deepEqual([g.away.abbr, g.away.runs, g.home.abbr, g.home.runs], ['LAD', 5, 'TOR', 4])
+  assert.equal(g.final, true)
+  assert.equal(g.innings, 11)
+  assert.equal(card.line.role, 'Relief')
+})

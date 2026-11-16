@@ -679,7 +679,7 @@ function TeamBlock({ feed, side, theme }) {
         </tfoot>
       </Table>
 
-      {cardFor && <PitcherGameCardSheet feed={feed} pitcher={cardFor} teamAbbr={side.abbreviation} onClose={() => setCardFor(null)} />}
+      {cardFor && <PitcherGameCardSheet feed={feed} pitcher={cardFor} teamId={side.id} teamAbbr={side.abbreviation} theme={theme} onClose={() => setCardFor(null)} />}
 
       {side.pitchNotes.length > 0 && (
         <div className="bs__notes">
