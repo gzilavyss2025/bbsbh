@@ -1,7 +1,7 @@
 import '../../styles/report/club-stretch.css'
 import { useState } from 'react'
 import { clubStretch } from '../../api/streaks/clubStretch.js'
-import { CLUB_PITCH_LENGTHS, measuresFor } from '../../api/streaks/bestStretch.js'
+import { CLUB_PITCH_LENGTHS, MLB_SCOPE as MLB, measuresFor } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -22,7 +22,6 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // 154 games in a row by one player, in six stats, top twenty, ten at a time. Static, computed once per season.
 // Not a scoring surface, so nothing is sealed (ADR-0034).
 // The MLB pin (issue 3133) opens the same boards across MLB, where a run crosses trades.
-const MLB = 'mlb'
 // Counting stats first, so the default (HR) leads the row.
 const CHIPS = {
   hitting: [['hr', 'HR'], ['h', 'Hits'], ['rbi', 'RBI'], ['sb', 'SB'], ['avg', 'AVG'], ['ops', 'OPS']],
@@ -118,13 +117,13 @@ export function ClubStretchPage() {
           <ol className="cstretch__board" aria-label={`${club}, best ${picks.n} ${unit} by ${measure.label}`}>
             {shown.map((r, i) => (
               <li key={r.id}>
-                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: picks.group, by: picks.by, n: picks.n, ...(mlb ? {} : { club: picks.team }), player: r.id, name: r.name })}`)}>
+                <a className="cstretch__row" {...link(`${pathOf('best-stretch')}?${new URLSearchParams({ group: picks.group, by: picks.by, n: picks.n, club: picks.team, player: r.id, name: r.name })}`)}>
                   <span className="cstretch__rank">{rankOf(rows, i)}</span>
                   <span className="cstretch__who">
                     <span className="cstretch__name">
                       {r.name}
                       {/* A run still reaching into the latest season gets a bright tag (Gary, 2026-11-16). */}
-                      {data.through && r.last >= `${data.through}` && <span className="cstretch__now">{data.through}</span>}
+                      {data.through && r.last >= `${data.through}` && <> <span className="cstretch__now"><span className="sr-only">run reaches </span>{data.through}</span></>}
                     </span>
                     <span className="t-label">{r.team} · {shortDate(r.first)} – {shortDate(r.last)}</span>
                   </span>

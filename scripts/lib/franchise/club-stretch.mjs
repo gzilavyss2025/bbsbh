@@ -4,14 +4,14 @@
 // 3.1 plate appearances per game (the batting-title rule). One row per player, top twenty.
 // Pitching (same day): 32 starts in a row, or 65 relief outings in a row, no innings floor.
 // The run rules live in the app, so Best Stretch's club filter and these boards agree.
-import { CLUB_PITCH_LENGTHS, bestInStints, clubPitchPool, measuresFor, stintsFor } from '../../../src/api/streaks/bestStretch.js'
+import { CLUB_PITCH_LENGTHS, MLB_SCOPE, bestInStints, clubPitchPool, measuresFor, stintsFor } from '../../../src/api/streaks/bestStretch.js'
 
 export const LENGTHS = { hitting: [162, 154], pitching: [CLUB_PITCH_LENGTHS.starts, CLUB_PITCH_LENGTHS.relief] }
 // Twenty a board: the page shows ten and a "Show 10 more" button the rest (Gary, 2026-11-16).
 export const TOP = 20
 
 // The MLB board's scope key (issue 3133): a run counts every MLB game, so it crosses trades.
-export const MLB = 'mlb'
+export const MLB = MLB_SCOPE
 
 // One player's rows for one club (or MLB): { "162:hr": row, ... }, a key only where he has a run.
 export function playerRows({ id, name, games }, teamId, group = 'hitting') {
@@ -27,7 +27,7 @@ export function playerRows({ id, name, games }, teamId, group = 'hitting') {
   return out
 }
 
-// Every player's rows for a club -> { 162: { hr: top ten, ... }, 154: { ... } }. A tie keeps
+// Every player's rows for a club -> { 162: { hr: top TOP, ... }, 154: { ... } }. A tie keeps
 // the earlier run, then the lower id, so a re-run writes the same bytes.
 const cmp = (x, y) => (x < y ? -1 : x > y ? 1 : 0)
 

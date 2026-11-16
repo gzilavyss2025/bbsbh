@@ -68,7 +68,7 @@
   background: var(--marker);
   color: var(--text-on-bright);
   font-family: var(--font-mono);
-  font-size: var(--fs-small);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   vertical-align: middle;
 }

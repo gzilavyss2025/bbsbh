@@ -1055,8 +1055,9 @@ for each generator; the reader modules:
 - `streaks/clubStretch.js` — a club's best 162 and 154 games in a row by one player, from
   `public/data/club-stretch/{teamId}.json` (hand-run `scripts/franchise/gen-club-stretch.mjs`).
   `clubStretch(teamId)` returns `{ through, firstSeason, boards }`; `boards[162|154][hr|h|rbi|sb|avg|ops]`
-  is a top-ten list of `{ id, name, team, first, last, value }` (`team` is the club's name of the time,
-  `value` printed). `clubStretch(teamId, 'pitching')` reads `public/data/club-stretch-pitching/{teamId}.json`
+  is a top-twenty list of `{ id, name, team, first, last, value }` (`team` is the club's name of the time,
+  `value` printed). `clubStretch('mlb')` reads `mlb.json`, the same boards across MLB (issue 3133): a run
+  goes on through a trade and `team` lists every club in it. `clubStretch(teamId, 'pitching')` reads `public/data/club-stretch-pitching/{teamId}.json`
   (`--group pitching`): `boards[32|65][era|whip|k|kbb]`, 32 starts or 65 relief outings, no innings floor.
   Read by `/club-stretch` (`screens/stretch/ClubStretchPage.jsx`).
 - `history/franchiseLeaders.js` — a club's all-time leaders, from

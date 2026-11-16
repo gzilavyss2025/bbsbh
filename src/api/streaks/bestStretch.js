@@ -93,7 +93,7 @@ export function bestStretch(games, n, measure, group = 'hitting') {
 // ---- One club only (Club Stretch, and Best Stretch's ?club=). A run counts his games for the
 // club, crosses seasons, and ends at a game for another club; a return starts a new run. AVG and
 // OPS need 3.1 plate appearances per game (the batting-title rule); pitching has no floor.
-const PA_PER_GAME = 3.1
+export const PA_PER_GAME = 3.1
 const RATES = new Set(['avg', 'ops'])
 
 // Old logs can leave plateAppearances at 0: rebuild it from its parts.
@@ -140,6 +140,19 @@ export function bestInStints(stints, n, measure, group = 'hitting') {
 // kind of outing is set aside first, so it neither counts nor ends a run.
 export const CLUB_PITCH_LENGTHS = { starts: 32, relief: 65 }
 export const clubPitchPool = (games, n) => games.filter((g) => (n === CLUB_PITCH_LENGTHS.relief ? !(g.gamesStarted > 0) : g.gamesStarted > 0))
+
+// Club Stretch's MLB board (issue 3133): the club rules over every MLB game, so a run goes on
+// through a trade. Best Stretch's ?club=mlb reads the same key.
+export const MLB_SCOPE = 'mlb'
+
+// Best Stretch's search. `club` (a link from Club Stretch) keeps it to the board's rules: a
+// club's runs, or MLB_SCOPE's; a pitcher's run there counts starts at 32 and relief outings at
+// 65 (clubPitchPool). With no club it is the plain best window over `pool`.
+export function searchBest(games, pool, n, measure, group, club) {
+  if (!club) return bestStretch(pool, n, measure, group)
+  const clubPool = group === 'pitching' && Object.values(CLUB_PITCH_LENGTHS).includes(n) ? clubPitchPool(games, n) : pool
+  return club === MLB_SCOPE ? bestInStints([clubPool], n, measure, group) : playerBest(clubPool, club, n, measure, group)
+}
 
 // The club he played the most of the window for: the card wears its colours.
 function mostCommon(ids) {

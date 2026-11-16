@@ -93,3 +93,19 @@ test('nextFetches: fetches while a ceiling can reach the 10th row, ties included
   const tie = { ...board, cands: [...cands.slice(0, 10), { id: 99, ceiling: 82 }] }
   assert.deepEqual([...nextFetches([tie], done, rowOf)], [99])
 })
+
+// Club Stretch's MLB rows link to Best Stretch with club=mlb: the card must find the same run.
+test("Best Stretch's MLB search keeps the board's rules: relief outings only, and the AVG floor", async () => {
+  const { searchBest } = await import('../src/api/streaks/bestStretch.js')
+  // A starter (40 starts) with 70 relief outings: his 65-relief run is the board's, not 65 starts.
+  const games = Array.from({ length: 110 }, (_, i) => toGame({ date: `1950-${String(4 + Math.floor(i / 28)).padStart(2, '0')}-${String(1 + (i % 28)).padStart(2, '0')}`, game: { gameNumber: 1 }, team: { id: i < 60 ? 158 : 147, name: 'C' }, stat: i % 11 < 4 ? { gamesStarted: 1, outs: 18, earnedRuns: 3 } : { outs: 3, earnedRuns: 0 } }, 'pitching'))
+  const era = measuresFor('pitching').find((m) => m.key === 'era')
+  const starts = games.filter((g) => g.gamesStarted > 0)
+  const best = searchBest(games, starts, 65, era, 'pitching', MLB)
+  assert.equal(best.value, playerRows({ id: 1, name: 'P', games }, MLB, 'pitching')['65:era'].raw)
+  // A hitter short of 3.1 PA a game has no MLB AVG run, as the board has none.
+  const avg = measuresFor('hitting').find((m) => m.key === 'avg')
+  const thin = Array.from({ length: 162 }, (_, i) => toGame({ date: `1950-${String(4 + Math.floor(i / 28)).padStart(2, '0')}-${String(1 + (i % 28)).padStart(2, '0')}`, game: { gameNumber: 1 }, team: { id: 158, name: 'C' }, stat: { atBats: 3, plateAppearances: 3, hits: 2 } }))
+  assert.equal(searchBest(thin, thin, 162, avg, 'hitting', MLB), null)
+  assert.equal(playerRows({ id: 1, name: 'P', games: thin }, MLB)['162:avg'], undefined)
+})

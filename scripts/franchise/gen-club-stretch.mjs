@@ -82,8 +82,13 @@ for (const { scope, season, splits } of lines) {
     m.get(id).seasons.push({ season, ...Object.fromEntries(LINE.map((k) => [k, Number(sp.stat?.[k]) || 0])) })
   }
 }
-// His career span (game logs cover all of it, so a game for another club ends a club run).
-const span = new Map([...scopes.get(MLB)].map(([id, p]) => [id, [Math.min(...p.seasons.map((s) => s.season)), Math.max(...p.seasons.map((s) => s.season))]]))
+// His career span (game logs cover all of it, so a game for another club ends a club run),
+// over every scope's lines, so a club season the league-wide call missed is still fetched.
+const span = new Map()
+for (const m of scopes.values()) for (const [id, p] of m) for (const { season } of p.seasons) {
+  const s = span.get(id)
+  span.set(id, s ? [Math.min(s[0], season), Math.max(s[1], season)] : [season, season])
+}
 for (const m of scopes.values()) for (const [id, p] of m) if (!qualifies(p.seasons)) m.delete(id)
 // The scopes each player qualifies for, so one log serves all of them.
 const playerOf = new Map()

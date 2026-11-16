@@ -1,16 +1,16 @@
 // Club Stretch's fetch pruning (Gary, 2026-11-16, issue 3133): a CEILING on a player's best
 // run, from season lines alone, so the generator fetches game logs only for players who could
-// still make a top ten. The boards stay exact: a player is skipped only when his ceiling is
-// strictly worse than a board's 10th exact row, and a tie is fetched (the tiebreak may favour him).
+// still make a board. The boards stay exact: a player is skipped only when his ceiling is
+// strictly worse than a board's last exact row (TOP), and a tie is fetched (the tiebreak may favour him).
 //
 // A run of n games lies inside seasons i..k of his list (with one club, or in MLB). Seasons
 // i+1..k-1 are wholly inside it, so they hold at most n games; seasons i..k hold at least n.
 // So the run's counting stats are at most season i..k's, and wholly-inside seasons set a floor.
 // Every such span is tried; the ceiling is the best one. A gap in his list (a year away) only
 // loosens it, which is safe.
-import { CLUB_PITCH_LENGTHS, measuresFor } from '../../../src/api/streaks/bestStretch.js'
+// PA_PER_GAME is the run rule's own floor: a ceiling built on another number would prune wrong.
+import { CLUB_PITCH_LENGTHS, PA_PER_GAME, measuresFor } from '../../../src/api/streaks/bestStretch.js'
 
-const PA_PER_GAME = 3.1
 const sum = (rows, k) => rows.reduce((n, s) => n + (s[k] ?? 0), 0)
 
 // The games a season gives a run of length n: games, starts, or relief outings.
@@ -80,8 +80,8 @@ const score = (raw, lower) => (lower ? -raw : raw)
 // Which players to fetch next. boards: [{ scope, n, measure, cands: [{ id, ceiling }] }] with
 // cands sorted best ceiling first; done(id) says a player's rows are in; rowOf(id, scope, key)
 // reads one exact row ({ raw } or undefined). For each board, the unfetched players whose
-// ceiling is at least the board's 10th exact score (all of them while it has fewer than ten),
-// up to `per` a board. An empty set means every board is final.
+// ceiling is at least the board's `top`th exact score (all of them while it has fewer than
+// `top`), up to `per` a board; the generator passes TOP. An empty set means every board is final.
 export function nextFetches(boards, done, rowOf, { top = 10, per = 8 } = {}) {
   const need = new Set()
   for (const b of boards) {
