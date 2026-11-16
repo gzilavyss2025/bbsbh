@@ -3,34 +3,11 @@
 // put back would pass lint and render fine; only this test notices.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import postcss from 'postcss'
+import { rulesEndingIn } from './helpers/css.js'
 
 const STYLES = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'styles')
-
-function sheets(dir, prefix = '') {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return sheets(abs, `${prefix}${f}/`)
-    return f.endsWith('.css') ? [`${prefix}${f}`] : []
-  })
-}
-
-// Every rule (outside the design lab) whose selector ends on `cls`.
-function rulesEndingIn(cls) {
-  const tail = new RegExp(`\\.${cls}(?![\\w-])[^\\s>+~]*$`)
-  const found = []
-  for (const rel of sheets(STYLES).filter((f) => !f.startsWith('designlab/'))) {
-    postcss.parse(readFileSync(join(STYLES, rel), 'utf8')).walkRules((rule) => {
-      if (!rule.selectors.some((sel) => tail.test(sel.trim()))) return
-      const props = rule.nodes.filter((n) => n.type === 'decl').map((d) => d.prop.toLowerCase())
-      found.push({ where: `${rel}: ${rule.selector}`, props })
-    })
-  }
-  return found
-}
 
 const BOX = new Set(['background', 'background-color', 'border', 'border-radius', 'box-shadow'])
 
@@ -50,7 +27,7 @@ const FLAT = [
 
 for (const cls of FLAT) {
   test(`.${cls} sits flat in its card, with no box of its own`, () => {
-    const rules = rulesEndingIn(cls)
+    const rules = rulesEndingIn(STYLES, cls)
     assert.ok(rules.length > 0, `.${cls} should still have a rule`)
     for (const { where, props } of rules) {
       if (STANDALONE.has(where)) continue
