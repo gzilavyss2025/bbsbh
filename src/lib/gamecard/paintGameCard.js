@@ -10,7 +10,9 @@
 // lib/pitch/cardPlots.js, shared with the SVG.
 import { glyphD } from '../pitch/pitchGlyph.js'
 import { pitchMark } from '../pitch/pitchTypes.js'
-import { locationScale, movementScale, movementRange } from '../pitch/cardPlots.js'
+import { locationScale, fitViewBox, BALL_R } from '../pitch/cardPlots.js'
+import { geometryOf, parkWindow } from '../ballpark/layout/parkWindow.js'
+import { HOME, wallStroke } from '../ballpark/ballparkGeometry.js'
 
 export const CARD_W = 360
 export const SCALE = 3 // 1080 px wide
@@ -90,11 +92,60 @@ function mark(ctx, code, x, y, r) {
   ctx.restore()
 }
 
-// model: { card, name, role, ctxLine, headline, sub, figures: [[label, value]], season }
+// The park as the box score's hit chart draws it (components/ballpark/
+// BallparkDiagram.jsx: foul ground, grass, track, the skinned infield, foul
+// lines, the fence), in the field's own inks read off that drawing, then the
+// balls in play: a hit is a marker dot, an out an ink ring.
+function paintSpray(ctx, park, balls, w, h, c) {
+  const g = geometryOf(park)
+  const fit = fitViewBox(parkWindow(park).viewBox, w, h)
+  ctx.translate(fit.dx, fit.dy)
+  ctx.scale(fit.scale, fit.scale)
+  const fill = (d, col) => {
+    if (!d || !col) return
+    ctx.fillStyle = col
+    ctx.fill(new Path2D(d))
+  }
+  const stroke = (d, col, lw) => {
+    if (!d || !col) return
+    ctx.strokeStyle = col
+    ctx.lineWidth = lw
+    ctx.stroke(new Path2D(d))
+  }
+  const f = c.field
+  fill(g.foul, f.foul)
+  fill(g.fair, f.grass)
+  fill(g.track, f.track)
+  fill(g.skin, f.dirt)
+  fill(g.grassDiamond, f.grass)
+  stroke(g.baselineDirtL, f.dirt, g.baselineDirtW)
+  stroke(g.baselineDirtR, f.dirt, g.baselineDirtW)
+  ctx.fillStyle = f.dirt
+  ctx.beginPath()
+  ctx.arc(g.mound.x, g.mound.y, g.moundDirtR, 0, Math.PI * 2)
+  ctx.arc(HOME.x, HOME.y, g.homeDirtR, 0, Math.PI * 2)
+  ctx.fill()
+  stroke(g.foulLineL, f.line, 2)
+  stroke(g.foulLineR, f.line, 2)
+  for (const seg of g.fenceSegs) stroke(seg.d, f.wall, wallStroke(seg.h))
+  for (const b of balls) {
+    ctx.beginPath()
+    ctx.arc(b.ball.x, b.ball.y, b.hit ? BALL_R.hit : BALL_R.out, 0, Math.PI * 2)
+    if (b.hit) {
+      ctx.fillStyle = c.marker
+      ctx.fill()
+    }
+    ctx.strokeStyle = c.ink
+    ctx.lineWidth = 4
+    ctx.stroke()
+  }
+}
+
+// model: { card, name, role, ctxLine, headline, sub, figures: [[label, value]], season, park }
 // art: { headshot } (HTMLImageElement | null). c: colours. f: font stacks { display, mono }.
 export function paintGameCard(canvas, model, art, c, f) {
   const { card } = model
-  const hasPlots = card.pitches.some((p) => p.loc || p.pfxX != null)
+  const hasPlots = card.pitches.some((p) => p.loc || p.ball)
   const L = cardLayout({ mixRows: card.mix.length, hasPlots })
   canvas.width = L.width * SCALE
   canvas.height = L.height * SCALE
@@ -198,31 +249,19 @@ export function paintGameCard(canvas, model, art, c, f) {
     ctx.strokeRect(loc.zone.x, loc.zone.y, loc.zone.w, loc.zone.h)
     card.pitches.forEach((q) => q.loc && mark(ctx, q.type, loc.x(q.loc.xn), loc.y(q.loc.zn), 3.6))
     ctx.restore()
-    const mv = movementScale(w, ph, movementRange(card.pitches, model.season?.byCode))
-    ctx.save()
-    ctx.translate(boxes[1], p.y + PLOT_TOP)
-    ctx.fillStyle = c.rule
-    ctx.fillRect(w / 2, 0, 1, ph)
-    ctx.fillRect(0, ph / 2, w, 1)
-    card.pitches.forEach((q) => q.pfxX != null && q.pfxZ != null && mark(ctx, q.type, mv.x(q.pfxX), mv.y(q.pfxZ), 3.2))
-    // His season, per pitch: a solid ink ring with the pitch's colour inside it,
-    // drawn over the dots so the comparison reads at a glance.
-    card.mix.forEach((row) => {
-      const s = model.season?.byCode?.get(row.type)
-      if (s?.pfxX == null || s?.pfxZ == null) return
+    const balls = card.pitches.filter((q) => q.ball)
+    if (model.park && c.field && balls.length) {
+      ctx.save()
+      ctx.translate(boxes[1], p.y + PLOT_TOP)
       ctx.beginPath()
-      ctx.arc(mv.x(s.pfxX), mv.y(s.pfxZ), 7, 0, Math.PI * 2)
-      ctx.strokeStyle = c.ink
-      ctx.lineWidth = 2.5
-      ctx.stroke()
-      ctx.strokeStyle = pitchMark(row.type).color
-      ctx.lineWidth = 1.2
-      ctx.stroke()
-    })
-    ctx.restore()
+      ctx.rect(0, 0, w, ph)
+      ctx.clip()
+      paintSpray(ctx, model.park, balls, w, ph, c)
+      ctx.restore()
+    }
     const cy = p.y + PLOT_TOP + ph + 14
     text(ctx, "WHERE · CATCHER'S VIEW", boxes[0], cy, { font: disp(600, 11), color: c.muted })
-    text(ctx, model.season?.byCode?.size ? 'MOVEMENT · RING = SEASON' : 'MOVEMENT', boxes[1], cy, { font: disp(600, 11), color: c.muted })
+    if (model.park && c.field && balls.length) text(ctx, 'IN PLAY · ● HIT ○ OUT', boxes[1], cy, { font: disp(600, 11), color: c.muted })
   }
 
   // Footer

@@ -266,10 +266,6 @@
   stroke: var(--border-stamped);
   stroke-width: 1.4;
 }
-.pgc__axis {
-  stroke: var(--border-hairline);
-  stroke-width: 1;
-}
 .pgc__dot {
   fill: var(--pitch, var(--text-muted));
   fill-opacity: 0.85;
@@ -279,17 +275,16 @@
   stroke: var(--pitch, var(--text-muted));
   stroke-width: 1.4;
 }
-/* His season, per pitch: a solid ink ring with the pitch's colour inside, over
-   the dots, so the comparison reads at a glance (the PNG paints the same). */
-.pgc__ring {
+.pgc__spray svg {
+  aspect-ratio: 120 / 140;
+}
+.pgc__ball {
   fill: none;
   stroke: var(--border-stamped);
-  stroke-width: 2.5;
+  stroke-width: 4;
 }
-.pgc__ring-in {
-  fill: none;
-  stroke: var(--pitch, var(--text-muted));
-  stroke-width: 1.2;
+.pgc__ball--hit {
+  fill: var(--marker);
 }
 .pgc__delta {
   color: var(--text-muted);

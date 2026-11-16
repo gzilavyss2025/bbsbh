@@ -2,10 +2,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { locationScale, movementScale, movementRange, seasonByCode, veloDelta, MOVE_RANGE } from '../src/lib/pitch/cardPlots.js'
+import { locationScale, fitViewBox, seasonByCode, veloDelta } from '../src/lib/pitch/cardPlots.js'
 import { buildPitcherGameCard } from '../src/api/pitcher/gameCard.js'
 
-const PHYS = ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime', 'spinRate']
 
 test('location: the zone is centred, its top above its bottom, and the catcher view keeps +x right', () => {
   const s = locationScale(100, 120)
@@ -23,32 +22,19 @@ test('location: a pitch far off the plate pins to the plot edge instead of leavi
   assert.equal(s.y(5), 0)
 })
 
-test('movement: zero is the centre, up is up, and a wild reading clamps to the edge', () => {
-  const m = movementScale(100, 100)
-  assert.equal(m.x(0), 50)
-  assert.equal(m.y(0), 50)
-  assert.ok(m.y(10) < 50)
-  assert.equal(m.x(MOVE_RANGE * 3), 100)
-  assert.equal(m.y(-MOVE_RANGE * 3), 100)
-})
-
-test('season by code: MLB rows by default, pfx read by field name, missing stays null', () => {
-  const entry = {
-    mlb: [{ code: 'FF', avgVelo: 96.1, phys: [-1.8, 5.3, -5.3, 9.3, 6.6, 0.39, 2251] }, { code: 'CU', avgVelo: 77 }],
-    aaa: [{ code: 'FF', avgVelo: 90 }],
-  }
-  const m = seasonByCode(entry, PHYS)
-  assert.deepEqual(m.get('FF'), { velo: 96.1, pfxX: -5.3, pfxZ: 9.3 })
-  assert.deepEqual(m.get('CU'), { velo: 77, pfxX: null, pfxZ: null })
-  assert.equal(seasonByCode({ aaa: [{ code: 'SL', avgVelo: 85 }] }, PHYS, 'aaa').get('SL').velo, 85)
-  assert.equal(seasonByCode(null, PHYS).size, 0)
+test('season by code: his season speed per pitch, MLB rows by default, missing stays null', () => {
+  const entry = { mlb: [{ code: 'FF', avgVelo: 96.1 }, { code: 'CU' }], aaa: [{ code: 'FF', avgVelo: 90 }] }
+  const m = seasonByCode(entry)
+  assert.equal(m.get('FF').velo, 96.1)
+  assert.equal(m.get('CU').velo, null)
+  assert.equal(seasonByCode(null).size, 0)
 })
 
 test('season by code: a Triple-A game compares against his Triple-A rows, never his MLB ones', () => {
   const entry = { mlb: [{ code: 'FF', avgVelo: 96 }], aaa: [{ code: 'FF', avgVelo: 94 }] }
-  assert.equal(seasonByCode(entry, PHYS, 'aaa').get('FF').velo, 94)
-  assert.equal(seasonByCode(entry, PHYS, 'mlb').get('FF').velo, 96)
-  assert.equal(seasonByCode({ mlb: [{ code: 'FF', avgVelo: 96 }] }, PHYS, 'aaa').size, 0)
+  assert.equal(seasonByCode(entry, 'aaa').get('FF').velo, 94)
+  assert.equal(seasonByCode(entry, 'mlb').get('FF').velo, 96)
+  assert.equal(seasonByCode({ mlb: [{ code: 'FF', avgVelo: 96 }] }, 'aaa').size, 0)
 })
 
 test('velo delta: signed tenths, a real minus sign, nothing under 0.3 mph or when a side is missing', () => {
@@ -60,29 +46,22 @@ test('velo delta: signed tenths, a real minus sign, nothing under 0.3 mph or whe
   assert.equal(veloDelta(91.6, null), '')
 })
 
-test('movement range: fits his biggest break plus a margin, never under 12 in or over the 24 in cap', () => {
-  const pitches = [{ pfxX: -14, pfxZ: 9 }, { pfxX: 3, pfxZ: -2 }, { pfxX: null, pfxZ: null }]
-  assert.equal(movementRange(pitches, new Map()), 17)
-  assert.equal(movementRange([{ pfxX: 2, pfxZ: 3 }], new Map()), 12)
-  assert.equal(movementRange([{ pfxX: 40, pfxZ: 0 }], new Map()), MOVE_RANGE)
-  assert.equal(movementRange([{ type: 'FF', pfxX: 2, pfxZ: 3 }], new Map([['FF', { pfxX: -16, pfxZ: 10 }]])), 19)
+test("field fit: the park's viewBox scales evenly into the box and centres in it", () => {
+  const f = fitViewBox('0 50 620 510', 160, 186)
+  assert.ok(Math.abs(f.scale - 160 / 620) < 1e-9)
+  assert.equal(f.dx, 0)
+  assert.ok(Math.abs(f.dy - ((186 - 510 * f.scale) / 2 - 50 * f.scale)) < 1e-9)
+  const tall = fitViewBox('0 0 100 400', 100, 100)
+  assert.equal(tall.scale, 0.25)
+  assert.equal(tall.dx, (100 - 25) / 2)
 })
 
-test('movement range: a season pitch he did not throw tonight (no ring drawn) does not widen the plot', () => {
-  const season = new Map([['FF', { pfxX: 4, pfxZ: 9 }], ['ST', { pfxX: 20, pfxZ: 1 }]])
-  assert.equal(movementRange([{ type: 'FF', pfxX: 5, pfxZ: 8 }], season), 12)
-})
-
-test('movement scale takes the fitted range: its edge is that range, not the cap', () => {
-  const m = movementScale(100, 100, 12)
-  assert.equal(m.x(12), 100)
-  assert.equal(m.y(-12), 100)
-  assert.equal(m.x(0), 50)
-})
-
-test('every pitch Yamamoto threw in WS G7 has a location and a movement to plot', () => {
+test('every pitch Yamamoto threw in WS G7 has a location, and each of his 7 balls in play a landing spot', () => {
   const feed = JSON.parse(readFileSync(new URL('./fixtures/game-813024.yamamoto.json', import.meta.url)))
   const card = buildPitcherGameCard(feed, 808967)
   assert.equal(card.pitches.filter((p) => p.loc).length, 34)
-  assert.equal(card.pitches.filter((p) => p.pfxX != null && p.pfxZ != null).length, 34)
+  // 10 batters: 1 K, 1 BB, 1 HBP, so 7 put the ball in play; 1 hit (the double).
+  const balls = card.pitches.filter((p) => p.ball)
+  assert.equal(balls.length, 7)
+  assert.equal(balls.filter((p) => p.hit).length, 1)
 })

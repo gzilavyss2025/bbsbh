@@ -21,6 +21,8 @@ import { pitchDotCategory, pitchCallCode } from '../playbyplay/pitchInfo.js'
 import { roundNameAt } from '../../lib/postseason/roundTag.js'
 import { monthDayNameYear } from '../../lib/dates.js'
 import { normalizePitch } from '../../lib/zone/zoneGeometry.js'
+import { hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
+import { HIT_EVENT_TYPES } from '../playbyplay/eventTypes.js'
 
 const SWING = new Set(['whiff', 'foul', 'inplay'])
 
@@ -91,6 +93,7 @@ function pitchesFor(feed, pitcherId) {
     const half = play?.about?.halfInning
     const finisher = play?.matchup?.pitcher?.id
     const bat = play?.matchup?.batSide?.code ?? null
+    const eventType = play?.result?.eventType ?? null
     let current = onMound[half] ?? finisher
     for (const e of play?.playEvents ?? []) {
       if (e?.details?.eventType === 'pitching_substitution' && e.player?.id != null) current = e.player.id
@@ -108,12 +111,14 @@ function pitchesFor(feed, pitcherId) {
         pZ: pd.coordinates?.pZ ?? null,
         ivb: pd.breaks?.breakVerticalInduced ?? null,
         hb: pd.breaks?.breakHorizontal ?? null,
-        // Movement in inches, catcher's view: the same pfx the season arsenal averages.
-        pfxX: pd.coordinates?.pfxX ?? null,
-        pfxZ: pd.coordinates?.pfxZ ?? null,
         // Location against THIS batter's zone (half-plate units, zone heights), so a
         // night of different hitters plots on one zone (lib/zone/zoneGeometry.js).
         loc: normalizePitch(pd.coordinates?.pX, pd.coordinates?.pZ, pd.strikeZoneTop, pd.strikeZoneBottom),
+        // Where a ball put in play landed, in the ballpark drawing's own space
+        // (lib/ballpark/hitProjection.js, the box score hit chart's projection),
+        // and whether the play went for a hit. Null for a pitch not put in play.
+        ball: e.hitData ? hitCoordToSvg(e.hitData.coordinates?.coordX, e.hitData.coordinates?.coordY) : null,
+        hit: e.hitData ? HIT_EVENT_TYPES.has(eventType) : false,
         ev: e.hitData?.launchSpeed ?? null,
         la: e.hitData?.launchAngle ?? null,
       })
@@ -153,8 +158,6 @@ export function buildPitcherGameCard(feed, pitcherId) {
         velo: avg(ps.map((p) => p.velo).filter((v) => v != null)),
         ivb: avg(ps.map((p) => p.ivb).filter((v) => v != null)),
         hb: avg(ps.map((p) => p.hb).filter((v) => v != null)),
-        pfxX: avg(ps.map((p) => p.pfxX).filter((v) => v != null)),
-        pfxZ: avg(ps.map((p) => p.pfxZ).filter((v) => v != null)),
         whiffs,
         zonePct: pct(zoned.filter((p) => p.inZone).length, zoned.length),
         chasePct: pct(outside.filter((p) => SWING.has(p.call)).length, outside.length),

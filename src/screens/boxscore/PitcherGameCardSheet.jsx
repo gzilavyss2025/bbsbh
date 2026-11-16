@@ -1,7 +1,7 @@
 import '../../styles/boxscore/pitcher-game-card.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildPitcherGameCard } from '../../api/pitcher/gameCard.js'
-import { fetchPitchArsenalFor, PHYS_FIELDS } from '../../api/pitcher/arsenal.js'
+import { fetchPitchArsenalFor } from '../../api/pitcher/arsenal.js'
 import { selectGameSeason } from '../../api/select.js'
 import { seasonByCode, veloDelta } from '../../lib/pitch/cardPlots.js'
 import { paintGameCard, cardFilename } from '../../lib/gamecard/paintGameCard.js'
@@ -11,6 +11,7 @@ import { realHeadshotUrl } from '../../lib/teams/headshots.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { SavePosterButton } from '../../components/preview/SavePosterButton.jsx'
 import { GameCardPlots } from './GameCardPlots.jsx'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { pitchMark } from '../../lib/pitch/pitchTypes.js'
 import { headerThemeStyle } from '../../lib/colors/headerTheme.js'
 import { PitchMark } from '../../components/playbyplay/pitcherCard/PitchMark.jsx'
@@ -31,8 +32,9 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 // The card (<article>) says who, which game and how he did, so it reads on its
 // own as a picture; the arsenal detail sits under it and stays out of the
 // image. Its band wears the club's jersey colours: a club may colour a card
-// that names the club (ADR-0030). The plots compare against his season
-// arsenal (spoiler-free, api/pitcher/arsenal.js) for the GAME's season only.
+// that names the club (ADR-0030). The mix rows compare each pitch's speed with
+// his season arsenal (spoiler-free, api/pitcher/arsenal.js) for the GAME's
+// season and level only.
 // "Save card as image" paints the same card on a canvas (lib/gamecard/).
 
 const pct = (x) => (x == null ? '—' : `${Math.round(x * 100)}%`)
@@ -50,11 +52,20 @@ function paletteOf(el) {
   const cs = getComputedStyle(el)
   const band = getComputedStyle(el.querySelector('.pgc__band'))
   const v = (k) => cs.getPropertyValue(k).trim()
+  // The field's inks, off the spray chart's own drawing, when it is on the card.
+  const ink = (sel, prop = 'fill') => {
+    const n = el.querySelector(`.pgc__spray ${sel}`)
+    return n ? getComputedStyle(n)[prop] : null
+  }
+  const field = el.querySelector('.pgc__spray')
+    ? { foul: ink('.bpdiagram__foul'), grass: ink('.bpdiagram__grass'), track: ink('.bpdiagram__track'), dirt: ink('.bpdiagram__dirt'), line: ink('.bpdiagram__line', 'stroke'), wall: ink('.bpdiagram__wall', 'stroke'), bag: ink('rect') }
+    : null
   return [
     {
       card: v('--surface-card'), page: v('--bg-canvas') || v('--surface-card'), ink: v('--surface-stamped-ink'),
       onInk: v('--text-on-ink'), text: v('--text-heading'), muted: v('--text-muted'), rule: v('--border-hairline'),
       marker: v('--marker'), band: band.backgroundColor, bandText: band.color, bandAccent: band.borderBottomColor,
+      field,
     },
     { display: v('--font-display'), mono: v('--font-mono') },
   ]
@@ -72,10 +83,16 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
   const season = useMemo(() => {
     // The arsenal tracks MLB and Triple-A only; any other level compares to nothing.
     const level = { 1: 'mlb', 11: 'aaa' }[feed?.gameData?.teams?.home?.sport?.id ?? 1]
-    const byCode = level ? seasonByCode(arsenal.data?.pit?.[String(pitcher.id)], PHYS_FIELDS, level) : new Map()
+    const byCode = level ? seasonByCode(arsenal.data?.pit?.[String(pitcher.id)], level) : new Map()
     const deltas = new Map(card?.mix.map((m) => [m.type, veloDelta(m.velo, byCode.get(m.type)?.velo)]) ?? [])
     return { byCode, deltas }
   }, [arsenal.data, pitcher.id, card, feed])
+  // The park's drawing (static geometry, not game state); null at a park the
+  // drawing doesn't carry, and the spray chart then stays off the card.
+  const park = useMemo(() => {
+    const g = feed?.gameData
+    return resolveBallparkLayout({ venueId: g?.venue?.id, venueName: g?.venue?.name, gameDate: g?.datetime?.officialDate })
+  }, [feed])
   const name = card?.line.name || pitcher.name
   const [first, ...rest] = name.split(' ')
   const role = [teamAbbr, pitcher.hand && `${pitcher.hand}HP`, card?.line.role].filter(Boolean).join(' · ')
@@ -89,7 +106,7 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
     Promise.all([loadPosterImages({ headshot: realHeadshotUrl(pitcher.id, 360) }), document.fonts?.ready]).then(([art]) => {
       if (!live) return
       paintGameCard(canvasRef.current, {
-        card, name, season,
+        card, name, season, park,
         role: [role, decisionWord(pitcher.dec)].filter(Boolean).join(' · '),
         ctxLine: contextLine(card),
         headline: headline(card.line),
@@ -101,7 +118,7 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
     return () => {
       live = false
     }
-  }, [card, season, arsenal.loading, name, role, pitcher.id, pitcher.dec])
+  }, [card, season, park, arsenal.loading, name, role, pitcher.id, pitcher.dec])
   return (
     <div className="scrim pgc-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <Stack gap="loose" className="sheet pgc" role="dialog" aria-modal="true" aria-label={`Game card, ${name}`}>
@@ -172,7 +189,7 @@ export function PitcherGameCardSheet({ feed, pitcher, teamId, teamAbbr, theme, o
                 </section>
               )}
 
-              <GameCardPlots pitches={card.pitches} mix={card.mix} season={season.byCode} />
+              <GameCardPlots pitches={card.pitches} park={park} />
 
               <footer className="pgc__foot">
                 <span className="pgc__brand">Tally Baseball</span>

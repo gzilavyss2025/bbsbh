@@ -11,6 +11,7 @@ const allPlays = feed.liveData.plays.allPlays
   .filter((p) => p.matchup.pitcher.id === ID)
   .map((p) => ({
     about: { halfInning: p.about.halfInning },
+    result: { eventType: p.result?.eventType },
     matchup: { pitcher: { id: ID }, batSide: { code: p.matchup.batSide.code } },
     playEvents: p.playEvents.map((e) => ({
       isPitch: e.isPitch,
@@ -26,15 +27,16 @@ const allPlays = feed.liveData.plays.allPlays
           breaks: pick(e.pitchData.breaks, ['breakVerticalInduced', 'breakHorizontal']),
         },
       }),
-      ...(e.hitData && { hitData: pick(e.hitData, ['launchSpeed', 'launchAngle']) }),
+      ...(e.hitData && { hitData: { ...pick(e.hitData, ['launchSpeed', 'launchAngle']), coordinates: pick(e.hitData.coordinates, ['coordX', 'coordY']) } }),
     })),
   }))
 const p = feed.liveData.boxscore.teams.away.players[`ID${ID}`]
-const g = feed.gameData
+const g = feed.gameData // venue: the spray chart's park
 const out = {
   gamePk: 813024,
   gameData: {
     game: { type: g.game.type },
+    venue: { id: g.venue?.id, name: g.venue?.name },
     datetime: { officialDate: g.datetime.officialDate },
     status: { codedGameState: g.status.codedGameState },
     teams: { away: { abbreviation: g.teams.away.abbreviation }, home: { abbreviation: g.teams.home.abbreviation, sport: { id: g.teams.home.sport?.id } } },
