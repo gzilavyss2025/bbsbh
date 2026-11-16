@@ -126,5 +126,5 @@ test('the per-start pitch mix store is excepted by name, so it never counts as u
   const r = run([{ name: 'pitch-arsenal-starts/', stamp: null }])
   assert.deepEqual(r.unstamped, [])
   assert.equal(r.excepted.length, 1)
-  assert.equal(UNSTAMPED_BUDGET, 23, 'the budget did not move')
+  assert.equal(UNSTAMPED_BUDGET, 22, 'the budget moved only for war-history/ (#3075)')
 })
