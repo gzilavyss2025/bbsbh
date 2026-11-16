@@ -1641,6 +1641,15 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `research/gen-retro-store.mjs` → Vercel Blob `retro/v1/` (NOT `public/data`), the
+  1961-2014 history store (#3135): one row per regular-season plate appearance from
+  Retrosheet, run through Chadwick's `cwevent` and joined to gamePk and MLBAM ids. Month
+  shards with a parallel pitch-string file, a game index per season, park files,
+  `parks.json`, `people.json`, `manifest.json`. **Hand-run, NOT on a cron**: dispatch
+  `.github/workflows/retro-store.yml` (header test, downloads, build, upload; always all 54
+  seasons). Locally, `--seasons=1961,1988,2014` without `--upload` builds a few seasons
+  into `--out`. Pure half: `lib/research/retro.mjs`. Layout: `docs/research-store.md`,
+  "History store".
 - `gen-eliminated.mjs` → `public/data/eliminated.json` — for each MLB club and regular
   season since 1995 (the wild-card era), the date it was mathematically eliminated from the postseason and
   every game it played from then on (date, opponent, home/away, record entering). The

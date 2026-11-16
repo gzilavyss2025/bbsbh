@@ -1,0 +1,70 @@
+name: History store
+
+# Builds the 1961-2014 history store (#3135) from Retrosheet play-by-play and uploads it to
+# Vercel Blob (retro/v1/). Dispatch only: the data is history, rebuilt by hand when
+# Retrosheet revises it (ADR-0100). Writes nothing to the repo.
+#
+# Order: the one-file header test (compression, CORS, Range) runs first and stops the run
+# if Blob would serve the store uncompressed or without CORS. Then it downloads the
+# Retrosheet event files, the Chadwick register and Chadwick 0.7.2 (SourceForge), builds
+# cwevent, builds every file, and uploads only if the whole build checks out
+# (scripts/research/gen-retro-store.mjs). Always all 54 seasons: the park files and the
+# manifest span every season, so a partial upload would cut them short. About 870 uploads.
+# Needs the BLOB_READ_WRITE_TOKEN repo secret (Settings > Secrets and variables > Actions).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: retro-store
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - name: Check the secret is set
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          if [ -z "$BLOB_READ_WRITE_TOKEN" ]; then echo "::error::BLOB_READ_WRITE_TOKEN is not set"; exit 1; fi
+          echo "BLOB_READ_WRITE_TOKEN is set (value not printed)."
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Header test (one throwaway file)
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: node scripts/research/retro-header-test.mjs
+      # Each download goes into its own new, empty folder outside the repo (ADR-0100).
+      - name: Download Retrosheet, the register and Chadwick
+        run: |
+          set -euo pipefail
+          R="$RUNNER_TEMP/retro"
+          # Three tries: retrosheet.org sometimes resets a connection.
+          dl() { for t in 1 2 3; do rm -rf "$R/dl/$2"; node scripts/lib/open-data/download.mjs "$1" "$R/dl/$2" && return 0; sleep 10; done; return 1; }
+          mkdir -p "$R/ev" "$R/chad"
+          for y in $(seq 1961 2014); do
+            dl "https://www.retrosheet.org/events/${y}eve.zip" "eve$y"
+            mkdir -p "$R/ev/$y" && unzip -q "$R/dl/eve$y/${y}eve.zip" -d "$R/ev/$y"
+            sleep 0.3
+          done
+          for i in 0 1 2 3 4 5 6 7 8 9 a b c d e f; do
+            dl "https://raw.githubusercontent.com/chadwickbureau/register/master/data/people-$i.csv" "chad$i"
+            cp "$R/dl/chad$i/people-$i.csv" "$R/chad/"
+          done
+          dl "https://sourceforge.net/projects/chadwick/files/chadwick-0.7/chadwick-0.7.2/chadwick-0.7.2.tar.gz/download" chadwick
+          tar xzf "$R/dl/chadwick/download" -C "$R"
+          (cd "$R/chadwick-0.7.2" && ./configure --prefix="$R/cw" > /dev/null && make -s > /dev/null && make install -s > /dev/null)
+          "$R/cw/bin/cwevent" -h 2>&1 | head -1 || true
+      - name: Build and upload
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          R="$RUNNER_TEMP/retro"
+          node scripts/research/gen-retro-store.mjs --events="$R/ev" --register="$R/chad" --cwevent="$R/cw/bin/cwevent" --out="$R/out" --upload
