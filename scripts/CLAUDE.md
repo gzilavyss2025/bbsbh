@@ -26,7 +26,8 @@ another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5) rather than `bette
 `npm install` step, and a built-in avoids adding install latency.
 A `bySeason` group keeps every season, one frozen dump per old season (ADR-0086).
 **The dumps and `data/callouts-archive/` are not in this repo** (ADR-0128): they live in
-the private `bbsbh-state` repo. Run `npm run state:pull` before a generator that reads them.
+the private `bbsbh-state` repo, as do `.scratch/level-benchmarks/`, `team-success/` and
+`prospect-traits/` (#3119). Run `npm run state:pull` before a generator or test that reads them.
 
 ## Generator rules
 

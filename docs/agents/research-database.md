@@ -408,7 +408,7 @@ question is until someone reads it, which is why reading it comes first.
   200 MB, because `level-benchmarks/raw.json` and `prospect-traits/mlb.json` pass
   16 MB.
 - `@duckdb/node-api` is a devDependency. The older `duckdb` package is deprecated.
-- `test/research-db-catalog.test.js` keeps this document true: every registered
+- `test-state/research-db-catalog.test.js` (run by `npm run test:state` after `npm run state:pull`) keeps this document true: every registered
   path and every skip is named here, every view built has one catalog row, every
   view returns a row, and a rebuild leaves no stale view. It does not fail when a
   new JSON file appears, because the nightly runs write there.

@@ -37,3 +37,13 @@ same paths they had under `scripts/data/`. `.gitignore` here lists them, and `is
   lost season (#2778).
 - **Rewriting this repo's history** to reclaim the space already used. It is destructive and
   forces a re-clone everywhere, and it does nothing for the checkout size.
+
+## Addendum: three `.scratch/` research folders (2026-11-16, #3119)
+
+`.scratch/level-benchmarks/`, `team-success/` and `prospect-traits/` (about 104 MB, 139 files)
+moved to `bbsbh-state` under `scratch/`. `state.mjs` pulls them back to the same `.scratch/`
+paths, so the docs, hooks and code that cite them need no change once you run
+`npm run state:pull`. Push sends local edits up. It skips the caches `.gitignore` already
+kept out of git, and it skips the folders entirely when they are not on disk. The two tests that
+read them moved, unchanged, to `test-state/`. The smaller `.scratch/` notes stay here. Git
+history still holds the old copies; this change shrinks the checkout, as before.

@@ -1,3 +1,5 @@
+// Moved unchanged from test/ (#3119): it reads .scratch/team-success/, which now lives in
+// the private bbsbh-state repo. Run `npm run state:pull`, then `npm run test:state`.
 import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
