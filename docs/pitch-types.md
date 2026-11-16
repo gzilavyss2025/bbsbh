@@ -28,37 +28,40 @@ starting point he can still tune.
 
 | Code | Pitch | Family / shape | Colour | Mark |
 | --- | --- | --- | --- | --- |
-| FF | Four-seam | Fastball / circle | `#FF6B5E` | solid |
-| SI | Sinker | Fastball / circle | `#FFA53A` | solid |
-| FC | Cutter | Fastball / circle | `#B79CFF` | solid |
-| SL | Slider | Breaking / diamond | `#4F8CFF` | solid |
-| ST | Sweeper | Breaking / diamond | `#49C6F0` | solid |
-| SV | Slurve | Breaking / diamond | `#2FD3B5` | solid |
-| CU | Curveball | Breaking / diamond | `#FF7AC6` | solid |
-| KC | Knuckle curve | Breaking / diamond | `#FF7AC6` | ring |
-| CS | Slow curve | Breaking / diamond | `#FFB8E0` | ring |
-| CH | Changeup | Offspeed / square | `#6EDC8C` | solid |
-| FS | Splitter | Offspeed / square | `#C6E84A` | solid |
-| FO | Forkball | Offspeed / square | `#C6E84A` | ring |
-| SC | Screwball | Specialty / triangle | `#8FE3C8` | solid |
-| KN | Knuckleball | Specialty / triangle | `#EEF2F7` | solid |
-| EP | Eephus | Specialty / triangle | `#FFD9A8` | solid |
-| UN | Other | Unlabeled / hexagon | `#8A97AD` | ring |
+| FF | Four-seam | Fastball / circle | `#FA1400` | solid |
+| SI | Sinker | Fastball / circle | `#BF6800` | solid |
+| FC | Cutter | Fastball / circle | `#8A67E9` | solid |
+| SL | Slider | Breaking / diamond | `#2E77FF` | solid |
+| ST | Sweeper | Breaking / diamond | `#0F88B1` | solid |
+| SV | Slurve | Breaking / diamond | `#1E8D79` | solid |
+| CU | Curveball | Breaking / diamond | `#F3008B` | solid |
+| KC | Knuckle curve | Breaking / diamond | `#F3008B` | ring |
+| CS | Slow curve | Breaking / diamond | `#BB5F93` | ring |
+| CH | Changeup | Offspeed / square | `#239141` | solid |
+| FS | Splitter | Offspeed / square | `#6E8811` | solid |
+| FO | Forkball | Offspeed / square | `#6E8811` | ring |
+| SC | Screwball | Specialty / triangle | `#4F8977` | solid |
+| KN | Knuckleball | Specialty / triangle | `#5A80B1` | solid |
+| EP | Eephus | Specialty / triangle | `#9F7744` | solid |
+| UN | Other | Unlabeled / hexagon | `#64738E` | ring |
 
 The family groups are the usual baseball grouping. They are not an MLB field.
 Check the codes against a live feed (`pitchData`/`details.type.code`) before you
 rely on one; `docs/MLB_STATS_API.md` has the feed notes.
 
+## Even brightness (#2974)
+
+All 15 colours sit at the same WCAG relative luminance, so no pitch reads louder
+than another, and each clears 3:1 (non-text UI) on light and dark card and inset
+paper. One hex serves both themes, so the colours are mid-tones: the pastel pitches
+(CS, SC, KN, EP) keep their hue at lower saturation instead of a lighter tone. `UN`
+sits below the band on purpose (rule 5). `npm run lint` enforces this
+(`src/lib/pitch/pitchLuminance.js`, run from `scripts/check-contrast.mjs`). Retune a
+hex until it passes; do not widen the band or darken a colour in a screen.
+
 ## Open items
 
-- **Paper ground.** The colours were tuned on a dark ground. The app's scorebook
-  pages are light. Screens already draw the colours on paper without a second tone:
-  a mark is the fill with an ink outline, and the Now Pitching card tints its active
-  tile with 28% of the pitch colour on `--surface-card` (text on that tint measures
-  6.3:1 or better, worst case the slider). A pale pitch such as the knuckleball
-  shows by its outline and the tile's ink underline. A second tone is still open for
-  any use that draws a colour alone, such as a line or text. Do not darken a colour
-  in a screen.
+
 - **The rare marks are the least distinct** (KC, CS, FO, SC, EP). Tune them with a
   real arsenal on screen.
 - The first artifact gave each of five pitches its own shape. The family rule

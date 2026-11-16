@@ -7,10 +7,10 @@
 // hollow and means "a rarer variant of the solid mark beside it". Colour never
 // works alone: draw the code (FF, SL, CH) next to the mark where room allows.
 //
-// Pure data, no React, no feed reads. Colours are tuned on a DARK ground (the
-// design-lab artifact). Screens already draw them on paper: a mark is the fill
-// with an ink outline, and the pitcher card tints its active tile. A second
-// paper tone for a colour drawn alone is an open item in the doc.
+// Pure data, no React, no feed reads. Every colour sits at the same WCAG
+// luminance (UN quieter), so no pitch reads louder than another, and clears 3:1
+// on light AND dark paper. check-contrast.mjs enforces it (pitchLuminance.js);
+// retune a hex until it passes, never the band (#2974).
 
 export const PITCH_FAMILIES = {
   H: { name: 'Fastballs', shape: 'circle' },
@@ -22,24 +22,24 @@ export const PITCH_FAMILIES = {
 
 // Order is the order the key shows them in.
 export const PITCH_TYPES = [
-  { code: 'FF', name: 'Four-seam', family: 'H', color: '#FF6B5E' },
-  { code: 'SI', name: 'Sinker', family: 'H', color: '#FFA53A' },
-  { code: 'FC', name: 'Cutter', family: 'H', color: '#B79CFF' },
-  { code: 'SL', name: 'Slider', family: 'B', color: '#4F8CFF' },
-  { code: 'ST', name: 'Sweeper', family: 'B', color: '#49C6F0' },
-  { code: 'SV', name: 'Slurve', family: 'B', color: '#2FD3B5' },
-  { code: 'CU', name: 'Curveball', family: 'B', color: '#FF7AC6' },
-  { code: 'KC', name: 'Knuckle curve', family: 'B', color: '#FF7AC6', ring: true },
-  { code: 'CS', name: 'Slow curve', family: 'B', color: '#FFB8E0', ring: true },
-  { code: 'CH', name: 'Changeup', family: 'O', color: '#6EDC8C' },
-  { code: 'FS', name: 'Splitter', family: 'O', color: '#C6E84A' },
-  { code: 'FO', name: 'Forkball', family: 'O', color: '#C6E84A', ring: true },
-  { code: 'SC', name: 'Screwball', family: 'S', color: '#8FE3C8' },
-  { code: 'KN', name: 'Knuckleball', family: 'S', color: '#EEF2F7' },
-  { code: 'EP', name: 'Eephus', family: 'S', color: '#FFD9A8' },
+  { code: 'FF', name: 'Four-seam', family: 'H', color: '#FA1400' },
+  { code: 'SI', name: 'Sinker', family: 'H', color: '#BF6800' },
+  { code: 'FC', name: 'Cutter', family: 'H', color: '#8A67E9' },
+  { code: 'SL', name: 'Slider', family: 'B', color: '#2E77FF' },
+  { code: 'ST', name: 'Sweeper', family: 'B', color: '#0F88B1' },
+  { code: 'SV', name: 'Slurve', family: 'B', color: '#1E8D79' },
+  { code: 'CU', name: 'Curveball', family: 'B', color: '#F3008B' },
+  { code: 'KC', name: 'Knuckle curve', family: 'B', color: '#F3008B', ring: true },
+  { code: 'CS', name: 'Slow curve', family: 'B', color: '#BB5F93', ring: true },
+  { code: 'CH', name: 'Changeup', family: 'O', color: '#239141' },
+  { code: 'FS', name: 'Splitter', family: 'O', color: '#6E8811' },
+  { code: 'FO', name: 'Forkball', family: 'O', color: '#6E8811', ring: true },
+  { code: 'SC', name: 'Screwball', family: 'S', color: '#4F8977' },
+  { code: 'KN', name: 'Knuckleball', family: 'S', color: '#5A80B1' },
+  { code: 'EP', name: 'Eephus', family: 'S', color: '#9F7744' },
 ]
 
-const UNKNOWN = { code: 'UN', name: 'Other', family: 'U', color: '#8A97AD', ring: true }
+const UNKNOWN = { code: 'UN', name: 'Other', family: 'U', color: '#64738E', ring: true }
 
 const BY_CODE = new Map(PITCH_TYPES.map((t) => [t.code, t]))
 
