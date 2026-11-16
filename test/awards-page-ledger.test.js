@@ -72,6 +72,7 @@ test('roster awards are the multi-winner ones', () => {
   assert.equal(isRosterAward('Gold Glove'), true)
   assert.equal(isRosterAward('Silver Slugger'), true)
   assert.equal(isRosterAward('All-MLB First Team'), true)
+  assert.equal(isRosterAward(ALL_MLB_KEY), true)
   assert.equal(isRosterAward('Platinum Glove'), false)
   assert.equal(isRosterAward('MVP'), false)
 })

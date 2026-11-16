@@ -102,11 +102,8 @@ thead .awardhistory__year {
   gap: var(--space-1h);
 }
 
-/* The wide layout (#3095): at 740px+ the live card becomes a grid of award tiles and
-   Past winners becomes one award × year matrix. Both layouts render; one is hidden. */
-.awardhistory__wide {
-  display: none;
-}
+/* The wide layout (#3095): at 740px+ (WIDE_QUERY) the live card becomes a grid of
+   award tiles and Past winners becomes one award × year matrix. */
 .awardhistory__tiles {
   list-style: none;
   margin: 0;
@@ -138,15 +135,6 @@ thead .awardhistory__year {
 }
 .awardhistory__lg--nl {
   color: var(--allstar-blue-deep);
-}
-
-@media (min-width: 740px) {
-  .awardhistory__narrow {
-    display: none;
-  }
-  .awardhistory__wide {
-    display: block;
-  }
 }
 .awardhistory__matrix .awardhistory__award {
   width: 10rem;

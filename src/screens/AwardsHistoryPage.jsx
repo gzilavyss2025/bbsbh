@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awards/history.js'
-import { ALL_MLB_KEY, countAnnounced, isRosterAward, mergeAllMlb, pastMatrix, pastWinners, seasonRows, splitName } from '../api/awards/ledger.js'
+import { countAnnounced, isRosterAward, mergeAllMlb, pastMatrix, pastWinners, seasonRows, splitName } from '../api/awards/ledger.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -42,7 +43,7 @@ function Winner({ r, favoriteTeamId, showPosition, league }) {
   const mine = favoriteTeamId != null && r.teamId === favoriteTeamId
   const club = r.teamId ? teamAbbr({ id: r.teamId }) : r.teamName
   return (
-    <li className={`awardhistory__winner${mine ? ' awardhistory__winner--mine' : ''}${league ? ' awardhistory__winner--tagged' : ''}`}>
+    <li className={`awardhistory__winner${mine ? ' awardhistory__winner--mine' : ''}`}>
       {league && <span className={`awardhistory__lg ${TAG_CLASS[league] ?? ''}`}>{league}</span>}
       <PlayerLink id={r.playerId} name={r.name} className="awardhistory__name">
         {first && <span className="awardhistory__first">{first}</span>}
@@ -105,7 +106,7 @@ function SeasonCellBody({ cell, favoriteTeamId, retry, showPosition, league }) {
       Couldn’t load.
     </Notice>
   ) : (
-    <span className="hint">{league ? `${league} not announced yet` : 'Not announced yet'}</span>
+    <span className="hint">{league && league !== 'MLB' ? `${league} not announced yet` : 'Not announced yet'}</span>
   )
 }
 
@@ -169,7 +170,7 @@ function SeasonTable({ rows, label, favoriteTeamId, retry }) {
 
 // This season's winners. The roster awards (Silver Slugger, Gold Glove, All-MLB)
 // open in place behind one button, so the table stays a screen tall.
-function ThisSeason({ season, favoriteTeamId }) {
+function ThisSeason({ season, favoriteTeamId, wide }) {
   const { loading, error, data, reload } = useAsync(() => loadSeasonAwards(season), [season])
   const [open, setOpen] = useState(false)
   const rows = seasonRows(data ?? [])
@@ -193,12 +194,11 @@ function ThisSeason({ season, favoriteTeamId }) {
       {!!data && !allFailed && (
         <Stack>
           <p className="hint">{`${announced} of ${rows.length} awards announced`}</p>
-          <div className="awardhistory__narrow">
-            <SeasonTable rows={main} label={`${season} award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
-          </div>
-          <div className="awardhistory__wide">
+          {wide ? (
             <SeasonTiles rows={main} favoriteTeamId={favoriteTeamId} retry={retry} />
-          </div>
+          ) : (
+            <SeasonTable rows={main} label={`${season} award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
+          )}
           {roster.length > 0 &&
             (open ? (
               <SeasonTable rows={roster} label={`${season} position award winners`} favoriteTeamId={favoriteTeamId} retry={retry} />
@@ -223,7 +223,7 @@ function PastByAward({ families, season, favoriteTeamId }) {
   const [picked, setPicked] = useState(families[0]?.key)
   const family = families.find((f) => f.key === picked) ?? families[0]
   const { columns, rows } = useMemo(() => pastWinners(family, season), [family, season])
-  const rosterFamily = isRosterAward(family.key) || family.key === ALL_MLB_KEY
+  const rosterFamily = isRosterAward(family.key)
   return (
     <Stack>
       <Chips
@@ -267,34 +267,40 @@ function PastByAward({ families, season, favoriteTeamId }) {
 // AL over NL in a cell. The roster awards open in place below it.
 function PastMatrix({ families, season, favoriteTeamId }) {
   const { years, rows } = useMemo(() => pastMatrix(families, season), [families, season])
-  const roster = families.filter((f) => isRosterAward(f.key) || f.key === ALL_MLB_KEY)
+  const roster = families.filter((f) => isRosterAward(f.key))
   const [open, setOpen] = useState(false)
   return (
     <Stack>
-      <Table frame="bare" density="keep" label="Past award winners by year" className="awardhistory__table awardhistory__matrix">
-        <thead>
-          <tr>
-            <th scope="col" className="awardhistory__award">Award</th>
-            {years.map((y) => (
-              <th key={y} scope="col" className="awardhistory__year">{y}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.key}>
-              <th scope="row" className="awardhistory__award">{row.label}</th>
-              {row.cells.map((cell) => (
-                <td key={cell.year}>
-                  {cell.entries.map((e) => (
-                    <Winners key={e.league} recipients={e.recipients} favoriteTeamId={favoriteTeamId} league={e.league} />
-                  ))}
-                </td>
+      {rows.length === 0 || years.length === 0 ? (
+        <EmptyState size="compact">No past winners on file</EmptyState>
+      ) : (
+        <Table frame="bare" density="keep" label="Past award winners by year" className="awardhistory__table awardhistory__matrix">
+          <thead>
+            <tr>
+              <th scope="col" className="awardhistory__award">Award</th>
+              {years.map((y) => (
+                <th key={y} scope="col" className="awardhistory__year">{y}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.key}>
+                <th scope="row" className="awardhistory__award">{row.label}</th>
+                {row.cells.map((cell) => (
+                  <td key={cell.year}>
+                    {cell.entries.some((e) => e.recipients.length)
+                      ? cell.entries.map((e) => (
+                          <Winners key={e.league} recipients={e.recipients} favoriteTeamId={favoriteTeamId} league={e.league} />
+                        ))
+                      : <span className="hint">—</span>}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
       {roster.length > 0 &&
         (open ? (
           <PastByAward families={roster} season={season} favoriteTeamId={favoriteTeamId} />
@@ -307,15 +313,14 @@ function PastMatrix({ families, season, favoriteTeamId }) {
   )
 }
 
-function PastWinners({ families, season, favoriteTeamId }) {
+function PastWinners({ families, season, favoriteTeamId, wide }) {
   return (
     <Card frame="stamped" label="Past winners" className="awardhistory__card">
-      <div className="awardhistory__narrow">
-        <PastByAward families={families} season={season} favoriteTeamId={favoriteTeamId} />
-      </div>
-      <div className="awardhistory__wide">
+      {wide ? (
         <PastMatrix families={families} season={season} favoriteTeamId={favoriteTeamId} />
-      </div>
+      ) : (
+        <PastByAward families={families} season={season} favoriteTeamId={favoriteTeamId} />
+      )}
     </Card>
   )
 }
@@ -324,6 +329,7 @@ export function AwardsHistoryPage() {
   useDocumentTitle('Awards')
   const { loading, error, data } = useAsync(() => loadAwardsHistory(), [])
   const { favoriteTeamId } = useFavoriteTeam()
+  const wide = useMediaQuery(WIDE_QUERY)
   const season = awardsSeasonInPlay()
   const families = useMemo(() => mergeAllMlb(data?.families ?? []), [data])
   const updated = monthDayName(data?.generatedAt)
@@ -344,8 +350,8 @@ export function AwardsHistoryPage() {
       />
 
       <Stack gap="loose">
-        {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} />}
-        {families.length > 0 && <PastWinners families={families} season={season} favoriteTeamId={favoriteTeamId} />}
+        {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} wide={wide} />}
+        {families.length > 0 && <PastWinners families={families} season={season} favoriteTeamId={favoriteTeamId} wide={wide} />}
       </Stack>
       {families.length > 0 && updated && <p className="hint prospects__caption">Updated {updated}.</p>}
 
