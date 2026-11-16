@@ -2,8 +2,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { toGame } from '../src/api/streaks/bestStretch.js'
-import { clubBoards, playerBest, stintsFor } from '../scripts/lib/franchise/club-stretch.mjs'
-import { measureByKey } from '../src/api/streaks/bestStretch.js'
+import { cacheLine, playerRows, rankBoards, readCache } from '../scripts/lib/franchise/club-stretch.mjs'
+import { measureByKey, playerBest, stintsFor } from '../src/api/streaks/bestStretch.js'
 
 const d0 = Date.UTC(1950, 3, 1)
 const day = (i) => new Date(d0 + i * 86400000).toISOString().slice(0, 10)
@@ -39,10 +39,17 @@ test('an old log with no PA rebuilds it from AB, BB, HBP and SF', () => {
 
 test('boards: one row per player, best first, top ten', () => {
   const players = Array.from({ length: 12 }, (_, p) => ({ id: p + 1, name: `P${p + 1}`, games: run(0, 170, 158, { homeRuns: p % 3 === 0 ? 1 : 0, hits: 1 }) }))
-  const b = clubBoards(players, 158)
+  const b = rankBoards(players.map((p) => playerRows(p, 158)))
   assert.equal(b[162].hr.length, 10)
   assert.equal(new Set(b[162].hr.map((r) => r.id)).size, 10)
   assert.equal(b[162].hr[0].value, '162')
   assert.equal(b[162].hr[0].team, 'Club 158')
   assert.ok(b[154].avg[0].value.startsWith('.'))
+})
+
+test('the cache ignores lines from a run with another --through', () => {
+  const text = cacheLine(2026, 1, { 158: { x: 1 } }) + cacheLine(2027, 2, { 158: { x: 2 } })
+  const rows = readCache(text, 2027)
+  assert.equal(rows.has(1), false)
+  assert.deepEqual(rows.get(2), { 158: { x: 2 } })
 })

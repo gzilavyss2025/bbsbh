@@ -186,7 +186,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">He has {games.length} MLB {unit} on file, fewer than {n}. Try a shorter stretch.</p>
+          <p className="hint">{picks.club ? `He has no ${n} games in a row with the ${teamFullName(picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (
@@ -194,7 +194,7 @@ export function BestStretchPage() {
             <div className="stretch__band">
               <div className="stretch__shot"><Headshot personId={picks.player.id} name={name} teamId={best.mainTeamId} /></div>
               <Stack gap="tight" className="stretch__who-line">
-                <span className="stretch__kicker">His best {n} {unit}{picks.club ? ` with the ${teamFullName(picks.club)}` : ''}</span>
+                <span className="stretch__kicker">His best {n} {unit}{picks.club ? ` with the ${best.teams.join(' / ')}` : ''}</span>
                 <a className="stretch__name" href={playerPath(picks.player.id, { name })}>{name}</a>
               </Stack>
               {best.mainTeamId && <span className="stretch__mark"><TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" /></span>}
@@ -212,7 +212,7 @@ export function BestStretchPage() {
                 ))}
               </dl>
               <p className="stretch__line">{lineFor(role, best)}</p>
-              <p className="hint">{best.teams.join(', ')} · regular season · {count(best.careerGames)} career {unit} on file</p>
+              <p className="hint">{best.teams.join(', ')} · regular season · {picks.club ? `${count(best.careerGames)} ${unit} in that stint` : `${count(best.careerGames)} career ${unit} on file`}</p>
             </Stack>
           </Card>
         )}

@@ -14,7 +14,8 @@
 //
 // HAND-RUN, after the regular season:
 //   node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache /tmp/club-stretch.jsonl]
-// --cache (outside the repo) keeps each fetched player's rows, so a stopped run resumes. Any
+// --cache (outside the repo) keeps each fetched player's rows, so a stopped run resumes; a line
+// from a run with another --through is ignored. Any
 // failed call aborts the run (strict). The files carry no clock.
 import { appendFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -23,7 +24,7 @@ import { toGame } from '../../src/api/streaks/bestStretch.js'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
-import { playerRows, rankBoards } from '../lib/franchise/club-stretch.mjs'
+import { cacheLine, playerRows, rankBoards, readCache } from '../lib/franchise/club-stretch.mjs'
 
 const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'club-stretch')
 const now = new Date()
@@ -70,11 +71,7 @@ console.log(`pass 1: ${jobs.length} club seasons, ${clubsOf.size} players with $
 // Pass 2: a player's rows for every club he qualifies for, fetched once (and kept in --cache).
 const cacheAt = process.argv.indexOf('--cache')
 const cachePath = cacheAt > 0 ? process.argv[cacheAt + 1] : null
-const rowsOf = new Map()
-if (cachePath) {
-  const text = await readFile(cachePath, 'utf8').catch(() => '')
-  for (const line of text.split('\n')) if (line) { const e = JSON.parse(line); rowsOf.set(e.id, e.rows) }
-}
+const rowsOf = cachePath ? readCache(await readFile(cachePath, 'utf8').catch(() => ''), through) : new Map()
 let fetched = 0
 async function fetchRows(id) {
   const p = clubsOf.get(id)
@@ -87,7 +84,7 @@ async function fetchRows(id) {
   }
   const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id, name: p.name, games }, teamId)]))
   rowsOf.set(id, rows)
-  if (cachePath) await appendFile(cachePath, `${JSON.stringify({ id, rows })}\n`)
+  if (cachePath) await appendFile(cachePath, cacheLine(through, id, rows))
   if (++fetched % 250 === 0) console.log(`${fetched} players fetched ${new Date().toISOString().slice(11, 19)}`)
   return rows
 }

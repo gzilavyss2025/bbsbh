@@ -48,10 +48,6 @@
   font-size: var(--fs-card-name);
   color: var(--text-heading);
 }
-.cstretch__meta {
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
 .cstretch__value {
   font-family: var(--font-mono);
   font-size: var(--fs-num-md);

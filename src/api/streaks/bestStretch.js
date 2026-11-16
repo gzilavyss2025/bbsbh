@@ -121,16 +121,18 @@ export function stintsFor(games, teamId) {
 
 // One player's best run with the club, or null when no stint is long enough (or none
 // clears the rate floor).
-export function playerBest(games, teamId, n, measure) {
+export const playerBest = (games, teamId, n, measure) => bestInStints(stintsFor(games, teamId), n, measure)
+
+// The same over stints already split, so a caller ranking many stats splits them once.
+export function bestInStints(stints, n, measure) {
   const m = flooredMeasure(measure, n)
   let best = null
-  for (const stint of stintsFor(games, teamId)) {
+  for (const stint of stints) {
     const b = bestStretch(stint, n, m)
     if (b && b.value !== -Infinity && (!best || b.value > best.value)) best = b
   }
   return best
 }
-
 
 // The club he played the most of the window for: the card wears its colours.
 function mostCommon(ids) {

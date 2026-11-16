@@ -14,6 +14,7 @@ import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
@@ -57,8 +58,15 @@ export function ClubStretchPage() {
       </header>
       <Stack gap="loose" className="cstretch">
         <Stack gap="tight">
-          <h2 className="cstretch__title">Best {picks.n} games in a {club} uniform</h2>
-          {data?.through && <p className="hint">Through the {data.through} season · {data.firstSeason}–{data.through}, every city</p>}
+          <h2 className="cstretch__title">Best {picks.n} games with the {club}</h2>
+          {data?.through && (
+            <p className="hint">
+              Through the {data.through} season · {data.firstSeason}–{data.through}{' '}
+              <InfoPopover label="How a run is counted" className="infopop--paper infopop--down">
+                His games played, in a row, with this club. A run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.
+              </InfoPopover>
+            </p>
+          )}
         </Stack>
 
         <TeamFilterStrip selectedTeamId={picks.team} onSelect={(id) => id != null && update({ team: id })} ariaLabel="Club" showMlbPin={false} />
@@ -85,7 +93,7 @@ export function ClubStretchPage() {
                   <span className="cstretch__rank">{i + 1}</span>
                   <span className="cstretch__who">
                     <span className="cstretch__name">{r.name}</span>
-                    <span className="cstretch__meta">{r.team} · {shortDate(r.first)} – {shortDate(r.last)}</span>
+                    <span className="t-label">{r.team} · {shortDate(r.first)} – {shortDate(r.last)}</span>
                   </span>
                   <span className="cstretch__value">{r.value}</span>
                 </a>
@@ -93,8 +101,6 @@ export function ClubStretchPage() {
             ))}
           </ol>
         )}
-
-        <p className="hint">His games played, in a row, with this club; a run ends when he plays for another club. One row per player. AVG and OPS need 3.1 plate appearances per game. Tap a name for that run in Best Stretch.</p>
       </Stack>
       <ReportFooter />
     </div>
