@@ -87,3 +87,34 @@ test('no ranking on file is null, so the card hides', () => {
   assert.equal(prospectsView({ history, snapshot, playerId: 688107, debutYear: 2023 }), null)
   assert.equal(prospectsView({ history: null, snapshot: null, playerId: 688107 }), null)
 })
+
+// The weekly Top-100 ranks (#2970): dated rows, newest first, from two snapshots on.
+const weekly = {
+  snapshots: [
+    { date: '2026-11-16', ranks: { 815908: 14 } },
+    { date: '2026-11-23', ranks: { 815908: 8, 1: 50 } },
+    { date: '2026-11-30', ranks: { 815908: 9 } },
+  ],
+}
+
+test('weekly ranks: two or more snapshots give dated rows, newest first', () => {
+  const v = prospectsView({ history, snapshot, playerId: 815908, weekly, currentSeason: 2026 })
+  assert.deepEqual(v.weeks.map((w) => [w.key, w.date, w.rank]), [
+    ['2026-11-30', 'Nov 30', '#9'],
+    ['2026-11-23', 'Nov 23', '#8'],
+    ['2026-11-16', 'Nov 16', '#14'],
+  ])
+  assert.equal(v.rows[v.weeksAfter].label, 'Current list · MLB Pipeline')
+})
+
+test('weekly ranks: a week from an earlier year than the newest says its year', () => {
+  const span = { snapshots: [{ date: '2026-12-28', ranks: { 815908: 8 } }, { date: '2027-01-04', ranks: { 815908: 9 } }] }
+  const v = prospectsView({ history, snapshot, playerId: 815908, weekly: span })
+  assert.deepEqual(v.weeks.map((w) => w.date), ['Jan 4', 'Dec 28, 2026'])
+})
+
+test('weekly ranks: one snapshot, or no file, shows nothing', () => {
+  const one = { snapshots: [weekly.snapshots[0]] }
+  assert.deepEqual(prospectsView({ history, snapshot, playerId: 815908, weekly: one }).weeks, [])
+  assert.deepEqual(prospectsView({ history, snapshot, playerId: 815908 }).weeks, [])
+})

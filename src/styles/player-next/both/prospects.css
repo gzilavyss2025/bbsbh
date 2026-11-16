@@ -82,3 +82,34 @@
 #root .prospects__note {
   text-transform: none; /* caps-exempt: prose, same idiom as .prankhist__foot */
 }
+
+/* The weekly Top-100 ranks under the current-list row (#2970): dated rows, newest first. */
+.prospects__weeks {
+  padding: var(--space-2) var(--space-3) var(--space-2) calc(3.25rem + 2 * var(--space-3));
+  border-bottom: var(--bw-hair) solid var(--border-grid);
+  color: var(--text-muted);
+}
+
+.prospects__weeklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prospects__week {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.prospects__more {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
