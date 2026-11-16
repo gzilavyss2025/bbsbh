@@ -113,13 +113,14 @@ export const showsHolds = (t) => t.holds > t.saves
 export const isStarter = (games) => games.filter((g) => g.gamesStarted > 0).length * 2 >= games.length
 
 // The player's whole MLB regular-season log for one group ('hitting' or
-// 'pitching'). The endpoint takes one date range for a career, so this is a
-// single request. { name, games }.
-export async function loadCareerLog(playerId, signal, group = 'hitting') {
-  const data = await getJson(
-    `/api/v1/people/${playerId}/stats?stats=gameLog&group=${group}&sportId=1&gameType=R&startDate=1871-01-01&endDate=${new Date().getFullYear()}-12-31`,
-    { signal },
-  )
-  const splits = data.stats?.[0]?.splits ?? []
+// 'pitching'). One season per request: the single career-range query takes
+// ~45 s cold at MLB and blew our timeout, while a season answers in under a
+// second. The season list comes from yearByYear. { name, games }.
+export async function loadCareerLog(playerId, signal, group = 'hitting', get = getJson) {
+  const base = `/api/v1/people/${playerId}/stats?group=${group}&sportId=1&gameType=R`
+  const years = await get(`${base}&stats=yearByYear`, { signal })
+  const seasons = [...new Set((years.stats?.[0]?.splits ?? []).map((x) => x.season))].sort()
+  const logs = await Promise.all(seasons.map((season) => get(`${base}&stats=gameLog&season=${season}`, { signal })))
+  const splits = logs.flatMap((data) => data.stats?.[0]?.splits ?? [])
   return { name: splits[0]?.player?.fullName ?? '', games: splits.map((x) => toGame(x, group)) }
 }
