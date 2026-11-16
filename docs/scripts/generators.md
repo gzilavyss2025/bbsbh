@@ -334,8 +334,9 @@ don't run these by hand.
   `src/api/notable/rarityCount.js`). A game with no play-by-play (most before 1950) gets no flag.
   Immaculate innings (#2968, `lib/notable/immaculate.mjs`): one `playByPlay` call per game from
   `IMMACULATE_FLOOR` on (earlier feeds hold made-up minimal counts, not pitches), about 2,400
-  calls a season. The nightly run reads only games after the file's `through` and keeps its rows;
-  a hand run (`--season`, `--from`) reads every game and replaces those seasons' rows. A game with
+  calls a season; floor 2001. The nightly run re-reads the last 3 days before the file's `through`
+  and every game after it, replacing those rows; a hand run (`--season`, `--from`, `--to`) reads
+  every game and replaces those seasons' rows. A game with
   no pitch sequences past the floor is logged, never counted.
   Each run REPLACES every row of each season it swept, in all three files (a corrected
   upstream row must not leave a ghost row), and writes after each season.

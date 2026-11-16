@@ -12,7 +12,7 @@
 // runs from the FLOOR: the year of the oldest flagged row with no unflagged row after it. The line
 // says "since {floor}", never "ever", and with no floor it says nothing: it never invents a count.
 // An immaculate inning has its own file, every row a find, so its floor is the first season the
-// generator swept (IMMACULATE_FLOOR in scripts/lib/notable/rules.mjs: the first year with pitches).
+// generator swept (IMMACULATE_FLOOR in scripts/lib/notable/immaculate.mjs: the first year with real pitches).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -99,7 +99,9 @@ export function immaculateInnings(allPlays) {
     // No batter reaches: a strikeout on a wild pitch puts the batter on base, not out.
     const clean = half.every((p) => p.result?.eventType === 'strikeout'
       && !(p.runners ?? []).some((r) => r.movement?.start == null && r.movement?.end))
-    const pitches = half.flatMap((p) => (p.playEvents ?? []).filter((e) => e.isPitch))
+    // His own pitches only: a reliever who comes in mid-count throws only those after the change.
+    const own = (events) => events.slice(events.findLastIndex((e) => e.details?.eventType === 'pitching_substitution') + 1)
+    const pitches = half.flatMap((p) => own(p.playEvents ?? []).filter((e) => e.isPitch))
     // The 1990s feeds fill a missing inning (often an extra one) with S, S, S for each strikeout,
     // inside a game of real sequences (gamePk 2342, 1999-07-10, the 10th). Nine swinging strikes
     // with no pitch speed is that fill, not a find; a modern pitch carries its speed.
@@ -118,6 +120,15 @@ export function floorYear(rows, flag) {
   const unflagged = rows.filter((r) => typeof r[flag] !== 'boolean').map((r) => yearOf(r.officialDate))
   const floor = Math.max(Math.min(...flagged), unflagged.length ? Math.max(...unflagged) + 1 : -Infinity)
   return flagged.some((y) => y >= floor) ? floor : null
+}
+
+// The first season of the unbroken run of swept seasons that ends at the newest: a gap means the
+// seasons before it may be missing rows, so the count starts after it. null when nothing is swept.
+export function sweptFrom(seasons = []) {
+  const s = [...seasons].sort((a, b) => a - b)
+  let i = s.length - 1
+  while (i > 0 && s[i - 1] === s[i] - 1) i -= 1
+  return s.length ? s[i] : null
 }
 
 // The rare feats a Final game holds: each natural cycle, unassisted triple play and immaculate inning.
@@ -143,8 +154,7 @@ export function buildRarityNotes(docs, feed, feat) {
   const spec = RARITY[feat?.kind]
   const rows = docs?.[feat?.kind]?.rows
   if (!t || !spec || !rows) return []
-  const seasons = docs[feat.kind].coverage?.seasons ?? []
-  const floor = spec.flag ? floorYear(rows, spec.flag) : seasons.length ? Math.min(...seasons) : null
+  const floor = spec.flag ? floorYear(rows, spec.flag) : sweptFrom(docs[feat.kind].coverage?.seasons)
   if (floor === null || yearOf(t.date) < floor) return []
   const counted = (r) => (spec.flag ? r[spec.flag] === true : true) && yearOf(r.officialDate) >= floor
   const prior = priorRows(docs, feat.kind, t).filter(counted)

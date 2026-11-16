@@ -50,7 +50,7 @@ import {
 import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 import { flagRows } from './lib/notable/flags.mjs'
-import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead } from './lib/notable/immaculate.mjs'
+import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
 const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json' }
@@ -117,16 +117,16 @@ for (const season of seasons) {
     counts.push(`${swept.rows[kind].length + applied} ${kind}`)
   }
   // Immaculate innings (#2968, lib/notable/immaculate.mjs): every game's play-by-play from the
-  // floor on. The nightly run (no flags) reads only games after the file's `through` and keeps
-  // its rows; a hand run reads the whole season and replaces its rows.
+  // floor on. The nightly run (no flags) re-reads the last few days and replaces them; a hand run
+  // reads the whole season and replaces its rows.
   if (season >= IMMACULATE_FLOOR) {
     const doc = docs.immaculate
-    const incremental = lastIsOpen && doc.coverage.seasons.includes(season)
-    const { rows, unknown } = await fetchImmaculate(get, gamesToRead(swept.gameMap, incremental ? doc.coverage.through : ''))
+    const from = readFrom(parsed, doc.coverage, season)
+    const { rows, unknown } = await fetchImmaculate(get, gamesToRead(swept.gameMap, from))
     if (unknown.length) console.log(`  ${season}: ${unknown.length} games with no pitch sequences, not counted: ${unknown.join(', ')}`)
     docs.immaculate = {
       coverage: mergeCoverage(doc.coverage, [season], swept.through),
-      rows: mergeRows('immaculate', doc.rows, incremental ? [] : [season], rows),
+      rows: from ? mergeWindow(doc.rows, from, rows) : mergeRows('immaculate', doc.rows, [season], rows),
     }
     await write('immaculate')
     counts.push(`${rows.length} immaculate`)

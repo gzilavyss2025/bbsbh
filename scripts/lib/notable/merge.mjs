@@ -49,7 +49,7 @@ export function sortRows(kind, rows) {
 // after the fact: a game scored again, a player credited to the other club, a feat the
 // feed drops. A per-key merge would keep the old row beside the corrected one for ever
 // (a ghost row, the gen-umpire-accuracy.mjs incident). So a run drops every row of each
-// season it swept, in all three files, and writes what it found. Seasons it did not
+// season it swept, in all three files (immaculate.json keeps its own rule, immaculate.mjs), and writes what it found. Seasons it did not
 // sweep stay as they were.
 export function mergeRows(kind, prevRows, seasons, freshRows) {
   const swept = new Set(seasons)
