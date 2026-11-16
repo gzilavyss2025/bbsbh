@@ -2147,11 +2147,15 @@ Re-run only to fold in a new season.
 
 - `gen-club-stretch.mjs` (in `scripts/franchise/`) → `public/data/club-stretch/{teamId}.json` — each of the
   30 MLB clubs' best runs of 162 and 154 games in a row by one player, in HR, H, RBI, SB, AVG and OPS,
-  top ten, one row per player (the Club Stretch page). **Hand-run**, after the regular season ends:
+  top twenty, one row per player (the Club Stretch page), plus `mlb.json`, the same boards across MLB
+  (issue 3133: a run there crosses trades). **Hand-run**, after the regular season ends:
   `node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache <file>]`. Two passes: one
-  season-stats call per club per season (about 3,800 small calls) names every player with 154+
-  games for a club; then every one of them gets his game logs ONE SEASON PER CALL, from his first
-  club season to his last, gap years included. Never ask for a career's log in one call: the feed
+  season-stats call per club per season, and one league-wide call per season (about 3,900 small
+  calls), names every player long enough for a run; then game logs ONE SEASON PER CALL over his
+  whole career, but only for players who could still make a board:
+  `scripts/lib/franchise/club-stretch-ceiling.mjs` bounds each player's best run from his season
+  lines, and the loop fetches best ceiling first until every board's 20th exact row beats every
+  unfetched ceiling, so the boards stay exact. Never ask for a career's log in one call: the feed
   can take 40 s to build one, against about 1 s for the same games season by season (measured
   2026-11-16). `--cache` (outside the repo) keeps each player's rows so a stopped run resumes.
   `firstSeason` is each club's first season with a batting line. The feed's per-game logs start in
