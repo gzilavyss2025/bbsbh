@@ -1,0 +1,88 @@
+=== #3106
+T: Best Stretch: fetch the career log a season at a time
+=== #3104
+T: Franchise parks: date a park name that comes back
+  B: ## Spoiler-safety
+=== #3103
+T: Test: hand-run generator outputs must be in the freshness EXCEPT list
+  B: ## Spoiler-safety
+=== #3105
+T: Percentile card: draw the real axis, key and foot while loading
+  B: ## Spoiler-safety
+=== #3102
+T: Spray zones: depth breaks at 150 / 280 ft, from the 2026 spray store
+  B: ## Spoiler-safety
+=== #3100
+T: Research: search 2015 onward by season (#2234)
+=== #3099
+T: Research: filter fixes, pitching club, Runners bases, design pass, player links
+  B: 5. **Player links open the player page.** Names now use `PlayerLink`: the canonical `/player/{name-id}` address, in-app navigation, and the desktop hover card. Dates use 
+  B: ## Spoiler-safety
+=== #3098
+T: Research: blank state groups presets under the four questions
+  B: ## Spoiler-safety
+=== #3097
+T: Research store: join the nightly job
+  B: ## Spoiler-safety
+=== #3096
+T: Awards: drop a repeated winner in recipientsOf (#3094)
+  B: ## Spoiler-safety
+=== #3092
++// SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
++// SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
++// SPOILER CLASSIFICATION: spoiler-free. Only games dated before the build day
++// SPOILER CLASSIFICATION: spoiler-free. The store holds only games dated before the
+T: Research page: first slice (2026 pitch store in Vercel Blob, /research)
+  B: ## Spoiler-safety
+  B: - [x] This change doesn't touch a scoring surface. `/research` is an open page (ADR-0034). The store holds only games dated before the build day, and `?d=` holds out that
+  B: - `src/api/research/{shard,filters,answer,store}.js` (new), `src/api/spoiler-manifest.json`
+=== #3093
++// the live season into rows of columns, so the page only draws. Spoiler-free: an
+T: Awards page: rebuild as two tables (#2546)
+  B: - **New pure module** `src/api/awards/ledger.js` (spoiler-free, in the manifest) shapes the tables, with `test/awards-page-ledger.test.js`.
+  B: ## Spoiler-safety
+  B: - `src/api/spoiler-manifest.json`
+=== #3086
+T: Franchise ledger: fill manager splits by attaching records to the manager stint (#2958)
+=== #3081
+T: Contact module: Dots / Zones spray view (#2975)
+  B: ## Spoiler-safety
+=== #3080
+T: Pressure Moments: round + game, ▲/▼ halves, links, phone cards, rescaled meter
+=== #3078
++      "why": "Roster moves and their dates carry no score — as spoiler-free as rehab/assignments.js and prospects/rookies.js."
+T: Group the rehab modules under src/api/rehab/
+  B: - `spoiler-manifest.json`: keys and `importers` moved with the files. No `class` changed.
+=== #3073
+T: Group the awards modules under src/api/awards/; franchiseHistory into history/
+  B: - `spoiler-manifest.json`: keys and `importers` moved with the files. No `class` changed.
+=== #3074
++// NO SCORE, no SealBox, same as targetCommand.js and
++      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, 
+T: Freshness guard: exempt hand-run eliminated.json
+=== #3072
++// NO SCORE, no SealBox, same as command/target.js and
++      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, 
+T: Group the pitch-command modules under src/api/command/
+  B: - `spoiler-manifest.json`: keys and `importers` moved with the files. No `class` changed.
+=== #3067
+T: Percentile card: hitter count comes from the generator's batPool (#3065)
+=== #3049
+T: Group the MiLB modules under src/api/milb/
+  B: - `spoiler-manifest.json`: keys and `importers` moved with the files. No `class` changed.
+=== #3044
+T: Group the score-formula modules under src/api/score/
+  B: - Imports, comments and docs rewritten (`src test scripts docs api`); `spoiler-manifest.json` keys moved with `class`/`why` unchanged.
+  B: - `performanceScore.js` stays put (not in the slice list; reveal-only, untouched).
+=== #3043
++// result and needs no SealBox, same footing as postseason/archive/leaders.js.
++// only (api/postseason/archive/series.js, spoiler-free in the manifest).
+T: Wire fields= trim, perf harness for desktop and deploys, postseason api folder
+  B: - References and `spoiler-manifest.json` keys were rewritten. Every `class` is unchanged. Two `why` strings had old file paths updated.
+  B: ## Spoiler-safety
+  B: - `src/api/postseason/**`, `src/api/spoiler-manifest.json`, `scripts/check-dir-size.mjs`, `test/postseason-leaders-retry.test.js`, plus importers and docs that name the m
+=== #3032
+T: Add a route table: one entry per no-params page
+=== #3031
+T: Group the logbook data modules under src/api/logbook/
+  B: - Every import, test, doc path, and `spoiler-manifest.json` key and importer list now points at the new paths. **No spoiler class changed.**
