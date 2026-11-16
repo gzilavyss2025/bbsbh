@@ -1,7 +1,7 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, bestStretch, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, bestStretch, clubPitchPool, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
@@ -55,7 +55,8 @@ function lineFor(role, t) {
 const clubNames = (games, club) => [...new Set(games.filter((g) => g.teamId === club).map((g) => g.teamName).filter(Boolean))].join(' / ') || teamFullName(club)
 
 const searches = new WeakMap()
-// `club` (a hitter only, from Club Stretch) keeps the search to his runs with that club.
+// `club` (from Club Stretch) keeps the search to his runs with that club. A pitcher's club run
+// counts relief outings at n=65, else starts (clubPitchPool), as the board does.
 function cachedSearch(games, startsOnly, n, by, group, club) {
   if (!games) return { pool: null, best: null }
   let entry = searches.get(games)
@@ -64,7 +65,10 @@ function cachedSearch(games, startsOnly, n, by, group, club) {
   const pool = entry.pools.get(startsOnly)
   const key = `${startsOnly}:${n}:${by}:${group}:${club}`
   const measure = measureByKey(by, group)
-  if (!entry.bests.has(key)) entry.bests.set(key, !pool.length ? null : club ? playerBest(pool, club, n, measure) : bestStretch(pool, n, measure, group))
+  if (!entry.bests.has(key)) {
+    const clubPool = club && group === 'pitching' ? clubPitchPool(games, n) : pool
+    entry.bests.set(key, !pool.length ? null : club ? playerBest(clubPool, club, n, measure, group) : bestStretch(pool, n, measure, group))
+  }
   return { pool, best: entry.bests.get(key) }
 }
 
@@ -76,7 +80,7 @@ function readQuery() {
   const n = int(q.get('n'), 5, 500, null)
   // Only an MLB club: any other id would run the filter against a club he never had.
   const clubId = Number(q.get('club'))
-  const club = group === 'hitting' && ALL_MLB_TEAM_IDS.includes(clubId) ? clubId : null
+  const club = ALL_MLB_TEAM_IDS.includes(clubId) ? clubId : null
   return { player: id ? { id, name: q.get('name') ?? '' } : null, group, n, by: measureByKey(q.get('by'), group).key, club }
 }
 function writeQuery({ player, group, n, by, club }) {
@@ -191,7 +195,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{picks.club ? `He has no ${n} games in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (

@@ -53,3 +53,30 @@ test('the cache ignores lines from a run with another --through', () => {
   assert.equal(rows.has(1), false)
   assert.deepEqual(rows.get(2), { 158: { x: 2 } })
 })
+
+// Pitching: 32 starts or 65 relief outings in a row, no innings floor, lower ERA and WHIP win.
+const outing = (i, teamId, s = {}) => toGame({ date: day(i), game: { gameNumber: 1 }, team: { id: teamId, name: `Club ${teamId}` }, stat: { outs: 18, ...s } }, 'pitching')
+
+test('pitching: the lowest ERA ranks first, and relief outings do not join a run of starts', () => {
+  const ace = { id: 1, name: 'Ace', games: Array.from({ length: 40 }, (_, k) => outing(k, 158, { gamesStarted: 1, earnedRuns: 1 })) }
+  const meh = { id: 2, name: 'Meh', games: Array.from({ length: 40 }, (_, k) => outing(k, 158, { gamesStarted: 1, earnedRuns: 3 })) }
+  const b = rankBoards([meh, ace].map((p) => playerRows(p, 158, 'pitching')), 'pitching')
+  assert.deepEqual(b[32].era.map((r) => r.id), [1, 2])
+  assert.equal(b[32].era[0].value, '1.50')
+  assert.equal(b[65].era.length, 0)
+})
+
+test('pitching: a start between relief outings is set aside, not a break', () => {
+  const games = [...Array.from({ length: 40 }, (_, k) => outing(k, 158, { outs: 3 })), outing(40, 158, { gamesStarted: 1 }), ...Array.from({ length: 30 }, (_, k) => outing(41 + k, 158, { outs: 3, strikeOuts: 1 }))]
+  const rows = playerRows({ id: 3, name: 'Pen', games }, 158, 'pitching')
+  assert.equal(rows['65:k'].value, '30')
+  assert.equal(rows['32:k'], undefined)
+})
+
+test('pitching: a run with no outs ranks last on ERA', () => {
+  const ok = playerRows({ id: 4, name: 'Ok', games: Array.from({ length: 65 }, (_, k) => outing(k, 158, { outs: 3, earnedRuns: 2 })) }, 158, 'pitching')
+  const none = playerRows({ id: 5, name: 'None', games: Array.from({ length: 65 }, (_, k) => outing(k, 158, { outs: 0, earnedRuns: 1 })) }, 158, 'pitching')
+  const b = rankBoards([none, ok], 'pitching')
+  assert.deepEqual(b[65].era.map((r) => r.id), [4, 5])
+  assert.equal(b[65].era[1].value, '—')
+})

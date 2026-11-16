@@ -2151,7 +2151,10 @@ Re-run only to fold in a new season.
   1901. A run counts his games played, crosses seasons, and ends at a game for another club; AVG and
   OPS need 3.1 PA per game (503 over 162, 478 over 154, rounded up). The pure half is
   `scripts/lib/franchise/club-stretch.mjs`, over the run rules in `src/api/streaks/bestStretch.js`,
-  which Best Stretch's `?club=` shares.
+  which Best Stretch's `?club=` shares. `--group pitching` writes `public/data/club-stretch-pitching/`
+  instead: 32 starts or 65 relief outings in a row (the other kind is set aside, not a break), in
+  ERA, WHIP, K and K-BB, no innings floor; a pitcher qualifies with 32 club starts or 65 relief outings.
+  Give each group its own `--cache` file.
 
 - `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
   the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top

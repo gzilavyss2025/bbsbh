@@ -1,6 +1,7 @@
 // Writes public/data/club-stretch/{teamId}.json: each of the 30 MLB clubs' best runs of 162
 // and 154 games in a row by one player, in six stats (HR, H, RBI, SB, AVG, OPS), top ten, one
-// row per player. Keyed by the CURRENT team id, which follows the franchise across moves. Reader:
+// row per player. With --group pitching it writes public/data/club-stretch-pitching/{teamId}.json
+// instead: 32 starts or 65 relief outings in a row, in ERA, WHIP, K and K-BB. Keyed by the CURRENT team id, which follows the franchise across moves. Reader:
 // src/api/streaks/clubStretch.js. The pure half (stints, rate floor, ranking):
 // scripts/lib/franchise/club-stretch.mjs.
 //
@@ -13,7 +14,8 @@
 // is cheap, and the boards are exact by construction. The feed's per-game logs start in 1901.
 //
 // HAND-RUN, after the regular season:
-//   node scripts/franchise/gen-club-stretch.mjs [--through 2026] [--cache /tmp/club-stretch.jsonl]
+//   node scripts/franchise/gen-club-stretch.mjs [--group pitching] [--through 2026] [--cache /tmp/club-stretch.jsonl]
+// (a cache file serves one group only: give each group its own)
 // --cache (outside the repo) keeps each fetched player's rows, so a stopped run resumes; a line
 // from a run with another --through is ignored. Any
 // failed call aborts the run (strict). The files carry no clock.
@@ -26,7 +28,9 @@ import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { cacheLine, playerRows, rankBoards, readCache } from '../lib/franchise/club-stretch.mjs'
 
-const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'club-stretch')
+const group = process.argv.includes('--group') && process.argv[process.argv.indexOf('--group') + 1] === 'pitching' ? 'pitching' : 'hitting'
+const pitching = group === 'pitching'
+const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', pitching ? 'club-stretch-pitching' : 'club-stretch')
 const now = new Date()
 const flag = process.argv.indexOf('--through')
 const through = flag > 0 ? Number(process.argv[flag + 1]) : now.getUTCFullYear() - (now.getUTCMonth() >= 9 ? 0 : 1)
@@ -34,14 +38,22 @@ if (!Number.isInteger(through) || through < 1901) throw new Error(`bad --through
 const MIN = 154
 // A pooled connection can stall with no answer: each log gets a 45 s timeout, and a timeout
 // retries. These fields alone (what toGame reads) cut a career log from about 2.8 MB to 0.75 MB.
-const FIELDS = 'stats,splits,date,team,id,name,game,gameNumber,stat,atBats,plateAppearances,hits,doubles,triples,homeRuns,runs,rbi,baseOnBalls,hitByPitch,sacFlies,stolenBases,totalBases,strikeOuts'
-const SEASON_FIELDS = 'stats,splits,season,player,id,fullName,stat,gamesPlayed,homeRuns,hits,rbi,stolenBases,atBats,baseOnBalls,hitByPitch,sacFlies,sacBunts,totalBases'
-const LINE = ['gamesPlayed', 'homeRuns', 'hits', 'rbi', 'stolenBases', 'atBats', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'sacBunts', 'totalBases']
+const BAT_FIELDS = 'stats,splits,date,team,id,name,game,gameNumber,stat,atBats,plateAppearances,hits,doubles,triples,homeRuns,runs,rbi,baseOnBalls,hitByPitch,sacFlies,stolenBases,totalBases,strikeOuts'
+const PITCH_FIELDS = 'stats,splits,date,team,id,name,game,gameNumber,stat,outs,earnedRuns,hits,baseOnBalls,hitByPitch,strikeOuts,homeRuns,gamesStarted,battersFaced'
+const FIELDS = pitching ? PITCH_FIELDS : BAT_FIELDS
+const BAT_SEASON_FIELDS = 'stats,splits,season,player,id,fullName,stat,gamesPlayed,homeRuns,hits,rbi,stolenBases,atBats,baseOnBalls,hitByPitch,sacFlies,sacBunts,totalBases'
+const SEASON_FIELDS = pitching ? 'stats,splits,season,player,id,fullName,stat,gamesPlayed,gamesStarted' : BAT_SEASON_FIELDS
+const LINE = pitching ? ['gamesPlayed', 'gamesStarted'] : ['gamesPlayed', 'homeRuns', 'hits', 'rbi', 'stolenBases', 'atBats', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'sacBunts', 'totalBases']
+// Enough club games for a run: 154 games, or 32 starts or 65 relief outings.
+const qualifies = (seasons) => {
+  const sum = (k) => seasons.reduce((n, s) => n + s[k], 0)
+  return pitching ? sum('gamesStarted') >= 32 || sum('gamesPlayed') - sum('gamesStarted') >= 65 : sum('gamesPlayed') >= MIN
+}
 
 // Pass 1: club -> player id -> { name, seasons }, for players with at least MIN club games.
 const jobs = ALL_MLB_TEAM_IDS.flatMap((teamId) => Array.from({ length: through - 1900 }, (_, i) => ({ teamId, season: 1901 + i })))
 const lines = await mapConcurrent(jobs, 4, async ({ teamId, season }) => {
-  const d = await getJson(`/api/v1/stats?stats=season&group=hitting&sportId=1&playerPool=ALL&limit=1000&teamId=${teamId}&season=${season}&fields=${SEASON_FIELDS}`, { timeoutMs: 45000, tries: 5 })
+  const d = await getJson(`/api/v1/stats?stats=season&group=${group}&sportId=1&playerPool=ALL&limit=1000&teamId=${teamId}&season=${season}&fields=${SEASON_FIELDS}`, { timeoutMs: 45000, tries: 5 })
   return { teamId, season, splits: d.stats?.[0]?.splits ?? [] }
 }, { strict: true })
 const clubs = new Map(ALL_MLB_TEAM_IDS.map((id) => [id, new Map()]))
@@ -57,7 +69,7 @@ for (const { teamId, season, splits } of lines) {
     club.get(id).seasons.push({ season, ...Object.fromEntries(LINE.map((k) => [k, Number(sp.stat?.[k]) || 0])) })
   }
 }
-for (const club of clubs.values()) for (const [id, p] of club) if (p.seasons.reduce((n, s) => n + s.gamesPlayed, 0) < MIN) club.delete(id)
+for (const club of clubs.values()) for (const [id, p] of club) if (!qualifies(p.seasons)) club.delete(id)
 // The clubs each player qualifies for, so one log serves all of them.
 const clubsOf = new Map()
 for (const [teamId, club] of clubs) for (const [id, p] of club) {
@@ -66,7 +78,7 @@ for (const [teamId, club] of clubs) for (const [id, p] of club) {
   e.clubs.push(teamId)
   for (const s of p.seasons) { e.from = Math.min(e.from, s.season); e.to = Math.max(e.to, s.season) }
 }
-console.log(`pass 1: ${jobs.length} club seasons, ${clubsOf.size} players with ${MIN}+ games for a club`)
+console.log(`pass 1: ${jobs.length} club seasons, ${clubsOf.size} players with a long enough club run (${group})`)
 
 // Pass 2: a player's rows for every club he qualifies for, fetched once (and kept in --cache).
 const cacheAt = process.argv.indexOf('--cache')
@@ -79,10 +91,10 @@ async function fetchRows(id) {
   if (rowsOf.has(id) && p.clubs.every((t) => t in rowsOf.get(id))) return rowsOf.get(id)
   const games = []
   for (let y = p.from; y <= p.to; y++) {
-    const d = await getJson(`/api/v1/people/${id}/stats?stats=gameLog&group=hitting&sportId=1&gameType=R&season=${y}&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
-    games.push(...(d.stats?.[0]?.splits ?? []).map((sp) => toGame(sp, 'hitting')))
+    const d = await getJson(`/api/v1/people/${id}/stats?stats=gameLog&group=${group}&sportId=1&gameType=R&season=${y}&fields=${FIELDS}`, { timeoutMs: 45000, tries: 5 })
+    games.push(...(d.stats?.[0]?.splits ?? []).map((sp) => toGame(sp, group)))
   }
-  const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id, name: p.name, games }, teamId)]))
+  const rows = Object.fromEntries(p.clubs.map((teamId) => [teamId, playerRows({ id, name: p.name, games }, teamId, group)]))
   rowsOf.set(id, rows)
   if (cachePath) await appendFile(cachePath, cacheLine(through, id, rows))
   if (++fetched % 250 === 0) console.log(`${fetched} players fetched ${new Date().toISOString().slice(11, 19)}`)
@@ -95,7 +107,7 @@ console.log(`pass 2: ${fetched} players fetched`)
 
 const files = [...clubs].map(([teamId, club]) => [
   String(teamId),
-  { through, firstSeason: firstOf.get(teamId) ?? null, boards: rankBoards([...club.keys()].map((id) => rowsOf.get(id)[teamId])) },
+  { through, firstSeason: firstOf.get(teamId) ?? null, boards: rankBoards([...club.keys()].map((id) => rowsOf.get(id)[teamId]), group) },
 ])
 const { written } = await writeShards(outDir, files)
 console.log(`wrote ${written} club files to ${outDir}`)
