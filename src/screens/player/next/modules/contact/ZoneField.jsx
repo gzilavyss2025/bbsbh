@@ -5,8 +5,9 @@ import { ZONE_DEPTHS, ZONE_THIRDS, polar as at, zoneFill, zoneLabelOnLight, zone
 // ball-type filter sets only the hue. Drawn inside ContactModule's own <svg>, over the same foul
 // lines; the outer band IS the fence here, so the arc and the zones share one edge. `side` only names
 // the thirds (zoneNames): Pull / Oppo, or LF / CF / RF for a switch hitter.
-// The bands' radii in SVG feet: the depth edges (150, 250 ft), the outer edge at the fence line.
-const RADII = { infield: [45, 150], shallow: [150, 250], deep: [250, 345] }
+// The bands' radii in SVG feet: the depth edges from ZONE_DEPTHS, the outer edge at the fence line.
+const [[, , IF], [, , OF]] = ZONE_DEPTHS
+const RADII = { infield: [45, IF], shallow: [IF, OF], deep: [OF, 345] }
 const WEDGE = { left: [-45, -15], center: [-15, 15], right: [15, 45] }
 
 const cellPath = (a0, a1, r0, r1) =>

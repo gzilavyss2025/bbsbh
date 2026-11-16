@@ -22,6 +22,13 @@ test('nine zones by field third and depth: where the ball went, whoever hit it',
   assert.equal(cell(z, 'right', 'deep').share, 0.5)
 })
 
+test('the depth breaks sit at 150 and 280 ft (#3083): a 265 ft ball is shallow, a 285 ft ball deep', () => {
+  const z = contactZones([ball(0, 145, 5), ball(0, 155, 15), ball(0, 265, 30), ball(0, 285, 30)])
+  assert.equal(cell(z, 'center', 'infield').n, 1)
+  assert.equal(cell(z, 'center', 'shallow').n, 2)
+  assert.equal(cell(z, 'center', 'deep').n, 1)
+})
+
 test('a switch hitter: each ball stays in the field it went to, from either side', () => {
   // Pulled from both sides: right-handed to left field, left-handed to right field.
   const z = contactZones([ball(-30, 300, 30, 'R'), ball(30, 300, 30, 'L')])
