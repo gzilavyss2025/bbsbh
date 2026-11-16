@@ -285,10 +285,9 @@
 
 /* Every navy/gold header on this page reads at the same, larger size —
    .sectionhead__title's own var(--fs-body) — rather than the smaller sizes
-   .abs__title/.halfdefense__title/.winprob__title carry by default
+   .halfdefense__title/.winprob__title carry by default
    elsewhere (those are shared with the innings view, so the bump is scoped
    to .bs rather than changing the shared classes themselves). */
-.bs .abs__title,
 .bs .halfdefense__title,
 .bs .winprob__title {
   font-size: var(--fs-body);

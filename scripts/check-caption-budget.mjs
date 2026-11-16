@@ -72,7 +72,8 @@ import { listSheets } from './lib/walk.mjs'
 // 98 -> 97: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
 // 96 -> 94: the Awards page's cards became tables (#2546); its head and name lines
 // moved to --fs-label and --fs-small, the club line to .t-label.
-const BUDGET = 94
+// 94 -> 93: the dead ABS row rules went (#3128).
+const BUDGET = 93
 
 const sheets = listSheets(process.cwd()).map((s) => ({ ...s, css: s.raw }))
 

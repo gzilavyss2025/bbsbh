@@ -80,103 +80,9 @@
   }
 }
 
-/* ABS (Automated Ball-Strike) challenges — the card's third row (see
-   StatBox's AbsRow). One club per row inside a single inset panel that matches
-   the R/H/E and pitch-stat cells above, so ABS reads as another row of the
-   card rather than orphaned text. The club logo anchors each row on the left;
-   the pips then narrate that club's challenge history left-to-right — one pip
-   per challenge MADE, colored by outcome (overturned = won, stood = lost) —
-   followed by any still-unused challenges in kraft brown. A right-aligned
-   record + remaining readout carries the same information as digits for anyone
-   who'd rather not decode the dots. It is an outcome history, not a plain
-   remaining count. */
-.abs {
-  margin-top: 10px;
-}
-/* The title's bottom corners square off and sit flush against the rows
-   below, so the navy header and the row panel read as ONE attached card
-   rather than a header floating loose above a separately-bordered box (which
-   this used to be inside .statbox, its inset-padded default context — see
-   .abs__rows below). .bs__abscard (box score) already wants this same
-   joined look; .absframe (desktop) is the one context that still wants the
-   header floating separately, and overrides both back apart below. */
-.abs__title {
-  display: block;
-  padding: var(--space-2) var(--space-2h);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  border-radius: var(--radius-square);
-  margin-bottom: 0;
-}
-.abs__rows {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  box-shadow: var(--inset-cell);
-  overflow: hidden;
-}
-.bs__abscard {
-  /* Now an independent card in its own right (BoxScoreBody's .bs__col),
-     not the batting/pitching card's tail — the column's own flex gap
-     (var(--space-4)) spaces it from its neighbors, so the base .abs rule's
-     own margin-top would double that gap. */
-  margin-top: 0;
-}
-.abs__row + .abs__row {
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-/* The row is a toggle button (see AbsRow, StatBox.jsx) — reset off the .btn
-   look entirely so it still reads as a plain card row, not an app button.
-   Inert (no pointer cursor, no hover) when there are no challenges yet to
-   expand — :disabled covers that without a separate modifier class. */
-.abs__rowbtn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2h) var(--space-3);
-  margin: 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.abs__rowbtn:disabled {
-  cursor: default;
-}
-.abs__rowbtn:not(:disabled):hover {
-  background: var(--bg-page);
-}
-.abs__rowbtn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -2px;
-}
-/* The club mark — sized like the app's other inline club logos. Falls back to
-   the abbreviation (.abs__team) when the art is missing (MiLB / load error). */
-.abs__logo {
-  flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-.abs__team {
-  flex: 0 0 auto;
-  min-width: 24px;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
-}
+/* ABS (Automated Ball-Strike) challenges: the box score's pips
+   (src/screens/boxscore/BoxAbs.jsx). One pip per challenge made, coloured by
+   outcome: overturned = won, stood = lost. */
 .abs__pips {
   display: inline-flex;
   align-items: center;
@@ -194,64 +100,6 @@
 }
 .abs__pip--lost {
   background: var(--accent-negative);
-}
-.abs__pip--open {
-  background: var(--accent-primary);
-}
-/* Record (won–lost) + what's still in the bank, right-aligned as tabular
-   figures — the same numbers the pips encode, for a scorer who wants the count. */
-.abs__rec {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-
-/* The expanded detail list under a tapped .abs__rowbtn — one line per
-   challenge, spelling out in words the same three facts the pips encode as
-   color (who, when, outcome), for anyone who taps in rather than decoding
-   dots. Inset panel matches the row's own kraft-tinted surface (same idiom as
-   .rolling__cell) rather than the card's plain paper. */
-.abs__detail {
-  padding: var(--space-1) var(--space-3) var(--space-2h);
-  background: var(--bg-page);
-}
-.abs__detailrow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--fs-caption);
-}
-.abs__detailhalf {
-  flex: 0 0 auto;
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-caption);
-  min-width: 5.5ch;
-}
-.abs__detailwho {
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--text-body);
-  font-weight: var(--w-semibold);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.abs__detailresult {
-  flex: 0 0 auto;
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-}
-.abs__detailresult--won {
-  color: var(--accent-positive);
-}
-.abs__detailresult--lost {
-  color: var(--accent-negative);
 }
 
 /* The before→after count blink — see CountBlink in StatBox.jsx. Fires once
@@ -623,14 +471,6 @@
   color: var(--text-muted);
 }
 
-/* Mobile-first hidden: AbsCard's whole-card copy of ABS Challenges only
-   exists for the wide layout's right column (unhidden in the min-width:740px
-   block below) — on a phone the ABS block stays inline inside StatBox
-   (`.statbox__abs`, always visible there below this breakpoint). */
-.absframe {
-  display: none;
-}
-
 /* Phone-only. `.inning` goes display:contents so `.half` (its one child now —
    the old row2/entering-reference siblings that used to share this ordering
    scheme are gone with the unfocused page) becomes a direct item of this flex
@@ -745,10 +585,6 @@
   border-top: none;
   border-radius: 0;
 }
-.bs__abscard .abs__rows {
-  border-radius: 0;
-}
-
 /* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
    does would leave this card with no frame (unlike its sibling .entering),
    so this uses .half .defdiamond's other remedy instead — drop the diamond's

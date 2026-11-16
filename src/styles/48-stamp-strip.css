@@ -266,11 +266,9 @@
   .bs .gamestory { order: 8; }
   .bs .bs__col--away > .bs__fill { order: 9; }
   .bs .bs__col--away > .bs__team { order: 10; }
-  .bs .bs__col--away > .bs__abscard { order: 11; }
   .bs .bs__col--away > .bs__defensecard { order: 12; }
   .bs .bs__col--home > .bs__fill { order: 13; }
   .bs .bs__col--home > .bs__team { order: 14; }
-  .bs .bs__col--home > .bs__abscard { order: 15; }
   .bs .bs__col--home > .bs__defensecard { order: 16; }
   .bs .winprob { order: 17; }
   .bs .bs__potg { order: 18; }

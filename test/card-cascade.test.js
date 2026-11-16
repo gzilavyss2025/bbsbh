@@ -844,18 +844,8 @@ test('C4: each block keeps its own margin and inset', () => {
   }
 })
 
-// The wide ABS frame shows only from 740px (StatBox's inline copy is the
-// phone's). Card sets no display, so the two namespace rules still decide it.
-test('C4: the ABS frame is hidden on a phone and shown from 740px', () => {
-  assert.equal(decl(ruleBody(read('12-sealbox.css'), '.absframe'), 'display'), 'none')
-  const wide = read('25-wide-layout.css').match(/@media \(min-width: 740px\) \{[^@]*?\n\s+\.absframe \{([^}]*)\}/)
-  assert.ok(wide, '25-wide-layout.css: an .absframe rule inside the 740px query')
-  assert.equal(decl(wide[1], 'display'), 'block')
-})
-
 // Strict, comments too: a comment that names a retired class sends the next
-// reader to a rule that does not exist. The box score's .bs__abscard is a
-// different class and stays.
+// reader to a rule that does not exist.
 const RETIRED_C4 = /(^|[^\w-])(lineupcard|abscard)(?![a-z0-9-])/
 test('C4: .lineupcard and .abscard are gone, from stylesheets, markup, comments and the seal guard', () => {
   const css = files(STYLES, ['.css']).filter((rel) => RETIRED_C4.test(readFileSync(join(STYLES, rel), 'utf8')))
