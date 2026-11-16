@@ -11,6 +11,7 @@
 // day it was built; the page drops games on or after `?d=` (filters.js `matcher`).
 
 import { decodePlateAppearances } from './shard.js'
+import { fetchSeries } from './series.js'
 
 export const STORE_BASE = import.meta.env?.VITE_RESEARCH_STORE || 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/research/v1/'
 
@@ -74,6 +75,24 @@ export function loadSeason(index, season, { onMonth = () => {} } = {}) {
   }
   return seasonCache.get(season).promise
 }
+// THE SERIES GAME CARD'S JOIN (#3141): a postseason PA gains its game's `series`
+// (series.js), once per decoded season, and only when a query asks. A season with no
+// postseason PA fetches nothing. A failure rejects and is forgotten, so the next ask retries.
+const seriesJoins = new WeakMap()
+export function attachSeries(season, pas) {
+  if (!seriesJoins.has(pas)) {
+    const post = pas.filter((pa) => pa.gameType !== 'R' && pa.gameType !== 'A')
+    const join = post.length
+      ? fetchSeries(season).then((byGame) => {
+          for (const pa of post) pa.series = byGame.get(pa.gamePk)
+        })
+      : Promise.resolve()
+    join.catch(() => seriesJoins.delete(pas))
+    seriesJoins.set(pas, join)
+  }
+  return seriesJoins.get(pas)
+}
+
 export function dropSeason(season) {
   seasonCache.get(season)?.ctrl.abort()
   seasonCache.delete(season)

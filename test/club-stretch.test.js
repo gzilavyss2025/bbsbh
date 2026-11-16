@@ -86,3 +86,21 @@ test('pitching: a run with no outs ranks last on ERA', () => {
   assert.deepEqual(b[65].era.map((r) => r.id), [4, 5])
   assert.equal(b[65].era[1].value, '—')
 })
+
+// Early game logs (e.g. Jack Taylor, 1903) leave earnedRuns out; reading it as 0 made a
+// 0.00 ERA. Hits, walks and outs are present, so WHIP still counts.
+test('pitching: a run with a game missing earned runs has no ERA, but keeps its WHIP', () => {
+  const start = (i, s) => outing(i, 158, { gamesStarted: 1, outs: 27, hits: 6, baseOnBalls: 2, ...s })
+  const games = Array.from({ length: 32 }, (_, k) => start(k, k === 5 ? {} : { earnedRuns: 3 }))
+  const rows = playerRows({ id: 6, name: 'Old', games }, 158, 'pitching')
+  assert.equal(rows['32:era'], undefined)
+  assert.equal(rows['32:whip'].value, '0.89')
+  const ok = Array.from({ length: 33 }, (_, k) => start(k, k === 0 ? {} : { earnedRuns: 3 }))
+  assert.equal(playerRows({ id: 7, name: 'Later', games: ok }, 158, 'pitching')['32:era'].value, '3.00')
+})
+
+test('a pitching cache line from before the earned-run rule is not read', () => {
+  const old = `${JSON.stringify({ through: 2026, group: 'pitching', id: 8, rows: {} })}\n`
+  assert.deepEqual([...readCache(old + cacheLine(2026, 9, {}, 'pitching'), 2026, 'pitching').keys()], [9])
+  assert.deepEqual([...readCache(`${JSON.stringify({ through: 2026, id: 1, rows: {} })}\n`, 2026).keys()], [1])
+})

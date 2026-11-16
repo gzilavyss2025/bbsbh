@@ -5,14 +5,14 @@ import { shiftDays } from '../../../src/lib/time/standingsDates.js'
 
 export const SAVANT_DAY_CAP = 25000
 
-// Savant's pitch CSV for one day, every game type. `batter_stands`/`pitcher_throws`
+// Savant's pitch CSV for one day: regular season, postseason and (#3141) All-Star games. `batter_stands`/`pitcher_throws`
 // are the hand params; `stand`/`p_throws` are silently ignored (#2234), so never send them.
 export function savantDayUrl(day) {
   const p = new URLSearchParams({
     all: 'true',
     type: 'details',
     player_type: 'batter',
-    hfGT: 'R|F|D|L|W|',
+    hfGT: 'R|F|D|L|W|A|',
     game_date_gt: day,
     game_date_lt: day,
   })

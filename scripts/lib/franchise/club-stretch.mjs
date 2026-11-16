@@ -47,13 +47,16 @@ export function rankBoards(rowSets, group = 'hitting') {
 // The --cache file: one JSON line per player, { through, id, rows }. A line from a run with
 // another --through is stale (his later games are missing), so it is not read.
 // A line from the other --group is not read either (a line with no group is hitting).
-export const cacheLine = (through, id, rows, group = 'hitting') => `${JSON.stringify({ through, group, id, rows })}\n`
+// A line from older run rules is not read either: pitching rule 2 gives a run with a game
+// missing earned runs no ERA (a rule-1 line holds its 0.00).
+const RULE = { hitting: 1, pitching: 2 }
+export const cacheLine = (through, id, rows, group = 'hitting') => `${JSON.stringify({ through, group, rule: RULE[group], id, rows })}\n`
 export function readCache(text, through, group = 'hitting') {
   const rows = new Map()
   for (const line of text.split('\n')) {
     if (!line) continue
     const e = JSON.parse(line)
-    if (e.through === through && (e.group ?? 'hitting') === group) rows.set(e.id, e.rows)
+    if (e.through === through && (e.group ?? 'hitting') === group && (e.rule ?? 1) === RULE[group]) rows.set(e.id, e.rows)
   }
   return rows
 }
