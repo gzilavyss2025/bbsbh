@@ -121,7 +121,7 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     permissions:
-      actions: read
+      actions: write # read the run list; cancel this run when it skips
     outputs:
       skip: ${{ steps.check.outputs.skip }}
     steps:
@@ -147,6 +147,15 @@ jobs:
             fi
           fi
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
+          # A skipped run used to show green, so three green runs a night looked like
+          # three real runs. Cancel it so the Actions tab shows it grey. The gate
+          # above counts only in-flight and successful runs, so a cancelled one never
+          # blocks a later run. The cancel is cosmetic: if it fails, the run still
+          # skips green. It is also asynchronous, so wait here for it to land;
+          # otherwise the run can finish as a success first.
+          if [ "$skip" = true ] && gh run cancel "$RUN_ID" --repo "$REPO"; then
+            sleep 120
+          fi
 
   update-nightly-data:
     needs: gate

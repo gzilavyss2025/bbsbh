@@ -365,7 +365,8 @@ Consequences to keep in mind when touching CI:
   hours** (the `gate` job in `update-nightly-data.yml`, 2026-10-09). A Claude routine
   dispatches the workflow about an hour after the last game goes Final, so the 08:17 UTC
   cron usually finds the work done and does not commit or deploy a second time. A hand
-  dispatch never skips.
+  dispatch never skips. A run that skips cancels itself, so it shows grey in the Actions tab,
+  not green (2026-11-16).
 - **Vercel Cron starts the run on time** (ADR-0125, 2026-11-02): `api/cron/nightly-dispatch.js`, on the
   `vercel.json` cron at 08:17 UTC, dispatches the workflow with `trigger: cron`, which the gate treats
   like the schedule. GitHub's own schedule stays as the backup; whichever fires second skips. It
