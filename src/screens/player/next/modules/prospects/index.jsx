@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchTopProspects } from '../../../../../api/prospects/top100.js'
 import { fetchProspectRankHistory } from '../../../../../api/player/prospectRankHistory.js'
+import { fetchTop100History } from '../../../../../api/prospects/top100History.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { prospectsView } from './prospectsView.js'
 import '../../../../../styles/player-next/both/prospects.css'
@@ -10,14 +11,16 @@ import '../../../../../styles/player-next/both/prospects.css'
 // and the pitching one hides. No ranking on file hides the card. Open surface: no seal.
 export default function ProspectsModule({ bio, role, season, onEmpty, onCount }) {
   const skip = role === 'pitching' && bio.twoWay
-  const { data } = useAsync(() => (skip ? null : Promise.all([fetchProspectRankHistory(), fetchTopProspects()])), [skip])
+  const { data } = useAsync(() => (skip ? null : Promise.all([fetchProspectRankHistory(), fetchTopProspects(), fetchTop100History()])), [skip])
   const view = data && prospectsView({
     history: data[0],
     snapshot: data[1],
     playerId: bio.id,
     debutYear: bio.debut ? Number(bio.debut.slice(0, 4)) : null,
     currentSeason: season,
+    weekly: data[2],
   })
+  const [allWeeks, setAllWeeks] = useState(false)
   const settled = skip || data
   useEffect(() => {
     if (!settled) return
@@ -30,14 +33,32 @@ export default function ProspectsModule({ bio, role, season, onEmpty, onCount })
   return (
     <div className="prospects">
       <ol className="prospects__list" aria-label="Prospect ranking by year">
-        {view.rows.map((r, i) => (
+        {view.rows.map((r, i) => [
           <li key={i} className={`prospects__row prospects__row--${r.tone}`}>
             <span className="prospects__year">{r.year}</span>
             <span className="prospects__label">{r.label}</span>
             <span className="prospects__delta">{r.delta}</span>
             <span className="prospects__rank">{r.rank}</span>
-          </li>
-        ))}
+          </li>,
+          // The weekly Top-100 ranks (#2970) sit under the first "Today" row, the current list.
+          i === view.rows.findIndex((x) => x.tone === 'today') && view.weeks.length > 0 && (
+            <li key="weeks" className="prospects__weeks">
+              <ol className="prospects__weeklist" aria-label="Top 100 rank by week">
+                {(allWeeks ? view.weeks : view.weeks.slice(0, 3)).map((w) => (
+                  <li key={w.date} className="prospects__week">
+                    <span>{w.date}</span>
+                    <span className="prospects__weekrank">{w.rank}</span>
+                  </li>
+                ))}
+              </ol>
+              {view.weeks.length > 3 && !allWeeks && (
+                <button type="button" className="prospects__more" onClick={() => setAllWeeks(true)}>
+                  All {view.weeks.length} weeks
+                </button>
+              )}
+            </li>
+          ),
+        ])}
       </ol>
       {view.note && <p className="prospects__note">{view.note}</p>}
       {view.credits.map((line) => <p key={line} className="prospects__note">{line}</p>)}

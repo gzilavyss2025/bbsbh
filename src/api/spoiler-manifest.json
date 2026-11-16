@@ -1130,6 +1130,10 @@
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
     },
+    "prospects/top100History.js": {
+      "class": "spoiler-free",
+      "why": "Static weekly Top-100 rank history reader (#2970) — a scout's ranking per week, not game state."
+    },
     "prospects/trend.js": {
       "class": "spoiler-free",
       "why": "Static prospect-trend reader — a level-relative OPS/ERA percentile computed from season stat splits. Season aggregate, not game state."

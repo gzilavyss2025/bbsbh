@@ -1494,6 +1494,11 @@ don't run these by hand.
   so `test/salaries.test.js` can pin it, and the money rule it enforces (an
   out-year code is a status, never an amount) is ADR-0052. App reads it via
   `src/api/salaries.js`.
+- `fetch-top-prospects.mjs` also appends → `public/data/top-prospects-history.json`
+  — one dated Top-100 snapshot per ISO week (`{ snapshots: [{ date, ranks }] }`),
+  written only after the scrape's validation gates pass; frozen-append, no back-fill
+  (#2970). Pure half: `scripts/lib/milb/top100-history.mjs`. Reader:
+  `src/api/prospects/top100History.js`. Detail: `docs/top-prospects.md`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

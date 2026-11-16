@@ -28,10 +28,12 @@
 // query-string URL for each team page's own prospect table.
 import { getJson } from './lib/statsapi.mjs'
 import { namesWithFallback, withStatsapiNames } from './lib/milb/prospect-names.mjs'
+import { appendWeeklySnapshot } from './lib/milb/top100-history.mjs'
 
 const TOP100_URL = 'https://www.mlb.com/prospects/stats/top-prospects'
 const ORG_URL = 'https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1'
 const OUT_PATH = new URL('../public/data/top-prospects.json', import.meta.url)
+const HISTORY_PATH = new URL('../public/data/top-prospects-history.json', import.meta.url)
 const UA = 'bbsbh-top-prospects/0.1 (baseball scorebook prospect rankings snapshot)'
 
 // The page embeds the ranked list as a plain `var data = [...]` JS array in
@@ -229,6 +231,20 @@ async function main() {
   await fs.mkdir(new URL('.', OUT_PATH), { recursive: true })
   await fs.writeFile(OUT_PATH, JSON.stringify(snapshot, null, 2) + '\n')
   console.log(`Wrote ${players.length} Top 100 prospects + ${orgProspects.length} org prospects to ${OUT_PATH.pathname}`)
+
+  // The weekly rank history (#2970): one dated snapshot per ISO week, written
+  // only here, after both validation gates passed. Frozen-append: never rewritten.
+  let history = null
+  try {
+    history = JSON.parse(await fs.readFile(HISTORY_PATH, 'utf8'))
+  } catch {
+    // first run: no history yet
+  }
+  const next = appendWeeklySnapshot(history, snapshot.generatedAt.slice(0, 10), players)
+  if (next.snapshots.length !== (history?.snapshots?.length ?? 0)) {
+    await fs.writeFile(HISTORY_PATH, JSON.stringify({ generatedAt: snapshot.generatedAt, ...next }) + '\n')
+    console.log(`Appended week ${next.snapshots.at(-1).date} to ${HISTORY_PATH.pathname}`)
+  }
 }
 
 // Never touch OUT_PATH on failure — the last-known-good snapshot must stay

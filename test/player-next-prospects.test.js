@@ -87,3 +87,27 @@ test('no ranking on file is null, so the card hides', () => {
   assert.equal(prospectsView({ history, snapshot, playerId: 688107, debutYear: 2023 }), null)
   assert.equal(prospectsView({ history: null, snapshot: null, playerId: 688107 }), null)
 })
+
+// The weekly Top-100 ranks (#2970): dated rows, newest first, from two snapshots on.
+const weekly = {
+  snapshots: [
+    { date: '2026-11-16', ranks: { 815908: 14 } },
+    { date: '2026-11-23', ranks: { 815908: 8, 1: 50 } },
+    { date: '2026-11-30', ranks: { 815908: 9 } },
+  ],
+}
+
+test('weekly ranks: two or more snapshots give dated rows, newest first', () => {
+  const v = prospectsView({ history, snapshot, playerId: 815908, weekly, currentSeason: 2026 })
+  assert.deepEqual(v.weeks, [
+    { date: 'Nov 30', rank: '#9' },
+    { date: 'Nov 23', rank: '#8' },
+    { date: 'Nov 16', rank: '#14' },
+  ])
+})
+
+test('weekly ranks: one snapshot, or no file, shows nothing', () => {
+  const one = { snapshots: [weekly.snapshots[0]] }
+  assert.deepEqual(prospectsView({ history, snapshot, playerId: 815908, weekly: one }).weeks, [])
+  assert.deepEqual(prospectsView({ history, snapshot, playerId: 815908 }).weeks, [])
+})
