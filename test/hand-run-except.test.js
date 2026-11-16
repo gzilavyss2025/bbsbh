@@ -16,7 +16,6 @@ const DOC = path.join(import.meta.dirname, '../docs/scripts/generators.md')
 // Hand-run outputs that a nightly step ALSO writes, so the freshness check
 // must keep watching them. Each value is the reason.
 const ALSO_NIGHTLY = {
-  'outliers/': 'gen-outliers.mjs runs nightly; its doc entry says so',
   'highlights/': 'the backfill seeds it; gen-highlights.mjs updates it nightly',
   'rookies.json': 'the backfill seeds it; gen-rookies.mjs updates it nightly',
   'from/': 'gen-where-from-map.mjs writes only from/map/; gen-where-from.mjs stamps from/index.json nightly',
