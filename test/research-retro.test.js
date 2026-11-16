@@ -59,6 +59,15 @@ test('joinSeason: exact key first, then the same two clubs either way round', ()
   assert.deepEqual(unjoined, ['C']) // a postponed game and a spring game never join
 })
 
+test('joinSeason: a game with no number line is game 1, even when statsapi lists game 2 first', () => {
+  const rows = [
+    sched({ gamePk: 22, doubleHeader: 'Y', gameNumber: 2 }),
+    sched({ gamePk: 11, doubleHeader: 'Y', gameNumber: 1 }),
+  ]
+  const game = { id: 'A', info: { date: '2014/04/01', hometeam: 'MIL', visteam: 'ATL' } }
+  assert.equal(joinSeason([game], rows).byId.get('A').gamePk, 11)
+})
+
 test('scheduleRows flattens a statsapi schedule', () => {
   const s = { dates: [{ games: [{ gamePk: 9, officialDate: '1961-04-10', gameType: 'R', status: { detailedState: 'Final' }, teams: { home: { team: { id: 120 } }, away: { team: { id: 145 } } }, doubleHeader: 'N', gameNumber: 1, venue: { id: 3, name: 'Park' }, linescore: { teams: { home: { runs: 3 }, away: { runs: 4 } } } }] }] }
   assert.deepEqual(scheduleRows(s), [{ gamePk: 9, officialDate: '1961-04-10', gameType: 'R', state: 'Final', home: 120, away: 145, doubleHeader: 'N', gameNumber: 1, venue: 3, venueName: 'Park', homeRuns: 3, awayRuns: 4 }])

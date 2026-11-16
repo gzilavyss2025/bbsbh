@@ -14,14 +14,16 @@
 //
 // THE COLUMNS (PA_COLS):
 //   gamePk   MLB's game id                 ab       cwevent's event number in the game
-//   batter   MLBAM id, null if unbridged   pitcher  the responsible pitcher (cwevent 16)
+//   batter   the responsible batter (cwevent 12: a pinch hitter who takes over with two
+//            strikes leaves a strikeout to the man he replaced), MLBAM id, null if unbridged
+//   pitcher  the responsible pitcher (cwevent 16), the same way
 //   event    Retrosheet event type (cwevent 34: 2 generic out, 3 K, 14 walk, 15 IBB,
 //            16 HBP, 18 error, 19 FC, 20-23 single-HR, ...)
 //   inn      inning                        half     0 top, 1 bottom
 //   outs     outs before the play          bases    runners: 1 first, 2 second, 4 third
 //   balls, strikes  the count before the last pitch; null when Retrosheet does not know it
 //            (`??`, or empty in 1984-87). Never 0 for "unknown".
-//   stand, throws   'L' | 'R', null unknown
+//   stand, throws   'L' | 'R' (cwevent resolves a switch hitter by the pitcher), null unknown
 //   bsd      batting club's score margin before the play
 //   slot     lineup place (1-9)            hit      hit value (0-4)
 //   rbi      RBI on the play
@@ -118,7 +120,8 @@ export function joinSeason(retroGames, sched) {
   }
   const used = new Set()
   const byId = new Map()
-  const gameNo = (g) => (g.info.number === '0' ? 1 : Number(g.info.number))
+  // '0' is a single game; a missing number line counts as one too (never NaN in the sort).
+  const gameNo = (g) => Number(g.info.number) || 1
   for (const g of retroGames) {
     const hit = (idx.get(key(teamOf.get(g.info.hometeam), iso(g.info.date), gameNo(g))) ?? []).filter((s) => !used.has(s.gamePk))
     if (hit.length !== 1) continue

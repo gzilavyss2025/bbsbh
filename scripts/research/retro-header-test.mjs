@@ -27,18 +27,26 @@ const headers = (extra) => {
 
 let failed = false
 try {
-  const full = headers([])
+  // A blob just written can miss on the CDN for a moment: ask up to three times.
+  let full = headers([])
+  for (let t = 1; t < 3 && !/ 200\b/.test(full.status); t++) {
+    await new Promise((r) => setTimeout(r, 5000))
+    full = headers([])
+  }
   const range = headers(['-H', 'Range: bytes=0-1023'])
   const show = (k, r) => console.log(`  ${k}: ${r.h[k] ?? '(none)'}`)
   console.log(`GET: ${full.status}`)
   for (const k of ['content-encoding', 'content-length', 'access-control-allow-origin', 'cache-control', 'accept-ranges']) show(k, full)
   console.log(`GET with Range 0-1023: ${range.status}`)
   for (const k of ['content-range', 'content-length', 'content-encoding']) show(k, range)
-  if (!full.h['content-encoding']) {
+  if (!/ 200\b/.test(full.status)) {
+    console.error(`::error::the test file answered ${full.status}, not 200: the checks below mean nothing`)
+    failed = true
+  } else if (!full.h['content-encoding']) {
     console.error('::error::Blob served the JSON uncompressed: the history store would download about 10 times its gzip size')
     failed = true
   }
-  if (!full.h['access-control-allow-origin']) {
+  if (/ 200\b/.test(full.status) && !full.h['access-control-allow-origin']) {
     console.error('::error::no Access-Control-Allow-Origin header: the page could not read the store')
     failed = true
   }

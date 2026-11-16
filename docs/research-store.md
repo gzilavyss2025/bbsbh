@@ -91,7 +91,7 @@ read it yet; a follow-up wires it into `/research`. Decisions: #3135 and its com
 
 | Path | What |
 |---|---|
-| `manifest.json` | credit lines; per season: games, PAs, `pitchString` and `knownCount` (% of PAs), and per month `{ pas, through }`. Month keys are not in order in the JSON; sort them. |
+| `manifest.json` | credit lines; per season: games, PAs, `pitchString` and `knownCount` (% of PAs), per month `{ pas, through }`, and `unbridged` (Retrosheet ids with no MLBAM id; their rows hold a null id) when any. Month keys are not in order in the JSON; sort them. |
 | `pa/{season}/{MM}.json` | the 18 columns below, as column arrays (371 files) |
 | `pitches/{season}/{MM}.json` | `pseq`: Retrosheet's raw pitch string per row, same order as `pa/` (371 files) |
 | `games/{season}.json` | gamePk, date, home and away club ids, Retrosheet park code, venue id, game number, night, DH, pitch info (0 none, 1 count, 2 pitches), final score |
@@ -116,7 +116,9 @@ one place the layout is written). Two points a reader needs:
 (one throwaway 1 MB file: compression and CORS required, Range reported), then downloads
 the inputs, builds `cwevent`, builds all 54 seasons, and uploads only when every
 Retrosheet game joined a gamePk and every `cwevent` row matched its raw play line.
-`manifest.json` uploads last. Local test (no upload), with the inputs extracted outside
+Each upload retries; `manifest.json` uploads last. An upload that still fails part way
+leaves new and old files under the old manifest, so rerun the workflow. Files carry a
+one-hour cache, as `research/v1/` does. Local test (no upload), with the inputs extracted outside
 the repo as in `.scratch/research-retrosheet-pa/findings.md`, "Reproduce":
 
 ```bash

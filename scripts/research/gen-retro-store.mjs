@@ -15,7 +15,10 @@
 //
 // A SAFE BUILD. Every file is written to --out first. Any Retrosheet game that does not
 // join to a gamePk, or any cwevent row that does not line up with its raw play line, fails
-// the run before an upload, so Blob never holds part of a store. manifest.json goes last.
+// the run before an upload. Each upload retries; manifest.json goes last. An upload that
+// still fails part way leaves a mix of new and old files under the old manifest: rerun the
+// workflow. A person with no MLBAM id does not fail the run (a row keeps a null id); the
+// manifest lists the Retrosheet ids per season (`unbridged`).
 //
 //   node scripts/research/gen-retro-store.mjs --events=E --register=R --cwevent=B --seasons=1961,1988,2014
 //   node scripts/research/gen-retro-store.mjs --events=E --register=R --cwevent=B --upload   # all of 1961-2014
@@ -24,10 +27,10 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { gzipSync } from 'node:zlib'
 import { parseArgs, strOpt } from '../lib/args.mjs'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
+import { withRetry } from '../lib/net/retry.mjs'
 import { buildRetroBridge } from '../lib/open-data/retro-bridge.mjs'
 import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../lib/open-data/credits.mjs'
 import { csvObjects } from '../../src/lib/csv/parse.js'
@@ -44,7 +47,7 @@ const registerDir = need('register')
 const cwevent = need('cwevent')
 const out = strOpt(args, 'out') ?? join(tmpdir(), 'retro-store')
 const upload = Boolean(args.upload)
-const seasons = strOpt(args, 'seasons')?.split(',').map(Number) ?? Array.from({ length: LAST_SEASON - FIRST_SEASON + 1 }, (_, i) => FIRST_SEASON + i)
+const seasons = strOpt(args, 'seasons') ? [...new Set(strOpt(args, 'seasons').split(',').map(Number))].sort((a, b) => a - b) : Array.from({ length: LAST_SEASON - FIRST_SEASON + 1 }, (_, i) => FIRST_SEASON + i)
 if (seasons.some((s) => !(s >= FIRST_SEASON && s <= LAST_SEASON))) throw new Error(`--seasons must sit in ${FIRST_SEASON}-${LAST_SEASON}`)
 if (upload && !process.env.BLOB_READ_WRITE_TOKEN) throw new Error('--upload needs BLOB_READ_WRITE_TOKEN')
 // The park files and the manifest span every season, so an upload is always all of them.
@@ -57,6 +60,9 @@ if (!bridge.matched) throw new Error(`no register rows in ${registerDir}`)
 const mlbamOf = (rid) => (bridge.retroToMlbam.has(rid) ? Number(bridge.retroToMlbam.get(rid)) : null)
 console.log(`register: ${bridge.rows} rows, ${bridge.matched} bridged, ${bridge.conflicts} conflicts`)
 
+// --out is cleared, so it must be a build folder: absent, empty, or an earlier build.
+const before = await readdir(out).catch(() => [])
+if (before.length && !before.includes('manifest.json')) throw new Error(`${out} holds files and no manifest.json: pick an empty --out`)
 await rm(out, { recursive: true, force: true })
 const files = new Map() // Blob path -> local path
 const write = async (path, obj) => {
@@ -96,6 +102,7 @@ for (const season of seasons) {
   for (const r of rows) for (const id of [r.batter, r.pitcher]) if (id != null) people.add(id)
   allGames.push(...games)
   manifest.seasons[season] = seasonEntry(stats, games, shards)
+  if (stats.unbridged.length) manifest.seasons[season].unbridged = stats.unbridged
 
   const e = manifest.seasons[season]
   console.log(`${season}: ${games.length} games, ${stats.pas} PAs, ${shards.length} months, pitch string ${e.pitchString}%, known count ${e.knownCount}%, unbridged people ${stats.unbridged.length}`)
@@ -122,9 +129,7 @@ await write('people.json', { v: STORE_VERSION, people: peopleNames(register, peo
 manifest.parks = parkSeasons.size
 await write('manifest.json', manifest)
 
-let gz = 0
-for (const local of files.values()) gz += gzipSync(await readFile(local)).length
-console.log(`${files.size} files in ${out}, ${(gz / 1e6).toFixed(1)} MB gzip`)
+console.log(`${files.size} files in ${out}`)
 if (bad) {
   console.error(`${bad} problems above: nothing uploaded`)
   process.exit(1)
@@ -133,7 +138,9 @@ if (bad) {
 if (upload) {
   const { put } = await import('@vercel/blob')
   const send = async (path) => {
-    const res = await put(PREFIX + path, await readFile(files.get(path)), { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', cacheControlMaxAge: 86400 })
+    const body = await readFile(files.get(path))
+    // An hour, as research/v1/: a rebuild serves a mix of old and new files for at most that.
+    const res = await withRetry(() => put(PREFIX + path, body, { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', cacheControlMaxAge: 3600 }), { tries: 4, delayMs: 5000, label: path })
     return res.url
   }
   // Data first, manifest last: a reader that finds the manifest finds every file it lists.
