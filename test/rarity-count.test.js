@@ -273,6 +273,6 @@ test('the committed four-homer index matches the published list (slice 4)', () =
   const doc = JSON.parse(readFileSync(new URL('../public/data/notable/fourhr.json', import.meta.url)))
   const names = doc.rows.map((r) => r.player.name)
   for (const n of ['Lou Gehrig', 'Willie Mays', 'Mike Cameron', 'J.D. Martinez']) assert.ok(names.includes(n), n)
-  // 18 four-homer games from 1901 through 2025 (Wikipedia, single-game records: 21 all-time, three before 1901).
-  assert.equal(doc.rows.filter((r) => r.officialDate < '2026').length, 18)
+  // 19 four-homer games from 1901 through 2025 (Wikipedia, single-game records: 21 all-time; Lowe 1894 and Delahanty 1896 are before 1901).
+  assert.equal(doc.rows.filter((r) => r.officialDate < '2026').length, 19)
 })
