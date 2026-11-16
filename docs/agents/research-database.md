@@ -408,6 +408,10 @@ question is until someone reads it, which is why reading it comes first.
   200 MB, because `level-benchmarks/raw.json` and `prospect-traits/mlb.json` pass
   16 MB.
 - `@duckdb/node-api` is a devDependency. The older `duckdb` package is deprecated.
+- `.scratch/level-benchmarks/`, `team-success/` and `prospect-traits/` are not in git
+  (#3119, ADR-0128). `npm run state:pull` fills them in from `bbsbh-state`. A PR does
+  not carry edits there: `node scripts/repo/state.mjs push` does, and it needs
+  `bbsbh-state` attached to the session with push access, so ask Gary first.
 - `test-state/research-db-catalog.test.js` (run by `npm run test:state` after `npm run state:pull`) keeps this document true: every registered
   path and every skip is named here, every view built has one catalog row, every
   view returns a row, and a rebuild leaves no stale view. It does not fail when a
