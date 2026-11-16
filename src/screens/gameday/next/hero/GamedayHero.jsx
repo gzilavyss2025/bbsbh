@@ -1,4 +1,4 @@
-import { createElement, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import '../../../../styles/gameday-next/hero.css'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { eventCardMarkup } from '../steps/eventCardMarkup.js'
@@ -14,9 +14,15 @@ import { BatterFallbackContext, BattingUniformContext, GameUniformsContext } fro
 import { fallbackFigureUrls } from '../../../../api/uniforms.js'
 import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
 import { ordinal } from '../../../../lib/format.js'
+import { fetchRunExpectancy } from '../../../../api/playbyplay/runExpectancyLine.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
-export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, ...props })
+export function GamedayHero(props) {
+  // The run-expectancy table (#2973) is not a score: it loads eagerly; heroMarkup reads it inside the reveal.
+  const [re, setRe] = useState(null)
+  useEffect(() => { let on = true; fetchRunExpectancy().then((t) => on && setRe(t)); return () => { on = false } }, [])
+  return heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, re, ...props })
+}
 export const GamedayEventCard = (props) => eventCardMarkup(createElement, { SealBox, ...props })
 
 // The play's words at the normal size; past their space, the smaller size; past that too, they scroll
