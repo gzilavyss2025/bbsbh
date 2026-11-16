@@ -50,10 +50,10 @@ Population: 216 merged `claude/*` PRs from 2026-10-08 to the baseline; 144 touch
 `src/` code and none of the four surfaces (filter in the PR's git history:
 `lineup`, `innings`, `boxscore`, `InningViewer`, `BoxScore`, `GameSelect`,
 `SealBox`, `linescore|derive|hitchart`, `slate`). Automatic diff flags for all
-144: `lookback-diff.csv` (noisy: `revealed` and manifest `class` lines match).
+144: `lookback-diff.csv` (noisy: `revealed`, any `seal` in tests and manifest lines match; not a rate). The `spoil*` count in method A also counts file names such as `spoiler-manifest.json`.
 
 Hand marks for the 25 most recent: `lookback-marks.csv`, PR body lines in
-`sample-body-lines.txt`. The scorer (an agent) saw the arm; there is only one.
+`sample-body-lines.txt`. The scorer (an agent) was not blind to the period; see the caveats below.
 
 | Sign | PRs (of 25) | Rate |
 | --- | --- | --- |
@@ -92,7 +92,7 @@ marks for the 25 most recent: `lookback-post-marks.csv`, evidence in
 | 5 Narrowed for a spoiler reason | 4 (16%) | 1 (4%) | 1 (6%) |
 | Any sign | 15 (60%) | 2 (8%) | 2 (12%) |
 
-Caveats. Eight of the after PRs are module moves, which give little room for
+Caveats. The surface filter matches file names only, so a slate score cell under another name would slip in. The before sample has six `Stack:` PRs (#2495, #2490, #2483, #2475, #2470, #2468), whose bodies join several child PRs; without them, sign 3 before is 11 of 19 (58%), so the drop holds. Eight of the after PRs are module moves, which give little room for
 new prose; the "moves excluded" column drops them. The scorer saw which period
 each PR came from. The two samples are different tasks, not the same prompts.
 Under-caution on the four surfaces is not measured (that was method C).
