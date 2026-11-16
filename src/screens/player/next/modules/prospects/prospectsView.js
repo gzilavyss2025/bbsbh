@@ -45,7 +45,15 @@ export function prospectsView({ history, snapshot, playerId, debutYear, currentS
   return {
     rows,
     // Drawn under the "Current list" row (the first today row).
-    weeks: weeks.length >= 2 ? weeks.map((w) => ({ date: dayLabel(w.date), rank: `#${w.rank}` })) : [],
+    // A week from an earlier year than the newest one says its year, so the list stays readable past New Year.
+    weeks: weeks.length >= 2
+      ? weeks.map((w) => ({
+        key: w.date,
+        date: w.date.slice(0, 4) === weeks[0].date.slice(0, 4) ? dayLabel(w.date) : `${dayLabel(w.date)}, ${w.date.slice(0, 4)}`,
+        rank: `#${w.rank}`,
+      }))
+      : [],
+    weeksAfter: rows.findIndex((r) => r.tone === 'today'),
     badge: lists ? `${lists} ${lists === 1 ? 'list' : 'lists'}` : 'Prospect',
     note: base ? base.note : !rank ? '' : 'No earlier lists on file.',
     credits: base?.credits ?? [],

@@ -41,11 +41,11 @@ export default function ProspectsModule({ bio, role, season, onEmpty, onCount })
             <span className="prospects__rank">{r.rank}</span>
           </li>,
           // The weekly Top-100 ranks (#2970) sit under the first "Today" row, the current list.
-          i === view.rows.findIndex((x) => x.tone === 'today') && view.weeks.length > 0 && (
+          i === view.weeksAfter && view.weeks.length > 0 && (
             <li key="weeks" className="prospects__weeks">
               <ol className="prospects__weeklist" aria-label="Top 100 rank by week">
                 {(allWeeks ? view.weeks : view.weeks.slice(0, 3)).map((w) => (
-                  <li key={w.date} className="prospects__week">
+                  <li key={w.key} className="prospects__week">
                     <span>{w.date}</span>
                     <span className="prospects__weekrank">{w.rank}</span>
                   </li>
