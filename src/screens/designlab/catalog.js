@@ -32,7 +32,7 @@ export const PILL_RECIPE = [
 ]
 
 // ---------------------------------------------------------------------------
-// CARDS — 28 blocks.
+// CARDS — 26 blocks.
 export const CARDS = [
   {
     cls: 'card card--sheet',

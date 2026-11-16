@@ -788,9 +788,9 @@ test('C2: the ball-flight card keeps its raised shadow', () => {
 // is neither, so a padded body would move the layout (C2 did the same). Each
 // band head stays the Card's first child, exactly as H1b left it.
 //
-// Two renames ride with the slice (ADR-0084 ledger): the entering-lineup card
-// .lineupcard is .entering, and the wide ABS frame .abscard is .absframe (not
-// .abs, which is the ABS block inside it).
+// Two renames rode with the slice (ADR-0084 ledger): the entering-lineup card
+// .lineupcard is .entering, and the wide ABS frame .abscard became .absframe,
+// since deleted with the ABS row it framed (#3128).
 const C4 = [
   // The lineup card is the stamped frame now (the lineup page's paper look): `frame` names it.
   // The Card only clips: the Table inside it is the scroller (#1132, slice T3),
