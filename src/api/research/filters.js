@@ -15,11 +15,20 @@
 //   Opp field    a spray angle more than 15 degrees from center toward the batter's
 //                opposite side, from hc_x/hc_y in Savant's frame. Pull is the mirror;
 //                center is within 15 degrees.
+// More cards (#3140, Gary 2026-11-16): Score, Moment, Batted ball, Batting slot, Month,
+// Home or road, and the Count card's batter ahead / even / behind (read off the LAST
+// pitch's count, not passed through: every PA passes through 0-0).
+//   Moment       read from the batting club's margin before and after the PA's last
+//                pitch. A run that scores with no PA (a wild pitch walk-off) is not found.
+// A card with `v` needs that store version (shard.js VERSIONS); a season built earlier
+// blocks it, like `since`.
 //
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store.
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
 import { countBit } from './shard.js'
+import { ordinal } from '../../lib/format.js'
+import { monthName } from '../../lib/time/months.js'
 import { seriesValues } from './series.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 
@@ -83,6 +92,39 @@ const RESULTS = [
 ]
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
+// The count the last pitch came in, from the batter's side. 3-2 is in no group.
+export function countGroup([b, s] = []) {
+  if (!Number.isInteger(b) || !Number.isInteger(s) || (b === 3 && s === 2)) return null
+  return b > s ? 'ahead' : b === s ? 'even' : 'behind'
+}
+const COUNT_GROUPS = [['ahead', 'Batter ahead'], ['even', 'Even'], ['behind', 'Batter behind']]
+
+// The batting club's margin as the Score card reads it: ['tied'] or ['ahead', 'up2'].
+export function scoreValues(m) {
+  if (m == null) return []
+  if (m === 0) return ['tied']
+  const by = Math.min(Math.abs(m), 3)
+  return m > 0 ? ['ahead', `up${by}`] : ['behind', `down${by}`]
+}
+const SCORES = [['tied', 'Tied'], ['ahead', 'Ahead'], ['behind', 'Behind'], ['up1', 'Up 1'], ['up2', 'Up 2'], ['up3', 'Up 3+'], ['down1', 'Down 1'], ['down2', 'Down 2'], ['down3', 'Down 3+']]
+
+// The moments a PA's last pitch made: 'walkoff', 'ahead', 'tie', plus 'first' / 'last'.
+export function momentValues(pa) {
+  const out = []
+  const { marginLast: before, marginAfter: after } = pa
+  if (before != null && after != null) {
+    if (before <= 0 && after > 0) out.push('ahead')
+    if (before <= 0 && after > 0 && !pa.top && pa.last) out.push('walkoff')
+    if (before < 0 && after === 0) out.push('tie')
+  }
+  if (pa.first) out.push('first')
+  if (pa.last) out.push('last')
+  return out
+}
+const MOMENTS = [['walkoff', 'Walk-off'], ['ahead', 'Go-ahead'], ['tie', 'Tying'], ['first', 'First PA of the game'], ['last', 'Last PA of the game']]
+const BB_TYPES = [['ground_ball', 'Ground ball'], ['line_drive', 'Line drive'], ['fly_ball', 'Fly ball'], ['popup', 'Popup']]
+const MONTHS = ['03', '04', '05', '06', '07', '08', '09', '10', '11'].map((m) => [m, monthName(Number(m) - 1)])
+
 // The Series game card (#3141): values from series.js `seriesValues`.
 const SERIES_GAMES = [...[1, 2, 3, 4, 5, 6, 7].map((n) => [`g${n}`, `Game ${n}`]), ['last', 'Series-deciding'], ['sd', 'Sudden death'], ['clinch', 'Potential clinch'], ['elim', 'Potential elimination']]
 
@@ -120,9 +162,15 @@ export const FILTERS = [
   { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2008, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
-  { key: 'cnt', label: 'Count (passed through)', options: COUNTS.map((c) => [c, c]), values: (pa) => COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2]))) },
+  { key: 'cnt', label: 'Count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none.' },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
   { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
+  { key: 'sc', label: 'Score', options: SCORES, values: (pa) => scoreValues(pa.margin), info: 'The batting club’s margin when the plate appearance began. Up 3+ and Down 3+ are three runs or more.' },
+  { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom half that ends the game. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found.' },
+  { key: 'bb', label: 'Batted ball type', options: BB_TYPES, values: (pa) => [pa.bbType], since: 2008, v: 2, info: 'Statcast’s batted-ball type for the ball put in play.' },
+  { key: 'slot', label: 'Batting slot', options: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), `Batting ${ordinal(n)}`]), values: (pa) => [pa.slot == null ? null : String(pa.slot)], v: 2, info: 'The batter’s spot in the order, from the MLB box score. A pinch hitter counts in the slot they batted in.' },
+  { key: 'mon', label: 'Month', options: MONTHS, values: (pa) => [pa.date.slice(5, 7)] },
+  { key: 'ha', label: 'Home or road', single: true, options: [['H', 'Home'], ['R', 'Road']], values: (pa) => [pa.top ? 'R' : 'H'], info: 'Whether the batting club is at home.' },
   { key: 'inn', label: 'Inning', options: [...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [String(i), `${i}`]), ['x', 'Extras']], values: (pa) => [pa.inning > 9 ? 'x' : String(pa.inning)] },
 ]
 
@@ -221,9 +269,13 @@ export function matcher(q, cutoff) {
   return (pa) => tests.every((t) => t(pa))
 }
 
-// Cards a season range cannot answer: [{ key, label, since }].
-export function unsupported(firstSeason) {
-  return FILTERS.filter((f) => f.since && firstSeason < f.since).map(({ key, label, since }) => ({ key, label, since }))
+// Cards a season range cannot answer: [{ key, label, since }], or { key, label, rebuild:
+// true } for a card whose store version (`v`) a searched season was not built with yet.
+// `version`: the lowest store version among the searched seasons (store.js storeVersion).
+export function unsupported(firstSeason, version = Infinity) {
+  return FILTERS.filter((f) => (f.since && firstSeason < f.since) || (f.v && version < f.v)).map(({ key, label, since }) =>
+    since && firstSeason < since ? { key, label, since } : { key, label, rebuild: true },
+  )
 }
 
 // THE SEASONS A QUERY SEARCHES (Gary, 2026-11-13, scope #2), newest first. `seasons`: the

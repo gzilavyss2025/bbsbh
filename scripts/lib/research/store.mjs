@@ -40,7 +40,7 @@ export function mergeIndex(index, season, month, shard, pas, built) {
   for (const pa of pas) events[pa.event] = (events[pa.event] ?? 0) + 1
   const next = { v: 1, built, seasons: { ...(index?.seasons ?? {}) } }
   const s = { months: { ...(next.seasons[season]?.months ?? {}) } }
-  s.months[month] = { through: shard.through, pitches: shard.cols.g.length, pas: pas.length, events }
+  s.months[month] = { v: shard.v, through: shard.through, pitches: shard.cols.g.length, pas: pas.length, events }
   next.seasons[season] = s
   return next
 }
@@ -66,4 +66,31 @@ export function recentMonths(today, days = 3) {
 export function shrinkReason(prev, pitches) {
   if (!prev || pitches >= prev.pitches) return null
   return `${pitches} pitches, fewer than the ${prev.pitches} on file`
+}
+
+// A game's batting order from its MLB box score (#3140): { batterId: slot 1-9 }. The
+// feed's `battingOrder` is "401" for the 4th slot's second man (a pinch hitter or a
+// sub), so the slot is the hundreds digit. A player who never batted has none.
+export const BOXSCORE_FIELDS = 'teams,home,away,players,person,id,battingOrder'
+export function lineupOf(box) {
+  const out = {}
+  for (const side of ['home', 'away']) {
+    for (const p of Object.values(box?.teams?.[side]?.players ?? {})) {
+      const slot = Math.floor(Number(p.battingOrder) / 100)
+      if (p.person?.id && slot >= 1 && slot <= 9) out[p.person.id] = slot
+    }
+  }
+  return out
+}
+
+// The lineups a rebuilt month can keep from the copy on file (a v2 shard), so a game's
+// box score is fetched once, not every night. { gamePk: { batterId: slot } }.
+export const keptLineups = (prev) => (prev?.v >= 2 && prev.order ? prev.order : {})
+
+// The games whose lineup is not on hand, or lacks a batter who batted (a box score read
+// while a suspended game was still to resume, or one that failed). Game ids, ascending.
+export function gamesNeedingLineups(rows, order) {
+  const need = new Set()
+  for (const r of rows) if (r.batter && !order[r.game_pk]?.[r.batter]) need.add(Number(r.game_pk))
+  return [...need].sort((a, b) => a - b)
 }

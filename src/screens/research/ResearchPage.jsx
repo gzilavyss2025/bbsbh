@@ -72,6 +72,8 @@ export function ResearchPage() {
     setState({ q: next, cutoff })
   }
   const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
+  // A card a season predates is always named; one waiting on a store rebuild only if picked.
+  const shownBlocked = blocked.filter((b) => b.since || q.chips[b.key])
   const data = head
   const people = run?.people ?? head?.people ?? {}
   const clubs = useMemo(() => (head ? [...new Set(head.pas.filter((p) => p.gameType !== 'A').map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
@@ -96,7 +98,7 @@ export function ResearchPage() {
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
-          {blocked.length > 0 && ` · not in this range: ${blocked.map((b) => `${b.label} (from ${b.since})`).join(', ')}`}
+          {shownBlocked.length > 0 && ` · not in this range: ${shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
         </p>
       )}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}

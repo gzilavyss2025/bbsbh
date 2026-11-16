@@ -57,6 +57,25 @@ day and later. No SealBox.
 - **Pitch type and location** read the last pitch of the plate appearance. **Count**
   matches a plate appearance that passed through that count on any pitch.
 
+## More cards (#3140, Gary 2026-11-16)
+
+- **Score**: the batting club's margin when the PA began: Tied, Ahead, Behind, Up or Down
+  1, 2, 3+.
+- **Moment**: from the margin before and after the PA's last pitch. Go-ahead (tied or
+  behind to ahead), walk-off (a go-ahead in the bottom of the 9th or later), tying, and the
+  game's first or last PA. A run with no PA (a wild-pitch walk-off) is not found.
+- **Count** groups: Batter ahead (1-0, 2-0, 3-0, 2-1, 3-1), Even (0-0, 1-1, 2-2), Batter
+  behind (0-1, 0-2, 1-2), read off the last pitch's count. A full count is in none.
+- **Batted ball type** (Savant `bb_type`), **Batting slot** (1–9), **Month**, **Home or road**
+  (the batting club).
+
+**Store v2.** Moment, batted-ball type and batting slot need columns added in shard v2:
+`rs` (runs on the pitch, `post_bat_score - bat_score`), `bb`, and `order`, each game's
+lineup from its MLB box score (`battingOrder`, so a pinch hitter has the slot they batted
+in). A rebuilt month keeps the lineups of the shard on file and fetches only new games'
+box scores. The index records each month's `v`; a card with `v: 2` is blocked, and named
+"not built yet" in the coverage line, while any searched month is older.
+
 ## Coverage
 
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,
