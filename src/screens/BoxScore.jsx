@@ -20,6 +20,7 @@ import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { HitChartCard } from './boxscore/HitChartCard.jsx'
 import { FeatLabel } from './boxscore/FeatLabel.jsx'
+import { PitcherGameCardSheet } from './boxscore/PitcherGameCardSheet.jsx'
 import { GameStoryCard } from '../components/game/GameStoryCard.jsx'
 import { StampGameButton } from '../components/logbook/StampGameButton.jsx'
 import { HeritagePass } from '../components/heritage/HeritagePass.jsx'
@@ -441,7 +442,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
         <div className="bs__duo">
           <div className="bs__col bs__col--away">
             <InfoCard fields={awayFields} />
-            <TeamBlock side={box.away} theme={awayTheme} />
+            <TeamBlock feed={feed} side={box.away} theme={awayTheme} />
             {/* Each own independent card, outside the batting/pitching card
                 above — not nested tail sections of it (see BoxAbs/BoxDefense). */}
             <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} />
@@ -449,7 +450,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
           </div>
           <div className="bs__col bs__col--home">
             <InfoCard fields={homeFields} />
-            <TeamBlock side={box.home} theme={homeTheme} />
+            <TeamBlock feed={feed} side={box.home} theme={homeTheme} />
             <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} />
             <BoxDefense feed={feed} sideKey="home" theme={homeTheme} />
           </div>
@@ -541,7 +542,8 @@ function InfoCard({ fields }) {
   )
 }
 
-function TeamBlock({ side, theme }) {
+function TeamBlock({ feed, side, theme }) {
+  const [cardFor, setCardFor] = useState(null) // the pitcher whose game card is open (#2969)
   return (
     <Card body="flush" className={`bs__team ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <SectionMasthead as="h3" title={<TeamLink id={side.id}>{side.teamName}</TeamLink>} />
@@ -628,10 +630,11 @@ function TeamBlock({ side, theme }) {
         </thead>
         <tbody>
           {side.pitchers.map((p) => (
-            <tr key={p.id}>
+            <tr key={p.id} data-card onClick={(e) => !e.target.closest('a, button') && setCardFor(p)}>
               <td className="bs__nameCol">
                 <span className="bs__player">
                   <PlayerLink id={p.id} className="bs__pname">{p.name}</PlayerLink>
+                  <button type="button" className="sr-only pgc__open" onClick={() => setCardFor(p)}>Game card</button>
                   {p.num !== '' && p.num != null && (
                     <span className="t-label t-label--nocaps bs__pos">
                       <span className="bs__unum">{p.num}</span>
@@ -675,6 +678,8 @@ function TeamBlock({ side, theme }) {
           </tr>
         </tfoot>
       </Table>
+
+      {cardFor && <PitcherGameCardSheet feed={feed} pitcher={cardFor} teamAbbr={side.abbreviation} onClose={() => setCardFor(null)} />}
 
       {side.pitchNotes.length > 0 && (
         <div className="bs__notes">

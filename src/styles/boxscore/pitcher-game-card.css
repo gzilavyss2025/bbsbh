@@ -1,0 +1,91 @@
+/* The pitcher game card sheet (#2969), opened from the box score's pitching
+   table. A bottom sheet on a phone; centered over the page on a wide screen,
+   as the wireframe has it. */
+@media (min-width: 720px) {
+  .scrim.pgc-scrim {
+    align-items: center;
+    padding: var(--space-4);
+  }
+  .sheet.pgc {
+    max-width: 620px;
+    border-radius: var(--radius-lg);
+  }
+}
+.sheet.pgc {
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: var(--bw-heavy) solid var(--text-heading);
+}
+.pgc__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.pgc__name {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.pgc__meta {
+  margin: 0;
+}
+.pgc__body {
+  min-width: 0;
+}
+.pgc__line th,
+.pgc__line td {
+  text-align: center;
+}
+.pgc__chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pgc__chips li {
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.pgc__chips span {
+  color: var(--text-muted);
+}
+.pgc__chips b {
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+.pgc__sub {
+  margin: var(--space-2) 0 0;
+}
+.pgc__mix td:first-child {
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* The pitching table's stat cells open the card; the name stays the player
+   page link. The button is for keyboards and screen readers and shows on focus. */
+.bs__grid--pit tbody tr[data-card] td:not(.bs__nameCol) {
+  cursor: pointer;
+}
+.bs__grid--pit tbody tr[data-card]:hover td:not(.bs__nameCol) {
+  text-decoration: underline dotted;
+}
+.pgc__open:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  margin: 0;
+}
+.pgc__mix th:first-child {
+  text-align: left;
+}

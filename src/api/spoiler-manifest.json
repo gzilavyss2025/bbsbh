@@ -850,8 +850,10 @@
     },
     "pitcher/gameCard.js": {
       "class": "reveal-only",
-      "why": "The pitcher game card (#2969): one pitcher's box line, pitch mix, arsenal rates, barrels and hard-hit balls for one game. All of it is a result, so it is called only inside the box score's SealBox reveal render. No importer yet; the sheet that renders it lands in a later slice and is added here then.",
-      "importers": []
+      "why": "The pitcher game card (#2969): one pitcher's box line, pitch mix, arsenal rates, barrels and hard-hit balls for one game. All of it is a result, so it is called only inside the box score's SealBox reveal render. Its one importer is the sheet that opens from a pitcher row in the revealed box score (screens/boxscore/PitcherGameCardSheet.jsx), which mounts only on a tap inside that reveal.",
+      "importers": [
+        "screens/boxscore/PitcherGameCardSheet.jsx"
+      ]
     },
     "pitcher/health.js": {
       "class": "reveal-gated",
