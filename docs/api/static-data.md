@@ -46,6 +46,11 @@ for each generator; the reader modules:
   decade file and passes `{ '1980s': table }`. Gives `null` for a season outside 1960-2023
   or a table not loaded. No screen reads it yet. The current table,
   `run-expectancy.json`, is unchanged.
+- `fetchRunExpectancy` / `runExpectancyLine` (`src/api/playbyplay/runExpectancyLine.js`, #2973) —
+  reads `run-expectancy.json`'s `re24` (base mask and outs) for the Gameday hero's one muted line,
+  "About .8 runs expected.", under the newest revealed at-bat. The table loads eagerly (not a score);
+  the line is REVEAL-ONLY (the base-out state after a play is its result), read inside the hero's
+  SealBox reveal. No line at 3 outs, after a walk-off, or for a state with no sample.
 - `staticJson.js` — not a dataset: the memoized read every reader below is built
   on. `staticJson(url, {shape, fallback})` returns a loader that fetches once per
   session and hands the SAME in-flight promise to concurrent callers;

@@ -964,6 +964,14 @@
         "screens/gameday/next/zonemap/zonePitches.js"
       ]
     },
+    "playbyplay/runExpectancyLine.js": {
+      "class": "reveal-only",
+      "why": "The innings viewer's run-expectancy line (#2973): the base-out state a play left is that play's result. runExpectancyLine is read only inside the Gameday hero's SealBox reveal render function, for the newest revealed at-bat (heroMarkup.js result). fetchRunExpectancy loads the RE24 table, which is not a score, so GamedayHero.jsx may call it eagerly.",
+      "importers": [
+        "screens/gameday/next/hero/GamedayHero.jsx",
+        "screens/gameday/next/hero/heroMarkup.js"
+      ]
+    },
     "playbyplay/runnerNotes.js": {
       "class": "reveal-only",
       "why": "Builds the leading notification card for a baserunning leg the playEvents scan never saw — reads runner identity, base and error-credit fields straight off runners[], a play outcome. Barrel-internal.",

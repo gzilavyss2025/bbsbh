@@ -5,6 +5,7 @@ import { halfIndex } from '../../../../api/select.js'
 import { pitchCallCode } from '../../../../api/playbyplay/eventTypes.js'
 import { boxModel, cutShort, playLine } from './heroModel.js'
 import { runnerOutCode } from '../../../../api/playbyplay/advanceCode.js'
+import { runExpectancyLine } from '../../../../api/playbyplay/runExpectancyLine.js'
 
 // THE HERO'S MARKUP (#2576, #2568): the scorebook box, the batter named once, the play line and
 // the due-up strip. GamedayHero.jsx calls heroMarkup(createElement, …); node --test
@@ -136,10 +137,14 @@ function words(h, feed, e) {
 // no layout, draws no handle (BallFlight stands down itself).
 // The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null) {
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, re = null) {
   const { batter } = e
+  const play = feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)
+  // The run-expectancy line (#2973), under the newest revealed at-bat only: `re` is the RE table, passed
+  // only when the box holds `last` (a replayed chip gets none). Read here, inside the reveal.
+  const reLine = re ? runExpectancyLine(play, re, feed?.liveData?.linescore?.scheduledInnings ?? 9) : null
   // The opened card adds Savant's figures for the ball in play (`Savant`, GamedayHero.jsx): its playId is the in-play pitch's.
-  const inPlay = Savant && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
+  const inPlay = Savant && e.battedBall ? play?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
   const extra = inPlay ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay, ball: { gameDate: feed.gameData?.datetime?.officialDate, ...e.battedBall } }) : null
   const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, extra }) : null
   const zone = Zone ? h(Zone, { entry: e, side, teamId: side ? feed?.gameData?.teams?.[side]?.id ?? null : null, feed }) : null
@@ -147,11 +152,12 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
         who(h, PlayerLink, batter)),
-      h('div', { className: 'gdhero__words' }, playText(h, Line, words(h, feed, e)))),
+      h('div', { className: 'gdhero__words' }, playText(h, Line, words(h, feed, e)),
+        reLine && h('p', { className: 'gdhero__re' }, reLine))),
     shot(h, Headshot, PlayerLink, batter))
 }
 
-export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null, re = null }) {
   // A replayed trail chip (Gary, 2026-10-29) puts its own at-bat in the box, read at the trail's cut so
   // nothing after the reader's step shows. It holds, as the trail's mark does, until the next tap.
   const shown = () => (replay != null && cutAt(feed, inning, half, step).cards.find((c) => c.atBatIndex === replay)) || last
@@ -159,6 +165,6 @@ export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Lin
     replay == null && open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line, Zone))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant, replay == null ? re : null))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }

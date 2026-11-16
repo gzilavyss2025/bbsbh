@@ -41,7 +41,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
-  at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. The box has one height per
+  at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. Under that at-bat's words, and only when the box holds `last` (not a replayed chip), one muted run-expectancy line (`api/playbyplay/runExpectancyLine.js`, reveal-only, #2973). The box has one height per
   tier in `styles/gameday-next/hero.css`; keep it free of pitch-count-driven size.
 - `checkpoint/` is the half-end checkpoint (#2572): `checkpointMarkup.js` builds it (`npm test` renders it),
   calling `api/gameday/checkpoint.js` inside a `SealBox` reveal function. InningViewer sets `checkpoint`
