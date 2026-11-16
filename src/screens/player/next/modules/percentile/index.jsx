@@ -28,14 +28,14 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
   if (loading) {
     const [rows, groups] = RESERVE[role === 'hitting' && bio.posAbbr === 'C' ? 'catcher' : role] ?? RESERVE.hitting
     // The real axis, key and foot around empty rows, so the reserve follows the CSS (#3066).
-    const per = Math.ceil(rows / Math.max(groups, 1))
+    const per = Math.ceil(rows / groups)
     return (
       <div className="pctl" aria-busy="true">
         <Axis />
         <ul className="pctl__list" aria-hidden="true">
           {Array.from({ length: rows }, (_, i) => (
             <Fragment key={i}>
-              {groups > 0 && i % per === 0 && i / per < groups && <li className="pctl__group mono">{'\u00a0'}</li>}
+              {groups > 0 && i % per === 0 && <li className="pctl__group mono">{'\u00a0'}</li>}
               <li className="pctl__row">
                 <span className="pctl__btn" />
               </li>
@@ -43,7 +43,7 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
           ))}
         </ul>
         <Key />
-        <Foot season={season} />
+        <p className="pctl__foot mono" aria-hidden="true">{'\u00a0'}</p>
       </div>
     )
   }
@@ -62,7 +62,7 @@ export default function PercentileModule({ bio, role, season, onEmpty, onCount }
         ))}
       </ul>
       <Key />
-      <Foot season={view.season} />
+      <p className="pctl__foot mono">{view.season} season · Baseball Savant</p>
     </div>
   )
 }
@@ -93,10 +93,6 @@ function Key() {
       <span>↓ Lower is better</span>
     </p>
   )
-}
-
-function Foot({ season }) {
-  return <p className="pctl__foot mono">{season} season · Baseball Savant</p>
 }
 
 function Row({ r, open, onToggle }) {
