@@ -138,19 +138,26 @@ test('parksView: a live season after the file extends the runs; a club that move
     ['Tropicana Field', '1998–2024, 2026 on'],
     ['George M. Steinbrenner Field', '2025'],
   ])
+  // #3089 review: a park left and returned to under the same name has no former name.
+  assert.deepEqual(rays[0].also, [])
+  assert.deepEqual(parksFor(147).find((p) => p.name === 'Yankee Stadium I').also, [])
   const brewers = parksFor(158, [{ season: 2026, venue: { id: 32, name: 'American Family Field' } }])
   assert.equal(brewers[0].years, '2001 on')
   assert.equal(parksFor(158, [{ season: 2026, venue: null }])[0].years, '2001 on')
 })
 
-// #2959 review: the generator keeps each name's FIRST season only, so a name that came back
-// (Oakland Coliseum -> O.co Coliseum -> Oakland Coliseum) loses its later stint. Dating the old
-// names there would print "O.co Coliseum 2013–2024", so that park lists them without years.
-test('parksView: a park whose old name came back lists its former names without years', () => {
+// #3089: every stint of every former name is dated, an earlier stint of the name in use too.
+test('parksView: a park whose old name came back dates each former name', () => {
   const coliseum = parksFor(133).find((p) => p.id === 10)
   assert.equal(coliseum.name, 'Oakland Coliseum')
-  assert.deepEqual(coliseum.also, ['Oakland-Alameda County Coliseum', 'Network Associates Coliseum', 'McAfee Coliseum', 'O.co Coliseum'])
-  assert.deepEqual(parksFor(114).find((p) => p.id === 3131).also, ['Dunn Field'])
+  assert.deepEqual(coliseum.also, [
+    'Oakland-Alameda County Coliseum 1968–1997',
+    'Network Associates Coliseum 1998–2004',
+    'McAfee Coliseum 2005–2008',
+    'Oakland Coliseum 2009–2012',
+    'O.co Coliseum 2013–2015',
+  ])
+  assert.ok(parksFor(114).find((p) => p.id === 3131).also.every((n) => /\d{4}/.test(n)))
 })
 
 // #2959 review: a temporary home used in two seasons with a gap reads as two runs, not one range.

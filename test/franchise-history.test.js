@@ -40,6 +40,20 @@ test('collapseSeasons: a venue renamed inside a span keeps every name, newest in
   assert.deepEqual(span.venueNamesFrom, [1986, 1990])
 })
 
+// #3089: a name that comes back gets a new run, so every stint of every name has its years.
+test('collapseSeasons: a venue name that comes back gets its own run in venueNameRuns', () => {
+  const name = (y) => (y < 2009 ? 'McAfee Coliseum' : y < 2013 || y > 2015 ? 'Oakland Coliseum' : 'O.co Coliseum')
+  const rows = []
+  for (let season = 2005; season <= 2024; season++) rows.push({ season, name: 'Oakland Athletics', league: 'AL', venueId: 10, venueName: name(season) })
+  const [span] = collapseSeasons(rows)
+  assert.deepEqual(span.venueNameRuns, [
+    { name: 'McAfee Coliseum', from: 2005, to: 2008 },
+    { name: 'Oakland Coliseum', from: 2009, to: 2012 },
+    { name: 'O.co Coliseum', from: 2013, to: 2015 },
+    { name: 'Oakland Coliseum', from: 2016, to: 2024 },
+  ])
+})
+
 test('collapseSeasons: unsorted input and no rows', () => {
   assert.equal(collapseSeasons([]).length, 0)
   const spans = collapseSeasons(sample().reverse())

@@ -1060,8 +1060,9 @@ for each generator; the reader modules:
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.
   The data starts in 1901, so a park's first season is the first IN THIS DATA,
   never its opening year. A MiLB id has no file and reads empty. Each span's `venueNamesFrom` holds the
-  first season of each of `venueNames` (#2959), so the Parks card dates a park's former names; a name
-  that came back keeps only its first season, and that park lists its former names undated.
+  first season of each of `venueNames` (#2959), and `venueNameRuns` holds every run of each name in
+  order, `[{ name, from, to }]`, so a name that came back gets a new run (#3089). The Parks card dates
+  every former stint from the runs; a file without them falls back to `venueNamesFrom`.
   `temporaryParksFor(teamId)` reads `public/data/temporary-parks.json`, hand-curated (#2959): a club's
   temporary or part-season home parks the season feed misses (the Blue Jays in Buffalo and Dunedin, the
   Expos in San Juan), each `{ venueId, name, seasons, note, source, checked }`. `test/temporary-parks.test.js`

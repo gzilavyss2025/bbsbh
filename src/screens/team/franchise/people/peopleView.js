@@ -74,18 +74,21 @@ export function parksView(history, live = [], temporary = []) {
   if (!known.length) return []
   const name = known[known.length - 1].name
   const extra = live.filter((l) => l.venue?.id && l.season > (history.through ?? 0))
-  const spans = [...known, ...extra.map((l) => ({ from: l.season, to: l.season, name, venueId: l.venue.id, venueName: l.venue.name }))]
+  const spans = [...known, ...extra.map((l) => ({ from: l.season, to: l.season, name, venueId: l.venue.id, venueName: l.venue.name, venueNameRuns: [{ name: l.venue.name, from: l.season, to: l.season }] }))]
   const newest = Math.max(history.through ?? 0, ...extra.map((l) => l.season))
   const regular = parkHistory(spans, history.mates ?? {}).map((p) => {
     const mine = spans.filter((s) => s.venueId === p.venueId)
     const current = mine[mine.length - 1]?.venueName ?? p.names[p.names.length - 1]
     const end = p.runs[p.runs.length - 1][1]
-    // A former name runs from its first season to the season before the next name (#2959). That
-    // holds only when every name has a first season and the one in use is the newest: the data
-    // keeps a name's FIRST season only, so a name that came back (O.co -> Oakland Coliseum) would
-    // date the names after it wrong. Such a park lists its former names without years.
+    // Every stint of every name has its years (#3089); only the stint in use now is left out, so an
+    // earlier stint of today's name (Oakland Coliseum 2009–2012) still shows. A file from before
+    // `venueNameRuns` dates each name from its first season, when the name in use is the newest.
+    const runs = p.nameRuns?.filter((r) => r.name) ?? []
+    const lastRun = runs[runs.length - 1]
     const dated = p.from.every((y) => y != null) && p.names[p.names.length - 1] === current
-    const also = p.names.flatMap((n, i) => (n === current ? [] : [dated ? `${n} ${years(p.from[i], (p.from[i + 1] ?? end + 1) - 1)}` : n]))
+    const also = runs.length
+      ? runs.filter((r) => !(r === lastRun && r.name === current)).map((r) => `${r.name} ${years(r.from, r.to)}`)
+      : p.names.flatMap((n, i) => (n === current ? [] : [dated ? `${n} ${years(p.from[i], (p.from[i + 1] ?? end + 1) - 1)}` : n]))
     return {
       last: end,
       row: {
