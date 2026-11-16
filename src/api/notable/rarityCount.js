@@ -70,8 +70,8 @@ export function gameHasUnassistedTriplePlay(allPlays, fieldingSide = null) {
   })
 }
 
-// The immaculate innings of a game: a half-inning of exactly three plate appearances, each a
-// strikeout by one pitcher, no batter reaching, on nine pitches in all. [{ side (the pitching
+// The immaculate innings of a game: one pitcher faces three batters to end a half-inning and
+// strikes out all three on nine pitches, no batter reaching. [{ side (the pitching
 // club), player (the pitcher) }]; null when the feed has no plays or no real pitch sequences.
 // Feeds before about 1988 make up a minimal count for each plate appearance (three strikes for a
 // strikeout, four balls for a walk; read on gamePk 188808, 1985), so every three-strikeout inning
@@ -87,11 +87,18 @@ export function immaculateInnings(allPlays) {
     halves.get(key).push(p)
   }
   const out = []
-  for (const half of halves.values()) {
-    const pitcher = half[0].matchup?.pitcher
+  for (const all of halves.values()) {
+    // The last pitcher's run of plays to the end of the half. A reliever who comes in with
+    // nobody out and fans three on nine pitches counts, whoever is on base (Brad Boxberger,
+    // gamePk 381051, 2014-05-08, with the bases loaded): his three strikeouts are all three outs.
+    const pitcher = all.at(-1).matchup?.pitcher
+    let from = all.length
+    while (from > 0 && all[from - 1].matchup?.pitcher?.id === pitcher?.id) from -= 1
+    const half = all.slice(from)
     if (half.length !== 3 || pitcher?.id == null) continue
-    const clean = half.every((p) => p.result?.eventType === 'strikeout' && p.matchup?.pitcher?.id === pitcher.id
-      && !(p.runners ?? []).some((r) => r.movement?.end))
+    // No batter reaches: a strikeout on a wild pitch puts the batter on base, not out.
+    const clean = half.every((p) => p.result?.eventType === 'strikeout'
+      && !(p.runners ?? []).some((r) => r.movement?.start == null && r.movement?.end))
     const pitches = half.flatMap((p) => (p.playEvents ?? []).filter((e) => e.isPitch))
     // The 1990s feeds fill a missing inning (often an extra one) with S, S, S for each strikeout,
     // inside a game of real sequences (gamePk 2342, 1999-07-10, the 10th). Nine swinging strikes

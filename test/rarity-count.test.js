@@ -156,8 +156,14 @@ test('an immaculate inning is three strikeouts on nine pitches by one pitcher', 
   assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { eventType: 'field_out' }), k(2)]), [])
   // two pitchers in the half is not
   assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { pitcher: { id: 51 } }), k(2)]), [])
+  // a reliever who comes in with the bases loaded and no outs and strikes out three on nine
+  // pitches counts (Brad Boxberger, gamePk 381051, 2014-05-08)
+  const starter = { id: 60, fullName: 'Pat Start' }
+  const onBase = (i) => k(i, { pitcher: starter, eventType: 'single', runners: [{ movement: { start: null, end: '1B' } }] })
+  const held = (i) => k(i, { runners: [{ movement: { start: null, end: null } }, { movement: { start: '1B', end: '1B' } }] })
+  assert.deepEqual(immaculateInnings([SEQ, onBase(0), onBase(1), onBase(2), held(3), held(4), held(5)]).map((f) => f.player.id), [50])
   // a strikeout batter who reached base is not an out
-  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { runners: [{ movement: { end: '1B' } }] }), k(2)]), [])
+  assert.deepEqual(immaculateInnings([SEQ, k(0), k(1, { runners: [{ movement: { start: null, end: '1B' } }] }), k(2)]), [])
   // no plays: unknown
   assert.equal(immaculateInnings([]), null)
 })

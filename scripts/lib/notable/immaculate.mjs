@@ -6,8 +6,9 @@
 // a row is the game's head plus `side` (the pitching club) and `player` (the pitcher).
 //
 // THE FLOOR. Feeds before 1988 hold made-up minimal counts, not pitches (rarityCount.js says how
-// to tell), and some 1988-1990 games still do. IMMACULATE_FLOOR is the first season with real
-// sequences in every game; earlier seasons are never swept, so `coverage.seasons[0]` is the
+// to tell), and every season from 1988 to 2000 still has such games (30 to 228 a season, measured
+// 2026-11-16); the 1990s also fill missing innings with made-up swinging strikes. 2001 is the
+// first season with real sequences in every game, through 2026. Earlier seasons are never swept, so `coverage.seasons[0]` is the
 // floor the page names ("the Nth since {floor}"). A game past the floor with no sequences is
 // logged by the generator, never counted.
 //
@@ -18,10 +19,10 @@ import { immaculateInnings } from '../../../src/api/notable/rarityCount.js'
 import { mapConcurrent } from '../concurrency.mjs'
 import { gameHead } from './games.mjs'
 
-export const IMMACULATE_FLOOR = 2000
+export const IMMACULATE_FLOOR = 2001
 
 const FIELDS = 'allPlays,about,atBatIndex,inning,halfInning,result,eventType,matchup,pitcher,id,fullName,'
-  + 'playEvents,isPitch,count,balls,strikes,details,code,pitchData,startSpeed,runners,movement,end'
+  + 'playEvents,isPitch,count,balls,strikes,details,code,pitchData,startSpeed,runners,movement,start,end'
 export const immaculateUrl = (gamePk) => `/api/v1/game/${gamePk}/playByPlay?fields=${FIELDS}`
 
 // The rows of one game's play-by-play, or null when it has no real pitch sequences.
