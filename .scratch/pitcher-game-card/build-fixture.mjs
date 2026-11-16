@@ -19,8 +19,10 @@ const allPlays = feed.liveData.plays.allPlays
       ...(e.pitchData && {
         pitchData: {
           startSpeed: e.pitchData.startSpeed,
+          strikeZoneTop: e.pitchData.strikeZoneTop,
+          strikeZoneBottom: e.pitchData.strikeZoneBottom,
           zone: e.pitchData.zone,
-          coordinates: pick(e.pitchData.coordinates, ['pX', 'pZ']),
+          coordinates: pick(e.pitchData.coordinates, ['pX', 'pZ', 'pfxX', 'pfxZ']),
           breaks: pick(e.pitchData.breaks, ['breakVerticalInduced', 'breakHorizontal']),
         },
       }),

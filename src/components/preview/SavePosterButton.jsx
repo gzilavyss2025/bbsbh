@@ -17,7 +17,8 @@ import { Button } from '../ui/control/Button.jsx'
 // image without CORS and toBlob() throws SecurityError forever after;
 // lib/preview/posterImages.js is what prevents it, and this catch is what says
 // so out loud instead of leaving a button that does nothing when pressed.
-export function SavePosterButton({ canvasRef, filename, title, disabled }) {
+// `label` / `ariaLabel` name what is saved (the pitcher game card reuses this button, #2969).
+export function SavePosterButton({ canvasRef, filename, title, disabled, label: idleLabel = 'Save image', ariaLabel = 'Save this preview as an image' }) {
   const [state, setState] = useState('idle')
 
   const saveViaLink = (file) => {
@@ -63,7 +64,7 @@ export function SavePosterButton({ canvasRef, filename, title, disabled }) {
   }
 
   const label = {
-    idle: 'Save image',
+    idle: idleLabel,
     working: 'Saving',
     done: 'Saved',
     error: 'Try again',
@@ -76,7 +77,7 @@ export function SavePosterButton({ canvasRef, filename, title, disabled }) {
       onClick={onClick}
       disabled={disabled || state === 'working'}
       aria-label={
-        state === 'error' ? 'Saving the poster failed — try again' : 'Save this preview as an image'
+        state === 'error' ? 'Saving the image failed — try again' : ariaLabel
       }
     >
       {label}
