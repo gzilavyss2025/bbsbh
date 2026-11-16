@@ -244,7 +244,18 @@ for (const file of CLAIM_SCAN) {
   }
 }
 
-const allFailures = [...failures, ...nightFailures, ...headerFailures, ...claimFailures]
+// ---- The pitch palette (#2974): even brightness, 3:1 on light and dark paper ----
+import { auditPitchPalette } from '../src/lib/pitch/pitchLuminance.js'
+const pitchFailures = auditPitchPalette({
+  'light card': resolveColor('surface-card'),
+  'light inset': resolveColor('surface-inset'),
+  'dark card': resolveColor('surface-card', new Set(), night),
+  'dark inset': resolveColor('surface-inset', new Set(), night),
+})
+if (pitchFailures.length) for (const f of pitchFailures) console.log(`  ✗ pitch ${f}`)
+else console.log('  ✓ pitch palette: even brightness, 3:1 on light and dark paper.')
+
+const allFailures = [...failures, ...pitchFailures, ...nightFailures, ...headerFailures, ...claimFailures]
 console.log(
   allFailures.length
     ? '\n✗ CONTRAST invariant violated:\n'
