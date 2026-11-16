@@ -72,6 +72,7 @@ test('roster awards are the multi-winner ones', () => {
   assert.equal(isRosterAward('Gold Glove'), true)
   assert.equal(isRosterAward('Silver Slugger'), true)
   assert.equal(isRosterAward('All-MLB First Team'), true)
+  assert.equal(isRosterAward(ALL_MLB_KEY), true)
   assert.equal(isRosterAward('Platinum Glove'), false)
   assert.equal(isRosterAward('MVP'), false)
 })
@@ -91,4 +92,23 @@ test('seasonRows marks league splits and countAnnounced counts whole families', 
   assert.equal(rows[1].split, false)
   assert.equal(rows[0].cells[1].status, 'pending')
   assert.equal(countAnnounced(families), 1)
+})
+
+test('pastMatrix pivots the main awards to a row per award and a column per past year', async () => {
+  const { pastMatrix } = await import('../src/api/awards/ledger.js')
+  const families = [
+    { key: 'MVP', label: 'MVP', years: { 2026: [w('Yordan Alvarez', 'AL')], 2025: [w('Aaron Judge', 'AL'), w('Shohei Ohtani', 'NL')], 2024: [w('Aaron Judge', 'AL')] } },
+    { key: 'World Series MVP', label: 'WS MVP', years: { 2025: [w('Yoshinobu Yamamoto')] } },
+    { key: 'Gold Glove', label: 'Gold Glove', years: { 2025: [w('Someone', 'AL')] } },
+    { key: ALL_MLB_KEY, label: ALL_MLB_KEY, years: { 2025: [w('Someone', 'First')] } },
+  ]
+  const { years, rows } = pastMatrix(families, 2026)
+  assert.deepEqual(years, [2025, 2024])
+  assert.deepEqual(rows.map((r) => r.key), ['MVP', 'World Series MVP'])
+  const mvp = rows[0].cells
+  assert.deepEqual(mvp.map((c) => c.year), [2025, 2024])
+  assert.deepEqual(mvp[0].entries.map((e) => [e.league, e.recipients.map((r) => r.name)]), [['AL', ['Aaron Judge']], ['NL', ['Shohei Ohtani']]])
+  assert.deepEqual(mvp[1].entries.map((e) => [e.league, e.recipients.length]), [['AL', 1], ['NL', 0]])
+  assert.deepEqual(rows[1].cells[0].entries.map((e) => e.league), ['MLB'])
+  assert.deepEqual(rows[1].cells[1].entries[0].recipients, [])
 })

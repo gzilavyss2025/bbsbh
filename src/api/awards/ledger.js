@@ -7,8 +7,9 @@ export const ALL_MLB_SECOND_KEY = 'All-MLB Second Team'
 export const ALL_MLB_KEY = 'All-MLB Teams'
 
 // Awards with a roster of winners per league (one per position, or a whole team).
-// The live "winners" table folds them behind one button so it stays short.
-const ROSTER_KEYS = new Set(['Silver Slugger', 'Gold Glove', ALL_MLB_FIRST_KEY, ALL_MLB_SECOND_KEY])
+// The live "winners" table folds them behind one button so it stays short. The merged
+// All-MLB family (mergeAllMlb) counts too.
+const ROSTER_KEYS = new Set(['Silver Slugger', 'Gold Glove', ALL_MLB_FIRST_KEY, ALL_MLB_SECOND_KEY, ALL_MLB_KEY])
 
 export function isRosterAward(key) {
   return ROSTER_KEYS.has(key)
@@ -86,4 +87,22 @@ export function seasonRows(families) {
 
 export function countAnnounced(families) {
   return families.filter((f) => f.awards.every((a) => a.status === 'announced')).length
+}
+
+// The wide-screen "Past winners" (#3095): the main awards pivoted into a row per
+// award and a column per past year, newest first. Roster awards stay out (they open
+// behind a button). Each cell's entries run AL then NL, or one MLB entry.
+export function pastMatrix(families, skipSeason = null) {
+  const main = families.filter((f) => !isRosterAward(f.key))
+  const tables = main.map((f) => ({ family: f, ...pastWinners(f, skipSeason) }))
+  const years = [...new Set(tables.flatMap((t) => t.rows.map((r) => r.year)))].sort((a, b) => b - a)
+  const rows = tables.map(({ family, columns, rows: byYear }) => ({
+    key: family.key,
+    label: family.label,
+    cells: years.map((year) => {
+      const row = byYear.find((r) => r.year === year)
+      return { year, entries: columns.map((c) => ({ league: c.key, recipients: row?.cells[c.key] ?? [] })) }
+    }),
+  }))
+  return { years, rows }
 }
