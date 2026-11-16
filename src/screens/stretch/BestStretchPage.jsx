@@ -1,7 +1,7 @@
 import '../../styles/report/streaks.css'
 import '../../styles/report/best-stretch.css'
 import { useId, useState } from 'react'
-import { avg, bestStretch, CLUB_PITCH_LENGTHS, clubPitchPool, playerBest, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, obp, presetsFor, rate3, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
+import { avg, dec2, ip, isStarter, kRate, loadCareerLog, measureByKey, measuresFor, MLB_SCOPE, obp, presetsFor, rate3, searchBest, showsHolds, slg, whip } from '../../api/streaks/bestStretch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
@@ -55,9 +55,8 @@ function lineFor(role, t) {
 const clubNames = (games, club) => [...new Set(games.filter((g) => g.teamId === club).map((g) => g.teamName).filter(Boolean))].join(' / ') || teamFullName(club)
 
 const searches = new WeakMap()
-// `club` (from Club Stretch) keeps the search to his runs with that club. A pitcher's club run
-// counts starts at 32 and relief outings at 65 (clubPitchPool), as the board does; any other
-// length keeps the role's pool.
+// `club` (from Club Stretch) keeps the search to that board's rules: his runs with that club,
+// or across MLB (MLB_SCOPE). searchBest in bestStretch.js holds them, as the board does.
 function cachedSearch(games, startsOnly, n, by, group, club) {
   if (!games) return { pool: null, best: null, noEra: false }
   let entry = searches.get(games)
@@ -67,8 +66,7 @@ function cachedSearch(games, startsOnly, n, by, group, club) {
   const key = `${startsOnly}:${n}:${by}:${group}:${club}`
   const measure = measureByKey(by, group)
   if (!entry.bests.has(key)) {
-    const clubPool = club && group === 'pitching' && Object.values(CLUB_PITCH_LENGTHS).includes(n) ? clubPitchPool(games, n) : pool
-    const search = (m) => (!pool.length ? null : club ? playerBest(clubPool, club, n, m, group) : bestStretch(pool, n, m, group))
+    const search = (m) => (!pool.length ? null : searchBest(games, pool, n, m, group, club))
     const best = search(measure)
     // No ERA run, but a WHIP run of the same games: the log is long enough, it lacks earned runs.
     entry.bests.set(key, { best, noEra: !best && by === 'era' && !!search(measureByKey('whip', group)) })
@@ -82,9 +80,9 @@ function readQuery() {
   const id = int(q.get('player'), 1, 1e7, null)
   const group = q.get('group') === 'pitching' ? 'pitching' : 'hitting'
   const n = int(q.get('n'), 5, 500, null)
-  // Only an MLB club: any other id would run the filter against a club he never had.
+  // Only an MLB club, or the MLB board's key: any other id would run the filter against a club he never had.
   const clubId = Number(q.get('club'))
-  const club = ALL_MLB_TEAM_IDS.includes(clubId) ? clubId : null
+  const club = q.get('club') === MLB_SCOPE ? MLB_SCOPE : ALL_MLB_TEAM_IDS.includes(clubId) ? clubId : null
   return { player: id ? { id, name: q.get('name') ?? '' } : null, group, n, by: measureByKey(q.get('by'), group).key, club }
 }
 function writeQuery({ player, group, n, by, club }) {
@@ -126,6 +124,8 @@ export function BestStretchPage() {
   const measure = measureByKey(picks.by, picks.group)
   // A starter's window counts starts only; a reliever's counts every outing.
   const { pool: games, best, noEra } = cachedSearch(log?.games, starter, n, picks.by, picks.group, picks.club)
+  // A club's runs; the MLB board's key words its card as a plain career search.
+  const oneClub = picks.club != null && picks.club !== MLB_SCOPE
   const setGroup = (group) => { setNDraft(''); setCustomOpen(false); update({ group, n: null, by: measureByKey(null, group).key, club: null }) }
   // An emptied box keeps the length in effect rather than snapping to the default.
   const commitN = () => { if (nDraft !== '') update({ n: int(nDraft, 5, 500, picks.n) }) }
@@ -199,7 +199,7 @@ export function BestStretchPage() {
         )}
 
         {games?.length > 0 && !loading && !best && (
-          <p className="hint">{noEra ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : picks.club ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
+          <p className="hint">{noEra ? `His early game logs carry no earned runs, so no ${n} ${unit} in a row has an ERA. Try WHIP.` : oneClub ? `He has no ${n} ${unit} in a row with the ${clubNames(games, picks.club)}. Try a shorter stretch.` : `He has ${games.length} MLB ${unit} on file, fewer than ${n}. Try a shorter stretch.`}</p>
         )}
 
         {best && !loading && (
@@ -207,7 +207,7 @@ export function BestStretchPage() {
             <div className="stretch__band">
               <div className="stretch__shot"><Headshot personId={picks.player.id} name={name} teamId={best.mainTeamId} /></div>
               <Stack gap="tight" className="stretch__who-line">
-                <span className="stretch__kicker">His best {n} {unit}{picks.club ? ` with the ${best.teams.join(' / ')}` : ''}</span>
+                <span className="stretch__kicker">His best {n} {unit}{oneClub ? ` with the ${best.teams.join(' / ')}` : ''}</span>
                 <a className="stretch__name" href={playerPath(picks.player.id, { name })}>{name}</a>
               </Stack>
               {best.mainTeamId && <span className="stretch__mark"><TeamLogo teamId={best.mainTeamId} name={best.teams[0] ?? ''} size={40} variant="mono" /></span>}
@@ -225,7 +225,7 @@ export function BestStretchPage() {
                 ))}
               </dl>
               <p className="stretch__line">{lineFor(role, best)}</p>
-              <p className="hint">{best.teams.join(', ')} · regular season · {picks.club ? `${count(best.careerGames)} ${unit} in that stint` : `${count(best.careerGames)} career ${unit} on file`}</p>
+              <p className="hint">{best.teams.join(', ')} · regular season · {oneClub ? `${count(best.careerGames)} ${unit} in that stint` : `${count(best.careerGames)} career ${unit} on file`}</p>
             </Stack>
           </Card>
         )}
