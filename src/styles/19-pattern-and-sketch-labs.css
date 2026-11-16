@@ -223,10 +223,6 @@
   justify-content: center;
   max-width: 100%;
   gap: var(--space-1);
-  padding: 3px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 
 .logomodal__variant {

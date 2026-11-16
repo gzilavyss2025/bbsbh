@@ -124,10 +124,6 @@
    control you scrub through, not just a loose row of images. */
 .vsteam__tray {
   margin-top: 8px;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--inset-cell);
   overflow: hidden;
 }
 .vsteam__strip {

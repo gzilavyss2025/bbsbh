@@ -400,10 +400,8 @@
 /* The ledger page itself: brightest inset paper, rows butted together so
    the clay margin rule runs unbroken from top to bottom. */
 .psseries__lrows {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--surface-inset);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .psseries__lcat {
   display: grid;
@@ -562,10 +560,8 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--surface-inset);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .psseries__rosterrow {
   display: grid;

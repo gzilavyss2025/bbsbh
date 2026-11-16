@@ -884,10 +884,6 @@
   gap: 2px;
   padding: var(--space-2) var(--space-1h);
   text-align: center;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
 }
 .horizontile__statv {
   font-family: var(--font-mono);
