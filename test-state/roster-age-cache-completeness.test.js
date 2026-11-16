@@ -1,3 +1,5 @@
+// Moved unchanged from test/ (#3119): it reads .scratch/team-success/, which now lives in
+// the private bbsbh-state repo. Run `npm run state:pull`, then `npm run test:state`.
 // Guards .scratch/team-success/roster-age-cache.json against losing a club
 // stint. That file stores one row per player per club stint and is the
 // authority eight other scripts read to decide WHICH CLUB a player's playing
@@ -14,7 +16,7 @@
 // Minnesota in 2025 were absent for months.
 //
 // The loss is only visible when the stints are ADDED UP and compared to what
-// the club says its own season was. fixtures/roster-age-club-totals.json holds
+// the club says its own season was. test/fixtures/roster-age-club-totals.json holds
 // that number for every club, season and group, captured from
 // /api/v1/teams/{id}/stats by .scratch/team-success/capture-club-totals.mjs, so
 // the comparison runs offline here.
@@ -36,7 +38,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const read = (...parts) => JSON.parse(readFileSync(join(__dirname, ...parts), 'utf8'))
 
 const cache = read('..', '.scratch', 'team-success', 'roster-age-cache.json')
-const clubTotals = read('fixtures', 'roster-age-club-totals.json')
+const clubTotals = read('..', 'test', 'fixtures', 'roster-age-club-totals.json')
 
 // Innings pitched carry thirds, so the comparison is to the last third of an
 // inning rather than to the last bit.

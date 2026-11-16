@@ -142,3 +142,9 @@ undefined/
 /.state/
 /scripts/data/*.sql
 /scripts/data/callouts-archive/
+
+# three big research folders (~104 MB) live in bbsbh-state under scratch/ (#3119).
+# `npm run state:pull` copies them here; scripts/repo/state.mjs SCRATCH lists them.
+.scratch/level-benchmarks/
+.scratch/team-success/
+.scratch/prospect-traits/
