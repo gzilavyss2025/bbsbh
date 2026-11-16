@@ -139,11 +139,12 @@ function words(h, feed, e) {
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
 function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, re = null) {
   const { batter } = e
+  const play = feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)
   // The run-expectancy line (#2973), under the newest revealed at-bat only: `re` is the RE table, passed
   // only when the box holds `last` (a replayed chip gets none). Read here, inside the reveal.
-  const reLine = re ? runExpectancyLine(feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex), re) : null
+  const reLine = re ? runExpectancyLine(play, re, feed?.liveData?.linescore?.scheduledInnings ?? 9) : null
   // The opened card adds Savant's figures for the ball in play (`Savant`, GamedayHero.jsx): its playId is the in-play pitch's.
-  const inPlay = Savant && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
+  const inPlay = Savant && e.battedBall ? play?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
   const extra = inPlay ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay, ball: { gameDate: feed.gameData?.datetime?.officialDate, ...e.battedBall } }) : null
   const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, extra }) : null
   const zone = Zone ? h(Zone, { entry: e, side, teamId: side ? feed?.gameData?.teams?.[side]?.id ?? null : null, feed }) : null

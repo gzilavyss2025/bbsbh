@@ -37,3 +37,18 @@ test('runsWord drops the leading zero and keeps one decimal', () => {
   assert.equal(runsWord(0.96), '1.0')
   assert.equal(runsWord(2.27), '2.3')
 })
+
+test('a walk-off ends the game: no line, though the outs are not three', () => {
+  const p = (inning, half, home, away) => ({ count: { outs: 1 }, matchup: { postOnFirst: on }, about: { inning, halfInning: half }, result: { homeScore: home, awayScore: away } })
+  assert.equal(runExpectancyLine(p(9, 'bottom', 4, 3), table), null)
+  assert.equal(runExpectancyLine(p(11, 'bottom', 4, 3), table), null)
+  assert.equal(runExpectancyLine(p(7, 'bottom', 2, 1), table, 7), null, 'a seven-inning doubleheader game')
+  assert.notEqual(runExpectancyLine(p(8, 'bottom', 4, 3), table), null, 'the 8th goes on')
+  assert.notEqual(runExpectancyLine(p(9, 'top', 3, 4), table), null, 'the top of the 9th goes on')
+  assert.notEqual(runExpectancyLine(p(9, 'bottom', 3, 3), table), null, 'tied: the bottom goes on')
+})
+
+test('a state the table has no sample of gets no line, not "About .0"', () => {
+  assert.equal(runExpectancyLine(play(1), { re24: {} }), null)
+  assert.equal(runExpectancyLine(play(1), { re24: { '0-1': { sum: 0, n: 0 } } }), null)
+})
