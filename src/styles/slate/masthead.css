@@ -441,6 +441,28 @@
   }
 }
 
+/* The picked chip keeps the chip's own paper and hard ink shadow: the tray's
+   picked style (a card fill and the soft card shadow, 26-player-page.css)
+   would otherwise win and make it read as a different control. */
+.teamfilterstrip--chips .vsteam__team.is-active {
+  background: var(--surface-inset);
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
+}
+
+/* The MLB reset chip never wears the picked ring: "every club" is the resting
+   state, and a ring round it read as a doubled circle beside the plain chips.
+   A ring therefore always means one club is picked. */
+.teamfilterstrip--chips .vsteam__team.teamfilterstrip__pin.is-active {
+  outline: none;
+}
+
+/* The MLB reset chip: its mark is a full-bleed square, so it is drawn at the
+   size the club marks reach inside their frames, not edge to edge. */
+.teamfilterstrip--chips .teamfilterstrip__mlblogo {
+  width: 26px; /* raw-value-exempt: matches the club marks' drawn size inside a chip */
+  height: 26px; /* raw-value-exempt: matches the club marks' drawn size inside a chip */
+}
+
 /* A filter page's picked club (the slate never picks one): an ink ring round
    the chip, so it never reads as the yellow favourite. */
 .teamfilterstrip--chips .vsteam__team.is-active {
