@@ -1,33 +1,57 @@
 /* ---------------------------------------------------------------- tensest moments
-   Three ranked tables (TensestMomentsPage): a club batting, a club pitching, and the
-   league. The cells, head row and row rules are the Table's (system/table.css); this
+   One ranked board (TensestMomentsPage): rank, the moment as a sentence, pressure, ▶. The cells, head row and row rules are the Table's (system/table.css); this
    block keeps the text columns left-aligned and the rank number readable. */
 /* No margin on the cards: they stack in a Stack (TensestMomentsPage), which owns the gap
    between them. Sibling margins collapsed with the name tab's own margin and left the
    cards touching (ADR-0132). */
-.tensest .what,
-.tensest .game,
-.tensest .batter {
+.tensest .moment {
   text-align: left;
-  /* The Table's cells are nowrap; these three are prose and wrap, so the table fits the
-     card on desktop instead of scrolling sideways. */
+  /* The Table's cells are nowrap; the moment is prose and wraps, so the table fits the
+     card instead of scrolling sideways. */
   white-space: normal;
-  min-width: 9rem;
+  width: 100%;
 }
 .tensest thead th {
   white-space: normal;
 }
 .tensest .rank {
   font-weight: var(--w-semibold);
+  vertical-align: top;
 }
-.tensest__gamelink,
-.tensest__post,
-.tensest__vs {
-  white-space: nowrap;
+.tensest__moment,
+.tensest__cite {
+  margin: 0;
 }
-.tensest__post,
-.tensest .what {
+/* The names carry the row: heading ink against softer prose, so a reader can scan down
+   the list by name (the fonts ship one weight, so contrast does the work, not bold). */
+.tensest__moment {
   color: var(--text-muted);
+}
+.tensest__moment .plink {
+  color: var(--text-heading);
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
+}
+/* The citation names the game under the moment: date, opponent, final, round. */
+.tensest__cite {
+  margin-block-start: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}
+.tensest__gamelink {
+  white-space: nowrap;
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
+}
+.tensest__gamelink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tensest .tensest__pressure {
+  text-align: right;
 }
 
 /* The (i) tip on this page wears the stamped frame too: square, a heavy ink edge and the
@@ -101,9 +125,8 @@
   outline-offset: 2px;
 }
 
-/* On a phone the seven columns don't fit, so each row stacks as a small card: rank,
-   pressure, date and inning on the first line, then the game, the at-bat and what
-   happened, each on its own line. The head row hides; the cells say what they are. */
+/* On a phone the head row hides and each row is rank, moment, ▶ — pressure moves up
+   beside the rank. The hidden cues say what each figure is. */
 @media (max-width: 739.98px) {
   .tensest thead {
     display: none;
@@ -111,36 +134,24 @@
   /* layout-exempt: a table row restacked as a card on a phone has no layout primitive */
   .tensest tbody tr {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto;
     grid-template-areas:
-      'rank pressure date inn'
-      'game game game game'
-      'batter batter batter batter'
-      'what what what what';
+      'rank pressure watch'
+      'moment moment watch';
     column-gap: var(--space-2);
-    row-gap: var(--space-2);
+    row-gap: var(--space-1);
     padding-block: var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border-rule);
   }
-  .tensest tbody td,
-  .tensest .what,
-  .tensest .game,
-  .tensest .batter {
+  .tensest tbody td {
     padding: 0 var(--space-3);
     border: 0;
     text-align: left;
-    min-width: 0;
   }
   .tensest .rank { grid-area: rank; }
-  .tensest .tensest__pressure { grid-area: pressure; }
-  .tensest .date { grid-area: date; }
-  .tensest .inn { grid-area: inn; }
-  .tensest .game { grid-area: game; }
-  .tensest .batter { grid-area: batter; }
-  .tensest .what { grid-area: what; }
-  /* A bigger thumb target on the game and the names: padding grows the tap area, the
-     negative margin keeps the card's lines where they were. With the row gap above,
-     two stacked targets meet but never overlap. */
+  .tensest .tensest__pressure { grid-area: pressure; text-align: left; }
+  .tensest .moment { grid-area: moment; }
+  .tensest .watch { grid-area: watch; align-self: center; }
   .tensest__gamelink,
   .tensest .plink {
     display: inline-block;
@@ -163,13 +174,7 @@
   vertical-align: text-bottom;
 }
 
-/* The ▶ for a play's clip, at the end of "What happened" (TensestWatch.jsx). */
-.tensest__what {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
+/* The ▶ for a play's clip, in the last column (TensestWatch.jsx). */
 .tensest__watch {
   flex: none;
   display: flex;
@@ -211,7 +216,8 @@
 .tensest__watch::after {
   content: '';
   position: absolute;
-  inset: calc((var(--tap-min) - 24px) / -2);
+  /* Not past its right edge: it is the table's last cell, and 1px over scrolls the table. */
+  inset: calc((var(--tap-min) - 24px) / -2) 0 calc((var(--tap-min) - 24px) / -2) calc((var(--tap-min) - 24px) / -2);
 }
 
 /* Phone: the pickers fold behind "Filter"; wide: always open, no button. */
@@ -256,4 +262,92 @@
 }
 .tensest__picker .vsteam__strip::-webkit-scrollbar-thumb:hover {
   background: var(--graphite);
+}
+
+
+/* The last row's ▶ tap area reaches 3px under the table; clip it rather than scroll. */
+.tensest__section .table {
+  overflow-y: clip;
+}
+
+/* The picked club's side won or lost the at-bat (swingFor): a wash light enough that the row still
+   reads as paper. */
+.tensest tbody tr.tensest__row--up {
+  background: color-mix(in srgb, var(--accent-positive) 7%, transparent);
+}
+.tensest tbody tr.tensest__row--down {
+  background: color-mix(in srgb, var(--accent-negative) 7%, transparent);
+}
+
+.tensest__nobreak {
+  white-space: nowrap;
+}
+
+/* The record, right of the switch: a stamped box holding the count over a tally strip,
+   one square per at-bat in its row's colour (a scorebook's tick marks). */
+.tensest__sidebar {
+  margin: var(--space-2) var(--space-3) 0;
+}
+.tensest__sidebar .tensest__side {
+  margin: 0;
+}
+.tensest__record {
+  margin-inline-start: auto;
+  padding: var(--space-2) var(--space-3);
+  /* A plain ink frame: it sits inside a stamped card, so no second hard shadow. */
+  border: var(--bw-hair) solid var(--border-stamped);
+  text-align: right;
+}
+.tensest__recordline {
+  margin: 0 0 var(--space-1);
+}
+.tensest__recordlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+.tensest__recordfig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  color: var(--text-heading);
+}
+.tensest__tally {
+  display: block;
+}
+.tensest__tick {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-inline-start: 2px;
+  vertical-align: top;
+  border: var(--bw-hair) solid var(--border-stamped);
+}
+.tensest__tick--up {
+  background: var(--accent-positive);
+}
+.tensest__tick--down {
+  background: var(--accent-negative);
+}
+@media (max-width: 739.98px) {
+  .tensest__record {
+    margin-inline-start: 0;
+    text-align: left;
+  }
+  .tensest__tick {
+    margin-inline: 0 2px;
+  }
+}
+
+/* The record against MLB, in words; green or red only past the 5-point margin. */
+.tensest__versus {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+.tensest__versus--up {
+  color: var(--accent-positive);
+}
+.tensest__versus--down {
+  color: var(--accent-negative);
 }

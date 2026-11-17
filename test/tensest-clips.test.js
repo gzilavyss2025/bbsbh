@@ -15,3 +15,11 @@ test('a tense play keeps its last pitch’s playId, keyed like its row', () => {
 test('a tense play with no pitch playId is left out', () => {
   assert.deepEqual(clipIds({ gamePk: 9 }, [{ leverageIndex: 8, playEvents: [{ type: 'action' }] }]), {})
 })
+
+import { scoredOn } from '../scripts/lib/tensest/tensest.mjs'
+
+test('scoredOn keeps each scoring runner whole, and nothing when none scored', () => {
+  const run = (id, fullName, score) => ({ details: { isScoringEvent: score, runner: { id, fullName } } })
+  assert.deepEqual(scoredOn({ runners: [run(1, 'Christian Yelich', true), run(2, 'Batter Man', false), run(3, 'Sal Frelick', true)] }), { sc: [[1, 'Christian Yelich'], [3, 'Sal Frelick']] })
+  assert.deepEqual(scoredOn({ runners: [run(2, 'Batter Man', false)] }), {})
+})
