@@ -86,7 +86,7 @@ export function TeamFilterStrip({
               type="button"
               role="tab"
               aria-selected={isAll}
-              aria-label={pinLabel ?? 'MLB'}
+              aria-label="MLB"
               className={`vsteam__team teamfilterstrip__pin${isAll ? ' is-active' : ''}`}
               onClick={() => onSelect(null)}
             >
