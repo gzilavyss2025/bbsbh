@@ -50,7 +50,8 @@ export async function loadPlayerOverview(id, asOf) {
   // files, session-cached, so each is free after the first player page anywhere in the
   // app. Statcast is fetched only for a player CURRENTLY active at the majors (the
   // source has no MiLB rows).
-  const [warCurrent, warHistory, contract, savantData, awards] = await Promise.all([
+  // Started, not awaited: the per-group fetches below run alongside it.
+  const wave1 = Promise.all([
     fetchWarData(),
     fetchWarHistory(id),
     // A contract ledger is a season's book, not a day's, and Cot's carries no
@@ -65,6 +66,9 @@ export async function loadPlayerOverview(id, asOf) {
     // places.
     fetchPlayerAwards(id),
   ])
+  // Its rejection is still thrown by the awaits below; this only keeps an early
+  // failure elsewhere from leaving it unhandled.
+  wave1.catch(() => {})
 
   const [results, debutSplits, convHittingMilb] = await Promise.all([
     Promise.all(
@@ -95,6 +99,7 @@ export async function loadPlayerOverview(id, asOf) {
           // The tiles' league figure, beside the rest rather than after them.
           currentActivitySportId === 1 && !cutoff ? leagueAverage(season, group) : Promise.resolve(null),
         ])
+        const [warCurrent, warHistory, , savantData] = await wave1
         const { seasonSplits, stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = current
         const block = buildBlock({
           group,
@@ -157,6 +162,7 @@ export async function loadPlayerOverview(id, asOf) {
       : Promise.resolve(null),
   ])
 
+  const [, , contract, , awards] = await wave1
   const blocks = results.map((r) => r.block)
 
   // Every gamePk the preview logs point at, plus the debut game — one shared

@@ -10,17 +10,6 @@
 .wr svg { display: block; width: 100%; height: auto; overflow: visible; }
 .wr button:focus-visible, .wr-ride:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
 
-/* ---- Tabs: the house Segmented for the four lists, Draw apart as a tool. */
-/* layout-exempt: the segmented strip and the draw button share one row */
-.wr-tabs { display: flex; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: var(--bw-hair) solid var(--border-hairline); }
-.wr-tabs .wr-seg { flex: 1 1 auto; }
-.wr-tabs .btn { min-height: 48px; }
-.wr-tab { display: grid; gap: 1px; text-align: left; }
-.wr-tab b { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); font-weight: inherit; }
-#root .wr-tab > span { font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--text-caption); text-transform: none; white-space: nowrap; } /* caps-exempt: a short sentence */
-#root .wr-tabs [aria-pressed='true'] .wr-tab > span { color: inherit; }
-.wr-tabs .wr-draw { flex: none; border-style: dashed; }
-
 /* ---- Two columns: the picker (5) and the ride (7). */
 /* layout-exempt: the card's two columns, stacked below 740px */
 .wr-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-4); align-items: stretch; }
@@ -135,8 +124,6 @@
   .wr-right { order: 2; }
   .wr-left > :not(.wr-top) { order: 3; }
   .wr-scroll { flex: none; height: 320px; }
-  .wr-tabs { overflow-x: auto; scrollbar-width: none; }
-  .wr-tabs .wr-seg { flex: none; }
   .wr-headline { font-size: var(--fs-title-md); }
   .wr-plate { grid-template-columns: 64px minmax(0, 1fr) 96px; min-height: 104px; }
   .wr-plate .wr-cap-face { width: 64px; height: 80px; }

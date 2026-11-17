@@ -468,13 +468,6 @@ button.seasonnote__barrow[aria-pressed='true'] {
 .seasonnote__longest .seasonnote__bars[data-end='true'] { mask-image: none; }
 
 /* ---- v2 (from Wild Rides): the three tabs, the label beside the number, the pitch strip, the club plate. */
-.seasonnote__tabs { margin: 0 0 var(--space-3); }
-.seasonnote__tabs .btn { min-height: 48px; }
-/* layout-exempt: a tab name over its one-line meaning */
-.seasonnote__tab { display: grid; gap: 1px; text-align: left; }
-.seasonnote__tab b { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); font-weight: inherit; }
-#root .seasonnote__tab > span { font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--text-caption); text-transform: none; white-space: nowrap; } /* caps-exempt: a short sentence */
-#root .seasonnote__tabs [aria-pressed='true'] .seasonnote__tab > span { color: inherit; }
 .seasonnote__big .seasonnote__unit { max-width: 15ch; line-height: var(--lh-loose); text-wrap: balance; }
 /* layout-exempt: one numbered mark per pitch across the zone's foot, the two controls at its end */
 .seasonnote__strip { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-top: var(--bw-hair) solid var(--border-hairline); cursor: ew-resize; touch-action: pan-y; }

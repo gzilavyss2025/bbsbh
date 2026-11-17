@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
-import { Headshot } from '../../../components/player/Headshot.jsx'
-import { HeaderBug } from '../../../components/gamehud/HeaderBug.jsx'
-import { ScrollCue } from '../../gameday/next/ScrollCue.jsx'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { TeamLogo } from '../../logo/TeamLogo.jsx'
+import { Headshot } from '../../player/Headshot.jsx'
+import { HeaderBug } from '../../gamehud/HeaderBug.jsx'
+import { ScrollCue } from '../../ui/layout/ScrollCue.jsx'
 import { teamPrimaryColor } from '../../../lib/teams.js'
 import { decodeState } from '../../../lib/wildrides/ride.js'
-import { abbr, club, consequence, ord } from '../../../lib/wildrides/story.js'
+import { consequence } from '../../../lib/wildrides/story.js'
+import { abbr, club, ord } from '../../../lib/explorers/copy.js'
 import { Field, playBall, showCall } from './Field.jsx'
-import { W, H, PX, PY, REDUCE, pathOf, monthDay } from './draw.js'
+import { W, H, PX, PY, pathOf, monthDay } from './draw.js'
+import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
 // THE RIDE: the win-probability line draws itself and pauses at each of the six biggest
 // swings; the scorebug follows the dot play by play; the plate shows the swing as the feed
@@ -16,7 +18,7 @@ import { W, H, PX, PY, REDUCE, pathOf, monthDay } from './draw.js'
 export function Ride({ game, chips, games, shape }) {
   const stat = shape.stat(game)
   const n = game.line.length
-  const beatIdx = game.beats.map((b) => Math.min(n - 1, b.idx))
+  const beatIdx = useMemo(() => game.beats.map((b) => Math.min(n - 1, b.idx)), [game, n])
   const [at, setAt] = useState(0)
   const [shown, setShown] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -38,7 +40,7 @@ export function Ride({ game, chips, games, shape }) {
       const s = state.current
       if (s.at >= n - 1 && s.shown >= game.beats.length) return cancelAnimationFrame(raf)
       // about 4 seconds of line from first pitch to final out, plus the beat pauses
-      s.at = Math.min(n - 1, s.at + (REDUCE ? n : (dt * n) / 4000))
+      s.at = Math.min(n - 1, s.at + (motionIsReduced() ? n : (dt * n) / 4000))
       if (s.shown < game.beats.length && beatIdx[s.shown] <= s.at) {
         s.at = beatIdx[s.shown]
         const b = game.beats[s.shown]
@@ -68,12 +70,8 @@ export function Ride({ game, chips, games, shape }) {
     setPaused(false)
     setRun((r) => r + 1)
   }
-  // Scrubbing: press and drag along the chart. The ride pauses, the dot follows the finger,
-  // and the scorebug, pins and plate show the game at that play.
-  const scrubTo = (e) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    const x = -PX + ((e.clientX - r.left) / r.width) * (W + 2 * PX)
-    const k = Math.max(0, Math.min(n - 1, Math.round((x / W) * (n - 1))))
+  // Put the dot on play k: the pins, scorebug and plate follow; a ball in flight is dropped.
+  const seek = (k) => {
     const sh = beatIdx.filter((bi) => bi <= k).length
     state.current = { at: k, shown: sh }
     ballToken.current++
@@ -81,6 +79,12 @@ export function Ride({ game, chips, games, shape }) {
     setAt(k)
     setShown(sh)
     if (sh) showCall(fieldRef.current, game.beats[sh - 1])
+  }
+  // Scrubbing: press and drag along the chart; the ride pauses and the dot follows the finger.
+  const scrubTo = (e) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    const x = -PX + ((e.clientX - r.left) / r.width) * (W + 2 * PX)
+    seek(Math.max(0, Math.min(n - 1, Math.round((x / W) * (n - 1)))))
   }
   const scrubStart = (e) => {
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -96,15 +100,8 @@ export function Ride({ game, chips, games, shape }) {
     const to = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : step != null ? Math.round(state.current.at) + step : null
     if (to == null) return
     e.preventDefault()
-    const k = Math.max(0, Math.min(n - 1, to))
-    const sh = beatIdx.filter((bi) => bi <= k).length
     setPaused(true)
-    ballToken.current++
-    state.current = { at: k, shown: sh }
-    hold.current = 0
-    setAt(k)
-    setShown(sh)
-    if (sh) showCall(fieldRef.current, game.beats[sh - 1])
+    seek(Math.max(0, Math.min(n - 1, to)))
   }
   const jump = (i) => {
     ballToken.current++
@@ -117,7 +114,6 @@ export function Ride({ game, chips, games, shape }) {
     setRun((r) => r + 1)
   }
 
-  const cur = shown ? game.beats[shown - 1] : null
   const homeC = teamPrimaryColor(game.home) || 'var(--text-heading)'
   const awayC = teamPrimaryColor(game.away) || 'var(--text-caption)'
   const areaOf = (line, upto) => upto < 2 ? '' : `${pathOf(line, W, H, upto)}L${(((upto - 1) * W) / (n - 1)).toFixed(1)},${H / 2}L0,${H / 2}Z`
@@ -139,11 +135,6 @@ export function Ride({ game, chips, games, shape }) {
   const k = Math.floor(at)
   const done = at >= n - 1 && shown >= game.beats.length
 
-  const beat = (i) => {
-    const b = game.beats[i]
-    return { b, team: b.top ? game.away : game.home, d: b.to - b.from }
-  }
-  const now = cur ? beat(shown - 1) : null
 
   return (
     <article className="wr-card">
@@ -161,24 +152,18 @@ export function Ride({ game, chips, games, shape }) {
         <div className="wr-right">
           <h2 className="wr-headline">{game.headline}.</h2>
           {/* Gameday's own scorebug (the one the longest at-bats card borrows), set to the game after this beat. */}
-          <div className="seasonnote__bug">
-            <HeaderBug
-              season={game.date.slice(0, 4)}
-              awayName={abbr(game.away)}
-              homeName={abbr(game.home)}
-              awayTeamId={game.away}
-              homeTeamId={game.home}
-              awayRuns={done ? game.score[0] : live.away}
-              homeRuns={done ? game.score[1] : live.home}
-              inning={live.inning}
-              half={live.top ? 'top' : 'bottom'}
-              batter={null}
-              pitcher={null}
-              final={done}
-              bases={done ? {} : live.bases}
-              outs={done ? 0 : live.outs}
-            />
-          </div>
+          <Bug
+            game={game}
+            away={done ? game.score[0] : live.away}
+            home={done ? game.score[1] : live.home}
+            inning={live.inning}
+            top={live.top}
+            outs={done ? 0 : live.outs}
+            b1={!done && live.bases.first}
+            b2={!done && live.bases.second}
+            b3={!done && live.bases.third}
+            final={done}
+          />
           {/* A tug of war: the line splits the field at even odds, and each side fills in its own club's
               colour, so who was winning reads at a glance. Innings run along the foot. */}
           <div className="wr-stage" style={{ '--home-c': homeC, '--away-c': awayC }}>
@@ -233,36 +218,68 @@ export function Ride({ game, chips, games, shape }) {
               ))}
             </div>
           </div>
-          {/* The swing as Gameday's band calls it (the longest at-bats result plate): navy, the marker
-              stripe, the play shouted in the display face, the facts in cream. The park rides inside. */}
-          <div
-            className={`wr-plate${now ? '' : ' is-waiting'}`}
-            aria-hidden={!now}
-            // A club may colour a card that identifies the club (ADR-0030's addendum): the batting side's.
-            style={{ '--side-club': teamPrimaryColor(now ? now.team : game.home) || 'var(--surface-stamped-ink)' }}
-          >
-            <TeamLogo teamId={now ? now.team : game.home} size={120} variant="mono" className="wr-plate-mark" />
-            {now ? (
-              <Headshot personId={now.b.batter.id} name={now.b.batter.name} teamId={now.team} className="wr-cap-face" />
-            ) : (
-              <TeamLogo teamId={game.home} size={44} />
-            )}
-            <div className="wr-plate-text">
-              <span className="wr-plate-kicker">
-                {now ? `${now.b.top ? 'Top' : 'Bottom'} of the ${ord(now.b.inning)} · ${consequence(now.b, game)}` : 'First pitch'}
-              </span>
-              {/* The play as the feed called it, word for word. */}
-              <ScrollCue label="More of the play below" className="wr-plate-scroll">
-                <p className="wr-plate-play">{now ? now.b.desc : ''}</p>
-              </ScrollCue>
-            </div>
-            <div className="wr-inset">
-              <Field ref={fieldRef} game={game} />
-            </div>
-          </div>
+          <Plate game={game} shown={shown} fieldRef={fieldRef} />
         </div>
       </div>
     </article>
   )
 }
 
+
+// The scorebug, redrawn only when what it shows changes (the ride re-renders every frame).
+const Bug = memo(function Bug({ game, away, home, inning, top, outs, b1, b2, b3, final }) {
+  return (
+    <div className="seasonnote__bug">
+      <HeaderBug
+        season={game.date.slice(0, 4)}
+        awayName={abbr(game.away)}
+        homeName={abbr(game.home)}
+        awayTeamId={game.away}
+        homeTeamId={game.home}
+        awayRuns={away}
+        homeRuns={home}
+        inning={inning}
+        half={top ? 'top' : 'bottom'}
+        batter={null}
+        pitcher={null}
+        final={final}
+        bases={{ first: b1, second: b2, third: b3 }}
+        outs={outs}
+      />
+    </div>
+  )
+})
+
+// The swing plate: the house At bat panel (the batting club's colour, its mono mark, the batter
+// as a cutout) with the feed's call of the play and the park. Redrawn per swing, not per frame.
+const Plate = memo(function Plate({ game, shown, fieldRef }) {
+  const b = shown ? game.beats[shown - 1] : null
+  const team = b ? (b.top ? game.away : game.home) : game.home
+  return (
+    <div
+      className={`wr-plate${b ? '' : ' is-waiting'}`}
+      aria-hidden={!b}
+      // A club may colour a card that identifies the club (ADR-0030's addendum): the batting side's.
+      style={{ '--side-club': teamPrimaryColor(team) || 'var(--surface-stamped-ink)' }}
+    >
+      <TeamLogo teamId={team} size={120} variant="mono" className="wr-plate-mark" />
+      {b ? (
+        <Headshot personId={b.batter.id} name={b.batter.name} teamId={team} className="wr-cap-face" />
+      ) : (
+        <TeamLogo teamId={game.home} size={44} />
+      )}
+      <div className="wr-plate-text">
+        <span className="wr-plate-kicker">
+          {b ? `${b.top ? 'Top' : 'Bottom'} of the ${ord(b.inning)} · ${consequence(b, game)}` : 'First pitch'}
+        </span>
+        {/* The play as the feed called it, word for word. */}
+        <ScrollCue label="More of the play below" className="wr-plate-scroll">
+          <p className="wr-plate-play">{b ? b.desc : ''}</p>
+        </ScrollCue>
+      </div>
+      <div className="wr-inset">
+        <Field ref={fieldRef} game={game} />
+      </div>
+    </div>
+  )
+})

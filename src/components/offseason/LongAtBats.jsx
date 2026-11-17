@@ -12,7 +12,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ClubStrip } from './ClubStrip.jsx'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
-import { Segmented } from '../ui/control/Segmented.jsx'
+import { ExplorerTabs } from '../explorers/ExplorerTabs.jsx'
 import { windowSlice } from '../../lib/react/windowSlice.js'
 import { heldFor } from '../../lib/react/heldFor.js'
 
@@ -218,25 +218,15 @@ export function LongAtBats({ season }) {
       </SectionHead>
 
       <Card frame="stamped" as="div" className="seasonnote__sheet">
-        <Segmented
+        <ExplorerTabs
           label="Kind of at-bat"
-          fill
-          className="seasonnote__tabs"
+          tabs={TABS}
           value={tab}
           onChange={(v) => {
             setTab(v)
             setSel({ list: null, club: null, pick: 0 })
             if (listRef.current) listRef.current.scrollTop = 0
           }}
-          options={TABS.map((t) => ({
-            value: t.value,
-            label: (
-              <span className="seasonnote__tab">
-                <b>{t.label}</b>
-                <span>{t.sub}</span>
-              </span>
-            ),
-          }))}
         />
         <ClubStrip clubs={clubs} value={club} onPick={pickClub} />
         <div className="seasonnote__row">

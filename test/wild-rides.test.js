@@ -3,7 +3,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildRide, decodeState, encodeState } from '../src/lib/wildrides/ride.js'
-import { headlineFor, storyOf, summarize, oddsOf, past, consequence, lastName } from '../src/lib/wildrides/story.js'
+import { headlineFor, storyOf, summarize, oddsOf, consequence } from '../src/lib/wildrides/story.js'
+import { past, lastName } from '../src/lib/explorers/copy.js'
 import { encodeShape, decodeShape, shapeDistance, paa, SEGMENTS } from '../src/lib/wildrides/shape.js'
 
 // A feed entry: the home team's win %, the inning and half, the score after, the batter.

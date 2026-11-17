@@ -5,7 +5,7 @@
 // (/wire-lab) on 2026-11-02; each names the player it came from.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { shapeFacts, shapeMinors, shapeScopeRows, tradedFor } from '../src/api/transactions/playerFacts.js'
+import { shapeFacts, shapeMinors, shapeScopeRows, tradedFor, tradedWith } from '../src/api/transactions/playerFacts.js'
 import { cutStory, dealPhrase, draftSentence, freeAgentStory, injuredStory, seasonSentence, subjectsOf } from '../src/api/transactions/templates.js'
 
 // The minimum facts a template reads, with overrides.
@@ -318,6 +318,18 @@ test('the draft read is the one he signed out of, the latest, with its overall p
   assert.equal(draftSentence(f), "The Angels drafted him out of St. Mary's College in the second round (45th overall) in 2021.")
   assert.equal(draftSentence({ draft: null }), null)
 })
+
+test('tradedWith: the other players on his own side of the trade', () => {
+  const mears = 'Milwaukee Brewers traded LF Isaac Collins and RHP Nick Mears to Kansas City Royals for LHP Angel Zerpa.'
+  assert.equal(tradedWith(mears, 'Nick Mears'), 'Isaac Collins')
+  assert.equal(tradedWith(mears, 'Angel Zerpa'), null)
+  const three = 'A traded C One Guy, RHP Two Guy and SS Three Guy to B for LHP Four Guy.'
+  assert.equal(tradedWith(three, 'Two Guy'), 'One Guy and Three Guy')
+  assert.equal(tradedWith('Mets traded RHP Al Pen and cash to San Diego Padres for C Bo Cat.', 'Al Pen'), null)
+  assert.equal(tradedWith('A traded LHP Luis Garcia Jr. and C Sam Dee to B for P Ed Foo.', 'Luis Garcia'), 'Sam Dee')
+  assert.equal(tradedWith('Some row with no trade in it.', 'Nick Mears'), null)
+})
+
 
 test('a competitive-balance pick names its round, never "NaNth"', () => {
   // Logan Driscoll (Padres, 2019): the feed's pickRound is "CB-B", not a number.

@@ -4,7 +4,6 @@ export const H = 260
 // Room around the plot so a swing on the first or last play (a walk-off), its dot and number, never clips.
 export const PX = 16
 export const PY = 26
-export const REDUCE = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export const pathOf = (line, w, h, n = line.length) =>
   line

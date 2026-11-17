@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import '../../../styles/gameday-next/scroll.css'
+import '../../../styles/system/scroll-cue/scroll-cue.css'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
 // A box whose words scroll inside it when they run past it (the checkpoint's game notes, the hero's play),

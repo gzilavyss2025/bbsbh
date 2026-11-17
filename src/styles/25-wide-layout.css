@@ -306,7 +306,7 @@ body:has(.wirelab) {
     display: flex;
     flex-direction: column;
   }
-  /* The scroll box is Gameday's ScrollCue (gameday-next/scroll.css): its own
+  /* The scroll box is ScrollCue (components/ui/layout/, styles/system/scroll-cue/scroll-cue.css): its own
      scorebook scrollbar and the bouncing chevron. Here it only fills the card. */
   .bs__scoring .scoresum__scroll { flex: 1 1 auto; min-height: 0; }
   .bs__scoring .scoresum__scroll .gdscroll__in { overflow-x: hidden; }

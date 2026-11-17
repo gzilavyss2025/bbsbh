@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
-import { ScrollCue } from '../../gameday/next/ScrollCue.jsx'
-import { Segmented } from '../../../components/ui/control/Segmented.jsx'
-import { Button } from '../../../components/ui/control/Button.jsx'
+import { TeamLogo } from '../../logo/TeamLogo.jsx'
+import { ScrollCue } from '../../ui/layout/ScrollCue.jsx'
+import { ExplorerTabs } from '../ExplorerTabs.jsx'
 import { fetchRide, fetchWildLists, fetchWildShapes } from '../../../api/wildrides/fetch.js'
-import { club, ord, summarize } from '../../../lib/wildrides/story.js'
+import { summarize } from '../../../lib/wildrides/story.js'
+import { club, ord } from '../../../lib/explorers/copy.js'
 import { SEGMENTS, shapeDistance } from '../../../lib/wildrides/shape.js'
 import { shortDate } from './draw.js'
 import { Ride } from './Ride.jsx'
-import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 import './wild-rides.css'
 
 // WILD RIDES (/wild-rides, unlisted while it is a draft): the season's games ranked by
@@ -94,30 +94,13 @@ export function WildRidesCard({ season }) {
 
   // The four lists are one house Segmented control; Draw is a tool, so it stands apart.
   const chips = (
-    <div className="wr-tabs">
-      <Segmented
-        label="Kind of game"
-        fill
-        className="wr-seg"
-        value={tab === 'draw' ? null : tab}
-        onChange={setTab}
-        options={TABS.map((x) => ({
-          value: x.key,
-          label: (
-            <span className="wr-tab">
-              <b>{x.label}</b>
-              <span>{x.sub}</span>
-            </span>
-          ),
-        }))}
-      />
-      <Button skin="outline" pressed={tab === 'draw'} onClick={() => setTab('draw')} className="wr-draw">
-        <span className="wr-tab">
-          <b>✎ Draw</b>
-          <span>Find a match</span>
-        </span>
-      </Button>
-    </div>
+    <ExplorerTabs
+      label="Kind of game"
+      tabs={TABS.map((t) => ({ value: t.key, label: t.label, sub: t.sub }))}
+      value={tab}
+      onChange={setTab}
+      tool={{ label: '✎ Draw', sub: 'Find a match', active: tab === 'draw', onPick: () => setTab('draw') }}
+    />
   )
   const games = (
     <>

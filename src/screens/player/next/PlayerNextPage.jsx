@@ -10,6 +10,9 @@ import { hasSeen, markSeen, viewKey } from '../../../lib/motion/inViewOnce.js'
 import { replayClass } from '../../../lib/jumpbar/land.js'
 import { LinkScope } from '../../../lib/nav.jsx'
 import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
+import { Loader } from '../../../components/ui/Loader.jsx'
+import { Notice } from '../../../components/ui/state/Notice.jsx'
+import { Button } from '../../../components/ui/control/Button.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../../components/chrome/BackBtn.jsx'
@@ -64,20 +67,22 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   }, [shown, topKey])
   const back = () => window.history.back()
   const gate = AsyncGate({
-    loading: core.loading || overview.loading,
-    error: core.error || overview.error,
-    data: core.data && overview.data ? true : null,
+    // The hero draws from core alone; the rest of the page fills in when overview lands.
+    loading: core.loading,
+    error: core.error,
+    data: core.data,
     screenClass: 'playernext',
     noun: 'player',
     onBack: back,
   })
   if (gate) return gate
 
-  const { blocks } = overview.data
-  const instances = slotInstances(rolesOf(core.data.bio, blocks))
+  const blocks = overview.data?.blocks ?? []
+  const ready = Boolean(overview.data)
+  const instances = ready ? slotInstances(rolesOf(core.data.bio, blocks)) : []
   // What the loaded data shows empty, then what the modules have reported.
   const gone = { ...seedEmpty(instances, blocks), ...empty }
-  const sections = shownSections(jumpSections(core.data.bio, blocks), instances, gone)
+  const sections = ready ? shownSections(jumpSections(core.data.bio, blocks), instances, gone) : []
   const markEmpty = (key) => setEmpty((e) => (e[key] ? e : { ...e, [key]: true }))
   // Overview has no slots: its hero and tiles already carry the stamp-in, so it plays again.
   // Replayed in place, not remounted: a remount would fetch the tiles' rank marks again (the
@@ -114,17 +119,18 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
-            <HotColdCard
+            {!ready && (overview.loading ? <Loader /> : <Notice tone="error" action={<Button size="control" skin="outline" onClick={overview.reload}>Try again</Button>}>Couldn’t load this player’s stats.</Notice>)}
+            {ready && <HotColdCard
               playerId={core.data.bio.id}
               name={core.data.bio.fullName}
               roles={rolesOf(core.data.bio, blocks)}
               season={core.data.season}
               sportId={core.data.sportId ?? sportId ?? null}
               asOf={asOf}
-            />
-            <OverviewExtras blocks={blocks} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
+            />}
+            {ready && <OverviewExtras blocks={blocks} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />}
           </Stack>
-          <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />
+          {ready && <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />}
           {sections
             .filter((s) => s.key !== 'overview')
             .map((s) => (
