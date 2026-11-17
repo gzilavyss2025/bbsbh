@@ -477,13 +477,13 @@ button.seasonnote__barrow[aria-pressed='true'] {
 #root .seasonnote__tabs [aria-pressed='true'] .seasonnote__tab > span { color: inherit; }
 .seasonnote__big .seasonnote__unit { max-width: 15ch; line-height: var(--lh-loose); text-wrap: balance; }
 /* layout-exempt: one numbered mark per pitch across the zone's foot, the two controls at its end */
-.seasonnote__strip { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-top: var(--bw-hair) solid var(--border-hairline); cursor: ew-resize; touch-action: pan-y; overflow-x: auto; scrollbar-width: none; }
+.seasonnote__strip { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-top: var(--bw-hair) solid var(--border-hairline); cursor: ew-resize; touch-action: pan-y; }
 .seasonnote__strip:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
 .seasonnote__mark { flex: none; opacity: 0.3; transition: opacity var(--dur-fast) var(--ease-out); }
 .seasonnote__mark.is-past { opacity: 1; }
 .seasonnote__mark.is-now { opacity: 1; outline: var(--bw-heavy) solid var(--text-heading); outline-offset: var(--bw-heavy); }
 /* layout-exempt: two square controls */
-.seasonnote__stripctl { display: flex; margin-left: auto; flex: none; }
+.seasonnote__stripctl { display: flex; margin-left: var(--space-2); flex: none; }
 .seasonnote__stripctl button { width: 32px; height: 28px; border: var(--bw-hair) solid var(--border-hairline); background: var(--surface-card); color: var(--text-heading); cursor: pointer; font-size: var(--fs-cell); }
 .seasonnote__result--club { max-width: none; background: var(--side-club); border-left-color: var(--marker); min-height: 92px; }
 @media (prefers-reduced-motion: reduce) { .seasonnote__mark { transition: none; } }
@@ -497,8 +497,6 @@ button.seasonnote__barrow[aria-pressed='true'] {
   .seasonnote__sheet .seasonnote__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 /* The marks scroll in their lane (no bar: the ride keeps the current one centred); the controls stay pinned. */
-.seasonnote__strip { overflow: visible; }
 /* layout-exempt: one line of numbered marks that scrolls sideways */
 .seasonnote__lane { display: flex; align-items: center; gap: var(--space-1); flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: var(--space-1); mask-image: linear-gradient(to right, transparent, var(--text-heading) var(--space-3), var(--text-heading) calc(100% - var(--space-3)), transparent); }
 .seasonnote__lane::-webkit-scrollbar { display: none; }
-.seasonnote__stripctl { margin-left: var(--space-2); }

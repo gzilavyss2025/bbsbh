@@ -12,23 +12,26 @@ import { atBatScenePitches, atBatZone } from '../../lib/pitcherCard/atBat.js'
 import { Button } from '../ui/control/Button.jsx'
 import { teamPrimaryColor } from '../../lib/teams.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
+import { lastName, ord } from '../../lib/wildrides/story.js'
 
 const PITCH_MS = 650
 
 // The at-bat said the way a beat writer would on its last pitch: who won it, on which pitch.
-const nth = (n) => `${n}${['th', 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] ?? 'th'}`
-const lastOf = (name) => (name ?? '').split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w)).slice(-1)[0] ?? ''
+// A walk or strikeout says it all; anything else is followed by the feed's own call.
 export function atBatLine(row, event) {
-  const b = lastOf(row.batter.name)
-  const p = lastOf(row.pitcher.name)
-  const n = nth(row.pitches)
+  const b = lastName(row.batter.name)
+  const p = lastName(row.pitcher.name)
+  const n = ord(row.pitches)
   const e = event ?? ''
   if (/walk/i.test(e)) return `${b} outlasted ${p} and walked on the ${n} pitch.`
   if (/strikeout/i.test(e)) return `${p} finally got ${b} on the ${n} pitch.`
+  if (/hit by pitch/i.test(e)) return `${b} was hit on the ${n} pitch.`
+  if (/error|interference/i.test(e)) return `${b} reached on the ${n} pitch.`
   const hit = { Single: 'singled', Double: 'doubled', Triple: 'tripled', 'Home Run': 'homered' }[e]
   if (hit) return `${b} ${hit} on the ${n} pitch.`
   return `${p} won it on the ${n} pitch.`
 }
+const SAYS_IT_ALL = /walk|strikeout/i
 
 // The longest at-bats card's picked at-bat (LongAtBats.jsx): Gameday's scorebug
 // and the zone with its replay. Its own chunk, loaded lazily: the zone, the
@@ -121,22 +124,24 @@ export function AtBatZone({ row }) {
   const [ride, setRide] = useState({ at: 0, paused: false, run: 0 })
   const laneRef = useRef(null)
   const at = Math.min(ride.at, Math.max(0, total - 1))
+  // Under reduced motion the ride doesn't play: the whole at-bat shows until a pitch is picked.
+  const shownAt = motionIsReduced() && !ride.paused ? Math.max(0, total - 1) : at
+  const atEnd = at >= total - 1
+  // The timer stops at the last pitch rather than ticking on unchanged.
   useEffect(() => {
-    if (!total || ride.paused || motionIsReduced()) return undefined
+    if (!total || ride.paused || atEnd || motionIsReduced()) return undefined
     const t = setInterval(() => setRide((r) => (r.at >= total - 1 ? r : { ...r, at: r.at + 1 })), PITCH_MS)
     return () => clearInterval(t)
-  }, [total, ride.paused, ride.run])
+  }, [total, ride.paused, ride.run, atEnd])
   // Keep the pitch being shown in view as the lane scrolls (the ride, a drag, the arrow keys).
   useEffect(() => {
     const lane = laneRef.current
-    const mark = lane?.children[Math.min(ride.at, total - 1)]
+    const mark = lane?.children[shownAt]
     if (!lane || !mark) return
     const left = mark.offsetLeft - lane.clientWidth / 2 + mark.offsetWidth / 2
     lane.scrollTo({ left, behavior: motionIsReduced() ? 'auto' : 'smooth' })
-  }, [ride.at, total])
+  }, [shownAt])
   if (!data) return null
-  const reduced = motionIsReduced()
-  const shownAt = reduced && !ride.paused ? total - 1 : at
   const goTo = (i) => setRide((r) => ({ ...r, at: Math.max(0, Math.min(total - 1, i)), paused: true }))
   // The mark nearest the pointer's x, so a drag scrubs whatever the lane has scrolled to.
   const scrubAt = (e) => {
@@ -152,6 +157,7 @@ export function AtBatZone({ row }) {
   }
   const now = data.pitchDetails[shownAt]
   const done = shownAt >= total - 1
+  const playing = !ride.paused && !done && !motionIsReduced()
   const side = row.batter.teamId === row.away?.id ? 'away' : 'home'
   const figures = fallbackFigureUrls(row.batter.teamId, side, data.batSide === 'L' ? 'left' : 'right')
   const onMove = (e) => {
@@ -243,10 +249,15 @@ export function AtBatZone({ row }) {
         ))}
         </div>
         <span className="seasonnote__stripctl">
-          <button type="button" aria-label={ride.paused ? 'Play' : 'Pause'} onPointerDown={(e) => e.stopPropagation()} onClick={() => setRide((r) => ({ ...r, paused: !r.paused, at: !r.paused || r.at < total - 1 ? r.at : 0 }))}>
-            {ride.paused ? '▶' : '❚❚'}
+          {/* Playing: pause. Paused or finished: play, from the top when at the last pitch. */}
+          <button
+            type="button"
+            aria-label={playing ? 'Pause' : 'Play'}
+            onClick={() => setRide((r) => (playing ? { ...r, paused: true } : { at: done ? 0 : r.at, paused: false, run: r.run + 1 }))}
+          >
+            {playing ? '❚❚' : '▶'}
           </button>
-          <button type="button" aria-label="Replay the at-bat" onPointerDown={(e) => e.stopPropagation()} onClick={() => setRide((r) => ({ at: 0, paused: false, run: r.run + 1 }))}>
+          <button type="button" aria-label="Replay the at-bat" onClick={() => setRide((r) => ({ at: 0, paused: false, run: r.run + 1 }))}>
             ↺
           </button>
         </span>
@@ -263,7 +274,7 @@ export function AtBatZone({ row }) {
           </p>
           <p className="seasonnote__resulttext">
             {done
-              ? `${atBatLine(row, data.event)} ${data.result ?? ''}`
+              ? `${atBatLine(row, data.event)}${SAYS_IT_ALL.test(data.event ?? '') || !data.result ? '' : ` ${data.result}`}`
               : `${now.callDesc || 'Pitch'}${now.type ? ` · ${now.type}` : ''}${now.mph != null ? ` · ${now.mph} mph` : ''}`}
           </p>
         </div>

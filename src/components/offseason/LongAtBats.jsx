@@ -50,9 +50,9 @@ const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(tota
 // The three ways to read the census (the house Segmented, a line of meaning under each).
 // Earned walks and lost battles filter on how the at-bat ended, which the file stores.
 const TABS = [
-  { value: 'long', label: 'Longest', sub: 'Most pitches', keep: () => true, unit: 'pitches in one at-bat' },
-  { value: 'walks', label: 'Earned walks', sub: 'Ended in a walk', keep: (r) => /walk/i.test(r.event ?? ''), unit: 'pitches, then a walk' },
-  { value: 'ks', label: 'Lost battles', sub: 'Ended in a strikeout', keep: (r) => /strikeout/i.test(r.event ?? ''), unit: 'pitches, then a strikeout' },
+  { value: 'long', label: 'Longest', sub: 'Most pitches', keep: () => true, unit: 'pitches in one at-bat', ended: '' },
+  { value: 'walks', label: 'Earned walks', sub: 'Ended in a walk', keep: (r) => /walk/i.test(r.event ?? ''), unit: 'pitches, then a walk', ended: ' that ended in a walk' },
+  { value: 'ks', label: 'Lost battles', sub: 'Ended in a strikeout', keep: (r) => /strikeout/i.test(r.event ?? ''), unit: 'pitches, then a strikeout', ended: ' that ended in a strikeout' },
 ]
 
 export function LongAtBats({ season }) {
@@ -318,7 +318,7 @@ export function LongAtBats({ season }) {
             // appearances to divide by. The club as the file names it (clubAbbr).
             <>
               <span className="seasonnote__against">{count(all.length)}</span> of the{' '}
-              <span className="seasonnote__against">{count(every.length)}</span> at-bats of {data.threshold}+ pitches in {season} had{' '}
+              <span className="seasonnote__against">{count(pool.length)}</span> at-bats of {data.threshold}+ pitches{tabDef.ended} in {season} had{' '}
               {clubAbbr(all[0], club) || teamAbbr({ id: club })} on one side
             </>
           ) : (
