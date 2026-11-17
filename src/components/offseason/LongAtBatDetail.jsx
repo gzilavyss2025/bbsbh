@@ -12,7 +12,7 @@ import { atBatScenePitches, atBatZone } from '../../lib/pitcherCard/atBat.js'
 import { Button } from '../ui/control/Button.jsx'
 import { teamPrimaryColor } from '../../lib/teams.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
-import { lastName, ord } from '../../lib/wildrides/story.js'
+import { lastName, ord } from '../../lib/explorers/copy.js'
 
 const PITCH_MS = 650
 

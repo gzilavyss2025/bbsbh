@@ -1,9 +1,9 @@
-import { BallparkDiagram } from '../../../components/ballpark/BallparkDiagram.jsx'
+import { BallparkDiagram } from '../../ballpark/BallparkDiagram.jsx'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { HOME as GEO_HOME, PLOT_VIEWBOX } from '../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../lib/ballpark/hitProjection.js'
 import { ballFlightPath } from '../../../lib/ballpark/ballFlight.js'
-import { REDUCE } from './draw.js'
+import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
 // ---- the field: Gameday's own park drawing (BallparkDiagram, the one BallFlight uses),
 // in its feet-scale coordinates, with the ball, runners and call laid over it.
@@ -55,9 +55,9 @@ export function playBall(svg, b, done) {
   trail.style.opacity = 0
   const finish = () => {
     flash.textContent = FLASH[b.type] ?? b.event
-    setTimeout(done, REDUCE ? 0 : 550)
+    setTimeout(done, motionIsReduced() ? 0 : 550)
   }
-  if (REDUCE || !b.spray) {
+  if (motionIsReduced() || !b.spray) {
     ball.setAttribute('cx', HOME[0])
     ball.setAttribute('cy', HOME[1])
     return finish()

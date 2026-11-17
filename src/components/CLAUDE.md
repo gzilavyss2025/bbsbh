@@ -30,6 +30,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `bracket/` | `PostseasonBracket`, `FullBracket`, `BracketRail`, `BracketDock`, `BracketNow`, `SurvivorsBoard` | October's bracket on the home slate. `SeriesPrimer` (in `postseason/`) draws `SurvivorsBoard` and `BracketRail` when there is no primer. `BracketNow` is the primer's small bracket. Nothing here fetches a score outside `src/api/postseason/bracket.js`'s cutoff-gated reads (ADR-0087) |
 | `charts/` | `WinProbChart`, `HitChart`, `BallFlight` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
+| `explorers/` | `ExplorerTabs`, `wildrides/` (`WildRidesCard`, `Ride`, `Field`) | The home-page explorer cards' shared parts and Wild Rides. Open season pages that show results (ADR-0134). Recipe: `docs/explorers.md` |
 | `game/` | `GameCard`, `GameFinder`, `GameResultFace`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
 | `gamehud/` | `HeaderBug`, `ScorebugMount`, `StatBox` (`CountBlink`, `Stat`) | Live-game heads-up widgets. Gameday's band draws through `ScorebugMount` |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |

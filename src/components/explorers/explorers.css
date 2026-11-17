@@ -1,0 +1,16 @@
+/* The explorers' shared parts (components/explorers/). ExplorerTabs: the house Segmented with a
+   line of meaning under each name, and an optional tool button set apart at the row's end. */
+/* layout-exempt: the segmented strip and the tool button share one row */
+.xtabs { display: flex; gap: var(--space-3); margin: 0 0 var(--space-3); }
+.xtabs .xtabs__seg { flex: 1 1 auto; }
+.xtabs .btn { min-height: 48px; }
+/* layout-exempt: a tab name over its one-line meaning */
+.xtabs__tab { display: grid; gap: 1px; text-align: left; }
+.xtabs__tab b { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); font-weight: inherit; }
+#root .xtabs__tab > span { font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--text-caption); text-transform: none; white-space: nowrap; } /* caps-exempt: a short sentence */
+#root .xtabs [aria-pressed='true'] .xtabs__tab > span { color: inherit; }
+.xtabs .xtabs__tool { flex: none; border-style: dashed; }
+@media (max-width: 740px) {
+  .xtabs { overflow-x: auto; scrollbar-width: none; }
+  .xtabs .xtabs__seg { flex: none; }
+}

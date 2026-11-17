@@ -2,14 +2,9 @@
 // the story numbers (runs down, leads blown, ties, lead changes), the one-line headline,
 // and the summary the generator keeps for each game. Copy rules: past tense in headlines,
 // present tense on a play; club nicknames, never abbreviations, in a sentence.
-import { teamAbbr } from '../teams.js'
-import { teamClubName } from '../teams/names.js'
 import { decodeState } from './ride.js'
+import { abbr, club, lastName, ord, past } from '../explorers/copy.js'
 
-export const abbr = (id) => teamAbbr({ id })
-export const club = (id) => teamClubName(id) ?? abbr(id)
-export const ord = (n) => `${n}${['th', 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] ?? 'th'}`
-export const lastName = (n) => (n ?? '').split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w)).slice(-1)[0] ?? ''
 
 // Where the score stood after a beat: "CWS leads 9–8", "Tied 7–7", "Walk-off".
 export function consequence(b, game) {
@@ -27,15 +22,6 @@ function decidedBy(b) {
   if (/double_play/.test(b.type)) return `${p} got a double play from ${h}`
   return `${p} retired ${h}`
 }
-
-// A beat's title is present tense ("Realmuto doubles"); a headline tells it after the fact.
-const PAST = [
-  [/\bstrikes out\b/, 'struck out'], [/\bis (walked|hit|out|forced)\b/, 'was $1'], [/\bhits\b/, 'hit'],
-  [/\b(single|double|triple|score)s\b/, '$1d'],
-  [/\bflies\b/, 'flied'], [/\blines\b/, 'lined'], [/\bpops\b/, 'popped'],
-  [/\b(homer|walk|bunt|reach|ground)(e?)s\b/, '$1ed'],
-]
-export const past = (t) => PAST.reduce((x, [re, to]) => x.replace(re, to), t)
 
 const list3 = (xs) => (xs.length < 3 ? xs.join(' and ') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`)
 
