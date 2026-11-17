@@ -20,8 +20,7 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
-import { offseasonPhase } from '../src/lib/time/seasonPhase.js'
-import { noteSeasonFor } from './lib/long-at-bats.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { buildRide, RIDE_FIELDS } from '../src/lib/wildrides/ride.js'
 import { summarize, LISTS } from '../src/lib/wildrides/story.js'
 import { encodeShape } from '../src/lib/wildrides/shape.js'
@@ -38,15 +37,6 @@ const opts = parseArgs(args)
 const rescan = args.includes('--rescan')
 const onlySeason = Number(strOpt(opts, 'season')) || null
 const today = new Date().toISOString().slice(0, 10)
-
-async function seasonRow(year) {
-  try {
-    const data = await getJson(`/api/v1/seasons?sportId=1&season=${year}&fields=seasons,seasonId,springStartDate,offseasonStartDate`)
-    return data.seasons?.[0] ?? null
-  } catch {
-    return null
-  }
-}
 
 // Every Final regular-season game (codedGameState 'F': a postponed game also says "Final").
 async function finals(season) {
@@ -82,8 +72,8 @@ async function scanGame(g) {
 }
 
 async function main() {
-  const year = Number(today.slice(0, 4))
-  const season = onlySeason ?? noteSeasonFor(offseasonPhase(today, await seasonRow(year)), year)
+  // The season in play (scripts/CLAUDE.md): the finished one until the next Opening Day.
+  const season = onlySeason ?? (await fetchSeasonInPlay())
   const scanFile = (await readJsonOr(scanPath, null)) ?? {}
   const scan = (scanFile[season] ??= { games: {} })
   const games = await finals(season)

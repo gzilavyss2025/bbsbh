@@ -16,7 +16,7 @@ import { pathOf } from '../../lib/route/table.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr } from '../../lib/teams.js'
 
 // The whole explorer (ride, park, Draw) loads only when the offseason page renders it.
-const WildRidesCard = lazyNamed(() => import('../../screens/designlab/wildrides/WildRides.jsx'), 'WildRidesCard')
+const WildRidesCard = lazyNamed(() => import('../explorers/wildrides/WildRidesCard.jsx'), 'WildRidesCard')
 const MLB_CLUBS = new Set(ALL_MLB_TEAM_IDS)
 
 // A club's moves: the ones it filed, and the ones that name it (a trade partner).
