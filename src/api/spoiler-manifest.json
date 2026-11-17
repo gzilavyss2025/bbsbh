@@ -1278,9 +1278,17 @@
       "class": "spoiler-free",
       "why": "/research's answer (#2234): the match list, summary line, leaders and outcome spread over the research store's plate appearances. Pure; an open page (ADR-0034)."
     },
+    "research/ask.js": {
+      "class": "spoiler-free",
+      "why": "/research's ask bar (#3138): a typed question -> the filter query, rule-based, with the words it could not read. Pure text; reads no game data."
+    },
     "research/filters.js": {
       "class": "spoiler-free",
       "why": "/research's filter definitions, predicates and URL format (#2234). Pure; the `?d=` cutoff drops games on or after that day."
+    },
+    "research/games.js": {
+      "class": "spoiler-free",
+      "why": "/research's game mode (#3137): plays grouped by game and batting club, tested on totals and how the runs scored. Pure; an open page (ADR-0034); a row carries the filtered totals, never the final score."
     },
     "research/history.js": {
       "class": "spoiler-free",

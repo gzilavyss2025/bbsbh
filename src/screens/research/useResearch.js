@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, matcher, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
+import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
 import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
@@ -17,6 +18,20 @@ import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, load
 //     a homer search matches in all twelve, and twelve decoded seasons is too much for a
 //     phone]. The share line is never shown from a part search (base null).
 // The latest season always loads: its people and clubs fill the pickers.
+// GAME MODE (#3137, games.js) runs the same two shapes over club-games: answerGames in place
+// of answer, summarizeGames of summarize, and the games left out summed across seasons.
+
+// The two modes behind one shape: `all` answers a pool, `part` one season's matches.
+const PLAY = {
+  all: (pas, q, cutoff) => answer(pas, q, cutoff),
+  part: (pas, q, cutoff) => ({ ...answer(pas, q, cutoff, { matchesOnly: true }), leftOut: 0 }),
+  sum: (found) => summarize(found),
+}
+const GAME = {
+  all: answerGames,
+  part: (pas, q, cutoff) => answerGames(pas, q, cutoff, { matchesOnly: true }),
+  sum: (found, leftOut, q) => summarizeGames(found, null, leftOut, q),
+}
 
 const raceAbort = (promise, signal) =>
   new Promise((resolve, reject) => {
@@ -40,15 +55,25 @@ export function useResearch(q, cutoff) {
     if (index && latest) loadSeason(index, latest).then(setHead, setError)
   }, [index, latest])
 
-  const targets = useMemo(() => seasonsFor(q, onFile, cutoff), [q, onFile, cutoff])
+  // Game mode has no "What happens": a game link that asks it searches as "Last time".
+  // Game mode reads per-pitch runs (games.js) that history rows do not carry, so it stays on
+  // the Savant seasons (#3150); the coverage line says "games from 2015".
+  const targets = useMemo(() => {
+    const ts = seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff)
+    return q.mode === 'game' ? ts.filter((s) => s > HISTORY_LAST) : ts
+  }, [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
   const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
+  const game = q.mode === 'game'
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]
-    return { ...q, chips }
-  }, [q, blocked])
-  const blank = isBlank(live)
+    if (!game) return { ...q, chips }
+    // A game query keeps only the cards that describe a whole game, and no person.
+    for (const k of Object.keys(chips)) if (!GAME_CHIPS.includes(k)) delete chips[k]
+    return { ...q, chips, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
+  }, [q, blocked, game])
+  const blank = game ? isGameBlank(live) : isBlank(live)
 
   // The "Who most" rank and minimum re-rank the answer on the page, so they never re-search.
   const key = JSON.stringify([searchKey(live), cutoff, targets])
@@ -59,6 +84,8 @@ export function useResearch(q, cutoff) {
     const ctrl = new AbortController()
     stopper.current = { ctrl, stopped: false }
     const bySeason = live.ask === 'last' && (!live.years || live.years[0] <= HISTORY_LAST)
+    const mode = live.mode === 'game' ? GAME : PLAY
+    let leftOut = 0
     const { res, ...baseChips } = live.chips // eslint-disable-line no-unused-vars
     const keep = matcher({ ...live, chips: baseChips }, cutoff)
     const people = { ...head.people }
@@ -87,9 +114,11 @@ export function useResearch(q, cutoff) {
           // A loop, not push(...): a broad card (count 0-0) matches 100k+ PAs a season, past
           // Safari's argument cap.
           const before = found.length
-          for (const m of answer(data.pas, live, cutoff, { matchesOnly: true }).matches) found.push(m)
+          const part = mode.part(data.pas, live, cutoff)
+          for (const m of part.matches) found.push(m)
+          leftOut += part.leftOut
           // The progress answer is rebuilt only when this season added matches.
-          if (found.length > before) interim = summarize([...found])
+          if (found.length > before) interim = mode.sum([...found], leftOut, live)
           if (season !== latest) dropSeason(season)
         } else if (season > HISTORY_LAST) pools.unshift(data.pas)
         else {
@@ -99,7 +128,7 @@ export function useResearch(q, cutoff) {
           dropSeason(season)
         }
       }
-      const result = bySeason ? summarize(found) : answer(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
+      const result = bySeason ? mode.sum(found, leftOut, live) : mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
       // Free every season but the latest once answered (Gary, 2026-11-14): re-asking a
       // range downloads it again rather than holding twelve seasons on a phone.
       pools.length = 0
@@ -110,7 +139,7 @@ export function useResearch(q, cutoff) {
       if (e.name !== 'AbortError') setRun({ key, result: null, people, searched, progress: null, error: e })
       // Stopped: "Last time" shows what it found so far; a one-pass search found nothing
       // yet, so it shows no answer (an empty one would read "nothing matches").
-      else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: bySeason ? summarize([...found]) : null, people, searched, progress: null, stopped: true })
+      else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: bySeason ? mode.sum([...found], leftOut, live) : null, people, searched, progress: null, stopped: true })
     })
     // A replaced search frees the season it was still downloading (not the latest), so a
     // season the new search skips does not stay in memory for the visit.

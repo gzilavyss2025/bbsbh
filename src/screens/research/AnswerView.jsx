@@ -22,7 +22,7 @@ import { Table } from '../../components/ui/table/Table.jsx'
 
 const PAGE = 20
 
-const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
+export const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const pct = (r) => `${(100 * r).toFixed(1)}%`
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
@@ -33,7 +33,7 @@ function Name({ id, people }) {
 }
 
 // A date opens that game's box score, sealed (ADR-0101), without a full page load.
-function BoxDate({ m, children }) {
+export function BoxDate({ m, children }) {
   const link = useRouteLink()
   return <a {...link(boxHref(m))}>{children}</a>
 }
@@ -75,12 +75,13 @@ function summary(a, ask, q) {
   return parts.join(' · ')
 }
 
-export function AnswerCard({ ask, q, a, people }) {
+export function AnswerCard({ ask, q, a, people, note }) {
   return (
     <Card frame="stamped" label={ASKS.find((x) => x.key === ask)?.label}>
       <Stack gap="tight" aria-live="polite">
         <p className="research__answer"><Sentence ask={ask} q={q} a={a} people={people} /></p>
         {a.matches.length > 0 && <p className="research__summary">{summary(a, ask, q)}</p>}
+        {note && <p className="research__summary">{note}</p>}
       </Stack>
     </Card>
   )

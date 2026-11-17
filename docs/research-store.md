@@ -76,6 +76,28 @@ in). A rebuilt month keeps the lineups of the shard on file and fetches only new
 box scores. The index records each month's `v`; a card with `v: 2` is blocked, and named
 "not built yet" in the coverage line, while any searched month is older.
 
+## Game mode (#3137, Gary 2026-11-16/17)
+
+`mode=game` groups plays by game and batting club (`src/api/research/games.js`) and tests that
+club's totals (`gr`, `gh`, `ghr`, `gbb`, `gso`, `gpi`: a range, either end blank) and how its runs
+scored (`how`). The Pitching club picker makes the totals "allowed". Answers: Last time, How often,
+Who most (clubs); no What happens. A row never shows the final score.
+
+Runs come from the change in `bat_score_diff` to the next pitch, not from rs alone: Savant's
+`post_bat_score` sometimes lags a play, and a walk-off's last pitch can read rs 0 (shard.js
+`runsAt`). A game whose club runs do not give its final margin is left out and counted on the
+coverage line. Checked 2026-11-17: 0 left out in 2016, 2019, 2020, 2024, 2025, 2026; June 2025's
+794 club-game totals all matched the official schedule scores.
+
+## The ask bar (#3138, Gary 2026-11-16/17)
+
+A question typed in plain English fills the filters (`src/api/research/ask.js`,
+`screens/research/AskBar.jsx`). Rule-based, in the page: no model call. The vocabulary
+is closed (chip phrases and synonyms, clubs, the store's player names, years, counts,
+question cues, game totals and "How runs scored"); every other word is skipped and
+shown underlined, and the answer card says "Searched without: …". It never guesses.
+**A new card adds its words to `ask.js`**, with a row in `test/research-ask.test.js`.
+
 ## Coverage
 
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,

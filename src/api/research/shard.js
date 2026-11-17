@@ -42,6 +42,12 @@ const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
 export const SHARD_VERSION = 2
 
+// Could this play have made the third out? Then a game that ends on it with the home club
+// behind is a loss, not a walk-off the scores missed (decodePlateAppearances runsAt).
+const ONE_OUT = new Set(['field_out', 'strikeout', 'force_out', 'fielders_choice_out', 'sac_bunt', 'other_out'])
+const TWO_OUTS = new Set(['grounded_into_double_play', 'double_play', 'strikeout_double_play', 'sac_fly_double_play', 'sac_bunt_double_play'])
+const thirdOut = (ev, outs) => ev === 'triple_play' || (ONE_OUT.has(ev) && outs >= 2) || (TWO_OUTS.has(ev) && outs >= 1)
+
 // A count's bit in a PA's `counts` mask; 0 for a count off the 4x3 grid or not on file
 // (null, which `>= 0` would read as 0).
 export const countBit = (balls, strikes) => (Number.isInteger(balls) && Number.isInteger(strikes) && balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
@@ -129,6 +135,9 @@ export function encodeMonth(rows, { season, month, names = {}, order = {} }) {
 // `count` ([balls, strikes]) is the count the last pitch was thrown in. From v2:
 // `marginAfter` (the batting club's margin after the last pitch), `bbType`, `slot`
 // (batting order 1-9); null on a v1 shard. `first` / `last`: the game's first or last PA.
+// `runs`: the runs the batting club scored on any of the PA's pitches; `eventRuns`: those
+// on its last pitch, the play itself (#3137). `finalMargin` (the game's last PA only): away
+// runs minus home runs at the end. Null where the store has no score for the last pitch.
 export function decodePlateAppearances(shard) {
   const { games, dict, cols } = shard
   const order = shard.order ?? {}
@@ -146,10 +155,51 @@ export function decodePlateAppearances(shard) {
     gameNumber.set(pk, seen.get(k))
   }
   const unscale = (k, v) => (v == null ? null : v / (SCALE[k] ?? 1))
+  // RUNS ON A PITCH (#3137): the change in the batting club's margin to the next pitch of
+  // the game (a new half flips the margin's side), not rs alone: Savant's post_bat_score
+  // sometimes lags a play (a run-scoring triple with rs 0, 2025-04-13 NYM at ATH). A run
+  // that scores after a play but before the next pitch (a steal of home) lands on that play.
+  // The game's last pitch has no next one, so it reads rs (null on a v1 shard).
+  const runsAt = (j) => {
+    const k = j + 1
+    if (k < n && cols.g[k] === cols.g[j] && cols.sd[k] != null && cols.sd[j] != null) {
+      // The margin's side flips with the batting club (top/bottom), not with the inning.
+      const sameSide = cols.t[k] === cols.t[j]
+      return Math.max(0, (sameSide ? cols.sd[k] : -cols.sd[k]) - cols.sd[j])
+    }
+    const rs = cols.rs?.[j]
+    if (rs == null) return null
+    // A walk-off whose rs lags (2025-03-30 PIT at MIA reads 0): a bottom half that ends the
+    // game with the home club not ahead scored the winning run, or a homer's runners and all.
+    // From the 7th on only (a seven-inning doubleheader walks off there): a game called
+    // earlier, mid-inning, is no walk-off.
+    const ev = dict.ev[cols.ev[j]]
+    if (cols.t[j] === 0 && cols.i[j] >= 7 && cols.sd[j] != null && cols.sd[j] + rs <= 0 && ev && !NOT_A_PA.has(ev) && !thirdOut(ev, cols.o[j])) {
+      const onBase = ((cols.r[j] & 1) + ((cols.r[j] >> 1) & 1) + ((cols.r[j] >> 2) & 1))
+      return ev === 'home_run' ? onBase + 1 : 1 - cols.sd[j]
+    }
+    return rs
+  }
+  // An at-bat that ends with no PA (a run scores, then a caught stealing ends the inning)
+  // keeps its runs: they go to the club's previous PA in the game as between-play runs
+  // (`runs` but not `eventRuns`), or with no such PA, to its next one (`carry`).
+  let carry = null
+  const flush = (c) => {
+    if (!c || pas.at(-1) === c || !(c.runs > 0)) return
+    const prev = pas.at(-1)
+    if (prev && prev.gamePk === c.gamePk && prev.batTeam === c.batTeam && prev.runs != null) prev.runs += c.runs
+    else {
+      // A carry only grows within its own club and game; another club's pending runs are
+      // dropped, and THE CHECK (games.js) then leaves that game out.
+      const same = carry?.gamePk === c.gamePk && carry?.batTeam === c.batTeam
+      carry = { gamePk: c.gamePk, batTeam: c.batTeam, runs: c.runs + (same ? carry.runs : 0) }
+    }
+  }
   for (let j = 0; j < n; j++) {
     const g = games[cols.g[j]]
     const key = `${g[0]}-${cols.ab[j]}`
     if (!cur || cur.key !== key) {
+      flush(cur)
       cur = {
         key,
         gamePk: g[0],
@@ -170,14 +220,22 @@ export function decodePlateAppearances(shard) {
         margin: cols.sd[j],
         counts: 0,
         nPitches: 0,
+        runs: 0,
         event: '',
       }
       cur.batTeam = cur.top ? cur.away : cur.home
       cur.fieldTeam = cur.top ? cur.home : cur.away
+      if (carry && carry.gamePk === cur.gamePk && carry.batTeam === cur.batTeam) {
+        cur.runs = carry.runs
+        carry = null
+      }
     }
     cur.counts |= countBit(cols.b[j], cols.s[j])
     cur.count = [cols.b[j], cols.s[j]]
     cur.nPitches++
+    // Runs on any pitch of the PA (a wild pitch, a steal of home) count toward `runs`.
+    const rsj = runsAt(j)
+    cur.runs = rsj == null || cur.runs == null ? null : cur.runs + rsj
     cur.pitchType = cols.pt[j] == null ? null : dict.pt[cols.pt[j]]
     cur.px = unscale('px', cols.px[j])
     const ev = dict.ev[cols.ev[j]]
@@ -187,6 +245,8 @@ export function decodePlateAppearances(shard) {
       cur.hcY = unscale('hy', cols.hy[j])
       cur.launchSpeed = unscale('ls', cols.ls[j])
       cur.launchAngle = cols.la[j]
+      cur.eventRuns = rsj
+      // The Moment card (#3140) keeps reading rs on the last pitch, not runsAt.
       const rs = cols.rs?.[j]
       cur.marginAfter = rs == null || cols.sd[j] == null ? null : cols.sd[j] + rs
       cur.marginLast = cols.sd[j]
@@ -199,6 +259,16 @@ export function decodePlateAppearances(shard) {
       pas.push(cur)
     }
   }
+  flush(cur)
   if (pas.length) pas.at(-1).last = true
+  // THE FINAL MARGIN (away minus home) from each game's last pitch, on its last PA: a game
+  // can end after its last PA (a wild-pitch walk-off in a cut-short at-bat).
+  const finals = new Map()
+  for (let j = 0; j < n; j++) {
+    if (j + 1 < n && cols.g[j + 1] === cols.g[j]) continue
+    const r = runsAt(j)
+    if (r != null && cols.sd[j] != null) finals.set(games[cols.g[j]][0], (cols.t[j] === 1 ? 1 : -1) * (cols.sd[j] + r))
+  }
+  for (const pa of pas) if (pa.last) pa.finalMargin = finals.get(pa.gamePk) ?? null
   return pas
 }
