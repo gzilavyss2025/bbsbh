@@ -175,7 +175,9 @@ export function sixDoublePlays(allPlays) {
 export function firstPitchHomer(allPlays, batterId) {
   const pa = orderedPlays({ allPlays }).find((p) => p.matchup?.batter?.id === batterId)
   if (!pa) return null
-  const pitches = (pa.playEvents ?? []).filter((e) => e.isPitch)
+  // His own pitches only: a pinch hitter who comes in mid-count sees those after the change.
+  const events = pa.playEvents ?? []
+  const pitches = events.slice(events.findLastIndex((e) => e.details?.eventType === 'offensive_substitution') + 1).filter((e) => e.isPitch)
   return pa.result?.eventType === 'home_run' && pitches.length === 1
 }
 

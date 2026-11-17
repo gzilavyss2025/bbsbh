@@ -352,7 +352,8 @@ don't run these by hand.
   player's first game of the season with a plate appearance, read off his hitting log; when it holds a
   home run, that game's play-by-play (first plate appearance one pitch, a homer), and for a player who
   debuted earlier his year-by-year line (no plate appearance before). Whole seasons, from 2001 (real
-  pitch sequences); about 20 extra calls a season.
+  pitch sequences); about 16 log calls plus a play-by-play call for each candidate, roughly 100 a
+  season.
   Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play

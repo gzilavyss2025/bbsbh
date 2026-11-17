@@ -385,6 +385,9 @@ test('a first-pitch home run: the first plate appearance of the game is one pitc
   // a one-pitch homer in his second plate appearance is not his first pitch
   assert.equal(firstPitchHomer([pa(0, 'field_out', 2), pa(1, 'home_run', 1)], BATTER), false)
   assert.equal(firstPitchHomer([pa(0, 'home_run', 1, { batter: 2 })], BATTER), null)
+  // a pinch hitter in at 1-0 homers on his own first pitch
+  const pinch = { ...play(0, 'home_run'), playEvents: [pitch(), { details: { eventType: 'offensive_substitution' } }, pitch()] }
+  assert.equal(firstPitchHomer([pinch], BATTER), true)
 })
 
 // A Final feed: the batter debuted this season, and the box score's season line (as of the game,
