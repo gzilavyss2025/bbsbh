@@ -10,6 +10,8 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { GAME_CHIPS } from '../../api/research/games.js'
 import { GameCards, gameAddOptions, openGameCard } from './GameCards.jsx'
+import { STREAK_CHIPS } from '../../api/research/streaks.js'
+import { StreakCards, openStreakCard, streakAddOptions } from './StreakView.jsx'
 
 // THE FILTER BAR (/research, #2234): one card per active chip filter, an "Add a
 // filter" picker for the rest, and the people and club pickers. It holds no state:
@@ -19,6 +21,8 @@ import { GameCards, gameAddOptions, openGameCard } from './GameCards.jsx'
 // A long card shows the picked chips and the first few, then "+N more" (FIRST_CHIPS).
 // GAME MODE (#3137): no person pickers; the play cards give way to the game cards
 // (GameCards.jsx) and the cards that describe a whole game (games.js GAME_CHIPS).
+// STREAKS MODE (#3142): one person picker for the picked side, one Club picker, the stat
+// cards (StreakView.jsx) and the Game type card.
 
 const FIRST_CHIPS = 4
 
@@ -168,12 +172,22 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
   }
   const blockedKeys = new Set(blocked.map((b) => b.key))
   const game = q.mode === 'game'
-  const inMode = (k) => !game || GAME_CHIPS.includes(k)
+  const streak = q.mode === 'streak'
+  const inMode = (k) => (streak ? STREAK_CHIPS.includes(k) : !game || GAME_CHIPS.includes(k))
   const active = Object.keys(q.chips).filter((k) => !blockedKeys.has(k) && inMode(k))
   const addable = FILTERS.filter((f) => !q.chips[f.key] && !blockedKeys.has(f.key) && inMode(f.key))
-  const gameAdd = game ? gameAddOptions(q) : []
+  const gameAdd = game ? gameAddOptions(q) : streak ? streakAddOptions(q) : []
+  const pit = q.s?.side === 'pit'
   return (
     <Stack>
+      {streak ? (
+        <Cluster>
+          {pit
+            ? <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />
+            : <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />}
+          <ClubField label="Club" value={q.team} clubs={clubs} onChange={(team) => onChange({ ...q, team })} />
+        </Cluster>
+      ) : (
       <Cluster>
         {!game && <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />}
         {!game && <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />}
@@ -181,7 +195,9 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
         <ClubField label="Pitching club" value={q.pitchTeam} clubs={clubs} onChange={(pitchTeam) => onChange({ ...q, pitchTeam })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
+      )}
       {game && <GameCards q={q} onChange={onChange} />}
+      {streak && <StreakCards q={q} onChange={onChange} />}
       {q.years && <SeasonsCard years={q.years} seasons={seasons} onYears={(years) => onChange({ ...q, years })} />}
       {active.map((key) => (
         <FilterCard key={key} f={FILTER_BY_KEY[key]} chip={q.chips[key]} onChip={(chip) => setChip(key, chip)} />
@@ -195,6 +211,7 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
             onChange={(e) => {
               if (e.target.value === 'yr') return onChange({ ...q, years: [latest, latest] })
               if (e.target.value.startsWith('g:')) return onChange(openGameCard(q, e.target.value))
+              if (e.target.value.startsWith('s:')) return onChange(openStreakCard(q, e.target.value))
               const f = FILTER_BY_KEY[e.target.value]
               if (f) setChip(f.key, { vals: [f.options[0][0]], inv: false })
             }}

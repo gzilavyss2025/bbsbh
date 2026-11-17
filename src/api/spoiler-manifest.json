@@ -1290,6 +1290,10 @@
       "class": "spoiler-free",
       "why": "/research's game mode (#3137): plays grouped by game and batting club, tested on totals and how the runs scored. Pure; an open page (ADR-0034); a row carries the filtered totals, never the final score."
     },
+    "research/streaks.js": {
+      "class": "spoiler-free",
+      "why": "/research's streaks mode (#3142): runs of a player's consecutive games that match stat cards, over games.js playerGames. Pure; an open page (ADR-0034); a row names games, never a score."
+    },
     "research/series.js": {
       "class": "spoiler-free",
       "why": "/research's postseason series state (#3141): each Final postseason game's series game number, decider, sudden death, potential clinch and elimination, joined by gamePk. Past games on an open page (ADR-0034)."

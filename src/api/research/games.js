@@ -200,11 +200,11 @@ export function playerGames(pas) {
   const pitched = new Set()
   for (const pa of pas) {
     if (!kept.has(pa.gamePk)) continue
-    const { gamePk, date, gameType, home, away } = pa
+    const { gamePk, date, gameType, home, away, gameNumber } = pa
     const line = (role, player, team) => {
       const k = `${gamePk}-${role}-${player}`
       if (!lines.has(k)) {
-        const base = { key: k, gamePk, date, gameType, home, away, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
+        const base = { key: k, gamePk, date, gameType, home, away, gameNumber, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
         // The first line a club's pitching side opens in a game is its starter's.
         const side = `${gamePk}-${team}`
         const starter = role === 'pit' && !pitched.has(side)

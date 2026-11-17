@@ -69,6 +69,10 @@
   font-weight: var(--w-semibold);
   text-align: right;
 }
+.research__active {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
 .research__ord {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
@@ -158,12 +162,15 @@
 /* Names and dates are links, but they read as ink in a ledger, not as blue web links:
    the underline comes back on hover and focus, so they still say they go somewhere. */
 .research__answer :is(a, .plink),
+.research__summary :is(a, .plink),
 .research__table :is(a, .plink),
 .research__rows :is(a, .plink) {
   color: inherit;
   text-decoration: none;
 }
 .research__answer :is(a, .plink):hover,
+.research__summary :is(a, .plink):hover,
+.research__summary :is(a, .plink):focus-visible,
 .research__table :is(a, .plink):hover,
 .research__rows :is(a, .plink):hover,
 .research__answer :is(a, .plink):focus-visible,

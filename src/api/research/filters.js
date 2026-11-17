@@ -32,6 +32,7 @@ import { monthName } from '../../lib/time/months.js'
 import { seriesValues } from './series.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 import { buildGameParams, parseGameQuery } from './games.js'
+import { buildStreakParams, parseStreakQuery } from './streaks.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
 // so a code finds its full name through teams.js. An unknown code shows as itself.
@@ -208,7 +209,9 @@ export function parseQuery(search) {
   const min = parseMin(p.get('min')) ?? RATE_MIN
   // Game mode (#3137, games.js): `mode=game` and its totals; `g` is null in play mode.
   const g = parseGameQuery(search)
-  return { mode: g ? 'game' : 'play', g, chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
+  // Streaks mode (#3142, streaks.js): `mode=streak`; `s` is null in the other modes.
+  const s = g ? null : parseStreakQuery(search)
+  return { mode: g ? 'game' : s ? 'streak' : 'play', g, s, chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -217,6 +220,10 @@ export function buildQuery(q, keep = {}) {
   if (q.mode === 'game') {
     p.set('mode', 'game')
     for (const [k, v] of buildGameParams(q.g ?? { totals: {}, how: [] })) p.set(k, v)
+  }
+  if (q.mode === 'streak') {
+    p.set('mode', 'streak')
+    for (const [k, v] of buildStreakParams(q.s ?? { side: 'bat', totals: {}, starts: false })) p.set(k, v)
   }
   for (const f of FILTERS) {
     const c = q.chips?.[f.key]
