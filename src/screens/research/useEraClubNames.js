@@ -30,6 +30,10 @@ export function eraNamer(spans, lo, hi) {
   }
 }
 
+// A streak row's club, named for the season the streak began (Gary, 2026-11-17, #3167): a
+// streak across a rename reads its first game's name.
+export const streakClub = (s, name) => name(s.team, Number(s.first.date.slice(0, 4)))
+
 // Each club's franchise spans, loaded once and kept (franchiseFor caches the request). A
 // club's spans do not depend on the range, so a loaded club never goes stale: a search that
 // adds clubs season by season names the ones already loaded throughout. A failed load

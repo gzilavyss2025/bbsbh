@@ -181,3 +181,11 @@ test('eraNamer: a game reads its season’s name, a range reads every name in it
   assert.equal(name('MIL', 1987), 'Milwaukee Brewers', 'a club not loaded reads today’s name')
   assert.equal(eraNamer(spans, null, null)('WSH'), 'Washington Nationals', 'no range: today’s name')
 })
+
+// #3167: a streak row names its club for the season the streak began (Gary, 2026-11-17).
+test('streakClub: a streak reads its first game’s season name, even across a rename', async () => {
+  const { eraNamer, streakClub } = await import('../src/screens/research/useEraClubNames.js')
+  const name = eraNamer({ CLE: [{ from: 1915, to: 2021, name: 'Cleveland Indians' }, { from: 2022, to: 2025, name: 'Cleveland Guardians' }] }, 2015, 2026)
+  assert.equal(streakClub({ team: 'CLE', first: { date: '2021-09-20' } }, name), 'Cleveland Indians')
+  assert.equal(streakClub({ team: 'CLE', first: { date: '2023-05-01' } }, name), 'Cleveland Guardians')
+})

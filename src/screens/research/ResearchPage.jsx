@@ -149,13 +149,15 @@ export function ResearchPage() {
   const start = !game && !streak && blank && !Object.keys(q.chips).length && !q.years
   const result = run?.result ?? null
   const progress = run?.progress
-  // A game answer names its own clubs too (#3165): every club in its matches and leaders.
+  // A game answer names its own clubs too (#3165): every club in its matches and leaders;
+  // a streak answer its streaks' clubs (#3167).
   const answerClubs = useMemo(() => {
+    if (streak && result) return [...new Set((result.top ?? []).map((s) => s.team))]
     if (!game || !result) return []
     const out = new Set((result.clubs ?? []).map((c) => c.club))
     for (const m of result.matches) out.add(m.club).add(m.batTeam).add(m.fieldTeam)
     return [...out]
-  }, [game, result])
+  }, [game, streak, result])
   const eraName = useEraClubNames([q.team, q.pitchTeam, q.park, ...answerClubs], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
   const pills = data ? pillsOf(live, people, eraName) : []
   const onAsk = (text) => {
@@ -241,7 +243,7 @@ export function ResearchPage() {
       )}
       {result && !game && !streak && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
       {result && !game && !streak && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
-      {result && streak && <StreakMatches key={searchKey(q)} q={live} a={result} people={people} wide={wide} asOf={cover?.through} />}
+      {result && streak && <StreakMatches key={searchKey(q)} q={live} a={result} people={people} wide={wide} asOf={cover?.through} name={eraName} />}
       {result && game && <GameMatches key={searchKey(q)} ask={live.ask} q={live} a={result} wide={wide} since={cover?.first} name={eraName} />}
     </Stack>
   )

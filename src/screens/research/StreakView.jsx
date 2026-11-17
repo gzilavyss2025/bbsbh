@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { clubName } from '../../api/research/filters.js'
 import { RUNS_INFO, STREAK_STATS } from '../../api/research/streaks.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
@@ -10,6 +9,7 @@ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { BoxDate } from './AnswerView.jsx'
+import { streakClub } from './useEraClubNames.js'
 import { RangeCard } from './GameCards.jsx'
 import { rangeWords } from '../../api/research/games.js'
 
@@ -93,13 +93,13 @@ export function StreakAnswerCard({ q, a, people, asOf }) {
   )
 }
 
-function Rows({ rows, all, people, asOf, q }) {
+function Rows({ rows, all, people, asOf, q, name }) {
   return (
     <ul className="research__rows">
       {rows.map((s) => (
         <li key={`${s.player}-${s.first.gamePk}`} className="research__row">
           <span className="research__date"><BoxDate m={s.first}>{shortDate(s.first.date)}</BoxDate></span>
-          <span><Name id={s.player} people={people} /> · {clubName(s.team)}</span>
+          <span><Name id={s.player} people={people} /> · {streakClub(s, name)}</span>
           <span className="research__ord">{rankText(s, all)} · {s.len} {gameWord(q, s.len)} · {s.active ? <span className="research__active">{through(s, asOf)}</span> : `through ${shortDate(s.last.date)}`}</span>
         </li>
       ))}
@@ -107,7 +107,7 @@ function Rows({ rows, all, people, asOf, q }) {
   )
 }
 
-function StreakTable({ rows, all, people, asOf, q }) {
+function StreakTable({ rows, all, people, asOf, q, name }) {
   return (
     <Table label="Longest streaks" className="research__table">
       <thead><tr><th className="research__num">#</th><th>Player</th><th>Club</th><th className="research__num">{q.s.side === 'pit' && q.s.starts ? 'Starts' : 'Games'}</th><th>From</th><th>Through</th></tr></thead>
@@ -116,7 +116,7 @@ function StreakTable({ rows, all, people, asOf, q }) {
           <tr key={`${s.player}-${s.first.gamePk}`}>
             <td className="research__num">{rankText(s, all)}</td>
             <td><Name id={s.player} people={people} /></td>
-            <td>{clubName(s.team)}</td>
+            <td>{streakClub(s, name)}</td>
             <td className="research__num">{s.len}</td>
             <td><BoxDate m={s.first}>{shortDate(s.first.date)}</BoxDate></td>
             <td>{s.active ? <span className="research__active">{through(s, asOf)}</span> : <BoxDate m={s.last}>{shortDate(s.last.date)}</BoxDate>}</td>
@@ -127,13 +127,13 @@ function StreakTable({ rows, all, people, asOf, q }) {
   )
 }
 
-export function StreakMatches({ q, a, people, wide, asOf }) {
+export function StreakMatches({ q, a, people, wide, asOf, name }) {
   const [shown, setShown] = useState(PAGE)
   if (!a.top.length) return null
   const rows = a.top.slice(0, shown)
   return (
     <Stack>
-      {wide ? <StreakTable rows={rows} all={a.top} people={people} asOf={asOf} q={q} /> : <Rows rows={rows} all={a.top} people={people} asOf={asOf} q={q} />}
+      {wide ? <StreakTable rows={rows} all={a.top} people={people} asOf={asOf} q={q} name={name} /> : <Rows rows={rows} all={a.top} people={people} asOf={asOf} q={q} name={name} />}
       {a.top.length > shown && <Button size="control" onClick={() => setShown(a.top.length)}>Show {a.top.length - shown} more</Button>}
     </Stack>
   )
