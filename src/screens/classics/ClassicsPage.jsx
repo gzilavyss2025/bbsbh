@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { rollClassic } from '../../api/classics/deck.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
@@ -14,6 +16,14 @@ import { teamClubNameShort, isMlbTeamId } from '../../lib/teams.js'
 //
 // The filters are page state, not address, and the seed is one per visit, so a
 // new visit deals a new game and a filter change deals inside the filter.
+// "This date" (#2971) is the reader's local month and day, read once per visit.
+// The chip shows only when one check deal with it on, under the current era and
+// club, finds a game. The check skips the card's started-game preference, so it
+// answers "is there one", not "which one".
+const todayMonthDay = () => new Date().toLocaleDateString('en-CA').slice(5)
+// The chip names the date it deals on ("On Jul 4"), so a reader knows before tapping.
+const onLabel = (md) => `On ${new Date(`2000-${md}T12:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+
 const ERAS = [1960, 1970, 1980, 1990, 2000, 2010, 2020].map((y) => ({ value: y, label: `${String(y).slice(2)}s` }))
 
 export function ClassicsPage() {
@@ -23,6 +33,14 @@ export function ClassicsPage() {
   const [seed] = useState(() => Math.floor(Math.random() * 1e9))
   const [era, setEra] = useState(null)
   const [teamId, setTeamId] = useState(favorite)
+  const [today] = useState(todayMonthDay)
+  const [onDate, setOnDate] = useState(null)
+  const { data: dateFits, loading: dateLoading } = useAsync(
+    () => rollClassic({ seed, era, teamId, monthDay: today }).then(Boolean).catch(() => false),
+    [seed, era, teamId, today],
+  )
+  // Keep the pick while a filter change rechecks, so the card does not deal off-date first.
+  const monthDay = dateFits || dateLoading ? onDate : null
 
   const clubs = [...(favorite ? [{ value: favorite, label: teamClubNameShort(favorite) }] : []), { value: null, label: 'Any club' }]
   return (
@@ -33,9 +51,15 @@ export function ClassicsPage() {
       </header>
       <Chips label="Era" options={[{ value: null, label: 'Any era' }, ...ERAS]} value={era} onChange={setEra} />
       <Chips label="Club" options={clubs} value={teamId} onChange={setTeamId} />
+      {/* While the check loads, the row holds its place unseen, so the card does not drop when it appears. */}
+      {(dateFits || dateLoading) && (
+        <div style={dateFits ? undefined : { visibility: 'hidden' }}>
+          <Chips label="Date" options={[{ value: null, label: 'Any date' }, { value: today, label: onLabel(today) }]} value={onDate} onChange={setOnDate} />
+        </div>
+      )}
       {/* The card empties while a deal loads (useAsync drops its data on a deps change); this holds its 360 px slot so the hint below does not jump. */}
       <div style={{ minHeight: '23rem' }}>
-        <ClassicCard seed={seed} era={era} teamId={teamId} kicker="Dealt for you" />
+        <ClassicCard seed={seed} era={era} teamId={teamId} monthDay={monthDay} kicker="Dealt for you" />
       </div>
       <p className="hint">Games you started show “Pick up where you left off”.</p>
     </div>
