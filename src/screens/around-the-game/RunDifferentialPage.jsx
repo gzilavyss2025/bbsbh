@@ -141,7 +141,7 @@ function RingChart({ eras }) {
 }
 
 export function RunDifferentialPage() {
-  useDocumentTitle('Run Differential')
+  useDocumentTitle('Best Clubs in October')
   const { data, loading, error } = useAsync(fetchRunDifferential, [])
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD)
   const [showAll, setShowAll] = useState(false)

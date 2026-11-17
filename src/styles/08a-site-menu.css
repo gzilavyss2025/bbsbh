@@ -265,16 +265,6 @@ body:has(.scrim--site-menu[open]) {
   background: var(--surface-card);
 }
 
-.sitemenusheet__note {
-  margin: 0 0 2px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
 .sitemenusheet__scroll {
   flex: 1;
   min-height: 0;
@@ -356,6 +346,194 @@ body:has(.scrim--site-menu[open]) {
 
   .sitemenusheet__group + .sitemenusheet__group {
     margin-top: 0;
+  }
+}
+
+/* -------------------------------------------------- the 2026-11-17 regroup
+   The reader's own pages ride above a find box, the report pages sit in six
+   cards three across on a wide screen, and on a phone every card but the
+   first two folds under its heading. Corners are square, as on the slate.
+
+   DESCRIPTIONS ARE A DELIBERATE EXCEPTION to src/styles/CLAUDE.md's "cut
+   helper text" rule (Gary, 2026-11-17): the menu's job is finding a page by
+   what it does, and a name alone ("Hot & Cold") does not say that. The menu
+   and /more only. */
+.sheet.sitemenusheet,
+.sitemenusheet .btn,
+.sitemenusheet .searchfield,
+.sitemenusheet .dirglyph,
+.sitemenusheet .dirlink,
+.sitemenusheet .dirtag,
+.sitemenusheet .navdir__everything {
+  border-radius: 0;
+}
+
+.sitemenusheet__yours {
+  flex: none;
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: var(--space-3) var(--space-4) 0;
+  background: var(--surface-card);
+}
+
+.sitemenusheet__yours .btn {
+  flex: none;
+}
+
+.sitemenusheet__find {
+  flex: none;
+  padding: var(--space-3) var(--space-4) var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.sitemenusheet__top {
+  flex: none;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.sitemenusheet__top .sitemenusheet__find {
+  border-bottom: 0;
+}
+
+/* layout-exempt: the find box takes the row, the close keeps its own width */
+.sitemenusheet__findrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sitemenusheet__findrow .searchfield {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Empty until the reader types, so it takes no room until then. */
+.sitemenusheet__count:empty {
+  display: none;
+}
+
+.sitemenusheet__count {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: a name and its description inside one anchor, which a Stack cannot be */
+.dirlink.dirlink--described {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+.dirlink__desc {
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+
+.dirlink__was {
+  display: none;
+}
+
+.sitemenusheet--finding .dirlink__was {
+  display: inline;
+}
+
+.dirhd__count {
+  font-weight: var(--w-regular);
+}
+
+/* The phone's fold: the heading is the button. */
+.sitemenusheet__fold {
+  margin: 0;
+}
+
+.sitemenusheet__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sitemenusheet__toggle .dirhd {
+  flex: 1;
+  margin: 0;
+}
+
+.sitemenusheet__toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.sitemenusheet__sign {
+  font-size: var(--fs-body);
+  color: var(--text-caption);
+}
+
+/* The sheet holds its height while the find box filters, so it does not
+   jump under the reader's thumb as the list shrinks. */
+.sheet.sitemenusheet {
+  height: 82vh;
+  height: 82dvh;
+}
+
+.sitemenusheet__empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (min-width: 740px) {
+  .sheet.sitemenusheet {
+    max-width: 1040px;
+    max-height: 88vh;
+    max-height: 88dvh;
+    height: 88vh;
+    height: 88dvh;
+  }
+
+  .sitemenusheet__scroll {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* A short window keeps the list's room: the reader's pages and the find
+     box share one row, and the title bar sits tighter. */
+  .sitemenusheet__head {
+    padding: var(--space-3) var(--space-4) var(--space-2);
+  }
+
+  /* layout-exempt: two fixed parts on one row, the find box taking the rest */
+  .sitemenusheet__top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .sitemenusheet__top .sitemenusheet__yours,
+  .sitemenusheet__top .sitemenusheet__find {
+    padding: 0;
+  }
+
+  .sitemenusheet__top .sitemenusheet__find {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .sitemenusheet__empty,
+  .sitemenusheet__trail {
+    grid-column: 1 / -1;
   }
 }
 

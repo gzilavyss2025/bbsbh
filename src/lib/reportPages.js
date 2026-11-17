@@ -16,181 +16,111 @@ import { pathOf } from './route/table.js'
 // picks it up. Adding a page to REPORT_PAGES directly is no longer possible,
 // which is the point.
 //
-// Grouping exists because nineteen ungrouped rows is not a list a reader
-// scans, it's a list a reader gives up on. The bucket names are a first pass
-// and three of them are known to be shaky — see the "unsettled" notes below.
-// They are recorded here rather than in a doc, because the next person to
-// touch this file is the one who needs to know.
-//
-// Order within a group is "busiest first". Order of the groups themselves is
-// "what's happening now" → "who's coming up" → "what already happened" →
-// "your own things", with the two menu-only groups (guides, tools) last.
+// Grouping exists because forty ungrouped rows is not a list a reader scans,
+// it's a list a reader gives up on. The 2026-11-17 regroup (below PAGE_GROUPS)
+// sorts them by what a reader came to do; its reasons are recorded here rather
+// than in a doc, because the next person to touch this file needs them.
 
-// WHAT THE BROADCAST FOUR ARE CALLED, in the menu, in the footer, on /more,
-// and on each page's own masthead — one string, because those are four places
-// and this file exists because copies drift.
+// WHAT THE CONDITIONS-AROUND-THE-GAME GROUP IS CALLED, in the menu, in the
+// footer, on /more, and on the broadcast pages' own mastheads — one string,
+// because those are four places and this file exists because copies drift.
 //
-// NOT "the reports". That was the first name and it was wrong: half the pages
-// on this page's other groups are reports too — Standings, League Leaders,
-// Situational Records, Umpire Rankings and Milestone Watch are all reports on a
-// season, and a group that claims the word for four of them implies the rest
-// are something else. What actually separates these four is their SUBJECT, not
-// their form: crowds, clock, pipeline and arm workload are the conditions
-// around a game rather than its result. So the label names that, and reads in
-// the same plain register as "This season" and "History" beside it.
-export const BROADCAST_STRAND = 'Around the game'
+// "On the field" since the regroup: the group now holds the officiating boards
+// (Umpire Rankings, ABS Challenges) beside the broadcast package (crowds, clock,
+// arm workload, doubleheaders, game notes) — all of it the conditions around a
+// game rather than its result. It was "Around the game" before; the broadcast
+// code still carries that name in its paths (src/screens/around-the-game/).
+export const BROADCAST_STRAND = 'On the field'
 
-// The four groups whose pages are report pages proper — the ones every
+// The groups whose pages are report pages proper, plus Yours — the ones every
 // footer lists. Guides and Tools are NOT here; see below for why.
+// The groups follow the 2026-11-17 menu regroup: sorted by what a reader came
+// to do, 5–8 pages each, so a column scans at a glance. Each page carries a
+// one-line `desc` (shown under its name in the menu) and optional `keywords`
+// the menu's find box also matches. A renamed page keeps its old name in
+// `was`, which the find box matches and shows while searching.
+//
+// Group order: who is winning → ask your own question → the conditions around
+// a game → the clubs' rosters and books → October → the record book, then the
+// reader's own pages. Order within a group is busiest first.
 export const PAGE_GROUPS = [
   {
-    id: 'this-season',
-    label: 'This season',
+    id: 'standings',
+    label: 'Standings & leaders',
     pages: [
-      { label: 'Standings', path: pathOf('standings') },
-      // Sits next to Standings on purpose: it's the same "who's winning"
-      // question, narrowed to the six-team postseason field.
-      { label: 'Postseason Race', path: pathOf('postseason-race') },
-      { label: 'League Leaders', path: '/leaders' },
-      // The same season-to-date read, asked as "who is out of the ordinary": every hot or
-      // cold callout in the league, with a date slider (#2453).
-      { label: 'Standing Out', path: '/outliers' },
-      // Directly under League Leaders because it is the same gesture asked a
-      // different way: that board ranks each skill in its own units, this one
-      // puts all four of them — bat, glove, legs, arm — on one scale of runs
-      // and adds them up. A reader who has just seen who leads in home runs is
-      // one row away from who has been worth the most, whatever he does.
-      { label: 'Run Value Leaders', path: pathOf('run-value') },
-      // Landed on main while this regrouping was in flight (#742): one
-      // situational record, every club at one level, ranked. It belongs next
-      // to League Leaders because it is the same gesture — a season-to-date
-      // board read across the league — not next to the club pages it is
-      // reached from.
-      { label: 'Situational Records', path: '/situational-records' },
-      // The season's tensest at-bats by MLB's pressure score, a club's and the league's.
-      // Beside Situational Records: the same season-to-date board gesture.
-      { label: 'Pressure Moments', path: pathOf('tensest') },
-      // Team-games since 2021 with no out to an outfielder (#2976): a rare-feat list.
-      { label: 'Kept It in the Infield', path: pathOf('infield') },
-      // Any club, any counting stat, N games in a row at a total, back to the franchise's first season.
-      { label: 'Streak Finder', path: pathOf('streaks') },
-      // Ask a question of past plays: when it last happened, how often, who most (#2234).
-      { label: 'Research', path: pathOf('research') },
-      // A player's best stretch in a row (162 games, 32 starts, 65 relief outings), across seasons.
-      { label: 'Best Stretch', path: pathOf('best-stretch') },
-      // A club's best 162 games (or 32 starts, 65 relief outings) in a row by one player.
-      { label: 'Club Stretch', path: pathOf('club-stretch') },
-      // Games each club played after it was mathematically out, by season span.
-      { label: 'Games After Elimination', path: pathOf('eliminated') },
-      // Money, read across the league: who is paid the most, what each club
-      // spends, where the spend goes by position. Here rather than under
-      // "Around the game" because it is a season-to-date board over the whole
-      // league, the same gesture as the two rows above it; a club's own book is
-      // the Contracts tab on its team page, reached from this page's club rail.
-      { label: 'Salaries', path: pathOf('salaries') },
-      // The hot-stove board (#2509): who filed for free agency and where each
-      // one signed. Beside Salaries because it is the same money question,
-      // read league-wide.
-      { label: 'Free Agents', path: '/free-agents' },
-      // One pitcher against one hitter: where he throws each pitch, how the
-      // hitter does against it, and every time they met (#1408). A lookup on
-      // the season's data, read like the boards above it, not a game page.
-      { label: 'Matchup Scout', path: '/scout' },
-      { label: 'Foul Tracker', path: pathOf('fouls') },
-      { label: 'Umpire Rankings', path: pathOf('umpire-rankings') },
-      // The season board for the ABS Challenge System, 2026's first in MLB.
-      // Next to Umpire Rankings because the two are the same kind of page —
-      // a season-to-date officiating board read across the league — asking
-      // different halves of one question: that one scores every called pitch
-      // against the zone, this one scores only the calls a player thought
-      // were wrong. Not under "Around the game": this is about a result on
-      // the field, not about the conditions around it.
-      { label: 'ABS Challenges', path: pathOf('abs-challenges') },
+      { label: 'Standings', path: pathOf('standings'), desc: 'Every division and the wild card', keywords: 'games back' },
+      { label: 'Postseason Race', path: pathOf('postseason-race'), desc: 'The six-club field, and who is chasing it', keywords: 'wild card clinch' },
+      { label: 'League Leaders', path: '/leaders', desc: 'Top of every batting and pitching category', keywords: 'home runs era avg' },
+      { label: 'Run Value Leaders', path: pathOf('run-value'), desc: 'Bat, glove, legs and arm on one scale of runs', keywords: 'war value' },
+      { label: 'Hot & Cold', path: '/outliers', desc: 'Who is far above or below his normal level', keywords: 'outliers', was: 'Standing Out' },
+      { label: 'Situational Records', path: '/situational-records', desc: 'Each club in one game situation, ranked', keywords: 'one-run extra innings' },
+      { label: 'Biggest At-Bats', path: pathOf('tensest'), desc: 'The season’s highest-pressure plate appearances', keywords: 'leverage clutch', was: 'Pressure Moments' },
     ],
   },
   {
-    id: 'around-the-game',
+    id: 'lookup',
+    label: 'Look it up',
+    pages: [
+      { label: 'Ask the Play Log', path: pathOf('research'), desc: 'Search every play by batter, pitcher, count and more', keywords: 'query', was: 'Research' },
+      { label: 'Matchup Scout', path: '/scout', desc: 'One pitcher against one hitter', keywords: 'pitch zones' },
+      { label: 'Streak Finder', path: pathOf('streaks'), desc: 'Any club, any stat, so many games in a row', keywords: 'consecutive' },
+      { label: 'Best Stretch', path: pathOf('best-stretch'), desc: 'A player’s best run of games, across seasons', keywords: 'span' },
+      { label: 'Best Stretch by Club', path: pathOf('club-stretch'), desc: 'A club’s best run of games', keywords: 'team span', was: 'Club Stretch' },
+      { label: 'Foul Tracker', path: pathOf('fouls'), desc: 'Who fouls off the most pitches', keywords: 'fouls' },
+      { label: 'Six Degrees of Teammates', path: pathOf('teammates'), desc: 'Link any two players through teammates', keywords: 'connections' },
+      { label: 'Where they’re from', path: '/from', desc: 'Players by birthplace', keywords: 'hometown country' },
+    ],
+  },
+  {
+    // The broadcast package (src/screens/around-the-game/) lives here with the
+    // officiating boards: all of it is the conditions around a game rather
+    // than its result. BROADCAST_STRAND names this group on those mastheads.
+    id: 'on-the-field',
     label: BROADCAST_STRAND,
-    // The broadcast package (src/screens/around-the-game/,
-    // styles/68-around-the-game.css — those paths carry this group's name, not
-    // this FILE's, for the collision reason spelled out at BROADCAST_STRAND).
-    // Its own group rather than four more rows under "This season" for two
-    // reasons. They are a SET — one graphics package, one voice, one nightly
-    // pair of data files behind three of them — and a reader who finds one is
-    // very likely to want the others. And they answer a different KIND of
-    // question than the rest of that group: Standings and League Leaders say
-    // who is winning, while these say who is showing up, how long it takes,
-    // what a club has coming and how much work its pen has already done.
-    //
-    // Four of the five are not about a result at all. The fifth, The Double
-    // Dip, is here deliberately: a doubleheader is a scheduling condition —
-    // rain in April, two games in August — and the page is about what that
-    // condition DOES to a club, which is the same question the other four ask
-    // about crowds, clock, pipeline and workload. It is a season aggregate
-    // over finished games; if a first-click test says
-    // readers look for it under History instead, move it rather than
-    // duplicating it.
-    //
-    // Attendance leads on busiest-first, the same rule every other group here
-    // orders by: it is the one a reader is most likely to have come looking
-    // for by name.
-    //
-    // All Star Game trails, outside that SET on purpose — it carries none of
-    // the broadcast package's shared graphics or nightly data files. It sits
-    // here because it answers the same "what's happening around the game
-    // right now" question the rest of the group asks rather than a result;
-    // if a first-click test says readers look for it under This season
-    // instead, move it back rather than duplicating it.
     pages: [
-      { label: 'Attendance', path: pathOf('attendance') },
-      { label: 'Bullpen Availability', path: pathOf('bullpens') },
-      { label: 'Pace of Play', path: pathOf('pace') },
-      { label: 'Doubleheaders', path: pathOf('doubleheaders') },
-      { label: 'All Star Game', path: pathOf('all-star-rosters') },
-      // Every club's pregame notes PDFs, links only. It was reachable only from
-      // the What's Brewing modal; it is the same "around the game" question —
-      // what a club hands the press before first pitch.
-      { label: 'Game Notes', path: '/game-notes' },
+      { label: 'Bullpen Availability', path: pathOf('bullpens'), desc: 'Who can pitch tonight, by recent work', keywords: 'relievers rest' },
+      { label: 'Umpire Rankings', path: pathOf('umpire-rankings'), desc: 'Every umpire’s called pitches against the zone', keywords: 'umps strike zone' },
+      { label: 'ABS Challenges', path: pathOf('abs-challenges'), desc: 'Each challenged call, and who wins them', keywords: 'robot zone' },
+      { label: 'Pace of Play', path: pathOf('pace'), desc: 'How long games take, club by club', keywords: 'clock time' },
+      { label: 'Attendance', path: pathOf('attendance'), desc: 'Crowds at every park', keywords: 'fans' },
+      { label: 'Doubleheaders', path: pathOf('doubleheaders'), desc: 'What two games in a day does to a club', keywords: 'twin bill' },
+      { label: 'Game Notes', path: '/game-notes', desc: 'Each club’s pregame notes', keywords: 'pdf press' },
     ],
   },
   {
-    id: 'prospects',
-    label: 'Prospects & injuries',
+    id: 'rosters',
+    label: 'Rosters & money',
     pages: [
-      { label: 'Top MLB Prospects', path: pathOf('prospects') },
-      { label: 'Farm System Rankings', path: pathOf('farm-system') },
-      { label: 'Rehab Assignments', path: pathOf('rehab') },
+      { label: 'Salaries', path: pathOf('salaries'), desc: 'Who is paid what, and each club’s payroll', keywords: 'payroll contracts' },
+      { label: 'Free Agents', path: '/free-agents', desc: 'Who filed, and where each one signed', keywords: 'signings hot stove' },
+      { label: 'Trade Deadline', path: '/trade-deadline', desc: 'Every deadline deal', keywords: 'trades' },
+      { label: 'Top MLB Prospects', path: pathOf('prospects'), desc: 'The best players not yet in the majors', keywords: 'minors pipeline' },
+      { label: 'Farm System Rankings', path: pathOf('farm-system'), desc: 'Each club’s minor-league talent, ranked', keywords: 'farm' },
+      { label: 'Rehab Assignments', path: pathOf('rehab'), desc: 'Injured players on minor-league rehab', keywords: 'injured list il' },
     ],
   },
   {
-    id: 'history',
-    label: 'History',
+    id: 'postseason',
+    label: 'Postseason',
     pages: [
-      { label: 'Where they’re from', path: '/from' },
-      { label: 'Awards History', path: pathOf('awards-history') },
-      { label: 'Postseason History', path: pathOf('postseason-history') },
-      // A shelf of results (final scores), like Postseason History beside it.
-      { label: 'Notable Games', path: pathOf('notable') },
-      // Beside Postseason History because it reads the same 26 brackets from
-      // the other end: that page shows what happened each October, this one
-      // asks what every champion had in common before October started.
-      { label: 'Nine Keys', path: pathOf('nine-keys') },
-      // Directly under Postseason History because it is that page's question
-      // turned around: the bracket page shows who won each October, this one
-      // takes the clubs that were plainly the best over a season and asks what
-      // October did to them. It wears the broadcast masthead and sits in
-      // src/screens/around-the-game/ for the same reason /abs-challenges does —
-      // that is where the report components and the one report stylesheet live
-      // — and is filed here because it is history, back to 1901.
-      { label: 'Run Differential', path: pathOf('run-differential') },
-      // Unsettled: a leader board filed by era, while League Leaders is filed
-      // by season. Same kind of page, two different groups.
-      { label: 'Postseason Leaders', path: pathOf('postseason-leaders') },
-      { label: 'Postseason Records', path: '/postseason-records' },
-      { label: 'All-Star Legacy', path: pathOf('all-star-legacy') },
-      { label: 'Six Degrees of Teammates', path: pathOf('teammates') },
-      { label: 'Milestone Watch', path: pathOf('milestones') },
-      { label: 'Trade Deadline', path: '/trade-deadline' },
+      { label: 'Postseason History', path: pathOf('postseason-history'), desc: 'Every bracket and champion', keywords: 'world series october' },
+      { label: 'Postseason Leaders', path: pathOf('postseason-leaders'), desc: 'Career leaders in October', keywords: 'october' },
+      { label: 'Postseason Records', path: '/postseason-records', desc: 'Single-game and series records', keywords: 'october' },
+      { label: 'Best Clubs in October', path: pathOf('run-differential'), desc: 'How the best regular-season clubs fared', keywords: 'run differential', was: 'Run Differential' },
+      { label: 'What Champions Share', path: pathOf('nine-keys'), desc: 'Nine traits every champion had', keywords: 'nine keys', was: 'Nine Keys' },
+    ],
+  },
+  {
+    id: 'record-book',
+    label: 'Record book',
+    pages: [
+      { label: 'Milestone Watch', path: pathOf('milestones'), desc: 'Who is close to a round number', keywords: '500 3000 career' },
+      { label: 'Awards History', path: pathOf('awards-history'), desc: 'MVP, Cy Young and more, every year', keywords: 'mvp cy young' },
+      { label: 'All Star Game', path: pathOf('all-star-rosters'), desc: 'This year’s rosters', keywords: 'all-star' },
+      { label: 'All-Star Legacy', path: pathOf('all-star-legacy'), desc: 'Every All-Star, every year', keywords: 'all-star history' },
+      { label: 'Notable Games', path: pathOf('notable'), desc: 'No-hitters, cycles and other rare games', keywords: 'no-hitter cycle' },
+      { label: 'No Outfield Outs', path: pathOf('infield'), desc: 'Games with no out made by an outfielder', keywords: 'infield', was: 'Kept It in the Infield' },
+      { label: 'Games After Elimination', path: pathOf('eliminated'), desc: 'What clubs did after they were out', keywords: 'eliminated' },
     ],
   },
   {

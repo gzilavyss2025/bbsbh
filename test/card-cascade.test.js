@@ -1937,7 +1937,7 @@ test('C6c: the off-day tile is a Card button that keeps its club accent and its 
 // helper (ScorebookGameLink, LogbookGameLink) when a caller passes `card`.
 // `gone` means the block's whole rule was the frame, so it has no rule left.
 const C7 = [
-  { css: '08a-site-menu.css', sel: '.sitemenusheet__group', jsx: ['components/chrome/SiteMenu.jsx'], ns: 'sitemenusheet__group', keep: ['overflow'] },
+  { css: '08a-site-menu.css', sel: '.sitemenusheet__group', jsx: ['components/chrome/SiteMenu.jsx'], ns: 'sitemenusheet__group', keep: ['overflow'], frame: 'stamped' },
   { css: '42-first-scorebook.css', sel: '.scorebookstory__gamecard', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__gamecard', button: true, frame: 'ledger' },
   { css: '42-first-scorebook.css', sel: '.scorebookstory__performer', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__performer', button: true, frame: 'ledger' },
   { css: '42-first-scorebook.css', sel: '.scorebookstory__leaders', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__leaders', as: 'div', frame: 'ledger', gone: true },
@@ -2120,7 +2120,7 @@ const H3_RENAMED = [
   ['szmodal__eyebrow', 'szmodal__note'],
   ['trrank__eyebrow', 'trrank__note'],
   ['umpmodal__eyebrow', 'umpmodal__note'],
-  ['sitemenusheet__eyebrow', 'sitemenusheet__note'],
+  // `.sitemenusheet__note` left with the menu's title bar (2026-11-17).
   // `.wordmarklab__eyebrow` left with the Wordmark Lab study itself (#1326).
   ['admincopy__lede', 'admincopy__note'],
   ['clubsseen__lede', 'clubsseen__note'],

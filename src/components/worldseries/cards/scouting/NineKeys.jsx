@@ -19,7 +19,7 @@ export function NineKeys({ data, clubIds, season }) {
   const verdict = keysVerdict(sideA, sideB, { limit: data.limit, firstSeason: data.firstSeason })
   return (
     <ComparisonLedger
-      title="Nine keys"
+      title="What Champions Share"
       note="League ranks · lower is better"
       noteAs="info"
       clubIds={clubIds}

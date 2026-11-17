@@ -118,7 +118,7 @@ function pillsOf(q, people, clubName) {
 }
 
 export function ResearchPage() {
-  useDocumentTitle('Research')
+  useDocumentTitle('Ask the Play Log')
   const wide = useMediaQuery(WIDE_QUERY)
   const sheet = useRef(null)
   const [{ q, cutoff }, setState] = useState(readUrl)
@@ -252,7 +252,7 @@ export function ResearchPage() {
     <div className="screen research">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Research</h1>
+        <h1 className="topbar__title">Ask the Play Log</h1>
       </header>
       {wide && data ? (
         <div className="research__cols">

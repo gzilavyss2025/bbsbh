@@ -4,7 +4,8 @@
 // card.
 //
 // FRAMES. sheet draws the box on the wrap; bare draws none, for a table inside
-// a Card that already draws it.
+// a Card that already draws it. stamped is the square card's frame (card--stamped):
+// no radius, the heavy ink edge and the hard offset shadow.
 // DENSITIES. row is the standard cell (6 by 8); tight is the box score's (4 by 2);
 // keep pads nothing, for a table whose namespace sets its own cells (a drawn mark,
 // a rank track).
@@ -12,7 +13,7 @@
 //
 // LABEL. Names the scroll region and makes it a Tab stop, so a keyboard can
 // scroll a wide table (WCAG 2.1.1). Without one the wrap is a plain div.
-export const FRAMES = ['sheet', 'bare']
+export const FRAMES = ['sheet', 'stamped', 'bare']
 export const DENSITIES = ['row', 'tight', 'keep']
 
 export function tableParts({ frame = 'sheet', density = 'row', sticky = false, label, className = '' } = {}) {

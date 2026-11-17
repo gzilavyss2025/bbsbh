@@ -9,7 +9,7 @@ const ids = (m) => m.map((c) => c.id)
 
 test('off day: Nine keys then Matchup edges, no umpire card', () => {
   assert.deepEqual(scoutingModel({ dayType: 'off', ...FULL }), [
-    { id: 'nine-keys', label: 'Nine keys' },
+    { id: 'nine-keys', label: 'What Champions Share' },
     { id: 'matchup-edges', label: 'Matchup edges' },
   ])
 })

@@ -66,7 +66,7 @@ function SeasonTable({ season, favoriteTeamId }) {
 // Team-games since 2021 in which a club made no out to an outfielder (#2976). A standalone
 // report, not a scoring surface: it opens live with no seal, and it shows no scores (ADR-0034).
 export function InfieldPage() {
-  useDocumentTitle('Kept It in the Infield')
+  useDocumentTitle('No Outfield Outs')
   const { loading, error, data } = useAsync(() => loadInfield(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const hasData = (data?.seasons?.length ?? 0) > 0
@@ -75,7 +75,7 @@ export function InfieldPage() {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Kept It in the Infield</h1>
+        <h1 className="topbar__title">No Outfield Outs</h1>
       </header>
 
       <p className="hint">

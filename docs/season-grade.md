@@ -1,5 +1,7 @@
 # Season Grade — one verdict with two visible drivers
 
+> **Retired 2026-11-17.** Season Grade's only surface, the Grade column on /standings, was removed, and `src/api/score/seasonGrade.js` was deleted with it. The nightly `team-score.json` is still written. This page is kept as the record of how the grade worked.
+
 Season Grade answers: **how impressive has this team's season been, considering
 both its play and the assignment it entered the year with?** It is an MLB-only,
 0.0–10.0 verdict on the Team Page. It is not a projection.
@@ -36,7 +38,7 @@ else:
 grade = clamp(quality + adjustment, 0, 10)
 ```
 
-The calculation lives in `src/api/score/seasonGrade.js`. It runs from the
+The calculation lived in `src/api/score/seasonGrade.js`, which was deleted (2026-11-17). It runs from the
 rounded, auditable Quality and Vs. expectation values already shipped to the
 browser. Examples from the July 2026 calibration set:
 

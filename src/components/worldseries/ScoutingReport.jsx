@@ -140,7 +140,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   const failed = failedLine(
     failedCards(
       [
-        { label: 'Nine keys', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError, id: 'nine-keys' },
+        { label: 'What Champions Share', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError, id: 'nine-keys' },
         { label: 'Glove and legs', failed: defense === CLUB_DEFENSE_FALLBACK || defenseError },
         { label: 'Roster', error: rosterError },
         { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },

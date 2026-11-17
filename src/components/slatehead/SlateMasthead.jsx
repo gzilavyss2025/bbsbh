@@ -65,6 +65,17 @@ export function SlateMasthead({ stops, dateStr, isToday, wide, onLevel, onDate, 
     return () => obs.disconnect()
   }, [wide])
 
+  // At the very top the bar is see-through, so the page's graph-paper grid
+  // runs behind the logo; the moment the page moves it takes its paper fill,
+  // since it sticks from the first pixel and the card would show through it.
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 0)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+
   const controls = (
     <CompactControls stops={stops} dateStr={dateStr} isToday={isToday} onLevel={onLevel} onDate={onDate} />
   )
@@ -75,7 +86,7 @@ export function SlateMasthead({ stops, dateStr, isToday, wide, onLevel, onDate, 
   const st = stamp ? ' slatemast--stamp' : ''
   return (
     <>
-      <header className={`slatemast__bar${st}${compact && wide ? ' is-compact' : ''}`}>
+      <header className={`slatemast__bar${st}${scrolled ? ' is-scrolled' : ''}${compact && wide ? ' is-compact' : ''}`}>
         <button type="button" className="slatemast__brand" onClick={onHome} aria-label="Tally, today's games">
           <TallyLockup height={wide ? 34 : 28} />
         </button>

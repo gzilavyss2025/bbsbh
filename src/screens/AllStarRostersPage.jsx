@@ -269,6 +269,8 @@ export function AllStarRostersPage() {
             selectedTeamId={filterTeamId}
             onSelect={setFilterTeamId}
             ariaLabel="Filter rosters by team"
+            showArrows
+            chips
           />
           <Stack gap="snug" className="allstarrosters__list">
             {visibleSeasons.map((year) => {

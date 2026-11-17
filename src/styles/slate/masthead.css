@@ -386,19 +386,19 @@
 }
 
 /* ---- the club strip as round chips (the old tray, restyled) ---- */
-.slatestrip .teamfilterstrip--chips {
+.teamfilterstrip--chips {
   border: 0;
   border-radius: 0;
   background: none;
   box-shadow: none;
 }
 
-.slatestrip .teamfilterstrip--chips .vsteam__strip {
+.teamfilterstrip--chips .vsteam__strip {
   gap: var(--space-3);
   padding: var(--space-1) var(--space-1) var(--space-2);
 }
 
-.slatestrip .teamfilterstrip--chips .vsteam__team {
+.teamfilterstrip--chips .vsteam__team {
   width: var(--tap-min);
   height: var(--tap-min);
   padding: 0;
@@ -408,14 +408,70 @@
   box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
 }
 
-.slatestrip .teamfilterstrip--chips .vsteam__team.is-marked {
+.teamfilterstrip--chips .vsteam__team.is-marked {
   background: var(--marker);
 }
 
-.slatestrip .teamfilterstrip--chips .vsteam__team .teamlogo {
-  width: 26px; /* raw-value-exempt: the logo inside a 44px chip, spec'd */
-  height: 26px; /* raw-value-exempt: the logo inside a 44px chip, spec'd */
+/* Chips are always full colour (the picked one carries the ring below, not the
+   colour), and the arrows replace the native scrollbar, as on the slate. */
+.teamfilterstrip--chips .vsteam__team .teamlogo {
+  filter: none;
+  opacity: 1;
 }
+
+.teamfilterstrip--chips .vsteam__strip {
+  scrollbar-width: none;
+}
+
+.teamfilterstrip--chips .vsteam__strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hover: the chip washes with the club's own colour (--chip-hover, set per
+   chip by TeamFilterStrip), light enough that the same mark still reads on
+   it. The mark never changes, so nothing moves or resizes, and it stays at
+   full strength (out-ranking the tray's own hover fade in 26-player-page.css). */
+@media (hover: hover) {
+  .teamfilterstrip--chips .vsteam__team:hover {
+    background: color-mix(in srgb, var(--chip-hover, var(--surface-inset)) 22%, var(--surface-inset));
+  }
+
+  .teamfilterstrip--chips .vsteam__team:not(.is-active):hover .teamlogo {
+    opacity: 1;
+  }
+}
+
+/* The picked chip keeps the chip's own paper and hard ink shadow: the tray's
+   picked style (a card fill and the soft card shadow, 26-player-page.css)
+   would otherwise win and make it read as a different control. */
+.teamfilterstrip--chips .vsteam__team.is-active {
+  background: var(--surface-inset);
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
+}
+
+/* The MLB reset chip never wears the picked ring: "every club" is the resting
+   state, and a ring round it read as a doubled circle beside the plain chips.
+   A ring therefore always means one club is picked. */
+.teamfilterstrip--chips .vsteam__team.teamfilterstrip__pin.is-active {
+  outline: none;
+}
+
+/* The MLB reset chip: its mark is a full-bleed square, so it is drawn at the
+   size the club marks reach inside their frames, not edge to edge. */
+.teamfilterstrip--chips .teamfilterstrip__mlblogo {
+  width: 26px; /* raw-value-exempt: matches the club marks' drawn size inside a chip */
+  height: 26px; /* raw-value-exempt: matches the club marks' drawn size inside a chip */
+}
+
+/* A filter page's picked club (the slate never picks one): an ink ring round
+   the chip, so it never reads as the yellow favourite. */
+.teamfilterstrip--chips .vsteam__team.is-active {
+  outline: var(--bw-heavy) solid var(--text-heading);
+  outline-offset: var(--bw-heavy);
+}
+
+/* No size rule for the chip's logo: TeamLogo sets an inline 36px, and the cap
+   set's own frame padding brings the mark to about 26px inside the 44px chip. */
 
 /* ---- wide: the sticky bar, the card in one row ---- */
 @media (min-width: 740px) {
@@ -427,6 +483,13 @@
     margin: 0 calc(-1 * var(--app-gutter));
     padding: 0 var(--app-gutter);
     border-bottom: var(--bw-heavy) solid transparent;
+    /* See-through at the top of the page, so the body's graph-paper grid runs
+       behind the logo: a paper fill there read as a patch where the grid was
+       erased. SlateMasthead adds .is-scrolled at the first pixel of scroll. */
+    background: transparent;
+  }
+
+  .slatemast__bar.is-scrolled {
     background: var(--bg-canvas);
   }
 
@@ -474,7 +537,7 @@
     width: 260px; /* raw-value-exempt: the D1 level menu width, spec'd */
   }
 
-  .slatestrip .teamfilterstrip--chips .vsteam__team {
+  .teamfilterstrip--chips .vsteam__team {
     width: var(--space-12);
     height: var(--space-12);
   }
