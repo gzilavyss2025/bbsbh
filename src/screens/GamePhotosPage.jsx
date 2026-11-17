@@ -112,7 +112,7 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
             <div className="gamephotos__sectionhead">
               <h2 className="gamephotos__sectiontitle">Club</h2>
             </div>
-            <TeamFilterStrip selectedTeamId={teamId} onSelect={pickTeam} ariaLabel="Choose a club" />
+            <TeamFilterStrip selectedTeamId={teamId} onSelect={pickTeam} ariaLabel="Choose a club" showArrows logoVariant="cap" className="teamfilterstrip--chips" />
           </section>
 
           <section className="gamephotos__section">

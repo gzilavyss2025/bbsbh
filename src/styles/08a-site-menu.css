@@ -265,16 +265,6 @@ body:has(.scrim--site-menu[open]) {
   background: var(--surface-card);
 }
 
-.sitemenusheet__note {
-  margin: 0 0 2px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
 .sitemenusheet__scroll {
   flex: 1;
   min-height: 0;
@@ -399,8 +389,34 @@ body:has(.scrim--site-menu[open]) {
   background: var(--surface-card);
 }
 
+.sitemenusheet__top {
+  flex: none;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.sitemenusheet__top .sitemenusheet__find {
+  border-bottom: 0;
+}
+
+/* layout-exempt: the find box takes the row, the close keeps its own width */
+.sitemenusheet__findrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sitemenusheet__findrow .searchfield {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Empty until the reader types, so it takes no room until then. */
+.sitemenusheet__count:empty {
+  display: none;
+}
+
 .sitemenusheet__count {
-  min-height: 1.2em;
   margin: var(--space-1) 0 0;
   font-size: var(--fs-small);
   color: var(--text-caption);
@@ -489,6 +505,30 @@ body:has(.scrim--site-menu[open]) {
 
   .sitemenusheet__scroll {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* A short window keeps the list's room: the reader's pages and the find
+     box share one row, and the title bar sits tighter. */
+  .sitemenusheet__head {
+    padding: var(--space-3) var(--space-4) var(--space-2);
+  }
+
+  /* layout-exempt: two fixed parts on one row, the find box taking the rest */
+  .sitemenusheet__top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .sitemenusheet__top .sitemenusheet__yours,
+  .sitemenusheet__top .sitemenusheet__find {
+    padding: 0;
+  }
+
+  .sitemenusheet__top .sitemenusheet__find {
+    flex: 1;
+    min-width: 200px;
   }
 
   .sitemenusheet__empty,

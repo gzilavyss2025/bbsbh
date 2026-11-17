@@ -76,6 +76,8 @@
   --navy:     #1B2A3A;   /* ink doubles as brand primary */
   --allstar-blue:      #1D4E8F;  /* All-Star banner — brighter than paper navy */
   --allstar-blue-deep: #163A6B;
+  --league-al:         #B0182F;  /* American League red, the league bars on /standings */
+  --league-nl:         #0B3B78;  /* National League blue */
 
   /* ---- Sealed (spoiler cover) — kraft tape ---- */
   --seal:      #B5824A;  /* kraft amber cover */
@@ -196,6 +198,9 @@
   --border-stamped-soft:  var(--graphite);
   --surface-stamped-ink:  var(--ink-0);
   --surface-stamped-tint: var(--field-wash);
+  /* A stamped table's head and group rows: the card paper with a touch of
+     ink, so it reads gray against the black stamped edge rather than tan. */
+  --surface-stamped-head: color-mix(in srgb, var(--ink-0) 7%, var(--surface-card));
   /* The ground of every notification card (ADR-0113): --marker at 35% over
      --paper-2, worked out once as a literal because the contrast checker does not
      parse color-mix() (the same precedent as the #FAEED0 pair in

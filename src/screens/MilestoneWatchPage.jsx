@@ -68,6 +68,8 @@ export function MilestoneWatchPage() {
           selectedTeamId={filterTeamId}
           onSelect={setFilterTeamId}
           ariaLabel="Filter Milestone Watch by team"
+          showArrows
+          logoVariant="cap" className="teamfilterstrip--chips"
         />
       )}
 

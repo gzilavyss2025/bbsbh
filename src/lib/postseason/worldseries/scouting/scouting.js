@@ -30,7 +30,7 @@ export function clubOrder(clubIds, sides) {
 }
 
 const CARDS = [
-  { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
+  { id: 'nine-keys', label: 'What Champions Share', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
   { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
   // The Series rosters by position group (direction A). `roster` is true once a roster loaded.
   { id: 'roster', label: 'Roster', rank: { off: 3, game: 8 }, has: (i) => Boolean(i.roster) },

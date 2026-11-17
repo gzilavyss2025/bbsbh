@@ -2120,7 +2120,7 @@ const H3_RENAMED = [
   ['szmodal__eyebrow', 'szmodal__note'],
   ['trrank__eyebrow', 'trrank__note'],
   ['umpmodal__eyebrow', 'umpmodal__note'],
-  ['sitemenusheet__eyebrow', 'sitemenusheet__note'],
+  // `.sitemenusheet__note` left with the menu's title bar (2026-11-17).
   // `.wordmarklab__eyebrow` left with the Wordmark Lab study itself (#1326).
   ['admincopy__lede', 'admincopy__note'],
   ['clubsseen__lede', 'clubsseen__note'],

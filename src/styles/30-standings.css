@@ -76,7 +76,7 @@
 .standings-jump {
   min-height: 28px;
   padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   border: var(--bw-hair) solid var(--border-rule);
   background: transparent;
   color: var(--text-caption);
@@ -186,7 +186,14 @@
   margin: 0 0 10px;
 }
 .lgstand__bar .sectionhead {
-  border-radius: var(--radius-md);
+  border-radius: 0;
+}
+/* Each league's bar wears its own colour: AL red, NL blue. */
+.lgstand__bar--al {
+  --bar-fill: var(--league-al);
+}
+.lgstand__bar--nl {
+  --bar-fill: var(--league-nl);
 }
 .lgstand__div {
   margin-bottom: 14px;
@@ -327,4 +334,76 @@
   font-size: var(--fs-small);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
+}
+
+/* A row opens its club's splits sheet (TeamSplitsSheet.jsx). */
+.clubtable--full tbody tr[tabindex] {
+  cursor: pointer;
+}
+
+.clubtable--full tbody tr[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.splitsheet {
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+
+.splitsheet__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.splitsheet__record {
+  color: var(--text-caption);
+}
+
+/* layout-exempt: the sheet's three tables in a column, the sheet owns its own scroll */
+.splitsheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.splitsheet__table td:last-child,
+.splitsheet__table th:last-child {
+  text-align: right;
+}
+
+.splitsheet__table :is(td, th):first-child {
+  text-align: left;
+}
+
+/* Square, like the stamped tables inside it. */
+.sheet.splitsheet,
+.splitsheet .btn {
+  border-radius: 0;
+}
+
+.splitsheet__of {
+  color: var(--text-caption);
+}
+
+/* Square tags, and a rank head that never wraps or touches the edge. */
+.splitsheet .rank__tag {
+  border-radius: 0;
+}
+
+.splitsheet__table th {
+  white-space: nowrap;
+}
+
+.splitsheet__table :is(td, th):last-child {
+  padding-right: var(--space-3);
+  padding-left: var(--space-3);
+}
+
+/* On the season row the board toggle stands as tall as the year pills. */
+.standings-headrow .standings-jump {
+  min-height: var(--control-min);
 }

@@ -150,16 +150,9 @@ function SiteMenuModal({ onClose }) {
       onClick={(e) => e.target === dialogRef.current && close()}
     >
       <div className={`sheet sitemenusheet${term ? ' sitemenusheet--finding' : ''}`}>
-        <div className="sitemenusheet__head">
-          <div>
-            <p className="sitemenusheet__note">Tally Baseball</p>
-            <h2 className="sheet__title">Site menu</h2>
-          </div>
-          <IconButton onClick={close} label="Close">
-            ✕
-          </IconButton>
-        </div>
-
+        {/* No title bar: the dialog is named by its aria-label, and the close
+            sits at the end of the find row. */}
+        <div className="sitemenusheet__top">
         <nav className="sitemenusheet__yours" aria-label={YOURS.label}>
           {YOURS.pages.map((item) => (
             <a key={item.path} className="btn" {...rowProps(item.path)}>
@@ -169,6 +162,7 @@ function SiteMenuModal({ onClose }) {
         </nav>
 
         <div className="sitemenusheet__find">
+          <div className="sitemenusheet__findrow">
           <div className="searchfield">
             <span className="searchfield__glyph" aria-hidden="true">
               <FindGlyph />
@@ -188,9 +182,14 @@ function SiteMenuModal({ onClose }) {
               spellCheck={false}
             />
           </div>
+          <IconButton onClick={close} label="Close">
+            ✕
+          </IconButton>
+          </div>
           <p className="sitemenusheet__count" aria-live="polite">
             {term ? `${hits} page${hits === 1 ? '' : 's'}` : ''}
           </p>
+        </div>
         </div>
 
         <div className="sitemenusheet__scroll" ref={listRef}>

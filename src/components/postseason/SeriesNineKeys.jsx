@@ -41,10 +41,10 @@ export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
   const at = (rank) => `${((Math.min(Math.max(rank, 1), 30) - 1) / 29) * 100}%`
   return (
     <section className="psseries__keyssection">
-      <Card frame="stamped" label="Nine keys" labelAs={labelAs} as="div" className="psseries__keys">
+      <Card frame="stamped" label="What Champions Share" labelAs={labelAs} as="div" className="psseries__keys">
         <Table frame="bare" density="keep" className="psseries__keystable">
           <caption className="sr-only">
-            Nine Keys ranks out of 30, {abbr(a.teamId)} and {abbr(b.teamId)}
+            Ranks out of 30, {abbr(a.teamId)} and {abbr(b.teamId)}
           </caption>
           <thead>
             <tr>

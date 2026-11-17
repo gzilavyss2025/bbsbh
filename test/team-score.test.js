@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '../scripts/gen-team-score.mjs'
-import { leagueSeasonGradesFor, gradeTiersByTeamId } from '../src/api/score/team.js'
-import { seasonGradeFromScores, seasonGradeFor } from '../src/api/score/seasonGrade.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import {
   scheduleStrengthAdjustment,
@@ -311,62 +309,3 @@ test('a walk-off win in the current-form window raises the score and is counted 
   assert.ok(withSwing.score > plain.score)
 })
 
-test('Season Grade preserves quality at expectation and uses bounded headroom', () => {
-  assert.deepEqual(seasonGradeFromScores(6.1, 8.5), {
-    score: 7.7,
-    adjustment: 1.6,
-    quality: 6.1,
-    surprise: 8.5,
-  })
-  assert.equal(seasonGradeFromScores(8.7, 4.1).score, 7.8)
-  assert.equal(seasonGradeFromScores(7.4, 5).score, 7.4)
-  assert.equal(seasonGradeFor({ score: 8 }, null), null)
-})
-
-test('league Season Grades require both inputs and never look past the cutoff', () => {
-  const quality = { seasons: { 2026: { byTeamId: {
-    1: {
-      '2026-07-10': { season: { score: 6, weightedWinsAbove500: 3.2 } },
-      '2026-07-12': { season: { score: 9, weightedWinsAbove500: 9.9 } },
-    },
-    2: { '2026-07-10': { season: { score: 7, weightedWinsAbove500: -1.5 } } },
-    3: { '2026-07-10': { season: { score: 8, weightedWinsAbove500: 4.4 } } },
-  } } } }
-  const surprise = { seasons: { 2026: { byTeamId: {
-    1: {
-      '2026-07-10': { score: 8, residualWins: 2.1 },
-      '2026-07-12': { score: 1, residualWins: 8.8 },
-    },
-    2: { '2026-07-10': { score: 5, residualWins: -0.6 } },
-  } } } }
-
-  // The 07-12 snapshots (weightedWinsAbove500: 9.9, residualWins: 8.8) sit
-  // past the cutoff and must never leak into team 1's tiebreak — only the
-  // 07-10 pair is eligible.
-  assert.deepEqual(leagueSeasonGradesFor(quality, surprise, 2026, '2026-07-11'), [
-    { teamId: 1, score: 7.4, tiebreak: [3.2, 2.1] },
-    { teamId: 2, score: 7, tiebreak: [-1.5, -0.6] },
-  ])
-})
-
-test('Season Grade tiers split a nine-team pool into even thirds by rank, not by score', () => {
-  const rows = Array.from({ length: 9 }, (_, i) => ({ teamId: i + 1, score: 9 - i, tiebreak: [] }))
-  const tiers = gradeTiersByTeamId(rows)
-  assert.deepEqual([...tiers.entries()], [
-    [1, 'high'], [2, 'high'], [3, 'high'],
-    [4, 'mid'], [5, 'mid'], [6, 'mid'],
-    [7, 'low'], [8, 'low'], [9, 'low'],
-  ])
-})
-
-test('Season Grade tiers handle a pool size not divisible by three without losing a team', () => {
-  const rows = Array.from({ length: 8 }, (_, i) => ({ teamId: i + 1, score: 8 - i, tiebreak: [] }))
-  const tiers = gradeTiersByTeamId(rows)
-  const counts = { high: 0, mid: 0, low: 0 }
-  for (const tier of tiers.values()) counts[tier] += 1
-  assert.equal(tiers.size, 8)
-  assert.equal(counts.high + counts.mid + counts.low, 8)
-  // Best-ranked team is always 'high', worst-ranked is always 'low'.
-  assert.equal(tiers.get(1), 'high')
-  assert.equal(tiers.get(8), 'low')
-})

@@ -1,18 +1,15 @@
 import '../styles/30-standings.css'
 import { useMemo, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team/fetch.js'
-import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/score/team.js'
-import { fetchSeasonScores } from '../api/score/season.js'
 import {
   shapeStandings,
   shapeWildCard,
-  attachTeamField,
   extractRanks,
   attachRankTrend,
   clinchMarksInPlay,
-  DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
+import { TeamSplitsSheet } from '../components/teamstats/TeamSplitsSheet.jsx'
 import { buildJumps, labelDate, shiftDays, stepStandingsDate, WILD_CARD_ERA_FROM } from '../lib/time/standingsDates.js'
 import { seasonPath } from '../lib/seasons/route.js'
 import { useRouteLink } from '../lib/nav.js'
@@ -31,7 +28,6 @@ import { Table } from '../components/ui/table/Table.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
-import { Pill } from '../components/ui/control/Pill.jsx'
 import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 
@@ -51,19 +47,6 @@ function TrendGlyph({ trend }) {
   return <span className={`standings-trend standings-trend--${trend}`}>{TREND_GLYPH[trend]}</span>
 }
 
-// One decimal, or DASH when the team has no Season Grade snapshot yet.
-function formatGrade(grade) {
-  return grade != null ? grade.toFixed(1) : DASH
-}
-
-// Season Grade cell: the number plus a percentile pill (top third of the
-// league-wide pool green, bottom third red, the rest the neutral rank tag)
-// — same good/bad palette as the WAR rank tag on the Team page.
-function GradePill({ grade, tier }) {
-  const cls = tier === 'high' ? ' rank__tag--good' : tier === 'low' ? ' rank__tag--bad' : ''
-  return <Pill className={`rank__tag${cls}`}>{formatGrade(grade)}</Pill>
-}
-
 // The league mark that rides the right edge of a league's bar. The two league
 // logos are on the same CDN as every club mark, under the All-Star team ids the
 // All-Star pages already draw (159 American, 160 National) — see
@@ -71,6 +54,9 @@ function GradePill({ grade, tier }) {
 // art by scripts/gen-mono-logos.mjs, since the bar is navy and both marks are
 // drawn largely in navy themselves (ADR-0031).
 const LEAGUE_MARK_ID = { 103: 159, 104: 160 }
+// The league's short name and its bar colour (--league-al / --league-nl).
+const LEAGUE_ABBR = { 103: 'AL', 104: 'NL' }
+const LEAGUE_KEY = { 103: 'al', 104: 'nl' }
 
 // One league's header: the same navy/gold bar a club wears everywhere else in
 // the app, title hard left and the league mark bleeding to the bar's full
@@ -103,7 +89,7 @@ const NO_ROWS = []
 
 // Screen: league-wide standings, both leagues × three divisions, with home/away
 // splits, runs for/against, run differential, expected (Pythagorean) W-L,
-// Season Grade, division magic number/clinch, streak, last-ten, and a
+// division magic number/clinch, streak, last-ten, and a
 // rank-movement trend glyph riding on GB. The view opens live (today's games
 // included); "Entering today" (through yesterday) is one tap away. The historical quick-jumps scrub back to earlier
 // dates this season. A season picker reaches every earlier year back to 1998:
@@ -133,7 +119,7 @@ export function StandingsPage({ seasonYear }) {
   // season picked from the picker is final for the same reason. Read off
   // statsapi's own season row, never off the clock or an empty response
   // (useStandingsSeason, lib/time/standingsDates.js).
-  const { today, yesterday, ready, final, season, current, seasons, seasonRow } =
+  const { today, yesterday, ready, final, season, current, seasons } =
     useStandingsSeason(seasonYear)
   const jumps = useMemo(() => (final ? [] : buildJumps(today)), [final, today])
   // The picker's address for a year. The current season is the bare address.
@@ -218,34 +204,6 @@ export function StandingsPage({ seasonYear }) {
   if (data && data !== lastGood.rows) setLastGood({ season, rows: data })
   const shown = data ?? (lastGood.season === season ? lastGood.rows : NO_ROWS)
 
-  // Season Grade column: a SEPARATE, independent fetch of two already-nightly
-  // static files (never statsapi) — a slow/failed grade file must never block
-  // the primary standings table. Cutoff pinned to at most yesterday even in
-  // Live mode: the nightly snapshots have no "today" entry, so a later cutoff
-  // would find nothing new.
-  const { data: scoreFiles } = useAsync(() => Promise.all([fetchTeamScores(), fetchSeasonScores()]), [])
-  // The nightly grade snapshots stop when the season does, so a December
-  // cutoff would find none of them. Final reads the season's own last day off
-  // the row the winter was established from.
-  // A past season's grades are the ones from its last day; the year's end is
-  // later than that day and the lookup takes the latest snapshot at or before.
-  const gradeCutoff = final
-    ? season === current
-      ? (seasonRow?.regularSeasonEndDate ?? yesterday)
-      : `${season}-12-31`
-    : (view.date ?? yesterday)
-  // Grade + percentile tier come from the SAME pool of rows, so a team's pill
-  // color can never disagree with its printed number.
-  const { gradeByTeamId, gradeTierByTeamId } = useMemo(() => {
-    if (!scoreFiles) return { gradeByTeamId: new Map(), gradeTierByTeamId: new Map() }
-    const [teamScores, seasonScores] = scoreFiles
-    const rows = leagueSeasonGradesFor(teamScores, seasonScores, season, gradeCutoff)
-    return {
-      gradeByTeamId: new Map(rows.map((r) => [r.teamId, r.score])),
-      gradeTierByTeamId: gradeTiersByTeamId(rows),
-    }
-  }, [scoreFiles, season, gradeCutoff])
-
   // Rank-movement trend: a second, independent standings fetch a week before
   // whatever date is currently effectively shown (`view.date`, or `today` in
   // Live mode), so its ranks are always from before what's on screen.
@@ -273,13 +231,33 @@ export function StandingsPage({ seasonYear }) {
       board === 'wildcard'
         ? shapeWildCard(shown, favoriteTeamId)
         : shapeStandings(shown, favoriteTeamId)
-    attachTeamField(shaped, gradeByTeamId, 'grade')
-    attachTeamField(shaped, gradeTierByTeamId, 'gradeTier')
     attachRankTrend(shaped, board, prevRankByTeamId)
     return shaped
-  }, [shown, favoriteTeamId, board, gradeByTeamId, gradeTierByTeamId, prevRankByTeamId])
+  }, [shown, favoriteTeamId, board, prevRankByTeamId])
 
   const clinchMarks = useMemo(() => clinchMarksInPlay(leagues), [leagues])
+
+  // The Magic# column earns its place only while a race is open: once every
+  // division is decided it reads "Clinched" or a dash all the way down, so it
+  // drops. Page-wide, so the division tables keep one set of columns.
+  // Elimination numbers follow the same rule: only while a club is still alive
+  // with a count to chase.
+  const elimInPlay = leagues.some((lg) =>
+    (lg.divisions ?? []).some((d) => d.teams.some((t) => /\d/.test(String(t.elim ?? '')))),
+  )
+  const wcElimInPlay = leagues.some((lg) =>
+    [...(lg.leaders ?? []), ...(lg.wildcard ?? [])].some((t) => /\d/.test(String(t.wcElim ?? ''))),
+  )
+  const wcCols = 9 + (wcElimInPlay ? 1 : 0)
+  const [splitsFor, setSplitsFor] = useState(null)
+  // Every club on the board, once, for the splits sheet's ranks.
+  const allTeams = leagues.flatMap((lg) =>
+    lg.divisions ? lg.divisions.flatMap((d) => d.teams) : [...(lg.leaders ?? []), ...(lg.wildcard ?? [])],
+  )
+
+  const magicInPlay = leagues.some((lg) =>
+    (lg.divisions ?? []).some((d) => d.teams.some((t) => /\d/.test(String(t.magic ?? '')))),
+  )
 
   const refreshing = loading && shown.length > 0
 
@@ -290,6 +268,19 @@ export function StandingsPage({ seasonYear }) {
     return {
       className: `${t.pinned ? 'is-me' : ''} ${t.clinch === 'e' ? 'is-eliminated' : ''}`.trim(),
       style: t.pinned ? { '--fav-accent': favoriteAccentColor(t.id) } : undefined,
+      tabIndex: 0,
+      'aria-label': `${t.name}: all splits`,
+      onClick: (e) => {
+        if (e.target.closest('a')) return
+        setSplitsFor(t)
+      },
+      onKeyDown: (e) => {
+        if (e.target !== e.currentTarget) return
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          setSplitsFor(t)
+        }
+      },
     }
   }
 
@@ -297,21 +288,43 @@ export function StandingsPage({ seasonYear }) {
     <div className="screen standings-screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Standings</h1>
+        <Cluster gap="snug" align="baseline" className="standings-title">
+          <h1 className="topbar__title">Standings</h1>
+          <span className="standings-ctrl__asof">
+            <span className="standings-ctrl__mode">{view.mode}</span>
+            <span className="standings-ctrl__detail">{view.detail}</span>
+          </span>
+        </Cluster>
         <Door className="topbar__action" {...linkProps(racePath)}>
           Postseason Race
         </Door>
       </header>
 
-      <SeasonPicker view={pickerView} pathFor={pathFor} compare={false} all={false} />
+      <Cluster gap="base" align="center" className="standings-headrow">
+        <SeasonPicker view={pickerView} pathFor={pathFor} compare={false} all={false} />
+        {ready && hasWildCard && (
+        <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings board">
+            <button
+              type="button"
+              aria-pressed={board === 'division'}
+              className={`standings-jump ${board === 'division' ? 'is-active' : ''}`}
+              onClick={() => setBoardMode('division')}
+            >
+              Division
+            </button>
+            <button
+              type="button"
+              aria-pressed={board === 'wildcard'}
+              className={`standings-jump ${board === 'wildcard' ? 'is-active' : ''}`}
+              onClick={() => setBoardMode('wildcard')}
+            >
+              Wild Card
+            </button>
+          </Cluster>
+        )}
+      </Cluster>
 
       <Stack gap="snug" className="standings-ctrl">
-        <div className="standings-ctrl__top">
-          <div className="standings-ctrl__asof">
-            <span className="standings-ctrl__mode">{view.mode}</span>
-            <span className="standings-ctrl__detail">{view.detail}</span>
-          </div>
-        </div>
 
         {/* Every date control on this page is hidden in the winter — the
             season's record is the record, and each of these would ask the
@@ -357,26 +370,6 @@ export function StandingsPage({ seasonYear }) {
           </Cluster>
         )}
 
-        {ready && hasWildCard && (
-        <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings board">
-            <button
-              type="button"
-              aria-pressed={board === 'division'}
-              className={`standings-jump ${board === 'division' ? 'is-active' : ''}`}
-              onClick={() => setBoardMode('division')}
-            >
-              Division
-            </button>
-            <button
-              type="button"
-              aria-pressed={board === 'wildcard'}
-              className={`standings-jump ${board === 'wildcard' ? 'is-active' : ''}`}
-              onClick={() => setBoardMode('wildcard')}
-            >
-              Wild Card
-            </button>
-          </Cluster>
-        )}
 
         {ready && !isWide && (
           <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings column detail">
@@ -405,10 +398,10 @@ export function StandingsPage({ seasonYear }) {
         {board === 'wildcard'
           ? leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
-                <div className="lgstand__bar">
+                <div className={`lgstand__bar lgstand__bar--${LEAGUE_KEY[lg.id] ?? 'other'}`}>
                   <LeagueBar league={lg} />
                 </div>
-                <Table sticky label={`${lg.name} wild card standings`} className={`clubtable clubtable--full ${expandedCols ? 'is-expanded' : ''}`.trim()}>
+                <Table frame="stamped" sticky label={`${lg.name} wild card standings`} className={`clubtable clubtable--full ${expandedCols ? 'is-expanded' : ''}`.trim()}>
                   <thead>
                     <tr>
                       <th className="team">Team</th>
@@ -416,15 +409,16 @@ export function StandingsPage({ seasonYear }) {
                       <th>L</th>
                       <th>Pct</th>
                       <th>GB</th>
+                      {wcElimInPlay && <th className="st-ext">E#</th>}
+                      <th className="st-ext">1-Run</th>
                       <th className="st-ext">Exp W-L</th>
-                      <th className="st-ext">Grade</th>
                       <th className="st-ext">Strk</th>
                       <th className="st-ext">L10</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="wc-grouphead">
-                      <td colSpan={9}>Division leaders</td>
+                      <td colSpan={wcCols}>Division leaders</td>
                     </tr>
                     {lg.leaders.map((t) => (
                       <tr key={t.id} {...rowProps(t)}>
@@ -442,24 +436,23 @@ export function StandingsPage({ seasonYear }) {
                         <td>
                           {t.gb} <TrendGlyph trend={t.trend} />
                         </td>
+                        {wcElimInPlay && <td className="st-ext">{t.wcElim}</td>}
+                        <td className="st-ext">{t.oneRun}</td>
                         <td className="st-ext">{t.expWL}</td>
-                        <td className="st-ext">
-                          <GradePill grade={t.grade} tier={t.gradeTier} />
-                        </td>
                         <td className="st-ext">{t.streak}</td>
                         <td className="st-ext">{t.l10}</td>
                       </tr>
                     ))}
                     <tr className="wc-grouphead">
-                      <td colSpan={9}>Wild card</td>
+                      <td colSpan={wcCols}>Wild card</td>
                     </tr>
                     {lg.wildcard.map((t) => {
-                      const { className, style } = rowProps(t)
+                      const row = rowProps(t)
                       return (
                         <tr
                           key={t.id}
-                          className={`${className} ${t.wcCutoff ? 'wc-cutoff' : ''}`.trim()}
-                          style={style}
+                          {...row}
+                          className={`${row.className} ${t.wcCutoff ? 'wc-cutoff' : ''}`.trim()}
                         >
                           <td className="team">
                             <TeamLink id={t.id} tab="numbers">
@@ -475,10 +468,9 @@ export function StandingsPage({ seasonYear }) {
                           <td>
                             {t.wcgb} <TrendGlyph trend={t.trend} />
                           </td>
+                          {wcElimInPlay && <td className="st-ext">{t.wcElim}</td>}
+                          <td className="st-ext">{t.oneRun}</td>
                           <td className="st-ext">{t.expWL}</td>
-                          <td className="st-ext">
-                            <GradePill grade={t.grade} tier={t.gradeTier} />
-                          </td>
                           <td className="st-ext">{t.streak}</td>
                           <td className="st-ext">{t.l10}</td>
                         </tr>
@@ -490,13 +482,13 @@ export function StandingsPage({ seasonYear }) {
             ))
           : leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
-                <div className="lgstand__bar">
+                <div className={`lgstand__bar lgstand__bar--${LEAGUE_KEY[lg.id] ?? 'other'}`}>
                   <LeagueBar league={lg} />
                 </div>
                 {lg.divisions.map((div) => (
                   <div className="lgstand__div" key={div.id}>
-                    <h3 className="lgstand__divname">{div.name}</h3>
-                    <Table sticky label={`${lg.name} ${div.name} standings`} className={`clubtable clubtable--full ${expandedCols ? 'is-expanded' : ''}`.trim()}>
+                    <h3 className="lgstand__divname">{LEAGUE_ABBR[lg.id] ? `${LEAGUE_ABBR[lg.id]} ${div.name}` : div.name}</h3>
+                    <Table frame="stamped" sticky label={`${lg.name} ${div.name} standings`} className={`clubtable clubtable--full ${expandedCols ? 'is-expanded' : ''}`.trim()}>
                       <thead>
                         <tr>
                           <th className="team">Team</th>
@@ -504,14 +496,15 @@ export function StandingsPage({ seasonYear }) {
                           <th>L</th>
                           <th>Pct</th>
                           <th>GB</th>
-                          <th className="st-ext">Magic#</th>
+                          {magicInPlay && <th className="st-ext">Magic#</th>}
+                          {elimInPlay && <th className="st-ext">E#</th>}
                           <th className="st-ext">Home</th>
                           <th className="st-ext">Away</th>
+                          <th className="st-ext">1-Run</th>
                           <th className="st-ext">RS</th>
                           <th className="st-ext">RA</th>
                           <th>Diff</th>
                           <th className="st-ext">Exp W-L</th>
-                          <th className="st-ext">Grade</th>
                           <th className="st-ext">Strk</th>
                           <th className="st-ext">L10</th>
                         </tr>
@@ -532,18 +525,19 @@ export function StandingsPage({ seasonYear }) {
                             <td>
                               {t.gb} <TrendGlyph trend={t.trend} />
                             </td>
-                            <td className={`st-ext ${t.magic === 'Clinched' ? 'is-clinched' : ''}`.trim()}>
-                              {t.magic}
-                            </td>
+                            {magicInPlay && (
+                              <td className={`st-ext ${t.magic === 'Clinched' ? 'is-clinched' : ''}`.trim()}>
+                                {t.magic}
+                              </td>
+                            )}
+                            {elimInPlay && <td className="st-ext">{t.elim}</td>}
                             <td className="st-ext">{t.home}</td>
                             <td className="st-ext">{t.away}</td>
+                            <td className="st-ext">{t.oneRun}</td>
                             <td className="st-ext">{t.rs}</td>
                             <td className="st-ext">{t.ra}</td>
                             <td className={t.diffTone}>{t.diff}</td>
                             <td className="st-ext">{t.expWL}</td>
-                            <td className="st-ext">
-                              <GradePill grade={t.grade} tier={t.gradeTier} />
-                            </td>
                             <td className="st-ext">{t.streak}</td>
                             <td className="st-ext">{t.l10}</td>
                           </tr>
@@ -578,6 +572,7 @@ export function StandingsPage({ seasonYear }) {
       )}
 
       <ReportFooter />
+      {splitsFor && <TeamSplitsSheet team={splitsFor} teams={allTeams} onClose={() => setSplitsFor(null)} />}
     </div>
   )
 }

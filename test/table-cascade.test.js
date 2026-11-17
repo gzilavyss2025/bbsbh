@@ -148,7 +148,7 @@ test('the helper names the wrap and the grid', () => {
 })
 
 test('an unknown frame or density is a caller typo, and it throws', () => {
-  assert.deepEqual(FRAMES, ['sheet', 'bare'])
+  assert.deepEqual(FRAMES, ['sheet', 'stamped', 'bare'])
   assert.deepEqual(DENSITIES, ['row', 'tight', 'keep'])
   assert.throws(() => tableParts({ frame: 'ledger' }), /unknown frame "ledger"/)
   assert.throws(() => tableParts({ density: 'loose' }), /unknown density "loose"/)
@@ -1040,7 +1040,7 @@ test('T6b: the seal pin: Nine Keys reads no reveal-only module, seal or stamp', 
 // are sheets at row density and scroll sideways on a phone, so each has a label;
 // only the /standings boards and the /postseason-race mini table pin the club.
 const T8 = [
-  { jsx: 'screens/StandingsPage.jsx', tags: 2, sticky: true, extra: 'clubtable--full' },
+  { jsx: 'screens/StandingsPage.jsx', tags: 2, sticky: true, extra: 'clubtable--full', frame: 'stamped' },
   { jsx: 'screens/PostseasonRacePage.jsx', tags: 1, sticky: true, extra: 'clubtable--full' },
   { jsx: 'components/teamstats/PostseasonOddsModal.jsx', tags: 1, sticky: false, extra: 'psoddstable' },
 ]
@@ -1051,14 +1051,20 @@ const t8Rule = (css, sel) => rules(read(css)).find(([s]) => s.split(',').map((x)
 
 test('T8: each club table renders on Table with the frame, density, sticky and label the census gives it', () => {
   let tables = 0
-  for (const { jsx, tags, sticky, extra } of T8) {
+  for (const { jsx, tags, sticky, extra, frame } of T8) {
     const code = src(jsx)
     assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
     assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
     const own = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => /className=\{?["`]clubtable(?![a-z0-9_-])/.test(a))
     assert.equal(own.length, tags, `${jsx}: ${tags} <Table> tag(s) wear .clubtable`)
     for (const a of own) {
-      assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a sheet at row density, the defaults`)
+      if (frame) {
+        // The standings tables wear the stamped frame (2026-11-17), still at row density.
+        assert.match(a, new RegExp(String.raw`\bframe="${frame}"`), `${jsx}: frame="${frame}"`)
+        assert.doesNotMatch(a, /\bdensity=/, `${jsx}: row density, the default`)
+      } else {
+        assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a sheet at row density, the defaults`)
+      }
       assert.equal(/\bsticky\b/.test(a), sticky, `${jsx}: sticky`)
       assert.match(a, /\blabel=/, `${jsx}: a club table scrolls sideways on a phone, so it has a label`)
       if (extra) assert.match(a, new RegExp(String.raw`className=\{?["\`][^"\`]*(?<![\w-])${extra}(?![\w-])`), `${jsx}: the tag keeps .${extra}`)

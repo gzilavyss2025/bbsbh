@@ -5,11 +5,12 @@ import {
   shapeWildCard,
   expectedRecord,
   formatMagicNumber,
+  formatElimination,
+  teamSplits,
   clinchMark,
   clinchLabel,
   clinchMarksInPlay,
   CLINCH_ORDER,
-  attachTeamField,
   extractRanks,
   rankTrend,
   attachRankTrend,
@@ -247,20 +248,6 @@ test('shapeWildCard threads the expected record but never a magic number (divisi
   assert.equal(lg.leaders[0].expWL, '58-42')
 })
 
-test('attachTeamField stamps a value by team id onto a Division-shaped tree', () => {
-  const leagues = [{ id: 103, divisions: [{ id: 201, teams: [{ id: 100 }, { id: 101 }] }] }]
-  attachTeamField(leagues, new Map([[100, 7.2]]), 'grade')
-  assert.equal(leagues[0].divisions[0].teams[0].grade, 7.2)
-  assert.equal(leagues[0].divisions[0].teams[1].grade, null)
-})
-
-test('attachTeamField stamps a value by team id onto a Wild-Card-shaped tree', () => {
-  const leagues = [{ id: 103, leaders: [{ id: 200 }], wildcard: [{ id: 201 }] }]
-  attachTeamField(leagues, new Map([[201, 6.5]]), 'grade')
-  assert.equal(leagues[0].leaders[0].grade, null)
-  assert.equal(leagues[0].wildcard[0].grade, 6.5)
-})
-
 test('extractRanks reads division rank in division mode', () => {
   const leagues = [{ id: 103, divisions: [{ id: 201, teams: [{ id: 1, rank: '1' }, { id: 2, rank: '2' }] }] }]
   const ranks = extractRanks(leagues, 'division')
@@ -311,4 +298,56 @@ test('shapeStandings names the run-differential sign as a variant, not a state (
   records[0].teamRecords[1].runDifferential = -12
   const [lg2] = shapeStandings(records)
   assert.equal(lg2.divisions[0].teams[1].diffTone, 'standings__diff--negative')
+})
+
+// ---- elimination numbers, the one-run column and the splits sheet (2026-11-17)
+
+test('formatElimination prints a count while alive, a dash once out or a leader', () => {
+  assert.equal(formatElimination('7'), '7')
+  assert.equal(formatElimination(12), '12')
+  assert.equal(formatElimination('E'), '—')
+  assert.equal(formatElimination('-'), '—')
+  assert.equal(formatElimination(undefined), '—')
+})
+
+test('teamSplits labels the feed splits, shortens league names, and drops what is missing', () => {
+  const t = {
+    records: {
+      splitRecords: [
+        { type: 'oneRun', wins: 25, losses: 14 },
+        { type: 'home', wins: 55, losses: 26 },
+        { type: 'grass', wins: null, losses: null },
+      ],
+      divisionRecords: [{ division: { name: 'American League East' }, wins: 28, losses: 24 }],
+      leagueRecords: [{ league: { id: 104, name: 'National League' }, wins: 27, losses: 21 }],
+    },
+  }
+  const { splits, divisions, leagues } = teamSplits(t)
+  // Reader order, not feed order: Home before One-run games.
+  assert.deepEqual(splits, [
+    { label: 'Home', record: '55-26' },
+    { label: 'One-run games', record: '25-14' },
+  ])
+  assert.deepEqual(divisions, [{ label: 'Vs. AL East', record: '28-24' }])
+  assert.deepEqual(leagues, [{ label: 'Vs. NL', record: '27-21' }])
+})
+
+test('shapeStandings carries the one-run record and the division elimination number', () => {
+  const [lg] = shapeStandings([
+    {
+      league: { id: 103 },
+      division: { id: 201, name: 'American League East' },
+      teamRecords: [
+        {
+          team: { id: 110, name: 'Orioles' },
+          divisionRank: '2',
+          eliminationNumberDivision: '5',
+          records: { splitRecords: [{ type: 'oneRun', wins: 18, losses: 24 }] },
+        },
+      ],
+    },
+  ])
+  const t = lg.divisions[0].teams[0]
+  assert.equal(t.oneRun, '18-24')
+  assert.equal(t.elim, '5')
 })

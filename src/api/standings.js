@@ -157,6 +157,53 @@ export function formatMagicNumber(t) {
   return DASH
 }
 
+// An elimination number as printed: a count while the club is still alive,
+// DASH otherwise. The feed writes "E" once a club is out and "-" for a leader
+// or a club with nothing left to count, and neither is a number to chase.
+export function formatElimination(value) {
+  return /^\d+$/.test(String(value ?? '')) ? String(value) : DASH
+}
+
+// Every split the feed carries, labelled for the team's splits sheet, in the
+// order a reader scans them: where, how close, against whom, when, on what.
+const SPLIT_LABELS = [
+  ['home', 'Home'], ['away', 'Away'],
+  ['oneRun', 'One-run games'], ['extraInning', 'Extra innings'],
+  ['winners', 'Vs. winning teams'],
+  ['right', 'Vs. right-handed starters'], ['left', 'Vs. left-handed starters'],
+  ['rightHome', 'Vs. RHP at home'], ['rightAway', 'Vs. RHP away'],
+  ['leftHome', 'Vs. LHP at home'], ['leftAway', 'Vs. LHP away'],
+  ['day', 'Day games'], ['night', 'Night games'],
+  ['grass', 'On grass'], ['turf', 'On turf'],
+  ['lastTen', 'Last 10'],
+]
+
+// "American League East" → "AL East", "National League" → "NL": the sheet's
+// rows are a phone's width, and fans say the short form anyway.
+function shortLeague(name) {
+  return String(name).replace(/^American League/, 'AL').replace(/^National League/, 'NL')
+}
+
+function wl(r) {
+  return r && Number.isFinite(r.wins) && Number.isFinite(r.losses) ? `${r.wins}-${r.losses}` : null
+}
+
+// The sheet's three sections. Each row is { label, record }; a split the feed
+// does not carry is left out rather than printed as a dash (MiLB feeds are thin).
+export function teamSplits(t) {
+  const splits = SPLIT_LABELS.map(([type, label]) => ({
+    label,
+    record: wl((t.records?.splitRecords ?? []).find((x) => x.type === type)),
+  })).filter((r) => r.record)
+  const divisions = (t.records?.divisionRecords ?? [])
+    .map((r) => ({ label: `Vs. ${shortLeague(r.division?.name ?? 'division')}`, record: wl(r) }))
+    .filter((r) => r.record)
+  const leagues = (t.records?.leagueRecords ?? [])
+    .map((r) => ({ label: `Vs. ${shortLeague(LEAGUE_NAME[r.league?.id] || r.league?.name || 'league')}`, record: wl(r) }))
+    .filter((r) => r.record)
+  return { splits, divisions, leagues }
+}
+
 function shapeTeam(t, pinnedTeamId) {
   const diff = t.runDifferential
   return {
@@ -178,6 +225,10 @@ function shapeTeam(t, pinnedTeamId) {
     l10: splitWL(t, 'lastTen'),
     expWL: expectedRecord(t),
     magic: formatMagicNumber(t),
+    oneRun: splitWL(t, 'oneRun'),
+    elim: formatElimination(t.eliminationNumberDivision ?? t.eliminationNumber),
+    wcElim: formatElimination(t.wildCardEliminationNumber),
+    splits: teamSplits(t),
     clinch: clinchMark(t),
     pinned: pinnedTeamId != null && t.team?.id === pinnedTeamId,
   }
@@ -323,17 +374,6 @@ export function clinchMarksInPlay(leagues) {
     if (t.clinch) marks.add(t.clinch)
   })
   return marks
-}
-
-// Stamps a value from a SECOND data source (e.g. Season Grade, keyed by team
-// id) onto an already-shaped standings tree, mutating in place. Kept
-// source-agnostic on purpose: this file only knows ONE fetch (the raw
-// /standings records), so a caller merging in a different static file's data
-// builds the `teamId -> value` map itself and just hands it here.
-export function attachTeamField(leagues, valueByTeamId, field) {
-  return eachTeam(leagues, (t) => {
-    t[field] = valueByTeamId?.get(t.id) ?? null
-  })
 }
 
 // A team's rank in whichever board is currently shown — division rank

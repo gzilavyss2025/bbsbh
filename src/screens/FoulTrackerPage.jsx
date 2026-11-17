@@ -129,6 +129,8 @@ export function FoulTrackerPage({ seasonYear, vs }) {
           selectedTeamId={filterTeamId}
           onSelect={setFilterTeamId}
           ariaLabel="Filter Foul Tracker by team"
+          showArrows
+          logoVariant="cap" className="teamfilterstrip--chips"
         />
       )}
 

@@ -75,6 +75,14 @@
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
+/* The stamped frame: the square card's edge and shadow (card--stamped), for a
+   table that stands on the page the way a stamped card does. */
+.table--stamped {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
 /* The scroll region carries a label (tableParts), so it is a Tab stop and
    needs a ring. */
 .table[tabindex]:focus-visible {
@@ -143,4 +151,14 @@
 }
 .table--sheet.table--sticky .table__grid tbody tr:last-child :is(th, td):first-child {
   border-bottom-left-radius: var(--radius-md);
+}
+
+/* Stamped tables: head and group rows sit on gray, not tan (--surface-stamped-head). */
+.table--stamped .table__grid thead th,
+.table--stamped .table__grid .wc-grouphead td {
+  background: var(--surface-stamped-head);
+}
+.table--stamped.table--sticky .table__grid thead th:first-child,
+.table--stamped.table--sticky .table__grid .wc-grouphead td:first-child {
+  background: var(--surface-stamped-head);
 }

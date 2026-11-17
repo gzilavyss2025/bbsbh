@@ -45,7 +45,7 @@
 .slatedate__arrow,
 .slatemast__brand,
 .slatecompact__chip,
-.slatestrip .teamfilterstrip--chips .vsteam__team {
+.teamfilterstrip--chips .vsteam__team {
   transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
@@ -58,7 +58,7 @@
   transform: scale(0.97);
 }
 
-.slatestrip .teamfilterstrip--chips .vsteam__team:active {
+.teamfilterstrip--chips .vsteam__team:active {
   transform: translate(var(--bw-heavy), var(--bw-heavy));
   box-shadow: 0 0 0 var(--border-stamped);
 }
@@ -139,7 +139,7 @@
   .slatemast__compactbar,
   .slatemast__compactbar.is-on,
   .slatemast__bar,
-  .slatestrip .teamfilterstrip--chips .vsteam__team {
+  .teamfilterstrip--chips .vsteam__team {
     transition: none;
   }
 

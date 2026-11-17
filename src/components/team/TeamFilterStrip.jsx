@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName, teamChipColors } from '../../lib/teams.js'
 
 // A finger-scrollable strip of every current MLB club's logo, reusing the
 // Splits vs Team / Favorite Team picker's tray styling (vsteam__* — see
@@ -19,6 +19,9 @@ import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../../lib/teams.j
 // caller like that banner, which has no "every team" state to reset to —
 // it's a straight navigation strip, not a filter. `markedTeamId` is that
 // banner's favourite club: marked (filled with --marker), not picked.
+// `logoVariant` picks the CDN mark; the round chips (teamfilterstrip--chips)
+// pass 'cap': the base marks carry a ™/® in a corner that throws them off
+// centre in a circle, and the cap set is drawn centred in a square frame.
 const CLUBS = ALL_MLB_TEAM_IDS
   .map((id) => ({ id, name: teamFullName(id) }))
   .sort((a, b) => a.name.localeCompare(b.name))
@@ -33,9 +36,11 @@ export function TeamFilterStrip({
   centerTeamId = null,
   markedTeamId = null,
   className = '',
+  logoVariant = 'base',
 }) {
   const stripRef = useRef(null)
   const activeRef = useRef(null)
+  const chips = className.includes('teamfilterstrip--chips')
 
   // Same centering effect as SplitsVsTeam/ClubPicker: keep the picked
   // club's logo centered horizontally without a page-level scroll jump, on
@@ -125,8 +130,12 @@ export function TeamFilterStrip({
                 // address (route.js `entitySegment`), and the several that
                 // merely filter ignore it exactly as they did before.
                 onClick={() => onSelect(t.id, t)}
+                // Round chips wash with the club's own colour on hover; the
+                // mark itself never changes, so it neither moves nor resizes.
+                // No colour known (MiLB): the plain hover.
+                style={chips && teamChipColors(t.id) ? { '--chip-hover': teamChipColors(t.id).primary } : undefined}
               >
-                <TeamLogo teamId={t.id} name={t.name} size={36} onLight={t.id === markedTeamId} />
+                <TeamLogo teamId={t.id} name={t.name} size={36} variant={logoVariant} onLight={t.id === markedTeamId} />
               </button>
             )
           })}

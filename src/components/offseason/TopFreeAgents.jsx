@@ -38,9 +38,12 @@ export function TopFreeAgents({ season }) {
     <section className="ofa" aria-label="Top free agents">
       <div className="ofa__head">
         <SectionHead as="h2" className="ofa__title">Top free agents</SectionHead>
+      </div>
+      {/* The door rides the filter row's right end, level with the chips. */}
+      <div className="ofa__filters">
+        <Chips label="Position" options={options} value={group} onChange={setGroup} className="ofa__chips" />
         <Door href="/free-agents" {...linkProps}>All free agents</Door>
       </div>
-      <Chips label="Position" options={options} value={group} onChange={setGroup} className="ofa__chips" />
       <ol className="ofa__list">
         {data.map((r) => (
           <li key={r.id} className="ofa__card">

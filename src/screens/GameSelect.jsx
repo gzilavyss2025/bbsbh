@@ -523,7 +523,7 @@ export function GameSelect({
             centerTeamId={favoriteTeamId}
             markedTeamId={favoriteTeamId}
             ariaLabel={`Browse ${stops.find((s) => s.picked)?.fullName ?? ''} teams`}
-            className="teamfilterstrip--nav teamfilterstrip--chips"
+            logoVariant="cap" className="teamfilterstrip--nav teamfilterstrip--chips"
           />
         )}
       </div>
