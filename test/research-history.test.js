@@ -7,7 +7,7 @@ import { decodeHistory, historyEvent, historyGames, historySeasons, pitchCounts 
 import { countBit } from '../src/api/research/shard.js'
 import { matcher, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
 import { coverage } from '../src/api/research/store.js'
-import { namesInRange } from '../src/screens/research/useEraClubNames.js'
+import { eraLabel, namesInRange } from '../src/screens/research/useEraClubNames.js'
 
 const PA_COLS = ['gamePk', 'ab', 'batter', 'pitcher', 'event', 'inn', 'half', 'outs', 'bases', 'balls', 'strikes', 'stand', 'throws', 'bsd', 'slot', 'hit', 'rbi', 'fl']
 const file = (cols, rows) => ({ cols, c: cols.map((_, i) => rows.map((r) => r[i])) })
@@ -110,4 +110,6 @@ test('a club’s names across a range, oldest first', () => {
   const spans = [{ from: 1969, to: 2004, name: 'Montreal Expos' }, { from: 2005, to: 2025, name: 'Washington Nationals' }]
   assert.deepEqual(namesInRange(spans, 1987, 2010), ['Montreal Expos', 'Washington Nationals'])
   assert.deepEqual(namesInRange(spans, 1987, 1990), ['Montreal Expos'])
+  assert.equal(eraLabel(namesInRange(spans, 1985, 1987)), 'Montreal Expos', 'one era name still replaces today’s')
+  assert.equal(eraLabel([]), null)
 })

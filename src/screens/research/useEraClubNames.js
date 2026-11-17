@@ -13,8 +13,12 @@ export function namesInRange(spans, lo, hi) {
   return [...new Set((spans ?? []).filter((s) => s.from <= hi && s.to >= lo).sort((a, b) => a.from - b.from).map((s) => s.name))]
 }
 
+// Pure: the pill's name, or null to keep the current one. One era name counts too: 1985-1987
+// at WSH is "Montreal Expos".
+export const eraLabel = (names) => (names.length ? names.join(' / ') : null)
+
 // { code: 'Name / Name' } for `codes` over seasons [lo, hi]; a club not yet loaded, or
-// with one name in range, reads its current name (clubName).
+// with no name on file in range, reads its current name (clubName).
 export function useEraClubNames(codes, lo, hi) {
   const [names, setNames] = useState({})
   const key = codes.filter(Boolean).join(',')
@@ -22,7 +26,7 @@ export function useEraClubNames(codes, lo, hi) {
     let live = true
     if (lo == null || hi == null) return undefined
     Promise.all(key.split(',').filter((c) => ID_OF[c]).map((c) => franchiseFor(ID_OF[c]).then((f) => [c, namesInRange(f.spans, lo, hi)]))).then((rows) => {
-      if (live) setNames(Object.fromEntries(rows.filter(([, n]) => n.length > 1).map(([c, n]) => [c, n.join(' / ')])))
+      if (live) setNames(Object.fromEntries(rows.filter(([, n]) => eraLabel(n)).map(([c, n]) => [c, eraLabel(n)])))
     }, () => {})
     return () => {
       live = false
