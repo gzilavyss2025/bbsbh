@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
@@ -16,15 +16,23 @@ const FIELDS = [
   ['pitching', 'Pitching club', 'clubs', 'Any club'],
 ]
 
-export function TensestFilters({ value, options, onChange }) {
+// `clubs` false drops the two club pickers, for a board the club strip already scopes.
+export function TensestFilters({ value, options, onChange, clubs = true }) {
   const uid = useId()
+  // On a phone the pickers fold behind one button, so the first at-bat is on the
+  // first screen; wide, they always show and the button is hidden (tensest.css).
+  const [open, setOpen] = useState(false)
   const set = (key, v) => onChange({ ...value, [key]: v })
   const nameOf = (list, id) => options[list].find((o) => o.id === id)?.name ?? ''
-  const active = FIELDS.filter(([key]) => value[key] != null)
+  const fields = clubs ? FIELDS : FIELDS.filter(([key]) => key !== 'batting' && key !== 'pitching')
+  const active = fields.filter(([key]) => value[key] != null)
   return (
     <Stack gap="snug" className="tensest__filters">
-      <Cluster className="tensest__fields">
-        {FIELDS.map(([key, label, list, any]) => (
+      <Button size="control" className="tensest__filtertoggle" aria-expanded={open} aria-controls={`${uid}-fields`} onClick={() => setOpen(!open)}>
+        {open ? 'Hide filters' : 'Filter'}
+      </Button>
+      <Cluster id={`${uid}-fields`} className={`tensest__fields${open ? ' is-open' : ''}`}>
+        {fields.map(([key, label, list, any]) => (
           <Stack gap="tight" key={key} className="tensest__field">
             <label className="t-label" htmlFor={`${uid}-${key}`}>{label}</label>
             <select id={`${uid}-${key}`} value={value[key] ?? ''} onChange={(e) => set(key, e.target.value === '' ? null : Number(e.target.value))}>

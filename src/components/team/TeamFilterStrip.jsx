@@ -33,6 +33,8 @@ export function TeamFilterStrip({
   onSelect,
   ariaLabel,
   showMlbPin = true,
+  // A word under the MLB pin ("All") for a page where the pin means every club.
+  pinLabel = null,
   showArrows = false,
   centerTeamId = null,
   markedTeamId = null,
@@ -84,7 +86,7 @@ export function TeamFilterStrip({
               type="button"
               role="tab"
               aria-selected={isAll}
-              aria-label="MLB"
+              aria-label={pinLabel ?? 'MLB'}
               className={`vsteam__team teamfilterstrip__pin${isAll ? ' is-active' : ''}`}
               onClick={() => onSelect(null)}
             >
@@ -96,6 +98,7 @@ export function TeamFilterStrip({
                 height={36}
                 aria-hidden="true"
               />
+              {pinLabel && <span className="teamfilterstrip__pinlabel" aria-hidden="true">{pinLabel}</span>}
             </button>
             <span className="teamfilterstrip__divider" aria-hidden="true" />
           </>
