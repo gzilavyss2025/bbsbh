@@ -162,3 +162,30 @@
   display: inline-flex;
   vertical-align: text-bottom;
 }
+
+/* The ▶ for a play's clip, at the end of "What happened" (TensestWatch.jsx). */
+.tensest__what {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.tensest__watch {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: var(--radius-square);
+  background: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+  color: var(--text-on-ink);
+  font-size: var(--fs-label);
+  cursor: pointer;
+}
+.tensest__watch:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}

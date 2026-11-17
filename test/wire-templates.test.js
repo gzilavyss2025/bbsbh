@@ -99,7 +99,7 @@ test('an outright: how he got here, his career line, then what the move means', 
   })
   assert.equal(
     cutStory(heuer, { moveDate: '2026-10-31', clause: 'Sent RHP Codi Heuer outright to Norfolk Tides.' }),
-    'The 30-year-old came to the Orioles from the Brewers in an Aug. 3 trade, two days after Milwaukee got him from Cleveland. ' +
+    'The 30-year-old came to the Orioles from the Brewers in an Aug. 3, 2026 trade, two days after Milwaukee got him from Cleveland. ' +
       'Heuer has a 3.76 ERA over 105.1 innings in 97 big-league games, eight of them in 2026. ' +
       'The move opens a 40-man spot; he stays in the organization. He has three options left.',
   )
@@ -288,7 +288,7 @@ test('a Rule 5 pick and a purchased contract say how he really arrived', () => {
   const r5 = facts({ arrival: { how: 'Rule 5 draft', date: '2025-12-10', teamId: 146, fromTeamId: 147 } })
   assert.match(cutStory(r5, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^Suárez, 35, was a Rule 5 pick by the Marlins from the Yankees in December 2025\./)
   const bought = facts({ arrival: { how: 'purchase', date: '2026-06-02', teamId: 146, fromTeamId: 147 } })
-  assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^Suárez, 35, was bought by the Marlins from the Yankees on June 2\./)
+  assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^Suárez, 35, was bought by the Marlins from the Yankees on June 2, 2026./)
 })
 
 // The More card's additions, 2026-11-02.

@@ -428,7 +428,7 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
   ])
   assert.equal(
     trade.cutline.map((s) => s.text).join(''),
-    'Acquired SS Braden Shewmake from the Houston Astros; designated LF Greg Jones for assignment.',
+    'Acquired SS Braden Shewmake from the Houston Astros; Milwaukee Brewers designated LF Greg Jones for assignment.',
   )
   const astrosSeg = trade.cutline.find((s) => s.text === 'Houston Astros')
   assert.equal(astrosSeg.teamId, 117)

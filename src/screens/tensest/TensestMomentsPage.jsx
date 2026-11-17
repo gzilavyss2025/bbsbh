@@ -4,6 +4,7 @@ import { boardBars, loadTensest, rankLabel, postseasonLabel } from '../../api/te
 import { clubTop, filterOptions, filterPlays, leagueTop } from '../../api/tensest/slices.js'
 import { PressureMeter } from '../../components/charts/PressureMeter.jsx'
 import { TensestFilters } from './TensestFilters.jsx'
+import { TensestWatch } from './TensestWatch.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -97,7 +98,7 @@ function TensestTable({ rows, teamId, label }) {
                 vs <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
               </span>
             </td>
-            <td className="what">{r.what}</td>
+            <td className="what"><span className="tensest__what">{r.what}<TensestWatch row={r} /></span></td>
           </tr>
           )
         })}

@@ -278,8 +278,9 @@ function cutlineTrade(story, ctx) {
   }
   if (clearRow) {
     const cName = nameFor(clearRow)
-    const cRaw = stripLeadingClub(clearRow.description, ownClubNames(clearRow, ctx))
-    const cClause = stripPeriod(leadsWithOwnClub(clearRow, ctx) ? lowerFirstClause(cRaw) : cRaw)
+    // Kept with its club: a trade names two clubs, so a bare "designated …"
+    // after it leaves the reader guessing which one made the move.
+    const cClause = stripPeriod(clearRow.description || '')
     segs.push({ text: '; ' })
     segs.push(...emphasizeClause(cClause, cName, 'secondary', clearRow.person?.id))
   }

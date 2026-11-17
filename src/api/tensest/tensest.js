@@ -54,3 +54,10 @@ export function boardBars(li) {
   if (typeof li !== 'number' || !Number.isFinite(li)) return null
   return Math.min(10, Math.max(1, 1 + Math.floor((li - BOARD_FLOOR + 1e-9) / BOARD_STEP)))
 }
+
+// Each tense play's clip id (`pk:i` -> playId), from its own file so the board's load
+// never pays for it: the first ▶ tap reads it, once (staticJson memoizes the request).
+export const loadTensestClips = staticJson('/data/tensest-clips.json', {
+  shape: (d) => d.clips ?? {},
+  fallback: {},
+})

@@ -171,3 +171,16 @@ export function mergePlays(existing, incoming) {
   for (const r of incoming) byKey.set(keyOf(r), r)
   return [...byKey.values()].sort(byTense)
 }
+
+// The clip of each tense play: its last pitch's playId, keyed `pk:i` like the rows.
+// Written to its own file (tensest-clips.json) so the page downloads it only when a
+// reader taps a play's ▶, never on load.
+export function clipIds(game, plays) {
+  const out = {}
+  ;(plays ?? []).forEach((p, i) => {
+    if (!(Number(p?.leverageIndex) >= LI_FLOOR)) return
+    const id = (p.playEvents ?? []).findLast((e) => e?.playId)?.playId
+    if (id) out[`${game.gamePk}:${i}`] = id
+  })
+  return out
+}
