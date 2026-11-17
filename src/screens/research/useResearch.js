@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, matcher, mayMatch, needsWinProb, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
-import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
+import { GAME_CHIPS, answerGames, isGameBlank, playerGames, summarizeGames } from '../../api/research/games.js'
+import { STREAK_CHIPS, isStreakBlank, streakRun } from '../../api/research/streaks.js'
 import { attachSeries, attachWinProbSeason, coverage, dropSeason, dropSeasonsExcept, fetchIndex, hasWinProb, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
@@ -20,6 +21,10 @@ import { attachSeries, attachWinProbSeason, coverage, dropSeason, dropSeasonsExc
 // The latest season always loads: its people and clubs fill the pickers.
 // GAME MODE (#3137, games.js) runs the same two shapes over club-games: answerGames in place
 // of answer, summarizeGames of summarize, and the games left out summed across seasons.
+
+// STREAKS MODE (#3142, streaks.js) reads every season in range OLDEST first, since a streak
+// carries across seasons: each season's player-game lines feed the run, then the season is
+// freed. Stopped, it shows nothing (a streak cut short would read as the answer).
 
 // The two modes behind one shape: `all` answers a pool, `part` one season's matches.
 const PLAY = {
@@ -57,10 +62,13 @@ export function useResearch(q, cutoff) {
 
   // Game mode has no "What happens": a game link that asks it searches as "Last time".
   // Game mode reads per-pitch runs (games.js) that history rows do not carry, so it stays on
-  // the Savant seasons (#3150); the coverage line says "games from 2015".
+  // the Savant seasons (#3150); the coverage line says "games from 2015". Streaks read
+  // games.js playerGames, whose runs check needs the same, and every season in range, so a
+  // streak search searches as "Last time".
   const targets = useMemo(() => {
-    const ts = seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff)
-    return q.mode === 'game' ? ts.filter((s) => s > HISTORY_LAST) : ts
+    const streak = q.mode === 'streak'
+    const ts = seasonsFor((q.mode === 'game' && q.ask === 'what') || streak ? { ...q, ask: 'last' } : q, onFile, cutoff)
+    return q.mode === 'game' || streak ? ts.filter((s) => s > HISTORY_LAST) : ts
   }, [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
   // Win probability (#3141) needs every searched month's side file; until a backfill, the
@@ -68,15 +76,22 @@ export function useResearch(q, cutoff) {
   const winProb = useMemo(() => Boolean(index && targets.length && hasWinProb(index, targets)), [index, targets])
   const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets), winProb) : []), [targets, index, winProb])
   const game = q.mode === 'game'
+  const streak = q.mode === 'streak'
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]
+    if (streak) {
+      // A streak query keeps the Game type card, the one person on its side and the club.
+      for (const k of Object.keys(chips)) if (!STREAK_CHIPS.includes(k)) delete chips[k]
+      const pit = q.s.side === 'pit'
+      return { ...q, chips, wp: false, batter: pit ? null : q.batter, pitcher: pit ? q.pitcher : null, pitchTeam: null, park: null, ask: 'last' }
+    }
     if (!game) return { ...q, chips, wp: q.wp && winProb }
     // A game query keeps only the cards that describe a whole game, and no person.
     for (const k of Object.keys(chips)) if (!GAME_CHIPS.includes(k)) delete chips[k]
     return { ...q, chips, wp: false, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
-  }, [q, blocked, game, winProb])
-  const blank = game ? isGameBlank(live) : isBlank(live)
+  }, [q, blocked, game, streak, winProb])
+  const blank = streak ? isStreakBlank(live) : game ? isGameBlank(live) : isBlank(live)
 
   // The "Who most" rank and minimum re-rank the answer on the page, so they never re-search.
   const key = JSON.stringify([searchKey(live), cutoff, targets])
@@ -98,6 +113,35 @@ export function useResearch(q, cutoff) {
     let inflight = null
     let interim = null
     const step = (season, i, extra) => setRun({ key, result: interim, people: { ...people }, searched: [...searched], progress: { season, n: i + 1, of: targets.length }, ...extra })
+    if (live.mode === 'streak') {
+      ;(async () => {
+        const streakSeasons = [...targets].sort((a, b) => a - b)
+        const runner = streakRun(live, cutoff)
+        for (const [i, season] of streakSeasons.entries()) {
+          step(season, i)
+          inflight = season
+          const data = await raceAbort(loadSeason(index, season), ctrl.signal)
+          inflight = null
+          Object.assign(people, data.people)
+          searched.push(season)
+          const lines = playerGames(data.pas)
+          leftOut += lines.leftOut
+          runner.feed(lines.lines)
+          if (season !== latest) dropSeason(season)
+        }
+        // A run still going is active only when the search reached the latest season with
+        // no `?d=` cutoff: a cutoff holds out the games that could have ended it.
+        const activeFrom = streakSeasons.at(-1) === latest && !cutoff ? `${latest}-01-01` : null
+        setRun({ key, result: { ...runner.finish({ activeFrom }), leftOut }, people, searched, progress: null })
+      })().catch((e) => {
+        if (e.name !== 'AbortError') setRun({ key, result: null, people, searched, progress: null, error: e })
+        else if (stopper.current?.ctrl === ctrl && stopper.current.stopped) setRun({ key, result: null, people, searched, progress: null, stopped: true })
+      })
+      return () => {
+        ctrl.abort()
+        if (inflight != null && inflight !== latest) dropSeason(inflight)
+      }
+    }
     ;(async () => {
       for (const [i, season] of targets.entries()) {
         if (ctrl.signal.aborted) return

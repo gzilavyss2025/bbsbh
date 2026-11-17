@@ -30,7 +30,7 @@ function Bound({ label, value, onCommit }) {
   )
 }
 
-function RangeCard({ label, range, onRange }) {
+export function RangeCard({ label, range, onRange }) {
   // Clearing both ends keeps the card open with no bound, like an emptied chip card.
   const set = (i) => (n) => {
     const next = [...range]

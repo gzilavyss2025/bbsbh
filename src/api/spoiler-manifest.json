@@ -1294,6 +1294,10 @@
       "class": "spoiler-free",
       "why": "/research's game mode (#3137): plays grouped by game and batting club, tested on totals and how the runs scored. Pure; an open page (ADR-0034); a row carries the filtered totals, never the final score."
     },
+    "research/streaks.js": {
+      "class": "spoiler-free",
+      "why": "/research's streaks mode (#3142): runs of a player's consecutive games that match stat cards, over games.js playerGames. Pure; an open page (ADR-0034); a row names games, never a score."
+    },
     "research/history.js": {
       "class": "spoiler-free",
       "why": "Decodes the 1961-2014 history store (Retrosheet, #3150) into /research's PA shape. All long-final games on an open page (ADR-0034)."

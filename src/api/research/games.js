@@ -55,7 +55,7 @@ export const HOW_INFO = 'Reads the play each run scored on. A run that scored be
 export const GAME_CHIPS = ['gt', 'mon', 'ha']
 
 const RANGE = /^(\d{0,3})-(\d{0,3})$|^(\d{1,3})$/
-function parseRange(v) {
+export function parseRange(v) {
   const m = RANGE.exec(v ?? '')
   if (!m) return null
   if (m[3]) return [Number(m[3]), Number(m[3])]
@@ -63,7 +63,7 @@ function parseRange(v) {
   const hi = m[2] === '' ? null : Number(m[2])
   return lo == null && hi == null ? null : [lo, hi]
 }
-const rangeText = ([lo, hi]) => `${lo ?? ''}-${hi ?? ''}`
+export const rangeText = ([lo, hi]) => `${lo ?? ''}-${hi ?? ''}`
 
 // The game half of the query, or null when the URL is not in game mode.
 export function parseGameQuery(search) {
@@ -200,11 +200,11 @@ export function playerGames(pas) {
   const pitched = new Set()
   for (const pa of pas) {
     if (!kept.has(pa.gamePk)) continue
-    const { gamePk, date, gameType, home, away } = pa
+    const { gamePk, date, gameType, home, away, gameNumber } = pa
     const line = (role, player, team) => {
       const k = `${gamePk}-${role}-${player}`
       if (!lines.has(k)) {
-        const base = { key: k, gamePk, date, gameType, home, away, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
+        const base = { key: k, gamePk, date, gameType, home, away, gameNumber, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
         // The first line a club's pitching side opens in a game is its starter's.
         const side = `${gamePk}-${team}`
         const starter = role === 'pit' && !pitched.has(side)
