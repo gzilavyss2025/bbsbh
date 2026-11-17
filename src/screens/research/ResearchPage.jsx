@@ -149,7 +149,9 @@ export function ResearchPage() {
   const start = !game && !streak && blank && !Object.keys(q.chips).length && !q.years
   const result = run?.result ?? null
   const progress = run?.progress
-  const eraName = useEraClubNames([q.team, q.pitchTeam, q.park], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
+  // A game answer names its own clubs too (#3165): every club in its matches and leaders.
+  const answerClubs = game && result ? [...(result.clubs ?? []).map((c) => c.club), ...result.matches.flatMap((m) => [m.club, m.batTeam, m.fieldTeam])] : []
+  const eraName = useEraClubNames([q.team, q.pitchTeam, q.park, ...answerClubs], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
   const pills = data ? pillsOf(live, people, eraName) : []
   const onAsk = (text) => {
     const r = parseAsk(text, { people, latest: latest ?? undefined })
@@ -219,7 +221,7 @@ export function ResearchPage() {
       )}
       {result && !game && !streak && <AnswerCard ask={q.ask} q={q} a={result} people={people} note={without} wp={live.wp} />}
       {result && streak && <StreakAnswerCard q={live} a={result} people={people} asOf={cover?.through} />}
-      {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} note={without} />}
+      {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} note={without} name={eraName} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -235,7 +237,7 @@ export function ResearchPage() {
       {result && !game && !streak && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
       {result && !game && !streak && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
       {result && streak && <StreakMatches key={searchKey(q)} q={live} a={result} people={people} wide={wide} asOf={cover?.through} />}
-      {result && game && <GameMatches key={searchKey(q)} ask={live.ask} q={live} a={result} wide={wide} since={cover?.first} />}
+      {result && game && <GameMatches key={searchKey(q)} ask={live.ask} q={live} a={result} wide={wide} since={cover?.first} name={eraName} />}
     </Stack>
   )
 

@@ -169,3 +169,15 @@ test('game mode answered season by season adds up to the pooled answer (#3163)',
   assert.deepEqual(summed.matches.map((m) => [m.gamePk, m.ordinal]), pooled.matches.map((m) => [m.gamePk, m.ordinal]))
   assert.equal(summed.base, pooled.base)
 })
+
+// #3165: game answers name a club for one game's season, or across the range.
+test('eraNamer: a game reads its season’s name, a range reads every name in it', async () => {
+  const { eraNamer } = await import('../src/screens/research/useEraClubNames.js')
+  const spans = { WSH: [{ from: 1969, to: 2004, name: 'Montreal Expos' }, { from: 2005, to: 2025, name: 'Washington Nationals' }] }
+  const name = eraNamer(spans, 1987, 2010)
+  assert.equal(name('WSH', 1987), 'Montreal Expos')
+  assert.equal(name('WSH', 2026), 'Washington Nationals', 'a season after the file reads its last name')
+  assert.equal(name('WSH'), 'Montreal Expos / Washington Nationals')
+  assert.equal(name('MIL', 1987), 'Milwaukee Brewers', 'a club not loaded reads today’s name')
+  assert.equal(eraNamer(spans, null, null)('WSH'), 'Washington Nationals', 'no range: today’s name')
+})
