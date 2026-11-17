@@ -192,3 +192,18 @@ test('attendanceRatesFor: null for a missing club, a missing file, or no games i
   assert.equal(attendanceRatesFor(empty, 200, 2026), null)
 })
 
+
+import { roadFor } from '../scripts/gen-gate.mjs'
+
+test('roadFor keeps a visitor’s road crowds per host park, weekend and weekday apart', () => {
+  const rows = [
+    { homeId: 1, dow: 6, attendance: 44000 }, // Saturday
+    { homeId: 2, dow: 2, attendance: 18000 }, // Tuesday
+    { homeId: 2, dow: 5, attendance: 26000 }, // Friday
+    { homeId: 1, dow: 3, attendance: null },
+  ]
+  assert.deepEqual(roadFor(rows), {
+    byHost: { 1: { we: [1, 44000], wd: [0, 0] }, 2: { we: [1, 26000], wd: [1, 18000] } },
+  })
+  assert.equal(roadFor([]), null)
+})

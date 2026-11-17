@@ -1,0 +1,38 @@
+/* ---------------------------------------------------------------- attendance
+   The Attendance page (AttendancePage.jsx) in the stamped frame Pressure Moments wears:
+   square, a heavy ink edge and the hard ink shadow (Gary, 2026-11-17). Scoped to .gate,
+   so the other report pages keep the broadcast look. */
+
+/* The title and its one-line deck read as one headline block, as on Pressure Moments. */
+.gate__head {
+  display: block;
+}
+.gate__head .gate__dek {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-family: var(--font-display);
+  color: var(--text-body);
+}
+.gate__dek .infopop__tip {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+  background: var(--surface-card);
+}
+
+.gate .slab {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+}
+.gate .table:has(.rpt) {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+}
+.gate .gate__sort {
+  margin-block-end: var(--space-3);
+}
+.gate__board {
+  margin-block: var(--space-4) var(--space-6);
+}

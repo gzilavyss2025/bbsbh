@@ -29,12 +29,13 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
-import { gameNumbers, gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
+import { clipIds, gameNumbers, gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
 import { cutoffsFromHist, emptyHist, foldHist, histOrNull } from './lib/tensest/cutoffs.mjs'
 import { parseArgs, strOpt } from './lib/args.mjs'
 
 const here = import.meta.dirname
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
+const CLIPS = join(here, '..', 'public', 'data', 'tensest-clips.json')
 const CUTOFFS = join(here, '..', 'public', 'data', 'tensest-cutoffs.json')
 const STATE = join(here, 'data', 'tensest-state.json')
 const CONCURRENCY = 8
@@ -60,13 +61,20 @@ const byPk = new Map(finals.map((g) => [g.gamePk, g]))
 let plays = (carried ? prev.plays : []).map((r) => (byPk.has(r.pk) ? { ...r, ...gameNumbers(byPk.get(r.pk)) } : r))
 
 // A suspended game is listed on both dates; read it once, or its plays count twice.
+const prevClips = await readJsonOr(CLIPS, null)
+let clips = carried && prevClips?.season === season ? { ...prevClips.clips } : {}
+// A game with rows and no clip ids was read before clips were kept: read it again for
+// its ids alone (a one-time backfill; its rows and histogram are already counted).
+const clipped = new Set(Object.keys(clips).map((k) => Number(k.split(':')[0])))
+const backfill = [...new Set(plays.map((r) => r.pk))].filter((pk) => !clipped.has(pk) && byPk.has(pk)).map((pk) => byPk.get(pk))
 const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
-if (todo.length === 0) {
+if (todo.length === 0 && backfill.length === 0) {
   // Restamp both files anyway: the freshness guard reads the stamp, and the nightly
   // commit drops a stamp-only change (nightly/drop-stamp-only.mjs), so this commits nothing.
   if (carried) {
     await writeJsonAtomic(OUT, { ...prev, plays, generatedAt: new Date().toISOString() })
     await writeCutoffs(cutoffsFromHist(hist))
+    await writeJsonAtomic(CLIPS, { season, generatedAt: new Date().toISOString(), clips })
   }
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
@@ -79,15 +87,21 @@ async function writeCutoffs(cutoffs) {
   await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs })
 }
 
+if (backfill.length) {
+  const got = await mapConcurrent(backfill, CONCURRENCY, async (g) => clipIds(g, await getJson(`/api/v1/game/${g.gamePk}/winProbability`)))
+  for (const c of got) if (c) Object.assign(clips, c)
+  console.log(`tensest: backfilled clip ids for ${got.filter(Boolean).length} of ${backfill.length} games`)
+}
+
 const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
   const plays = await getJson(`/api/v1/game/${g.gamePk}/winProbability`)
   const rows = gameRowsOrThrow(g, plays)
   // Folded here, not after: holding every game's whole feed runs out of memory.
   hist = foldHist(hist, plays)
-  return { g, rows }
+  return { g, rows, clips: clipIds(g, plays) }
 })
 const ok = read.filter(Boolean)
-if (ok.length === 0) throw new Error('tensest: every winProbability read failed')
+if (todo.length && ok.length === 0) throw new Error('tensest: every winProbability read failed')
 
 plays = mergePlays(plays, ok.flatMap((r) => r.rows))
 // The page cuts each club's top 25 batting and pitching from this list, which stops at
@@ -104,5 +118,10 @@ const cutoffs = cutoffsFromHist(hist)
 const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
 await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, plays })
 await writeCutoffs(cutoffs)
+// Only the plays still on the board keep a clip id.
+for (const r of ok) Object.assign(clips, r.clips)
+const live = new Set(plays.map((r) => `${r.pk}:${r.i}`))
+clips = Object.fromEntries(Object.entries(clips).filter(([k]) => live.has(k)))
+await writeJsonAtomic(CLIPS, { season, generatedAt: new Date().toISOString(), clips })
 await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
 console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; ${plays.length} tense plays; bar edges ${cutoffs?.li.join(' ')}`)

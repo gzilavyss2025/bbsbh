@@ -111,6 +111,15 @@ export function gameNumbers(game) {
   return out
 }
 
+// `sc`: [[id, full name], …] for each runner the play scored, in the feed's order; kept
+// off the row when none did.
+export function scoredOn(play) {
+  const sc = (play?.runners ?? [])
+    .filter((r) => r?.details?.isScoringEvent && r.details.runner?.id)
+    .map((r) => [r.details.runner.id, r.details.runner.fullName])
+  return sc.length ? { sc } : {}
+}
+
 // One game's plays -> the rows worth keeping. `game` is a schedule row
 // ({ gamePk, gameType, officialDate, teams: { away, home } }).
 export function playRows(game, plays) {
@@ -138,6 +147,10 @@ export function playRows(game, plays) {
       pid: p.matchup.pitcher.id,
       pn: p.matchup.pitcher.fullName,
       what: describePlay(p),
+      // The runners who scored, whole, so the page can name and link them; and the
+      // home club's win-probability swing, which tints the row for the club that gained.
+      ...scoredOn(p),
+      ...(Number.isFinite(p.homeTeamWinProbabilityAdded) ? { wpa: Math.round(p.homeTeamWinProbabilityAdded * 10) / 10 } : {}),
       // The park, from the schedule game: not the home club's, because of neutral sites.
       vid: game.venue?.id ?? null,
       vn: game.venue?.name ?? null,
@@ -170,4 +183,17 @@ export function mergePlays(existing, incoming) {
   for (const r of existing ?? []) byKey.set(keyOf(r), r)
   for (const r of incoming) byKey.set(keyOf(r), r)
   return [...byKey.values()].sort(byTense)
+}
+
+// The clip of each tense play: its last pitch's playId, keyed `pk:i` like the rows.
+// Written to its own file (tensest-clips.json) so the page downloads it only when a
+// reader taps a play's ▶, never on load.
+export function clipIds(game, plays) {
+  const out = {}
+  ;(plays ?? []).forEach((p, i) => {
+    if (!(Number(p?.leverageIndex) >= LI_FLOOR)) return
+    const id = (p.playEvents ?? []).findLast((e) => e?.playId)?.playId
+    if (id) out[`${game.gamePk}:${i}`] = id
+  })
+  return out
 }

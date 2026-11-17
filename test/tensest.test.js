@@ -102,3 +102,87 @@ test('boardBars spreads the page\'s range (4 to 9.99) over the 10 bars', () => {
   assert.ok(boardBars(6.1) < boardBars(8.48))
   assert.equal(boardBars(undefined), null)
 })
+
+import { momentParts, ordinal, postseasonCitation, swingFor } from '../src/api/tensest/tensest.js'
+
+test('ordinal writes innings as a game story does', () => {
+  assert.deepEqual([1, 2, 3, 9, 10, 11, 12, 13, 21].map(ordinal), ['1st', '2nd', '3rd', '9th', '10th', '11th', '12th', '13th', '21st'])
+})
+
+test('momentParts: a hit is off the pitcher, an out against him, runs trail the pitcher', () => {
+  assert.deepEqual(momentParts({ what: 'singled to right, scoring Cheng', inn: 9 }), { lead: 'batter', verb: 'singled to right', prep: 'off', after: '', scoring: ', scoring Cheng', runners: null, when: 'in the bottom of the 9th' })
+  assert.deepEqual(momentParts({ what: 'flew out to right', inn: 10 }), { lead: 'batter', verb: 'flew out to right', prep: 'against', after: '', scoring: '', runners: null, when: 'in the bottom of the 10th' })
+  assert.equal(momentParts({ what: 'hit a two-run homer to left', inn: 9 }).prep, 'off')
+  assert.equal(momentParts({ what: 'reached on an error, scoring Pages', inn: 10 }).verb, 'reached on an error')
+})
+
+test('momentParts: a play the batter did not make leads with the play', () => {
+  assert.deepEqual(momentParts({ what: 'wild pitch', inn: 9 }), { lead: 'play', verb: 'Wild pitch', prep: 'with', after: '', scoring: '', runners: null, when: 'in the bottom of the 9th' })
+})
+
+test('postseasonCitation writes the game out', () => {
+  assert.equal(postseasonCitation({ gt: 'D', aw: 135, d: '2026-10-04', sg: 2 }), 'NLDS Game 2')
+})
+
+test('momentParts names the half, and hands back the runners who scored', () => {
+  const m = momentParts({ what: 'singled to center, scoring Yelich and Frelick', inn: 9, top: 1, sc: [[1, 'Christian Yelich'], [2, 'Sal Frelick']] })
+  assert.equal(m.when, 'in the top of the 9th')
+  assert.deepEqual(m.runners, [[1, 'Christian Yelich'], [2, 'Sal Frelick']])
+})
+
+test('swingFor: the club’s side won the at-bat, from the Batting or Pitching view', () => {
+  const hit = { what: 'singled to right', inn: 9 }
+  const out = { what: 'flew out to right', inn: 9 }
+  const sacFly = { what: 'hit a sacrifice fly to center, scoring Jones', inn: 10 }
+  assert.equal(swingFor(hit, 158, 'bat'), 'up')
+  assert.equal(swingFor(out, 158, 'bat'), 'down')
+  assert.equal(swingFor(sacFly, 158, 'bat'), 'up')
+  assert.equal(swingFor(hit, 158, 'pit'), 'down')
+  assert.equal(swingFor(out, 158, 'pit'), 'up')
+  assert.equal(swingFor(hit, null, 'bat'), null)
+})
+
+import { boardRecord } from '../src/api/tensest/tensest.js'
+
+test('boardRecord counts the at-bats the side succeeded in, on either side', () => {
+  const rows = [
+    { what: 'singled to right, scoring Cheng', sc: [[1, 'A Cheng']] },
+    { what: 'struck out swinging' },
+    { what: 'hit a two-run homer to left', sc: [[2, 'B'], [3, 'C']] },
+  ]
+  assert.deepEqual(boardRecord(rows, 'bat'), { succeeded: 2, of: 3, tone: 'up' })
+  assert.deepEqual(boardRecord(rows, 'pit'), { succeeded: 1, of: 3, tone: 'down' })
+  assert.deepEqual(boardRecord([], 'bat'), { succeeded: 0, of: 0, tone: null })
+})
+
+import { mlbRate, versusMlb } from '../src/api/tensest/tensest.js'
+
+test('mlbRate is the batter’s success rate, or the pitcher’s on the Pitching view', () => {
+  const plays = [{ what: 'singled to right' }, { what: 'flew out to right' }, { what: 'struck out looking' }, { what: 'walked' }]
+  assert.equal(mlbRate(plays, 'bat'), 50)
+  assert.equal(mlbRate([...plays, { what: 'grounded out to short' }], 'pit'), 60)
+  assert.equal(mlbRate([], 'bat'), null)
+})
+
+test('versusMlb says near inside 5 points, then above/below, then well past 10', () => {
+  assert.deepEqual(versusMlb(42, 41), { text: 'Near the MLB average of 41%', tone: null })
+  assert.deepEqual(versusMlb(48, 41), { text: 'Above the MLB average of 41%', tone: 'up' })
+  assert.deepEqual(versusMlb(48, 59), { text: 'Well below the MLB average of 59%', tone: 'down' })
+  assert.deepEqual(versusMlb(54, 59), { text: 'Below the MLB average of 59%', tone: 'down' })
+  assert.equal(versusMlb(null, 41), null)
+})
+
+test('a walk reads "against" the pitcher, never "walked off", and still counts as the batter’s', () => {
+  const walk = { what: 'walked', inn: 9 }
+  assert.equal(momentParts(walk).prep, 'against')
+  assert.equal(swingFor(walk, 158, 'bat'), 'up')
+  assert.equal(swingFor({ what: 'was hit by a pitch', inn: 9 }, 158, 'bat'), 'up')
+})
+
+test('an intentional walk is BY the pitcher; a hit batter FROM him, the forced run after', () => {
+  const ibb = momentParts({ what: 'was walked on purpose', inn: 9 })
+  assert.equal(`${ibb.verb} ${ibb.prep}`, 'was intentionally walked by')
+  const hbp = momentParts({ what: 'was hit by a pitch, forcing in a run', inn: 9 })
+  assert.deepEqual([hbp.verb, hbp.prep, hbp.after], ['was hit by a pitch', 'from', ', forcing in a run'])
+  assert.equal(swingFor({ what: 'was walked on purpose', inn: 9 }, 158, 'bat'), 'up')
+})

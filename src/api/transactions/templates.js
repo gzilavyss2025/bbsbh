@@ -296,7 +296,7 @@ function originSentence(facts, name, moveDate) {
     if (signed) parts.push(`${name} signed with ${the(signed.teamId)} in ${signed.date.slice(0, 4)}`)
   }
   for (const a of before.filter((x) => x.how === 'trade' || x.how === 'waiver claim')) {
-    const when = `${apDate(a.date)}${a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`}`
+    const when = `${apDate(a.date)}, ${a.date.slice(0, 4)}`
     parts.push(a.how === 'trade' ? `${the(a.teamId)} got him in ${aMonth(when)} ${when} trade` : `${the(a.teamId)} claimed him on ${when}`)
   }
   if (!parts.length) return null
@@ -321,10 +321,10 @@ function arrivalSentence(facts, who, moveDate) {
   const a = facts.arrival
   // A claim is its own arrival: the move already says how he got here.
   if (!a || (moveDate && daysBetween(a.date, moveDate) <= 1)) return null
-  const year = a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`
+  const year = `, ${a.date.slice(0, 4)}`
   const when = `${apDate(a.date)}${year}`
   let s
-  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)}${a.tradedWith ? ` with ${a.tradedWith}` : ''} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
+  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)}${a.tradedWith ? ` with ${a.tradedWith}` : ''} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
   else if (a.how === 'Rule 5 draft')
