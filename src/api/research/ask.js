@@ -18,7 +18,7 @@
 //
 // SPOILER CLASSIFICATION: spoiler-free. Pure text -> query; it reads no game data.
 
-import { FILTER_BY_KEY } from './filters.js'
+import { FILTER_BY_KEY, parseQuery } from './filters.js'
 import { GAME_CHIPS } from './games.js'
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
@@ -70,7 +70,7 @@ const ask = (key) => (ctx) => {
   return true
 }
 const how = (key, fallback) => (ctx) => {
-  if (ctx.all || ctx.none) {
+  if (ctx.game && (ctx.all || ctx.none)) {
     ctx.how.add(key)
     ctx.all = ctx.none = false
     return true
@@ -117,6 +117,12 @@ const BASE = [
   [['rhb', 'right handed batter', 'right handed hitter'], set('bh', ['R'])],
   [['lhp', 'left handed pitcher', 'left handed pitching'], set('ph', ['L'])],
   [['rhp', 'right handed pitcher', 'right handed pitching'], set('ph', ['R'])],
+  // A field side names no hand ("to left field"), so it is read as nothing: skipped.
+  [['left field', 'right field', 'to left', 'to right', 'left center', 'right center'], () => false],
+  // Home runs by the runners on: a two-run homer had one on, a grand slam three.
+  [['grand slam', 'grand slams', 'slam'], (ctx) => chip(ctx, 'res', ['home_run']) && chip(ctx, 'run', ['123'])],
+  [['2 run', 'two run'].flatMap((n) => HR.map((h) => `${n} ${h}`)), (ctx) => chip(ctx, 'res', ['home_run']) && chip(ctx, 'run', ['1--', '-2-', '--3'])],
+  [['3 run', 'three run'].flatMap((n) => HR.map((h) => `${n} ${h}`)), (ctx) => chip(ctx, 'res', ['home_run']) && chip(ctx, 'run', ['12-', '1-3', '-23'])],
   // Batted ball location and type.
   [['oppo', 'opposite field', 'opp field', 'the other way', 'other way'], set('fld', ['oppo'])],
   [['pull', 'pulled', 'pull side'], set('fld', ['pull'])],
@@ -184,8 +190,8 @@ const BASE = [
   [['late innings', 'late in the game'], set('inn', ['7', '8', '9', 'x'])],
   [['9th or later', 'ninth or later'], set('inn', ['9', 'x'])],
   // Game mode words.
-  [['game', 'games', 'a game where', 'a game in which', 'game where'], (ctx) => ((ctx.game = true), true)],
-  [['allowed', 'allow', 'allows', 'gave up', 'give up', 'gives up', 'surrendered', 'yielded'], (ctx) => ((ctx.side = 'pitch'), true)],
+  [['game', 'games', 'a game where', 'a game in which', 'game where'], (ctx) => ((ctx.game = true), true), 'game'],
+  [['allowed', 'allow', 'allows', 'gave up', 'give up', 'gives up', 'surrendered', 'yielded'], (ctx) => ((ctx.side = 'pitch'), true), 'game'],
   [['scored', 'score', 'scores', 'scoring'], (ctx) => ((ctx.side = 'bat'), true)],
   [['all', 'all of them', 'every run', 'all the runs', 'all their runs', 'all runs'], (ctx) => ((ctx.all = true), true)],
   [['none', 'no runs', 'none of them'], (ctx) => ((ctx.none = true), true)],
@@ -212,7 +218,7 @@ function vocabulary(people) {
   const add = (phrases, apply, kind) => {
     for (const p of phrases) entries.push({ words: p.split(' '), apply, kind })
   }
-  for (const [phrases, apply] of BASE) add(phrases, apply)
+  for (const [phrases, apply, kind] of BASE) add(phrases, apply, kind)
   // Clubs: nickname ("brewers", "red sox"), and a city only one club has.
   const cities = {}
   for (const id of ALL_MLB_TEAM_IDS) cities[fold(teamLocationName(id) ?? '')] = (cities[fold(teamLocationName(id) ?? '')] ?? 0) + 1
@@ -222,7 +228,6 @@ function vocabulary(people) {
     const city = fold(teamLocationName(id) ?? '')
     const names = [nick, nick.replace(/s$/, ''), cities[city] === 1 ? city : null].filter(Boolean)
     if (nick === 'diamondbacks') names.push('dbacks', 'd backs')
-    if (nick === 'athletics') names.push('as')
     add([...new Set(names)], (ctx) => ctx.clubs.push({ code, cue: ctx.cue, at: ctx.at, next: ctx.next }), 'club')
   }
   // People: full name, and a last name only one person on file has.
@@ -289,6 +294,8 @@ function totalAt(toks, i) {
           ;[lo, hi] = toks[i + len + 1].w === 'more' ? [n, null] : [null, n]
           len += 2
         }
+        // "a 3-run homer" is a home run, not a game's run total.
+        if (u === 'run' && HR.some((h) => h.split(' ').every((x, j) => toks[i + len + j]?.w === x))) return null
         return { key, range: [lo, hi], len }
       }
     }
@@ -322,11 +329,14 @@ export function parseAsk(text, { people = {}, latest = new Date().getFullYear() 
   const toks = tokenize(text ?? '')
   const vocab = vocabFor(people)
   const ctx = { q: { chips: {}, ask: 'last' }, how: new Set(), totals: {}, clubs: [], people: [], game: false, side: null, all: false, none: false, cue: false }
+  const hitAt = (i) => (vocab.get(toks[i].w) ?? []).find((e) => e.words.every((x, j) => toks[i + j]?.w === x))
   // Game mode is decided before reading, so a play-only chip in a game question is skipped.
-  for (let i = 0; i < toks.length; i++) {
-    if (totalAt(toks, i)) ctx.game = true
-    if (['game', 'games', 'allowed', 'allow', 'surrendered'].includes(toks[i].w)) ctx.game = true
-    if (toks[i].w === 'gave' && toks[i + 1]?.w === 'up') ctx.game = true
+  // A dry pass of the same longest-first match: "game" inside "tie game" is not a cue.
+  for (let i = 0; i < toks.length; ) {
+    const total = totalAt(toks, i)
+    const hit = !total && hitAt(i)
+    if (total || hit?.kind === 'game') ctx.game = true
+    i += total ? total.len : hit ? hit.words.length : 1
   }
   const skipped = []
   let read = 0
@@ -358,7 +368,7 @@ export function parseAsk(text, { people = {}, latest = new Date().getFullYear() 
       i += outs.len
       continue
     }
-    const hit = (vocab.get(toks[i].w) ?? []).find((e) => e.words.every((x, j) => toks[i + j]?.w === x))
+    const hit = hitAt(i)
     if (hit) {
       ctx.next = toks[i + hit.words.length]?.w
       ctx.at = back >= 0 && (toks[back].w === 'at' || toks[back].w === 'in')
@@ -402,7 +412,7 @@ export function parseAsk(text, { people = {}, latest = new Date().getFullYear() 
     q.mode = 'play'
     q.g = null
   }
-  const full = { mode: q.mode, g: q.g, chips: q.chips, years: q.years ?? null, batter: q.batter ?? null, pitcher: q.pitcher ?? null, team: q.team ?? null, pitchTeam: q.pitchTeam ?? null, park: q.park ?? null, ask: q.ask, rank: 'count', min: 50 }
+  const full = { ...parseQuery(''), ...q }
   return { q: full, read, skipped: skipped.map(({ start, end }) => ({ start, end, text: text.slice(start, end) })) }
 }
 

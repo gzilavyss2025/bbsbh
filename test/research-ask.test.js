@@ -81,3 +81,25 @@ test('suggestions complete the last word with phrases the parser reads', () => {
   for (const { text } of suggest('bas')) assert.ok(read(text).read > 0, text)
   assert.deepEqual(suggest('a'), [])
 })
+
+// Code-review fixes (#3138): each of these misread before.
+test('"game" inside a longer phrase is not a game-mode cue', () => {
+  assert.equal(url('most homers in a tie game'), '?ask=most&res=home_run&sc=tied')
+  assert.equal(url('last time the first batter of the game homered'), '?res=home_run&mom=first')
+})
+
+test('"all" before a play-mode result keeps the chip', () => {
+  assert.equal(url('all of the lefties who homered'), '?ask=most&res=home_run&bh=L')
+})
+
+test('an N-run homer is a home run with runners on, not a game total', () => {
+  assert.equal(url('last time someone hit a 3-run homer'), '?res=home_run&run=12-.1-3.-23')
+  assert.equal(url('a grand slam'), '?res=home_run&run=123')
+})
+
+test('"as" is not the Athletics, and a field side is skipped, not a hand', () => {
+  assert.equal(url('who homered as a pinch hitter'), '?ask=most&res=home_run')
+  const r = read('a lefty homered to left field')
+  assert.equal(decodeURIComponent(buildQuery(r.q)), '?res=home_run&bh=L')
+  assert.deepEqual(r.skipped.map((s) => s.text), ['to left field'])
+})

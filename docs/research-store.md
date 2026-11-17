@@ -89,6 +89,15 @@ Runs come from the change in `bat_score_diff` to the next pitch, not from rs alo
 coverage line. Checked 2026-11-17: 0 left out in 2016, 2019, 2020, 2024, 2025, 2026; June 2025's
 794 club-game totals all matched the official schedule scores.
 
+## The ask bar (#3138, Gary 2026-11-16/17)
+
+A question typed in plain English fills the filters (`src/api/research/ask.js`,
+`screens/research/AskBar.jsx`). Rule-based, in the page: no model call. The vocabulary
+is closed (chip phrases and synonyms, clubs, the store's player names, years, counts,
+question cues, game totals and "How runs scored"); every other word is skipped and
+shown underlined, and the answer card says "Searched without: …". It never guesses.
+**A new card adds its words to `ask.js`**, with a row in `test/research-ask.test.js`.
+
 ## Coverage
 
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,
