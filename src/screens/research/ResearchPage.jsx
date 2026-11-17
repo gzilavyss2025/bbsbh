@@ -150,7 +150,12 @@ export function ResearchPage() {
   const result = run?.result ?? null
   const progress = run?.progress
   // A game answer names its own clubs too (#3165): every club in its matches and leaders.
-  const answerClubs = game && result ? [...(result.clubs ?? []).map((c) => c.club), ...result.matches.flatMap((m) => [m.club, m.batTeam, m.fieldTeam])] : []
+  const answerClubs = useMemo(() => {
+    if (!game || !result) return []
+    const out = new Set((result.clubs ?? []).map((c) => c.club))
+    for (const m of result.matches) out.add(m.club).add(m.batTeam).add(m.fieldTeam)
+    return [...out]
+  }, [game, result])
   const eraName = useEraClubNames([q.team, q.pitchTeam, q.park, ...answerClubs], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
   const pills = data ? pillsOf(live, people, eraName) : []
   const onAsk = (text) => {

@@ -30,20 +30,18 @@ export function eraNamer(spans, lo, hi) {
   }
 }
 
-// Each club's franchise spans, loaded once per set of `codes` (franchiseFor caches the
-// request). Tagged with the codes they answer, so a stale or failed load names nothing.
+// Each club's franchise spans, loaded once and kept (franchiseFor caches the request). A
+// club's spans do not depend on the range, so a loaded club never goes stale: a search that
+// adds clubs season by season names the ones already loaded throughout. A failed load
+// leaves that club on today's name.
 export function useEraClubNames(codes, lo, hi) {
-  const [got, setGot] = useState({ tag: null, spans: {} })
-  const tag = [...new Set(codes.filter((c) => c && ID_OF[c]))].sort().join(',')
+  const [spans, setSpans] = useState({})
+  const key = [...new Set(codes.filter((c) => c && ID_OF[c]))].sort().join(',')
   useEffect(() => {
-    let live = true
-    if (!tag) return undefined
-    Promise.all(tag.split(',').map((c) => franchiseFor(ID_OF[c]).then((f) => [c, f.spans]))).then((rows) => {
-      if (live) setGot({ tag, spans: Object.fromEntries(rows) })
-    }, () => {})
-    return () => {
-      live = false
+    if (!key) return
+    for (const c of key.split(',')) {
+      franchiseFor(ID_OF[c]).then((f) => setSpans((s) => (s[c] ? s : { ...s, [c]: f.spans })), () => {})
     }
-  }, [tag])
-  return eraNamer(got.tag === tag ? got.spans : {}, lo, hi)
+  }, [key])
+  return eraNamer(spans, lo, hi)
 }
