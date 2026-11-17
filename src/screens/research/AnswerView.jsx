@@ -75,12 +75,13 @@ function summary(a, ask, q) {
   return parts.join(' · ')
 }
 
-export function AnswerCard({ ask, q, a, people }) {
+export function AnswerCard({ ask, q, a, people, note }) {
   return (
     <Card frame="stamped" label={ASKS.find((x) => x.key === ask)?.label}>
       <Stack gap="tight" aria-live="polite">
         <p className="research__answer"><Sentence ask={ask} q={q} a={a} people={people} /></p>
         {a.matches.length > 0 && <p className="research__summary">{summary(a, ask, q)}</p>}
+        {note && <p className="research__summary">{note}</p>}
       </Stack>
     </Card>
   )

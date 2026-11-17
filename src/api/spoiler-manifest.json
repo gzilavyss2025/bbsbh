@@ -1278,6 +1278,10 @@
       "class": "spoiler-free",
       "why": "/research's answer (#2234): the match list, summary line, leaders and outcome spread over the research store's plate appearances. Pure; an open page (ADR-0034)."
     },
+    "research/ask.js": {
+      "class": "spoiler-free",
+      "why": "/research's ask bar (#3138): a typed question -> the filter query, rule-based, with the words it could not read. Pure text; reads no game data."
+    },
     "research/filters.js": {
       "class": "spoiler-free",
       "why": "/research's filter definitions, predicates and URL format (#2234). Pure; the `?d=` cutoff drops games on or after that day."

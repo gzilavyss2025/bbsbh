@@ -191,3 +191,52 @@
   inline-size: 5rem;
   font-family: var(--font-mono);
 }
+/* The ask bar (#3138): the input takes the row, Ask sits at its end; the suggestions
+   are full-width tap rows under it. Skipped words are underlined in the sentence. */
+.research__askrow {
+  flex-wrap: nowrap;
+}
+.research__askrow input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+}
+.research__suggest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+}
+.research__suggest li + li {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.research__suggest button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  text-align: start;
+}
+.research__asked {
+  font-size: var(--fs-ui);
+  overflow-wrap: anywhere;
+}
+.research__skipped {
+  text-decoration: underline wavy var(--marker);
+  text-underline-offset: 0.2em;
+}

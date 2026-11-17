@@ -2,6 +2,7 @@ import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
 import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
 import { isRealDate } from '../../lib/dates.js'
+import { ALL_MLB_TEAM_IDS, teamClubName } from '../../lib/teams.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
@@ -18,6 +19,8 @@ import { Notice } from '../../components/ui/state/Notice.jsx'
 import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
 import { useResearch } from './useResearch.js'
+import { AskBar } from './AskBar.jsx'
+import { parseAsk } from '../../api/research/ask.js'
 import { GAME_CHIPS, TOTALS, HOW, rangeWords } from '../../api/research/games.js'
 import { GameAnswerCard, GameMatches } from './GameAnswer.jsx'
 import { totalLabel } from './GameCards.jsx'
@@ -81,9 +84,13 @@ export function ResearchPage() {
   const wide = useMediaQuery(WIDE_QUERY)
   const sheet = useRef(null)
   const [{ q, cutoff }, setState] = useState(readUrl)
-  const setQ = (next) => {
+  // The ask bar's last question (#3138): page state, not the URL. A change made any other
+  // way (a chip, a preset) drops it, so the sentence never describes a query it did not make.
+  const [asked, setAsked] = useState(null)
+  const setQ = (next, fromAsk = null) => {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${buildQuery(next, { d: cutoff })}`)
     setState({ q: next, cutoff })
+    setAsked(fromAsk)
   }
   const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   // A card a season predates is always named; one waiting on a store rebuild only if picked.
@@ -92,6 +99,7 @@ export function ResearchPage() {
   const asks = game ? ASKS.filter((x) => x.key !== 'what') : ASKS
   const data = head
   const people = run?.people ?? head?.people ?? {}
+  const clubNames = useMemo(() => ALL_MLB_TEAM_IDS.map((id) => teamClubName(id)), [])
   const clubs = useMemo(() => (head ? [...new Set(head.pas.filter((p) => p.gameType !== 'A').map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
   // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
   // open, so the page shows the start screen (presets). An emptied card keeps the page
@@ -101,10 +109,18 @@ export function ResearchPage() {
   const result = run?.result ?? null
   const progress = run?.progress
   const pills = data ? pillsOf(live, people) : []
+  const onAsk = (text) => {
+    const r = parseAsk(text, { people, latest: latest ?? undefined })
+    const info = { text, skipped: r.skipped, read: r.read }
+    if (r.read) setQ(r.q, info)
+    else setAsked(info)
+  }
+  const without = asked?.read && asked.skipped.length ? `Searched without: ${asked.skipped.map((s) => s.text).join(', ')}` : null
   const bar = data && <FilterBar q={q} people={people} clubs={clubs} seasons={onFile} latest={latest} blocked={blocked} onChange={setQ} />
 
   const main = (
     <Stack>
+      {data && <AskBar key={asked ? 'asked' : 'free'} asked={asked} clubs={clubNames} onAsk={onAsk} />}
       <Segmented label="Search" options={SEARCH_MODES} value={q.mode} onChange={(mode) => setQ(withMode(q, mode))} />
       {!start && <Segmented label="Question" fill options={asks.map((x) => ({ value: x.key, label: x.label }))} value={live.ask} onChange={(ask) => setQ({ ...q, ask })} />}
       {error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
@@ -147,8 +163,8 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && !game && <AnswerCard ask={q.ask} q={q} a={result} people={people} />}
-      {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} />}
+      {result && !game && <AnswerCard ask={q.ask} q={q} a={result} people={people} note={without} />}
+      {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} note={without} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
