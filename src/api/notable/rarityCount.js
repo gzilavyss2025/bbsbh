@@ -1,5 +1,5 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club
+// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club,
 // a home run on a first MLB pitch or an inside-the-park grand slam (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
@@ -36,8 +36,8 @@ export const RARITY = {
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
   sixdp: { flag: null, noun: 'game with six or more double plays' },
-  // Its own sentence: "The 16th player since 2001 to homer on his first MLB pitch" (Gary, 2026-11-17).
   itpslam: { flag: null, noun: 'inside-the-park grand slam' },
+  // Its own sentence: "The 16th player since 2001 to homer on his first MLB pitch" (Gary, 2026-11-17).
   firstpitch: { flag: null, lead: (nth, floor) => `The ${nth} player since ${floor} to homer on his first MLB pitch` },
 }
 
@@ -192,7 +192,7 @@ export function insideParkSlams(allPlays) {
   const plays = orderedPlays({ allPlays })
   if (!plays.length) return null
   return plays
-    .filter((p) => p.result?.eventType === 'home_run' && p.result?.rbi === 4 && /inside-the-park/i.test(p.result?.description ?? ''))
+    .filter((p) => p.result?.eventType === 'home_run' && p.result?.rbi === 4 && /inside[- ]the[- ]park/i.test(p.result?.description ?? ''))
     .map((p) => ({ side: p.about?.halfInning === 'top' ? 'away' : 'home', player: { id: p.matchup?.batter?.id, name: p.matchup?.batter?.fullName ?? '' } }))
 }
 
@@ -224,9 +224,16 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning, four-homer game, run of four straight home runs and club game of six or more double plays.
-// [{ kind, side, player? }]
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning,
+// four-homer game, run of four straight home runs, club game of six or more double plays, home run
+// on a first MLB pitch and inside-the-park grand slam. [{ kind, side, player? }]
+// The index holds MLB games of the kept types only (scripts/lib/notable/rules.mjs GAME_TYPES), so a
+// minor-league, spring or exhibition game has no count to give: nothing.
+const INDEXED_TYPES = ['R', 'F', 'D', 'L', 'W']
 export function detectRareFeats(feed) {
+  const sport = feed?.gameData?.teams?.home?.sport?.id
+  const type = feed?.gameData?.game?.type
+  if ((sport != null && sport !== 1) || (type != null && !INDEXED_TYPES.includes(type))) return []
   const plays = orderedPlays(feed?.liveData?.plays)
   const out = []
   const homers = new Map() // batter id -> home runs so far

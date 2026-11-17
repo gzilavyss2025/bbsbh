@@ -660,7 +660,7 @@ export default defineConfig({
               /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname) ||
               // Standing out (#2453): one file per season, read only by /outliers.
               /^\/data\/outliers\/\d{4}\.json$/.test(url.pathname) ||
-              // The feat index (ADR-0101): five whole files, read only after a box score's reveal.
+              // The feat index (ADR-0101): nine whole files, read only after a box score's reveal.
               /^\/data\/notable\/(?:nohitters|cycles|tripleplays|immaculate|fourhr|fourstraight|sixdp|firstpitch|itpslam)\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',

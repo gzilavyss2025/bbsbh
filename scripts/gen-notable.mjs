@@ -168,7 +168,9 @@ for (const season of seasons) {
     if (unknown.length) console.log(`  ${season}: ${unknown.length} slam-candidate games with no plays, not counted: ${unknown.join(', ')}`)
     docs.itpslam = {
       coverage: mergeCoverage(docs.itpslam.coverage, [season], swept.through),
-      rows: mergeRows('itpslam', docs.itpslam.rows, [season], rows),
+      // A game whose play-by-play came back empty keeps the rows it had: an empty read is not a
+      // finding that the slam never happened.
+      rows: mergeRows('itpslam', docs.itpslam.rows, [season], [...rows, ...docs.itpslam.rows.filter((r) => unknown.includes(r.gamePk))]),
     }
     await write('itpslam')
     counts.push(`${rows.length} itpslam`)

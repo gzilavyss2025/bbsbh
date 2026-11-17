@@ -482,6 +482,11 @@ test('an inside-the-park grand slam: a home run with 4 RBI whose play text says 
   assert.deepEqual(insideParkSlams([hr(0, 4, 'Pat Hitter hits a grand slam (3) to left field.')]), [])
   assert.deepEqual(insideParkSlams([hr(0, 2, 'Pat Hitter hits an inside-the-park home run (5) on a fly ball.')]), [])
   assert.equal(insideParkSlams([]), null)
+  assert.equal(insideParkSlams([hr(0, 4, 'Pat Hitter hits an inside the park grand slam (2).')]).length, 1)
+  // a minor-league or spring game has no MLB count to give
+  const aaa = { gameData: { teams: { home: { sport: { id: 11 } } }, game: { type: 'R' } }, liveData: { plays: { allPlays: [slam] } } }
+  assert.deepEqual(detectRareFeats(aaa), [])
+  assert.deepEqual(detectRareFeats({ gameData: { game: { type: 'S' } }, liveData: { plays: { allPlays: [slam] } } }), [])
   assert.deepEqual(detectRareFeats({ liveData: { plays: { allPlays: [slam] } } }).map((f) => f.kind), ['itpslam'])
 })
 
