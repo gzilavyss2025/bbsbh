@@ -43,7 +43,8 @@ export function classicsFrom(rows, abbr) {
     }))
 }
 
-// One deal. `era` is a decade (1980), `teamId` a club; both optional. Walks the
+// One deal. `era` is a decade (1980), `teamId` a club, `monthDay` an `MM-DD`
+// ("This date", #2971); all optional. Walks the
 // seasons in a seeded order until one yields a game, so a club that did not exist
 // in a season, or an empty season, costs a call rather than a dead card.
 // ponytail: season, then club, then game is not uniform over games; fine for a card.
@@ -52,10 +53,12 @@ export async function rollClassic({
   step = 0,
   era = null,
   teamId = null,
+  monthDay = null,
   lastSeason = new Date().getFullYear() - 1,
   isStarted = null,
   fetchJson = getJson,
 } = {}) {
+  if (monthDay && !inSeasonSpan(monthDay)) return null
   const decade = Number(era) || null
   const seasons = []
   for (let y = FIRST_SEASON; y <= lastSeason; y++) if (!decade || Math.floor(y / 10) * 10 === decade) seasons.push(y)
@@ -66,7 +69,8 @@ export async function rollClassic({
     const club = teamId ?? clubs[Math.floor(seedFrom(`${seed}|${season}|club`) / 4294967296 * clubs.length)]?.id
     if (!abbr.has(club)) continue
     const rows = (await fetchJson(scheduleUrl(club, season)))?.dates?.flatMap((d) => d.games) ?? []
-    const dealt = pickGame(classicsFrom(rows, abbr), { seed: seedFrom(`${seed}|${season}`), step, isStarted })
+    const games = classicsFrom(rows, abbr).filter((g) => !monthDay || g.date.endsWith(`-${monthDay}`))
+    const dealt = pickGame(games, { seed: seedFrom(`${seed}|${season}`), step, isStarted })
     if (dealt) return { ...dealt, season }
   }
   return null
@@ -74,5 +78,11 @@ export async function rollClassic({
 
 // The season order and the club pick use separate hashes. One shared hash would sort
 // the lowest value first and so pick club 0 for almost every seed.
+// The earliest and latest MM-DD any MLB game since 1960 was played on, with margin
+// (2025 opened in Tokyo on 03-18; 2001 and 2009 ended on 11-04). A date outside
+// is a sure null with no request, so a winter "This date" probe costs nothing.
+const SEASON_SPAN = ['03-01', '11-15']
+const inSeasonSpan = (md) => md >= SEASON_SPAN[0] && md <= SEASON_SPAN[1]
+
 const pickOrder = (seasons, seed) =>
   seasons.map((y) => [seedFrom(`${seed}|${y}|order`), y]).sort((a, b) => a[0] - b[0]).map((p) => p[1])

@@ -83,3 +83,16 @@ test('rollClassic spreads the club pick across seeds and accepts a string era', 
   for (let seed = 0; seed < 40; seed++) await rollClassic({ seed, era: '1980', lastSeason: 1989, fetchJson })
   assert.ok(asked.size > 8, `only ${asked.size} clubs asked`)
 })
+
+// "This date" (#2971): a month-day filter deals only games on that MM-DD.
+test('a monthDay filter deals only games on that month and day, else null', async () => {
+  const deal = (seed, monthDay) => rollClassic({ seed, monthDay, lastSeason: 1990, fetchJson: fakeFetch([]) })
+  for (const seed of [1, 2, 3, 4]) assert.ok((await deal(seed, '04-15')).game.date.endsWith('-04-15'))
+  assert.equal(await deal(1, '07-04'), null)
+})
+
+test('a monthDay with no MLB games in history costs no request', async () => {
+  const log = []
+  assert.equal(await rollClassic({ monthDay: '12-25', lastSeason: 1990, fetchJson: fakeFetch(log) }), null)
+  assert.equal(log.length, 0)
+})

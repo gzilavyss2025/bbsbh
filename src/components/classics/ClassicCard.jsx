@@ -25,18 +25,18 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 //
 // It wears PickedGame's `.pgame*` sheet (styles/78-offseason.css) on purpose: a
 // dealt game is one card in two places, and one sheet keeps it so.
-export function ClassicCard({ seed = 0, era = null, teamId = null, kicker = 'A classic to score' }) {
+export function ClassicCard({ seed = 0, era = null, teamId = null, monthDay = null, kicker = 'A classic to score' }) {
   const [step, setStep] = useState(0)
   const linkProps = useRouteLink()
   // The deal and its facts are one load, so the card never paints clubs with no
   // park or a park with the wrong clubs. A new filter or step is a new deal.
   const { data, loading } = useAsync(async () => {
-    const dealt = await rollClassic({ seed, step, era, teamId, isStarted: (pk) => readRevealMarkFor(pk) >= 0 })
+    const dealt = await rollClassic({ seed, step, era, teamId, monthDay, isStarted: (pk) => readRevealMarkFor(pk) >= 0 })
     if (!dealt) return null
     // No facts is a card with abbreviations and no park or reason line, not no card.
     const bare = { away: { id: null, name: dealt.game.away.abbr }, home: { id: null, name: dealt.game.home.abbr }, venue: '', reason: null }
     return { ...dealt, facts: (await fetchClassicFacts(dealt.game.pk).catch(() => null)) ?? bare }
-  }, [seed, step, era, teamId])
+  }, [seed, step, era, teamId, monthDay])
 
   if (!data?.facts) {
     return loading ? <section className="pgame" aria-busy="true" aria-label={kicker} /> : null
