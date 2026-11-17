@@ -30,6 +30,7 @@ import { countBit } from './shard.js'
 import { ordinal } from '../../lib/format.js'
 import { monthName } from '../../lib/time/months.js'
 import { seriesValues } from './series.js'
+import { HISTORY_LAST } from './history.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
@@ -157,17 +158,17 @@ export const FILTERS = [
   { key: 'res', label: 'PA result', options: RESULTS, values: (pa) => [Object.keys(RESULT_GROUPS).find((k) => RESULT_GROUPS[k].includes(pa.event)) ?? pa.event] },
   { key: 'gt', label: 'Game type', options: [['R', 'Regular season'], ['P', 'Postseason'], ['A', 'All-Star']], values: (pa) => [pa.gameType === 'R' || pa.gameType === 'A' ? pa.gameType : 'P'] },
   { key: 'sg', label: 'Series game', options: SERIES_GAMES, values: seriesValues, only: (pa) => pa.series != null, info: 'Postseason games. Potential clinch: the batting club takes the series with a win. Potential elimination: the batting club is out with a loss. Sudden death: both clubs one win from taking it. Series-deciding: the game the series ended in.' },
-  { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [pa.pitchType], since: 2008 },
-  { key: 'loc', label: 'Horizontal location', options: [['inner', 'Inner third'], ['middle', 'Middle third'], ['outer', 'Outer third']], values: (pa) => [horizontalThird(pa.px, pa.stand)], since: 2008, info: 'Thirds of the 17-inch plate, from the batter’s side. Inner third is the third nearest the batter. A pitch off the plate is in no third. Reads the last pitch of the plate appearance.' },
-  { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2008, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
+  { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [pa.pitchType], since: 2015 },
+  { key: 'loc', label: 'Horizontal location', options: [['inner', 'Inner third'], ['middle', 'Middle third'], ['outer', 'Outer third']], values: (pa) => [horizontalThird(pa.px, pa.stand)], since: 2015, info: 'Thirds of the 17-inch plate, from the batter’s side. Inner third is the third nearest the batter. A pitch off the plate is in no third. Reads the last pitch of the plate appearance.' },
+  { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2015, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
-  { key: 'cnt', label: 'Count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none.' },
+  { key: 'cnt', label: 'Count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
   { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'sc', label: 'Score', options: SCORES, values: (pa) => scoreValues(pa.margin), info: 'The batting club’s margin when the plate appearance began. Up 3+ and Down 3+ are three runs or more.' },
-  { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom half that ends the game. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found.' },
-  { key: 'bb', label: 'Batted ball type', options: BB_TYPES, values: (pa) => [pa.bbType], since: 2008, v: 2, info: 'Statcast’s batted-ball type for the ball put in play.' },
+  { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom half that ends the game. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found. Before 2015, a run that scores between plate appearances counts toward the one before it.' },
+  { key: 'bb', label: 'Batted ball type', options: BB_TYPES, values: (pa) => [pa.bbType], since: 2015, v: 2, info: 'Statcast’s batted-ball type for the ball put in play.' },
   { key: 'slot', label: 'Batting slot', options: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), `Batting ${ordinal(n)}`]), values: (pa) => [pa.slot == null ? null : String(pa.slot)], v: 2, info: 'The batter’s spot in the order, from the MLB box score. A pinch hitter counts in the slot they batted in.' },
   { key: 'mon', label: 'Month', options: MONTHS, values: (pa) => [pa.date.slice(5, 7)] },
   { key: 'ha', label: 'Home or road', single: true, options: [['H', 'Home'], ['R', 'Road']], values: (pa) => [pa.top ? 'R' : 'H'], info: 'Whether the batting club is at home.' },
@@ -282,10 +283,13 @@ export function unsupported(firstSeason, version = Infinity) {
 // seasons on file. A season after `?d=`'s year is out. With a Seasons range, its seasons.
 // Without one, "Last time" searches every season (newest first, until Stop) and the other
 // three questions read the latest season, so a rate or a leader board is one season's.
+// The history seasons (1961-2014) are searched only by a range that reaches them (Gary,
+// 2026-11-17, #3150): an open "Last time" stays on the Savant seasons.
 export function seasonsFor(q, seasons, cutoff) {
   const open = seasons.filter((s) => !cutoff || s <= Number(cutoff.slice(0, 4))).sort((a, b) => b - a)
   if (q.years) return open.filter((s) => s >= q.years[0] && s <= q.years[1])
-  return q.ask === 'last' ? open : open.slice(0, 1)
+  const recent = open.filter((s) => s > HISTORY_LAST)
+  return q.ask === 'last' ? recent : recent.slice(0, 1)
 }
 
 // Can `season` hold a match? Only a PA result card answers from the index alone: with

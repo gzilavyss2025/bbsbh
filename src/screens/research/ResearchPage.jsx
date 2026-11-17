@@ -1,6 +1,7 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
 import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
+import { HISTORY_LAST } from '../../api/research/history.js'
 import { isRealDate } from '../../lib/dates.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -18,6 +19,7 @@ import { Notice } from '../../components/ui/state/Notice.jsx'
 import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
 import { useResearch } from './useResearch.js'
+import { useEraClubNames } from './useEraClubNames.js'
 
 // RESEARCH (/research, #2234): ask a question of past plays. The page reads ANSWER
 // FIRST (Gary, 2026-11-13, wireframe "/research, answer first"): the question, then
@@ -41,13 +43,21 @@ const PRESETS = [
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]
 
+// Retrosheet's required notice, shown whenever a history season is searched.
+const RETROSHEET_CREDIT = 'The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711.'
+const spanOf = (seasons) => {
+  const lo = Math.min(...seasons)
+  const hi = Math.max(...seasons)
+  return lo === hi ? `${lo}` : `${lo}–${hi}`
+}
+
 function readUrl() {
   const d = new URLSearchParams(window.location.search).get('d')
   return { q: parseQuery(window.location.search), cutoff: isRealDate(d) ? d : null }
 }
 
 // The filter bar's pills: one per active filter, in words.
-function pillsOf(q, people) {
+function pillsOf(q, people, clubName) {
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
   const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
@@ -84,7 +94,8 @@ export function ResearchPage() {
   const start = blank && !Object.keys(q.chips).length && !q.years
   const result = run?.result ?? null
   const progress = run?.progress
-  const pills = data ? pillsOf(live, people) : []
+  const eraName = useEraClubNames([q.team, q.pitchTeam, q.park], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
+  const pills = data ? pillsOf(live, people, eraName) : []
   const bar = data && <FilterBar q={q} people={people} clubs={clubs} seasons={onFile} latest={latest} blocked={blocked} onChange={setQ} />
 
   const main = (
@@ -97,10 +108,12 @@ export function ResearchPage() {
           {cover.first === cover.last ? cover.first : `${cover.first}–${cover.last}`}
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
-          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
+          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · {cover.history ? (cover.last > HISTORY_LAST ? 'Retrosheet and Baseball Savant' : 'Retrosheet') : 'Baseball Savant'}
           {shownBlocked.length > 0 && ` · not in this range: ${shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
+          {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}
         </p>
       )}
+      {data && cover?.history && <p className="t-label t-label--nocaps">{RETROSHEET_CREDIT}</p>}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
       {data && !targets.length && <p className="t-label t-label--nocaps">No season on file in this range{cutoff ? ` before ${labelDate(cutoff)}` : ''}.</p>}
       {progress && (

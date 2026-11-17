@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
+import { HISTORY_LAST } from '../../api/research/history.js'
 import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
 //   ONE PASS. A Seasons range, or "How often" / "Who most" / "What happens" (latest season):
 //     every season loads, then one answer over all of them.
-//   SEASON BY SEASON. "Last time" with no range: newest season first, an answer after each,
+//   SEASON BY SEASON. "Last time" with no range, or with one that reaches the history
+//     seasons (#3150: up to 54 seasons will not fit a phone at once): newest season first, an answer after each,
 //     until the oldest or Stop. A season whose index counts say it holds none of a picked
 //     result is skipped unfetched (mayMatch). Each season is freed once read, the latest
 //     excepted [DECISION: free every searched season, not only the ones with no match;
@@ -55,7 +57,7 @@ export function useResearch(q, cutoff) {
     if (!index || !head || blank || !targets.length) return undefined
     const ctrl = new AbortController()
     stopper.current = { ctrl, stopped: false }
-    const bySeason = live.ask === 'last' && !live.years
+    const bySeason = live.ask === 'last' && (!live.years || live.years[0] <= HISTORY_LAST)
     const people = { ...head.people }
     const searched = []
     const found = []
