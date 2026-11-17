@@ -8,6 +8,7 @@ import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
 import { useRollupNotes } from '../../hooks/callouts/useLastTime.js'
+import { GameLink } from '../../components/player/GameLink.jsx'
 
 // How many insight CARDS the Insights card shows before folding the rest
 // behind a Show-more button (the former-teammates pattern). The notes arrive
@@ -164,9 +165,29 @@ function InsightNoteCard({ group }) {
       <span className="bs__noteBody">
         {group.personName && <span className="bs__noteWho">{group.personName}</span>}
         {group.notes.map((note, i) => (
-          <CalloutNote key={i} text={note.text} kind={note.kind} link={note.link} />
+          <div key={i}>
+            <CalloutNote text={note.text} kind={note.kind} link={note.link} />
+            {note.earlier && <EarlierFold note={note} />}
+          </div>
         ))}
       </span>
     </Card>
+  )
+}
+
+// The rarity count's full list (#2968): the tail names the two most recent, this fold all of the
+// club's earlier ones, each opening its box score. A native <details>, as the coaching tree's.
+function EarlierFold({ note }) {
+  return (
+    <details className="bs__noteMore">
+      <summary>All {note.earlier.length} before, for the {note.teamName}</summary>
+      <ul className="bs__noteMoreList">
+        {note.earlier.map((e) => (
+          <li key={e.path ?? `${e.name}${e.year}`}>
+            <GameLink path={e.path}>{e.name}</GameLink> ({e.year})
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 }

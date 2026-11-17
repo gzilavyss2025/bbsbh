@@ -20,6 +20,7 @@
 // for six-plus double plays (sixdp.json, read off the team fielding game logs), FIRSTPITCH_FLOOR (2001) for a
 // home run on a first MLB pitch (scripts/lib/notable/rarity/firstpitch.mjs, real pitch sequences).
 import { ordinal } from '../../lib/format.js'
+import { gamePath } from '../../lib/route.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
 import { SCORE_BASE } from '../callout-notes/shared.js'
@@ -250,6 +251,29 @@ export function detectRareFeats(feed) {
   return out
 }
 
+// The club's earlier players, newest first: " (after Adam Wainwright (2006) and Gene Stechschulte
+// (2001))", the two most recent and then a count. '' for a club kind (no player) or none before.
+const NAMED = 2
+export function earlierNames(clubRows) {
+  const named = clubRows.filter((r) => r.player?.name)
+  if (!named.length || named.length !== clubRows.length) return ''
+  const shown = named.slice(0, NAMED).map((r) => `${r.player.name} (${yearOf(r.officialDate)})`)
+  const rest = named.length - shown.length
+  const list = rest ? `${shown.join(', ')} and ${rest} other${rest > 1 ? 's' : ''}` : shown.join(' and ')
+  return ` (after ${list})`
+}
+
+// Every earlier player of the club, newest first, for the card's "see all" fold: only when the
+// tail names fewer than all of them. null otherwise.
+export function earlierList(clubRows) {
+  if (clubRows.length <= NAMED || !clubRows.every((r) => r.player?.name)) return null
+  return clubRows.map((r) => ({
+    name: r.player.name,
+    year: yearOf(r.officialDate),
+    path: gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1),
+  }))
+}
+
 // One note for a rare feat: "The 9th natural cycle since 1950, the Brewers' 1st." [] when the
 // index has no floor, or tonight is older than it.
 export function buildRarityNotes(docs, feed, feat) {
@@ -263,8 +287,12 @@ export function buildRarityNotes(docs, feed, feat) {
   const prior = priorRows(docs, feat.kind, t).filter(counted)
   const club = feed.gameData?.teams?.[feat.side]
   const clubName = club?.teamName ?? club?.name
-  const mine = prior.filter((r) => r[r.side]?.id === club?.id).length
-  const tail = clubName ? `, the ${possessive(clubName)} ${ordinal(mine + 1)}` : ''
+  const clubRows = prior.filter((r) => r[r.side]?.id === club?.id)
+  const mine = clubRows.length
+  // A sentence-style line (`lead`) ends "3rd for the Cardinals": "the Cardinals' 3rd" after a
+  // player sentence reads as the Cardinals' 3rd player.
+  const nthForClub = spec.lead ? `${ordinal(mine + 1)} for the ${clubName}` : `the ${possessive(clubName)} ${ordinal(mine + 1)}`
+  const tail = clubName ? `, ${nthForClub}${earlierNames(clubRows)}` : ''
   return [{
     text: `${spec.lead ? spec.lead(ordinal(prior.length + 1), floor) : `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}`}${tail}.`,
     link: null,
@@ -274,6 +302,7 @@ export function buildRarityNotes(docs, feed, feat) {
     teamName: clubName ?? '',
     personName: feat.player?.name ?? '',
     kind: 'rarityCount',
+    earlier: clubName ? earlierList(clubRows) : null,
     dedupeKey: `rarityCount-${feat.kind}-${feat.player?.id ?? feat.side}`,
     score: SCORE_BASE.rarityCount,
   }]
