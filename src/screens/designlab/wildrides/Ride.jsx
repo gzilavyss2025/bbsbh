@@ -90,7 +90,6 @@ export function Ride({ game, chips, games, shape }) {
   const scrubMove = (e) => {
     if (e.buttons) scrubTo(e)
   }
-  const scrubEnd = () => {}
   // The keyboard's scrub: arrows step a play, Page keys an inning's worth, Home/End the ends.
   const scrubKey = (e) => {
     const step = { ArrowRight: 1, ArrowLeft: -1, PageUp: 6, PageDown: -6 }[e.key]
@@ -114,6 +113,8 @@ export function Ride({ game, chips, games, shape }) {
     setShown(i)
     setAt(state.current.at)
     setPaused(false)
+    // a finished ride's loop has stopped: start it again from the jumped-to play
+    setRun((r) => r + 1)
   }
 
   const cur = shown ? game.beats[shown - 1] : null
@@ -189,7 +190,7 @@ export function Ride({ game, chips, games, shape }) {
               </div>
             </div>
             <span className="wr-side wr-side--away"><TeamLogo teamId={game.away} size={18} /> {club(game.away)} ahead</span>
-            <svg viewBox={`${-PX} ${-PY} ${W + 2 * PX} ${H + 2 * PY}`} className="wr-ride" onPointerDown={scrubStart} onPointerMove={scrubMove} onPointerUp={scrubEnd} onKeyDown={scrubKey} tabIndex={0} role="slider" aria-label="Win probability through the game. Drag, or use the arrow keys, to scrub." aria-valuemin={0} aria-valuemax={n - 1} aria-valuenow={Math.floor(at)} aria-valuetext={`${live.top ? "Top" : "Bottom"} of the ${ord(live.inning)}, ${abbr(game.away)} ${live.away}, ${abbr(game.home)} ${live.home}`}>
+            <svg viewBox={`${-PX} ${-PY} ${W + 2 * PX} ${H + 2 * PY}`} className="wr-ride" onPointerDown={scrubStart} onPointerMove={scrubMove} onKeyDown={scrubKey} tabIndex={0} role="slider" aria-label="Win probability through the game. Drag, or use the arrow keys, to scrub." aria-valuemin={0} aria-valuemax={n - 1} aria-valuenow={Math.floor(at)} aria-valuetext={`${live.top ? "Top" : "Bottom"} of the ${ord(live.inning)}, ${abbr(game.away)} ${live.away}, ${abbr(game.home)} ${live.home}`}>
               <defs>
                 <clipPath id={`wr-top-${game.gamePk}`}><rect x="0" y="0" width={W} height={H / 2} /></clipPath>
                 <clipPath id={`wr-bot-${game.gamePk}`}><rect x="0" y={H / 2} width={W} height={H / 2} /></clipPath>

@@ -45,6 +45,17 @@ export function WildRidesCard({ season }) {
   const [drawn, setDrawn] = useState(null)
   const [pick, setPick] = useState(null) // the list row picked
   const [game, setGame] = useState(null) // its ride, with its story
+  const [failed, setFailed] = useState(null) // the gamePk whose ride could not be read
+  // The ride is read from statsapi only once the card is near the screen (it sits below the fold).
+  const cardRef = useRef(null)
+  const [near, setNear] = useState(() => typeof IntersectionObserver === 'undefined')
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el || near) return undefined
+    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && setNear(true), { rootMargin: '400px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [near, lists])
   useEffect(() => {
     fetchWildLists(season).then((d) => setLists(d?.lists ?? null))
   }, [season])
@@ -67,13 +78,17 @@ export function WildRidesCard({ season }) {
 
   // Read the picked game's ride; its story comes from the same code the generator ran.
   useEffect(() => {
-    if (!current) return
+    if (!current || !near) return
     let live = true
-    fetchRide(current).then((ride) => live && setGame(ride ? { ...ride, ...summarize(ride) } : null))
+    fetchRide(current).then((ride) => {
+      if (!live) return
+      if (ride) setGame({ ...ride, ...summarize(ride) })
+      setFailed(ride ? null : current.gamePk)
+    })
     return () => {
       live = false
     }
-  }, [current])
+  }, [current, near])
 
   if (!lists) return null
 
@@ -111,7 +126,7 @@ export function WildRidesCard({ season }) {
         <ol className="wr-list">
           {list.map((g) => (
             <li key={g.gamePk}>
-              <button aria-pressed={g.gamePk === current?.gamePk} onClick={() => setPick(g)}>
+              <button aria-pressed={g.gamePk === current?.gamePk} onClick={() => { setFailed(null); setPick({ ...g }) }}>
                 <span className="wr-when">{shortDate(g.date)}</span>
                 <span className="wr-teams">
                   <TeamLogo teamId={g.away} size={20} />
@@ -129,7 +144,7 @@ export function WildRidesCard({ season }) {
     </>
   )
   return (
-    <section className="wr" aria-label={`The wildest games of ${season}`}>
+    <section className="wr" ref={cardRef} aria-label={`The wildest games of ${season}`}>
       {/* Mixed case in the markup, shouted by the CSS (ADR-0017), as the at-bats card's head. */}
       <SectionHead as="h3" className="oseason__head">
         Wild rides of {season}
@@ -137,7 +152,7 @@ export function WildRidesCard({ season }) {
       {game ? (
         <Ride key={game.gamePk} game={game} chips={chips} games={games} shape={TABS.find((x) => x.key === tab) ?? TABS[0]} />
       ) : (
-        <article className="wr-card">{chips}<p className="wr-eyebrow">Loading the game…</p>{games}</article>
+        <article className="wr-card">{chips}<p className="wr-eyebrow">{failed === current?.gamePk ? 'This game could not be read just now. Pick it again to retry.' : 'Loading the game…'}</p>{games}</article>
       )}
     </section>
   )
