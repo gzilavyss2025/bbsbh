@@ -829,11 +829,18 @@
 .bs .card {
   --card-radius: var(--radius-square);
 }
-/* The rarity count's fold (#2968): every earlier player of the club, each opening his box score. */
+/* The rarity count's fold (#2968): every earlier find of the club, each opening its box score. */
 .bs__noteMore {
   margin: var(--space-1) 0 0 var(--space-4);
   font-size: var(--fs-small);
   color: var(--text-caption);
 }
-.bs__noteMore > summary { cursor: pointer; }
-.bs__noteMoreList { margin: var(--space-1) 0 0; padding-left: var(--space-4); }
+/* Tap targets of at least 32px (WCAG 2.2 asks 24), and a faint underline so each entry reads as a link. */
+.bs__noteMore > summary { cursor: pointer; padding-block: var(--space-2); }
+.bs__noteMoreList { margin: 0; padding-left: var(--space-4); }
+.bs__noteMoreList .plink {
+  min-height: 32px;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+  text-underline-offset: 3px;
+}
