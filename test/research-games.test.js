@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodePlateAppearances, encodeMonth } from '../src/api/research/shard.js'
-import { answerGames, buildGameParams, clubGames, gameMatcher, isGameBlank, parseGameQuery, summarizeGames } from '../src/api/research/games.js'
+import { answerGames, buildGameParams, clubGames, gameMatcher, isGameBlank, parseGameQuery, playerGames, summarizeGames } from '../src/api/research/games.js'
 
 // One Savant row; `s` is [bat_score, post_bat_score], `d` the batting club's margin before.
 const row = (o) => ({
@@ -162,8 +162,7 @@ test('opening an empty How card does not change the search', async () => {
 })
 
 // Player-game lines (#3156): one row per batter and per pitcher per game, for streaks (#3142).
-test('plays group into one batting line and one pitching line per player per game', async () => {
-  const { playerGames } = await import('../src/api/research/games.js')
+test('plays group into one batting line and one pitching line per player per game', () => {
   const { lines, leftOut } = playerGames(pas)
   assert.equal(leftOut, 0)
   const bat = Object.fromEntries(lines.filter((l) => l.role === 'bat').map((l) => [l.player, l]))
@@ -177,8 +176,7 @@ test('plays group into one batting line and one pitching line per player per gam
   assert.deepEqual([pit[40].bf, pit[40].h, pit[40].so, pit[40].runs, pit[40].pitches, pit[40].team], [2, 1, 1, 1, 4, 'CIN'])
 })
 
-test('a player-game line is left out when its game fails the final-margin check', async () => {
-  const { playerGames } = await import('../src/api/research/games.js')
+test('a player-game line is left out when its game fails the final-margin check', () => {
   const broken = pas.map((p, i) => (i === pas.length - 1 ? { ...p, finalMargin: 5 } : p))
   const { lines, leftOut } = playerGames(broken)
   assert.deepEqual([lines.length, leftOut], [0, 1])

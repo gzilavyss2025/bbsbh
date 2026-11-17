@@ -194,30 +194,27 @@ export function summarizeGames(matches, base = null, leftOut = 0, q = {}) {
 // `runs` are every run his club allowed during his plate appearances, earned or not, and
 // `starter` marks the first pitcher his club used in the game.
 export function playerGames(pas) {
-  const kept = new Set(clubGames(pas).games.map((g) => g.gamePk))
+  const { games, leftOut } = clubGames(pas)
+  const kept = new Set(games.map((g) => g.gamePk))
   const lines = new Map()
-  let leftOut = 0
-  const counted = new Set()
-  const firstPitcher = new Map()
+  const pitched = new Set()
   for (const pa of pas) {
-    if (!kept.has(pa.gamePk)) {
-      if (!counted.has(pa.gamePk)) counted.add(pa.gamePk), leftOut++
-      continue
-    }
+    if (!kept.has(pa.gamePk)) continue
     const { gamePk, date, gameType, home, away } = pa
     const line = (role, player, team) => {
       const k = `${gamePk}-${role}-${player}`
       if (!lines.has(k)) {
         const base = { key: k, gamePk, date, gameType, home, away, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
-        lines.set(k, role === 'bat' ? { ...base, pa: 0, runsOn: 0 } : { ...base, bf: 0, pitches: 0, runs: 0, starter: false })
+        // The first line a club's pitching side opens in a game is its starter's.
+        const side = `${gamePk}-${team}`
+        const starter = role === 'pit' && !pitched.has(side)
+        if (role === 'pit') pitched.add(side)
+        lines.set(k, role === 'bat' ? { ...base, pa: 0, runsOn: 0 } : { ...base, bf: 0, pitches: 0, runs: 0, starter })
       }
       return lines.get(k)
     }
     const b = line('bat', pa.batter, pa.batTeam)
     const p = line('pit', pa.pitcher, pa.fieldTeam)
-    const side = `${gamePk}-${pa.fieldTeam}`
-    if (!firstPitcher.has(side)) firstPitcher.set(side, pa.pitcher)
-    p.starter = firstPitcher.get(side) === pa.pitcher
     b.pa++
     p.bf++
     p.pitches += pa.nPitches
