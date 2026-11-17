@@ -110,14 +110,14 @@ test('ordinal writes innings as a game story does', () => {
 })
 
 test('momentParts: a hit is off the pitcher, an out against him, runs trail the pitcher', () => {
-  assert.deepEqual(momentParts({ what: 'singled to right, scoring Cheng', inn: 9 }), { lead: 'batter', verb: 'singled to right', prep: 'off', scoring: ', scoring Cheng', runners: null, when: 'in the bottom of the 9th' })
-  assert.deepEqual(momentParts({ what: 'flew out to right', inn: 10 }), { lead: 'batter', verb: 'flew out to right', prep: 'against', scoring: '', runners: null, when: 'in the bottom of the 10th' })
+  assert.deepEqual(momentParts({ what: 'singled to right, scoring Cheng', inn: 9 }), { lead: 'batter', verb: 'singled to right', prep: 'off', after: '', scoring: ', scoring Cheng', runners: null, when: 'in the bottom of the 9th' })
+  assert.deepEqual(momentParts({ what: 'flew out to right', inn: 10 }), { lead: 'batter', verb: 'flew out to right', prep: 'against', after: '', scoring: '', runners: null, when: 'in the bottom of the 10th' })
   assert.equal(momentParts({ what: 'hit a two-run homer to left', inn: 9 }).prep, 'off')
   assert.equal(momentParts({ what: 'reached on an error, scoring Pages', inn: 10 }).verb, 'reached on an error')
 })
 
 test('momentParts: a play the batter did not make leads with the play', () => {
-  assert.deepEqual(momentParts({ what: 'wild pitch', inn: 9 }), { lead: 'play', verb: 'Wild pitch', prep: 'with', scoring: '', runners: null, when: 'in the bottom of the 9th' })
+  assert.deepEqual(momentParts({ what: 'wild pitch', inn: 9 }), { lead: 'play', verb: 'Wild pitch', prep: 'with', after: '', scoring: '', runners: null, when: 'in the bottom of the 9th' })
 })
 
 test('postseasonCitation writes the game out', () => {
@@ -170,4 +170,19 @@ test('versusMlb says near inside 5 points, then above/below, then well past 10',
   assert.deepEqual(versusMlb(48, 59), { text: 'Well below the MLB average of 59%', tone: 'down' })
   assert.deepEqual(versusMlb(54, 59), { text: 'Below the MLB average of 59%', tone: 'down' })
   assert.equal(versusMlb(null, 41), null)
+})
+
+test('a walk reads "against" the pitcher, never "walked off", and still counts as the batter’s', () => {
+  const walk = { what: 'walked', inn: 9 }
+  assert.equal(momentParts(walk).prep, 'against')
+  assert.equal(swingFor(walk, 158, 'bat'), 'up')
+  assert.equal(swingFor({ what: 'was hit by a pitch', inn: 9 }, 158, 'bat'), 'up')
+})
+
+test('an intentional walk is BY the pitcher; a hit batter FROM him, the forced run after', () => {
+  const ibb = momentParts({ what: 'was walked on purpose', inn: 9 })
+  assert.equal(`${ibb.verb} ${ibb.prep}`, 'was intentionally walked by')
+  const hbp = momentParts({ what: 'was hit by a pitch, forcing in a run', inn: 9 })
+  assert.deepEqual([hbp.verb, hbp.prep, hbp.after], ['was hit by a pitch', 'from', ', forcing in a run'])
+  assert.equal(swingFor({ what: 'was walked on purpose', inn: 9 }, 158, 'bat'), 'up')
 })

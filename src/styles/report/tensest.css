@@ -202,6 +202,11 @@
 }
 
 /* "All" under the MLB pin: the pin means every club here (TeamFilterStrip pinLabel). */
+/* The strip's pins are a fixed height; this one also holds "All", so it grows to fit. */
+.tensest__picker .teamfilterstrip__pin {
+  height: auto;
+  padding-block: var(--space-1);
+}
 .teamfilterstrip__pinlabel {
   display: block;
   margin-block-start: var(--space-1);
@@ -350,4 +355,16 @@
 }
 .tensest__versus--down {
   color: var(--accent-negative);
+}
+
+/* The title and its one-line deck read as one headline block: the deck sits tight under
+   the title, on the same left edge, in the title's display face a size down. */
+.tensest__head {
+  display: block;
+}
+.tensest__head .tensest__intro {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-family: var(--font-display);
+  color: var(--text-body);
 }

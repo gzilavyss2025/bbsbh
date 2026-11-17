@@ -75,9 +75,9 @@ function Moment({ r, teamId, routeLink }) {
   // The comma rides with the word before it: a name is a button, and a line may break
   // after a button, which left a comma alone at the start of a line.
   const tail = scoring
-    ? <>{pitcher}{scoring}</>
-    : m.scoring
-      ? <>{pitcher}{m.scoring},</>
+    ? <>{pitcher}{m.after}{scoring}</>
+    : m.scoring || m.after
+      ? <>{pitcher}{m.after}{m.scoring},</>
       : <span className="tensest__nobreak">{pitcher},</span>
   return (
     <>
@@ -165,24 +165,22 @@ export function TensestMomentsPage() {
   return (
     <div className="screen">
       <SiteHeader />
-      <header className="topbar">
+      <header className="topbar tensest__head">
         <h1 className="topbar__title">Biggest At-Bats{data?.season ? `, ${data.season}` : ''}</h1>
+        {/* One line up front; the explanation is opt-in, behind the (i) (src/styles/CLAUDE.md). */}
+        <p className="hint infopop-row tensest__intro">
+          The season’s tensest at-bats, by MLB’s pressure score.{' '}
+          <InfoPopover label="About biggest at-bats" className="infopop--paper infopop--down">
+            MLB scores every at-bat for pressure, from the inning, the score, the outs and the runners. A normal
+            at-bat is 1.0 and the top is 9.99. Every at-bat here is 4 or more, and the meter fills from 4 to 9.99.
+            Pick a club for its 25 biggest, batting or pitching, or All for baseball’s top 50. Green means the
+            club’s side succeeded: for a batter, a hit, a walk, a hit-by-pitch, a run or reaching base; for a pitcher,
+            anything else. Red means it didn’t. Each square in the box is one at-bat, in rank order. The MLB average
+            covers every at-bat this season that scored 4 or more; within 5 points counts as near. T marks a tie,
+            which can add a 26th at-bat.
+          </InfoPopover>
+        </p>
       </header>
-
-      {/* One line up front; the explanation is opt-in, behind the (i) (src/styles/CLAUDE.md). */}
-      <p className="hint infopop-row tensest__intro">
-        The season’s tensest at-bats, by MLB’s pressure score.{' '}
-        <InfoPopover label="About biggest at-bats" className="infopop--paper infopop--down">
-          MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
-          the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more;
-          the meter runs from 4 (one bar) to 9.99 (full). Pick a club for its top 25 batting or pitching, or All
-          for the league’s top 50 (a tie for the last place can add one); narrow either by batter, pitcher or park.
-          With a club picked, each row is green when its side succeeded in the at-bat and red when it didn’t, and
-          the box counts them: each square is one at-bat, in rank order. The MLB average beside it is every at-bat
-          in baseball this season at a pressure of 4 or more; within 5 points of it reads as near. Ties are marked T, and
-          postseason games carry their round and game.
-        </InfoPopover>
-      </p>
 
       <AsyncStatus
         loading={loading}
