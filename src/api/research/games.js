@@ -186,3 +186,46 @@ export function summarizeGames(matches, base = null, leftOut = 0, q = {}) {
   const clubs = [...seen].map(([club, n]) => ({ club, n })).sort((a, b) => b.n - a.n || a.club.localeCompare(b.club)).slice(0, 10)
   return { matches: rows, base, leftOut, clubs }
 }
+
+// PLAYER-GAME LINES (#3156, step 3 of #3137; #3142's streaks build on it). One line per
+// batter (`role: 'bat'`) and per pitcher (`role: 'pit'`) per game, oldest game first, and
+// `leftOut`: games THE CHECK drops, as in clubGames. A batter's `runsOn` is the runs on his
+// plays (eventRuns): near RBI, not the official call (a run on an error counts). A pitcher's
+// `runs` are every run his club allowed during his plate appearances, earned or not, and
+// `starter` marks the first pitcher his club used in the game.
+export function playerGames(pas) {
+  const { games, leftOut } = clubGames(pas)
+  const kept = new Set(games.map((g) => g.gamePk))
+  const lines = new Map()
+  const pitched = new Set()
+  for (const pa of pas) {
+    if (!kept.has(pa.gamePk)) continue
+    const { gamePk, date, gameType, home, away } = pa
+    const line = (role, player, team) => {
+      const k = `${gamePk}-${role}-${player}`
+      if (!lines.has(k)) {
+        const base = { key: k, gamePk, date, gameType, home, away, role, player, team, h: 0, hr: 0, bb: 0, so: 0 }
+        // The first line a club's pitching side opens in a game is its starter's.
+        const side = `${gamePk}-${team}`
+        const starter = role === 'pit' && !pitched.has(side)
+        if (role === 'pit') pitched.add(side)
+        lines.set(k, role === 'bat' ? { ...base, pa: 0, runsOn: 0 } : { ...base, bf: 0, pitches: 0, runs: 0, starter })
+      }
+      return lines.get(k)
+    }
+    const b = line('bat', pa.batter, pa.batTeam)
+    const p = line('pit', pa.pitcher, pa.fieldTeam)
+    b.pa++
+    p.bf++
+    p.pitches += pa.nPitches
+    b.runsOn += pa.eventRuns ?? 0
+    p.runs += pa.runs ?? 0
+    for (const l of [b, p]) {
+      if (HITS.has(pa.event)) l.h++
+      if (pa.event === 'home_run') l.hr++
+      if (WALKS.has(pa.event)) l.bb++
+      if (STRIKEOUTS.has(pa.event)) l.so++
+    }
+  }
+  return { lines: [...lines.values()], leftOut }
+}
