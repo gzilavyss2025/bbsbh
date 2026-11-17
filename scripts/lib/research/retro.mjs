@@ -190,7 +190,8 @@ export function seasonRows(csv, retroGames, byId, mlbamOf) {
       continue
     }
     const pseq = v[AT.pseq]
-    if (rp[1] !== pseq) stats.pseqDiffers++
+    // cwevent trims the string: one 1974 play line reads ' X' (CHA197409200, event 47).
+    if (rp[1].trim() !== pseq) stats.pseqDiffers++
     // Unknown count: '??' (1961-83) or an empty field (1984-87). cwevent prints 0-0 for both.
     const known = /^\d\d$/.test(rp[0])
     const date = iso(rg.info.date)

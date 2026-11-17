@@ -118,6 +118,14 @@ test('seasonRows: the home half reads the margin from the home side; rows sort b
   assert.deepEqual(rows.map((r) => [r.ab, r.bsd]), [[1, 0], [2, 2]])
 })
 
+test('seasonRows: a raw pitch string with a stray space matches cwevent, which trims it', () => {
+  // CHA197409200 event 47 (1974): the event file has ' X'; cwevent prints 'X'.
+  const games = parseEventFile(EVENT_FILE.replace('play,1,0,heywj001,22,BCX,S8/G', 'play,1,0,heywj001,22, X,S8/G'))
+  const { rows, stats } = seasonRows(line({ evn: 1, pseq: 'X' }), games, new Map([['MIL201404010', sched()]]), () => 1)
+  assert.equal(stats.pseqDiffers, 0)
+  assert.equal(rows[0].pseq, 'X')
+})
+
 test('seasonRows counts a pitch string that differs from the raw play line', () => {
   const games = parseEventFile(EVENT_FILE)
   const { stats } = seasonRows(line({ evn: 1, pseq: 'BBX' }), games, new Map([['MIL201404010', sched()]]), () => 1)
