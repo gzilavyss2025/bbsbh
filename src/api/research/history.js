@@ -67,9 +67,10 @@ const reader = ({ cols, c }) => (name) => c[cols.indexOf(name)] ?? []
 // games/{season}.json -> Map(gamePk -> { date, home, away, gameNumber, homeRuns, awayRuns }).
 export function historyGames(file) {
   const col = reader(file)
+  const [date, home, away, num, homeRuns, awayRuns] = ['date', 'home', 'away', 'num', 'homeRuns', 'awayRuns'].map(col)
   const out = new Map()
   col('gamePk').forEach((pk, i) => {
-    out.set(pk, { date: col('date')[i], home: teamAbbr({ id: col('home')[i] }), away: teamAbbr({ id: col('away')[i] }), gameNumber: col('num')[i] || 1, homeRuns: col('homeRuns')[i], awayRuns: col('awayRuns')[i] })
+    out.set(pk, { date: date[i], home: teamAbbr({ id: home[i] }), away: teamAbbr({ id: away[i] }), gameNumber: num[i] || 1, homeRuns: homeRuns[i], awayRuns: awayRuns[i] })
   })
   return out
 }
@@ -78,38 +79,40 @@ export function historyGames(file) {
 export function decodeHistory(paFile, pitchFile, games) {
   const col = reader(paFile)
   const pseq = pitchFile?.pseq ?? []
-  const n = col('gamePk').length
+  // Each column read once, not per row: a season is ~160,000 rows.
+  const c = Object.fromEntries(paFile.cols.map((name) => [name, col(name)]))
+  const n = c.gamePk.length
   const pas = []
   for (let j = 0; j < n; j++) {
-    const g = games.get(col('gamePk')[j])
+    const g = games.get(c.gamePk[j])
     if (!g) continue
-    const top = col('half')[j] === 0
-    const balls = col('balls')[j]
-    const strikes = col('strikes')[j]
-    const bsd = col('bsd')[j]
+    const top = c.half[j] === 0
+    const balls = c.balls[j]
+    const strikes = c.strikes[j]
+    const bsd = c.bsd[j]
     const pa = {
-      key: `${col('gamePk')[j]}-${col('ab')[j]}`,
-      gamePk: col('gamePk')[j],
+      key: `${c.gamePk[j]}-${c.ab[j]}`,
+      gamePk: c.gamePk[j],
       date: g.date,
       gameType: 'R',
       home: g.home,
       away: g.away,
       gameNumber: g.gameNumber,
-      atBat: col('ab')[j],
-      batter: col('batter')[j],
-      pitcher: col('pitcher')[j],
-      stand: col('stand')[j],
-      throws: col('throws')[j],
-      inning: col('inn')[j],
+      atBat: c.ab[j],
+      batter: c.batter[j],
+      pitcher: c.pitcher[j],
+      stand: c.stand[j],
+      throws: c.throws[j],
+      inning: c.inn[j],
       top,
-      outs: col('outs')[j],
-      runners: col('bases')[j],
+      outs: c.outs[j],
+      runners: c.bases[j],
       margin: bsd,
       marginLast: bsd,
       counts: pitchCounts(pseq[j]),
       count: [balls, strikes],
-      event: historyEvent(col('event')[j], col('fl')[j]),
-      slot: col('slot')[j],
+      event: historyEvent(c.event[j], c.fl[j]),
+      slot: c.slot[j],
       pitchType: null,
       px: null,
       hcX: null,

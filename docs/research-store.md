@@ -79,7 +79,8 @@ box scores. The index records each month's `v`; a card with `v: 2` is blocked, a
 ## Coverage
 
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,
-location and batted-ball location from 2008. The coverage line under the bar lists any
+location, batted-ball location and batted-ball type from 2015 (the history seasons before
+it hold none; #3150). The coverage line under the bar lists any
 card the store's seasons cannot answer. With 2026 only, every card works.
 
 ## Seasons (scope #2, Gary 2026-11-13)
@@ -124,8 +125,10 @@ A July shard built before 2026-11-16 holds no All-Star game until it is rebuilt.
 ## History store, 1961-2014 (#3135)
 
 A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from
-Retrosheet play-by-play: one row per plate appearance, no pitch rows. The page does not
-read it yet; a follow-up wires it into `/research`. Decisions: #3135 and its comments
+Retrosheet play-by-play: one row per plate appearance, no pitch rows. `/research` reads it
+(#3150, `src/api/research/history.js`) when a Seasons range reaches before 2015; an open
+search stays on 2015 on. Gaps by design: no force out or ground-ball double play, Moment's
+margin after comes from the next PA, and Count's passed-through mask needs a pitch string. Decisions: #3135 and its comments
 (Gary, 2026-10-21 and 2026-11-16). Measurements: `.scratch/research-retrosheet-pa/findings.md`.
 
 | Path | What |

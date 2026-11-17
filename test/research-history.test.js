@@ -95,6 +95,8 @@ test('history seasons are searched only by a range that reaches them', () => {
   assert.deepEqual(seasonsFor(parseQuery('?res=home_run'), on, null), [2016, 2015])
   assert.deepEqual(seasonsFor(parseQuery('?ask=often&res=home_run'), on, null), [2016])
   assert.deepEqual(seasonsFor(parseQuery('?res=home_run&yr=1987-2015'), on, null), [2015, 2014, 1988, 1987])
+  // A cutoff before 2015 leaves no Savant season: the history seasons before it are read.
+  assert.deepEqual(seasonsFor(parseQuery('?res=home_run'), on, '1990-06-01'), [1988, 1987])
 })
 
 test('coverage credits Retrosheet and names the seasons with thin pitch strings', () => {

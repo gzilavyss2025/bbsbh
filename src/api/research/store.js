@@ -33,8 +33,7 @@ async function getJson(path, signal, base = STORE_BASE) {
 // `history: true`, and the season `pitchString` (% of PAs with a pitch string). A history
 // manifest that fails to load leaves the page on the Savant seasons alone.
 export function fetchIndex() {
-  const history = getJson('manifest.json', undefined, HISTORY_BASE).then(historySeasons, () => ({}))
-  indexP ??= Promise.all([getJson('index.json'), history]).then(([index, past]) => ({ ...index, seasons: { ...past, ...index.seasons } })).catch((e) => {
+  indexP ??= Promise.all([getJson('index.json'), getJson('manifest.json', undefined, HISTORY_BASE).then(historySeasons, () => ({}))]).then(([index, past]) => ({ ...index, seasons: { ...past, ...index.seasons } })).catch((e) => {
     indexP = null
     throw e
   })
@@ -64,9 +63,11 @@ export function storeVersion(index, seasons) {
 // Is `season` a history-store season?
 export const isHistory = (index, season) => Object.values(index.seasons[season]?.months ?? {}).some((m) => m.history)
 
+// Shared by every history season, so it carries no season's AbortSignal: dropping one season
+// must not reject the names another is waiting on.
 let historyPeople = null
-const getHistoryPeople = (signal) => {
-  historyPeople ??= getJson('people.json', signal, HISTORY_BASE).then((f) => f.people ?? {}).catch((e) => {
+const getHistoryPeople = () => {
+  historyPeople ??= getJson('people.json', undefined, HISTORY_BASE).then((f) => f.people ?? {}).catch((e) => {
     historyPeople = null
     throw e
   })
@@ -77,7 +78,7 @@ const getHistoryPeople = (signal) => {
 async function loadHistorySeason(index, season, ctrl, onMonth) {
   const months = Object.keys(index.seasons[season].months).sort()
   const get = (path) => getJson(path, ctrl.signal, HISTORY_BASE)
-  const [games, people] = await Promise.all([get(`games/${season}.json`).then(historyGames), getHistoryPeople(ctrl.signal)])
+  const [games, people] = await Promise.all([get(`games/${season}.json`).then(historyGames), getHistoryPeople()])
   let loaded = 0
   onMonth(0, months.length)
   const parts = await Promise.all(months.map((mm) => Promise.all([get(`pa/${season}/${mm}.json`), get(`pitches/${season}/${mm}.json`)]).then(([pa, pitches]) => {

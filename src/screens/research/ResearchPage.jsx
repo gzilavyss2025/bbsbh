@@ -2,6 +2,7 @@ import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
 import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
+import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../../../scripts/lib/open-data/credits.mjs'
 import { isRealDate } from '../../lib/dates.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -43,8 +44,8 @@ const PRESETS = [
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]
 
-// Retrosheet's required notice, shown whenever a history season is searched.
-const RETROSHEET_CREDIT = 'The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711.'
+// Retrosheet's required notice and the Chadwick register's (the MLBAM ids), shown whenever
+// a history season is searched. Written once, in credits.mjs (ADR-0100).
 const spanOf = (seasons) => {
   const lo = Math.min(...seasons)
   const hi = Math.max(...seasons)
@@ -113,7 +114,7 @@ export function ResearchPage() {
           {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}
         </p>
       )}
-      {data && cover?.history && <p className="t-label t-label--nocaps">{RETROSHEET_CREDIT}</p>}
+      {data && cover?.history && <p className="t-label t-label--nocaps">{RETROSHEET_CREDIT} {CHADWICK_JOIN}</p>}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
       {data && !targets.length && <p className="t-label t-label--nocaps">No season on file in this range{cutoff ? ` before ${labelDate(cutoff)}` : ''}.</p>}
       {progress && (

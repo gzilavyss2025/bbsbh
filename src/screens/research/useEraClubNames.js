@@ -20,17 +20,20 @@ export const eraLabel = (names) => (names.length ? names.join(' / ') : null)
 // { code: 'Name / Name' } for `codes` over seasons [lo, hi]; a club not yet loaded, or
 // with no name on file in range, reads its current name (clubName).
 export function useEraClubNames(codes, lo, hi) {
-  const [names, setNames] = useState({})
+  // Tagged with the clubs and range they answer, so a stale or failed lookup shows nothing.
+  const [got, setGot] = useState({ tag: null, names: {} })
   const key = codes.filter(Boolean).join(',')
+  const tag = `${key}|${lo}|${hi}`
   useEffect(() => {
     let live = true
     if (lo == null || hi == null) return undefined
     Promise.all(key.split(',').filter((c) => ID_OF[c]).map((c) => franchiseFor(ID_OF[c]).then((f) => [c, namesInRange(f.spans, lo, hi)]))).then((rows) => {
-      if (live) setNames(Object.fromEntries(rows.filter(([, n]) => eraLabel(n)).map(([c, n]) => [c, eraLabel(n)])))
+      if (live) setGot({ tag, names: Object.fromEntries(rows.filter(([, n]) => eraLabel(n)).map(([c, n]) => [c, eraLabel(n)])) })
     }, () => {})
     return () => {
       live = false
     }
-  }, [key, lo, hi])
+  }, [key, lo, hi, tag])
+  const names = got.tag === tag ? got.names : {}
   return (code) => names[code] ?? clubName(code)
 }

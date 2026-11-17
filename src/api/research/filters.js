@@ -155,7 +155,7 @@ export const basesOf = (v) => ({ first: v[0] === '1', second: v[1] === '2', thir
 // `only` (optional) bounds a card, Invert included: an inverted Series game chip reads
 // postseason series games, never the regular season.
 export const FILTERS = [
-  { key: 'res', label: 'PA result', options: RESULTS, values: (pa) => [Object.keys(RESULT_GROUPS).find((k) => RESULT_GROUPS[k].includes(pa.event)) ?? pa.event] },
+  { key: 'res', label: 'PA result', options: RESULTS, info: 'Before 2015, Retrosheet does not mark a force out or a ground-ball double play: those plays read as an out in play and a double play.', values: (pa) => [Object.keys(RESULT_GROUPS).find((k) => RESULT_GROUPS[k].includes(pa.event)) ?? pa.event] },
   { key: 'gt', label: 'Game type', options: [['R', 'Regular season'], ['P', 'Postseason'], ['A', 'All-Star']], values: (pa) => [pa.gameType === 'R' || pa.gameType === 'A' ? pa.gameType : 'P'] },
   { key: 'sg', label: 'Series game', options: SERIES_GAMES, values: seriesValues, only: (pa) => pa.series != null, info: 'Postseason games. Potential clinch: the batting club takes the series with a win. Potential elimination: the batting club is out with a loss. Sudden death: both clubs one win from taking it. Series-deciding: the game the series ended in.' },
   { key: 'pt', label: 'Pitch type', options: PITCH_TYPES.map((p) => [p.code, p.name]), values: (pa) => [pa.pitchType], since: 2015 },
@@ -288,7 +288,8 @@ export function unsupported(firstSeason, version = Infinity) {
 export function seasonsFor(q, seasons, cutoff) {
   const open = seasons.filter((s) => !cutoff || s <= Number(cutoff.slice(0, 4))).sort((a, b) => b - a)
   if (q.years) return open.filter((s) => s >= q.years[0] && s <= q.years[1])
-  const recent = open.filter((s) => s > HISTORY_LAST)
+  // A `?d=` before 2015 leaves no Savant season: then the history seasons before it.
+  const recent = open.some((s) => s > HISTORY_LAST) ? open.filter((s) => s > HISTORY_LAST) : open
   return q.ask === 'last' ? recent : recent.slice(0, 1)
 }
 
