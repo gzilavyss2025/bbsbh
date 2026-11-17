@@ -76,3 +76,10 @@ test('a month built with its side file is marked wp; a season is ready only when
   index.seasons[2026].months['05'] = { v: 2 }
   assert.equal(hasWinProb(index, [2026]), false)
 })
+
+test('an inverted Leverage chip never matches a PA with no LI', async () => {
+  const { matcher } = await import('../src/api/research/filters.js')
+  const m = matcher(parseQuery('?lev=!high'))
+  assert.equal(m({ ...pa(), gameType: 'R', date: '2025-06-01', li: null }), false)
+  assert.equal(m({ ...pa(), gameType: 'R', date: '2025-06-01', li: 1 }), true)
+})

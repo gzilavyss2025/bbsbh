@@ -16,7 +16,7 @@ import { csvObjects } from '../lib/savant.mjs'
 import { monthDays, savantDayUrl, seasonMonths } from '../lib/research/store.mjs'
 import { baseballToday } from '../../src/lib/time/standingsDates.js'
 import { decodePlateAppearances, encodeMonth } from '../../src/api/research/shard.js'
-import { buildLeverage } from '../../src/api/research/winprob.js'
+import { buildLeverage, encodeWinProb } from '../../src/api/research/winprob.js'
 
 const args = parseArgs(process.argv.slice(2))
 const seasons = (strOpt(args, 'seasons') ?? '2024,2025').split(',').map(Number)
@@ -35,14 +35,9 @@ for (const season of seasons) {
       // Regular season only: the table is the league's, not October's.
       const rows = csvObjects(text).filter((r) => r.game_type === 'R')
       if (!rows.length) continue
-      const swing = new Map()
-      for (const r of rows) {
-        const k = `${r.game_pk}-${r.at_bat_number}`
-        swing.set(k, (swing.get(k) ?? 0) + (Number(r.delta_home_win_exp) || 0))
-      }
-      for (const pa of decodePlateAppearances(encodeMonth(rows, { season, month }))) {
-        pas.push({ inning: pa.inning, top: pa.top, outs: pa.outs, runners: pa.runners, margin: pa.margin, swing: Math.abs(swing.get(pa.key) ?? 0) })
-      }
+      const decoded = decodePlateAppearances(encodeMonth(rows, { season, month }))
+      const { w } = encodeWinProb(rows, decoded)
+      decoded.forEach((pa, i) => pas.push({ inning: pa.inning, top: pa.top, outs: pa.outs, runners: pa.runners, margin: pa.margin, swing: Math.abs(w[i]) / 1000 }))
       console.log(`${day}: ${pas.length} PAs so far`)
       await sleep(400)
     }
