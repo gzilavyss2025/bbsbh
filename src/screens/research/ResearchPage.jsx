@@ -136,7 +136,7 @@ export function ResearchPage() {
   const streak = q.mode === 'streak'
   // The Win prob toggle is set but a searched season has no side file yet (#3141).
   const wpBlocked = q.wp && !game && !streak && !winProb
-  const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key]) && (streak ? STREAK_CHIPS.includes(b.key) : !game || GAME_CHIPS.includes(b.key)))
+  const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key]) && (streak ? STREAK_CHIPS.includes(b.key) : !game || b.total || GAME_CHIPS.includes(b.key)))
   const asks = game ? ASKS.filter((x) => x.key !== 'what') : ASKS
   const data = head
   const people = run?.people ?? head?.people ?? {}
@@ -174,7 +174,7 @@ export function ResearchPage() {
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · {cover.history ? (cover.last > HISTORY_LAST ? 'Retrosheet and Baseball Savant' : 'Retrosheet') : 'Baseball Savant'}
-          {(game || streak) && q.years?.[0] <= HISTORY_LAST && ` · games from ${HISTORY_LAST + 1}`}
+          {(game || streak) && q.years?.[0] <= HISTORY_LAST && targets.length > 0 && Math.min(...targets) > HISTORY_LAST && ` · games from ${HISTORY_LAST + 1}`}
           {result?.leftOut > 0 && ` · ${result.leftOut.toLocaleString()} ${result.leftOut === 1 ? 'game' : 'games'} left out: runs on file don’t add up`}
           {(shownBlocked.length > 0 || wpBlocked) && ` · not in this range: ${[...shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`), ...(wpBlocked ? ['Win prob (not built yet)'] : [])].join(', ')}`}
           {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}

@@ -118,7 +118,8 @@ export function clubGames(pas) {
       if (pa.event === 'home_run') s.hr++
       if (WALKS.has(pa.event)) s.bb++
       if (STRIKEOUTS.has(pa.event)) s.so++
-      s.pitches += pa.nPitches
+      // A history PA with no pitch string (#3163) leaves the club-game's pitches unknown.
+      s.pitches = pa.nPitches == null || s.pitches == null ? null : s.pitches + pa.nPitches
       if (pa.runs > 0) s.scoringPas.push(pa)
       if (pa.eventRuns > 0) s.scoring.push(pa)
       if (pa.runs != null && pa.eventRuns != null) s.between += pa.runs - pa.eventRuns
@@ -217,7 +218,7 @@ export function playerGames(pas) {
     const p = line('pit', pa.pitcher, pa.fieldTeam)
     b.pa++
     p.bf++
-    p.pitches += pa.nPitches
+    p.pitches = pa.nPitches == null || p.pitches == null ? null : p.pitches + pa.nPitches
     b.runsOn += pa.eventRuns ?? 0
     p.runs += pa.runs ?? 0
     for (const l of [b, p]) {

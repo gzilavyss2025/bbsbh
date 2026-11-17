@@ -169,7 +169,10 @@ PAs falls back to inning + half + margin. Buckets: Low < 0.85, Medium, High > 2.
 A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from
 Retrosheet play-by-play: one row per plate appearance, no pitch rows. `/research` reads it
 (#3150, `src/api/research/history.js`) when a Seasons range reaches before 2015; an open
-search stays on 2015 on. Gaps by design: no force out or ground-ball double play, Moment's
+search stays on 2015 on. Store version 2 (#3163) adds two run columns, `er` (runs on the
+play) and `pr` (runs on non-PA events while the batter was up), so game mode searches the
+history seasons too; a v1 store keeps game mode on 2015 on. Pitches is blocked in game
+mode before 1988, where most pitch strings are missing. Gaps by design: no force out or ground-ball double play, Moment's
 margin after comes from the next PA, and Count's passed-through mask needs a pitch string. Decisions: #3135 and its comments
 (Gary, 2026-10-21 and 2026-11-16). Measurements: `.scratch/research-retrosheet-pa/findings.md`.
 

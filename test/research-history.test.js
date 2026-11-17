@@ -122,3 +122,50 @@ test('a history season whose result counts hold none of a picked result is skipp
   assert.equal(mayMatch(parseQuery('?res=home_run'), seasonEvents(index, 1961)), true)
   assert.equal(seasonEvents(index, 1962), null, 'a store built before #3159 skips nothing')
 })
+
+// #3163: game mode on history rows. A v2 store carries `er` (runs on the play) and `pr` (runs
+// on non-PA events while the batter was up).
+test('a v2 history month gives game mode its runs, final margin and pitch count', async () => {
+  const { clubGames } = await import('../src/api/research/games.js')
+  const cols = [...PA_COLS, 'er', 'pr']
+  // Final MON 2, MIL 1. Top: a solo homer. Bottom: a wild pitch scores one, then a single
+  // drives one in.
+  const games = historyGames(file(['gamePk', 'date', 'home', 'away', 'park', 'venue', 'num', 'night', 'dh', 'pitches', 'homeRuns', 'awayRuns'], [[100, '1987-07-04', 120, 158, 'MON02', 22, 0, 1, 0, 2, 2, 1]]))
+  const pas = decodeHistory(file(cols, [
+    [100, 1, 11, 21, 23, 1, 0, 0, 0, 0, 0, 'R', 'R', 0, 1, 4, 1, 0, 1, 0],
+    [100, 2, 12, 22, 20, 1, 1, 0, 4, 0, 0, 'L', 'R', -1, 1, 1, 1, 0, 1, 1],
+  ]), { pseq: ['BX', ''] }, games)
+  assert.deepEqual(pas.map((p) => [p.runs, p.eventRuns]), [[1, 1], [2, 1]])
+  assert.equal(pas[1].finalMargin, -1, 'away minus home at the end')
+  assert.deepEqual(pas.map((p) => p.nPitches), [2, null])
+  const { games: rows, leftOut } = clubGames(pas)
+  assert.equal(leftOut, 0)
+  assert.deepEqual(rows.map((g) => [g.batTeam, g.runs, g.between]).sort(), [['MIL', 1, 0], ['WSH', 2, 1]])
+})
+
+test('a v1 history row has no runs, and only a v2 manifest opens game mode', () => {
+  assert.equal(MONTH[0].runs, null)
+  assert.equal(MONTH.at(-1).finalMargin, -1)
+  const m = (v) => ({ v, seasons: { 1987: { months: { '07': { pas: 1, through: '1987-07-31' } } } } })
+  assert.equal(historySeasons(m(1))[1987].gameRuns, false)
+  assert.equal(historySeasons(m(2))[1987].gameRuns, true)
+})
+
+test('game mode answered season by season adds up to the pooled answer (#3163)', async () => {
+  const { answerGames, summarizeGames } = await import('../src/api/research/games.js')
+  const cols = [...PA_COLS, 'er', 'pr']
+  const season = (pk, date) => {
+    const games = historyGames(file(['gamePk', 'date', 'home', 'away', 'park', 'venue', 'num', 'night', 'dh', 'pitches', 'homeRuns', 'awayRuns'], [[pk, date, 120, 158, 'MON02', 22, 0, 1, 0, 2, 0, 1]]))
+    return decodeHistory(file(cols, [
+      [pk, 1, 11, 21, 23, 1, 0, 0, 0, 0, 0, 'R', 'R', 0, 1, 4, 1, 0, 1, 0],
+      [pk, 2, 12, 22, 3, 1, 1, 0, 0, 0, 0, 'L', 'R', -1, 1, 0, 0, 0, 0, 0],
+    ]), null, games)
+  }
+  const [a, b] = [season(1, '1980-05-01'), season(2, '1981-05-01')]
+  const q = { mode: 'game', ask: 'often', chips: {}, g: { totals: { hr: [1, null] }, how: [] } }
+  const pooled = answerGames([...a, ...b], q, null)
+  const parts = [answerGames(b, q, null), answerGames(a, q, null)] // newest season first
+  const summed = summarizeGames(parts.flatMap((p) => p.matches), parts.reduce((n, p) => n + p.base, 0), 0, q)
+  assert.deepEqual(summed.matches.map((m) => [m.gamePk, m.ordinal]), pooled.matches.map((m) => [m.gamePk, m.ordinal]))
+  assert.equal(summed.base, pooled.base)
+})

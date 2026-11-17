@@ -61,6 +61,14 @@ export function pitchCounts(pseq) {
   return mask
 }
 
+// The pitches a pitch string holds, or null with no string or an unknown pitch (U).
+export function pitchTotal(pseq) {
+  if (!pseq || pseq.includes('U')) return null
+  let n = 0
+  for (const ch of pseq) if (BALLS.has(ch) || STRIKES.has(ch) || FOULS.has(ch) || IN_PLAY.has(ch)) n++
+  return n
+}
+
 // Column-array file ({ cols, c }) -> a reader: col('name') is that column's array.
 const reader = ({ cols, c }) => (name) => c[cols.indexOf(name)] ?? []
 
@@ -110,6 +118,10 @@ export function decodeHistory(paFile, pitchFile, games) {
       margin: bsd,
       marginLast: bsd,
       counts: pitchCounts(pseq[j]),
+      nPitches: pitchTotal(pseq[j]),
+      // Game mode (#3163): a v2 store's runs on the play and runs between plays; null on v1.
+      eventRuns: c.er ? c.er[j] : null,
+      runs: c.er && c.pr ? c.er[j] + c.pr[j] : null,
       count: [balls, strikes],
       event: historyEvent(c.event[j], c.fl[j]),
       slot: c.slot[j],
@@ -143,17 +155,19 @@ function settle(prev, next, games) {
   const home = g?.homeRuns
   const away = g?.awayRuns
   prev.marginAfter = home == null || away == null ? null : prev.top ? away - home : home - away
+  prev.finalMargin = home == null || away == null ? null : away - home
 }
 
 // manifest.json -> the Savant index's `seasons` shape ({ season: { months: { MM: { pas,
 // through, v, history, events } } } }), plus `pitchString` (% of PAs with a pitch string) per
 // season. `events` (#3159) is absent on a store built before it: then no season is skipped.
-// `v: 2`: the decoder fills every field a v2 card reads.
+// `v: 2`: the decoder fills every field a v2 card reads. `gameRuns`: the store carries runs
+// per PA (manifest v2, #3163), so game mode can answer on the season.
 export function historySeasons(manifest) {
   const out = {}
   for (const [season, s] of Object.entries(manifest?.seasons ?? {})) {
     const months = Object.fromEntries(Object.entries(s.months ?? {}).map(([mm, m]) => [mm, { pas: m.pas, through: m.through, v: 2, history: true, ...(m.events && { events: m.events }) }]))
-    out[season] = { months, pitchString: s.pitchString ?? 0 }
+    out[season] = { months, pitchString: s.pitchString ?? 0, gameRuns: (manifest.v ?? 1) >= 2 }
   }
   return out
 }
