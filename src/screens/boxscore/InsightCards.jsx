@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { resolveCardPlayer } from '../../api/boxscore.js'
 import { PerformerCard } from '../../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../../components/playbyplay/CalloutNote.jsx'
@@ -8,6 +8,7 @@ import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
 import { useRollupNotes } from '../../hooks/callouts/useLastTime.js'
+import { GameLink } from '../../components/player/GameLink.jsx'
 
 // How many insight CARDS the Insights card shows before folding the rest
 // behind a Show-more button (the former-teammates pattern). The notes arrive
@@ -110,7 +111,7 @@ export function StatcastLeadersCard({ feed, insights }) {
 }
 
 // Every note that fired somewhere in the game (computeGameCalloutNotes, plus a no-hitter's
-// "last time" lines and the rarity count of a natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs or six-plus double plays, useRollupNotes). Hidden entirely when nothing fired.
+// "last time" lines and the rarity count of a natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays or a home run on a first MLB pitch, useRollupNotes). Hidden entirely when nothing fired.
 export function InsightsCard({ calloutNotes: rolled, feed }) {
   const calloutNotes = useRollupNotes(feed, rolled)
   const [showAll, setShowAll] = useState(false)
@@ -164,9 +165,29 @@ function InsightNoteCard({ group }) {
       <span className="bs__noteBody">
         {group.personName && <span className="bs__noteWho">{group.personName}</span>}
         {group.notes.map((note, i) => (
-          <CalloutNote key={i} text={note.text} kind={note.kind} link={note.link} />
+          <Fragment key={i}>
+            <CalloutNote text={note.text} kind={note.kind} link={note.link} />
+            {note.earlier && <EarlierFold note={note} />}
+          </Fragment>
         ))}
       </span>
     </Card>
+  )
+}
+
+// The rarity count's full list (#2968): the line counts them, this fold names all of the
+// club's earlier ones, each opening its box score. A native <details>, as the coaching tree's.
+function EarlierFold({ note }) {
+  return (
+    <details className="bs__noteMore">
+      <summary>{note.earlier.length} earlier for the {note.teamName}</summary>
+      <ul className="bs__noteMoreList">
+        {note.earlier.map((e, i) => (
+          <li key={i}>
+            <GameLink path={e.path}>{e.name}</GameLink> ({e.year})
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 }

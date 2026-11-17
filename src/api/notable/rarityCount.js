@@ -1,5 +1,6 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs or six-plus double plays by one club (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club
+// or a home run on a first MLB pitch (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -16,8 +17,10 @@
 // scripts/lib/notable/immaculate.mjs, the first year with real pitches), 1901 for four-homer games
 // (fourhr.json, read off the hitting game logs), FOURSTRAIGHT_FLOOR for four straight home runs
 // (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays), 1901
-// for six-plus double plays (sixdp.json, read off the team fielding game logs).
+// for six-plus double plays (sixdp.json, read off the team fielding game logs), FIRSTPITCH_FLOOR (2001) for a
+// home run on a first MLB pitch (scripts/lib/notable/rarity/firstpitch.mjs, real pitch sequences).
 import { ordinal } from '../../lib/format.js'
+import { gamePath } from '../../lib/route.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
 import { SCORE_BASE } from '../callout-notes/shared.js'
@@ -32,6 +35,8 @@ export const RARITY = {
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
   sixdp: { flag: null, noun: 'game with six or more double plays' },
+  // Its own sentence: "The 16th player since 2001 to homer on his first MLB pitch" (Gary, 2026-11-17).
+  firstpitch: { flag: null, lead: (nth, floor) => `The ${nth} player since ${floor} to homer on his first MLB pitch` },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -165,6 +170,29 @@ export function sixDoublePlays(allPlays) {
   return ['away', 'home'].filter((side) => turned[side] >= 6).map((side) => ({ side }))
 }
 
+// A home run on the first pitch of the batter's first plate appearance of the game: true, false,
+// or null when the feed has no plays or the batter never batted. The plate appearance holds one
+// pitch and ends in a home run. Whether it was his first in the majors is the caller's question
+// (scripts/lib/notable/firstpitch.mjs reads his logs; the page reads his debut date).
+export function firstPitchHomer(allPlays, batterId) {
+  const pa = orderedPlays({ allPlays }).find((p) => p.matchup?.batter?.id === batterId)
+  if (!pa) return null
+  // His own pitches only: a pinch hitter who comes in mid-count sees those after the change.
+  const events = pa.playEvents ?? []
+  const pitches = events.slice(events.findLastIndex((e) => e.details?.eventType === 'offensive_substitution') + 1).filter((e) => e.isPitch)
+  return pa.result?.eventType === 'home_run' && pitches.length === 1
+}
+
+// True when the box score says the batter had a plate appearance before tonight's this season
+// (season total above tonight's), or cannot say. `seasonStats` in a Final feed includes the game.
+function battedBeforeTonight(feed, batterId) {
+  const teams = feed?.liveData?.boxscore?.teams
+  const bp = teams?.away?.players?.[`ID${batterId}`] ?? teams?.home?.players?.[`ID${batterId}`]
+  const season = bp?.seasonStats?.batting?.plateAppearances
+  const tonight = bp?.stats?.batting?.plateAppearances
+  return !(Number.isInteger(season) && Number.isInteger(tonight)) || season > tonight
+}
+
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
 export function floorYear(rows, flag) {
@@ -205,7 +233,37 @@ export function detectRareFeats(feed) {
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
   for (const f of fourStraightHomers(plays) ?? []) out.push({ kind: 'fourstraight', ...f })
   for (const f of sixDoublePlays(plays) ?? []) out.push({ kind: 'sixdp', ...f })
+  // A home run on a first MLB pitch: the batter's first plate appearance tonight is a one-pitch home
+  // run, he debuted this season, and the box score shows no plate appearance before tonight's
+  // (a debut days earlier off the bench counts: Willson Contreras, gamePk 447906). A player who
+  // debuted in an earlier season and never batted (a pitcher) is missed, never miscounted.
+  // MLB regular season only: a postseason or minor-league box score's `seasonStats` covers only
+  // that game type or level, so it cannot rule out an earlier MLB plate appearance.
+  const mlbRegular = feed?.gameData?.game?.type === 'R' && feed.gameData.teams?.home?.sport?.id === 1
+  const year = mlbRegular ? (feed.gameData.datetime?.officialDate ?? '').slice(0, 4) : ''
+  const firstPa = new Set()
+  for (const p of plays) {
+    const batter = p.matchup?.batter
+    if (batter?.id == null || firstPa.has(batter.id)) continue
+    firstPa.add(batter.id)
+    const debut = feed.gameData?.players?.[`ID${batter.id}`]?.mlbDebutDate ?? ''
+    if (!year || debut.slice(0, 4) !== year || !firstPitchHomer([p], batter.id)) continue
+    if (battedBeforeTonight(feed, batter.id)) continue
+    out.push({ kind: 'firstpitch', side: p.about?.halfInning === 'top' ? 'away' : 'home', player: { id: batter.id, name: batter.fullName ?? '' } })
+  }
   return out
+}
+
+// Every earlier player of the club, newest first, for the card's fold under the line. null for a
+// club kind (no player) or none before.
+export function earlierList(clubRows) {
+  if (!clubRows.length || !clubRows.some((r) => r.player)) return null
+  return clubRows.map((r) => ({
+    // The generator writes '' when the feed left the name out: keep the row, so the list matches the count.
+    name: r.player?.name || 'Name not listed',
+    year: yearOf(r.officialDate),
+    path: gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1),
+  }))
 }
 
 // One note for a rare feat: "The 9th natural cycle since 1950, the Brewers' 1st." [] when the
@@ -221,10 +279,14 @@ export function buildRarityNotes(docs, feed, feat) {
   const prior = priorRows(docs, feat.kind, t).filter(counted)
   const club = feed.gameData?.teams?.[feat.side]
   const clubName = club?.teamName ?? club?.name
-  const mine = prior.filter((r) => r[r.side]?.id === club?.id).length
-  const tail = clubName ? `, the ${possessive(clubName)} ${ordinal(mine + 1)}` : ''
+  const clubRows = prior.filter((r) => r[r.side]?.id === club?.id)
+  const mine = clubRows.length
+  // A sentence-style line (`lead`) ends "3rd for the Cardinals": "the Cardinals' 3rd" after a
+  // player sentence reads as the Cardinals' 3rd player.
+  const nthForClub = spec.lead ? `${ordinal(mine + 1)} for the ${clubName}` : `the ${possessive(clubName)} ${ordinal(mine + 1)}`
+  const tail = clubName ? `, ${nthForClub}` : ''
   return [{
-    text: `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}${tail}.`,
+    text: `${spec.lead ? spec.lead(ordinal(prior.length + 1), floor) : `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}`}${tail}.`,
     link: null,
     personId: feat.player?.id ?? null,
     side: feat.side,
@@ -232,6 +294,7 @@ export function buildRarityNotes(docs, feed, feat) {
     teamName: clubName ?? '',
     personName: feat.player?.name ?? '',
     kind: 'rarityCount',
+    earlier: clubName ? earlierList(clubRows) : null,
     dedupeKey: `rarityCount-${feat.kind}-${feat.player?.id ?? feat.side}`,
     score: SCORE_BASE.rarityCount,
   }]
