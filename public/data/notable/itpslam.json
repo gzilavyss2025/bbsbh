@@ -1,0 +1,6 @@
+{"coverage":{"seasons":[2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"through":"2026-10-28","leagues":["AL","NL"],"gameTypes":["R","F","D","L","W"]},"rows":[
+{"gamePk":822736,"officialDate":"2026-05-19","gameType":"R","gameNumber":1,"away":{"id":121,"abbr":"NYM","name":"New York Mets","runs":6},"home":{"id":120,"abbr":"WSH","name":"Washington Nationals","runs":9},"player":{"id":695578,"name":"James Wood"},"side":"home"},
+{"gamePk":663222,"officialDate":"2022-07-22","gameType":"R","gameNumber":1,"away":{"id":141,"abbr":"TOR","name":"Toronto Blue Jays","runs":28},"home":{"id":111,"abbr":"BOS","name":"Boston Red Sox","runs":5},"player":{"id":606132,"name":"Raimel Tapia"},"side":"away"},
+{"gamePk":492211,"officialDate":"2017-09-08","gameType":"R","gameNumber":1,"away":{"id":143,"abbr":"PHI","name":"Philadelphia Phillies","runs":10},"home":{"id":120,"abbr":"WSH","name":"Washington Nationals","runs":11},"player":{"id":572191,"name":"Michael A. Taylor"},"side":"home"},
+{"gamePk":415949,"officialDate":"2015-09-25","gameType":"R","gameNumber":1,"away":{"id":143,"abbr":"PHI","name":"Philadelphia Phillies","runs":8},"home":{"id":120,"abbr":"WSH","name":"Washington Nationals","runs":2},"player":{"id":571437,"name":"Aaron Altherr"},"side":"away"}
+]}

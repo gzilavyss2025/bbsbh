@@ -661,7 +661,7 @@ export default defineConfig({
               // Standing out (#2453): one file per season, read only by /outliers.
               /^\/data\/outliers\/\d{4}\.json$/.test(url.pathname) ||
               // The feat index (ADR-0101): five whole files, read only after a box score's reveal.
-              /^\/data\/notable\/(?:nohitters|cycles|tripleplays|immaculate|fourhr|fourstraight|sixdp|firstpitch)\.json$/.test(url.pathname),
+              /^\/data\/notable\/(?:nohitters|cycles|tripleplays|immaculate|fourhr|fourstraight|sixdp|firstpitch|itpslam)\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: { cacheName: 'bbsbh-record-shards', networkTimeoutSeconds: 3 },

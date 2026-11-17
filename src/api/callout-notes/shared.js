@@ -92,7 +92,7 @@ export const SCORE_BASE = {
   lastTimeClub: 40, // a triple play, cycle or no-hitter: the club's last one (lastTime.js)
   lastTimePlayer: 45, // …the player's own earlier one
   lastTimeLeague: 50, // …the league's last one, after a year or more without
-  rarityCount: 55, // a natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays or a home run on a first MLB pitch: the Nth since the floor (notable/rarityCount.js)
+  rarityCount: 55, // a natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays, a home run on a first MLB pitch or an inside-the-park grand slam: the Nth since the floor (notable/rarityCount.js)
   ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,

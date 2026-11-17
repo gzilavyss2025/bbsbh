@@ -383,7 +383,7 @@ test('the seed file holds the one triple play the API misses, and a row per kind
 test('no committed file carries a key outside the allowlist, at any depth', () => {
   const dir = join(ROOT, 'public', 'data', 'notable')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort()
-  assert.deepEqual(files, ['cycles.json', 'firstpitch.json', 'fourhr.json', 'fourstraight.json', 'immaculate.json', 'nohitters.json', 'sixdp.json', 'tripleplays.json'])
+  assert.deepEqual(files, ['cycles.json', 'firstpitch.json', 'fourhr.json', 'fourstraight.json', 'immaculate.json', 'itpslam.json', 'nohitters.json', 'sixdp.json', 'tripleplays.json'])
 
   for (const file of files) {
     const kind = file.replace('.json', '')

@@ -4,12 +4,13 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, earlierList, firstPitchHomer, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, earlierList, insideParkSlams, firstPitchHomer, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
 import { candidateGames, fetchFourStraight, fourStraightRows } from '../scripts/lib/notable/fourstraight.mjs'
 import { fetchImmaculate, gamesToRead, mergeWindow, readFrom } from '../scripts/lib/notable/immaculate.mjs'
 import { fetchFirstPitch, firstPaCandidate, priorPlateAppearances } from '../scripts/lib/notable/rarity/firstpitch.mjs'
+import { fetchItpSlams, slamCandidates } from '../scripts/lib/notable/rarity/itpslam.mjs'
 
 const BATTER = 1
 const play = (i, eventType, { batter = BATTER, half = 'top', runners = [] } = {}) => ({
@@ -468,4 +469,49 @@ test('the fold lists every earlier player of the club, none for a club kind', ()
   assert.equal(earlierList([{ officialDate: '2001-01-01' }]), null)
   // a row the feed left unnamed stays in the list, so it matches the count
   assert.equal(earlierList([...three, row('', '2001-05-01')])[3].name, 'Name not listed')
+})
+
+// ---- inside-the-park grand slams (slice 8) ----
+
+const hr = (i, rbi, description, half = 'top') => ({ ...play(i, 'home_run', { half }), result: { eventType: 'home_run', rbi, description } })
+
+test('an inside-the-park grand slam: a home run with 4 RBI whose play text says inside-the-park', () => {
+  // Raimel Tapia, gamePk 663222 (2022-07-22)
+  const slam = hr(0, 4, 'Raimel Tapia hits an inside-the-park grand slam (5) on a fly ball to center field.')
+  assert.deepEqual(insideParkSlams([slam]), [{ side: 'away', player: { id: BATTER, name: 'Pat Hitter' } }])
+  assert.deepEqual(insideParkSlams([hr(0, 4, 'Pat Hitter hits a grand slam (3) to left field.')]), [])
+  assert.deepEqual(insideParkSlams([hr(0, 2, 'Pat Hitter hits an inside-the-park home run (5) on a fly ball.')]), [])
+  assert.equal(insideParkSlams([]), null)
+  assert.deepEqual(detectRareFeats({ liveData: { plays: { allPlays: [slam] } } }).map((f) => f.kind), ['itpslam'])
+})
+
+test('the slam generator reads only games where a player homered and drove in 4 or more', async () => {
+  const head = (pk) => [pk, { gamePk: pk, officialDate: '2026-05-19', gameNumber: 1, gameType: 'R', away: { id: 120, abbr: 'WSH', name: 'Washington Nationals', runs: 9 }, home: { id: 158, abbr: 'MIL', name: 'Milwaukee Brewers', runs: 2 } }]
+  const map = new Map([head(1), head(2), head(3)])
+  const split = (pk, homeRuns, rbi) => ({ game: { gamePk: pk }, stat: { homeRuns, rbi } })
+  const people = [{ id: 1, stats: [{ splits: [split(1, 1, 4), split(2, 1, 3), split(3, 0, 5)] }] }]
+  assert.deepEqual(slamCandidates(people, map), [1])
+  const read = []
+  const get = async (path) => {
+    if (path.includes('/sports/1/players')) return { people: [{ id: 1 }] }
+    if (path.includes('/people?')) return { people }
+    read.push(path)
+    return { allPlays: [hr(0, 4, 'Pat Hitter hits an inside-the-park grand slam (8) on a line drive.')] }
+  }
+  const { rows } = await fetchItpSlams(get, map, 2026)
+  assert.equal(read.length, 1)
+  assert.equal(rows[0].player.name, 'Pat Hitter')
+  assert.equal(rows[0].side, 'away')
+})
+
+test('the committed slam index holds the 2001-2026 finds and counts from 2001', () => {
+  const doc = JSON.parse(readFileSync(new URL('../public/data/notable/itpslam.json', import.meta.url)))
+  const names = doc.rows.map((r) => r.player.name)
+  for (const n of ['Aaron Altherr', 'Michael A. Taylor', 'Raimel Tapia']) assert.ok(names.includes(n), n)
+  assert.equal(doc.coverage.seasons[0], 2001)
+  const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', player: { id: pk, name: `P${pk}` }, away: { id: club }, home: { id: 1 } })
+  const idx = { itpslam: { coverage: doc.coverage, rows: [r(1, '2015-09-25', 143), r(2, '2017-09-08', 158), r(6, '2026-08-01', 158)] } }
+  const [note] = buildRarityNotes(idx, feed, { kind: 'itpslam', side: 'away', player: { id: 6, name: 'Pat Hitter' } })
+  assert.equal(note.text, "The 3rd inside-the-park grand slam since 2001, the Brewers' 2nd.")
+  assert.equal(note.earlier.length, 1)
 })
