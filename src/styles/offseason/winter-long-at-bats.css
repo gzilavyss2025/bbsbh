@@ -466,3 +466,39 @@ button.seasonnote__barrow[aria-pressed='true'] {
   letter-spacing: var(--ls-label);
 }
 .seasonnote__longest .seasonnote__bars[data-end='true'] { mask-image: none; }
+
+/* ---- v2 (from Wild Rides): the three tabs, the label beside the number, the pitch strip, the club plate. */
+.seasonnote__tabs { margin: 0 0 var(--space-3); }
+.seasonnote__tabs .btn { min-height: 48px; }
+/* layout-exempt: a tab name over its one-line meaning */
+.seasonnote__tab { display: grid; gap: 1px; text-align: left; }
+.seasonnote__tab b { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); font-weight: inherit; }
+#root .seasonnote__tab > span { font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--text-caption); text-transform: none; white-space: nowrap; } /* caps-exempt: a short sentence */
+#root .seasonnote__tabs [aria-pressed='true'] .seasonnote__tab > span { color: inherit; }
+.seasonnote__big .seasonnote__unit { max-width: 15ch; line-height: var(--lh-loose); text-wrap: balance; }
+/* layout-exempt: one numbered mark per pitch across the zone's foot, the two controls at its end */
+.seasonnote__strip { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-top: var(--bw-hair) solid var(--border-hairline); cursor: ew-resize; touch-action: pan-y; overflow-x: auto; scrollbar-width: none; }
+.seasonnote__strip:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
+.seasonnote__mark { flex: none; opacity: 0.3; transition: opacity var(--dur-fast) var(--ease-out); }
+.seasonnote__mark.is-past { opacity: 1; }
+.seasonnote__mark.is-now { opacity: 1; outline: var(--bw-heavy) solid var(--text-heading); outline-offset: var(--bw-heavy); }
+/* layout-exempt: two square controls */
+.seasonnote__stripctl { display: flex; margin-left: auto; flex: none; }
+.seasonnote__stripctl button { width: 32px; height: 28px; border: var(--bw-hair) solid var(--border-hairline); background: var(--surface-card); color: var(--text-heading); cursor: pointer; font-size: var(--fs-cell); }
+.seasonnote__result--club { max-width: none; background: var(--side-club); border-left-color: var(--marker); min-height: 92px; }
+@media (prefers-reduced-motion: reduce) { .seasonnote__mark { transition: none; } }
+/* The strip's marks: the pitch list's call-coloured dots (14-strike-zone.css), a size up to tap. */
+.seasonnote__strip .seasonnote__mark { width: 22px; height: 22px; font-family: var(--font-display); font-size: var(--fs-cell); color: var(--text-on-ink-bright); }
+/* The same three call colours the zone's dots use (14-strike-zone.css scopes them to .strikezone). */
+.seasonnote__strip { --pd-ball: var(--accent-positive); --pd-strike: var(--accent-negative); --pd-inplay: var(--accent-inplay); }
+/* An even split: `1fr` alone let the zone's own width push the right column wider. */
+@media (min-width: 740px) {
+  /* layout-exempt: the card's two equal halves, held even against the zone's own width */
+  .seasonnote__sheet .seasonnote__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+/* The marks scroll in their lane (no bar: the ride keeps the current one centred); the controls stay pinned. */
+.seasonnote__strip { overflow: visible; }
+/* layout-exempt: one line of numbered marks that scrolls sideways */
+.seasonnote__lane { display: flex; align-items: center; gap: var(--space-1); flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: var(--space-1); mask-image: linear-gradient(to right, transparent, var(--text-heading) var(--space-3), var(--text-heading) calc(100% - var(--space-3)), transparent); }
+.seasonnote__lane::-webkit-scrollbar { display: none; }
+.seasonnote__stripctl { margin-left: var(--space-2); }

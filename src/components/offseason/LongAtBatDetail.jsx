@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { findLongAtBat } from '../../api/notebook.js'
 import { getJson } from '../../api/statsapi.js'
@@ -10,6 +10,25 @@ import { HeaderBug } from '../gamehud/HeaderBug.jsx'
 import { PitchScene } from '../playbyplay/pitcherCard/PitchScene.jsx'
 import { atBatScenePitches, atBatZone } from '../../lib/pitcherCard/atBat.js'
 import { Button } from '../ui/control/Button.jsx'
+import { teamPrimaryColor } from '../../lib/teams.js'
+import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
+
+const PITCH_MS = 650
+
+// The at-bat said the way a beat writer would on its last pitch: who won it, on which pitch.
+const nth = (n) => `${n}${['th', 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] ?? 'th'}`
+const lastOf = (name) => (name ?? '').split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w)).slice(-1)[0] ?? ''
+export function atBatLine(row, event) {
+  const b = lastOf(row.batter.name)
+  const p = lastOf(row.pitcher.name)
+  const n = nth(row.pitches)
+  const e = event ?? ''
+  if (/walk/i.test(e)) return `${b} outlasted ${p} and walked on the ${n} pitch.`
+  if (/strikeout/i.test(e)) return `${p} finally got ${b} on the ${n} pitch.`
+  const hit = { Single: 'singled', Double: 'doubled', Triple: 'tripled', 'Home Run': 'homered' }[e]
+  if (hit) return `${b} ${hit} on the ${n} pitch.`
+  return `${p} won it on the ${n} pitch.`
+}
 
 // The longest at-bats card's picked at-bat (LongAtBats.jsx): Gameday's scorebug
 // and the zone with its replay. Its own chunk, loaded lazily: the zone, the
@@ -26,8 +45,23 @@ function fetchAtBat(row) {
   if (!atBats.has(k)) atBats.set(k, readAtBat(row))
   return atBats.get(k)
 }
+// Only the fields this card reads (the pitch card, the scorebug, the result): about 42%
+// of the full play-by-play (610 KB -> 352 KB a game, measured on the 2026 top eight). The
+// pitch list, count and calls come back identical to the untrimmed feed on those games.
+// statsapi's `fields=` matches key names at any depth, so every name on a path is listed.
+const AT_BAT_FIELDS = [
+  'allPlays', 'about', 'halfInning', 'inning', 'atBatIndex', 'isTopInning', 'result', 'event', 'eventType',
+  'description', 'awayScore', 'homeScore', 'count', 'balls', 'strikes', 'outs', 'matchup', 'batter', 'pitcher',
+  'id', 'fullName', 'batSide', 'pitchHand', 'code', 'postOnFirst', 'postOnSecond', 'postOnThird', 'playEvents',
+  'isPitch', 'pitchNumber', 'playId', 'details', 'call', 'type', 'pitchData', 'coordinates', 'pX', 'pZ', 'aX',
+  'aY', 'aZ', 'vX', 'vY', 'vZ', 'x0', 'y0', 'z0', 'pfxX', 'pfxZ', 'strikeZoneTop', 'strikeZoneBottom',
+  'startSpeed', 'endSpeed', 'extension', 'breaks', 'breakHorizontal', 'breakVerticalInduced', 'spinRate',
+  'hitData', 'coordX', 'coordY', 'launchAngle', 'launchSpeed', 'totalDistance', 'trajectory', 'reviewDetails',
+  'isOverturned', 'inProgress', 'reviewType', 'challengeTeamId', 'player',
+].join(',')
+
 async function readAtBat(row) {
-  const feed = await getJson(`/api/v1/game/${row.pk}/playByPlay`).catch(() => null)
+  const feed = await getJson(`/api/v1/game/${row.pk}/playByPlay?fields=${AT_BAT_FIELDS}`).catch(() => null)
   const play = findLongAtBat(feed?.allPlays, row)
   if (!play) return null
   // The game as the at-bat began: the play before it carries the score, and,
@@ -82,10 +116,44 @@ export function AtBatZone({ row }) {
   // through PitchScene's at-bat look (a new object replays it).
   const [play, setPlay] = useState(null)
   const scene = useMemo(() => (data ? atBatScenePitches(data.pitchDetails, 'hitter', data.batSide) : []), [data])
+  // The ride: the pitches land one at a time; the strip under the zone scrubs them.
+  const total = data?.pitchDetails.length ?? 0
+  const [ride, setRide] = useState({ at: 0, paused: false, run: 0 })
+  const laneRef = useRef(null)
+  const at = Math.min(ride.at, Math.max(0, total - 1))
+  useEffect(() => {
+    if (!total || ride.paused || motionIsReduced()) return undefined
+    const t = setInterval(() => setRide((r) => (r.at >= total - 1 ? r : { ...r, at: r.at + 1 })), PITCH_MS)
+    return () => clearInterval(t)
+  }, [total, ride.paused, ride.run])
+  // Keep the pitch being shown in view as the lane scrolls (the ride, a drag, the arrow keys).
+  useEffect(() => {
+    const lane = laneRef.current
+    const mark = lane?.children[Math.min(ride.at, total - 1)]
+    if (!lane || !mark) return
+    const left = mark.offsetLeft - lane.clientWidth / 2 + mark.offsetWidth / 2
+    lane.scrollTo({ left, behavior: motionIsReduced() ? 'auto' : 'smooth' })
+  }, [ride.at, total])
   if (!data) return null
+  const reduced = motionIsReduced()
+  const shownAt = reduced && !ride.paused ? total - 1 : at
+  const goTo = (i) => setRide((r) => ({ ...r, at: Math.max(0, Math.min(total - 1, i)), paused: true }))
+  // The mark nearest the pointer's x, so a drag scrubs whatever the lane has scrolled to.
+  const scrubAt = (e) => {
+    const marks = [...(laneRef.current?.children ?? [])]
+    let best = 0
+    let d = Infinity
+    marks.forEach((m, i) => {
+      const b = m.getBoundingClientRect()
+      const dd = Math.abs(b.left + b.width / 2 - e.clientX)
+      if (dd < d) { d = dd; best = i }
+    })
+    goTo(best)
+  }
+  const now = data.pitchDetails[shownAt]
+  const done = shownAt >= total - 1
   const side = row.batter.teamId === row.away?.id ? 'away' : 'home'
   const figures = fallbackFigureUrls(row.batter.teamId, side, data.batSide === 'L' ? 'left' : 'right')
-  const last = data.pitchDetails[data.pitchDetails.length - 1]
   const onMove = (e) => {
     const no = Number(e.target.closest('g')?.querySelector('.strikezone__num')?.textContent)
     const p = no ? data.pitchDetails.find((d) => d.no === no) : null
@@ -109,7 +177,7 @@ export function AtBatZone({ row }) {
           </div>
         ) : (
           <BatterFallbackContext.Provider value={figures}>
-            <StrikeZone pitchDetails={data.pitchDetails} batSide={data.batSide} className="seasonnote__zone" margin={0.6} />
+            <StrikeZone pitchDetails={data.pitchDetails.slice(0, shownAt + 1)} batSide={data.batSide} className="seasonnote__zone" margin={0.6} />
           </BatterFallbackContext.Provider>
         )}
         {scene.length > 0 && (
@@ -140,14 +208,64 @@ export function AtBatZone({ row }) {
           </div>
         )}
       </div>
-      {data.result && (
-        <div className="seasonnote__result">
+      {/* The pitch log: one mark per pitch in the zone's colours; tap, drag or arrow to scrub. */}
+      <div
+        className="seasonnote__strip"
+        role="slider"
+        tabIndex={0}
+        aria-label="Pitches of the at-bat"
+        aria-valuemin={1}
+        aria-valuemax={total}
+        aria-valuenow={shownAt + 1}
+        aria-valuetext={now ? `Pitch ${now.no}, ${now.callDesc}` : ''}
+        onKeyDown={(e) => {
+          const d = { ArrowRight: 1, ArrowLeft: -1, Home: -total, End: total }[e.key]
+          if (d == null) return
+          e.preventDefault()
+          goTo(shownAt + d)
+        }}
+        onPointerDown={(e) => {
+          if (e.target.closest('button')) return
+          e.currentTarget.setPointerCapture?.(e.pointerId)
+          scrubAt(e)
+        }}
+        onPointerMove={(e) => e.buttons && scrubAt(e)}
+      >
+        {/* The marks scroll in their own lane; the two controls stay pinned at the end. */}
+        <div className="seasonnote__lane" ref={laneRef}>
+        {data.pitchDetails.map((p, i) => (
+          <span
+            key={p.no}
+            className={`pitchlist__num pitchlist__num--${p.cat} seasonnote__mark${i < shownAt ? ' is-past' : i === shownAt ? ' is-now' : ''}`}
+          >
+            {p.no}
+          </span>
+        ))}
+        </div>
+        <span className="seasonnote__stripctl">
+          <button type="button" aria-label={ride.paused ? 'Play' : 'Pause'} onPointerDown={(e) => e.stopPropagation()} onClick={() => setRide((r) => ({ ...r, paused: !r.paused, at: !r.paused || r.at < total - 1 ? r.at : 0 }))}>
+            {ride.paused ? '▶' : '❚❚'}
+          </button>
+          <button type="button" aria-label="Replay the at-bat" onPointerDown={(e) => e.stopPropagation()} onClick={() => setRide((r) => ({ at: 0, paused: false, run: r.run + 1 }))}>
+            ↺
+          </button>
+        </span>
+      </div>
+      {now && (
+        <div
+          className="seasonnote__result seasonnote__result--club"
+          // A club may colour a card that identifies the club (ADR-0030's addendum): the batter's.
+          style={{ '--side-club': teamPrimaryColor(row.batter.teamId) || 'var(--surface-stamped-ink)' }}
+        >
           <p className="t-label t-label--bold seasonnote__what">
-            {last
-              ? `Pitch ${last.no}: ${/walk/i.test(data.event ?? '') ? 'Ball 4' : /strikeout/i.test(data.event ?? '') ? 'Strike 3' : last.callDesc}`
-              : data.event ?? 'Result'}
+            Pitch {now.no} of {total}
+            {now.balls != null ? ` · ${now.balls}-${now.strikes}` : ''}
           </p>
-          <p className="seasonnote__resulttext">{data.result}</p>
+          <p className="seasonnote__resulttext">
+            {done
+              ? `${atBatLine(row, data.event)} ${data.result ?? ''}`
+              : `${now.callDesc || 'Pitch'}${now.type ? ` · ${now.type}` : ''}${now.mph != null ? ` · ${now.mph} mph` : ''}`}
+          </p>
         </div>
       )}
     </div>

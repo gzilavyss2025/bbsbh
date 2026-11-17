@@ -12,6 +12,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ClubStrip } from './ClubStrip.jsx'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
+import { Segmented } from '../ui/control/Segmented.jsx'
 import { windowSlice } from '../../lib/react/windowSlice.js'
 import { heldFor } from '../../lib/react/heldFor.js'
 
@@ -46,6 +47,14 @@ const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(tota
 // Opening its date opens the game sealed (api/notebook.js).
 
 
+// The three ways to read the census (the house Segmented, a line of meaning under each).
+// Earned walks and lost battles filter on how the at-bat ended, which the file stores.
+const TABS = [
+  { value: 'long', label: 'Longest', sub: 'Most pitches', keep: () => true, unit: 'pitches in one at-bat' },
+  { value: 'walks', label: 'Earned walks', sub: 'Ended in a walk', keep: (r) => /walk/i.test(r.event ?? ''), unit: 'pitches, then a walk' },
+  { value: 'ks', label: 'Lost battles', sub: 'Ended in a strikeout', keep: (r) => /strikeout/i.test(r.event ?? ''), unit: 'pitches, then a strikeout' },
+]
+
 export function LongAtBats({ season }) {
   const { data } = useAsync(() => fetchLongAtBats(season), [season])
   // How many rows are on screen, not a boolean — the door adds to it rather
@@ -53,6 +62,7 @@ export function LongAtBats({ season }) {
   // The club filter and which at-bat the scorebug, tiles and zone show (an index into
   // the filtered list), held for the census they were taken from (`every`, below).
   const [sel, setSel] = useState({ list: null, club: null, pick: 0 })
+  const [tab, setTab] = useState('long')
   const linkProps = useRouteLink()
   const listRef = useRef(null)
   const [geo, setGeo] = useState(() => ({ rowH: guessRowH(), viewH: 0 }))
@@ -81,19 +91,22 @@ export function LongAtBats({ season }) {
         : [],
     [data, ok], // eslint-disable-line react-hooks/exhaustive-deps -- rows and post come from data
   )
-  const clubs = useMemo(
-    () =>
-      [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
-        .filter(Boolean)
-        .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b }))),
-    [every],
-  )
   // A new census starts with no club and its first row: a club held from the last one may
   // not be in it, and an empty filtered list has no top row to draw (heldFor).
-  const kept = heldFor(sel, every)
+  const tabDef = TABS.find((t) => t.value === tab) ?? TABS[0]
+  const pool = useMemo(() => every.filter(tabDef.keep), [every, tabDef])
+  // Only clubs with an at-bat in this tab, so a picked club never empties the list.
+  const clubs = useMemo(
+    () =>
+      [...new Set(pool.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
+        .filter(Boolean)
+        .sort((a, b) => teamAbbr({ id: a }).localeCompare(teamAbbr({ id: b }))),
+    [pool],
+  )
+  const kept = heldFor(sel, pool)
   const club = kept ? sel.club : null
   const pick = kept ? sel.pick : 0
-  const all = useMemo(() => atBatsForClub(every, club), [every, club])
+  const all = useMemo(() => atBatsForClub(pool, club), [pool, club])
   // Where the window sits and which row holds focus (it stays drawn even when it scrolls
   // out of the window). Tied to the list they were taken
   // from: a new season, new data or a club filter is a new `all`, and a fresh list
@@ -126,7 +139,7 @@ export function LongAtBats({ season }) {
 
   const top = all[pick] ?? all[0]
   const pickClub = (id) => {
-    setSel({ list: every, club: id, pick: 0 })
+    setSel({ list: pool, club: id, pick: 0 })
     if (listRef.current) listRef.current.scrollTop = 0
   }
   // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
@@ -160,7 +173,7 @@ export function LongAtBats({ season }) {
           className="seasonnote__barrow"
           aria-pressed={i === pick}
           aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayName(row.date)}`}
-          onClick={() => setSel({ list: every, club, pick: i })}
+          onClick={() => setSel({ list: pool, club, pick: i })}
         >
           <span className="seasonnote__barn">{row.pitches}</span>
           <span className="seasonnote__barwho">
@@ -205,12 +218,32 @@ export function LongAtBats({ season }) {
       </SectionHead>
 
       <Card frame="stamped" as="div" className="seasonnote__sheet">
+        <Segmented
+          label="Kind of at-bat"
+          fill
+          className="seasonnote__tabs"
+          value={tab}
+          onChange={(v) => {
+            setTab(v)
+            setSel({ list: null, club: null, pick: 0 })
+            if (listRef.current) listRef.current.scrollTop = 0
+          }}
+          options={TABS.map((t) => ({
+            value: t.value,
+            label: (
+              <span className="seasonnote__tab">
+                <b>{t.label}</b>
+                <span>{t.sub}</span>
+              </span>
+            ),
+          }))}
+        />
         <ClubStrip clubs={clubs} value={club} onPick={pickClub} />
         <div className="seasonnote__row">
           <div className="seasonnote__longest">
             <p className="seasonnote__big">
               <span className="seasonnote__n">{top.pitches}</span>
-              <span className="t-label t-label--bold">pitches</span>
+              <span className="t-label t-label--bold seasonnote__unit">{tabDef.unit}</span>
               {path && (
                 <a className="seasonnote__when" {...linkProps(path)}>
                   {monthDayNameYear(top.date)}
