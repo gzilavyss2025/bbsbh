@@ -459,14 +459,21 @@ test('the committed first-pitch index holds the known 2001 to 2021 home runs (sl
   assert.equal(doc.coverage.seasons[0], 2001)
 })
 
-test('the fold lists every earlier player of the club, none for a club kind', () => {
+test('the fold lists every earlier game of a club kind by date and opponent (#3171)', () => {
+  const club = (date, side) => ({ officialDate: date, gameNumber: 2, away: { abbr: 'MIL' }, home: { abbr: 'PIT' }, side })
+  const list = earlierList([club('2018-08-17', 'away'), club('1999-04-03', 'home')])
+  assert.deepEqual(list.map((e) => e.label), ['Aug 17, 2018 at PIT', 'Apr 3, 1999 vs MIL'])
+  assert.equal(list[0].name, undefined)
+  assert.ok(list[0].path.includes('boxscore'))
+})
+
+test('the fold lists every earlier player of the club', () => {
   const row = (name, date) => ({ officialDate: date, gameNumber: 1, away: { abbr: 'STL' }, home: { abbr: 'CHC' }, player: { id: 1, name } })
   const three = [row('A', '2020-05-01'), row('B', '2010-05-01'), row('C', '2005-05-01')]
   const list = earlierList(three)
   assert.deepEqual(list.map((e) => `${e.name} ${e.year}`), ['A 2020', 'B 2010', 'C 2005'])
   assert.ok(list[0].path)
   assert.equal(earlierList([]), null)
-  assert.equal(earlierList([{ officialDate: '2001-01-01' }]), null)
   // a row the feed left unnamed stays in the list, so it matches the count
   assert.equal(earlierList([...three, row('', '2001-05-01')])[3].name, 'Name not listed')
 })

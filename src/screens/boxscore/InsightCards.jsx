@@ -176,7 +176,7 @@ function InsightNoteCard({ group }) {
 }
 
 // The rarity count's full list (#2968): the line counts them, this fold names all of the
-// club's earlier ones, each opening its box score. A native <details>, as the coaching tree's.
+// club's earlier ones (a player and year, or a date and opponent), each opening its box score. A native <details>, as the coaching tree's.
 function EarlierFold({ note }) {
   return (
     <details className="bs__noteMore">
@@ -184,7 +184,7 @@ function EarlierFold({ note }) {
       <ul className="bs__noteMoreList">
         {note.earlier.map((e, i) => (
           <li key={i}>
-            <GameLink path={e.path}>{e.name}</GameLink> ({e.year})
+            {e.label ? <GameLink path={e.path}>{e.label}</GameLink> : <><GameLink path={e.path}>{e.name}</GameLink> ({e.year})</>}
           </li>
         ))}
       </ul>
