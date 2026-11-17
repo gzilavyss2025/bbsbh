@@ -470,8 +470,8 @@ test('the fold lists every earlier game of a club kind by date and opponent (#31
 
 test('the club fold marks the second game of a doubleheader (#3176)', () => {
   const club = (gameNumber) => ({ officialDate: '1950-07-04', gameNumber, away: { abbr: 'MIL' }, home: { abbr: 'SF' }, side: 'away' })
-  const list = earlierList([club(2), club(1)])
-  assert.deepEqual(list.map((e) => e.label), ['Jul 4, 1950 at SF (G2)', 'Jul 4, 1950 at SF'])
+  const list = earlierList([club(3), club(2), club(1)])
+  assert.deepEqual(list.map((e) => e.label), ['Jul 4, 1950 at SF (G3)', 'Jul 4, 1950 at SF (G2)', 'Jul 4, 1950 at SF'])
   assert.notEqual(list[0].path, list[1].path)
 })
 

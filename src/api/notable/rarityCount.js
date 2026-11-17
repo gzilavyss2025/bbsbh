@@ -285,8 +285,8 @@ export function earlierList(clubRows) {
     const path = gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1)
     if (!r.player) {
       const opp = r.side === 'home' ? `vs ${r.away?.abbr ?? ''}` : `at ${r.home?.abbr ?? ''}`
-      // The second game of a doubleheader says so, or the two entries read alike (#3176).
-      const g2 = r.gameNumber === 2 ? ' (G2)' : ''
+      // A later game of a doubleheader (or tripleheader) says so, or the entries read alike (#3176).
+      const g2 = r.gameNumber > 1 ? ` (G${r.gameNumber})` : ''
       return { label: `${SHORT_DATE.format(new Date(`${r.officialDate}T12:00:00Z`))} ${opp}${g2}`, path }
     }
     // The generator writes '' when the feed left the name out: keep the row, so the list matches the count.
