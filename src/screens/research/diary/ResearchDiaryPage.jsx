@@ -1,5 +1,5 @@
 import { DiaryPage } from './DiaryPage.jsx'
-import * as diary from '../../lib/research/diary/index.js'
+import * as diary from '../../../lib/research/diary/index.js'
 
 // The prospect-research diary (route: /admin/research, admin only, linked from the footer):
 // everything the minor-league development spikes found, newest first, retractions included.

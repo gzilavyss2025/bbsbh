@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { ASKS } from '../../api/research/filters.js'
-import { HOW, TOTALS, pitchingSide, totalOf } from '../../api/research/games.js'
-import { ordinal as nth } from '../../lib/format.js'
-import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
-import { Card } from '../../components/ui/frame/Card.jsx'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
-import { Table } from '../../components/ui/table/Table.jsx'
-import { Button } from '../../components/ui/control/Button.jsx'
-import { BoxDate, plural } from './AnswerView.jsx'
+import { ASKS } from '../../../api/research/filters.js'
+import { HOW, TOTALS, pitchingSide, totalOf } from '../../../api/research/games.js'
+import { ordinal as nth } from '../../../lib/format.js'
+import { labelDate as shortDate } from '../../../lib/time/standingsDates.js'
+import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
+import { Button } from '../../../components/ui/control/Button.jsx'
+import { BoxDate, plural } from '../plays/AnswerView.jsx'
 
 // THE GAME-MODE ANSWER (/research, #3137; wireframe v3, Gary 2026-11-17). The sentence
 // reads from the picked club's side ("allowed" with a Pitching club). A row is the date

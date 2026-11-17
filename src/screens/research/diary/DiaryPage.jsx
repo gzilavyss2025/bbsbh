@@ -1,10 +1,10 @@
-import '../../styles/research/diary.css'
+import '../../../styles/research/diary.css'
 import { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
-import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
-import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { isClerkEnabled } from '../../lib/clerkConfig.js'
+import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
+import { ReportFooter } from '../../../components/chrome/ReportFooter.jsx'
+import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
+import { isClerkEnabled } from '../../../lib/clerkConfig.js'
 
 // The admin research diaries' one page: the prospect-research diary
 // (ResearchDiaryPage.jsx, /admin/research) and the Contender Diary

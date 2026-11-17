@@ -112,12 +112,12 @@ test('the standing front matter is present', () => {
 })
 
 test('the traps heading can still count the traps it is standing over', () => {
-  // The diary page (research/DiaryPage.jsx, shared with the prospect diary)
+  // The diary page (research/diary/DiaryPage.jsx, shared with the prospect diary)
   // spells the count as a word from its COUNT_WORDS list; a count that runs off the end falls back to a numeral, which is not
   // this page's voice. Read the ceiling off the page instead of hard-coding a
   // number here, so widening the page's list is enough to widen this test.
   const page = readFileSync(
-    new URL('../src/screens/research/DiaryPage.jsx', import.meta.url),
+    new URL('../src/screens/research/diary/DiaryPage.jsx', import.meta.url),
     'utf8',
   )
   const words = page.match(/const COUNT_WORDS = \[([\s\S]*?)\]/)
