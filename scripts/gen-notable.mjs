@@ -152,7 +152,7 @@ for (const season of seasons) {
   // A home run on a first MLB pitch (#2968, lib/notable/rarity/firstpitch.mjs): the hitting logs, then
   // the play-by-play of each player's first game with a plate appearance when it holds a home run.
   if (season >= FIRSTPITCH_FLOOR) {
-    const { rows, unknown } = await fetchFirstPitch(get, swept.gameMap, season)
+    const { rows, unknown } = await fetchFirstPitch(get, swept.gameMap, season, swept.people)
     if (unknown.length) console.log(`  ${season}: ${unknown.length} first-PA games with no plays, not counted: ${unknown.join(', ')}`)
     docs.firstpitch = {
       coverage: mergeCoverage(docs.firstpitch.coverage, [season], swept.through),
@@ -164,7 +164,7 @@ for (const season of seasons) {
   // Inside-the-park grand slams (#2968, lib/notable/rarity/itpslam.mjs): the play-by-play of each
   // game where a player homered and drove in 4 or more.
   if (season >= ITPSLAM_FLOOR) {
-    const { rows, unknown } = await fetchItpSlams(get, swept.gameMap, season)
+    const { rows, unknown } = await fetchItpSlams(get, swept.gameMap, swept.people)
     if (unknown.length) console.log(`  ${season}: ${unknown.length} slam-candidate games with no plays, not counted: ${unknown.join(', ')}`)
     docs.itpslam = {
       coverage: mergeCoverage(docs.itpslam.coverage, [season], swept.through),

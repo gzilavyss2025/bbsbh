@@ -2,7 +2,7 @@
 // (#2968, slice 7).
 //
 // A player's first MLB plate appearance is the first one in his hitting game logs. So, per season:
-// every player's hitting game log (100 players a call, as the cycles read them), his first game of
+// every player's hitting game log (the sweep's one read, rarity/logs.mjs), his first game of
 // the season with a plate appearance, and only when that game holds a home run, the game's
 // play-by-play: his first plate appearance must be one pitch and a home run (the page's detector,
 // src/api/notable/rarityCount.js firstPitchHomer). A player who debuted in an earlier season (a
@@ -17,11 +17,9 @@ import { firstPitchHomer } from '../../../../src/api/notable/rarityCount.js'
 import { mapConcurrent } from '../../concurrency.mjs'
 import { gameHead, sideOfClub } from '../games.mjs'
 import { IMMACULATE_FLOOR } from '../immaculate.mjs'
-import { fetchSeasonHittingLogs } from './logs.mjs'
 
 export const FIRSTPITCH_FLOOR = IMMACULATE_FLOOR
 
-const PEOPLE_FIELDS = 'people,id,fullName,mlbDebutDate,stats,splits,stat,plateAppearances,homeRuns,team,id,isHome,game,gamePk'
 const PBP_FIELDS = 'allPlays,about,atBatIndex,halfInning,result,eventType,matchup,batter,id,playEvents,isPitch'
 const CAREER_FIELDS = 'stats,splits,season,stat,plateAppearances'
 
@@ -45,8 +43,8 @@ export const priorPlateAppearances = (career, season) =>
   (career?.stats?.[0]?.splits ?? []).filter((s) => Number(s.season) < season).reduce((n, s) => n + (Number(s.stat?.plateAppearances) || 0), 0)
 
 // { rows, unknown: [gamePk] } for one season, strict at 4 like the sweep.
-export async function fetchFirstPitch(get, gameMap, season, concurrency = 4) {
-  const people = await fetchSeasonHittingLogs(get, season, PEOPLE_FIELDS, concurrency)
+// `people` is the season's hitting logs: sweepSeason's one read (rarity/logs.mjs, #3173).
+export async function fetchFirstPitch(get, gameMap, season, people, concurrency = 4) {
   const found = people.map((p) => firstPaCandidate(p, gameMap)).filter(Boolean)
   const checked = await mapConcurrent(found, concurrency, async (c) => {
     const pbp = await get(`/api/v1/game/${c.game.gamePk}/playByPlay?fields=${PBP_FIELDS}`)

@@ -440,7 +440,8 @@ test('fetchFirstPitch keeps a debut first-pitch homer and checks a veteran pitch
     if (path.includes('/people/2/stats')) return { stats: [{ splits: [{ season: '2020', stat: { plateAppearances: 3 } }] }] }
     throw new Error(path)
   }
-  const { rows } = await fetchFirstPitch(get, map, 2026)
+  const people = (await get('/people?')).people
+  const { rows } = await fetchFirstPitch(get, map, 2026, people)
   assert.deepEqual(rows.map((r) => r.player.name), ['Rook'])
   assert.equal(rows[0].side, 'away')
 })
@@ -510,7 +511,7 @@ test('the slam generator reads only games where a player homered and drove in 4 
     read.push(path)
     return { allPlays: [hr(0, 4, 'Pat Hitter hits an inside-the-park grand slam (8) on a line drive.')] }
   }
-  const { rows } = await fetchItpSlams(get, map, 2026)
+  const { rows } = await fetchItpSlams(get, map, people)
   assert.equal(read.length, 1)
   assert.equal(rows[0].player.name, 'Pat Hitter')
   assert.equal(rows[0].side, 'away')
