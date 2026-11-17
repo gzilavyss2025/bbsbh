@@ -160,7 +160,15 @@ test('parkTable: the venue a park code holds most games at', () => {
 test('seasonEntry: coverage shares and month rows', () => {
   const shards = monthShards([row({}), row({ ab: 2 })], 2014)
   const games = [{ date: '2014-04-01' }]
-  assert.deepEqual(seasonEntry({ pas: 3, pitchString: 1, knownCount: 2 }, games, shards), { games: 1, pas: 3, pitchString: 33.3, knownCount: 66.7, months: { '04': { pas: 2, through: '2014-04-01' } } })
+  assert.deepEqual(seasonEntry({ pas: 3, pitchString: 1, knownCount: 2 }, games, shards), { games: 1, pas: 3, pitchString: 33.3, knownCount: 66.7, months: { '04': { pas: 2, through: '2014-04-01', events: { field_out: 2 } } } })
+})
+
+// #3159: each month's result counts, keyed the way the page reads history rows
+// (history.js historyEvent), so /research skips a season that holds none of a picked result.
+test('seasonEntry: month events count the Savant result names', () => {
+  const shards = monthShards([row({ event: 23 }), row({ ab: 2, event: 23 }), row({ ab: 3, event: 2, fl: 4 }), row({ ab: 4, event: 2, fl: 2 })], 2014)
+  const { events } = seasonEntry({ pas: 4, pitchString: 4, knownCount: 4 }, [{ date: '2014-04-01' }], shards).months['04']
+  assert.deepEqual(events, { home_run: 2, double_play: 1, sac_fly: 1 })
 })
 
 test('gameIndex keeps the column order', () => {
