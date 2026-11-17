@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, matcher, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
+import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
+import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // The first season game mode's Pitches total answers in (#3163).
 const PITCHES_SINCE = 1988
-import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
-import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
