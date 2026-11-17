@@ -94,6 +94,11 @@ npm run knip       # unused files/exports/deps (advisory, not in CI; config: kni
 npm run e2e        # playwright — ONLY when Gary asks (hook-enforced, see docs/testing.md)
 ```
 
+**"Commit and push" means only that** (local and cloud): no lint, test, or build run first;
+CI runs them, and you fix a red run from its log (Gary, 2026-11-17). Watching a new
+test fail during a bug fix (Test discipline) is separate and still happens. The pre-commit
+hook only blocks CRLF line endings; it runs no tests (`docs/testing.md`).
+
 `scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
 `docs/scripts/generators.md` catalogs them. The `npm test` suite does not replace the
 browser-level check. For anything user-visible, also check it in `npm run dev`
