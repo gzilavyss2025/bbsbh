@@ -130,10 +130,12 @@ export function ResearchPage() {
     setState({ q: next, cutoff })
     setAsked(fromAsk)
   }
-  const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
+  const { error, winProb, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   // A card a season predates is always named; one waiting on a store rebuild only if picked.
   const game = q.mode === 'game'
   const streak = q.mode === 'streak'
+  // The Win prob toggle is set but a searched season has no side file yet (#3141).
+  const wpBlocked = q.wp && !game && !streak && !winProb
   const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key]) && (streak ? STREAK_CHIPS.includes(b.key) : !game || GAME_CHIPS.includes(b.key)))
   const asks = game ? ASKS.filter((x) => x.key !== 'what') : ASKS
   const data = head
@@ -174,7 +176,7 @@ export function ResearchPage() {
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · {cover.history ? (cover.last > HISTORY_LAST ? 'Retrosheet and Baseball Savant' : 'Retrosheet') : 'Baseball Savant'}
           {(game || streak) && q.years?.[0] <= HISTORY_LAST && ` · games from ${HISTORY_LAST + 1}`}
           {result?.leftOut > 0 && ` · ${result.leftOut.toLocaleString()} ${result.leftOut === 1 ? 'game' : 'games'} left out: runs on file don’t add up`}
-          {shownBlocked.length > 0 && ` · not in this range: ${shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
+          {(shownBlocked.length > 0 || wpBlocked) && ` · not in this range: ${[...shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`), ...(wpBlocked ? ['Win prob (not built yet)'] : [])].join(', ')}`}
           {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}
         </p>
       )}
@@ -215,7 +217,7 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && !game && !streak && <AnswerCard ask={q.ask} q={q} a={result} people={people} note={without} />}
+      {result && !game && !streak && <AnswerCard ask={q.ask} q={q} a={result} people={people} note={without} wp={live.wp} />}
       {result && streak && <StreakAnswerCard q={live} a={result} people={people} asOf={cover?.through} />}
       {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} note={without} />}
       {data && !wide && !start && (
@@ -225,8 +227,13 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
+      {data && !start && !game && !streak && (
+        <Cluster>
+          <Button size="control" pressed={q.wp} onClick={() => setQ({ ...q, wp: !q.wp })}>Win prob</Button>
+        </Cluster>
+      )}
       {result && !game && !streak && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
-      {result && !game && !streak && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} />}
+      {result && !game && !streak && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
       {result && streak && <StreakMatches key={searchKey(q)} q={live} a={result} people={people} wide={wide} asOf={cover?.through} />}
       {result && game && <GameMatches key={searchKey(q)} ask={live.ask} q={live} a={result} wide={wide} since={cover?.first} />}
     </Stack>

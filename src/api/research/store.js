@@ -12,6 +12,8 @@
 
 import { decodePlateAppearances } from './shard.js'
 import { fetchSeries } from './series.js'
+import { attachWinProb } from './winprob.js'
+import { staticJson } from '../staticJson.js'
 import { HISTORY_BASE, decodeHistory, historyGames, historySeasons } from './history.js'
 
 export const STORE_BASE = import.meta.env?.VITE_RESEARCH_STORE || 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/research/v1/'
@@ -107,7 +109,7 @@ export function loadSeason(index, season, { onMonth = () => {} } = {}) {
     const promise = Promise.all(paths.map((path) => getJson(path, ctrl.signal).then((shard) => {
       onMonth(++loaded, paths.length)
       return { pas: decodePlateAppearances(shard), people: shard.people }
-    }))).then((parts) => ({ pas: parts.flatMap((x) => x.pas), people: Object.assign({}, ...parts.map((x) => x.people)) }))
+    }))).then((parts) => ({ pas: parts.flatMap((x) => x.pas), people: Object.assign({}, ...parts.map((x) => x.people)), months: parts.map((x, i) => ({ path: paths[i], pas: x.pas })) }))
     seasonCache.set(season, { promise, ctrl })
     promise.catch(() => seasonCache.get(season)?.promise === promise && seasonCache.delete(season))
   }
@@ -129,6 +131,28 @@ export function attachSeries(season, pas) {
     seriesJoins.set(pas, join)
   }
   return seriesJoins.get(pas)
+}
+
+// Every month of `seasons` has its win-probability side file (#3141; index `wp`).
+export const hasWinProb = (index, seasons) => seasons.every((s) => Object.values(index.seasons[s]?.months ?? {}).every((m) => m.wp))
+
+// THE WIN-PROBABILITY JOIN (#3141, part 2): each month's `{MM}.wp.json` sets `wpa`, `re24`
+// and `li` on its PAs (winprob.js), once per decoded season, only when a query asks
+// (Win prob toggle or a Leverage chip). A failure rejects and is forgotten, like attachSeries.
+const leverageTable = staticJson('/data/leverage-index.json')
+const wpJoins = new WeakMap()
+export function attachWinProbSeason(data) {
+  if (!wpJoins.has(data)) {
+    const table = leverageTable()
+    const join = Promise.all(data.months.map(async ({ path, pas }) => {
+      const [side, lev] = await Promise.all([getJson(path.replace(/\.json$/, '.wp.json')), table])
+      if (!lev) throw new Error('leverage table not loaded')
+      attachWinProb(pas, side, lev)
+    }))
+    join.catch(() => wpJoins.delete(data))
+    wpJoins.set(data, join)
+  }
+  return wpJoins.get(data)
 }
 
 export function dropSeason(season) {

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
-import { isBlank, matcher, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
+import { isBlank, matcher, mayMatch, needsWinProb, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
 import { GAME_CHIPS, answerGames, isGameBlank, playerGames, summarizeGames } from '../../api/research/games.js'
 import { STREAK_CHIPS, isStreakBlank, streakRun } from '../../api/research/streaks.js'
-import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
+import { attachSeries, attachWinProbSeason, coverage, dropSeason, dropSeasonsExcept, fetchIndex, hasWinProb, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
@@ -71,7 +71,10 @@ export function useResearch(q, cutoff) {
     return q.mode === 'game' || streak ? ts.filter((s) => s > HISTORY_LAST) : ts
   }, [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
-  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
+  // Win probability (#3141) needs every searched month's side file; until a backfill, the
+  // Leverage card and the Win prob toggle are blocked like a card awaiting a rebuild.
+  const winProb = useMemo(() => Boolean(index && targets.length && hasWinProb(index, targets)), [index, targets])
+  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets), winProb) : []), [targets, index, winProb])
   const game = q.mode === 'game'
   const streak = q.mode === 'streak'
   const live = useMemo(() => {
@@ -81,13 +84,13 @@ export function useResearch(q, cutoff) {
       // A streak query keeps the Game type card, the one person on its side and the club.
       for (const k of Object.keys(chips)) if (!STREAK_CHIPS.includes(k)) delete chips[k]
       const pit = q.s.side === 'pit'
-      return { ...q, chips, batter: pit ? null : q.batter, pitcher: pit ? q.pitcher : null, pitchTeam: null, park: null, ask: 'last' }
+      return { ...q, chips, wp: false, batter: pit ? null : q.batter, pitcher: pit ? q.pitcher : null, pitchTeam: null, park: null, ask: 'last' }
     }
-    if (!game) return { ...q, chips }
+    if (!game) return { ...q, chips, wp: q.wp && winProb }
     // A game query keeps only the cards that describe a whole game, and no person.
     for (const k of Object.keys(chips)) if (!GAME_CHIPS.includes(k)) delete chips[k]
-    return { ...q, chips, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
-  }, [q, blocked, game, streak])
+    return { ...q, chips, wp: false, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
+  }, [q, blocked, game, streak, winProb])
   const blank = streak ? isStreakBlank(live) : game ? isGameBlank(live) : isBlank(live)
 
   // The "Who most" rank and minimum re-rank the answer on the page, so they never re-search.
@@ -151,6 +154,8 @@ export function useResearch(q, cutoff) {
         const data = await raceAbort(loadSeason(index, season), ctrl.signal)
         // A Series game chip needs the season's postseason schedule (#3141).
         if (live.chips.sg?.vals.length) await raceAbort(attachSeries(season, data.pas), ctrl.signal)
+        // The Win prob toggle or a Leverage chip needs the month side files (#3141).
+        if (needsWinProb(live)) await raceAbort(attachWinProbSeason(data), ctrl.signal)
         inflight = null
         Object.assign(people, data.people)
         searched.push(season)
@@ -205,5 +210,5 @@ export function useResearch(q, cutoff) {
   }
 
   const cover = index && (run?.searched?.length || targets.length) ? coverage(index, run?.searched?.length && !run.progress ? run.searched : targets) : null
-  return { index, error: error ?? run?.error ?? null, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
+  return { index, error: error ?? run?.error ?? null, winProb, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
 }

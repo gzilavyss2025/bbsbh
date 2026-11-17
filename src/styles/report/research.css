@@ -73,6 +73,12 @@
   color: var(--text-heading);
   font-weight: var(--w-semibold);
 }
+.research__wp {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
 .research__ord {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
