@@ -8,6 +8,7 @@ import { club, ord, summarize } from '../../../lib/wildrides/story.js'
 import { SEGMENTS, shapeDistance } from '../../../lib/wildrides/shape.js'
 import { shortDate } from './draw.js'
 import { Ride } from './Ride.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import './wild-rides.css'
 
 // WILD RIDES (/wild-rides, unlisted while it is a draft): the season's games ranked by
@@ -26,7 +27,18 @@ const TABS = [
   { key: 'seesaw', label: 'Seesaws', sub: 'Most lead changes', stat: (g) => ({ n: g.leadChanges, label: 'lead changes' }) },
 ]
 
+// The page (/wild-rides) is the card on its own.
 export function WildRides() {
+  return (
+    <div className="screen">
+      <WildRidesCard season={SEASON} />
+    </div>
+  )
+}
+
+// The card: on the page above, and on the offseason home page under the longest at-bats
+// (OffseasonLead.jsx). Renders nothing for a season with no file.
+export function WildRidesCard({ season }) {
   const [lists, setLists] = useState(null)
   const [shapes, setShapes] = useState(null)
   const [tab, setTab] = useState('wild')
@@ -34,11 +46,11 @@ export function WildRides() {
   const [pick, setPick] = useState(null) // the list row picked
   const [game, setGame] = useState(null) // its ride, with its story
   useEffect(() => {
-    fetchWildLists(SEASON).then((d) => setLists(d?.lists ?? {}))
-  }, [])
+    fetchWildLists(season).then((d) => setLists(d?.lists ?? null))
+  }, [season])
   useEffect(() => {
-    if (tab === 'draw' && !shapes) fetchWildShapes(SEASON).then(setShapes)
-  }, [tab, shapes])
+    if (tab === 'draw' && !shapes) fetchWildShapes(season).then(setShapes)
+  }, [tab, shapes, season])
 
   const list = useMemo(() => {
     if (tab !== 'draw') return lists?.[tab] ?? []
@@ -63,7 +75,7 @@ export function WildRides() {
     }
   }, [current])
 
-  if (!lists) return <div className="screen wr"><p className="wr-eyebrow">Loading the season…</p></div>
+  if (!lists) return null
 
   // The four lists are one house Segmented control; Draw is a tool, so it stands apart.
   const chips = (
@@ -117,14 +129,17 @@ export function WildRides() {
     </>
   )
   return (
-    <div className="screen wr">
-      <div className="wr-eyebrow">Wild rides of {SEASON}</div>
+    <section className="wr" aria-label={`The wildest games of ${season}`}>
+      {/* Mixed case in the markup, shouted by the CSS (ADR-0017), as the at-bats card's head. */}
+      <SectionHead as="h3" className="oseason__head">
+        Wild rides of {season}
+      </SectionHead>
       {game ? (
         <Ride key={game.gamePk} game={game} chips={chips} games={games} shape={TABS.find((x) => x.key === tab) ?? TABS[0]} />
       ) : (
         <article className="wr-card">{chips}<p className="wr-eyebrow">Loading the game…</p>{games}</article>
       )}
-    </div>
+    </section>
   )
 }
 
