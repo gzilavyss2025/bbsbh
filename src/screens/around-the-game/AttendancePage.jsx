@@ -1,4 +1,5 @@
 import '../../styles/68-around-the-game.css'
+import '../../styles/report/attendance.css'
 import { useMemo, useState } from 'react'
 import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn, postseasonBoard } from '../../api/around-the-game/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
@@ -10,12 +11,14 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
+import { Segmented } from '../../components/ui/control/Segmented.jsx'
 import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE GATE — who is actually going to the ballpark.
@@ -47,7 +50,7 @@ const COLUMNS = [
   { key: 'avg', label: 'Average', render: (r) => commas(r.avg) },
   { key: 'total', label: 'Season', render: (r) => commas(r.total) },
   { key: 'best', label: 'Best', render: (r) => commas(r.best) },
-  { key: 'swing', label: 'Swing', render: (r) => commas(r.swing) },
+  { key: 'swing', label: 'Range', render: (r) => commas(r.swing) },
 ]
 
 export function AttendancePage() {
@@ -88,26 +91,28 @@ export function AttendancePage() {
   const monthMin = monthValues.length ? Math.min(...monthValues) * 0.9 : 0
   const monthMax = monthValues.length ? Math.max(...monthValues) : 1
 
-  const fullest = [...rows].filter((r) => r.fill != null).sort((a, b) => b.fill - a.fill)[0]
-  const biggestNight = [...rows].filter((r) => r.best != null).sort((a, b) => b.best - a.best)[0]
   const widestSwing = [...rows].filter((r) => r.swing != null).sort((a, b) => b.swing - a.swing)[0]
 
   return (
-    <div className="screen">
+    <div className="screen gate">
       <SiteHeader />
 
-      <BroadcastMasthead
-        eyebrow="The Gate"
-        title="Attendance"
-        dek="Every club’s home gate, ranked by the share of the park that fills rather than by
-             the number of seats it built. Average attendance mostly measures architecture;
-             fill rate measures a town."
-        meta={[
-          { label: 'Season', value: season ?? '—' },
-          { label: 'Through', value: board?.through ? humanDate(board.through) : '—' },
-          { label: 'Games', value: commas(league?.attGames) },
-        ]}
-      />
+      {/* The title and one line, as Pressure Moments opens; the explanation is opt-in,
+          behind the (i) (src/styles/CLAUDE.md). The season and its last day ride in the line. */}
+      <header className="topbar gate__head">
+        <h1 className="topbar__title">Attendance{season ? `, ${season}` : ''}</h1>
+        <p className="hint infopop-row gate__dek">
+          Every club’s home gate, ranked by how full the park gets
+          {board?.through ? `, through ${humanDate(board.through)}` : ''}.{' '}
+          <InfoPopover label="About attendance" className="infopop--paper infopop--down">
+            A club’s average crowd mostly measures how many seats it built; the share of the park
+            that fills measures a town, so fill rate leads. Fill rate is against the park’s listed
+            capacity, so standing room can push a real crowd past 100%. Bars are scaled across the
+            league’s own range, not from zero. Range is a club’s biggest night minus its smallest.
+            {league?.attGames ? ` ${commas(league.attGames)} home dates so far.` : ''}
+          </InfoPopover>
+        </p>
+      </header>
 
       <AsyncStatus
         loading={loading}
@@ -119,55 +124,14 @@ export function AttendancePage() {
 
       {rows.length > 0 && (
         <>
-          <SlabRow>
-            <Slab
-              tone="lead"
-              value={commas(league?.attAvg)}
-              label="League average"
-              note={`Median ${commas(league?.attMedian)} — the gap between the two is the
-                     handful of clubs drawing 45,000 a night.`}
+          <BroadcastSection title="The board">
+            <Segmented
+              label="Sort the board"
+              value={sortBy}
+              onChange={setSortBy}
+              options={GATE_SORTS.map((s) => ({ value: s.key, label: s.label }))}
+              className="gate__sort"
             />
-            <Slab
-              value={commas(league?.attTotal)}
-              label="Tickets, season to date"
-              note={`Across ${commas(league?.attGames)} home dates.`}
-            />
-            <Slab
-              value={fullest ? pct1(fullest.fill) : '—'}
-              label="Fullest park"
-              note={fullest ? clubName(clubs, fullest.teamId) : ''}
-            />
-            <Slab
-              value={commas(biggestNight?.best)}
-              label="Biggest single gate"
-              note={
-                biggestNight
-                  ? `${clubName(clubs, biggestNight.teamId)}, ${humanDate(biggestNight.bestDate)}`
-                  : ''
-              }
-            />
-          </SlabRow>
-
-          <BroadcastSection
-            title="The board"
-            note="Bars are scaled across the league’s own range on the sorted column, not from
-                  zero — off a zero floor thirty clubs draw as thirty identical bars. Fill rate
-                  is against the park’s listed capacity, so standing room and a sold-out club
-                  level can push a real crowd past 100%; those are printed as they came in."
-          >
-            <div className="rpt-controls" role="group" aria-label="Sort the board">
-              {GATE_SORTS.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  className={`rpt-chip${s.key === sortBy ? ' is-on' : ''}`}
-                  aria-pressed={s.key === sortBy}
-                  onClick={() => setSortBy(s.key)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
 
             <Table sticky label="Attendance board, every club ranked" className="rpt">
               <thead>
@@ -215,12 +179,7 @@ export function AttendancePage() {
             </Table>
           </BroadcastSection>
 
-          <BroadcastSection
-            title="When the house fills"
-            note="Every club draws better on a Saturday than on a Tuesday. What separates them
-                  is by how much — a club whose weekend and weekday lines nearly meet sells the
-                  same house whoever is in town and whenever they come."
-          >
+          <BroadcastSection title="When the house fills">
             <Table sticky label="Weekend and weekday attendance by club" className="rpt">
               <thead>
                 <tr>
@@ -250,12 +209,7 @@ export function AttendancePage() {
             </Table>
           </BroadcastSection>
 
-          <BroadcastSection
-            title="Who fills the place"
-            note="The three visiting clubs each park draws best for, by average gate. Three
-                  dates is a small sample and a single sold-out weekend can carry one — read
-                  it as who the town turns out for, not as a ranking."
-          >
+          <BroadcastSection title="Who fills the place">
             <Table sticky label="Best-drawing opponents and quietest night by club" className="rpt">
               <thead>
                 <tr>
@@ -291,10 +245,7 @@ export function AttendancePage() {
           {post && (
             <BroadcastSection
               title="Postseason"
-              note={`${commas(post.games)} postseason home dates with a crowd on file, through
-                    ${post.through ? humanDate(post.through) : '—'}. Kept apart from every figure
-                    above: clubs are ranked here only against the other clubs that played in
-                    October.`}
+              note={`${commas(post.games)} home dates, through ${post.through ? humanDate(post.through) : '—'}; ranked only against other October clubs.`}
             >
               <SlabRow>
                 <Slab value={commas(post.league?.attAvg)} label="Postseason average" />
@@ -367,8 +318,8 @@ export function AttendancePage() {
               column.
             </p>
             <p>
-              <strong>Swing is the distance between a club’s biggest night and its smallest.</strong>{' '}
-              A wide swing means the crowd depends on the opponent and the day of the week; a
+              <strong>Range is the distance between a club’s biggest night and its smallest.</strong>{' '}
+              A wide range means the crowd depends on the opponent and the day of the week; a
               narrow one means the club sells much the same house whoever is in town.
               {widestSwing
                 ? ` The widest in the league belongs to ${clubName(clubs, widestSwing.teamId)}, at

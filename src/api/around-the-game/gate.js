@@ -95,7 +95,7 @@ export const GATE_SORTS = [
   { key: 'avg', label: 'Average', lowIsBest: false },
   { key: 'total', label: 'Season total', lowIsBest: false },
   { key: 'best', label: 'Best night', lowIsBest: false },
-  { key: 'swing', label: 'Swing', lowIsBest: false },
+  { key: 'swing', label: 'Range', lowIsBest: false },
 ]
 
 export function gateBoard(data, season, sortBy = 'fill') {
