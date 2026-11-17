@@ -1,4 +1,4 @@
-/* ==== GAMEDAY, a box that scrolls when its words run past it (ScrollCue.jsx): the game notes, the hero's play.
+/* ==== SCROLL CUE (components/ui/layout/ScrollCue.jsx): a box that scrolls when its words run past it.
    While more is below, the foot fades and a chevron bounces there; a tap on it scrolls on. */
 .gdscroll { position: relative; flex: 1; min-height: 0; }
 .gdscroll__in { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-right: var(--space-2); box-sizing: border-box; }

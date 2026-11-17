@@ -49,3 +49,6 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   named areas, a fixed count) — those keep their own namespace rule.
   New layout uses these parts. Old rules move only when a PR already edits them
   (`layout/check-layout-ratchet` freezes the count; `layout-exempt: <reason>` opts out). The freeze: ADR-0108.
+  `ScrollCue` is a box whose words scroll inside it rather than clip: the scorebook scrollbar and a
+  bouncing "more below" chevron (`styles/system/scroll-cue/scroll-cue.css`, component-imported). Gameday, the box
+  score's scoring summary and the explorers use it.

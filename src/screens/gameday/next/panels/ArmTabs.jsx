@@ -5,7 +5,7 @@ import { useAsync } from '../../../../hooks/useAsync.js'
 import { monthDay } from '../../../../lib/dates.js'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
-import { ScrollCue } from '../ScrollCue.jsx'
+import { ScrollCue } from '../../../../components/ui/layout/ScrollCue.jsx'
 import { Segmented } from '../../../../components/ui/control/Segmented.jsx'
 
 // The Gameday arm card's tabs, under his line tonight (Gary, 2026-10-29): Arsenal (his season

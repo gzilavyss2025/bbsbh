@@ -23,7 +23,7 @@ Live with Gary, in one session:
 | Copy | `lib/explorers/copy.js` | `club`, `abbr`, `ord`, `lastName`, `past` (below) |
 | Scorebug | `components/gamehud/HeaderBug.jsx` | Gameday's own bug. In a ride, wrap it in a `memo` child so it redraws when the game state changes, not every frame |
 | Club plate | `.seasonnote__result--club`, `.wr-plate` | The batting club's colour, its mono mark, the batter as a cutout (the house At bat panel) |
-| Scroll list | `screens/gameday/next/ScrollCue.jsx` | Gameday's scroll box: the scorebook scrollbar and the bouncing "more below" chevron. Zebra rows on `--surface-inset` |
+| Scroll list | `components/ui/layout/ScrollCue.jsx` | Gameday's scroll box: the scorebook scrollbar and the bouncing "more below" chevron. Zebra rows on `--surface-inset` |
 | Park | `components/ballpark/BallparkDiagram.jsx` + `lib/ballpark/ballFlight.js` | The real park and a ball's flight to its landing spot |
 
 ## Copy

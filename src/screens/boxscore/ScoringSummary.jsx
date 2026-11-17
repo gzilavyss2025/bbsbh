@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
-import { ScrollCue } from '../gameday/next/ScrollCue.jsx'
+import { ScrollCue } from '../../components/ui/layout/ScrollCue.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'

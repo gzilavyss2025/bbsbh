@@ -9,7 +9,7 @@ import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { GamedayPressure } from './panels/GamedayPressure.jsx'
 import { useTier } from './useTier.js'
-import { ScrollCue } from './ScrollCue.jsx'
+import { ScrollCue } from '../../../components/ui/layout/ScrollCue.jsx'
 
 // The Gameday page (ADR-0043's 2026-10-27 amendment): a fixed no-scroll frame whose blocks the
 // window's tier places (lib/gameday/ladder.js). `engine` is GamedayEngine, which draws nothing: it

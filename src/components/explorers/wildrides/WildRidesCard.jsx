@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
-import { ScrollCue } from '../../../screens/gameday/next/ScrollCue.jsx'
+import { ScrollCue } from '../../ui/layout/ScrollCue.jsx'
 import { ExplorerTabs } from '../ExplorerTabs.jsx'
 import { fetchRide, fetchWildLists, fetchWildShapes } from '../../../api/wildrides/fetch.js'
 import { summarize } from '../../../lib/wildrides/story.js'
