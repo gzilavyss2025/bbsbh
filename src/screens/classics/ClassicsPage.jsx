@@ -20,6 +20,8 @@ import { teamClubNameShort, isMlbTeamId } from '../../lib/teams.js'
 // The chip shows only when one deal with it on, under the current era and club,
 // finds a game; that probe is the same deal the card then makes.
 const todayMonthDay = () => new Date().toLocaleDateString('en-CA').slice(5)
+// The chip names the date it deals on ("On Jul 4"), so a reader knows before tapping.
+const onLabel = (md) => `On ${new Date(`2000-${md}T12:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
 
 const ERAS = [1960, 1970, 1980, 1990, 2000, 2010, 2020].map((y) => ({ value: y, label: `${String(y).slice(2)}s` }))
 
@@ -32,7 +34,7 @@ export function ClassicsPage() {
   const [teamId, setTeamId] = useState(favorite)
   const [today] = useState(todayMonthDay)
   const [onDate, setOnDate] = useState(null)
-  const { data: dateFits } = useAsync(
+  const { data: dateFits, loading: dateLoading } = useAsync(
     () => rollClassic({ seed, era, teamId, monthDay: today }).then(Boolean).catch(() => false),
     [seed, era, teamId, today],
   )
@@ -47,8 +49,11 @@ export function ClassicsPage() {
       </header>
       <Chips label="Era" options={[{ value: null, label: 'Any era' }, ...ERAS]} value={era} onChange={setEra} />
       <Chips label="Club" options={clubs} value={teamId} onChange={setTeamId} />
-      {dateFits && (
-        <Chips label="Date" options={[{ value: null, label: 'Any date' }, { value: today, label: 'This date' }]} value={onDate} onChange={setOnDate} />
+      {/* While the check loads, the row holds its place unseen, so the card does not drop when it appears. */}
+      {(dateFits || dateLoading) && (
+        <div style={dateFits ? undefined : { visibility: 'hidden' }} aria-hidden={dateFits ? undefined : 'true'}>
+          <Chips label="Date" options={[{ value: null, label: 'Any date' }, { value: today, label: onLabel(today) }]} value={onDate} onChange={setOnDate} />
+        </div>
       )}
       {/* The card empties while a deal loads (useAsync drops its data on a deps change); this holds its 360 px slot so the hint below does not jump. */}
       <div style={{ minHeight: '23rem' }}>
