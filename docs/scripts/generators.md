@@ -272,6 +272,12 @@ don't run these by hand.
   at all (hence its `check-data-freshness.mjs` exception: unchanged is healthy
   here). `--rebuild` forces the scan; `--level=13` narrows it. The roster ids that
   make the nightly re-join free live in `scripts/data/milb-pool-scan.json`.
+- `gen-wild-rides.mjs` → `public/data/wild-rides/{season}.json` (the four lists, top 15 each, a few
+  KB) and `{season}-shapes.json` (every game as a row plus a 24-character PAA shape word, for Draw).
+  Each Final game's `/winProbability` is read once (`RIDE_FIELDS`) and kept as a summary in
+  `scripts/data/wild-rides-scan.json`; no line or play is stored, because the page reads the one game
+  picked client-direct. Story, headline and shape logic is imported from `src/lib/wildrides/`, never
+  copied. Nightly, gated on finals. `--season=`, `--rescan`.
 - `gen-long-at-bats.mjs` → `public/data/long-at-bats/{season}.json` — every plate
   appearance of an MLB regular season that took **12 pitches or more**, for the offseason
   page's notebook note (ADR-0081). The postseason is counted **beside** it under `post`

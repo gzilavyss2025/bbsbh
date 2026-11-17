@@ -1,0 +1,144 @@
+/* WILD RIDES — laid out like the longest at-bats card (winter-long-at-bats.css): tabs across
+   the top, the picker on the left, the ride on the right. One wide step: 740px. */
+
+.wr { display: grid; gap: var(--space-2); padding-block: var(--space-4); }
+.wr-eyebrow { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-caption); }
+.wr-card {
+  display: grid; gap: var(--space-3); padding: var(--space-3);
+  background: var(--surface-card); border: var(--bw-heavy) solid var(--text-heading); box-shadow: var(--space-1h) var(--space-1h) 0 var(--text-heading);
+}
+.wr svg { display: block; width: 100%; height: auto; overflow: visible; }
+.wr button:focus-visible, .wr-ride:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
+
+/* ---- Tabs: the house Segmented for the four lists, Draw apart as a tool. */
+/* layout-exempt: the segmented strip and the draw button share one row */
+.wr-tabs { display: flex; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.wr-tabs .wr-seg { flex: 1 1 auto; }
+.wr-tabs .btn { min-height: 48px; }
+.wr-tab { display: grid; gap: 1px; text-align: left; }
+.wr-tab b { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); font-weight: inherit; }
+#root .wr-tab > span { font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--text-caption); text-transform: none; white-space: nowrap; } /* caps-exempt: a short sentence */
+#root .wr-tabs [aria-pressed='true'] .wr-tab > span { color: inherit; }
+.wr-tabs .wr-draw { flex: none; border-style: dashed; }
+
+/* ---- Two columns: the picker (5) and the ride (7). */
+/* layout-exempt: the card's two columns, stacked below 740px */
+.wr-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-4); align-items: stretch; }
+/* layout-exempt: the picker column fills the card's height; its list scrolls */
+.wr-left { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.wr-right { display: grid; gap: var(--space-2); min-width: 0; align-content: start; }
+
+/* The list's number, as tall as its two-line label, and the game's date. */
+/* layout-exempt: number, label, date on one line */
+.wr-top { display: flex; align-items: center; gap: var(--space-2); }
+.wr-big { font-family: var(--font-display); font-size: var(--fs-hero-sm); line-height: var(--lh-solid); color: var(--text-heading); }
+.wr-top > .wr-eyebrow { flex: 1 1 0; min-width: 0; line-height: var(--lh-loose); text-wrap: balance; }
+.wr-date { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text-heading); white-space: nowrap; }
+
+/* The picker: date, the two clubs and the final, innings; zebra rows; Gameday's scroll box. */
+/* layout-exempt: the scroll box fills the rest of the column */
+.wr-scroll { flex: 1 1 0; min-height: 200px; display: flex; flex-direction: column; border-top: var(--bw-hair) solid var(--border-hairline); }
+.wr-scroll .gdscroll__in { flex: 1 1 0; min-height: 0; }
+.wr-list { list-style: none; margin: 0; padding: 0; }
+.wr-list li:nth-child(even) button { background: var(--surface-inset); }
+.wr-list button {
+  all: unset; box-sizing: border-box; width: 100%; cursor: pointer; min-height: 44px;
+  display: grid; grid-template-columns: 64px 1fr auto; gap: var(--space-3); align-items: center;
+  padding: var(--space-1h) var(--space-3) var(--space-1h) var(--space-2);
+  font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text-heading);
+}
+.wr-list li button[aria-pressed='true'] { background: var(--surface-row-selected); box-shadow: inset var(--space-1) 0 0 var(--marker); }
+/* layout-exempt: two logos and a score on one line */
+.wr-teams { display: flex; align-items: center; gap: var(--space-1h); white-space: nowrap; }
+.wr-teams b { min-width: 2ch; font-weight: inherit; color: var(--text-caption); }
+.wr-teams b.is-win { font-family: var(--font-display); font-size: var(--fs-title-sm); color: var(--text-heading); }
+.wr-at, .wr-when, .wr-inns { color: var(--text-caption); }
+
+/* ---- The ride column: headline, scorebug, chart, plate. */
+.wr-headline { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-lg); line-height: var(--lh-title); color: var(--text-heading); text-wrap: balance; }
+.wr-right .seasonnote__bug { margin: 0; }
+
+/* The chart: a tug of war. Each half fills in its club's colour as the line draws; innings
+   are faint alternating bands, extras tinted, numbers along the foot. */
+.wr-stage { position: relative; display: grid; border: var(--bw-heavy) solid var(--text-heading); background: var(--surface-card); }
+/* layout-exempt: the home label and the controls share the head strip */
+.wr-stagehead { display: flex; align-items: center; justify-content: space-between; height: 28px; padding-left: var(--space-2); border-bottom: var(--bw-hair) solid var(--border-hairline); }
+/* layout-exempt: a club mark beside its label */
+.wr-side { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-heading); }
+.wr-side--away { position: absolute; left: var(--space-2); bottom: 36px; pointer-events: none; }
+/* layout-exempt: the two controls, square, flush to the strip */
+.wr-ctl { display: flex; align-self: stretch; }
+.wr-ctl button { width: 34px; border: 0; border-left: var(--bw-hair) solid var(--border-hairline); background: none; color: var(--text-heading); font-size: var(--fs-cell); cursor: pointer; }
+.wr-ride { cursor: ew-resize; touch-action: pan-y; }
+.wr-ride text { fill: var(--text-heading); font-family: var(--font-display); font-size: 16px; } /* raw-value-exempt: SVG user units, scales with the chart */
+.wr-band { fill: transparent; }
+.wr-band.is-odd { fill: var(--surface-inset); }
+.wr-band.is-extra { fill: color-mix(in srgb, var(--marker) 14%, transparent); }
+.wr-area--home { fill: var(--home-c); opacity: 0.28; }
+.wr-area--away { fill: var(--away-c); opacity: 0.28; }
+.wr-mid { stroke: var(--text-heading); opacity: 0.35; }
+.wr-ghost { fill: none; stroke: var(--text-caption); stroke-width: 2; opacity: 0.2; }
+.wr-live { fill: none; stroke: var(--text-heading); stroke-width: 2.5; stroke-linejoin: round; }
+.wr-dot { fill: var(--marker); stroke: var(--text-heading); stroke-width: 2; }
+.wr-pin { cursor: pointer; animation: wr-pop 350ms cubic-bezier(.3, 1.6, .5, 1); }
+.wr-pin circle { fill: var(--surface-card); stroke: var(--text-heading); stroke-width: 2; }
+.wr-pin.is-decider circle { fill: var(--marker); }
+.wr-pin.is-now circle { stroke-width: 3; }
+@keyframes wr-pop { from { transform: scale(0.2); } to { transform: scale(1); } }
+.wr-axis { position: relative; height: 28px; border-top: var(--bw-hair) solid var(--border-hairline); font-family: var(--font-display); font-size: var(--fs-label); color: var(--text-caption); }
+.wr-axis > span { position: absolute; top: var(--space-1h); transform: translateX(-50%); }
+.wr-axis > span.is-extra { color: var(--text-heading); }
+
+/* The swing plate: the house At bat panel (seasonnote__side) — the batting club's colour, its
+   mono mark as a watermark, the batter as a cutout — with the feed's call of the play and the park. */
+/* layout-exempt: cutout, play, park on one row */
+.wr-plate {
+  position: relative; overflow: hidden; display: grid; grid-template-columns: 84px minmax(0, 1fr) 128px; gap: var(--space-3); align-items: end;
+  min-height: 124px; padding: 0 var(--space-2) 0 var(--space-3);
+  background: var(--side-club); color: var(--text-on-ink); border-left: var(--space-1h) solid var(--marker);
+  transition: opacity 250ms ease;
+}
+.wr-plate.is-waiting { visibility: hidden; opacity: 0; }
+.wr-plate > * { position: relative; }
+.wr-plate .wr-plate-mark { position: absolute; left: -18px; top: 50%; transform: translateY(-50%); width: 140px; height: 140px; opacity: 0.18; pointer-events: none; }
+.wr-plate .wr-cap-face { width: 84px; height: 104px; border-radius: 0; border: 0; box-shadow: none; background: transparent !important; }
+.wr-plate .wr-cap-face img { object-fit: contain; object-position: bottom; }
+.wr-plate-text { display: grid; gap: var(--space-1); min-width: 0; align-self: center; padding-block: var(--space-2); }
+.wr-plate-kicker { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-on-ink-soft); white-space: nowrap; }
+/* layout-exempt: the play's scroll box keeps the plate one height */
+.wr-plate-scroll { max-height: 76px; display: flex; flex-direction: column; }
+.wr-plate-scroll .gdscroll__in { min-height: 0; padding-right: var(--space-5); }
+#root .wr-plate-play { margin: 0; font-family: var(--font-body); font-size: var(--fs-small); line-height: var(--lh-prose); color: var(--text-on-ink-bright); text-transform: none; } /* caps-exempt: the feed's sentence reads as written */
+.wr-plate-scroll.has-more::after { height: var(--space-6); background: linear-gradient(to bottom, transparent, var(--side-club)); }
+.wr-plate-scroll .gdscroll__more { left: auto; right: var(--space-3); margin-left: 0; width: var(--space-5); height: var(--space-5); background: var(--side-club); border-color: var(--text-on-ink-cream); }
+.wr-plate-scroll .gdscroll__more span { border-color: var(--text-on-ink-bright); }
+.wr-plate-scroll .gdscroll__in::-webkit-scrollbar-track { background: transparent; border-left: var(--bw-hair) solid var(--text-on-ink-dim); }
+.wr-plate-scroll .gdscroll__in::-webkit-scrollbar-thumb { background: var(--text-on-ink-cream); border-color: var(--side-club); }
+.wr-plate .wr-inset { align-self: center; margin-block: var(--space-2); background: var(--surface-card); aspect-ratio: 620 / 510; overflow: hidden; }
+
+/* The park: Gameday's ballpark drawing, the ball's flight and the call over it. */
+.wr-field .bpdiagram { margin: 0; max-width: none; }
+.wr-trail { fill: none; stroke: var(--accent-negative); stroke-width: 5; stroke-linecap: round; opacity: 0; }
+.wr-ball { fill: var(--surface-card); stroke: var(--accent-negative); stroke-width: 4; }
+.wr-flash { font-family: var(--font-display); font-size: 64px; fill: var(--text-heading); paint-order: stroke; stroke: var(--surface-card); stroke-width: 8px; } /* raw-value-exempt: SVG user units in the 620-wide park */
+
+/* Draw. */
+.wr-pad { touch-action: none; cursor: crosshair; border: var(--bw-hair) dashed var(--text-caption); }
+.wr-ink { fill: none; stroke: var(--accent-negative); stroke-width: 3; stroke-linecap: round; }
+
+/* ---- Phone: one column — number, headline, scorebug, chart, plate, then the picker, short. */
+@media (max-width: 740px) {
+  /* layout-exempt: the two columns become one ordered stack */
+  .wr-grid { display: flex; flex-direction: column; }
+  .wr-left { display: contents; }
+  .wr-top { order: 1; }
+  .wr-right { order: 2; }
+  .wr-left > :not(.wr-top) { order: 3; }
+  .wr-scroll { flex: none; height: 320px; }
+  .wr-tabs { overflow-x: auto; scrollbar-width: none; }
+  .wr-tabs .wr-seg { flex: none; }
+  .wr-headline { font-size: var(--fs-title-md); }
+  .wr-plate { grid-template-columns: 64px minmax(0, 1fr) 96px; min-height: 104px; }
+  .wr-plate .wr-cap-face { width: 64px; height: 80px; }
+}
+@media (prefers-reduced-motion: reduce) { .wr * { animation: none !important; transition: none !important; } }
