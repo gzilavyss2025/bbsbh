@@ -270,7 +270,7 @@ export function AllStarRostersPage() {
             onSelect={setFilterTeamId}
             ariaLabel="Filter rosters by team"
             showArrows
-            logoVariant="cap" className="teamfilterstrip--chips"
+            chips
           />
           <Stack gap="snug" className="allstarrosters__list">
             {visibleSeasons.map((year) => {

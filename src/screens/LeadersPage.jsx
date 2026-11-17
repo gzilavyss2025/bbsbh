@@ -144,7 +144,7 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
             onSelect={setFilterTeamId}
             ariaLabel="Highlight a team's leaders"
             showArrows
-            logoVariant="cap" className="teamfilterstrip--chips"
+            chips
           />
         )}
 

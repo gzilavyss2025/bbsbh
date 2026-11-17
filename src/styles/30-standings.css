@@ -341,9 +341,11 @@
   cursor: pointer;
 }
 
+/* An outline, not the --ring shadow: browsers paint no box-shadow on a <tr>.
+   Inset, so the stamped edge and the sticky first column don't clip it. */
 .clubtable--full tbody tr[tabindex]:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(-1 * var(--bw-heavy));
 }
 
 .splitsheet {

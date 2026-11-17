@@ -6,6 +6,7 @@ import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 
 // AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
 // dynamically imported — and only then does that SDK reach a device — when a
@@ -78,29 +79,17 @@ function MenuGlyph() {
 const YOURS = MENU_GROUPS.find((g) => g.id === 'yours')
 const TRAIL = MENU_GROUPS.filter((g) => g.id === 'guides' || g.id === 'tools')
 const CARDS = MENU_GROUPS.filter((g) => g !== YOURS && !TRAIL.includes(g))
-const WIDE = '(min-width: 740px)'
 
 // What the find box matches: the name, its description, its keywords and a
 // renamed page's old name. Lower-cased once.
 const haystack = (page) => [page.label, page.desc, page.keywords, page.was].filter(Boolean).join(' ').toLowerCase() // caps-js-exempt: case-folds a search match, renders nothing
-
-function useWide() {
-  const [wide, setWide] = useState(() => typeof matchMedia === 'function' && matchMedia(WIDE).matches)
-  useEffect(() => {
-    const mq = matchMedia(WIDE)
-    const on = () => setWide(mq.matches)
-    mq.addEventListener('change', on)
-    return () => mq.removeEventListener('change', on)
-  }, [])
-  return wide
-}
 
 function SiteMenuModal({ onClose }) {
   const navigate = useNav()
   const linkProps = useRouteLink()
   const dialogRef = useRef(null)
   const listRef = useRef(null)
-  const wide = useWide()
+  const wide = useMediaQuery(WIDE_QUERY)
   const [query, setQuery] = useState('')
   // A phone folds every card but the first two; the reader's own taps win.
   const [folded, setFolded] = useState({})
@@ -137,7 +126,8 @@ function SiteMenuModal({ onClose }) {
   const onFindKey = (event) => {
     const first = listRef.current?.querySelector('.sitemenusheet__item')
     if (!first) return
-    if (event.key === 'Enter') { event.preventDefault(); first.click() }
+    // Only a typed search has a "first match"; Enter in an empty box opens nothing.
+    if (event.key === 'Enter' && term) { event.preventDefault(); first.click() }
     if (event.key === 'ArrowDown') { event.preventDefault(); first.focus() }
   }
 

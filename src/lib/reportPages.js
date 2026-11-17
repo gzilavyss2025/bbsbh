@@ -16,31 +16,23 @@ import { pathOf } from './route/table.js'
 // picks it up. Adding a page to REPORT_PAGES directly is no longer possible,
 // which is the point.
 //
-// Grouping exists because nineteen ungrouped rows is not a list a reader
-// scans, it's a list a reader gives up on. The bucket names are a first pass
-// and three of them are known to be shaky — see the "unsettled" notes below.
-// They are recorded here rather than in a doc, because the next person to
-// touch this file is the one who needs to know.
-//
-// Order within a group is "busiest first". Order of the groups themselves is
-// "what's happening now" → "who's coming up" → "what already happened" →
-// "your own things", with the two menu-only groups (guides, tools) last.
+// Grouping exists because forty ungrouped rows is not a list a reader scans,
+// it's a list a reader gives up on. The 2026-11-17 regroup (below PAGE_GROUPS)
+// sorts them by what a reader came to do; its reasons are recorded here rather
+// than in a doc, because the next person to touch this file needs them.
 
-// WHAT THE BROADCAST FOUR ARE CALLED, in the menu, in the footer, on /more,
-// and on each page's own masthead — one string, because those are four places
-// and this file exists because copies drift.
+// WHAT THE CONDITIONS-AROUND-THE-GAME GROUP IS CALLED, in the menu, in the
+// footer, on /more, and on the broadcast pages' own mastheads — one string,
+// because those are four places and this file exists because copies drift.
 //
-// NOT "the reports". That was the first name and it was wrong: half the pages
-// on this page's other groups are reports too — Standings, League Leaders,
-// Situational Records, Umpire Rankings and Milestone Watch are all reports on a
-// season, and a group that claims the word for four of them implies the rest
-// are something else. What actually separates these four is their SUBJECT, not
-// their form: crowds, clock, pipeline and arm workload are the conditions
-// around a game rather than its result. So the label names that, and reads in
-// the same plain register as "This season" and "History" beside it.
+// "On the field" since the regroup: the group now holds the officiating boards
+// (Umpire Rankings, ABS Challenges) beside the broadcast package (crowds, clock,
+// arm workload, doubleheaders, game notes) — all of it the conditions around a
+// game rather than its result. It was "Around the game" before; the broadcast
+// code still carries that name in its paths (src/screens/around-the-game/).
 export const BROADCAST_STRAND = 'On the field'
 
-// The four groups whose pages are report pages proper — the ones every
+// The groups whose pages are report pages proper, plus Yours — the ones every
 // footer lists. Guides and Tools are NOT here; see below for why.
 // The groups follow the 2026-11-17 menu regroup: sorted by what a reader came
 // to do, 5–8 pages each, so a column scans at a glance. Each page carries a

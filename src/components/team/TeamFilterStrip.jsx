@@ -19,9 +19,10 @@ import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName, teamChipColors } from '.
 // caller like that banner, which has no "every team" state to reset to —
 // it's a straight navigation strip, not a filter. `markedTeamId` is that
 // banner's favourite club: marked (filled with --marker), not picked.
-// `logoVariant` picks the CDN mark; the round chips (teamfilterstrip--chips)
-// pass 'cap': the base marks carry a ™/® in a corner that throws them off
-// centre in a circle, and the cap set is drawn centred in a square frame.
+// `chips` draws the round stamped chips (teamfilterstrip--chips): the cap
+// marks, since the base marks carry a ™/® in a corner that throws them off
+// centre in a circle and the cap set is drawn centred in a square frame, and
+// a wash of the club's own colour on hover.
 const CLUBS = ALL_MLB_TEAM_IDS
   .map((id) => ({ id, name: teamFullName(id) }))
   .sort((a, b) => a.name.localeCompare(b.name))
@@ -36,11 +37,10 @@ export function TeamFilterStrip({
   centerTeamId = null,
   markedTeamId = null,
   className = '',
-  logoVariant = 'base',
+  chips = false,
 }) {
   const stripRef = useRef(null)
   const activeRef = useRef(null)
-  const chips = className.includes('teamfilterstrip--chips')
 
   // Same centering effect as SplitsVsTeam/ClubPicker: keep the picked
   // club's logo centered horizontally without a page-level scroll jump, on
@@ -76,7 +76,7 @@ export function TeamFilterStrip({
   const isAll = selectedTeamId == null
 
   return (
-    <div className={`vsteam__tray teamfilterstrip ${className}`.trim()}>
+    <div className={`vsteam__tray teamfilterstrip${chips ? ' teamfilterstrip--chips' : ''} ${className}`.trim()}>
       <div className="teamfilterstrip__row" role="tablist" aria-label={ariaLabel}>
         {showMlbPin && (
           <>
@@ -113,6 +113,7 @@ export function TeamFilterStrip({
         <div className="vsteam__strip" ref={stripRef}>
           {teams.map((t) => {
             const active = t.id === selectedTeamId
+            const hover = chips ? teamChipColors(t.id)?.primary : null
             return (
               <button
                 key={t.id}
@@ -133,9 +134,9 @@ export function TeamFilterStrip({
                 // Round chips wash with the club's own colour on hover; the
                 // mark itself never changes, so it neither moves nor resizes.
                 // No colour known (MiLB): the plain hover.
-                style={chips && teamChipColors(t.id) ? { '--chip-hover': teamChipColors(t.id).primary } : undefined}
+                style={hover ? { '--chip-hover': hover } : undefined}
               >
-                <TeamLogo teamId={t.id} name={t.name} size={36} variant={logoVariant} onLight={t.id === markedTeamId} />
+                <TeamLogo teamId={t.id} name={t.name} size={36} variant={chips ? 'cap' : 'base'} onLight={t.id === markedTeamId} />
               </button>
             )
           })}

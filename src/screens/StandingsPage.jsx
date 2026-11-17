@@ -269,7 +269,6 @@ export function StandingsPage({ seasonYear }) {
       className: `${t.pinned ? 'is-me' : ''} ${t.clinch === 'e' ? 'is-eliminated' : ''}`.trim(),
       style: t.pinned ? { '--fav-accent': favoriteAccentColor(t.id) } : undefined,
       tabIndex: 0,
-      'aria-label': `${t.name}: all splits`,
       onClick: (e) => {
         if (e.target.closest('a')) return
         setSplitsFor(t)

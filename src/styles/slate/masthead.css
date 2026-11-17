@@ -448,10 +448,8 @@
   outline-offset: var(--bw-heavy);
 }
 
-.teamfilterstrip--chips .vsteam__team .teamlogo {
-  width: 34px; /* raw-value-exempt: the cap logo inside a 44px chip; the cap set pads its own frame */
-  height: 34px; /* raw-value-exempt: the cap logo inside a 44px chip; the cap set pads its own frame */
-}
+/* No size rule for the chip's logo: TeamLogo sets an inline 36px, and the cap
+   set's own frame padding brings the mark to about 26px inside the 44px chip. */
 
 /* ---- wide: the sticky bar, the card in one row ---- */
 @media (min-width: 740px) {
