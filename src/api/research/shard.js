@@ -163,15 +163,18 @@ export function decodePlateAppearances(shard) {
   const runsAt = (j) => {
     const k = j + 1
     if (k < n && cols.g[k] === cols.g[j] && cols.sd[k] != null && cols.sd[j] != null) {
-      const sameHalf = cols.i[k] === cols.i[j] && cols.t[k] === cols.t[j]
-      return Math.max(0, (sameHalf ? cols.sd[k] : -cols.sd[k]) - cols.sd[j])
+      // The margin's side flips with the batting club (top/bottom), not with the inning.
+      const sameSide = cols.t[k] === cols.t[j]
+      return Math.max(0, (sameSide ? cols.sd[k] : -cols.sd[k]) - cols.sd[j])
     }
     const rs = cols.rs?.[j]
     if (rs == null) return null
     // A walk-off whose rs lags (2025-03-30 PIT at MIA reads 0): a bottom half that ends the
     // game with the home club not ahead scored the winning run, or a homer's runners and all.
+    // From the 7th on only (a seven-inning doubleheader walks off there): a game called
+    // earlier, mid-inning, is no walk-off.
     const ev = dict.ev[cols.ev[j]]
-    if (cols.t[j] === 0 && cols.sd[j] != null && cols.sd[j] + rs <= 0 && ev && !NOT_A_PA.has(ev) && !thirdOut(ev, cols.o[j])) {
+    if (cols.t[j] === 0 && cols.i[j] >= 7 && cols.sd[j] != null && cols.sd[j] + rs <= 0 && ev && !NOT_A_PA.has(ev) && !thirdOut(ev, cols.o[j])) {
       const onBase = ((cols.r[j] & 1) + ((cols.r[j] >> 1) & 1) + ((cols.r[j] >> 2) & 1))
       return ev === 'home_run' ? onBase + 1 : 1 - cols.sd[j]
     }
@@ -185,7 +188,12 @@ export function decodePlateAppearances(shard) {
     if (!c || pas.at(-1) === c || !(c.runs > 0)) return
     const prev = pas.at(-1)
     if (prev && prev.gamePk === c.gamePk && prev.batTeam === c.batTeam && prev.runs != null) prev.runs += c.runs
-    else carry = { gamePk: c.gamePk, batTeam: c.batTeam, runs: c.runs + (carry?.runs ?? 0) }
+    else {
+      // A carry only grows within its own club and game; another club's pending runs are
+      // dropped, and THE CHECK (games.js) then leaves that game out.
+      const same = carry?.gamePk === c.gamePk && carry?.batTeam === c.batTeam
+      carry = { gamePk: c.gamePk, batTeam: c.batTeam, runs: c.runs + (same ? carry.runs : 0) }
+    }
   }
   for (let j = 0; j < n; j++) {
     const g = games[cols.g[j]]

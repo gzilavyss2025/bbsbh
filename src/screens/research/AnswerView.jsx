@@ -22,7 +22,7 @@ import { Table } from '../../components/ui/table/Table.jsx'
 
 const PAGE = 20
 
-const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
+export const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const pct = (r) => `${(100 * r).toFixed(1)}%`
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
@@ -33,7 +33,7 @@ function Name({ id, people }) {
 }
 
 // A date opens that game's box score, sealed (ADR-0101), without a full page load.
-function BoxDate({ m, children }) {
+export function BoxDate({ m, children }) {
   const link = useRouteLink()
   return <a {...link(boxHref(m))}>{children}</a>
 }

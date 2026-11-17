@@ -52,7 +52,8 @@ export function useResearch(q, cutoff) {
     if (index && latest) loadSeason(index, latest).then(setHead, setError)
   }, [index, latest])
 
-  const targets = useMemo(() => seasonsFor(q, onFile, cutoff), [q, onFile, cutoff])
+  // Game mode has no "What happens": a game link that asks it searches as "Last time".
+  const targets = useMemo(() => seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff), [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
   const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
   const game = q.mode === 'game'

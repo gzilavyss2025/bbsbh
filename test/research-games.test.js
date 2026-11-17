@@ -138,3 +138,25 @@ test('a walk-off whose last-pitch rs lags still counts the winning run; a final 
   assert.equal(walkoff({ events: 'home_run' })[1].eventRuns, 2, 'a homer brings its runner home too')
   assert.equal(walkoff({ events: 'strikeout', outs_when_up: '2' })[1].eventRuns, 0, 'a play that can be the third out adds no inferred run')
 })
+
+test('review fixes: margin side flips with top/bottom only; no walk-off before the 7th', () => {
+  // Bottom 4 missing on file: top 4 -> top 5 keeps the margin's side.
+  const gap = decodePlateAppearances(encodeMonth([
+    row({ at_bat_number: '1', inning: '4', events: 'field_out', bat_score_diff: '-1' }),
+    row({ at_bat_number: '2', inning: '5', batter: '11', events: 'field_out', bat_score_diff: '-1' }),
+    row({ at_bat_number: '3', inning: '9', inning_topbot: 'Bot', batter: '30', pitcher: '40', events: 'field_out', outs_when_up: '2', bat_score_diff: '1' }),
+  ], { season: 2026, month: '06' }))
+  assert.equal(gap[0].runs, 0)
+  // A game called in the bottom 5th after a single, home behind: no inferred run.
+  const called = decodePlateAppearances(encodeMonth([
+    row({ at_bat_number: '1', events: 'home_run', post_bat_score: '1' }),
+    row({ at_bat_number: '2', inning: '5', inning_topbot: 'Bot', batter: '30', pitcher: '40', events: 'single', bat_score_diff: '-1' }),
+  ], { season: 2026, month: '06' }))
+  assert.equal(called[1].eventRuns, 0)
+})
+
+test('opening an empty How card does not change the search', async () => {
+  const { searchKey } = await import('../src/api/research/filters.js')
+  const q = { mode: 'game', g: { totals: {}, how: [] }, chips: {} }
+  assert.equal(searchKey(q), searchKey({ ...q, g: { ...q.g, howOpen: true } }))
+})

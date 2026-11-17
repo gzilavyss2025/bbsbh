@@ -69,7 +69,8 @@ function pillsOf(q, people) {
   if (q.park) out.push(`at ${clubName(q.park)}`)
   if (q.years) out.push(q.years[0] === q.years[1] ? `${q.years[0]}` : `${q.years[0]}–${q.years[1]}`)
   if (q.mode === 'game') {
-    for (const t of TOTALS) if (q.g.totals[t.key]) out.push(`${totalLabel(q, t)} ${rangeWords(q.g.totals[t.key])}`)
+    // An emptied range ([null, null]) filters nothing, so it has no pill.
+    for (const t of TOTALS) if (q.g.totals[t.key]?.some((v) => v != null)) out.push(`${totalLabel(q, t)} ${rangeWords(q.g.totals[t.key])}`)
     for (const k of q.g.how) out.push(HOW_LABEL[k])
   }
   return out

@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { ASKS, clubName } from '../../api/research/filters.js'
 import { HOW, TOTALS, pitchingSide, totalOf } from '../../api/research/games.js'
-import { gamePath } from '../../lib/route.js'
-import { useRouteLink } from '../../lib/nav.js'
 import { ordinal as nth } from '../../lib/format.js'
 import { labelDate as shortDate } from '../../lib/time/standingsDates.js'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { BoxDate, plural } from './AnswerView.jsx'
 
 // THE GAME-MODE ANSWER (/research, #3137; wireframe v3, Gary 2026-11-17). The sentence
 // reads from the picked club's side ("allowed" with a Pitching club). A row is the date
@@ -17,16 +16,12 @@ import { Button } from '../../components/ui/control/Button.jsx'
 
 const PAGE = 20
 const UNITS = { r: ['run', 'runs'], h: ['hit', 'hits'], hr: ['home run', 'home runs'], bb: ['walk', 'walks'], so: ['strikeout', 'strikeouts'], pi: ['pitch', 'pitches'] }
-const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const HOW_LABEL = Object.fromEntries(HOW.map(([k, label]) => [k, label]))
 
 // The filtered totals, in TOTALS order.
 const shownTotals = (q) => TOTALS.filter((t) => q.g?.totals?.[t.key])
 
-function BoxDate({ m }) {
-  const link = useRouteLink()
-  return <a {...link(gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber))}>{shortDate(m.date)}</a>
-}
+const GameDate = ({ m }) => <BoxDate m={m}>{shortDate(m.date)}</BoxDate>
 
 // "Milwaukee Brewers allowed 6 runs, all on solo home runs".
 function gameLine(q, m) {
@@ -45,7 +40,7 @@ function Sentence({ ask, q, a }) {
   if (ask === 'often') return `${plural(n, 'game', 'games')} of ${a.base.toLocaleString()}`
   if (ask === 'most') return `${clubName(a.clubs[0].club)} lead with ${plural(a.clubs[0].n, 'game', 'games')}`
   const m = a.matches[0]
-  return <>{gameLine(q, m)} · <BoxDate m={m} /></>
+  return <>{gameLine(q, m)} · <GameDate m={m} /></>
 }
 
 function summary(ask, q, a) {
@@ -53,8 +48,8 @@ function summary(ask, q, a) {
   const m = a.matches[0]
   if (ask === 'last') return `vs ${clubName(opponent(q, m))} · ${plural(n, 'game', 'games')}`
   if (ask === 'often' && a.base) {
-    const club = q.pitchTeam ?? q.team
-    return `${((100 * n) / a.base).toFixed(2)}% of ${club ? `${clubName(club)} ` : 'club '}games in range`
+    const of = q.pitchTeam && q.team ? `${clubName(q.pitchTeam)} v ${clubName(q.team)} ` : q.pitchTeam ?? q.team ? `${clubName(q.pitchTeam ?? q.team)} ` : 'club '
+    return `${((100 * n) / a.base).toFixed(2)}% of ${of}games in range`
   }
   return plural(n, 'game', 'games')
 }
@@ -79,7 +74,7 @@ function Rows({ rows, q, since }) {
     <ul className="research__rows">
       {rows.map((m) => (
         <li key={m.key} className="research__row">
-          <span className="research__date"><BoxDate m={m} /></span>
+          <span className="research__date"><GameDate m={m} /></span>
           <span>{m.away} at {m.home}{totalsText(q, m) && <span className="research__result"> · {totalsText(q, m)}</span>}</span>
           <span className="research__ord">{ord(m, since)}</span>
         </li>
@@ -96,7 +91,7 @@ function GameTable({ rows, q, since }) {
       <tbody>
         {rows.map((m) => (
           <tr key={m.key}>
-            <td><BoxDate m={m} /></td>
+            <td><GameDate m={m} /></td>
             <td>{m.away} at {m.home}</td>
             {totals.map((t) => <td key={t.key} className="research__num">{totalOf(m, t.key)}</td>)}
             <td className="research__num">{ord(m, since)}</td>

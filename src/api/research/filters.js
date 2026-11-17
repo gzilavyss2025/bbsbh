@@ -249,7 +249,8 @@ export const ASKS = [
 
 // The query as the search reads it: the "Who most" rank and minimum only re-rank the
 // answer on the page, so changing them never re-runs a search or resets the match list.
-export const searchKey = ({ rank, min, ...q }) => JSON.stringify(q) // eslint-disable-line no-unused-vars
+// Nor does opening an empty game card (`g.howOpen`, page state only).
+export const searchKey = ({ rank, min, ...q }) => JSON.stringify({ ...q, g: q.g && { totals: q.g.totals, how: q.g.how } }) // eslint-disable-line no-unused-vars
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
 export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
