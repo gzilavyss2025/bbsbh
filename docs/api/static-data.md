@@ -327,6 +327,11 @@ for each generator; the reader modules:
   Degrades to `[]`. Also exports the career blend's start values for step 5:
   `LEVEL_WEIGHT` (AAA 0.6, AA 0.5, A+ 0.35, A 0.25, Rk 0.1), `FULL_WEIGHT_PA` (400) and
   `FULL_WEIGHT_OUTS` (450, 150 IP). Spoiler-free: season totals only.
+- `wildrides/fetch.js` — Wild Rides (`/wild-rides`). `fetchWildLists(season)` reads
+  `wild-rides/{season}.json` (four lists, each game's summary and headline); `fetchWildShapes(season)`
+  reads `wild-rides/{season}-shapes.json`, packed `[gamePk, date, away, home, awayScore, homeScore,
+  innings, shape, venue]`, only when Draw opens; `fetchRide(summary)` reads that game's `/winProbability` from
+  statsapi and builds the ride with `lib/wildrides/ride.js`. Finals shown plainly: an open season page.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
   (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12

@@ -6,13 +6,17 @@ import { LongAtBats } from './LongAtBats.jsx'
 import { RecordDoors, SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
 import { TopFreeAgents } from './TopFreeAgents.jsx'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, useLayoutEffect, useRef, useState } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { ClubStrip } from './ClubStrip.jsx'
 import { useRouteLink } from '../../lib/nav.js'
 import { pathOf } from '../../lib/route/table.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr } from '../../lib/teams.js'
+
+// The whole explorer (ride, park, Draw) loads only when the offseason page renders it.
+const WildRidesCard = lazyNamed(() => import('../../screens/designlab/wildrides/WildRides.jsx'), 'WildRidesCard')
 const MLB_CLUBS = new Set(ALL_MLB_TEAM_IDS)
 
 // A club's moves: the ones it filed, and the ones that name it (a trade partner).
@@ -197,6 +201,10 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
 
       {/* The season's notebook: one row of stamped cards (LongAtBats.jsx). */}
       <LongAtBats season={winter.seasonEnded} />
+      {/* Wild rides: the season's games by win-probability drama, in its own chunk. */}
+      <Suspense fallback={null}>
+        <WildRidesCard season={winter.seasonEnded} />
+      </Suspense>
     </section>
   )
 }

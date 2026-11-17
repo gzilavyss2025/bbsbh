@@ -78,6 +78,9 @@ export const ROUTE_TABLE = [
   { name: 'admin-research', path: '/admin/research' },
   { name: 'admin-contenders', path: '/admin/contenders' },
   { name: 'admin-contracts', path: '/admin/contracts' },
+  // Wild Rides on its own page (the offseason home page carries the same card). An open
+  // season page of Final games with their results, not a scoring surface.
+  { name: 'wild-rides', path: '/wild-rides' },
   // Unlisted labs, reachable by direct URL only. No score or reveal content.
   { name: 'animation-lab', path: '/animation-lab' },
   { name: 'design-lab', path: '/design-lab' },
