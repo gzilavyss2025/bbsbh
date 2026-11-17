@@ -445,7 +445,7 @@ test('the first-pitch home run count runs from 2001, tonight not counted twice',
   const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', player: { id: pk }, away: { id: club }, home: { id: 1 } })
   const idx = { firstpitch: { coverage: { seasons: Array.from({ length: 26 }, (_, i) => 2001 + i) }, rows: [r(1, '2006-09-02', 114), r(2, '2021-04-04', 158), r(6, '2026-08-01', 158)] } }
   const [note] = buildRarityNotes(idx, feed, { kind: 'firstpitch', side: 'away', player: { id: 6, name: 'Pat Hitter' } })
-  assert.equal(note.text, "The 3rd home run on a first MLB pitch since 2001, the Brewers' 2nd.")
+  assert.equal(note.text, "The 3rd player since 2001 to homer on his first MLB pitch, the Brewers' 2nd.")
 })
 
 test('the committed first-pitch index holds the known 2001 to 2021 home runs (slice 7)', () => {

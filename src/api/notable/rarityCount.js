@@ -34,7 +34,8 @@ export const RARITY = {
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
   sixdp: { flag: null, noun: 'game with six or more double plays' },
-  firstpitch: { flag: null, noun: 'home run on a first MLB pitch' },
+  // Its own sentence: "The 16th player since 2001 to homer on his first MLB pitch" (Gary, 2026-11-17).
+  firstpitch: { flag: null, lead: (nth, floor) => `The ${nth} player since ${floor} to homer on his first MLB pitch` },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -265,7 +266,7 @@ export function buildRarityNotes(docs, feed, feat) {
   const mine = prior.filter((r) => r[r.side]?.id === club?.id).length
   const tail = clubName ? `, the ${possessive(clubName)} ${ordinal(mine + 1)}` : ''
   return [{
-    text: `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}${tail}.`,
+    text: `${spec.lead ? spec.lead(ordinal(prior.length + 1), floor) : `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}`}${tail}.`,
     link: null,
     personId: feat.player?.id ?? null,
     side: feat.side,
