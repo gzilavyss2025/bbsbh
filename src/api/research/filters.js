@@ -31,6 +31,7 @@ import { ordinal } from '../../lib/format.js'
 import { monthName } from '../../lib/time/months.js'
 import { seriesValues } from './series.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
+import { buildGameParams, parseGameQuery } from './games.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
 // so a code finds its full name through teams.js. An unknown code shows as itself.
@@ -205,12 +206,18 @@ export function parseQuery(search) {
   const years = yr ? [Number(yr[1]), Number(yr[2] ?? yr[1])].sort((a, b) => a - b) : null
   // "Who most" ranking (#3147): `rank=rate` and its PA minimum `min` (50 when absent).
   const min = parseMin(p.get('min')) ?? RATE_MIN
-  return { chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
+  // Game mode (#3137, games.js): `mode=game` and its totals; `g` is null in play mode.
+  const g = parseGameQuery(search)
+  return { mode: g ? 'game' : 'play', g, chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
 }
 
 export function buildQuery(q, keep = {}) {
   const p = new URLSearchParams()
   if (q.ask && q.ask !== 'last') p.set('ask', q.ask)
+  if (q.mode === 'game') {
+    p.set('mode', 'game')
+    for (const [k, v] of buildGameParams(q.g ?? { totals: {}, how: [] })) p.set(k, v)
+  }
   for (const f of FILTERS) {
     const c = q.chips?.[f.key]
     if (c?.vals?.length) p.set(f.key, `${c.inv ? '!' : ''}${c.vals.join('.')}`)
@@ -242,7 +249,8 @@ export const ASKS = [
 
 // The query as the search reads it: the "Who most" rank and minimum only re-rank the
 // answer on the page, so changing them never re-runs a search or resets the match list.
-export const searchKey = ({ rank, min, ...q }) => JSON.stringify(q) // eslint-disable-line no-unused-vars
+// Nor does opening an empty game card (`g.howOpen`, page state only).
+export const searchKey = ({ rank, min, ...q }) => JSON.stringify({ ...q, g: q.g && { totals: q.g.totals, how: q.g.how } }) // eslint-disable-line no-unused-vars
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
 export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park

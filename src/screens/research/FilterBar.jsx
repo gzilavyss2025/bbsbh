@@ -8,6 +8,8 @@ import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
+import { GAME_CHIPS } from '../../api/research/games.js'
+import { GameCards, gameAddOptions, openGameCard } from './GameCards.jsx'
 
 // THE FILTER BAR (/research, #2234): one card per active chip filter, an "Add a
 // filter" picker for the rest, and the people and club pickers. It holds no state:
@@ -15,6 +17,8 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 // A card the season range cannot answer is listed under `blocked` and stays off.
 // The Seasons card (`yr`) sits first when open.
 // A long card shows the picked chips and the first few, then "+N more" (FIRST_CHIPS).
+// GAME MODE (#3137): no person pickers; the play cards give way to the game cards
+// (GameCards.jsx) and the cards that describe a whole game (games.js GAME_CHIPS).
 
 const FIRST_CHIPS = 4
 
@@ -163,22 +167,26 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
     onChange({ ...q, chips })
   }
   const blockedKeys = new Set(blocked.map((b) => b.key))
-  const active = Object.keys(q.chips).filter((k) => !blockedKeys.has(k))
-  const addable = FILTERS.filter((f) => !q.chips[f.key] && !blockedKeys.has(f.key))
+  const game = q.mode === 'game'
+  const inMode = (k) => !game || GAME_CHIPS.includes(k)
+  const active = Object.keys(q.chips).filter((k) => !blockedKeys.has(k) && inMode(k))
+  const addable = FILTERS.filter((f) => !q.chips[f.key] && !blockedKeys.has(f.key) && inMode(f.key))
+  const gameAdd = game ? gameAddOptions(q) : []
   return (
     <Stack>
       <Cluster>
-        <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />
-        <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />
+        {!game && <PersonField label="Batter" value={q.batter} people={people} onChange={(batter) => onChange({ ...q, batter })} />}
+        {!game && <PersonField label="Pitcher" value={q.pitcher} people={people} onChange={(pitcher) => onChange({ ...q, pitcher })} />}
         <ClubField label="Batting club" value={q.team} clubs={clubs} onChange={(team) => onChange({ ...q, team })} />
         <ClubField label="Pitching club" value={q.pitchTeam} clubs={clubs} onChange={(pitchTeam) => onChange({ ...q, pitchTeam })} />
         <ClubField label="Ballpark (home club)" value={q.park} clubs={clubs} onChange={(park) => onChange({ ...q, park })} />
       </Cluster>
+      {game && <GameCards q={q} onChange={onChange} />}
       {q.years && <SeasonsCard years={q.years} seasons={seasons} onYears={(years) => onChange({ ...q, years })} />}
       {active.map((key) => (
         <FilterCard key={key} f={FILTER_BY_KEY[key]} chip={q.chips[key]} onChip={(chip) => setChip(key, chip)} />
       ))}
-      {(addable.length > 0 || (!q.years && seasons.length > 1)) && (
+      {(addable.length > 0 || gameAdd.length > 0 || (!q.years && seasons.length > 1)) && (
         <Stack gap="tight" className="research__field">
           <label className="t-label" htmlFor={addId}>Add a filter</label>
           <select
@@ -186,11 +194,13 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
             value=""
             onChange={(e) => {
               if (e.target.value === 'yr') return onChange({ ...q, years: [latest, latest] })
+              if (e.target.value.startsWith('g:')) return onChange(openGameCard(q, e.target.value))
               const f = FILTER_BY_KEY[e.target.value]
               if (f) setChip(f.key, { vals: [f.options[0][0]], inv: false })
             }}
           >
             <option value="">Choose…</option>
+            {gameAdd.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
             {!q.years && seasons.length > 1 && <option value="yr">Seasons</option>}
             {addable.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
