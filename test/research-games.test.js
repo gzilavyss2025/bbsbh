@@ -160,3 +160,26 @@ test('opening an empty How card does not change the search', async () => {
   const q = { mode: 'game', g: { totals: {}, how: [] }, chips: {} }
   assert.equal(searchKey(q), searchKey({ ...q, g: { ...q.g, howOpen: true } }))
 })
+
+// Player-game lines (#3156): one row per batter and per pitcher per game, for streaks (#3142).
+test('plays group into one batting line and one pitching line per player per game', async () => {
+  const { playerGames } = await import('../src/api/research/games.js')
+  const { lines, leftOut } = playerGames(pas)
+  assert.equal(leftOut, 0)
+  const bat = Object.fromEntries(lines.filter((l) => l.role === 'bat').map((l) => [l.player, l]))
+  assert.deepEqual(Object.keys(bat).map(Number).sort(), [10, 11, 12, 30, 31])
+  assert.deepEqual([bat[10].pa, bat[10].hr, bat[10].h, bat[10].runsOn], [1, 1, 1, 1])
+  assert.equal(bat[11].so, 1)
+  assert.deepEqual([bat[30].h, bat[30].runsOn], [1, 0], 'the wild-pitch run is not on his single')
+  assert.equal(bat[30].team, 'MIL')
+  const pit = Object.fromEntries(lines.filter((l) => l.role === 'pit').map((l) => [l.player, l]))
+  assert.deepEqual([pit[20].bf, pit[20].h, pit[20].hr, pit[20].so, pit[20].runs, pit[20].pitches, pit[20].starter, pit[20].team], [3, 2, 2, 1, 2, 3, true, 'MIL'])
+  assert.deepEqual([pit[40].bf, pit[40].h, pit[40].so, pit[40].runs, pit[40].pitches, pit[40].team], [2, 1, 1, 1, 4, 'CIN'])
+})
+
+test('a player-game line is left out when its game fails the final-margin check', async () => {
+  const { playerGames } = await import('../src/api/research/games.js')
+  const broken = pas.map((p, i) => (i === pas.length - 1 ? { ...p, finalMargin: 5 } : p))
+  const { lines, leftOut } = playerGames(broken)
+  assert.deepEqual([lines.length, leftOut], [0, 1])
+})
