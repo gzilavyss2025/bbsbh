@@ -12,7 +12,7 @@ import { fetchOnce } from '../../../../lib/gameday/fetchOnce.js'
 import { useCalloutLedger } from '../../../../hooks/useCalloutLedger.js'
 import { useWsCalloutInputs } from '../../../../hooks/postseason/useWsEvents.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
-import { ScrollCue } from '../ScrollCue.jsx'
+import { ScrollCue } from '../../../../components/ui/layout/ScrollCue.jsx'
 import { useTier } from '../useTier.js'
 import { checkpointMarkup } from './checkpointMarkup.js'
 
