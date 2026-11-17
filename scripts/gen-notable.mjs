@@ -164,7 +164,7 @@ for (const season of seasons) {
   // Inside-the-park grand slams (#2968, lib/notable/rarity/itpslam.mjs): the play-by-play of each
   // game where a player homered and drove in 4 or more.
   if (season >= ITPSLAM_FLOOR) {
-    const { rows, unknown } = await fetchItpSlams(get, swept.gameMap, season, swept.people)
+    const { rows, unknown } = await fetchItpSlams(get, swept.gameMap, swept.people)
     if (unknown.length) console.log(`  ${season}: ${unknown.length} slam-candidate games with no plays, not counted: ${unknown.join(', ')}`)
     docs.itpslam = {
       coverage: mergeCoverage(docs.itpslam.coverage, [season], swept.through),

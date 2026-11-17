@@ -290,7 +290,7 @@ test('sweep: one people-log read a season feeds cycles, first-pitch homers and s
   }
   const swept = await sweepSeason(get, 2022)
   await fetchFirstPitch(get, swept.gameMap, 2022, swept.people)
-  await fetchItpSlams(get, swept.gameMap, 2022, swept.people)
+  await fetchItpSlams(get, swept.gameMap, swept.people)
   assert.equal(urls.filter((u) => u.includes('/sports/1/players')).length, 1)
   assert.equal(urls.filter((u) => u.includes('/people?')).length, 2, '150 players, 100 a call')
   // the one read carries every field the three passes need

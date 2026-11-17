@@ -87,7 +87,7 @@ export async function sweepSeason(get, season) {
   const gameMap = await fetchGameMap(get, season)
   if (!gameMap) return null
   const nohitters = await fetchNoHitters(get, gameMap)
-  const people = await fetchSeasonHittingLogs(get, season, undefined, CONCURRENCY)
+  const people = await fetchSeasonHittingLogs(get, season, CONCURRENCY)
   const { cycles, fourhr } = cyclesFromLogs(people, gameMap)
   const { tripleplays, sixdp } = await fetchFieldingFeats(get, gameMap, season)
   return { gameMap, people, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr, sixdp } }
