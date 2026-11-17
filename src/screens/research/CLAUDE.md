@@ -14,7 +14,9 @@ shares with the contender diary (`DiaryPage.jsx`).
 
 ## Rule
 
-A part that more than one mode uses stays at the root: `ResearchPage.jsx`,
-`FilterBar.jsx`, `AskBar.jsx`, `useResearch.js`, `useEraClubNames.js`. A mode folder
-may import from another mode (Games and Streaks reuse `BoxDate` from Plays); move
-such a helper to the root once a third mode needs it.
+A new part that more than one mode uses goes at the root: `ResearchPage.jsx`,
+`FilterBar.jsx`, `AskBar.jsx`, `useResearch.js`, `useEraClubNames.js`. Two older
+helpers still live in a mode file and are imported across modes (the split was
+move-only): `BoxDate` and `plural` in `plays/AnswerView.jsx` (used by Games and
+Streaks), and `RangeCard` in `games/GameCards.jsx` (used by Streaks). Check those
+callers before you change them.
