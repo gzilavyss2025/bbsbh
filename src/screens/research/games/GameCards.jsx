@@ -1,11 +1,11 @@
 import { useId, useState } from 'react'
-import { HOW, HOW_INFO, TOTALS, pitchingSide } from '../../api/research/games.js'
-import { Chips } from '../../components/ui/control/Chips.jsx'
-import { IconButton } from '../../components/ui/control/IconButton.jsx'
-import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
-import { Card } from '../../components/ui/frame/Card.jsx'
-import { Cluster } from '../../components/ui/layout/Cluster.jsx'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
+import { HOW, HOW_INFO, TOTALS, pitchingSide } from '../../../api/research/games.js'
+import { Chips } from '../../../components/ui/control/Chips.jsx'
+import { IconButton } from '../../../components/ui/control/IconButton.jsx'
+import { InfoPopover } from '../../../components/ui/InfoPopover.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // THE GAME-MODE CARDS (/research, #3137): a From/To card per total and the "How runs
 // scored" card. A total's label reads from the picked side ("Runs allowed" with a Pitching

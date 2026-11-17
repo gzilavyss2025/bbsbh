@@ -9,9 +9,9 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { GAME_CHIPS } from '../../api/research/games.js'
-import { GameCards, gameAddOptions, openGameCard } from './GameCards.jsx'
+import { GameCards, gameAddOptions, openGameCard } from './games/GameCards.jsx'
 import { STREAK_CHIPS } from '../../api/research/streaks.js'
-import { StreakCards, openStreakCard, streakAddOptions } from './StreakView.jsx'
+import { StreakCards, openStreakCard, streakAddOptions } from './streaks/StreakView.jsx'
 
 // THE FILTER BAR (/research, #2234): one card per active chip filter, an "Add a
 // filter" picker for the rest, and the people and club pickers. It holds no state:

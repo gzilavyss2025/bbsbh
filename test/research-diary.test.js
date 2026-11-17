@@ -93,7 +93,7 @@ test('the traps heading counts the traps it is standing over', () => {
   // a count that runs off the end of COUNT_WORDS silently falls back to a
   // numeral, which is not this page's voice.
   assert.ok(TRAPS.length >= 1, 'there must be traps to count')
-  const page = readFileSync(new URL('../src/screens/research/DiaryPage.jsx', import.meta.url), 'utf8')
+  const page = readFileSync(new URL('../src/screens/research/diary/DiaryPage.jsx', import.meta.url), 'utf8')
   const words = page.match(/const COUNT_WORDS = \[([\s\S]*?)\]/)
   assert.ok(words, 'COUNT_WORDS not found in DiaryPage.jsx')
   const ceiling = words[1].split(',').filter((word) => word.trim()).length - 1

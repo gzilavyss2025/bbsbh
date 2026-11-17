@@ -1,4 +1,4 @@
-import { DiaryPage } from '../research/DiaryPage.jsx'
+import { DiaryPage } from '../research/diary/DiaryPage.jsx'
 import * as diary from '../../lib/research/contenderDiary/index.js'
 
 // The Contender Diary (route: /admin/contenders, admin only, linked from the footer), drawn by the

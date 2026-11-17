@@ -87,7 +87,7 @@ if (isSlateUrl(currentUrl())) import('./screens/GameSelect.jsx').catch(() => {})
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const ResearchDiaryPage = lazyNamed(
-  () => import('./screens/research/ResearchDiaryPage.jsx'),
+  () => import('./screens/research/diary/ResearchDiaryPage.jsx'),
   'ResearchDiaryPage',
 )
 const ContenderDiaryPage = lazyNamed(
