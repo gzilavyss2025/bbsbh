@@ -40,7 +40,7 @@ export function mergeIndex(index, season, month, shard, pas, built) {
   for (const pa of pas) events[pa.event] = (events[pa.event] ?? 0) + 1
   const next = { v: 1, built, seasons: { ...(index?.seasons ?? {}) } }
   const s = { months: { ...(next.seasons[season]?.months ?? {}) } }
-  s.months[month] = { v: shard.v, through: shard.through, pitches: shard.cols.g.length, pas: pas.length, events }
+  s.months[month] = { v: shard.v, through: shard.through, pitches: shard.cols.g.length, pas: pas.length, events, wp: 1 }
   next.seasons[season] = s
   return next
 }

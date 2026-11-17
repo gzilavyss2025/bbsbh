@@ -1286,6 +1286,10 @@
       "class": "spoiler-free",
       "why": "/research's filter definitions, predicates and URL format (#2234). Pure; the `?d=` cutoff drops games on or after that day."
     },
+    "research/winprob.js": {
+      "class": "spoiler-free",
+      "why": "/research's win probability (#3141): each past PA's WPA, RE24 and Leverage Index from a month side file and a state table. Past games on an open page (ADR-0034)."
+    },
     "research/games.js": {
       "class": "spoiler-free",
       "why": "/research's game mode (#3137): plays grouped by game and batting club, tested on totals and how the runs scored. Pure; an open page (ADR-0034); a row carries the filtered totals, never the final score."

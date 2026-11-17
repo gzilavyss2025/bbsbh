@@ -24,6 +24,10 @@
 // score that fails is left out, retried by the next build of that month, and turns the
 // run red (exit 1) so a month outside the nightly window gets a hand run.
 //
+// WIN PROBABILITY (#3141). Each month also writes `{MM}.wp.json` (src/api/research/winprob.js),
+// one entry per decoded PA, and the index marks the month `wp: 1`. A month built before
+// that has none until a backfill rebuilds it.
+//
 // THE STAMP. `--stamp=<file>` writes { generatedAt, through } there AFTER the index
 // upload, so check-data-freshness.mjs sees a run that reached Blob, not one that only
 // started. The page does not read it; it reads index.json.
@@ -48,6 +52,7 @@ import { BOXSCORE_FIELDS, SAVANT_DAY_CAP, gamesNeedingLineups, keptLineups, line
 import { baseballToday } from '../../src/lib/time/standingsDates.js'
 import { decodePlateAppearances, encodeMonth } from '../../src/api/research/shard.js'
 import { coverage } from '../../src/api/research/store.js'
+import { encodeWinProb } from '../../src/api/research/winprob.js'
 
 const PREFIX = 'research/v1/'
 const SPACING_MS = 400
@@ -185,6 +190,10 @@ for (const { season, month } of targets) {
   await mkdir(join(out, String(season)), { recursive: true })
   await writeFile(join(out, String(season), `${month}.json`), body)
   if (put) console.log(`uploaded ${(await put(`${season}/${month}.json`, body)).url}`)
+  // The win-probability side file (#3141): parallel to the shard's PAs, written with it.
+  const wp = JSON.stringify(encodeWinProb(rows, pas))
+  await writeFile(join(out, String(season), `${month}.wp.json`), wp)
+  if (put) console.log(`uploaded ${(await put(`${season}/${month}.wp.json`, wp)).url}`)
   index = mergeIndex(index, season, month, shard, pas, new Date().toISOString())
   changed++
 }

@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { rateLeaders } from '../../api/research/answer.js'
 import { ASKS, parseMin, resultName } from '../../api/research/filters.js'
 import { rate3 } from '../../api/person/shared.js'
+import { winProbTotals } from '../../api/research/winprob.js'
 import { gamePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
@@ -24,6 +25,9 @@ const PAGE = 20
 
 export const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 const pct = (r) => `${(100 * r).toFixed(1)}%`
+// Win probability (#3141): WPA and RE24 signed, from the batting club's view; LI to two places.
+const signed = (x, places) => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(places)}`
+const wpLine = (m) => (m.wpa == null ? '' : `WPA ${signed(m.wpa, 3)} · RE24 ${signed(m.re24, 2)}${m.li == null ? '' : ` · LI ${m.li.toFixed(2)}`}`)
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
 
 // A name opens the player page the app's own way (PlayerLink: the canonical
@@ -63,7 +67,7 @@ function Sentence({ ask, q, a, people }) {
 }
 
 // One result filter gives every match the same event, so its slash line says nothing new.
-function summary(a, ask, q) {
+function summary(a, ask, q, wp) {
   const n = a.matches.length
   const parts = []
   if (ask !== 'often') parts.push(plural(n, 'match', 'matches'))
@@ -71,16 +75,18 @@ function summary(a, ask, q) {
   const kinds = new Set(a.matches.map((m) => m.event)).size
   const t = a.totals
   if (kinds > 1) parts.push(`${rate3(t.avg)}/${rate3(t.obp)}/${rate3(t.slg)}`)
+  const w = wp && winProbTotals(a.matches)
+  if (w) parts.push(`WPA ${signed(w.wpa, 2)} · RE24 ${signed(w.re24, 1)}${w.li == null ? '' : ` · mean LI ${w.li.toFixed(2)}`}`)
   if (ask === 'most' && byRate(q, a)) parts.push(`rate, min ${plural(q.min, 'PA', 'PAs')}`)
   return parts.join(' · ')
 }
 
-export function AnswerCard({ ask, q, a, people, note }) {
+export function AnswerCard({ ask, q, a, people, note, wp }) {
   return (
     <Card frame="stamped" label={ASKS.find((x) => x.key === ask)?.label}>
       <Stack gap="tight" aria-live="polite">
         <p className="research__answer"><Sentence ask={ask} q={q} a={a} people={people} /></p>
-        {a.matches.length > 0 && <p className="research__summary">{summary(a, ask, q)}</p>}
+        {a.matches.length > 0 && <p className="research__summary">{summary(a, ask, q, wp)}</p>}
         {note && <p className="research__summary">{note}</p>}
       </Stack>
     </Card>
@@ -127,7 +133,7 @@ function RankBar({ q, onChange }) {
   )
 }
 
-function Rows({ rows, people }) {
+function Rows({ rows, people, wp }) {
   return (
     <ul className="research__rows">
       {rows.map((m) => (
@@ -136,16 +142,17 @@ function Rows({ rows, people }) {
           <span className="research__result">{resultName(m.event)}</span>
           <span><Name id={m.batter} people={people} /> v <Name id={m.pitcher} people={people} /> · {m.top ? '▲' : '▼'}{m.inning}</span>
           <span className="research__ord">{nth(m.ordinal)} in {m.date.slice(0, 4)}</span>
+          {wp && m.wpa != null && <span className="research__wp">{wpLine(m)}</span>}
         </li>
       ))}
     </ul>
   )
 }
 
-function MatchTable({ rows, people }) {
+function MatchTable({ rows, people, wp }) {
   return (
     <Table label="Matches" className="research__table">
-      <thead><tr><th>Date</th><th>Batter</th><th>Pitcher</th><th>Result</th><th>Inn</th><th className="research__num">His</th></tr></thead>
+      <thead><tr><th>Date</th><th>Batter</th><th>Pitcher</th><th>Result</th><th>Inn</th><th className="research__num">His</th>{wp && <><th className="research__num">WPA</th><th className="research__num">RE24</th><th className="research__num">LI</th></>}</tr></thead>
       <tbody>
         {rows.map((m) => (
           <tr key={m.key}>
@@ -155,6 +162,7 @@ function MatchTable({ rows, people }) {
             <td>{resultName(m.event)}</td>
             <td>{m.top ? '▲' : '▼'}{m.inning}</td>
             <td className="research__num">{nth(m.ordinal)} in {m.date.slice(0, 4)}</td>
+            {wp && <><td className="research__num">{m.wpa == null ? '—' : signed(m.wpa, 3)}</td><td className="research__num">{m.re24 == null ? '—' : signed(m.re24, 2)}</td><td className="research__num">{m.li == null ? '—' : m.li.toFixed(2)}</td></>}
           </tr>
         ))}
       </tbody>
@@ -162,13 +170,13 @@ function MatchTable({ rows, people }) {
   )
 }
 
-export function MatchList({ a, people, wide }) {
+export function MatchList({ a, people, wide, wp }) {
   const [shown, setShown] = useState(PAGE)
   if (!a.matches.length) return null
   const rows = a.matches.slice(0, shown)
   return (
     <Stack>
-      {wide ? <MatchTable rows={rows} people={people} /> : <Rows rows={rows} people={people} />}
+      {wide ? <MatchTable rows={rows} people={people} wp={wp} /> : <Rows rows={rows} people={people} wp={wp} />}
       {a.matches.length > shown && (
         <Button size="control" onClick={() => setShown(shown + PAGE)}>
           Show {Math.min(PAGE, a.matches.length - shown)} more · {a.matches.length - shown} left

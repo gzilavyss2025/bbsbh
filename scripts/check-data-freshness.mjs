@@ -57,6 +57,7 @@ export const EXCEPT = {
   'postseason-history.json': 'hand-run; only October adds to it',
   'postseason-leaders.json': 'hand-run; only October adds to it',
   'run-expectancy.json': 'hand-run; the 24-state table is recomputed per season',
+  'leverage-index.json': 'hand-run (gen-leverage.mjs, #3141); LI by game state barely moves, rerun after a rule change',
   'level-tenure-benchmark.json': 'hand-run research dataset (docs/level-tenure-benchmark.md)',
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
