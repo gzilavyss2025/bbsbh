@@ -104,7 +104,7 @@ test('a card needing store v2 is blocked until every searched month is rebuilt',
   assert.equal(storeVersion(index, [2025, 2026]), 1, 'a month with no v was built as v1')
   assert.deepEqual(unsupported(2025, 1).filter((b) => b.rebuild).map((b) => b.key), ['mom', 'bb', 'slot'])
   assert.deepEqual(unsupported(2025, 2), [])
-  assert.deepEqual(unsupported(2005, 2).find((b) => b.key === 'bb'), { key: 'bb', label: 'Batted ball type', since: 2008 }, 'a season before the card reads its since year')
+  assert.deepEqual(unsupported(2005, 2).find((b) => b.key === 'bb'), { key: 'bb', label: 'Batted ball type', since: 2015 }, 'a season before the card reads its since year')
   for (const k of ['sc', 'mom', 'bb', 'slot', 'mon', 'ha']) assert.ok(FILTER_BY_KEY[k], k)
 })
 

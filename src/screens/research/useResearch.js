@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
-import { isBlank, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
+import { isBlank, matcher, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
+import { HISTORY_LAST } from '../../api/research/history.js'
 import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
 import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
@@ -8,7 +9,9 @@ import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, load
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
 //   ONE PASS. A Seasons range, or "How often" / "Who most" / "What happens" (latest season):
 //     every season loads, then one answer over all of them.
-//   SEASON BY SEASON. "Last time" with no range: newest season first, an answer after each,
+//   SEASON BY SEASON. "Last time" with no range, or with one that reaches the history
+//     seasons (#3150: up to 54 seasons will not fit a phone at once; a one-pass question
+//     keeps only each history season's base PAs): newest season first, an answer after each,
 //     until the oldest or Stop. A season whose index counts say it holds none of a picked
 //     result is skipped unfetched (mayMatch). Each season is freed once read, the latest
 //     excepted [DECISION: free every searched season, not only the ones with no match;
@@ -53,7 +56,12 @@ export function useResearch(q, cutoff) {
   }, [index, latest])
 
   // Game mode has no "What happens": a game link that asks it searches as "Last time".
-  const targets = useMemo(() => seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff), [q, onFile, cutoff])
+  // Game mode reads per-pitch runs (games.js) that history rows do not carry, so it stays on
+  // the Savant seasons (#3150); the coverage line says "games from 2015".
+  const targets = useMemo(() => {
+    const ts = seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff)
+    return q.mode === 'game' ? ts.filter((s) => s > HISTORY_LAST) : ts
+  }, [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
   const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
   const game = q.mode === 'game'
@@ -75,9 +83,11 @@ export function useResearch(q, cutoff) {
     if (!index || !head || blank || !targets.length) return undefined
     const ctrl = new AbortController()
     stopper.current = { ctrl, stopped: false }
-    const bySeason = live.ask === 'last' && !live.years
+    const bySeason = live.ask === 'last' && (!live.years || live.years[0] <= HISTORY_LAST)
     const mode = live.mode === 'game' ? GAME : PLAY
     let leftOut = 0
+    const { res, ...baseChips } = live.chips // eslint-disable-line no-unused-vars
+    const keep = matcher({ ...live, chips: baseChips }, cutoff)
     const people = { ...head.people }
     const searched = []
     const found = []
@@ -110,7 +120,13 @@ export function useResearch(q, cutoff) {
           // The progress answer is rebuilt only when this season added matches.
           if (found.length > before) interim = mode.sum([...found], leftOut, live)
           if (season !== latest) dropSeason(season)
-        } else pools.unshift(data.pas)
+        } else if (season > HISTORY_LAST) pools.unshift(data.pas)
+        else {
+          // A history season keeps only the PAs the answer can read (the query without its
+          // result card: answer.js's base) and is freed, so a range back to 1961 fits a phone.
+          pools.unshift(data.pas.filter(keep))
+          dropSeason(season)
+        }
       }
       const result = bySeason ? mode.sum(found, leftOut, live) : mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
       // Free every season but the latest once answered (Gary, 2026-11-14): re-asking a

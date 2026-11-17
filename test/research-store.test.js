@@ -211,7 +211,7 @@ test('the Seasons range round-trips in the URL, and a range alone is still blank
 test('the coverage line reads only the seasons asked, and a season with no plays is not on file', () => {
   const ix = { seasons: { 2015: { months: { '04': { through: '2015-04-30', pitches: 10, pas: 3 } } }, 2026: { months: { '04': { through: '2026-04-30', pitches: 20, pas: 5 } } }, 2027: { months: { '03': { through: '', pitches: 0, pas: 0 } } } } }
   assert.deepEqual(seasonsOnFile(ix), [2015, 2026])
-  assert.deepEqual(coverage(ix, [2015]), { first: 2015, last: 2015, through: '2015-04-30', pitches: 10 })
+  assert.deepEqual(coverage(ix, [2015]), { first: 2015, last: 2015, through: '2015-04-30', pitches: 10, history: false, thinCounts: [] })
   assert.equal(coverage(ix).pitches, 30)
 })
 

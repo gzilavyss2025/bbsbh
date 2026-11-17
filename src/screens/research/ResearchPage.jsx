@@ -1,6 +1,8 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
 import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
+import { HISTORY_LAST } from '../../api/research/history.js'
+import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../../../scripts/lib/open-data/credits.mjs'
 import { isRealDate } from '../../lib/dates.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../../lib/teams.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
@@ -19,6 +21,7 @@ import { Notice } from '../../components/ui/state/Notice.jsx'
 import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
 import { useResearch } from './useResearch.js'
+import { useEraClubNames } from './useEraClubNames.js'
 import { AskBar } from './AskBar.jsx'
 import { parseAsk } from '../../api/research/ask.js'
 import { GAME_CHIPS, TOTALS, HOW, rangeWords } from '../../api/research/games.js'
@@ -47,6 +50,14 @@ const PRESETS = [
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]
 
+// Retrosheet's required notice and the Chadwick register's (the MLBAM ids), shown whenever
+// a history season is searched. Written once, in credits.mjs (ADR-0100).
+const spanOf = (seasons) => {
+  const lo = Math.min(...seasons)
+  const hi = Math.max(...seasons)
+  return lo === hi ? `${lo}` : `${lo}–${hi}`
+}
+
 function readUrl() {
   const d = new URLSearchParams(window.location.search).get('d')
   return { q: parseQuery(window.location.search), cutoff: isRealDate(d) ? d : null }
@@ -59,7 +70,7 @@ const HOW_LABEL = Object.fromEntries(HOW.map(([k, label]) => [k, label]))
 const withMode = (q, mode) => ({ ...q, mode, g: mode === 'game' ? q.g ?? { totals: {}, how: [] } : null, ask: mode === 'game' && q.ask === 'what' ? 'last' : q.ask })
 
 // The filter bar's pills: one per active filter, in words.
-function pillsOf(q, people) {
+function pillsOf(q, people, clubName) {
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
   const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
@@ -108,7 +119,8 @@ export function ResearchPage() {
   const start = !game && blank && !Object.keys(q.chips).length && !q.years
   const result = run?.result ?? null
   const progress = run?.progress
-  const pills = data ? pillsOf(live, people) : []
+  const eraName = useEraClubNames([q.team, q.pitchTeam, q.park], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
+  const pills = data ? pillsOf(live, people, eraName) : []
   const onAsk = (text) => {
     const r = parseAsk(text, { people, latest: latest ?? undefined })
     const info = { text, skipped: r.skipped, read: r.read }
@@ -130,11 +142,14 @@ export function ResearchPage() {
           {cover.first === cover.last ? cover.first : `${cover.first}–${cover.last}`}
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
-          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
+          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · {cover.history ? (cover.last > HISTORY_LAST ? 'Retrosheet and Baseball Savant' : 'Retrosheet') : 'Baseball Savant'}
+          {game && q.years?.[0] <= HISTORY_LAST && ` · games from ${HISTORY_LAST + 1}`}
           {result?.leftOut > 0 && ` · ${result.leftOut.toLocaleString()} ${result.leftOut === 1 ? 'game' : 'games'} left out: runs on file don’t add up`}
           {shownBlocked.length > 0 && ` · not in this range: ${shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
+          {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}
         </p>
       )}
+      {data && cover?.history && <p className="t-label t-label--nocaps">{RETROSHEET_CREDIT} {CHADWICK_JOIN}</p>}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
       {data && game && blank && <p className="t-label t-label--nocaps">Pick a club or add a total to find games.</p>}
       {data && !targets.length && <p className="t-label t-label--nocaps">No season on file in this range{cutoff ? ` before ${labelDate(cutoff)}` : ''}.</p>}

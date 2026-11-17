@@ -33,6 +33,8 @@
 //
 // SPOILER CLASSIFICATION: spoiler-free. 1961 to 2014, all long final.
 
+import { historyEvent } from '../../../src/api/research/history.js'
+
 export const STORE_VERSION = 1
 export const FIRST_SEASON = 1961
 export const LAST_SEASON = 2014
@@ -286,12 +288,26 @@ export function parkTable(games) {
 // A share, to the tenth of a percent, for the manifest's coverage line.
 const share = (n, d) => (d ? Math.round((1000 * n) / d) / 10 : 0)
 
-// One season's entry in manifest.json: counts, the coverage shares, and each month's rows.
+// A month's result counts ({ event: n }), keyed by the Savant name the page reads a history
+// row as (historyEvent, imported so the two cannot drift), for /research's season skip (#3159).
+function monthEvents(pa) {
+  const ev = pa.c[PA_COLS.indexOf('event')]
+  const fl = pa.c[PA_COLS.indexOf('fl')]
+  const out = {}
+  ev.forEach((e, i) => {
+    const k = historyEvent(e, fl[i])
+    out[k] = (out[k] ?? 0) + 1
+  })
+  return out
+}
+
+// One season's entry in manifest.json: counts, the coverage shares, and each month's rows
+// and result counts.
 export function seasonEntry(stats, games, shards) {
   return {
     games: games.length, pas: stats.pas,
     pitchString: share(stats.pitchString, stats.pas), knownCount: share(stats.knownCount, stats.pas),
-    months: Object.fromEntries(shards.map((s) => [s.month, { pas: s.pa.c[0].length, through: games.filter((g) => g.date.slice(5, 7) === s.month).at(-1)?.date ?? null }])),
+    months: Object.fromEntries(shards.map((s) => [s.month, { pas: s.pa.c[0].length, through: games.filter((g) => g.date.slice(5, 7) === s.month).at(-1)?.date ?? null, events: monthEvents(s.pa) }])),
   }
 }
 
