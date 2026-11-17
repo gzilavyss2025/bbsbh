@@ -29,6 +29,9 @@ driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
 that would need dozens of statsapi calls per page load). See `docs/scripts/generators.md`
 for each generator; the reader modules:
 
+- `research/store.js` (`attachWinProbSeason`) — `leverage-index.json` → `winprob.js`
+  `leverageOf`: a PA's Leverage Index by game state, read only for /research's Win prob
+  toggle or Leverage card (#3141). Hand-run generator; method in `docs/research-store.md`.
 - `leagueAverages.js` — `leagueAverage(season, 'hitting'|'pitching')` → the season's
   league AVG or ERA, or `null`; `leagueRates(season)` → the whole row, which adds the Advanced
   card's league rates `k`, `bb`, `kbb` (fractions), `bbk`, `iso`, `babip`, `ppa` (P/PA) and `ops`

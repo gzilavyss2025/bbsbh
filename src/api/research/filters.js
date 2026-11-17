@@ -20,6 +20,9 @@
 // pitch's count, not passed through: every PA passes through 0-0).
 //   Moment       read from the batting club's margin before and after the PA's last
 //                pitch. A run that scores with no PA (a wild pitch walk-off) is not found.
+// Leverage (#3141, part 2): Low < 0.85, Medium, High > 2.0 (Gary, 2026-11-17), from the
+// month's win-probability side file (winprob.js). A card with `wp` blocks every season
+// that has no side file yet, like `v`.
 // A card with `v` needs that store version (shard.js VERSIONS); a season built earlier
 // blocks it, like `since`.
 //
@@ -27,12 +30,14 @@
 
 import { PITCH_TYPES } from '../../lib/pitch/pitchTypes.js'
 import { countBit } from './shard.js'
+import { LEVERAGE, leverageBucket } from './winprob.js'
 import { ordinal } from '../../lib/format.js'
 import { monthName } from '../../lib/time/months.js'
 import { seriesValues } from './series.js'
 import { HISTORY_LAST } from './history.js'
 import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName } from '../../lib/teams.js'
 import { buildGameParams, parseGameQuery } from './games.js'
+import { buildStreakParams, parseStreakQuery } from './streaks.js'
 
 // Savant's club codes are the app's own abbreviations (all 30 matched on 2026-11-13),
 // so a code finds its full name through teams.js. An unknown code shows as itself.
@@ -171,6 +176,7 @@ export const FILTERS = [
   { key: 'mom', label: 'Moment', options: MOMENTS, values: momentValues, v: 2, info: 'Read from the batting club’s margin before and after the last pitch of the plate appearance. Go-ahead puts the club in front from tied or behind; walk-off is a go-ahead in the bottom half that ends the game. A run that scores with no plate appearance, such as a wild pitch walk-off, is not found. Before 2015, a run that scores between plate appearances counts toward the one before it.' },
   { key: 'bb', label: 'Batted ball type', options: BB_TYPES, values: (pa) => [pa.bbType], since: 2015, v: 2, info: 'Statcast’s batted-ball type for the ball put in play.' },
   { key: 'slot', label: 'Batting slot', options: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), `Batting ${ordinal(n)}`]), values: (pa) => [pa.slot == null ? null : String(pa.slot)], v: 2, info: 'The batter’s spot in the order, from the MLB box score. A pinch hitter counts in the slot they batted in.' },
+  { key: 'lev', label: 'Leverage', options: LEVERAGE, values: (pa) => [leverageBucket(pa.li)], only: (pa) => pa.li != null, wp: true, info: 'Leverage Index: how much the game could swing on this plate appearance, 1.0 being average. Low is under 0.85, High is over 2.0. Read from the game state when the plate appearance began.' },
   { key: 'mon', label: 'Month', options: MONTHS, values: (pa) => [pa.date.slice(5, 7)] },
   { key: 'ha', label: 'Home or road', single: true, options: [['H', 'Home'], ['R', 'Road']], values: (pa) => [pa.top ? 'R' : 'H'], info: 'Whether the batting club is at home.' },
   { key: 'inn', label: 'Inning', options: [...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [String(i), `${i}`]), ['x', 'Extras']], values: (pa) => [pa.inning > 9 ? 'x' : String(pa.inning)] },
@@ -209,7 +215,9 @@ export function parseQuery(search) {
   const min = parseMin(p.get('min')) ?? RATE_MIN
   // Game mode (#3137, games.js): `mode=game` and its totals; `g` is null in play mode.
   const g = parseGameQuery(search)
-  return { mode: g ? 'game' : 'play', g, chips, years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
+  // Streaks mode (#3142, streaks.js): `mode=streak`; `s` is null in the other modes.
+  const s = g ? null : parseStreakQuery(search)
+  return { mode: g ? 'game' : s ? 'streak' : 'play', g, s, chips, wp: p.get('wp') === '1', years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -218,6 +226,10 @@ export function buildQuery(q, keep = {}) {
   if (q.mode === 'game') {
     p.set('mode', 'game')
     for (const [k, v] of buildGameParams(q.g ?? { totals: {}, how: [] })) p.set(k, v)
+  }
+  if (q.mode === 'streak') {
+    p.set('mode', 'streak')
+    for (const [k, v] of buildStreakParams(q.s ?? { side: 'bat', totals: {}, starts: false })) p.set(k, v)
   }
   for (const f of FILTERS) {
     const c = q.chips?.[f.key]
@@ -229,6 +241,7 @@ export function buildQuery(q, keep = {}) {
   if (q.team) p.set('team', q.team)
   if (q.pitchTeam) p.set('pteam', q.pitchTeam)
   if (q.park) p.set('park', q.park)
+  if (q.wp) p.set('wp', '1')
   if (q.rank === 'rate') p.set('rank', 'rate')
   if (q.rank === 'rate' && q.min && q.min !== RATE_MIN) p.set('min', q.min)
   for (const [k, v] of Object.entries(keep)) if (v) p.set(k, v)
@@ -252,6 +265,9 @@ export const ASKS = [
 // answer on the page, so changing them never re-runs a search or resets the match list.
 // Nor does opening an empty game card (`g.howOpen`, page state only).
 export const searchKey = ({ rank, min, ...q }) => JSON.stringify({ ...q, g: q.g && { totals: q.g.totals, how: q.g.how } }) // eslint-disable-line no-unused-vars
+
+// The query needs the win-probability side files: the Win prob toggle, or a Leverage chip.
+export const needsWinProb = (q) => Boolean(q.wp || q.chips?.lev?.vals.length)
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
 export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
@@ -280,9 +296,10 @@ export function matcher(q, cutoff) {
 
 // Cards a season range cannot answer: [{ key, label, since }], or { key, label, rebuild:
 // true } for a card whose store version (`v`) a searched season was not built with yet.
-// `version`: the lowest store version among the searched seasons (store.js storeVersion).
-export function unsupported(firstSeason, version = Infinity) {
-  return FILTERS.filter((f) => (f.since && firstSeason < f.since) || (f.v && version < f.v)).map(({ key, label, since }) =>
+// `version`: the lowest store version among the searched seasons (store.js storeVersion);
+// `winProb`: every searched month has its win-probability file (store.js hasWinProb).
+export function unsupported(firstSeason, version = Infinity, winProb = true) {
+  return FILTERS.filter((f) => (f.since && firstSeason < f.since) || (f.v && version < f.v) || (f.wp && !winProb)).map(({ key, label, since }) =>
     since && firstSeason < since ? { key, label, since } : { key, label, rebuild: true },
   )
 }
