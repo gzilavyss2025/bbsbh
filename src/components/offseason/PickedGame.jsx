@@ -4,7 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { readRevealMarkFor } from '../../lib/account/revealMark.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { humanDateWithYear } from '../../lib/dates.js'
-import { SPORT_LABEL } from '../../lib/teams.js'
+import { SPORT_LABEL, shortenClubName } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
@@ -121,7 +121,7 @@ export function Club({ club }) {
     <span className="pgame__club">
       <TeamLogo teamId={club.id} name={club.name} size={56} />
       <span className="pgame__lines">
-        <span className="pgame__name">{club.name}</span>
+        <span className="pgame__name">{shortenClubName(club.id, club.name)}</span>
         {club.orgName && <span className="pgame__org">{club.orgName}</span>}
       </span>
     </span>
