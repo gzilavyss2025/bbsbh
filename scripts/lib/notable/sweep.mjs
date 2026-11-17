@@ -9,15 +9,13 @@ import { mapConcurrent } from '../concurrency.mjs'
 import { buildGameMap, lastPlayedDate, otherSide, scheduleUrl } from './games.mjs'
 import { cycleRows, fourHomerRows, noHitSides, noHitterRow, pitchersFromBox, sixDoublePlayRows, triplePlayRows } from './kinds.mjs'
 import { POSTSEASON_TYPES } from './rules.mjs'
+import { fetchSeasonHittingLogs } from './rarity/logs.mjs'
 
 export const CONCURRENCY = 4
-export const PLAYERS_PER_CALL = 100
 const strict = { strict: true }
 
 const BOX_FIELDS = 'teams,away,home,pitchers,players,person,fullName'
 const FIELDING_FIELDS = 'stats,splits,stat,triplePlays,doublePlays,game,gamePk'
-const PEOPLE_FIELDS =
-  'people,id,fullName,stats,splits,stat,hits,doubles,triples,homeRuns,team,isHome,game,gamePk'
 
 // The season's game map, or null when the season has no kept game (write nothing).
 export async function fetchGameMap(get, season) {
@@ -77,34 +75,20 @@ export async function fetchFieldingFeats(get, gameMap, season) {
   return { tripleplays: logs.flatMap((l) => l.tripleplays), sixdp: logs.flatMap((l) => l.sixdp) }
 }
 
-// The cycles and the four-homer games (#2968), from one pass over every player's hitting log.
-export async function fetchCycles(get, gameMap, season) {
-  const pool = await get(`/api/v1/sports/1/players?season=${season}&fields=people,id`)
-  const ids = [...new Set((pool?.people ?? []).map((p) => p.id))].sort((a, b) => a - b)
-  const batches = []
-  for (let i = 0; i < ids.length; i += PLAYERS_PER_CALL) batches.push(ids.slice(i, i + PLAYERS_PER_CALL))
-  // gameType=[R,F,D,L,W] with brackets: a comma list falls back to the regular season.
-  const hydrate = `stats(group=[hitting],type=[gameLog],season=${season},gameType=[R,F,D,L,W])`
-  const found = await mapConcurrent(
-    batches,
-    CONCURRENCY,
-    async (batch) => {
-      const data = await get(`/api/v1/people?personIds=${batch.join(',')}&hydrate=${hydrate}&fields=${PEOPLE_FIELDS}`)
-      return { cycles: cycleRows(data?.people, gameMap), fourhr: fourHomerRows(data?.people, gameMap) }
-    },
-    strict,
-  )
-  return { cycles: found.flatMap((f) => f.cycles), fourhr: found.flatMap((f) => f.fourhr) }
+// The cycles and the four-homer games (#2968), from the season's hitting logs (rarity/logs.mjs).
+export function cyclesFromLogs(people, gameMap) {
+  return { cycles: cycleRows(people, gameMap), fourhr: fourHomerRows(people, gameMap) }
 }
 
-// One season, all three kinds, the four-homer games and the six-plus double play games. null when the season has no game to keep.
+// One season, all three kinds, the four-homer games and the six-plus double play games. null when
+// the season has no game to keep. `people` is the season's one hitting-log read (#3173): the
+// generator hands it on to the first-pitch and slam passes, so none of them reads it again.
 export async function sweepSeason(get, season) {
   const gameMap = await fetchGameMap(get, season)
   if (!gameMap) return null
-  const [nohitters, { cycles, fourhr }, { tripleplays, sixdp }] = [
-    await fetchNoHitters(get, gameMap),
-    await fetchCycles(get, gameMap, season),
-    await fetchFieldingFeats(get, gameMap, season),
-  ]
-  return { gameMap, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr, sixdp } }
+  const nohitters = await fetchNoHitters(get, gameMap)
+  const people = await fetchSeasonHittingLogs(get, season, undefined, CONCURRENCY)
+  const { cycles, fourhr } = cyclesFromLogs(people, gameMap)
+  const { tripleplays, sixdp } = await fetchFieldingFeats(get, gameMap, season)
+  return { gameMap, people, through: lastPlayedDate(gameMap), rows: { nohitters, cycles, tripleplays, fourhr, sixdp } }
 }

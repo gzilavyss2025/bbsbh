@@ -14,6 +14,8 @@ import {
 } from '../scripts/lib/notable/merge.mjs'
 import { normalizeArgv, seasonsFromArgs, unknownFlags } from '../scripts/lib/notable/cli.mjs'
 import { sweepSeason } from '../scripts/lib/notable/sweep.mjs'
+import { fetchFirstPitch } from '../scripts/lib/notable/rarity/firstpitch.mjs'
+import { fetchItpSlams } from '../scripts/lib/notable/rarity/itpslam.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -273,6 +275,27 @@ test('sweep: one fielded call per need, game types as measured, no call for a dr
   // the six-plus double play rows (#2968) ride this call: without the field they silently vanish
   assert.ok(teamLogs.every((u) => /fields=[^&]*\bdoublePlays\b/.test(u)))
   assert.ok(!urls.some((u) => /\/teams\/43[01]\//.test(u)), 'a Negro league club gets no call')
+})
+
+test('sweep: one people-log read a season feeds cycles, first-pitch homers and slams (#3173)', async () => {
+  const urls = []
+  const game = row({ gamePk: 1, away: club(147, 'NYY', 103), home: club(119, 'BRO', 104) })
+  const get = async (url) => {
+    urls.push(url)
+    if (/\/schedule\?/.test(url)) return { dates: [{ games: [game] }] }
+    if (/\/sports\/1\/players/.test(url)) return { people: Array.from({ length: 150 }, (_, i) => ({ id: i + 1 })) }
+    if (/\/people\?/.test(url)) return { people: [] }
+    if (/\/teams\/\d+\/stats/.test(url)) return { stats: [{ splits: [] }] }
+    throw new Error(url)
+  }
+  const swept = await sweepSeason(get, 2022)
+  await fetchFirstPitch(get, swept.gameMap, 2022, swept.people)
+  await fetchItpSlams(get, swept.gameMap, 2022, swept.people)
+  assert.equal(urls.filter((u) => u.includes('/sports/1/players')).length, 1)
+  assert.equal(urls.filter((u) => u.includes('/people?')).length, 2, '150 players, 100 a call')
+  // the one read carries every field the three passes need
+  const fields = urls.find((u) => u.includes('/people?')).split('fields=')[1].split(',')
+  for (const f of ['hits', 'doubles', 'triples', 'homeRuns', 'rbi', 'plateAppearances', 'team', 'isHome', 'gamePk', 'fullName', 'mlbDebutDate']) assert.ok(fields.includes(f), f)
 })
 
 test('sweep: a season with no kept game writes nothing', async () => {

@@ -1,10 +1,16 @@
-// Every player's hitting game log for one season, 100 players a call (as the cycles read them),
-// for the rarity kinds that start from a player's game line (#2968): firstpitch.mjs, itpslam.mjs.
+// Every player's hitting game log for one season, 100 players a call. Read ONCE a season by
+// sweep.mjs (#3173) and shared by every pass that starts from a player's game line (#2968): the
+// cycles and four-homer games (kinds.mjs), firstpitch.mjs and itpslam.mjs.
 import { mapConcurrent } from '../../concurrency.mjs'
-import { PLAYERS_PER_CALL } from '../sweep.mjs'
+
+export const PLAYERS_PER_CALL = 100
+
+// The union of the fields those passes read. Add a field here, never a second read.
+export const PEOPLE_LOG_FIELDS =
+  'people,id,fullName,mlbDebutDate,stats,splits,stat,hits,doubles,triples,homeRuns,rbi,plateAppearances,team,isHome,game,gamePk'
 
 // The people of the season, each with his game log splits (`fields` must keep the stats path).
-export async function fetchSeasonHittingLogs(get, season, fields, concurrency = 4) {
+export async function fetchSeasonHittingLogs(get, season, fields = PEOPLE_LOG_FIELDS, concurrency = 4) {
   const pool = await get(`/api/v1/sports/1/players?season=${season}&fields=people,id`)
   const ids = [...new Set((pool?.people ?? []).map((p) => p.id))].sort((a, b) => a - b)
   const batches = []

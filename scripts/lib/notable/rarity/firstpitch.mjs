@@ -21,7 +21,6 @@ import { fetchSeasonHittingLogs } from './logs.mjs'
 
 export const FIRSTPITCH_FLOOR = IMMACULATE_FLOOR
 
-const PEOPLE_FIELDS = 'people,id,fullName,mlbDebutDate,stats,splits,stat,plateAppearances,homeRuns,team,id,isHome,game,gamePk'
 const PBP_FIELDS = 'allPlays,about,atBatIndex,halfInning,result,eventType,matchup,batter,id,playEvents,isPitch'
 const CAREER_FIELDS = 'stats,splits,season,stat,plateAppearances'
 
@@ -45,8 +44,9 @@ export const priorPlateAppearances = (career, season) =>
   (career?.stats?.[0]?.splits ?? []).filter((s) => Number(s.season) < season).reduce((n, s) => n + (Number(s.stat?.plateAppearances) || 0), 0)
 
 // { rows, unknown: [gamePk] } for one season, strict at 4 like the sweep.
-export async function fetchFirstPitch(get, gameMap, season, concurrency = 4) {
-  const people = await fetchSeasonHittingLogs(get, season, PEOPLE_FIELDS, concurrency)
+// `people` is the season's hitting logs (sweep.mjs's one read); fetched here only when not given.
+export async function fetchFirstPitch(get, gameMap, season, people = null, concurrency = 4) {
+  people ??= await fetchSeasonHittingLogs(get, season, undefined, concurrency)
   const found = people.map((p) => firstPaCandidate(p, gameMap)).filter(Boolean)
   const checked = await mapConcurrent(found, concurrency, async (c) => {
     const pbp = await get(`/api/v1/game/${c.game.gamePk}/playByPlay?fields=${PBP_FIELDS}`)

@@ -17,7 +17,6 @@ import { fetchSeasonHittingLogs } from './logs.mjs'
 
 export const ITPSLAM_FLOOR = IMMACULATE_FLOOR
 
-const PEOPLE_FIELDS = 'people,id,stats,splits,stat,homeRuns,rbi,game,gamePk'
 const PBP_FIELDS = 'allPlays,about,atBatIndex,halfInning,result,eventType,rbi,description,matchup,batter,id,fullName'
 
 // The kept gamePks where one of `people` homered and drove in 4 or more.
@@ -32,8 +31,9 @@ export function slamCandidates(people, gameMap) {
 }
 
 // { rows, unknown: [gamePk] } for one season, strict at 4 like the sweep.
-export async function fetchItpSlams(get, gameMap, season, concurrency = 4) {
-  const people = await fetchSeasonHittingLogs(get, season, PEOPLE_FIELDS, concurrency)
+// `people` is the season's hitting logs (sweep.mjs's one read); fetched here only when not given.
+export async function fetchItpSlams(get, gameMap, season, people = null, concurrency = 4) {
+  people ??= await fetchSeasonHittingLogs(get, season, undefined, concurrency)
   const games = slamCandidates(people, gameMap).map((pk) => gameMap.get(pk))
   const per = await mapConcurrent(games, concurrency, async (g) => {
     const found = insideParkSlams((await get(`/api/v1/game/${g.gamePk}/playByPlay?fields=${PBP_FIELDS}`))?.allPlays ?? [])
