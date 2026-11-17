@@ -18,7 +18,7 @@ import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 export function Ride({ game, chips, games, shape }) {
   const stat = shape.stat(game)
   const n = game.line.length
-  const beatIdx = game.beats.map((b) => Math.min(n - 1, b.idx))
+  const beatIdx = useMemo(() => game.beats.map((b) => Math.min(n - 1, b.idx)), [game, n])
   const [at, setAt] = useState(0)
   const [shown, setShown] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -70,8 +70,6 @@ export function Ride({ game, chips, games, shape }) {
     setPaused(false)
     setRun((r) => r + 1)
   }
-  // Scrubbing: press and drag along the chart. The ride pauses, the dot follows the finger,
-  // and the scorebug, pins and plate show the game at that play.
   // Put the dot on play k: the pins, scorebug and plate follow; a ball in flight is dropped.
   const seek = (k) => {
     const sh = beatIdx.filter((bi) => bi <= k).length
@@ -82,6 +80,7 @@ export function Ride({ game, chips, games, shape }) {
     setShown(sh)
     if (sh) showCall(fieldRef.current, game.beats[sh - 1])
   }
+  // Scrubbing: press and drag along the chart; the ride pauses and the dot follows the finger.
   const scrubTo = (e) => {
     const r = e.currentTarget.getBoundingClientRect()
     const x = -PX + ((e.clientX - r.left) / r.width) * (W + 2 * PX)

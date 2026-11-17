@@ -1,7 +1,7 @@
 /* The explorers' shared parts (components/explorers/). ExplorerTabs: the house Segmented with a
    line of meaning under each name, and an optional tool button set apart at the row's end. */
 /* layout-exempt: the segmented strip and the tool button share one row */
-.xtabs { display: flex; gap: var(--space-3); margin: 0 0 var(--space-3); }
+.xtabs { display: flex; gap: var(--space-3); margin: 0 0 var(--space-3); padding-bottom: var(--space-3); border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .xtabs .xtabs__seg { flex: 1 1 auto; }
 .xtabs .btn { min-height: 48px; }
 /* layout-exempt: a tab name over its one-line meaning */
