@@ -17,8 +17,9 @@ import { teamClubNameShort, isMlbTeamId } from '../../lib/teams.js'
 // The filters are page state, not address, and the seed is one per visit, so a
 // new visit deals a new game and a filter change deals inside the filter.
 // "This date" (#2971) is the reader's local month and day, read once per visit.
-// The chip shows only when one deal with it on, under the current era and club,
-// finds a game; that probe is the same deal the card then makes.
+// The chip shows only when one check deal with it on, under the current era and
+// club, finds a game. The check skips the card's started-game preference, so it
+// answers "is there one", not "which one".
 const todayMonthDay = () => new Date().toLocaleDateString('en-CA').slice(5)
 // The chip names the date it deals on ("On Jul 4"), so a reader knows before tapping.
 const onLabel = (md) => `On ${new Date(`2000-${md}T12:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
@@ -38,7 +39,8 @@ export function ClassicsPage() {
     () => rollClassic({ seed, era, teamId, monthDay: today }).then(Boolean).catch(() => false),
     [seed, era, teamId, today],
   )
-  const monthDay = dateFits ? onDate : null
+  // Keep the pick while a filter change rechecks, so the card does not deal off-date first.
+  const monthDay = dateFits || dateLoading ? onDate : null
 
   const clubs = [...(favorite ? [{ value: favorite, label: teamClubNameShort(favorite) }] : []), { value: null, label: 'Any club' }]
   return (
@@ -51,7 +53,7 @@ export function ClassicsPage() {
       <Chips label="Club" options={clubs} value={teamId} onChange={setTeamId} />
       {/* While the check loads, the row holds its place unseen, so the card does not drop when it appears. */}
       {(dateFits || dateLoading) && (
-        <div style={dateFits ? undefined : { visibility: 'hidden' }} aria-hidden={dateFits ? undefined : 'true'}>
+        <div style={dateFits ? undefined : { visibility: 'hidden' }}>
           <Chips label="Date" options={[{ value: null, label: 'Any date' }, { value: today, label: onLabel(today) }]} value={onDate} onChange={setOnDate} />
         </div>
       )}

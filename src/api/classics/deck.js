@@ -43,6 +43,12 @@ export function classicsFrom(rows, abbr) {
     }))
 }
 
+// The earliest and latest MM-DD any MLB game since 1960 was played on, with margin
+// (2025 opened in Tokyo on 03-18; 2001 and 2009 ended on 11-04). A date outside
+// is a sure null with no request, so a winter "This date" probe costs nothing.
+const SEASON_SPAN = ['03-01', '11-15']
+const inSeasonSpan = (md) => md >= SEASON_SPAN[0] && md <= SEASON_SPAN[1]
+
 // One deal. `era` is a decade (1980), `teamId` a club, `monthDay` an `MM-DD`
 // ("This date", #2971); all optional. Walks the
 // seasons in a seeded order until one yields a game, so a club that did not exist
@@ -78,11 +84,5 @@ export async function rollClassic({
 
 // The season order and the club pick use separate hashes. One shared hash would sort
 // the lowest value first and so pick club 0 for almost every seed.
-// The earliest and latest MM-DD any MLB game since 1960 was played on, with margin
-// (2025 opened in Tokyo on 03-18; 2001 and 2009 ended on 11-04). A date outside
-// is a sure null with no request, so a winter "This date" probe costs nothing.
-const SEASON_SPAN = ['03-01', '11-15']
-const inSeasonSpan = (md) => md >= SEASON_SPAN[0] && md <= SEASON_SPAN[1]
-
 const pickOrder = (seasons, seed) =>
   seasons.map((y) => [seedFrom(`${seed}|${y}|order`), y]).sort((a, b) => a[0] - b[0]).map((p) => p[1])
