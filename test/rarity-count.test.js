@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, earlierList, earlierNames, firstPitchHomer, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, earlierList, firstPitchHomer, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
 import { candidateGames, fetchFourStraight, fourStraightRows } from '../scripts/lib/notable/fourstraight.mjs'
@@ -445,7 +445,7 @@ test('the first-pitch home run count runs from 2001, tonight not counted twice',
   const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', player: { id: pk, name: pk === 2 ? 'Akil Baddoo' : 'Kevin Kouzmanoff' }, away: { id: club }, home: { id: 1 } })
   const idx = { firstpitch: { coverage: { seasons: Array.from({ length: 26 }, (_, i) => 2001 + i) }, rows: [r(1, '2006-09-02', 114), r(2, '2021-04-04', 158), r(6, '2026-08-01', 158)] } }
   const [note] = buildRarityNotes(idx, feed, { kind: 'firstpitch', side: 'away', player: { id: 6, name: 'Pat Hitter' } })
-  assert.equal(note.text, "The 3rd player since 2001 to homer on his first MLB pitch, 2nd for the Brewers (after Akil Baddoo (2021)).")
+  assert.equal(note.text, "The 3rd player since 2001 to homer on his first MLB pitch, 2nd for the Brewers.")
 })
 
 test('the committed first-pitch index holds the known 2001 to 2021 home runs (slice 7)', () => {
@@ -455,20 +455,12 @@ test('the committed first-pitch index holds the known 2001 to 2021 home runs (sl
   assert.equal(doc.coverage.seasons[0], 2001)
 })
 
-test('the club tail names the two most recent earlier players, then a count', () => {
-  const row = (name, date) => ({ officialDate: date, player: { id: 1, name } })
-  assert.equal(earlierNames([row('Adam Wainwright', '2006-05-24'), row('Gene Stechschulte', '2001-04-17')]), ' (after Adam Wainwright (2006) and Gene Stechschulte (2001))')
-  assert.equal(earlierNames([row('A', '2020-01-01'), row('B', '2010-01-01'), row('C', '2005-01-01'), row('D', '2002-01-01')]), ' (after A (2020), B (2010) and 2 others)')
-  assert.equal(earlierNames([]), '')
-  // a club kind has no player to name
-  assert.equal(earlierNames([{ officialDate: '2001-01-01' }]), '')
-})
-
-test('the fold lists every earlier player, only when the tail names fewer than all', () => {
+test('the fold lists every earlier player of the club, none for a club kind', () => {
   const row = (name, date) => ({ officialDate: date, gameNumber: 1, away: { abbr: 'STL' }, home: { abbr: 'CHC' }, player: { id: 1, name } })
   const three = [row('A', '2020-05-01'), row('B', '2010-05-01'), row('C', '2005-05-01')]
   const list = earlierList(three)
   assert.deepEqual(list.map((e) => `${e.name} ${e.year}`), ['A 2020', 'B 2010', 'C 2005'])
   assert.ok(list[0].path)
-  assert.equal(earlierList(three.slice(0, 2)), null)
+  assert.equal(earlierList([]), null)
+  assert.equal(earlierList([{ officialDate: '2001-01-01' }]), null)
 })

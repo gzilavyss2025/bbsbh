@@ -251,22 +251,10 @@ export function detectRareFeats(feed) {
   return out
 }
 
-// The club's earlier players, newest first: " (after Adam Wainwright (2006) and Gene Stechschulte
-// (2001))", the two most recent and then a count. '' for a club kind (no player) or none before.
-const NAMED = 2
-export function earlierNames(clubRows) {
-  const named = clubRows.filter((r) => r.player?.name)
-  if (!named.length || named.length !== clubRows.length) return ''
-  const shown = named.slice(0, NAMED).map((r) => `${r.player.name} (${yearOf(r.officialDate)})`)
-  const rest = named.length - shown.length
-  const list = rest ? `${shown.join(', ')} and ${rest} other${rest > 1 ? 's' : ''}` : shown.join(' and ')
-  return ` (after ${list})`
-}
-
-// Every earlier player of the club, newest first, for the card's "see all" fold: only when the
-// tail names fewer than all of them. null otherwise.
+// Every earlier player of the club, newest first, for the card's fold under the line. null for a
+// club kind (no player) or none before.
 export function earlierList(clubRows) {
-  if (clubRows.length <= NAMED || !clubRows.every((r) => r.player?.name)) return null
+  if (!clubRows.length || !clubRows.every((r) => r.player?.name)) return null
   return clubRows.map((r) => ({
     name: r.player.name,
     year: yearOf(r.officialDate),
@@ -292,7 +280,7 @@ export function buildRarityNotes(docs, feed, feat) {
   // A sentence-style line (`lead`) ends "3rd for the Cardinals": "the Cardinals' 3rd" after a
   // player sentence reads as the Cardinals' 3rd player.
   const nthForClub = spec.lead ? `${ordinal(mine + 1)} for the ${clubName}` : `the ${possessive(clubName)} ${ordinal(mine + 1)}`
-  const tail = clubName ? `, ${nthForClub}${earlierNames(clubRows)}` : ''
+  const tail = clubName ? `, ${nthForClub}` : ''
   return [{
     text: `${spec.lead ? spec.lead(ordinal(prior.length + 1), floor) : `The ${ordinal(prior.length + 1)} ${spec.noun} since ${floor}`}${tail}.`,
     link: null,
