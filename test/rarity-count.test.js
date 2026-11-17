@@ -461,11 +461,18 @@ test('the committed first-pitch index holds the known 2001 to 2021 home runs (sl
 })
 
 test('the fold lists every earlier game of a club kind by date and opponent (#3171)', () => {
-  const club = (date, side) => ({ officialDate: date, gameNumber: 2, away: { abbr: 'MIL' }, home: { abbr: 'PIT' }, side })
+  const club = (date, side) => ({ officialDate: date, gameNumber: 1, away: { abbr: 'MIL' }, home: { abbr: 'PIT' }, side })
   const list = earlierList([club('2018-08-17', 'away'), club('1999-04-03', 'home')])
   assert.deepEqual(list.map((e) => e.label), ['Aug 17, 2018 at PIT', 'Apr 3, 1999 vs MIL'])
   assert.equal(list[0].name, undefined)
   assert.ok(list[0].path.includes('boxscore'))
+})
+
+test('the club fold marks the second game of a doubleheader (#3176)', () => {
+  const club = (gameNumber) => ({ officialDate: '1950-07-04', gameNumber, away: { abbr: 'MIL' }, home: { abbr: 'SF' }, side: 'away' })
+  const list = earlierList([club(3), club(2), club(1)])
+  assert.deepEqual(list.map((e) => e.label), ['Jul 4, 1950 at SF (G3)', 'Jul 4, 1950 at SF (G2)', 'Jul 4, 1950 at SF'])
+  assert.notEqual(list[0].path, list[1].path)
 })
 
 test('the fold lists every earlier player of the club', () => {
