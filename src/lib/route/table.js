@@ -82,6 +82,7 @@ export const ROUTE_TABLE = [
   { name: 'animation-lab', path: '/animation-lab' },
   { name: 'design-lab', path: '/design-lab' },
   { name: 'wire-lab', path: '/wire-lab' },
+  { name: 'wild-rides', path: '/wild-rides' }, // ROUGH DRAFT explorer
 ]
 
 // Route name → canonical address, for callers that hold a name from outside

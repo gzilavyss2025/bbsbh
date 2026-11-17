@@ -359,6 +359,13 @@ jobs:
         if: steps.inputs.outputs.finals != 'false'
         continue-on-error: true
         run: node scripts/gen-long-at-bats.mjs
+      # Wild Rides: each Final game's /winProbability read once and kept as a summary and a
+      # 24-character shape (scripts/data/wild-rides-scan.json); ~15 games a night in season.
+      - name: Wild rides
+        id: wild-rides
+        if: steps.inputs.outputs.finals != 'false'
+        continue-on-error: true
+        run: node scripts/gen-wild-rides.mjs
       # Kept-it-in-the-infield (issue #2976): the team-games with no out to an
       # outfielder. Reads only gamePks it has not scanned (about 15 a night in
       # season), and defaults to the season in play (season-in-play.mjs).

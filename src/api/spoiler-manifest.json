@@ -1563,6 +1563,13 @@
     "callout-notes/nugget.js": {
       "class": "spoiler-free",
       "why": "The `nugget` note family's wording and ranking (#2809): count, threshold label and the frozen anchor. It reads no feed and no date it is not handed; the date cut that makes a list safe for a scoring surface is nuggets/nuggets.js's."
+    },
+    "wildrides/fetch.js": {
+      "class": "spoiler-free",
+      "why": "Wild Rides (/wild-rides): a season page of Final games ranked by win-probability drama, each shown with its result. An open season page like the leader boards, not one of the four scoring surfaces (ADR-0034). It reads the raw /winProbability feed for the one game picked, so its importers are listed: anything that would show a ride on a scoring surface must not import it.",
+      "importers": [
+        "screens/designlab/wildrides/WildRides.jsx"
+      ]
     }
   }
 }
