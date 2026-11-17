@@ -1282,6 +1282,10 @@
       "class": "spoiler-free",
       "why": "/research's filter definitions, predicates and URL format (#2234). Pure; the `?d=` cutoff drops games on or after that day."
     },
+    "research/games.js": {
+      "class": "spoiler-free",
+      "why": "/research's game mode (#3137): plays grouped by game and batting club, tested on totals and how the runs scored. Pure; an open page (ADR-0034); a row carries the filtered totals, never the final score."
+    },
     "research/series.js": {
       "class": "spoiler-free",
       "why": "/research's postseason series state (#3141): each Final postseason game's series game number, decider, sudden death, potential clinch and elimination, joined by gamePk. Past games on an open page (ADR-0034)."
