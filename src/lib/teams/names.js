@@ -131,6 +131,16 @@ export function teamClubNameShort(teamId) {
   return SHORT_CLUB_NAMES[teamId] ?? teamClubName(teamId)
 }
 
+// "Arizona D-backs" — a full club name with the short nickname swapped in, for a
+// name that sits beside a logo in half a phone card (#3175). Any name that does
+// not end in the club's own nickname (a MiLB club, an old name) passes through.
+// A word joiner after each hyphen keeps "D-backs" on one line.
+export function shortenClubName(teamId, name) {
+  const long = teamClubName(teamId)
+  const short = SHORT_CLUB_NAMES[teamId]?.replaceAll('-', '-\u2060')
+  return short && name?.endsWith(long) ? `${name.slice(0, -long.length)}${short}` : name
+}
+
 // "Pittsburgh Pirates" — the full club name. Collapses the relocating
 // Athletics' duplicated halves to a single "Athletics". Null for a MiLB id.
 //
