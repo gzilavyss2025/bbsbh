@@ -17,7 +17,7 @@ import { firstPitchHomer } from '../../../../src/api/notable/rarityCount.js'
 import { mapConcurrent } from '../../concurrency.mjs'
 import { gameHead, sideOfClub } from '../games.mjs'
 import { IMMACULATE_FLOOR } from '../immaculate.mjs'
-import { PLAYERS_PER_CALL } from '../sweep.mjs'
+import { fetchSeasonHittingLogs } from './logs.mjs'
 
 export const FIRSTPITCH_FLOOR = IMMACULATE_FLOOR
 
@@ -46,16 +46,9 @@ export const priorPlateAppearances = (career, season) =>
 
 // { rows, unknown: [gamePk] } for one season, strict at 4 like the sweep.
 export async function fetchFirstPitch(get, gameMap, season, concurrency = 4) {
-  const pool = await get(`/api/v1/sports/1/players?season=${season}&fields=people,id`)
-  const ids = [...new Set((pool?.people ?? []).map((p) => p.id))].sort((a, b) => a - b)
-  const batches = []
-  for (let i = 0; i < ids.length; i += PLAYERS_PER_CALL) batches.push(ids.slice(i, i + PLAYERS_PER_CALL))
-  const hydrate = `stats(group=[hitting],type=[gameLog],season=${season},gameType=[R,F,D,L,W])`
-  const found = await mapConcurrent(batches, concurrency, async (batch) => {
-    const data = await get(`/api/v1/people?personIds=${batch.join(',')}&hydrate=${hydrate}&fields=${PEOPLE_FIELDS}`)
-    return (data?.people ?? []).map((p) => firstPaCandidate(p, gameMap)).filter(Boolean)
-  }, { strict: true })
-  const checked = await mapConcurrent(found.flat(), concurrency, async (c) => {
+  const people = await fetchSeasonHittingLogs(get, season, PEOPLE_FIELDS, concurrency)
+  const found = people.map((p) => firstPaCandidate(p, gameMap)).filter(Boolean)
+  const checked = await mapConcurrent(found, concurrency, async (c) => {
     const pbp = await get(`/api/v1/game/${c.game.gamePk}/playByPlay?fields=${PBP_FIELDS}`)
     const hit = firstPitchHomer(pbp?.allPlays ?? [], c.player.id)
     if (hit !== true) return { c, hit }

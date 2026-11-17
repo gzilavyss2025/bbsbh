@@ -311,7 +311,7 @@ don't run these by hand.
   2021–2026 is about 14.6k calls at concurrency 20; `--from=2021 --to=2026` runs that backfill.
   Incremental, with the scan at `scripts/data/outfield-outs-scan.json`. The default season is
   `fetchSeasonInPlay()`, not the calendar year (#1465).
-- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp,firstpitch}.json` — the
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp,firstpitch,itpslam}.json` — the
   games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
   THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
@@ -354,6 +354,10 @@ don't run these by hand.
   debuted earlier his year-by-year line (no plate appearance before). Whole seasons, from 2001 (real
   pitch sequences); about 16 log calls plus a play-by-play call for each candidate, roughly 100 a
   season.
+  Inside-the-park grand slams (#2968, `itpslam.json`, `lib/notable/rarity/itpslam.mjs`): the same
+  hitting logs (`rarity/logs.mjs`); a game where a player homered and drove in 4 or more is read
+  play by play (about 300 a season), and a home run with 4 RBI whose play text says
+  inside-the-park is a row. Whole seasons, from 2001 (the play text names them in every season since).
   Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play

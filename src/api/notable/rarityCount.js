@@ -1,6 +1,6 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club
-// or a home run on a first MLB pitch (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club,
+// a home run on a first MLB pitch or an inside-the-park grand slam (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -18,7 +18,8 @@
 // (fourhr.json, read off the hitting game logs), FOURSTRAIGHT_FLOOR for four straight home runs
 // (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays), 1901
 // for six-plus double plays (sixdp.json, read off the team fielding game logs), FIRSTPITCH_FLOOR (2001) for a
-// home run on a first MLB pitch (scripts/lib/notable/rarity/firstpitch.mjs, real pitch sequences).
+// home run on a first MLB pitch (scripts/lib/notable/rarity/firstpitch.mjs, real pitch sequences), ITPSLAM_FLOOR (2001)
+// for an inside-the-park grand slam (scripts/lib/notable/rarity/itpslam.mjs).
 import { ordinal } from '../../lib/format.js'
 import { gamePath } from '../../lib/route.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
@@ -35,6 +36,7 @@ export const RARITY = {
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
   sixdp: { flag: null, noun: 'game with six or more double plays' },
+  itpslam: { flag: null, noun: 'inside-the-park grand slam' },
   // Its own sentence: "The 16th player since 2001 to homer on his first MLB pitch" (Gary, 2026-11-17).
   firstpitch: { flag: null, lead: (nth, floor) => `The ${nth} player since ${floor} to homer on his first MLB pitch` },
 }
@@ -183,6 +185,17 @@ export function firstPitchHomer(allPlays, batterId) {
   return pa.result?.eventType === 'home_run' && pitches.length === 1
 }
 
+// The inside-the-park grand slams of a game: a home run that drives in four, whose play text says
+// inside-the-park ("... hits an inside-the-park grand slam ..."). [{ side (the batting club),
+// player (the batter) }]; null when the feed has no plays.
+export function insideParkSlams(allPlays) {
+  const plays = orderedPlays({ allPlays })
+  if (!plays.length) return null
+  return plays
+    .filter((p) => p.result?.eventType === 'home_run' && p.result?.rbi === 4 && /inside[- ]the[- ]park/i.test(p.result?.description ?? ''))
+    .map((p) => ({ side: p.about?.halfInning === 'top' ? 'away' : 'home', player: { id: p.matchup?.batter?.id, name: p.matchup?.batter?.fullName ?? '' } }))
+}
+
 // True when the box score says the batter had a plate appearance before tonight's this season
 // (season total above tonight's), or cannot say. `seasonStats` in a Final feed includes the game.
 function battedBeforeTonight(feed, batterId) {
@@ -211,9 +224,16 @@ export function sweptFrom(seasons = []) {
   return s.length ? s[i] : null
 }
 
-// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning, four-homer game, run of four straight home runs and club game of six or more double plays.
-// [{ kind, side, player? }]
+// The rare feats a Final game holds: each natural cycle, unassisted triple play, immaculate inning,
+// four-homer game, run of four straight home runs, club game of six or more double plays, home run
+// on a first MLB pitch and inside-the-park grand slam. [{ kind, side, player? }]
+// The index holds MLB games of the kept types only (scripts/lib/notable/rules.mjs GAME_TYPES), so a
+// minor-league, spring or exhibition game has no count to give: nothing.
+const INDEXED_TYPES = ['R', 'F', 'D', 'L', 'W']
 export function detectRareFeats(feed) {
+  const sport = feed?.gameData?.teams?.home?.sport?.id
+  const type = feed?.gameData?.game?.type
+  if ((sport != null && sport !== 1) || (type != null && !INDEXED_TYPES.includes(type))) return []
   const plays = orderedPlays(feed?.liveData?.plays)
   const out = []
   const homers = new Map() // batter id -> home runs so far
@@ -233,6 +253,7 @@ export function detectRareFeats(feed) {
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
   for (const f of fourStraightHomers(plays) ?? []) out.push({ kind: 'fourstraight', ...f })
   for (const f of sixDoublePlays(plays) ?? []) out.push({ kind: 'sixdp', ...f })
+  for (const f of insideParkSlams(plays) ?? []) out.push({ kind: 'itpslam', ...f })
   // A home run on a first MLB pitch: the batter's first plate appearance tonight is a one-pitch home
   // run, he debuted this season, and the box score shows no plate appearance before tonight's
   // (a debut days earlier off the bench counts: Willson Contreras, gamePk 447906). A player who
