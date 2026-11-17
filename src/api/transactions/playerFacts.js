@@ -88,19 +88,34 @@ const arrivalOf = (t, name) => ({
   fromTeamId: t.fromTeam?.id ?? null,
   fromName: t.fromTeam?.name ?? null,
   tradedFor: ARRIVALS[t.typeCode] === 'trade' ? tradedFor(t.description, t.person?.fullName ?? name) : null,
+  tradedWith: ARRIVALS[t.typeCode] === 'trade' ? tradedWith(t.description, t.person?.fullName ?? name) : null,
 })
+
+const POSITIONS = /\b(?:[LR]HP|C|1B|2B|3B|SS|LF|CF|RF|OF|IF|DH|P|UT)\s+(?=\p{Lu})/gu
+
+// A trade row's two sides, positions dropped, as read for `name`; null if he is on neither.
+function tradeSides(description, name) {
+  const m = (description ?? '').match(/\btraded (.+?) to .+? for (.+?)\.?$/)
+  if (!m || !name) return null
+  const [sent, got] = [m[1], m[2]].map((x) => x.replace(POSITIONS, '').trim())
+  return got.includes(name) ? { mine: got, theirs: sent } : sent.includes(name) ? { mine: sent, theirs: got } : null
+}
 
 // The other side of a trade, out of the row's own description: "White Sox
 // traded RHP Lucas Giolito and RHP Reynaldo López to Los Angeles Angels for
 // C Edgar Quero and LHP Ky Bush." read for Bush is "Lucas Giolito and Reynaldo
 // López". Positions drop; "cash" and "a player to be named later" stay.
 export function tradedFor(description, name) {
-  const m = (description ?? '').match(/\btraded (.+?) to .+? for (.+?)\.?$/)
-  if (!m || !name) return null
-  const [, sent, got] = m
-  const side = got.includes(name) ? sent : sent.includes(name) ? got : null
-  if (!side) return null
-  return side.replace(/\b(?:[LR]HP|C|1B|2B|3B|SS|LF|CF|RF|OF|IF|DH|P|UT)\s+(?=\p{Lu})/gu, '').trim() || null
+  return tradeSides(description, name)?.theirs || null
+}
+
+// The other PLAYERS on his side: "Brewers traded LF Isaac Collins and RHP Nick Mears to
+// Kansas City Royals for LHP Angel Zerpa." read for Mears is "Isaac Collins".
+const NOT_A_PLAYER = /^(?:cash( considerations)?|(a )?player to be named later|international bonus.*)$/i
+export function tradedWith(description, name) {
+  const others = (tradeSides(description, name)?.mine ?? '').split(/,\s*(?:and\s+)?|\s+and\s+/)
+    .map((x) => x.trim()).filter((x) => x && !x.includes(name) && !NOT_A_PLAYER.test(x))
+  return others.length < 2 ? others[0] ?? null : `${others.slice(0, -1).join(', ')} and ${others.at(-1)}`
 }
 
 function prospectOf(snapshot, playerId) {

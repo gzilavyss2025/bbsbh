@@ -324,7 +324,7 @@ function arrivalSentence(facts, who, moveDate) {
   const year = a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`
   const when = `${apDate(a.date)}${year}`
   let s
-  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
+  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)}${a.tradedWith ? ` with ${a.tradedWith}` : ''} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
   else if (a.how === 'Rule 5 draft')
