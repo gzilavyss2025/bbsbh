@@ -145,7 +145,8 @@ don't run these by hand.
   (`scripts/lib/tensest/tensest.mjs` `mergePlays`, tested in `test/tensest-slices.test.js`). A file without `plays`
   rebuilds the season (about 90 seconds in a container). A game that errors stays off the list and is retried. The
   page ranks and slices the list itself (`src/api/tensest/slices.js`). App reads it via `src/api/tensest/tensest.js`.
-  It also writes `public/data/tensest-cutoffs.json`: the season's leverage edges for the Pressure meter's 10 bars
+  It also writes `public/data/tensest-clips.json` (each tense play's last-pitch playId, for the ▶; a game
+  with rows and no ids is re-read once for its ids alone) and `public/data/tensest-cutoffs.json`: the season's leverage edges for the Pressure meter's 10 bars
   (bands 20/40/55/70/80/88/93/97/99, #2939), from a histogram of every play's LI (0.01 buckets, 0–9.99) that the state
   file carries as `hist` (`scripts/lib/tensest/cutoffs.mjs`, tested in `test/tensest-cutoffs.test.js`). A state file
   with no `hist` rebuilds the season from scratch. Both files are restamped every run, even with no new game, so

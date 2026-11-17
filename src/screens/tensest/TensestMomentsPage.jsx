@@ -95,7 +95,8 @@ function Moment({ r, teamId, routeLink }) {
   )
 }
 
-function TensestTable({ rows, teamId, side, label }) {
+// `tints[n]` is row n's 'up' / 'down' / null (swingFor), worked out once by the page.
+function TensestTable({ rows, tints, teamId, label }) {
   const routeLink = useRouteLink()
   return (
     <Table frame="bare" label={label} className="tensest">
@@ -108,9 +109,9 @@ function TensestTable({ rows, teamId, side, label }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => (
+        {rows.map((r, n) => (
           // A faint green or red wash: the picked club's side won or lost the at-bat.
-          <tr key={`${r.pk}:${r.i}`} className={swingFor(r, teamId, side) ? `tensest__row--${swingFor(r, teamId, side)}` : undefined}>
+          <tr key={`${r.pk}:${r.i}`} className={tints[n] ? `tensest__row--${tints[n]}` : undefined}>
             <td className="rank"><span className="sr-only tensest__cue">Rank </span>{rankLabel(r, rows)}</td>
             <td className="moment"><Moment r={r} teamId={teamId} routeLink={routeLink} /></td>
             {/* The meter spreads this board's own range (boardBars), not the season's: on the
@@ -151,8 +152,11 @@ export function TensestMomentsPage() {
     if (teamId == null) return leagueTop(filterPlays(plays, filters))
     return clubTop(filterPlays(plays, { ...filters, batting: null, pitching: null }), teamId, side)
   }, [plays, teamId, side, filters])
+  const tints = useMemo(() => rows.map((r) => swingFor(r, teamId, side)), [rows, teamId, side])
   const record = boardRecord(rows, side)
-  const mlb = useMemo(() => mlbRate(plays, side), [plays, side])
+  // The yardstick takes the same batter/pitcher/park filters as the board, so a slice is
+  // measured against the same slice of baseball, not the whole league.
+  const mlb = useMemo(() => mlbRate(filterPlays(plays, { ...filters, batting: null, pitching: null }), side), [plays, filters, side])
   const pct = record.of ? Math.round((record.succeeded / record.of) * 100) : null
   const versus = versusMlb(pct, mlb)
   const hasData = (plays?.length ?? 0) > 0
@@ -228,7 +232,7 @@ export function TensestMomentsPage() {
                       {/* One square per at-bat, in rank order, in its row's green or red: the
                           count, and where on the list the successes fell. */}
                       <span className="tensest__tally" aria-hidden="true">
-                        {rows.map((r) => <i key={`${r.pk}:${r.i}`} className={`tensest__tick tensest__tick--${swingFor(r, teamId, side)}`} />)}
+                        {rows.map((r, n) => <i key={`${r.pk}:${r.i}`} className={`tensest__tick tensest__tick--${tints[n]}`} />)}
                       </span>
                     </div>
                   )}
@@ -237,7 +241,7 @@ export function TensestMomentsPage() {
               <TensestFilters value={filters} options={options} onChange={setFilters} clubs={teamId == null} />
             </div>
             {rows.length ? (
-              <TensestTable rows={rows} teamId={teamId} side={side} label={`${teamId == null ? 'All of baseball' : name}, tensest at-bats`} />
+              <TensestTable rows={rows} tints={tints} teamId={teamId} label={`${teamId == null ? 'All of baseball' : name}, tensest at-bats`} />
             ) : (
               <p className="hint">{filtering ? 'No tense at-bats match these filters.' : 'No tense at-bats yet.'}</p>
             )}

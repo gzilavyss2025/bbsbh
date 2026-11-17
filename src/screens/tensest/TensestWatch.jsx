@@ -35,8 +35,9 @@ export function TensestWatch({ row }) {
     // MLB's own cut wins when there is one, as on the box score and Gameday: it carries
     // the play's title and blurb. The raw pitch clip is the floor under it.
     const pkg = playId ? highlightForPlay(await fetchHighlights(row.pk), playId) : null
+    // Gone while the lookups ran: ask the clip host nothing (it blocks a bursty client).
+    if (!live.current) return
     if (pkg) {
-      if (!live.current) return
       setItem(pkg)
       setLoading(false)
       return

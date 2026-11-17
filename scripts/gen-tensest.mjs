@@ -62,7 +62,7 @@ let plays = (carried ? prev.plays : []).map((r) => (byPk.has(r.pk) ? { ...r, ...
 
 // A suspended game is listed on both dates; read it once, or its plays count twice.
 const prevClips = await readJsonOr(CLIPS, null)
-let clips = carried && prevClips?.season === season ? prevClips.clips : {}
+let clips = carried && prevClips?.season === season ? { ...prevClips.clips } : {}
 // A game with rows and no clip ids was read before clips were kept: read it again for
 // its ids alone (a one-time backfill; its rows and histogram are already counted).
 const clipped = new Set(Object.keys(clips).map((k) => Number(k.split(':')[0])))
@@ -74,6 +74,7 @@ if (todo.length === 0 && backfill.length === 0) {
   if (carried) {
     await writeJsonAtomic(OUT, { ...prev, plays, generatedAt: new Date().toISOString() })
     await writeCutoffs(cutoffsFromHist(hist))
+    await writeJsonAtomic(CLIPS, { season, generatedAt: new Date().toISOString(), clips })
   }
   console.log(`tensest: ${season}, nothing new (${done.size} games read)`)
   process.exit(0)
@@ -88,7 +89,7 @@ async function writeCutoffs(cutoffs) {
 
 if (backfill.length) {
   const got = await mapConcurrent(backfill, CONCURRENCY, async (g) => clipIds(g, await getJson(`/api/v1/game/${g.gamePk}/winProbability`)))
-  for (const c of got) if (c) clips = { ...clips, ...c }
+  for (const c of got) if (c) Object.assign(clips, c)
   console.log(`tensest: backfilled clip ids for ${got.filter(Boolean).length} of ${backfill.length} games`)
 }
 
@@ -118,7 +119,7 @@ const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
 await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, plays })
 await writeCutoffs(cutoffs)
 // Only the plays still on the board keep a clip id.
-for (const r of ok) clips = { ...clips, ...r.clips }
+for (const r of ok) Object.assign(clips, r.clips)
 const live = new Set(plays.map((r) => `${r.pk}:${r.i}`))
 clips = Object.fromEntries(Object.entries(clips).filter(([k]) => live.has(k)))
 await writeJsonAtomic(CLIPS, { season, generatedAt: new Date().toISOString(), clips })

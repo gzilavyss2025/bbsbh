@@ -127,6 +127,9 @@ for each generator; the reader modules:
   gzipped in 2026, #2981). `tensest/slices.js` ranks and slices it on the page: the league's top 50, a club's top 25
   batting and pitching (`rank.js`, ties share a rank), and the league list filtered by batter, pitcher, park and
   batting or pitching club. Spoiler-free: not one of the four scoring surfaces, and a stat line is not a score (ADR-0034).
+- `tensest/tensest.js` `loadTensestClips` — each tense play's clip id (`pk:i` → playId), from
+  `public/data/tensest-clips.json`. Its own file so the board's load never pays for it: the first ▶ tap reads it
+  (`screens/tensest/TensestWatch.jsx`), which then plays MLB's highlight for the play or, failing that, the raw clip.
 - `tensest/tenseBars.js` — the Pressure meter's numbers. `loadCutoffs` reads `public/data/tensest-cutoffs.json` (9 LI
   edges and their season bands, from `gen-tensest.mjs`); `tenseBars(li, cutoffs)` turns a play's LI into 1–10 bars and
   `pressureLabel` into the words a screen reader hears. The cutoffs are spoiler-free; the LI is not, so callers pass
