@@ -722,7 +722,9 @@ for each generator; the reader modules:
 - `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
   `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;
-  everything comparative is derived here. `gateBoard(data, season, sortBy)`
+  everything comparative is derived here. `roadBoard(data, season)` ranks visiting
+  clubs by their road crowds against each host's own weekend or weekday average
+  (`lift`, a signed percent), so park size and Saturday luck drop out. `gateBoard(data, season, sortBy)`
   ranks the home gate, joining the club's park to
   `lib/ballpark/ballparkData.js`'s capacity table for a **fill rate** — the
   headline column, because a raw average mostly measures how many seats a club

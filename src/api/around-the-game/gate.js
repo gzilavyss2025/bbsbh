@@ -275,3 +275,42 @@ export function monthsIn(rows) {
   for (const r of rows ?? []) for (const m of Object.keys(r.byMonth ?? {})) seen.add(m)
   return [...seen].sort()
 }
+
+// WHO DRAWS ON THE ROAD. Each visiting club's crowds, read against the host's own
+// season average for the same kind of date — its weekend average for a Fri-Sun crowd,
+// its weekday average otherwise — so a club is credited neither for the size of the
+// parks it visits nor for drawing more Saturdays. `lift` is the mean of (crowd / that
+// average) over its road games, as a percent above (+) or below (-); `avg` is the raw
+// road gate. A host with no split on file falls back to its season average. Best first.
+export function roadBoard(data, season) {
+  const clubs = data?.seasons?.[season]?.clubs
+  if (!clubs) return []
+  const yardstick = (hostId, part) => {
+    const g = clubs[hostId]?.gate
+    return (part === 'we' ? g?.weekend?.avg : g?.weekday?.avg) || g?.avg || null
+  }
+  const rows = []
+  for (const [teamId, c] of Object.entries(clubs)) {
+    let games = 0
+    let total = 0
+    let ratio = 0
+    for (const [hostId, parts] of Object.entries(c?.road?.byHost ?? {})) {
+      for (const part of ['we', 'wd']) {
+        const [g, sum] = parts?.[part] ?? [0, 0]
+        const avg = yardstick(hostId, part)
+        if (!g || !avg) continue
+        games += g
+        total += sum
+        ratio += sum / avg
+      }
+    }
+    if (!games) continue
+    rows.push({
+      teamId: Number(teamId),
+      games,
+      avg: Math.round(total / games),
+      lift: Math.round((ratio / games - 1) * 1000) / 10,
+    })
+  }
+  return rows.sort((a, b) => b.lift - a.lift).map((r, i) => ({ ...r, rank: i + 1 }))
+}

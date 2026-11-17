@@ -409,8 +409,11 @@
 
 .rpt td.team,
 .rpt th.team {
-  font-family: var(--font-body);
   text-align: left;
+}
+/* The club NAME reads in the body face; its column head stays a head like the rest. */
+.rpt td.team {
+  font-family: var(--font-body);
 }
 
 .rpt__rank {

@@ -203,6 +203,10 @@ function extreme(rows, field, pick) {
   return { n: best[field], date: best.date, oppId: best.oppId ?? null, ...round }
 }
 
+// Friday(5)/Saturday(6)/Sunday(0): the industry's own weekend. gateFor's split and
+// roadFor's yardstick must agree on it, so it is said once.
+const isWeekend = (dow) => dow === 0 || dow === 5 || dow === 6
+
 // The home-gate half: how many came, when they came, and who they came to see.
 function gateFor(rows) {
   const counted = rows.filter((r) => r.attendance != null)
@@ -225,13 +229,29 @@ function gateFor(rows) {
     night: bucket(counted.filter((r) => r.dayNight === 'night'), 'attendance'),
     // Friday(5)/Saturday(6)/Sunday(0) is the industry's own weekend, and it is
     // the split a club's ticketing office actually plans against.
-    weekend: bucket(counted.filter((r) => [0, 5, 6].includes(r.dow)), 'attendance'),
-    weekday: bucket(counted.filter((r) => [1, 2, 3, 4].includes(r.dow)), 'attendance'),
+    weekend: bucket(counted.filter((r) => isWeekend(r.dow)), 'attendance'),
+    weekday: bucket(counted.filter((r) => r.dow != null && !isWeekend(r.dow)), 'attendance'),
     topOpponents: [...byOpp.entries()]
       .map(([oppId, vals]) => ({ teamId: Number(oppId), g: vals.length, avg: mean(vals) }))
       .sort((a, b) => b.avg - a.avg)
       .slice(0, TOP_OPPONENTS),
   }
+}
+
+// The road half: the crowds this club drew as the VISITOR, kept per host park and split
+// weekend (Fri-Sun, as gateFor splits a host) / weekday, as { we: [games, total],
+// wd: [games, total] } — facts only. The reader (api/around-the-game/gate.js roadBoard)
+// reads each against the host's own weekend or weekday average.
+export function roadFor(awayRows) {
+  const byHost = {}
+  for (const r of awayRows) {
+    if (r.attendance == null) continue
+    const host = (byHost[r.homeId] ??= { we: [0, 0], wd: [0, 0] })
+    const t = host[isWeekend(r.dow) ? 'we' : 'wd']
+    t[0] += 1
+    t[1] += r.attendance
+  }
+  return Object.keys(byHost).length ? { byHost } : null
 }
 
 // The clock half: home AND road, for the reason in this file's header.
@@ -278,12 +298,23 @@ function monthSplit(rows, field) {
   return split
 }
 
+// The row naming the venue a club hosts at most often.
+function homePark(hostRows) {
+  const n = new Map()
+  for (const r of hostRows) if (r.venue) n.set(r.venueId, (n.get(r.venueId) ?? 0) + 1)
+  const id = [...n].sort((a, b) => b[1] - a[1])[0]?.[0]
+  return hostRows.find((r) => r.venue && r.venueId === id) ?? null
+}
+
 // Fold every usable row into per-club aggregates. `rows` is the flat list
 // toRow produced; the return value is gate.json's `clubs` map.
 export function aggregate(rows) {
   const home = new Map() // teamId -> rows where that club was the host
   const all = new Map() // teamId -> rows that club played in, either side
+  const away = new Map() // teamId -> rows where that club was the visitor
   for (const r of rows) {
+    if (!away.has(r.awayId)) away.set(r.awayId, [])
+    away.get(r.awayId).push(r)
     if (!home.has(r.homeId)) home.set(r.homeId, [])
     home.get(r.homeId).push({ ...r, oppId: r.awayId })
     for (const [id, oppId] of [
@@ -300,9 +331,11 @@ export function aggregate(rows) {
     const hostRows = home.get(teamId) ?? []
     const playedRows = all.get(teamId) ?? []
     clubs[teamId] = {
-      venue: hostRows.find((r) => r.venue)?.venue ?? null,
-      venueId: hostRows.find((r) => r.venue)?.venueId ?? null,
+      // The park it hosts at most: the first game listed can be a neutral site.
+      venue: homePark(hostRows)?.venue ?? null,
+      venueId: homePark(hostRows)?.venueId ?? null,
       gate: gateFor(hostRows),
+      road: roadFor(away.get(teamId) ?? []),
       pace: paceFor(playedRows),
     }
   }
@@ -350,7 +383,28 @@ export function leagueFor(rows) {
   }
 }
 
-export function buildSeason(rows) {
+// A home game played away from the club's own park — the Little League Classic in
+// Williamsport, Field of Dreams, a Tokyo or London series — is not a fact about that
+// club's gate, so its crowd is dropped (attendance null) before anything is counted.
+// The game still counts for pace. A club's own park is the venue it hosts most often.
+export function homeParkOnly(rows) {
+  const counts = new Map()
+  for (const r of rows) {
+    if (r.venueId == null) continue
+    const byVenue = counts.get(r.homeId) ?? new Map()
+    byVenue.set(r.venueId, (byVenue.get(r.venueId) ?? 0) + 1)
+    counts.set(r.homeId, byVenue)
+  }
+  const park = new Map([...counts].map(([id, byVenue]) => [id, [...byVenue].sort((a, b) => b[1] - a[1])[0][0]]))
+  return rows.map((r) =>
+    r.attendance != null && r.venueId != null && park.has(r.homeId) && r.venueId !== park.get(r.homeId)
+      ? { ...r, attendance: null }
+      : r,
+  )
+}
+
+export function buildSeason(allRows) {
+  const rows = homeParkOnly(allRows)
   return {
     games: rows.length,
     through: rows.reduce((a, r) => (r.date > a ? r.date : a), ''),
@@ -363,7 +417,7 @@ export function buildSeason(rows) {
 // not here), over rows that report a crowd. `league` carries just the
 // attendance line, counted off the games like leagueFor's.
 export function buildPostseason(rows) {
-  const gated = rows.filter((r) => r.attendance != null)
+  const gated = homeParkOnly(rows).filter((r) => r.attendance != null)
   if (!gated.length) return null
   const att = gated.map((r) => r.attendance)
   const clubs = {}

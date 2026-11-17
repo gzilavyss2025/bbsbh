@@ -423,3 +423,33 @@ test('the postseason crowd table prints the game number only when there is one',
   const page = readFileSync(new URL('../src/screens/around-the-game/AttendancePage.jsx', import.meta.url), 'utf8')
   assert.match(page, /r\.bestSeriesGame != null/)
 })
+
+import { roadBoard } from '../src/api/around-the-game/gate.js'
+
+test('roadBoard reads each road crowd against the host’s weekend or weekday average', () => {
+  const data = { seasons: { 2026: { clubs: {
+    // Host 2: 30,000 on weekends, 20,000 on weekdays. Club 1 drew 33,000 on a Saturday
+    // (+10%) and 22,000 on a Tuesday (+10%): +10%, not credited for the Saturday.
+    1: { gate: { avg: 40000 }, road: { byHost: { 2: { we: [1, 33000], wd: [1, 22000] } } } },
+    2: { gate: { avg: 25000, weekend: { avg: 30000 }, weekday: { avg: 20000 } }, road: { byHost: { 1: { we: [0, 0], wd: [1, 36000] } } } },
+    3: { road: { byHost: { 9: { we: [3, 90000], wd: [0, 0] } } } }, // host with no average: left out
+  } } } }
+  assert.deepEqual(roadBoard(data, 2026), [
+    { teamId: 1, games: 2, avg: 27500, lift: 10, rank: 1 },
+    { teamId: 2, games: 1, avg: 36000, lift: -10, rank: 2 }, // host 1 has no split: its 40,000 season average
+  ])
+  assert.deepEqual(roadBoard(null, 2026), [])
+})
+
+import { homeParkOnly } from '../scripts/gen-gate.mjs'
+
+test('homeParkOnly drops the crowd of a home game played away from the club’s own park', () => {
+  const rows = [
+    { homeId: 158, venueId: 32, attendance: 40000 },
+    { homeId: 158, venueId: 32, attendance: 38000 },
+    { homeId: 158, venueId: 5340, attendance: 2500 }, // Little League Classic, Williamsport
+    { homeId: 112, venueId: 17, attendance: 39000 },
+  ]
+  const out = homeParkOnly(rows)
+  assert.deepEqual(out.map((r) => r.attendance), [40000, 38000, null, 39000])
+})

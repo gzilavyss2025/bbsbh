@@ -33,3 +33,6 @@
 .gate .gate__sort {
   margin-block-end: var(--space-3);
 }
+.gate__board {
+  margin-block: var(--space-4) var(--space-6);
+}

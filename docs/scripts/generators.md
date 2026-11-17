@@ -1230,6 +1230,11 @@ don't run these by hand.
   (`toRow`). TWO DENOMINATORS on purpose: attendance is counted for
   the HOME club only (a gate is a fact about that club's park), game length for
   BOTH clubs (it is made by the two rosters on the field, not by the park).
+  A home game away from the club's own park (the venue it hosts most: the Little
+  League Classic, Field of Dreams, an overseas series) drops its crowd
+  (`homeParkOnly`, season and postseason) and still counts for pace. Each club
+  also carries `road.byHost` — its crowds as the visitor, per host park, split
+  weekend/weekday as `{ we: [games, total], wd: [games, total] }` (facts only).
   Ships per-club aggregates only — month splits, day/night, weekend/weekday,
   top-drawing opponents, the extremes with their dates — never a per-game
   table; every rank, fill rate and league comparison is derived in
