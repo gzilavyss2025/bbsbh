@@ -170,39 +170,55 @@ address, so you can share it.
 **Standings** open live, with today's games in. One tap shows them *through
 yesterday*, and you can scrub back to any earlier date.
 
-**Search** any player or team by name from the footer. "Find a past matchup"
+**Search** any player or team by name from the search button at the top of every
+screen. "Find a past matchup"
 takes two clubs and a season, then lists every game they played. Each one opens
 its box score, sealed until you tap.
 
-Standalone reference pages, all reachable from the menu and the slate footer:
+Standalone reference pages, all reachable from the site menu. The menu sorts
+them into six groups, gives each page a one-line description, and has a find box
+that matches a page by name or by what it covers:
 
 | Page | What it gives you |
 |---|---|
-| Standings | Both leagues, through yesterday by default |
-| Postseason Race | The six-team postseason field, narrowed from Standings |
+| Standings | Every division and the wild card, through yesterday by default |
+| Postseason Race | The six-team postseason field, and who is chasing it |
 | League Leaders | The majors, one league, one minor-league level, or one organization's whole system |
 | Run Value Leaders | Bat, glove, legs, and arm, added up on one scale of runs |
+| Hot & Cold | Who is far above or below his normal level |
 | Situational Records | One record at a time, every club at a level, ranked |
-| Salaries | Who is paid the most, and what each club spends |
+| Biggest At-Bats | The season's highest-pressure plate appearances |
+| Ask the Play Log | Search every play by batter, pitcher, count, and more — or type a plain-English question. Finds games by their totals, and player streaks |
 | Matchup Scout | Pick a pitcher and a hitter: where he throws each pitch, where the hitter does damage against it, and every time they met |
+| Streak Finder | Any club, any stat, so many games in a row |
+| Best Stretch | A player's best run of games (162 games, or 32 starts), across seasons |
+| Best Stretch by Club | Each club's best run of games |
 | Foul Tracker | Season foul-ball boards for batters and pitchers, plus the top foul games |
+| Six Degrees of Teammates | Link any two players through the teammates between them |
+| Where they're from | Players by birthplace |
+| Bullpen Availability | How much work each staff's relievers have already logged |
 | Umpire Rankings | Every qualifying plate umpire, ranked by called-pitch accuracy, plus a page per umpire |
 | ABS Challenges | The season board for the Automated Ball-Strike challenge system |
-| Attendance | Season crowds, by club |
-| Bullpen Availability | How much work each staff's relievers have already logged |
 | Pace of Play | Game length across the league, tracked over the season |
+| Attendance | Season crowds, by club |
 | Doubleheaders | Every doubleheader this season, and how each club fared |
+| Game Notes | Each club's pregame notes, as links |
+| Salaries | Who is paid the most, and what each club spends |
+| Free Agents | Who filed, and where each one signed |
+| Trade Deadline | Deadline moves, by season |
 | Top MLB Prospects | The current Top 100, each row linked to the player |
 | Farm System Rankings | Every organization's farm system, ranked |
 | Rehab Assignments | Every big leaguer on a minor-league rehab stint, and where |
-| Milestone Watch | Career counting stats in reach this season, with projections |
-| Awards History | Past award winners |
 | Postseason History / Leaders | Series by series, plus all-time postseason leaders |
 | Postseason Records | Win-loss records by game situation for every postseason club since 1995 |
-| Nine Keys | Nine season measures, and how many of them every champion since 2000 passed |
-| Run Differential | What happens to a club that outscores the league by 200 runs, back to 1901 |
-| Trade Deadline | Deadline moves, by season |
+| Best Clubs in October | What happens to a club that outscores the league by 200 runs, back to 1901 |
+| What Champions Share | Nine season measures, and how many of them every champion since 2000 passed |
+| Milestone Watch | Career counting stats in reach this season, with projections |
+| Awards History | MVP, Cy Young, and more, every year |
 | All Star Game / Legacy | Rosters for the current game, and the history behind it |
+| Notable Games | No-hitters, cycles, and other rare games |
+| No Outfield Outs | Games with no out made by an outfielder |
+| Games After Elimination | What clubs did after they were out |
 | Logo Sheet | A grayscale sheet of every club at one level, to trace into your book |
 
 The menu's **Guides** section links to eleven how-to articles: scoring a game,
@@ -218,7 +234,8 @@ and more.
   both clubs, the date, and the venue. Stamps collect into passport books that
   you arrange by hand, eight to a page. A retrospective adds the collection up —
   clubs seen, your record watching them, and the span of dates you covered.
-- **My Tally** (`/profile`) — the club you follow, how this device behaves, and
+- **My Tally** (`/profile`) — the club you follow, how this device behaves
+  (including day or night mode), and
   what an account carries between devices. It shows no game data at all.
 - **My First Scorebook** (`/first-scorebook`) — a retrospective on the
   maintainer's first season of scoring by hand.
@@ -263,9 +280,6 @@ router library and no state library: routing is a small parse/build pair in
 npm install
 npm run dev       # http://localhost:5173
 ```
-
-Add `?nointro` to a test URL, so the first-visit welcome modal does not cover
-the page.
 
 Do you run more than one dev server at a time? Ports `5173` (dev) and `4173`
 (preview) use `strictPort`, so a second server on the same port fails instead of
