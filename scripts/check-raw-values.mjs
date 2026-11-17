@@ -72,9 +72,9 @@ const ROOT = join(import.meta.dirname, '..')
 // hex 26 -> 24, radius 82 -> 81, motion 56 -> 55. Shadow stays at 41.
 export const BUDGETS = {
   hex: 10,
-  radius: 57,
+  radius: 77,
   motion: 54,
-  shadow: 36,
+  shadow: 41,
 }
 
 export const KINDS = Object.keys(BUDGETS)

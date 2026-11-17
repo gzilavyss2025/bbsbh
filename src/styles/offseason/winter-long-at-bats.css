@@ -485,7 +485,7 @@ button.seasonnote__barrow[aria-pressed='true'] {
 /* layout-exempt: two square controls */
 .seasonnote__stripctl { display: flex; margin-left: var(--space-2); flex: none; }
 .seasonnote__stripctl button { width: 32px; height: 28px; border: var(--bw-hair) solid var(--border-hairline); background: var(--surface-card); color: var(--text-heading); cursor: pointer; font-size: var(--fs-cell); }
-.seasonnote__result--club { max-width: none; background: var(--side-club); border-left-color: var(--marker); min-height: 92px; }
+.seasonnote__result--club { max-width: none; background: var(--side-club, var(--surface-stamped-ink)); border-left-color: var(--marker); min-height: 92px; }
 @media (prefers-reduced-motion: reduce) { .seasonnote__mark { transition: none; } }
 /* The strip's marks: the pitch list's call-coloured dots (14-strike-zone.css), a size up to tap. */
 .seasonnote__strip .seasonnote__mark { width: 22px; height: 22px; font-family: var(--font-display); font-size: var(--fs-cell); color: var(--text-on-ink-bright); }
