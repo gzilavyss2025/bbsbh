@@ -137,7 +137,7 @@ function Legend() {
 }
 
 export function NineKeysPage() {
-  useDocumentTitle('Nine Keys')
+  useDocumentTitle('What Champions Share')
   const { loading, error, data, reload } = useAsync(() => loadNineKeys(), [])
 
   const keys = data?.keys ?? []
@@ -157,7 +157,7 @@ export function NineKeysPage() {
     <div className="screen">
       <SiteHeader />
 
-      <h1 className="topbar__title">Nine Keys</h1>
+      <h1 className="topbar__title">What Champions Share</h1>
       <p className="ninekeys__intro">
         Allan Lichtman predicts presidencies with thirteen true-or-false keys and one rule: the
         party in power loses if six come up false. The same structure, pointed at a baseball
@@ -168,7 +168,7 @@ export function NineKeysPage() {
         loading={loading}
         error={error}
         hasData={hasData}
-        errorMessage="Couldn’t load the Nine Keys report. Try again."
+        errorMessage="Couldn’t load What Champions Share. Try again."
         emptyMessage="No report yet."
         onRetry={reload}
       />

@@ -64,7 +64,7 @@ export function ClubStretchPage() {
   const link = useRouteLink()
   const mlb = picks.team === MLB
   const club = mlb ? 'MLB' : teamFullName(picks.team)
-  useDocumentTitle(`Club Stretch · ${club}`)
+  useDocumentTitle(`Best Stretch by Club · ${club}`)
   const { data, loading, error, reload } = useAsync(() => clubStretch(picks.team, picks.group), [picks.team, picks.group])
   const measure = measuresFor(picks.group).find((m) => m.key === picks.by)
   const unit = unitOf(picks.group, picks.n)
@@ -79,7 +79,7 @@ export function ClubStretchPage() {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Club Stretch</h1>
+        <h1 className="topbar__title">Best Stretch by Club</h1>
       </header>
       <Stack gap="loose" className="cstretch">
         <Stack gap="tight">

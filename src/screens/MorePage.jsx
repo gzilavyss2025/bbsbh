@@ -57,8 +57,9 @@ export function MorePage() {
                 const props = linkProps(page.path)
                 return (
                   <li key={page.path}>
-                    <a className="dirlink" href={props.href} onClick={props.onClick}>
+                    <a className={`dirlink${page.desc ? ' dirlink--described' : ''}`} href={props.href} onClick={props.onClick}>
                       {page.label}
+                      {page.desc && <span className="dirlink__desc">{page.desc}</span>}
                       {isGuidePath(page.path) && (
                         // The guides are documents, not app screens. Saying so
                         // is honest about the page load, and it is visible

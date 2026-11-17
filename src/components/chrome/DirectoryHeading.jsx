@@ -2,13 +2,16 @@
 // and /more page. The drawings are deliberately simple line marks: they read
 // at caption size and feel printed into the scorebook instead of imported from
 // an unrelated icon set.
-export function DirectoryHeading({ group, as: Heading = 'h2' }) {
+export function DirectoryHeading({ group, as: Heading = 'h2', count }) {
   return (
     <Heading className="dirhd">
       <span className={`dirglyph dirglyph--${group.id}`} aria-hidden="true">
         <DirectoryGlyph name={group.id} />
       </span>
-      <span className="dirhd__label">{group.label}</span>
+      <span className="dirhd__label">
+        {group.label}
+        {count != null && <span className="dirhd__count"> {count}</span>}
+      </span>
       <span className="dirhd__rule" aria-hidden="true" />
     </Heading>
   )
@@ -26,6 +29,23 @@ function DirectoryGlyph({ name }) {
   }
 
   switch (name) {
+    case 'lookup':
+      return (
+        <svg {...common}>
+          <circle cx="10.5" cy="10.5" r="6" />
+          <path d="m15 15 5 5" />
+          <path d="M8 10.5h5M10.5 8v5" />
+        </svg>
+      )
+    case 'postseason':
+      return (
+        <svg {...common}>
+          <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" />
+          <path d="M8 6H5v1.5A2.5 2.5 0 0 0 8 10M16 6h3v1.5A2.5 2.5 0 0 1 16 10" />
+          <path d="M12 13v4M8.5 20h7M10 17h4v3h-4z" />
+        </svg>
+      )
+    case 'standings':
     case 'this-season':
       return (
         <svg {...common}>
@@ -45,6 +65,7 @@ function DirectoryGlyph({ name }) {
     // nesting the field inside the stands is a life preserver. Enclosed curves
     // fill in at this size. Every mark in this file that works is sparse and
     // rectilinear — a box with a few things inside it — so this one is too.
+    case 'on-the-field':
     case 'around-the-game':
       return (
         <svg {...common}>
@@ -54,6 +75,7 @@ function DirectoryGlyph({ name }) {
           <path d="M9 20h6" />
         </svg>
       )
+    case 'rosters':
     case 'prospects':
       return (
         <svg {...common}>
@@ -63,6 +85,7 @@ function DirectoryGlyph({ name }) {
           <circle cx="10" cy="13" r="1.5" />
         </svg>
       )
+    case 'record-book':
     case 'history':
       return (
         <svg {...common}>

@@ -206,13 +206,13 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
 const REVISIT = [
   ['Streak Finder', pathOf('streaks')],
   ['Best Stretch', pathOf('best-stretch')],
-  ['Club Stretch', pathOf('club-stretch')],
-  ['Pressure Moments', pathOf('tensest')],
+  ['Best Stretch by Club', pathOf('club-stretch')],
+  ['Biggest At-Bats', pathOf('tensest')],
   ['Situational Records', '/situational-records'],
   ['League Leaders', '/leaders'],
   ['ABS Challenges', pathOf('abs-challenges')],
   ['Games After Elimination', pathOf('eliminated')],
-  ['Standing Out', '/outliers'],
+  ['Hot & Cold', '/outliers'],
 ]
 function RevisitSeason({ season }) {
   const linkProps = useRouteLink()

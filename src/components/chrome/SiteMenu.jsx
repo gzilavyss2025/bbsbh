@@ -72,10 +72,38 @@ function MenuGlyph() {
   )
 }
 
+// The groups the sheet lays out as cards. "Yours" rides above the find box as
+// a row of buttons, and Guides and The site sit in the foot's trail, so the
+// cards are the report pages alone.
+const YOURS = MENU_GROUPS.find((g) => g.id === 'yours')
+const TRAIL = MENU_GROUPS.filter((g) => g.id === 'guides' || g.id === 'tools')
+const CARDS = MENU_GROUPS.filter((g) => g !== YOURS && !TRAIL.includes(g))
+const WIDE = '(min-width: 740px)'
+
+// What the find box matches: the name, its description, its keywords and a
+// renamed page's old name. Lower-cased once.
+const haystack = (page) => [page.label, page.desc, page.keywords, page.was].filter(Boolean).join(' ').toLowerCase() // caps-js-exempt: case-folds a search match, renders nothing
+
+function useWide() {
+  const [wide, setWide] = useState(() => typeof matchMedia === 'function' && matchMedia(WIDE).matches)
+  useEffect(() => {
+    const mq = matchMedia(WIDE)
+    const on = () => setWide(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return wide
+}
+
 function SiteMenuModal({ onClose }) {
   const navigate = useNav()
   const linkProps = useRouteLink()
   const dialogRef = useRef(null)
+  const listRef = useRef(null)
+  const wide = useWide()
+  const [query, setQuery] = useState('')
+  // A phone folds every card but the first two; the reader's own taps win.
+  const [folded, setFolded] = useState({})
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -86,6 +114,33 @@ function SiteMenuModal({ onClose }) {
   // dialog's own `close` event, which is the one place React hears about it.
   const close = () => dialogRef.current?.close()
 
+  const term = query.trim().toLowerCase() // caps-js-exempt: case-folds a search match, renders nothing
+  const groups = CARDS.map((group) => ({
+    ...group,
+    shown: term ? group.pages.filter((page) => haystack(page).includes(term)) : group.pages,
+  })).filter((group) => group.shown.length > 0)
+  const hits = groups.reduce((n, g) => n + g.shown.length, 0)
+
+  const rowProps = (path) => {
+    const props = linkProps(path)
+    return {
+      href: props.href,
+      onClick: (event) => {
+        props.onClick(event)
+        // A guide link is left to the browser, which unmounts this sheet on
+        // its own; close only when we handled it.
+        if (event.defaultPrevented) close()
+      },
+    }
+  }
+
+  const onFindKey = (event) => {
+    const first = listRef.current?.querySelector('.sitemenusheet__item')
+    if (!first) return
+    if (event.key === 'Enter') { event.preventDefault(); first.click() }
+    if (event.key === 'ArrowDown') { event.preventDefault(); first.focus() }
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -94,7 +149,7 @@ function SiteMenuModal({ onClose }) {
       onClose={onClose}
       onClick={(e) => e.target === dialogRef.current && close()}
     >
-      <div className="sheet sitemenusheet">
+      <div className={`sheet sitemenusheet${term ? ' sitemenusheet--finding' : ''}`}>
         <div className="sitemenusheet__head">
           <div>
             <p className="sitemenusheet__note">Tally Baseball</p>
@@ -105,63 +160,131 @@ function SiteMenuModal({ onClose }) {
           </IconButton>
         </div>
 
-        <div className="sitemenusheet__scroll">
-          {MENU_GROUPS.map((group) => (
-            <Card key={group.id} body="flush" className="sitemenusheet__group">
-              <DirectoryHeading group={group} as="h3" />
-              <ul className="navdir__list">
-                {group.pages.map((item) => {
-                  const props = linkProps(item.path)
-                  return (
+        <nav className="sitemenusheet__yours" aria-label={YOURS.label}>
+          {YOURS.pages.map((item) => (
+            <a key={item.path} className="btn" {...rowProps(item.path)}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="sitemenusheet__find">
+          <div className="searchfield">
+            <span className="searchfield__glyph" aria-hidden="true">
+              <FindGlyph />
+            </span>
+            <input
+              type="search"
+              enterKeyHint="go"
+              className="searchfield__input"
+              placeholder="Find a page"
+              aria-label="Find a page"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onFindKey}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+          </div>
+          <p className="sitemenusheet__count" aria-live="polite">
+            {term ? `${hits} page${hits === 1 ? '' : 's'}` : ''}
+          </p>
+        </div>
+
+        <div className="sitemenusheet__scroll" ref={listRef}>
+          {groups.map((group, i) => {
+            const open = wide || term !== '' || (folded[group.id] ?? i < 2)
+            return (
+              <Card key={group.id} frame="stamped" body="flush" className="sitemenusheet__group">
+                {wide || term ? (
+                  <DirectoryHeading group={group} as="h3" count={group.pages.length} />
+                ) : (
+                  <h3 className="sitemenusheet__fold">
+                    <button
+                      type="button"
+                      className="sitemenusheet__toggle"
+                      aria-expanded={open}
+                      onClick={() => setFolded((f) => ({ ...f, [group.id]: !open }))}
+                    >
+                      <DirectoryHeading group={group} as="span" count={group.pages.length} />
+                      <span className="sitemenusheet__sign" aria-hidden="true">{open ? '–' : '+'}</span>
+                    </button>
+                  </h3>
+                )}
+                <ul className="navdir__list" hidden={!open}>
+                  {group.shown.map((item) => (
                     <li key={item.path}>
-                      <a
-                        className="dirlink sitemenusheet__item"
-                        href={props.href}
-                        onClick={(event) => {
-                          props.onClick(event)
-                          // A guide link is left to the browser, which unmounts
-                          // this sheet on its own; close only when we handled it.
-                          if (event.defaultPrevented) close()
-                        }}
-                      >
+                      <a className="dirlink dirlink--described sitemenusheet__item" {...rowProps(item.path)}>
+                        {item.label}
+                        <span className="dirlink__desc">
+                          {item.desc}
+                          {item.was && <span className="dirlink__was"> (was {item.was})</span>}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )
+          })}
+          {term && hits === 0 && (
+            <p className="sitemenusheet__empty">No page matches that. Try a stat, a club word, or “umpire”.</p>
+          )}
+          {!term && (
+          <div className="navdir__trail sitemenusheet__trail">
+            {TRAIL.map((group) => (
+              <div key={group.id} className="navdir__trail-group">
+                <DirectoryHeading group={group} as="h3" />
+                <ul className="navdir__list">
+                  {group.pages.map((item) => (
+                    <li key={item.path}>
+                      <a className="dirlink dirlink--trail" {...rowProps(item.path)}>
                         {item.label}
                         {/* Says the row leaves the app for a server-rendered
-                            document — the same tag /more puts on the same rows,
-                            and visible text rather than a title= tooltip, which
-                            is invisible on the phone this app is built for. */}
+                            document — visible text, never a title= tooltip. */}
                         {isGuidePath(item.path) && <span className="dirtag">Guide</span>}
                       </a>
                     </li>
-                  )
-                })}
-                {/* The admin row rides the last group's list ("The site"),
-                    which is already where the site's own pages live. It is not
-                    a MENU_GROUPS entry: that registry also feeds both footers
-                    and /more, none of which is role-aware, so an entry there
-                    would print /admin for every visitor. See AdminMenuLink. */}
-                {AdminMenuLink && group.id === MENU_GROUPS[MENU_GROUPS.length - 1].id && (
-                  <Suspense fallback={null}>
-                    <AdminMenuLink onNavigate={close} />
-                  </Suspense>
-                )}
-              </ul>
-            </Card>
-          ))}
+                  ))}
+                  {/* The admin row rides "The site", where the site's own pages
+                      live. Not a MENU_GROUPS entry: that registry also feeds
+                      both footers and /more, none of them role-aware. */}
+                  {AdminMenuLink && group.id === 'tools' && (
+                    <Suspense fallback={null}>
+                      <AdminMenuLink onNavigate={close} />
+                    </Suspense>
+                  )}
+                </ul>
+              </div>
+            ))}
+          </div>
+          )}
         </div>
 
         <div className="sitemenusheet__foot">
-          <button
-            type="button"
-            className="navdir__everything"
-            onClick={() => {
-              close()
-              navigate('/more')
-            }}
-          >
-            Everything, on one page
-          </button>
+            <button
+              type="button"
+              className="navdir__everything"
+              onClick={() => {
+                close()
+                navigate('/more')
+              }}
+            >
+              Everything, on one page
+            </button>
         </div>
       </div>
     </dialog>
+  )
+}
+
+function FindGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" strokeWidth="2" />
+      <path d="m12 12 4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   )
 }

@@ -32,7 +32,7 @@ const ROLES = [
 // leaving the season out here would make a row flag that the page then denies. The page
 // says so under the list.
 export function OutliersPage({ asOf = null }) {
-  useDocumentTitle('Standing out')
+  useDocumentTitle('Hot & Cold')
   const navigate = useNav()
   const today = slateToday()
   const season = Number((asOf || today).slice(0, 4))
@@ -57,7 +57,7 @@ export function OutliersPage({ asOf = null }) {
       <div className="screen outl">
         <SiteHeader />
         <header className="topbar">
-          <h1 className="topbar__title">Standing out</h1>
+          <h1 className="topbar__title">Hot &amp; Cold</h1>
         </header>
         <AsyncStatus
           loading={loading}

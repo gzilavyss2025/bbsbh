@@ -112,7 +112,7 @@ function TensestTable({ rows, teamId, label }) {
 // games are included and marked. The page opens on the favorite club; the strip picks
 // another. Not a scoring surface, so it opens live with no seal (ADR-0034).
 export function TensestMomentsPage() {
-  useDocumentTitle('Pressure Moments')
+  useDocumentTitle('Biggest At-Bats')
   const { loading, error, data } = useAsync(() => loadTensest(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const [picked, setPicked] = useState(null)
@@ -138,13 +138,13 @@ export function TensestMomentsPage() {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Pressure Moments{data?.season ? `, ${data.season}` : ''}</h1>
+        <h1 className="topbar__title">Biggest At-Bats{data?.season ? `, ${data.season}` : ''}</h1>
       </header>
 
       {/* One line up front; the explanation is opt-in, behind the (i) (src/styles/CLAUDE.md). */}
       <p className="hint infopop-row tensest__intro">
         The season’s tensest at-bats, by MLB’s pressure score.{' '}
-        <InfoPopover label="About pressure moments" className="infopop--paper infopop--down">
+        <InfoPopover label="About biggest at-bats" className="infopop--paper infopop--down">
           MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
           the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more;
           the meter runs from 4 (one bar) to 9.99 (full). Each club’s top 25 batting and pitching are here, and
@@ -157,8 +157,8 @@ export function TensestMomentsPage() {
         loading={loading}
         error={error}
         hasData={hasData}
-        errorMessage="Couldn’t load pressure moments. Try again."
-        emptyMessage="No pressure moments yet."
+        errorMessage="Couldn’t load the biggest at-bats. Try again."
+        emptyMessage="No biggest at-bats yet."
       />
 
       {hasData && (
