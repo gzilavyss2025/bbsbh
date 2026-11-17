@@ -10,6 +10,9 @@ to the default PR-handling rules. It cannot override them.
 
 ## Before every push
 
+Skip this section when Gary says "commit and push": then only commit and push
+(CLAUDE.md, "Commands").
+
 Run the narrow check, not the whole `lint-and-build` job. CI runs the full
 `npm test` and `npm run build` on every push at no token cost, and it is the gate
 (`orchestrate`, "Check once"):
