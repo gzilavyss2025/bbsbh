@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
-import { isBlank, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
-import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
+import { isBlank, mayMatch, needsWinProb, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
+import { attachSeries, attachWinProbSeason, coverage, dropSeason, dropSeasonsExcept, fetchIndex, hasWinProb, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
 // THE SEARCH behind /research (#2234, scope #2): which seasons a query reads, loading them,
 // and the answer. filters.js seasonsFor picks the seasons. Two shapes:
@@ -39,12 +39,15 @@ export function useResearch(q, cutoff) {
 
   const targets = useMemo(() => seasonsFor(q, onFile, cutoff), [q, onFile, cutoff])
   // A chip the searched seasons cannot answer stays in the URL but out of the query.
-  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
+  // Win probability (#3141) needs every searched month's side file; until a backfill, the
+  // Leverage card and the Win prob toggle are blocked like a card awaiting a rebuild.
+  const winProb = useMemo(() => Boolean(index && targets.length && hasWinProb(index, targets)), [index, targets])
+  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets), winProb) : []), [targets, index, winProb])
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]
-    return { ...q, chips }
-  }, [q, blocked])
+    return { ...q, chips, wp: q.wp && winProb }
+  }, [q, blocked, winProb])
   const blank = isBlank(live)
 
   // The "Who most" rank and minimum re-rank the answer on the page, so they never re-search.
@@ -75,6 +78,8 @@ export function useResearch(q, cutoff) {
         const data = await raceAbort(loadSeason(index, season), ctrl.signal)
         // A Series game chip needs the season's postseason schedule (#3141).
         if (live.chips.sg?.vals.length) await raceAbort(attachSeries(season, data.pas), ctrl.signal)
+        // The Win prob toggle or a Leverage chip needs the month side files (#3141).
+        if (needsWinProb(live)) await raceAbort(attachWinProbSeason(data), ctrl.signal)
         inflight = null
         Object.assign(people, data.people)
         searched.push(season)
@@ -121,5 +126,5 @@ export function useResearch(q, cutoff) {
   }
 
   const cover = index && (run?.searched?.length || targets.length) ? coverage(index, run?.searched?.length && !run.progress ? run.searched : targets) : null
-  return { index, error: error ?? run?.error ?? null, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
+  return { index, error: error ?? run?.error ?? null, winProb, head, onFile, targets, blocked, live, blank, run, stop, cover, latest }
 }

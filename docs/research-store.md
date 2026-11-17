@@ -121,6 +121,26 @@ All-Star, so a default count or leader board stays official games, and `AL`/`NL`
 the club pickers.
 A July shard built before 2026-11-16 holds no All-Star game until it is rebuilt.
 
+## Win probability (#3141, Gary 2026-11-16/17)
+
+**Side file per month**: `research/v1/{season}/{MM}.wp.json`, written with each shard by
+`gen-research-store.mjs` (`winprob.js` `encodeWinProb`): per decoded PA, summed Savant
+`delta_home_win_exp` (x1000, home view) and `delta_run_exp` (x100, batting view). About 11%
+of a shard gzipped (measured on 2025-06-15: 4.5 KB vs 39.4 KB). The index marks such a month
+`wp: 1`. The main shards did not change and were not rebuilt; a month built before this has
+no side file until a backfill (`research-store.yml`) rebuilds it, and until then the
+Leverage card and the Win prob toggle are blocked for its season ("not built yet").
+
+**Loaded only when asked**: the **Win prob** toggle (`wp=1`) or a **Leverage** chip (`lev`).
+Then `store.js` `attachWinProbSeason` sets `wpa` (batting club's view), `re24` and `li` on
+each PA. The rows show them; the summary line adds summed WPA and RE24 and the mean LI.
+
+**Leverage Index**: Savant has none. `scripts/research/gen-leverage.mjs` (hand-run) builds
+`public/data/leverage-index.json` from the 2024-2025 regular seasons, Tango's method: a
+state's mean |WPA| over the league's mean |WPA|. State: inning (9 = 9th or later), half,
+outs, runners, batting margin clamped to ±4, at the PA's start; a state with fewer than 30
+PAs falls back to inning + half + margin. Buckets: Low < 0.85, Medium, High > 2.0.
+
 ## History store, 1961-2014 (#3135)
 
 A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from

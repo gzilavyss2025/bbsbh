@@ -1641,6 +1641,10 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `research/gen-leverage.mjs` → `public/data/leverage-index.json`, the Leverage Index of
+  each game state for /research (#3141). Reads every regular-season day of `--seasons`
+  (default 2024,2025) from Savant, about an hour. **Hand-run, NOT on a cron**: LI by state
+  barely moves; rerun after a rule change. Method: `docs/research-store.md`, "Win probability".
 - `research/gen-retro-store.mjs` → Vercel Blob `retro/v1/` (NOT `public/data`), the
   1961-2014 history store (#3135): one row per regular-season plate appearance from
   Retrosheet, run through Chadwick's `cwevent` and joined to gamePk and MLBAM ids. Month

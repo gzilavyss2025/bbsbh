@@ -71,7 +71,7 @@ export function ResearchPage() {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${buildQuery(next, { d: cutoff })}`)
     setState({ q: next, cutoff })
   }
-  const { error, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
+  const { error, winProb, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   // A card a season predates is always named; one waiting on a store rebuild only if picked.
   const shownBlocked = blocked.filter((b) => b.since || q.chips[b.key])
   const data = head
@@ -98,7 +98,7 @@ export function ResearchPage() {
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
           {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
-          {shownBlocked.length > 0 && ` · not in this range: ${shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`).join(', ')}`}
+          {(shownBlocked.length > 0 || (q.wp && !winProb)) && ` · not in this range: ${[...shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`), ...(q.wp && !winProb ? ['Win prob (not built yet)'] : [])].join(', ')}`}
         </p>
       )}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
@@ -128,7 +128,7 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && <AnswerCard ask={q.ask} q={q} a={result} people={people} />}
+      {result && <AnswerCard ask={q.ask} q={q} a={result} people={people} wp={live.wp} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -136,8 +136,13 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
+      {data && !start && (
+        <Cluster>
+          <Button size="control" pressed={q.wp} onClick={() => setQ({ ...q, wp: !q.wp })}>Win prob</Button>
+        </Cluster>
+      )}
       {result && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
-      {result && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} />}
+      {result && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
     </Stack>
   )
 
