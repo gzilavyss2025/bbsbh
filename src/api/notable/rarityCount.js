@@ -1,5 +1,6 @@
 // "The 9th natural cycle since 1950, the Brewers' 1st." The rarity count for a natural cycle,
-// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs or six-plus double plays by one club (#2968), from the feat index (public/data/notable/).
+// an unassisted triple play, an immaculate inning, a four-homer game, four straight home runs, six-plus double plays by one club
+// or a home run on a first MLB pitch (#2968), from the feat index (public/data/notable/).
 //
 // REVEAL-ONLY (ADR-0101, ADR-0001). The docs and the count name results, so this module takes the
 // docs as an argument and never fetches. hooks/callouts/useLastTime.js calls it only inside the
@@ -16,7 +17,8 @@
 // scripts/lib/notable/immaculate.mjs, the first year with real pitches), 1901 for four-homer games
 // (fourhr.json, read off the hitting game logs), FOURSTRAIGHT_FLOOR for four straight home runs
 // (scripts/lib/notable/fourstraight.mjs, the first season whose four-homer games all have plays), 1901
-// for six-plus double plays (sixdp.json, read off the team fielding game logs).
+// for six-plus double plays (sixdp.json, read off the team fielding game logs), FIRSTPITCH_FLOOR (2001) for a
+// home run on a first MLB pitch (scripts/lib/notable/rarity/firstpitch.mjs, real pitch sequences).
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
 import { detectPlayFeat, possessive, priorRows, tonightOf, yearOf } from '../callout-notes/lastTime.js'
@@ -32,6 +34,7 @@ export const RARITY = {
   fourhr: { flag: null, noun: 'four-homer game' },
   fourstraight: { flag: null, noun: 'set of four straight home runs' },
   sixdp: { flag: null, noun: 'game with six or more double plays' },
+  firstpitch: { flag: null, noun: 'home run on a first MLB pitch' },
 }
 
 // A natural cycle: the batter's hits hold a single, then a double, then a triple, then a home
@@ -165,6 +168,27 @@ export function sixDoublePlays(allPlays) {
   return ['away', 'home'].filter((side) => turned[side] >= 6).map((side) => ({ side }))
 }
 
+// A home run on the first pitch of the batter's first plate appearance of the game: true, false,
+// or null when the feed has no plays or the batter never batted. The plate appearance holds one
+// pitch and ends in a home run. Whether it was his first in the majors is the caller's question
+// (scripts/lib/notable/firstpitch.mjs reads his logs; the page reads his debut date).
+export function firstPitchHomer(allPlays, batterId) {
+  const pa = orderedPlays({ allPlays }).find((p) => p.matchup?.batter?.id === batterId)
+  if (!pa) return null
+  const pitches = (pa.playEvents ?? []).filter((e) => e.isPitch)
+  return pa.result?.eventType === 'home_run' && pitches.length === 1
+}
+
+// True when the box score says the batter had a plate appearance before tonight's this season
+// (season total above tonight's), or cannot say. `seasonStats` in a Final feed includes the game.
+function battedBeforeTonight(feed, batterId) {
+  const teams = feed?.liveData?.boxscore?.teams
+  const bp = teams?.away?.players?.[`ID${batterId}`] ?? teams?.home?.players?.[`ID${batterId}`]
+  const season = bp?.seasonStats?.batting?.plateAppearances
+  const tonight = bp?.stats?.batting?.plateAppearances
+  return !(Number.isInteger(season) && Number.isInteger(tonight)) || season > tonight
+}
+
 // The first year the flag is known for every row from then on: the year after the newest
 // unflagged row, and never before the oldest flagged one. null when no flagged row is left.
 export function floorYear(rows, flag) {
@@ -205,6 +229,21 @@ export function detectRareFeats(feed) {
   for (const f of immaculateInnings(plays) ?? []) out.push({ kind: 'immaculate', ...f })
   for (const f of fourStraightHomers(plays) ?? []) out.push({ kind: 'fourstraight', ...f })
   for (const f of sixDoublePlays(plays) ?? []) out.push({ kind: 'sixdp', ...f })
+  // A home run on a first MLB pitch: the batter's first plate appearance tonight is a one-pitch home
+  // run, he debuted this season, and the box score shows no plate appearance before tonight's
+  // (a debut days earlier off the bench counts: Willson Contreras, gamePk 447906). A player who
+  // debuted in an earlier season and never batted (a pitcher) is missed, never miscounted.
+  const year = (feed?.gameData?.datetime?.officialDate ?? '').slice(0, 4)
+  const firstPa = new Set()
+  for (const p of plays) {
+    const batter = p.matchup?.batter
+    if (batter?.id == null || firstPa.has(batter.id)) continue
+    firstPa.add(batter.id)
+    const debut = feed.gameData?.players?.[`ID${batter.id}`]?.mlbDebutDate ?? ''
+    if (!year || debut.slice(0, 4) !== year || !firstPitchHomer([p], batter.id)) continue
+    if (battedBeforeTonight(feed, batter.id)) continue
+    out.push({ kind: 'firstpitch', side: p.about?.halfInning === 'top' ? 'away' : 'home', player: { id: batter.id, name: batter.fullName ?? '' } })
+  }
   return out
 }
 

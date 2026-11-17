@@ -4,7 +4,7 @@ import { GAME_TYPES, LEAGUE_NAMES } from './rules.mjs'
 
 export const KINDS = ['nohitters', 'cycles', 'tripleplays']
 // The kinds whose row names one player, keyed on the gamePk and that player.
-export const PLAYER_KINDS = new Set(['cycles', 'immaculate', 'fourhr'])
+export const PLAYER_KINDS = new Set(['cycles', 'immaculate', 'fourhr', 'firstpitch'])
 
 // EVERY KEY A FILE MAY CARRY, in one place. test/notable.test.js reads the committed
 // files and fails on any key at any depth that is not here. The score is in a row on
@@ -17,7 +17,7 @@ export const ALLOWED_KEYS = {
     // every kind
     'gamePk', 'officialDate', 'gameType', 'gameNumber', 'away', 'home',
     // the kind's own: no-hitter (side, pitchers, shortened, lost), cycle (player, side),
-    // triple play, four straight home runs and six-plus double plays (side), immaculate inning and four-homer game (player, side); the rarity flags, cycle (natural) and triple play (unassisted),
+    // triple play, four straight home runs and six-plus double plays (side), immaculate inning, four-homer game and home run on a first MLB pitch (player, side); the rarity flags, cycle (natural) and triple play (unassisted),
     // only where the play-by-play says (lib/notable/flags.mjs, #2968)
     'side', 'pitchers', 'shortened', 'lost', 'player', 'natural', 'unassisted',
   ],

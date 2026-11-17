@@ -311,7 +311,7 @@ don't run these by hand.
   2021–2026 is about 14.6k calls at concurrency 20; `--from=2021 --to=2026` runs that backfill.
   Incremental, with the scan at `scripts/data/outfield-outs-scan.json`. The default season is
   `fetchSeasonInPlay()`, not the calendar year (#1465).
-- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp}.json` — the
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp,firstpitch}.json` — the
   games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
   THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
@@ -348,6 +348,11 @@ don't run these by hand.
   Six-plus double plays (#2968, `sixdp.json`): a club's fielding game line with 6 or more
   `doublePlays`, read off the same fielding logs as the triple plays (no extra call); one row per
   gamePk and fielding side, whole seasons, from 1901.
+  A home run on a first MLB pitch (#2968, `firstpitch.json`, `lib/notable/rarity/firstpitch.mjs`): each
+  player's first game of the season with a plate appearance, read off his hitting log; when it holds a
+  home run, that game's play-by-play (first plate appearance one pitch, a homer), and for a player who
+  debuted earlier his year-by-year line (no plate appearance before). Whole seasons, from 2001 (real
+  pitch sequences); about 20 extra calls a season.
   Each run REPLACES every row of each season it swept, in every file (immaculate.json re-reads a window on the nightly run; a corrected
   upstream row must not leave a ghost row), and writes after each season.
   `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play

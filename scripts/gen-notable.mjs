@@ -1,4 +1,4 @@
-// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp}.json: the games behind
+// Regenerates public/data/notable/{nohitters,cycles,tripleplays,immaculate,fourhr,fourstraight,sixdp,firstpitch}.json: the games behind
 // the "Notable games" shelf (D4 in .scratch/old-games/decisions.md, ADR-0101 DRAFT).
 // A no-hitter, a cycle and a triple play, from the MLB Stats API alone: every row has a
 // gamePk, so a row opens its game with no join. AL and NL games only (D6); the regular
@@ -52,10 +52,11 @@ import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 import { flagRows } from './lib/notable/flags.mjs'
 import { FOURSTRAIGHT_FLOOR, fetchFourStraight } from './lib/notable/fourstraight.mjs'
+import { FIRSTPITCH_FLOOR, fetchFirstPitch } from './lib/notable/rarity/firstpitch.mjs'
 import { IMMACULATE_FLOOR, fetchImmaculate, gamesToRead, mergeWindow, readFrom } from './lib/notable/immaculate.mjs'
 
 const root = join(import.meta.dirname, '..')
-const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json', fourstraight: 'fourstraight.json', sixdp: 'sixdp.json' }
+const FILES = { nohitters: 'nohitters.json', cycles: 'cycles.json', tripleplays: 'tripleplays.json', immaculate: 'immaculate.json', fourhr: 'fourhr.json', fourstraight: 'fourstraight.json', sixdp: 'sixdp.json', firstpitch: 'firstpitch.json' }
 
 const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
@@ -81,7 +82,7 @@ const get = async (path) => {
 
 const seed = (await readJsonOr(join(root, 'scripts', 'notable-seed.json'), {})) ?? {}
 const docs = {}
-for (const kind of [...KINDS, 'immaculate', 'fourhr', 'fourstraight', 'sixdp']) {
+for (const kind of [...KINDS, 'immaculate', 'fourhr', 'fourstraight', 'sixdp', 'firstpitch']) {
   const prev = await readJsonOr(join(outDir, FILES[kind]), null)
   docs[kind] = prev?.coverage && Array.isArray(prev.rows) ? prev : emptyDoc()
 }
@@ -146,6 +147,18 @@ for (const season of seasons) {
     }
     await write('fourstraight')
     counts.push(`${rows.length} fourstraight`)
+  }
+  // A home run on a first MLB pitch (#2968, lib/notable/rarity/firstpitch.mjs): the hitting logs, then
+  // the play-by-play of each player's first game with a plate appearance when it holds a home run.
+  if (season >= FIRSTPITCH_FLOOR) {
+    const { rows, unknown } = await fetchFirstPitch(get, swept.gameMap, season)
+    if (unknown.length) console.log(`  ${season}: ${unknown.length} first-PA games with no plays, not counted: ${unknown.join(', ')}`)
+    docs.firstpitch = {
+      coverage: mergeCoverage(docs.firstpitch.coverage, [season], swept.through),
+      rows: mergeRows('firstpitch', docs.firstpitch.rows, [season], rows),
+    }
+    await write('firstpitch')
+    counts.push(`${rows.length} firstpitch`)
   }
   console.log(`  ${season}: ${counts.join(', ')} (through ${swept.through})`)
 }

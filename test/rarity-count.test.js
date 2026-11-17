@@ -1,14 +1,15 @@
-// The rarity count (#2968): natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays:
+// The rarity count (#2968): natural cycle, unassisted triple play, immaculate inning, four-homer game, four straight home runs, six-plus double plays, home run on a first MLB pitch:
 // src/api/notable/rarityCount.js and the generator's flags (scripts/lib/notable/flags.mjs).
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  buildRarityNotes, detectRareFeats, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
+  buildRarityNotes, detectRareFeats, firstPitchHomer, floorYear, gameHasUnassistedTriplePlay, fourStraightHomers, immaculateInnings, isNaturalCycle, sixDoublePlays, isUnassistedTriplePlay,
 } from '../src/api/notable/rarityCount.js'
 import { flagRow, flagRows } from '../scripts/lib/notable/flags.mjs'
 import { candidateGames, fetchFourStraight, fourStraightRows } from '../scripts/lib/notable/fourstraight.mjs'
 import { fetchImmaculate, gamesToRead, mergeWindow, readFrom } from '../scripts/lib/notable/immaculate.mjs'
+import { fetchFirstPitch, firstPaCandidate, priorPlateAppearances } from '../scripts/lib/notable/rarity/firstpitch.mjs'
 
 const BATTER = 1
 const play = (i, eventType, { batter = BATTER, half = 'top', runners = [] } = {}) => ({
@@ -371,4 +372,82 @@ test('the committed six-plus double play index holds the 7-DP games (slice 6)', 
   // ESPN (#2968 sources): three clubs turned 7 in a nine-inning game.
   for (const g of ['1942-08-14 NYY', '1969-05-04 HOU', '2018-08-17 CHC']) assert.ok(games.includes(g), g)
   assert.equal(doc.coverage.seasons[0], 1901)
+})
+
+// ---- a home run on a first MLB pitch (slice 7) ----
+
+const pitch = () => ({ isPitch: true })
+const pa = (i, eventType, pitches, opts) => ({ ...play(i, eventType, opts), playEvents: Array.from({ length: pitches }, pitch) })
+
+test('a first-pitch home run: the first plate appearance of the game is one pitch and a homer', () => {
+  assert.equal(firstPitchHomer([pa(0, 'home_run', 1)], BATTER), true)
+  assert.equal(firstPitchHomer([pa(0, 'home_run', 3)], BATTER), false)
+  // a one-pitch homer in his second plate appearance is not his first pitch
+  assert.equal(firstPitchHomer([pa(0, 'field_out', 2), pa(1, 'home_run', 1)], BATTER), false)
+  assert.equal(firstPitchHomer([pa(0, 'home_run', 1, { batter: 2 })], BATTER), null)
+})
+
+// A Final feed: the batter debuted this season, and the box score's season line (as of the game,
+// read on gamePk 447906) says whether he batted before tonight.
+const debutFeed = ({ debut = '2026-08-01', seasonPa = 4, tonightPa = 4, plays = [pa(0, 'home_run', 1)] } = {}) => ({
+  gameData: { datetime: { officialDate: '2026-08-01' }, players: { [`ID${BATTER}`]: { mlbDebutDate: debut } } },
+  liveData: {
+    plays: { allPlays: plays },
+    boxscore: { teams: { away: { players: { [`ID${BATTER}`]: { seasonStats: { batting: { plateAppearances: seasonPa } }, stats: { batting: { plateAppearances: tonightPa } } } } }, home: { players: {} } } },
+  },
+})
+const firstPitchFeats = (f) => detectRareFeats(f).filter((x) => x.kind === 'firstpitch')
+
+test('the page finds a first-pitch home run only when it was his first plate appearance', () => {
+  assert.deepEqual(firstPitchFeats(debutFeed()), [{ kind: 'firstpitch', side: 'away', player: { id: BATTER, name: 'Pat Hitter' } }])
+  // debuted off the bench two days earlier, no plate appearance (Willson Contreras, 2016)
+  assert.equal(firstPitchFeats(debutFeed({ debut: '2026-07-30' })).length, 1)
+  // batted in an earlier game this season (game 1 of a doubleheader)
+  assert.equal(firstPitchFeats(debutFeed({ seasonPa: 7 })).length, 0)
+  // debuted in an earlier season: the page cannot tell, so it says nothing
+  assert.equal(firstPitchFeats(debutFeed({ debut: '2025-09-01' })).length, 0)
+  // a one-pitch homer that was not his first plate appearance of the game
+  assert.equal(firstPitchFeats(debutFeed({ plays: [pa(0, 'single', 2), pa(1, 'home_run', 1)] })).length, 0)
+})
+
+test('the generator takes his first game with a plate appearance, and only when it holds a homer', () => {
+  const g = (pk, date, n = 1) => [pk, { gamePk: pk, officialDate: date, gameNumber: n, gameType: 'R', away: { id: 158 }, home: { id: 112 } }]
+  const map = new Map([g(1, '2026-05-01'), g(2, '2026-05-02', 1), g(3, '2026-05-02', 2)])
+  const split = (pk, paCount, hr) => ({ game: { gamePk: pk }, team: { id: 158 }, stat: { plateAppearances: paCount, homeRuns: hr } })
+  const person = (splits) => ({ id: 9, fullName: 'Pat Hitter', mlbDebutDate: '2026-05-01', stats: [{ splits }] })
+  // no plate appearance in game 1 (a defensive debut), his first comes in game 2 of the doubleheader
+  assert.equal(firstPaCandidate(person([split(3, 4, 1), split(1, 0, 0), split(2, 3, 1)]), map).game.gamePk, 2)
+  assert.equal(firstPaCandidate(person([split(2, 3, 0), split(3, 4, 1)]), map), null)
+  const career = { stats: [{ splits: [{ season: '2024', stat: { plateAppearances: 0 } }, { season: '2025', stat: { plateAppearances: 2 } }, { season: '2026', stat: { plateAppearances: 9 } }] }] }
+  assert.equal(priorPlateAppearances(career, 2026), 2)
+  assert.equal(priorPlateAppearances(career, 2025), 0)
+})
+
+test('fetchFirstPitch keeps a debut first-pitch homer and checks a veteran pitcher\'s career', async () => {
+  const map = new Map([[1, { gamePk: 1, officialDate: '2026-05-01', gameNumber: 1, gameType: 'R', away: { id: 158, abbr: 'MIL', name: 'Milwaukee Brewers', runs: 3 }, home: { id: 112, abbr: 'CHC', name: 'Chicago Cubs', runs: 2 } }]])
+  const split = { game: { gamePk: 1 }, team: { id: 158 }, stat: { plateAppearances: 1, homeRuns: 1 } }
+  const get = async (path) => {
+    if (path.includes('/sports/1/players')) return { people: [{ id: 1 }, { id: 2 }] }
+    if (path.includes('/people?')) return { people: [{ id: 1, fullName: 'Rook', mlbDebutDate: '2026-05-01', stats: [{ splits: [split] }] }, { id: 2, fullName: 'Vet', mlbDebutDate: '2020-05-01', stats: [{ splits: [split] }] }] }
+    if (path.includes('/playByPlay')) return { allPlays: [pa(0, 'home_run', 1, { batter: 1 }), pa(1, 'home_run', 1, { batter: 2 })] }
+    if (path.includes('/people/2/stats')) return { stats: [{ splits: [{ season: '2020', stat: { plateAppearances: 3 } }] }] }
+    throw new Error(path)
+  }
+  const { rows } = await fetchFirstPitch(get, map, 2026)
+  assert.deepEqual(rows.map((r) => r.player.name), ['Rook'])
+  assert.equal(rows[0].side, 'away')
+})
+
+test('the first-pitch home run count runs from 2001, tonight not counted twice', () => {
+  const r = (pk, date, club) => ({ gamePk: pk, officialDate: date, gameNumber: 1, side: 'away', player: { id: pk }, away: { id: club }, home: { id: 1 } })
+  const idx = { firstpitch: { coverage: { seasons: Array.from({ length: 26 }, (_, i) => 2001 + i) }, rows: [r(1, '2006-09-02', 114), r(2, '2021-04-04', 158), r(6, '2026-08-01', 158)] } }
+  const [note] = buildRarityNotes(idx, feed, { kind: 'firstpitch', side: 'away', player: { id: 6, name: 'Pat Hitter' } })
+  assert.equal(note.text, "The 3rd home run on a first MLB pitch since 2001, the Brewers' 2nd.")
+})
+
+test('the committed first-pitch index holds the known 2001 to 2021 home runs (slice 7)', () => {
+  const doc = JSON.parse(readFileSync(new URL('../public/data/notable/firstpitch.json', import.meta.url)))
+  const names = doc.rows.map((r) => r.player.name)
+  for (const n of ['Gene Stechschulte', 'Kazuo Matsui', 'Adam Wainwright', 'Kevin Kouzmanoff', 'Willson Contreras', 'Akil Baddoo']) assert.ok(names.includes(n), n)
+  assert.equal(doc.coverage.seasons[0], 2001)
 })
