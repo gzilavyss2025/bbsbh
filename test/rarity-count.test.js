@@ -392,8 +392,8 @@ test('a first-pitch home run: the first plate appearance of the game is one pitc
 
 // A Final feed: the batter debuted this season, and the box score's season line (as of the game,
 // read on gamePk 447906) says whether he batted before tonight.
-const debutFeed = ({ debut = '2026-08-01', seasonPa = 4, tonightPa = 4, plays = [pa(0, 'home_run', 1)] } = {}) => ({
-  gameData: { datetime: { officialDate: '2026-08-01' }, players: { [`ID${BATTER}`]: { mlbDebutDate: debut } } },
+const debutFeed = ({ debut = '2026-08-01', seasonPa = 4, tonightPa = 4, plays = [pa(0, 'home_run', 1)], type = 'R', sport = 1 } = {}) => ({
+  gameData: { game: { type }, teams: { home: { sport: { id: sport } } }, datetime: { officialDate: '2026-08-01' }, players: { [`ID${BATTER}`]: { mlbDebutDate: debut } } },
   liveData: {
     plays: { allPlays: plays },
     boxscore: { teams: { away: { players: { [`ID${BATTER}`]: { seasonStats: { batting: { plateAppearances: seasonPa } }, stats: { batting: { plateAppearances: tonightPa } } } } }, home: { players: {} } } },
@@ -409,6 +409,9 @@ test('the page finds a first-pitch home run only when it was his first plate app
   assert.equal(firstPitchFeats(debutFeed({ seasonPa: 7 })).length, 0)
   // debuted in an earlier season: the page cannot tell, so it says nothing
   assert.equal(firstPitchFeats(debutFeed({ debut: '2025-09-01' })).length, 0)
+  // a postseason or minor-league box score's season line cannot rule out an earlier MLB plate appearance
+  assert.equal(firstPitchFeats(debutFeed({ type: 'F' })).length, 0)
+  assert.equal(firstPitchFeats(debutFeed({ sport: 11 })).length, 0)
   // a one-pitch homer that was not his first plate appearance of the game
   assert.equal(firstPitchFeats(debutFeed({ plays: [pa(0, 'single', 2), pa(1, 'home_run', 1)] })).length, 0)
 })
@@ -463,4 +466,6 @@ test('the fold lists every earlier player of the club, none for a club kind', ()
   assert.ok(list[0].path)
   assert.equal(earlierList([]), null)
   assert.equal(earlierList([{ officialDate: '2001-01-01' }]), null)
+  // a row the feed left unnamed stays in the list, so it matches the count
+  assert.equal(earlierList([...three, row('', '2001-05-01')])[3].name, 'Name not listed')
 })

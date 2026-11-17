@@ -237,7 +237,10 @@ export function detectRareFeats(feed) {
   // run, he debuted this season, and the box score shows no plate appearance before tonight's
   // (a debut days earlier off the bench counts: Willson Contreras, gamePk 447906). A player who
   // debuted in an earlier season and never batted (a pitcher) is missed, never miscounted.
-  const year = (feed?.gameData?.datetime?.officialDate ?? '').slice(0, 4)
+  // MLB regular season only: a postseason or minor-league box score's `seasonStats` covers only
+  // that game type or level, so it cannot rule out an earlier MLB plate appearance.
+  const mlbRegular = feed?.gameData?.game?.type === 'R' && feed.gameData.teams?.home?.sport?.id === 1
+  const year = mlbRegular ? (feed.gameData.datetime?.officialDate ?? '').slice(0, 4) : ''
   const firstPa = new Set()
   for (const p of plays) {
     const batter = p.matchup?.batter
@@ -254,9 +257,10 @@ export function detectRareFeats(feed) {
 // Every earlier player of the club, newest first, for the card's fold under the line. null for a
 // club kind (no player) or none before.
 export function earlierList(clubRows) {
-  if (!clubRows.length || !clubRows.every((r) => r.player?.name)) return null
+  if (!clubRows.length || !clubRows.some((r) => r.player)) return null
   return clubRows.map((r) => ({
-    name: r.player.name,
+    // The generator writes '' when the feed left the name out: keep the row, so the list matches the count.
+    name: r.player?.name || 'Name not listed',
     year: yearOf(r.officialDate),
     path: gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1),
   }))

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { resolveCardPlayer } from '../../api/boxscore.js'
 import { PerformerCard } from '../../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../../components/playbyplay/CalloutNote.jsx'
@@ -165,10 +165,10 @@ function InsightNoteCard({ group }) {
       <span className="bs__noteBody">
         {group.personName && <span className="bs__noteWho">{group.personName}</span>}
         {group.notes.map((note, i) => (
-          <div key={i}>
+          <Fragment key={i}>
             <CalloutNote text={note.text} kind={note.kind} link={note.link} />
             {note.earlier && <EarlierFold note={note} />}
-          </div>
+          </Fragment>
         ))}
       </span>
     </Card>
@@ -182,8 +182,8 @@ function EarlierFold({ note }) {
     <details className="bs__noteMore">
       <summary>{note.earlier.length} earlier for the {note.teamName}</summary>
       <ul className="bs__noteMoreList">
-        {note.earlier.map((e) => (
-          <li key={e.path ?? `${e.name}${e.year}`}>
+        {note.earlier.map((e, i) => (
+          <li key={i}>
             <GameLink path={e.path}>{e.name}</GameLink> ({e.year})
           </li>
         ))}
