@@ -30,20 +30,25 @@
 //   fl       flags: 1 sac bunt, 2 sac fly, 4 double play, 8 triple play. Not in the
 //            2026-10-21 column list: added so the PA result chip's GIDP, double play, sac
 //            fly and sac bunt answer on history rows (event type alone cannot).
+//   er       runs on the play itself (v2, #3163): the batter and runners whose cwevent
+//            destination (58-61) is 4 or more, scored
+//   pr       runs that scored on non-PA events (a wild pitch, a balk, a steal of home) while
+//            this batter was up (v2). A half that ends with no PA after such a run (caught
+//            stealing for the third out) gives it to the club's last PA in the game.
 //
 // SPOILER CLASSIFICATION: spoiler-free. 1961 to 2014, all long final.
 
 import { historyEvent } from '../../../src/api/research/history.js'
 
-export const STORE_VERSION = 1
+export const STORE_VERSION = 2
 export const FIRST_SEASON = 1961
 export const LAST_SEASON = 2014
 
-export const PA_COLS = ['gamePk', 'ab', 'batter', 'pitcher', 'event', 'inn', 'half', 'outs', 'bases', 'balls', 'strikes', 'stand', 'throws', 'bsd', 'slot', 'hit', 'rbi', 'fl']
+export const PA_COLS = ['gamePk', 'ab', 'batter', 'pitcher', 'event', 'inn', 'half', 'outs', 'bases', 'balls', 'strikes', 'stand', 'throws', 'bsd', 'slot', 'hit', 'rbi', 'fl', 'er', 'pr']
 export const GAME_COLS = ['gamePk', 'date', 'home', 'away', 'park', 'venue', 'num', 'night', 'dh', 'pitches', 'homeRuns', 'awayRuns']
 
 // cwevent fields read (cwevent -d lists them). cwevent prints them in this order.
-const FIELDS = { gid: 0, inn: 2, half: 3, outs: 4, balls: 5, strikes: 6, pseq: 7, vis: 8, home: 9, bat: 12, bh: 13, pit: 16, ph: 17, r1: 26, r2: 27, r3: 28, slot: 33, ev: 34, batEv: 35, hit: 37, sh: 38, sf: 39, dp: 41, tp: 42, rbi: 43, evn: 96 }
+const FIELDS = { gid: 0, inn: 2, half: 3, outs: 4, balls: 5, strikes: 6, pseq: 7, vis: 8, home: 9, bat: 12, bh: 13, pit: 16, ph: 17, r1: 26, r2: 27, r3: 28, slot: 33, ev: 34, batEv: 35, hit: 37, sh: 38, sf: 39, dp: 41, tp: 42, rbi: 43, bd: 58, d1: 59, d2: 60, d3: 61, evn: 96 }
 export const CWEVENT_FIELDS = Object.values(FIELDS).join(',')
 const AT = Object.fromEntries(Object.keys(FIELDS).map((k, i) => [k, i]))
 
@@ -175,11 +180,28 @@ export function seasonRows(csv, retroGames, byId, mlbamOf) {
   const rows = []
   const gamesById = new Map()
   const stats = { pas: 0, skippedUnjoined: 0, noRawPlay: 0, pseqDiffers: 0, unbridged: new Set(), pitchString: 0, knownCount: 0 }
+  // Runs on non-PA events wait for the next PA of the same half (`pending`); a half that
+  // ends first gives them to that club's last row in the game (`lastOf`).
+  let pending = null
+  const lastOf = new Map()
+  const settle = () => {
+    if (!pending) return
+    const r = lastOf.get(pending.side)
+    if (r) r.pr += pending.runs
+    pending = null
+  }
   for (const line of csv.split(/\r?\n/)) {
     if (!line) continue
     const v = splitCsvLine(line)
-    if (v[AT.batEv] !== 'T') continue
     const gid = v[AT.gid]
+    const half = Number(v[AT.half])
+    const inHalf = `${gid}|${v[AT.inn]}|${half}`
+    if (pending && pending.inHalf !== inHalf) settle()
+    const scored = [AT.bd, AT.d1, AT.d2, AT.d3].filter((i) => Number(v[i]) >= 4).length
+    if (v[AT.batEv] !== 'T') {
+      if (scored) pending = { inHalf, side: `${gid}|${half}`, runs: scored + (pending?.runs ?? 0) }
+      continue
+    }
     const s = byId.get(gid)
     if (!s) {
       stats.skippedUnjoined++
@@ -197,7 +219,6 @@ export function seasonRows(csv, retroGames, byId, mlbamOf) {
     // Unknown count: '??' (1961-83) or an empty field (1984-87). cwevent prints 0-0 for both.
     const known = /^\d\d$/.test(rp[0])
     const date = iso(rg.info.date)
-    const half = Number(v[AT.half])
     const [vis, home] = [Number(v[AT.vis]), Number(v[AT.home])]
     const person = (rid) => {
       const id = mlbamOf(rid)
@@ -213,7 +234,10 @@ export function seasonRows(csv, retroGames, byId, mlbamOf) {
       stand: hand(v[AT.bh]), throws: hand(v[AT.ph]), bsd: half ? home - vis : vis - home,
       slot: Number(v[AT.slot]), hit: Number(v[AT.hit]), rbi: Number(v[AT.rbi]),
       fl: (flag(v[AT.sh]) ? 1 : 0) | (flag(v[AT.sf]) ? 2 : 0) | (flag(v[AT.dp]) ? 4 : 0) | (flag(v[AT.tp]) ? 8 : 0),
+      er: scored, pr: pending?.runs ?? 0,
     })
+    pending = null
+    lastOf.set(`${gid}|${half}`, rows.at(-1))
     stats.pas++
     if (pseq) stats.pitchString++
     if (known) stats.knownCount++
@@ -226,6 +250,7 @@ export function seasonRows(csv, retroGames, byId, mlbamOf) {
       })
     }
   }
+  settle()
   rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || a.gamePk - b.gamePk || a.ab - b.ab)
   const games = [...gamesById.values()].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || a.gamePk - b.gamePk)
   return { rows, games, stats: { ...stats, unbridged: [...stats.unbridged].sort() } }

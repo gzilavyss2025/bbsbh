@@ -79,9 +79,9 @@ test('splitCsvLine keeps a quoted comma', () => {
 })
 
 // One cwevent line in CWEVENT_FIELDS order.
-const FIELD_NAMES = ['gid', 'inn', 'half', 'outs', 'balls', 'strikes', 'pseq', 'vis', 'home', 'bat', 'bh', 'pit', 'ph', 'r1', 'r2', 'r3', 'slot', 'ev', 'batEv', 'hit', 'sh', 'sf', 'dp', 'tp', 'rbi', 'evn']
+const FIELD_NAMES = ['gid', 'inn', 'half', 'outs', 'balls', 'strikes', 'pseq', 'vis', 'home', 'bat', 'bh', 'pit', 'ph', 'r1', 'r2', 'r3', 'slot', 'ev', 'batEv', 'hit', 'sh', 'sf', 'dp', 'tp', 'rbi', 'bd', 'd1', 'd2', 'd3', 'evn']
 const line = (o) => {
-  const d = { gid: 'MIL201404010', inn: 1, half: 0, outs: 0, balls: 0, strikes: 0, pseq: '', vis: 0, home: 0, bat: 'heywj001', bh: 'L', pit: 'garzm001', ph: 'R', r1: '', r2: '', r3: '', slot: 1, ev: 2, batEv: 'T', hit: 0, sh: 'F', sf: 'F', dp: 'F', tp: 'F', rbi: 0, evn: 1, ...o }
+  const d = { gid: 'MIL201404010', inn: 1, half: 0, outs: 0, balls: 0, strikes: 0, pseq: '', vis: 0, home: 0, bat: 'heywj001', bh: 'L', pit: 'garzm001', ph: 'R', r1: '', r2: '', r3: '', slot: 1, ev: 2, batEv: 'T', hit: 0, sh: 'F', sf: 'F', dp: 'F', tp: 'F', rbi: 0, bd: '', d1: '', d2: '', d3: '', evn: 1, ...o }
   return FIELD_NAMES.map((k) => `"${d[k]}"`).join(',')
 }
 
@@ -132,7 +132,24 @@ test('seasonRows counts a pitch string that differs from the raw play line', () 
   assert.equal(stats.pseqDiffers, 1)
 })
 
-const row = (o) => ({ date: '2014-04-01', month: '04', pseq: 'X', gamePk: 1, ab: 1, batter: 1, pitcher: 2, event: 2, inn: 1, half: 0, outs: 0, bases: 0, balls: 0, strikes: 0, stand: 'R', throws: 'R', bsd: 0, slot: 1, hit: 0, rbi: 0, fl: 0, ...o })
+// #3163: runs on each PA (`er`) and runs on non-PA events while it was up (`pr`), from
+// cwevent's destination fields (4 and up: scored).
+test('seasonRows: runs on the play, and runs that scored between plays', () => {
+  const plays = Array.from({ length: 6 }, (_, i) => `play,1,0,heywj001,00,X,E${i}`)
+  const file = ['id,MIL201404010', 'info,visteam,ATL', 'info,hometeam,MIL', 'info,date,2014/04/01', ...plays].join('\n')
+  const csv = [
+    line({ evn: 1, ev: 20, bd: 1 }), // single
+    line({ evn: 2, ev: 9, batEv: 'F', r1: 'a', r3: 'b', d3: 4 }), // a wild pitch scores the runner from 3rd
+    line({ evn: 3, ev: 23, bd: 4, d1: 4, r1: 'a' }), // two-run homer
+    line({ evn: 4, ev: 20, bd: 1, half: 1 }), // bottom half: a single
+    line({ evn: 5, ev: 4, batEv: 'F', half: 1, r3: 'c', d3: 5 }), // a steal of home (unearned)...
+    line({ evn: 6, ev: 6, batEv: 'F', half: 1, outs: 2, r1: 'd', d1: 0 }), // ...then caught stealing ends the half
+  ].join('\n')
+  const { rows } = seasonRows(csv, parseEventFile(file), new Map([['MIL201404010', sched()]]), () => 1)
+  assert.deepEqual(rows.map((r) => [r.ab, r.er, r.pr]), [[1, 0, 0], [3, 2, 1], [4, 0, 1]], 'a half that ends with no PA gives its runs to the club’s last PA')
+})
+
+const row = (o) => ({ date: '2014-04-01', month: '04', pseq: 'X', gamePk: 1, ab: 1, batter: 1, pitcher: 2, event: 2, inn: 1, half: 0, outs: 0, bases: 0, balls: 0, strikes: 0, stand: 'R', throws: 'R', bsd: 0, slot: 1, hit: 0, rbi: 0, fl: 0, er: 0, pr: 0, ...o })
 
 test('monthShards: two parallel files per month, the same row order', () => {
   const shards = monthShards([row({ ab: 1 }), row({ ab: 2, pseq: 'BX' }), row({ date: '2014-05-01', month: '05', ab: 1 })], 2014)

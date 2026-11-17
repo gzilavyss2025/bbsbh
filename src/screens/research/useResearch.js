@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { answer, summarize } from '../../api/research/answer.js'
 import { isBlank, matcher, mayMatch, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
+
+// The first season game mode's Pitches total answers in (#3163).
+const PITCHES_SINCE = 1988
 import { GAME_CHIPS, answerGames, isGameBlank, summarizeGames } from '../../api/research/games.js'
 import { attachSeries, coverage, dropSeason, dropSeasonsExcept, fetchIndex, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
 
@@ -56,22 +59,31 @@ export function useResearch(q, cutoff) {
   }, [index, latest])
 
   // Game mode has no "What happens": a game link that asks it searches as "Last time".
-  // Game mode reads per-pitch runs (games.js) that history rows do not carry, so it stays on
-  // the Savant seasons (#3150); the coverage line says "games from 2015".
+  // Game mode reads runs per PA (games.js): a history season answers only once the store
+  // carries them (`gameRuns`, #3163); before that rebuild the coverage line says "games
+  // from 2015".
   const targets = useMemo(() => {
     const ts = seasonsFor(q.mode === 'game' && q.ask === 'what' ? { ...q, ask: 'last' } : q, onFile, cutoff)
-    return q.mode === 'game' ? ts.filter((s) => s > HISTORY_LAST) : ts
-  }, [q, onFile, cutoff])
-  // A chip the searched seasons cannot answer stays in the URL but out of the query.
-  const blocked = useMemo(() => (targets.length ? unsupported(Math.min(...targets), storeVersion(index, targets)) : []), [targets, index])
+    return q.mode === 'game' ? ts.filter((s) => s > HISTORY_LAST || index?.seasons[s]?.gameRuns) : ts
+  }, [q, onFile, cutoff, index])
   const game = q.mode === 'game'
+  // A chip the searched seasons cannot answer stays in the URL but out of the query. In game
+  // mode the Pitches total needs pitch strings, near-complete only from 1988 (Gary, #3163).
+  const blocked = useMemo(() => {
+    if (!targets.length) return []
+    const out = unsupported(Math.min(...targets), storeVersion(index, targets))
+    if (game && Math.min(...targets) < PITCHES_SINCE) out.push({ key: 'pi', label: 'Pitches', since: PITCHES_SINCE, total: true })
+    return out
+  }, [targets, index, game])
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]
     if (!game) return { ...q, chips }
+    const totals = { ...q.g?.totals }
+    for (const b of blocked) if (b.total) delete totals[b.key]
     // A game query keeps only the cards that describe a whole game, and no person.
     for (const k of Object.keys(chips)) if (!GAME_CHIPS.includes(k)) delete chips[k]
-    return { ...q, chips, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
+    return { ...q, chips, g: { ...q.g, totals }, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
   }, [q, blocked, game])
   const blank = game ? isGameBlank(live) : isBlank(live)
 
@@ -88,6 +100,11 @@ export function useResearch(q, cutoff) {
     let leftOut = 0
     const { res, ...baseChips } = live.chips // eslint-disable-line no-unused-vars
     const keep = matcher({ ...live, chips: baseChips }, cutoff)
+    // A one-pass game question over a range that reaches history (#3163) answers season by
+    // season and adds them up: a game never spans seasons, and a club filter cannot thin a
+    // season's PAs (a club-game needs both sides). `gameBase`: club-games in scope.
+    const perSeason = !bySeason && game && live.years?.[0] <= HISTORY_LAST
+    let gameBase = 0
     const people = { ...head.people }
     const searched = []
     const found = []
@@ -120,6 +137,12 @@ export function useResearch(q, cutoff) {
           // The progress answer is rebuilt only when this season added matches.
           if (found.length > before) interim = mode.sum([...found], leftOut, live)
           if (season !== latest) dropSeason(season)
+        } else if (perSeason) {
+          const part = answerGames(data.pas, live, cutoff)
+          for (const m of part.matches) found.push(m)
+          gameBase += part.base
+          leftOut += part.leftOut
+          if (season !== latest) dropSeason(season)
         } else if (season > HISTORY_LAST) pools.unshift(data.pas)
         else {
           // A history season keeps only the PAs the answer can read (the query without its
@@ -128,7 +151,7 @@ export function useResearch(q, cutoff) {
           dropSeason(season)
         }
       }
-      const result = bySeason ? mode.sum(found, leftOut, live) : mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
+      const result = bySeason ? mode.sum(found, leftOut, live) : perSeason ? summarizeGames(found, gameBase, leftOut, live) : mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
       // Free every season but the latest once answered (Gary, 2026-11-14): re-asking a
       // range downloads it again rather than holding twelve seasons on a phone.
       pools.length = 0

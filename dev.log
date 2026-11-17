@@ -11,3 +11,8 @@
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+2:33:39 PM [vite] (client) hmr update /src/screens/research/ResearchPage.jsx, /src/screens/research/AnswerView.jsx, /src/screens/research/FilterBar.jsx, /src/screens/research/AskBar.jsx, /src/screens/research/GameAnswer.jsx, /src/screens/research/GameCards.jsx
+2:33:39 PM [vite] (client) hmr update /src/screens/research/ResearchPage.jsx, /src/screens/research/AnswerView.jsx, /src/screens/research/FilterBar.jsx, /src/screens/research/AskBar.jsx, /src/screens/research/GameAnswer.jsx, /src/screens/research/GameCards.jsx
+2:33:54 PM [vite] (client) hmr update /src/screens/research/ResearchPage.jsx
+2:33:54 PM [vite] (client) hmr update /src/screens/research/ResearchPage.jsx
+2:35:33 PM [vite] (client) hmr update /src/screens/research/ResearchPage.jsx
