@@ -54,12 +54,13 @@ function summary(ask, q, a) {
   return plural(n, 'game', 'games')
 }
 
-export function GameAnswerCard({ ask, q, a }) {
+export function GameAnswerCard({ ask, q, a, note }) {
   return (
     <Card frame="stamped" label={ASKS.find((x) => x.key === ask)?.label}>
       <Stack gap="tight" aria-live="polite">
         <p className="research__answer"><Sentence ask={ask} q={q} a={a} /></p>
         {a.matches.length > 0 && <p className="research__summary">{summary(ask, q, a)}</p>}
+        {note && <p className="research__summary">{note}</p>}
       </Stack>
     </Card>
   )
