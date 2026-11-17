@@ -13,6 +13,8 @@
 //
 // SPOILER CLASSIFICATION: spoiler-free. Pure functions over the store (ADR-0034).
 
+import { parseRange, rangeText } from './games.js'
+
 // The stat cards per side: key (URL `s{key}`, the line's field), label, unit words.
 export const STREAK_STATS = {
   bat: [
@@ -39,15 +41,6 @@ export const RUNS_INFO = 'Runs driven in: the runs that scored on his plate appe
 export const STREAK_CHIPS = ['gt']
 export const TOP = 25
 
-const RANGE = /^(\d{0,3})-(\d{0,3})$|^(\d{1,3})$/
-function parseRange(v) {
-  const m = RANGE.exec(v ?? '')
-  if (!m) return null
-  if (m[3]) return [Number(m[3]), Number(m[3])]
-  const lo = m[1] === '' ? null : Number(m[1])
-  const hi = m[2] === '' ? null : Number(m[2])
-  return lo == null && hi == null ? null : [lo, hi]
-}
 
 // The streak half of the query, or null when the URL is not in streak mode.
 export function parseStreakQuery(search) {
@@ -68,7 +61,7 @@ export function buildStreakParams(s) {
   if (s.side === 'pit') p.set('side', 'pit')
   for (const t of STREAK_STATS[s.side]) {
     const r = s.totals[t.key]
-    if (r) p.set(`s${t.key}`, `${r[0] ?? ''}-${r[1] ?? ''}`)
+    if (r) p.set(`s${t.key}`, rangeText(r))
   }
   if (s.side === 'pit' && s.starts) p.set('st', '1')
   return p
@@ -103,6 +96,8 @@ function counts(q, cutoff) {
     if (cutoff && l.date >= cutoff) return false
     const type = l.gameType === 'R' || l.gameType === 'A' ? l.gameType : 'P'
     if (!types) return type === 'R'
+    // All-Star counts only on a plain pick of it, never through an inverted card (filters.js matcher).
+    if (type === 'A' && (gt.inv || !types.has('A'))) return false
     return types.has(type) !== Boolean(gt.inv)
   }
 }

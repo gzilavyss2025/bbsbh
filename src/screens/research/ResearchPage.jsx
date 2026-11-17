@@ -59,7 +59,7 @@ const SIDES = [{ value: 'bat', label: 'Batters' }, { value: 'pit', label: 'Pitch
 const NO_STREAK = { side: 'bat', totals: {}, starts: false }
 // The Streaks start screen (#3142): three presets, each a whole-row door.
 const STREAK_PRESETS = [
-  { label: 'Hitting streak', search: '?mode=streak&sh=1-' },
+  { label: 'Games with a hit', search: '?mode=streak&sh=1-' },
   { label: '10+ strikeout starts', search: '?mode=streak&side=pit&st=1&sso=10-' },
   { label: 'Scoreless starts', search: '?mode=streak&side=pit&st=1&sruns=-0' },
 ]
@@ -71,8 +71,22 @@ const withMode = (q, mode) => ({ ...q, mode, g: mode === 'game' ? q.g ?? { total
 // Switching side clears the stat cards: the two sides' stats differ.
 const withSide = (q, side) => ({ ...q, s: { side, totals: {}, starts: false } })
 
+// A streak query's pills (#3142): the Game type card, the one person, the club, the
+// seasons and the stat cards. The person is the streak's subject, so no "vs".
+function streakPillsOf(q, people) {
+  const out = []
+  const gt = q.chips.gt
+  if (gt?.vals.length) out.push(`${gt.inv ? 'Not ' : ''}${gt.vals.map((v) => Object.fromEntries(FILTER_BY_KEY.gt.options)[v]).join(' / ')}`)
+  const person = q.s.side === 'pit' ? q.pitcher : q.batter
+  if (person) out.push(people[person] ?? 'Player')
+  if (q.team) out.push(clubName(q.team))
+  if (q.years) out.push(q.years[0] === q.years[1] ? `${q.years[0]}` : `${q.years[0]}–${q.years[1]}`)
+  return [...out, ...streakPills(q)]
+}
+
 // The filter bar's pills: one per active filter, in words.
 function pillsOf(q, people) {
+  if (q.mode === 'streak') return streakPillsOf(q, people)
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
   const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
@@ -84,9 +98,6 @@ function pillsOf(q, people) {
   if (q.pitchTeam) out.push(`${clubName(q.pitchTeam)} pitching`)
   if (q.park) out.push(`at ${clubName(q.park)}`)
   if (q.years) out.push(q.years[0] === q.years[1] ? `${q.years[0]}` : `${q.years[0]}–${q.years[1]}`)
-  if (q.mode === 'streak') {
-    out.splice(0, out.length, ...out.filter((p) => !p.endsWith(' pitching') && !p.startsWith('at ')).map((p) => p.replace(/ batting$/, '')), ...streakPills(q))
-  }
   if (q.mode === 'game') {
     // An emptied range ([null, null]) filters nothing, so it has no pill.
     for (const t of TOTALS) if (q.g.totals[t.key]?.some((v) => v != null)) out.push(`${totalLabel(q, t)} ${rangeWords(q.g.totals[t.key])}`)

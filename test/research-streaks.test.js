@@ -99,3 +99,9 @@ test('a streak query is blank with no stat card', () => {
   assert.equal(isStreakBlank(q({ totals: { h: [1, null] } })), false)
   assert.equal(streakMatcher(q({ side: 'pit', totals: { runs: [null, 0] } }))(pit(1, '2026-01-01', { runs: 0 })), true)
 })
+
+test('an inverted Game type card never lets an All-Star game into a streak', () => {
+  const run = streakRun(q({ totals: { h: [1, null] } }, { chips: { gt: { vals: ['P'], inv: true } } }))
+  run.feed([line(1, '2026-07-10'), line(1, '2026-07-14', { gameType: 'A', h: 0 }), line(1, '2026-07-18')])
+  assert.deepEqual(run.finish({ activeFrom: null }).top.map((s) => s.len), [2])
+})

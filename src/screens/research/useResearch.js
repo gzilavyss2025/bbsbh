@@ -114,8 +114,9 @@ export function useResearch(q, cutoff) {
           runner.feed(lines.lines)
           if (season !== latest) dropSeason(season)
         }
-        // A run still going is active only when the search reached the latest season.
-        const activeFrom = streakSeasons.at(-1) === latest ? `${latest}-01-01` : null
+        // A run still going is active only when the search reached the latest season with
+        // no `?d=` cutoff: a cutoff holds out the games that could have ended it.
+        const activeFrom = streakSeasons.at(-1) === latest && !cutoff ? `${latest}-01-01` : null
         setRun({ key, result: { ...runner.finish({ activeFrom }), leftOut }, people, searched, progress: null })
       })().catch((e) => {
         if (e.name !== 'AbortError') setRun({ key, result: null, people, searched, progress: null, error: e })
