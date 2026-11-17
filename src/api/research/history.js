@@ -146,12 +146,13 @@ function settle(prev, next, games) {
 }
 
 // manifest.json -> the Savant index's `seasons` shape ({ season: { months: { MM: { pas,
-// through, v, history } } } }), plus `pitchString` (% of PAs with a pitch string) per season.
+// through, v, history, events } } } }), plus `pitchString` (% of PAs with a pitch string) per
+// season. `events` (#3159) is absent on a store built before it: then no season is skipped.
 // `v: 2`: the decoder fills every field a v2 card reads.
 export function historySeasons(manifest) {
   const out = {}
   for (const [season, s] of Object.entries(manifest?.seasons ?? {})) {
-    const months = Object.fromEntries(Object.entries(s.months ?? {}).map(([mm, m]) => [mm, { pas: m.pas, through: m.through, v: 2, history: true }]))
+    const months = Object.fromEntries(Object.entries(s.months ?? {}).map(([mm, m]) => [mm, { pas: m.pas, through: m.through, v: 2, history: true, ...(m.events && { events: m.events }) }]))
     out[season] = { months, pitchString: s.pitchString ?? 0 }
   }
   return out

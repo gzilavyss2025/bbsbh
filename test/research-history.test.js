@@ -5,8 +5,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { decodeHistory, historyEvent, historyGames, historySeasons, pitchCounts } from '../src/api/research/history.js'
 import { countBit } from '../src/api/research/shard.js'
-import { matcher, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
-import { coverage } from '../src/api/research/store.js'
+import { matcher, mayMatch, parseQuery, seasonsFor, unsupported } from '../src/api/research/filters.js'
+import { coverage, seasonEvents } from '../src/api/research/store.js'
 import { eraLabel, namesInRange } from '../src/screens/research/useEraClubNames.js'
 
 const PA_COLS = ['gamePk', 'ab', 'batter', 'pitcher', 'event', 'inn', 'half', 'outs', 'bases', 'balls', 'strikes', 'stand', 'throws', 'bsd', 'slot', 'hit', 'rbi', 'fl']
@@ -114,4 +114,11 @@ test('a club’s names across a range, oldest first', () => {
   assert.deepEqual(namesInRange(spans, 1987, 1990), ['Montreal Expos'])
   assert.equal(eraLabel(namesInRange(spans, 1985, 1987)), 'Montreal Expos', 'one era name still replaces today’s')
   assert.equal(eraLabel([]), null)
+})
+
+test('a history season whose result counts hold none of a picked result is skipped (#3159)', () => {
+  const index = { seasons: historySeasons({ seasons: { 1961: { months: { '04': { pas: 9, through: '1961-04-30', events: { home_run: 2, field_out: 7 } } } }, 1962: { months: { '04': { pas: 9, through: '1962-04-30' } } } } }) }
+  assert.equal(mayMatch(parseQuery('?res=triple_play'), seasonEvents(index, 1961)), false)
+  assert.equal(mayMatch(parseQuery('?res=home_run'), seasonEvents(index, 1961)), true)
+  assert.equal(seasonEvents(index, 1962), null, 'a store built before #3159 skips nothing')
 })
