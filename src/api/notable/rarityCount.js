@@ -275,16 +275,21 @@ export function detectRareFeats(feed) {
   return out
 }
 
-// Every earlier player of the club, newest first, for the card's fold under the line. null for a
-// club kind (no player) or none before.
+// Every earlier find of the club, newest first, for the card's fold under the line. A player
+// row names the player and year; a club row (four straight home runs, six-plus double plays, an
+// unassisted triple play) gives the date and opponent, "Aug 17, 2018 at PIT" (#3171). null for none.
+const SHORT_DATE = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' })
 export function earlierList(clubRows) {
-  if (!clubRows.length || !clubRows.some((r) => r.player)) return null
-  return clubRows.map((r) => ({
+  if (!clubRows.length) return null
+  return clubRows.map((r) => {
+    const path = gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1)
+    if (!r.player) {
+      const opp = r.side === 'home' ? `vs ${r.away?.abbr ?? ''}` : `at ${r.home?.abbr ?? ''}`
+      return { label: `${SHORT_DATE.format(new Date(`${r.officialDate}T12:00:00Z`))} ${opp}`, path }
+    }
     // The generator writes '' when the feed left the name out: keep the row, so the list matches the count.
-    name: r.player?.name || 'Name not listed',
-    year: yearOf(r.officialDate),
-    path: gamePath(r.officialDate, r.away?.abbr, r.home?.abbr, 'boxscore', r.gameNumber ?? 1),
-  }))
+    return { name: r.player.name || 'Name not listed', year: yearOf(r.officialDate), path }
+  })
 }
 
 // One note for a rare feat: "The 9th natural cycle since 1950, the Brewers' 1st." [] when the
