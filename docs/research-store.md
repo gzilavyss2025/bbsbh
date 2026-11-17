@@ -76,10 +76,33 @@ in). A rebuilt month keeps the lineups of the shard on file and fetches only new
 box scores. The index records each month's `v`; a card with `v: 2` is blocked, and named
 "not built yet" in the coverage line, while any searched month is older.
 
+## Game mode (#3137, Gary 2026-11-16/17)
+
+`mode=game` groups plays by game and batting club (`src/api/research/games.js`) and tests that
+club's totals (`gr`, `gh`, `ghr`, `gbb`, `gso`, `gpi`: a range, either end blank) and how its runs
+scored (`how`). The Pitching club picker makes the totals "allowed". Answers: Last time, How often,
+Who most (clubs); no What happens. A row never shows the final score.
+
+Runs come from the change in `bat_score_diff` to the next pitch, not from rs alone: Savant's
+`post_bat_score` sometimes lags a play, and a walk-off's last pitch can read rs 0 (shard.js
+`runsAt`). A game whose club runs do not give its final margin is left out and counted on the
+coverage line. Checked 2026-11-17: 0 left out in 2016, 2019, 2020, 2024, 2025, 2026; June 2025's
+794 club-game totals all matched the official schedule scores.
+
+## The ask bar (#3138, Gary 2026-11-16/17)
+
+A question typed in plain English fills the filters (`src/api/research/ask.js`,
+`screens/research/AskBar.jsx`). Rule-based, in the page: no model call. The vocabulary
+is closed (chip phrases and synonyms, clubs, the store's player names, years, counts,
+question cues, game totals and "How runs scored"); every other word is skipped and
+shown underlined, and the answer card says "Searched without: …". It never guesses.
+**A new card adds its words to `ask.js`**, with a row in `test/research-ask.test.js`.
+
 ## Coverage
 
 A filter card names the first season it can answer (`since` in `filters.js`): pitch type,
-location and batted-ball location from 2008. The coverage line under the bar lists any
+location, batted-ball location and batted-ball type from 2015 (the history seasons before
+it hold none; #3150). The coverage line under the bar lists any
 card the store's seasons cannot answer. With 2026 only, every card works.
 
 ## Seasons (scope #2, Gary 2026-11-13)
@@ -144,13 +167,15 @@ PAs falls back to inning + half + margin. Buckets: Low < 0.85, Medium, High > 2.
 ## History store, 1961-2014 (#3135)
 
 A second store, `retro/v1/` in the same Blob, holds the 1961-2014 regular seasons from
-Retrosheet play-by-play: one row per plate appearance, no pitch rows. The page does not
-read it yet; a follow-up wires it into `/research`. Decisions: #3135 and its comments
+Retrosheet play-by-play: one row per plate appearance, no pitch rows. `/research` reads it
+(#3150, `src/api/research/history.js`) when a Seasons range reaches before 2015; an open
+search stays on 2015 on. Gaps by design: no force out or ground-ball double play, Moment's
+margin after comes from the next PA, and Count's passed-through mask needs a pitch string. Decisions: #3135 and its comments
 (Gary, 2026-10-21 and 2026-11-16). Measurements: `.scratch/research-retrosheet-pa/findings.md`.
 
 | Path | What |
 |---|---|
-| `manifest.json` | credit lines; per season: games, PAs, `pitchString` and `knownCount` (% of PAs), per month `{ pas, through }`, and `unbridged` (Retrosheet ids with no MLBAM id; their rows hold a null id) when any. Month keys are not in order in the JSON; sort them. |
+| `manifest.json` | credit lines; per season: games, PAs, `pitchString` and `knownCount` (% of PAs), per month `{ pas, through, events }` (`events`: result counts by the Savant name `history.js` reads a row as, so `/research` skips a season with none of a picked result; #3159), and `unbridged` (Retrosheet ids with no MLBAM id; their rows hold a null id) when any. Month keys are not in order in the JSON; sort them. |
 | `pa/{season}/{MM}.json` | the 18 columns below, as column arrays (371 files) |
 | `pitches/{season}/{MM}.json` | `pseq`: Retrosheet's raw pitch string per row, same order as `pa/` (371 files) |
 | `games/{season}.json` | gamePk, date, home and away club ids, Retrosheet park code, venue id, game number, night, DH, pitch info (0 none, 1 count, 2 pitches), final score |

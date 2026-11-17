@@ -1,7 +1,10 @@
 import '../../styles/report/research.css'
 import { useMemo, useRef, useState } from 'react'
 import { ASKS, FILTER_BY_KEY, buildQuery, clubName, parseQuery, searchKey } from '../../api/research/filters.js'
+import { HISTORY_LAST } from '../../api/research/history.js'
+import { CHADWICK_JOIN, RETROSHEET_CREDIT } from '../../../scripts/lib/open-data/credits.mjs'
 import { isRealDate } from '../../lib/dates.js'
+import { ALL_MLB_TEAM_IDS, teamClubName } from '../../lib/teams.js'
 import { labelDate } from '../../lib/time/standingsDates.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
@@ -18,6 +21,12 @@ import { Notice } from '../../components/ui/state/Notice.jsx'
 import { AnswerCard, AskTables, MatchList } from './AnswerView.jsx'
 import { FilterBar } from './FilterBar.jsx'
 import { useResearch } from './useResearch.js'
+import { useEraClubNames } from './useEraClubNames.js'
+import { AskBar } from './AskBar.jsx'
+import { parseAsk } from '../../api/research/ask.js'
+import { GAME_CHIPS, TOTALS, HOW, rangeWords } from '../../api/research/games.js'
+import { GameAnswerCard, GameMatches } from './GameAnswer.jsx'
+import { totalLabel } from './GameCards.jsx'
 
 // RESEARCH (/research, #2234): ask a question of past plays. The page reads ANSWER
 // FIRST (Gary, 2026-11-13, wireframe "/research, answer first"): the question, then
@@ -41,13 +50,27 @@ const PRESETS = [
   { ask: 'what', label: 'After a 3-0 count', search: '?ask=what&cnt=3-0' },
 ]
 
+// Retrosheet's required notice and the Chadwick register's (the MLBAM ids), shown whenever
+// a history season is searched. Written once, in credits.mjs (ADR-0100).
+const spanOf = (seasons) => {
+  const lo = Math.min(...seasons)
+  const hi = Math.max(...seasons)
+  return lo === hi ? `${lo}` : `${lo}–${hi}`
+}
+
 function readUrl() {
   const d = new URLSearchParams(window.location.search).get('d')
   return { q: parseQuery(window.location.search), cutoff: isRealDate(d) ? d : null }
 }
 
+const SEARCH_MODES = [{ value: 'play', label: 'Plays' }, { value: 'game', label: 'Games' }]
+const HOW_LABEL = Object.fromEntries(HOW.map(([k, label]) => [k, label]))
+
+// Switch between plays and games (#3137). Game mode has no "What happens".
+const withMode = (q, mode) => ({ ...q, mode, g: mode === 'game' ? q.g ?? { totals: {}, how: [] } : null, ask: mode === 'game' && q.ask === 'what' ? 'last' : q.ask })
+
 // The filter bar's pills: one per active filter, in words.
-function pillsOf(q, people) {
+function pillsOf(q, people, clubName) {
   const HANDS = { bh: { L: 'LHB', R: 'RHB' }, ph: { L: 'vs LHP', R: 'vs RHP' } }
   const out = Object.entries(q.chips).filter(([, c]) => c.vals.length).map(([k, c]) => {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
@@ -59,6 +82,11 @@ function pillsOf(q, people) {
   if (q.pitchTeam) out.push(`${clubName(q.pitchTeam)} pitching`)
   if (q.park) out.push(`at ${clubName(q.park)}`)
   if (q.years) out.push(q.years[0] === q.years[1] ? `${q.years[0]}` : `${q.years[0]}–${q.years[1]}`)
+  if (q.mode === 'game') {
+    // An emptied range ([null, null]) filters nothing, so it has no pill.
+    for (const t of TOTALS) if (q.g.totals[t.key]?.some((v) => v != null)) out.push(`${totalLabel(q, t)} ${rangeWords(q.g.totals[t.key])}`)
+    for (const k of q.g.how) out.push(HOW_LABEL[k])
+  }
   return out
 }
 
@@ -67,29 +95,48 @@ export function ResearchPage() {
   const wide = useMediaQuery(WIDE_QUERY)
   const sheet = useRef(null)
   const [{ q, cutoff }, setState] = useState(readUrl)
-  const setQ = (next) => {
+  // The ask bar's last question (#3138): page state, not the URL. A change made any other
+  // way (a chip, a preset) drops it, so the sentence never describes a query it did not make.
+  const [asked, setAsked] = useState(null)
+  const setQ = (next, fromAsk = null) => {
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${buildQuery(next, { d: cutoff })}`)
     setState({ q: next, cutoff })
+    setAsked(fromAsk)
   }
   const { error, winProb, head, onFile, targets, blocked, live, blank, run, stop, cover, latest } = useResearch(q, cutoff)
   // A card a season predates is always named; one waiting on a store rebuild only if picked.
-  const shownBlocked = blocked.filter((b) => b.since || q.chips[b.key])
+  const game = q.mode === 'game'
+  // The Win prob toggle is set but a searched season has no side file yet (#3141).
+  const wpBlocked = q.wp && !game && !winProb
+  const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key]) && (!game || GAME_CHIPS.includes(b.key)))
+  const asks = game ? ASKS.filter((x) => x.key !== 'what') : ASKS
   const data = head
   const people = run?.people ?? head?.people ?? {}
+  const clubNames = useMemo(() => ALL_MLB_TEAM_IDS.map((id) => teamClubName(id)), [])
   const clubs = useMemo(() => (head ? [...new Set(head.pas.filter((p) => p.gameType !== 'A').map((p) => p.home))].sort((a, b) => clubName(a).localeCompare(clubName(b))) : []), [head])
   // `blank`: nothing filters, so there is no answer. `start`: not even an empty card is
   // open, so the page shows the start screen (presets). An emptied card keeps the page
   // out of the start screen until its ✕ (Gary, 2026-11-13), so on a phone the filter bar
   // stays one tap away. A Seasons range counts as a card.
-  const start = blank && !Object.keys(q.chips).length && !q.years
+  const start = !game && blank && !Object.keys(q.chips).length && !q.years
   const result = run?.result ?? null
   const progress = run?.progress
-  const pills = data ? pillsOf(live, people) : []
+  const eraName = useEraClubNames([q.team, q.pitchTeam, q.park], targets.length ? Math.min(...targets) : null, targets.length ? Math.max(...targets) : null)
+  const pills = data ? pillsOf(live, people, eraName) : []
+  const onAsk = (text) => {
+    const r = parseAsk(text, { people, latest: latest ?? undefined })
+    const info = { text, skipped: r.skipped, read: r.read }
+    if (r.read) setQ(r.q, info)
+    else setAsked(info)
+  }
+  const without = asked?.read && asked.skipped.length ? `Searched without: ${asked.skipped.map((s) => s.text).join(', ')}` : null
   const bar = data && <FilterBar q={q} people={people} clubs={clubs} seasons={onFile} latest={latest} blocked={blocked} onChange={setQ} />
 
   const main = (
     <Stack>
-      {!start && <Segmented label="Question" fill options={ASKS.map((x) => ({ value: x.key, label: x.label }))} value={q.ask} onChange={(ask) => setQ({ ...q, ask })} />}
+      {data && <AskBar key={asked ? 'asked' : 'free'} asked={asked} clubs={clubNames} onAsk={onAsk} />}
+      <Segmented label="Search" options={SEARCH_MODES} value={q.mode} onChange={(mode) => setQ(withMode(q, mode))} />
+      {!start && <Segmented label="Question" fill options={asks.map((x) => ({ value: x.key, label: x.label }))} value={live.ask} onChange={(ask) => setQ({ ...q, ask })} />}
       {error && <Notice tone="error">The research store did not load. Try again later.</Notice>}
       {data && cover && (
         <p className="t-label t-label--nocaps">
@@ -97,11 +144,16 @@ export function ResearchPage() {
           {cover.first === cover.last ? cover.first : `${cover.first}–${cover.last}`}
           {start ? `’s ${cover.pitches.toLocaleString()} pitches` : ' MLB'} · through {labelDate(cover.through)}
           {run?.stopped ? ' · stopped' : ''}
-          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · Baseball Savant
-          {(shownBlocked.length > 0 || (q.wp && !winProb)) && ` · not in this range: ${[...shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`), ...(q.wp && !winProb ? ['Win prob (not built yet)'] : [])].join(', ')}`}
+          {cutoff ? ` · before ${labelDate(cutoff)}` : ''} · {cover.history ? (cover.last > HISTORY_LAST ? 'Retrosheet and Baseball Savant' : 'Retrosheet') : 'Baseball Savant'}
+          {game && q.years?.[0] <= HISTORY_LAST && ` · games from ${HISTORY_LAST + 1}`}
+          {result?.leftOut > 0 && ` · ${result.leftOut.toLocaleString()} ${result.leftOut === 1 ? 'game' : 'games'} left out: runs on file don’t add up`}
+          {(shownBlocked.length > 0 || wpBlocked) && ` · not in this range: ${[...shownBlocked.map((b) => `${b.label} (${b.since ? `from ${b.since}` : 'not built yet'})`), ...(wpBlocked ? ['Win prob (not built yet)'] : [])].join(', ')}`}
+          {live.chips.cnt?.vals.length > 0 && cover.thinCounts.length > 0 && ` · pitch-by-pitch counts are missing for most plate appearances in ${spanOf(cover.thinCounts)}`}
         </p>
       )}
+      {data && cover?.history && <p className="t-label t-label--nocaps">{RETROSHEET_CREDIT} {CHADWICK_JOIN}</p>}
       {!data && !error && <p className="t-label t-label--nocaps">Loading plays…</p>}
+      {data && game && blank && <p className="t-label t-label--nocaps">Pick a club or add a total to find games.</p>}
       {data && !targets.length && <p className="t-label t-label--nocaps">No season on file in this range{cutoff ? ` before ${labelDate(cutoff)}` : ''}.</p>}
       {progress && (
         <Cluster>
@@ -128,7 +180,8 @@ export function ResearchPage() {
           {data && wide && <p className="research__own t-label">Build your own: start with a filter on the left</p>}
         </Card>
       )}
-      {result && <AnswerCard ask={q.ask} q={q} a={result} people={people} wp={live.wp} />}
+      {result && !game && <AnswerCard ask={q.ask} q={q} a={result} people={people} note={without} wp={live.wp} />}
+      {result && game && <GameAnswerCard ask={live.ask} q={live} a={result} note={without} />}
       {data && !wide && !start && (
         <Cluster className="research__bar">
           <span className="t-label t-label--bold">Filters · {pills.length}</span>
@@ -136,13 +189,14 @@ export function ResearchPage() {
           <Button size="control" className="research__edit" onClick={() => sheet.current?.showModal()}>Edit</Button>
         </Cluster>
       )}
-      {data && !start && (
+      {data && !start && !game && (
         <Cluster>
           <Button size="control" pressed={q.wp} onClick={() => setQ({ ...q, wp: !q.wp })}>Win prob</Button>
         </Cluster>
       )}
-      {result && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
-      {result && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
+      {result && !game && <AskTables ask={q.ask} q={q} a={result} people={people} onChange={setQ} />}
+      {result && !game && <MatchList key={searchKey(q)} a={result} people={people} wide={wide} wp={live.wp} />}
+      {result && game && <GameMatches key={searchKey(q)} ask={live.ask} q={live} a={result} wide={wide} since={cover?.first} />}
     </Stack>
   )
 

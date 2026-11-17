@@ -14,6 +14,7 @@ import { decodePlateAppearances } from './shard.js'
 import { fetchSeries } from './series.js'
 import { attachWinProb } from './winprob.js'
 import { staticJson } from '../staticJson.js'
+import { HISTORY_BASE, decodeHistory, historyGames, historySeasons } from './history.js'
 
 export const STORE_BASE = import.meta.env?.VITE_RESEARCH_STORE || 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/research/v1/'
 
@@ -21,8 +22,8 @@ export const STORE_BASE = import.meta.env?.VITE_RESEARCH_STORE || 'https://p6soa
 // shards would not fit a phone. A season is decoded once and kept (seasonCache) until the
 // page frees it (dropSeason): "Last time" frees each season it found nothing in.
 let indexP = null
-async function getJson(path, signal) {
-  const r = await fetch(`${STORE_BASE}${path}`, { signal })
+async function getJson(path, signal, base = STORE_BASE) {
+  const r = await fetch(`${base}${path}`, { signal })
   if (!r.ok) throw new Error(`research store HTTP ${r.status}`)
   return r.json()
 }
@@ -30,8 +31,11 @@ async function getJson(path, signal) {
 // index: { v, built, seasons: { '2026': { months: { '04': { v, through, pitches, pas, events } } } } }
 // A month's `v` is its shard's version; absent on a month built before #3140 (v1).
 // `events` ({ event: n }) is absent on a month built before 2026-11-13.
+// The history store's seasons (1961-2014, history.js) join it: their months carry
+// `history: true`, and the season `pitchString` (% of PAs with a pitch string). A history
+// manifest that fails to load leaves the page on the Savant seasons alone.
 export function fetchIndex() {
-  indexP ??= getJson('index.json').catch((e) => {
+  indexP ??= Promise.all([getJson('index.json'), getJson('manifest.json', undefined, HISTORY_BASE).then(historySeasons, () => ({}))]).then(([index, past]) => ({ ...index, seasons: { ...past, ...index.seasons } })).catch((e) => {
     indexP = null
     throw e
   })
@@ -58,6 +62,34 @@ export function storeVersion(index, seasons) {
   return vs.length ? Math.min(...vs) : Infinity
 }
 
+// Is `season` a history-store season?
+export const isHistory = (index, season) => Object.values(index.seasons[season]?.months ?? {}).some((m) => m.history)
+
+// Shared by every history season, so it carries no season's AbortSignal: dropping one season
+// must not reject the names another is waiting on.
+let historyPeople = null
+const getHistoryPeople = () => {
+  historyPeople ??= getJson('people.json', undefined, HISTORY_BASE).then((f) => f.people ?? {}).catch((e) => {
+    historyPeople = null
+    throw e
+  })
+  return historyPeople
+}
+
+// A history season: its games, then each month's PA and pitch-string files.
+async function loadHistorySeason(index, season, ctrl, onMonth) {
+  const months = Object.keys(index.seasons[season].months).sort()
+  const get = (path) => getJson(path, ctrl.signal, HISTORY_BASE)
+  const [games, people] = await Promise.all([get(`games/${season}.json`).then(historyGames), getHistoryPeople()])
+  let loaded = 0
+  onMonth(0, months.length)
+  const parts = await Promise.all(months.map((mm) => Promise.all([get(`pa/${season}/${mm}.json`), get(`pitches/${season}/${mm}.json`)]).then(([pa, pitches]) => {
+    onMonth(++loaded, months.length)
+    return decodeHistory(pa, pitches, games)
+  })))
+  return { pas: parts.flat(), people }
+}
+
 const seasonCache = new Map()
 // One season's plate appearances, oldest first, plus its people names. onMonth(loaded,
 // total). Each season's fetches have their own AbortController, so two queries can share
@@ -65,6 +97,12 @@ const seasonCache = new Map()
 export function loadSeason(index, season, { onMonth = () => {} } = {}) {
   if (!seasonCache.has(season)) {
     const ctrl = new AbortController()
+    if (isHistory(index, season)) {
+      const promise = loadHistorySeason(index, season, ctrl, onMonth)
+      seasonCache.set(season, { promise, ctrl })
+      promise.catch(() => seasonCache.get(season)?.promise === promise && seasonCache.delete(season))
+      return promise
+    }
     const paths = Object.keys(index.seasons[season]?.months ?? {}).sort().map((m) => `${season}/${m}.json`)
     let loaded = 0
     onMonth(0, paths.length)
@@ -127,11 +165,15 @@ export function dropSeasonsExcept(keep) {
 }
 
 // The coverage line's facts over `seasons` (default: all on file): first and last
-// season, the newest game date, and the pitches on file.
+// season, the newest game date, and the pitches on file. `history`: a history season is
+// among them (the Retrosheet credit). `thinCounts`: the history seasons whose pitch
+// strings cover under 90% of PAs, so a Count card misses most of their PAs.
 export function coverage(index, seasons = Object.keys(index.seasons).map(Number)) {
   const sorted = [...seasons].sort((a, b) => a - b)
   const months = sorted.flatMap((s) => Object.values(index.seasons[s]?.months ?? {}))
   const through = months.map((m) => m.through).sort().at(-1) ?? null
   const pitches = months.reduce((n, m) => n + (m.pitches ?? 0), 0)
-  return { first: sorted[0] ?? null, last: sorted.at(-1) ?? null, through, pitches }
+  const past = sorted.filter((s) => isHistory(index, s))
+  const thinCounts = past.filter((s) => (index.seasons[s].pitchString ?? 0) < 90)
+  return { first: sorted[0] ?? null, last: sorted.at(-1) ?? null, through, pitches, history: past.length > 0, thinCounts }
 }
