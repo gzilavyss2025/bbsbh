@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pressure Moments critique 2</title>
+<style>
+:root{--bg:#faf6ea;--ink:#1b2a3a;--rule:#d8cfb8;--red:#b23a2e;--amber:#b7791f;--green:#3d7a4a}
+@media (prefers-color-scheme:dark){:root{--bg:#151b22;--ink:#e8e2d2;--rule:#33404d}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:28px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}td,th{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.c{color:var(--red);font-weight:bold}.m{color:var(--amber);font-weight:bold}.n{color:var(--green);font-weight:bold}
+</style></head><body><main>
+<h1>Pressure Moments — critique, round 2</h1>
+<p>The one-sentence rows, the green/red tints and the tally-strip record, checked at desktop and 375 px.</p>
+
+<h2>Overall impression</h2>
+<p>The page now reads like a baseball page instead of a spreadsheet: one sentence per moment, and the tally strip is a real scorebook idea. The biggest opportunity is the sentence itself: in all-caps mono, the names don't stand out from the prose, so a long row is slow to scan.</p>
+
+<h2>Usability</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr>
+<tr><td>Player names are links but look like the words around them: same case, weight and colour. A reader can't scan a column of names, and can't tell they're tappable.</td><td class="c">Critical</td><td>Set the batter (and pitcher) a step heavier or in heading ink, so each row leads with a name the eye can find.</td></tr>
+<tr><td>"11 of 26" on a list described as a club's top 25. The 26th is a tie for 25th, but nothing says so.</td><td class="m">Moderate</td><td>Fine to keep the real count; add "ties included" to the (i) text, not the box.</td></tr>
+<tr><td>The tally strip isn't explained; a first-time reader may not link a square to a row.</td><td class="m">Moderate</td><td>One line in the (i) text: "Each square is one at-bat, in rank order." The row tints teach it too.</td></tr>
+<tr><td>Pressure sits at the far right, a long eye-jump from the rank it explains.</td><td class="n">Minor</td><td>Leave it; the sentence earns the width. Revisit only if readers miss it.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><b>What draws the eye first:</b> the record box. Its heavy stamp and shadow sit inside a card that already has one, so it out-shouts the board it summarises.</li>
+<li><b>Reading flow:</b> strip → switch → record → filters → rows. On a phone the record adds about 100 px before row 1; still on the first screen.</li>
+<li><b>Emphasis:</b> the large "11 of 26" is right. The box frame is one accessory too many: drop the shadow, or the border, and let the figure and strip carry it.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table><tr><th>Element</th><th>Issue</th><th>Fix</th></tr>
+<tr><td>Green / red</td><td>Rows use a 7% wash; ticks use solid green and 55% red. Two strengths of one signal.</td><td>OK as designed (ticks are tiny), but match the red's weight to the green so neither reads as "missing".</td></tr>
+<tr><td>Citation line</td><td>"won 4-3" sits on every row while the record says "Succeeded". Distinct words, as intended.</td><td>None.</td></tr>
+<tr><td>Stamped frames</td><td>A stamped box inside a stamped card.</td><td>Use the inner box without the hard shadow.</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><b>Colour:</b> the tints and ticks are colour-only. The ticks differ by fill weight too (solid vs faded), which helps; the row tints don't, but the sentence itself says the outcome, so nothing is lost.</li>
+<li><b>Screen readers:</b> the strip is hidden and the line reads "Succeeded in 11 of 26 (42%)". Good.</li>
+<li><b>Tap targets:</b> ▶ 44 px; names inside a sentence are short targets on a phone (inline text).</li>
+<li><b>Readability:</b> long all-caps mono sentences are the slowest thing on the page (site-wide caps rule, so the fix is weight, not case).</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>The sentence rows read like a game story; the citation line keeps the game details quiet.</li>
+<li>The tally strip shows the count and where on the list the successes fell, in one glance.</li>
+<li>Batting/Pitching flips the tints and the record, so the whole board answers one question.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><b>Make the names findable</b> — batter and pitcher in a heavier weight or heading ink.</li>
+<li><b>Quiet the record's frame</b> — drop its hard shadow; keep the big figure and strip.</li>
+<li><b>Add two lines to the (i) text</b> — ties can make it 26, and each square is one at-bat in rank order.</li>
+</ol>
+</main></body></html>

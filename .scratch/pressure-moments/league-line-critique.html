@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>League line critique</title>
+<style>
+:root{--bg:#faf6ea;--ink:#1b2a3a;--rule:#d8cfb8;--red:#b23a2e;--amber:#b7791f;--green:#3d7a4a}
+@media (prefers-color-scheme:dark){:root{--bg:#151b22;--ink:#e8e2d2;--rule:#33404d}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:28px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}td,th{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.c{color:var(--red);font-weight:bold}.m{color:var(--amber);font-weight:bold}.n{color:var(--green);font-weight:bold}
+pre{font:14px/1.5 ui-monospace,Menlo,monospace;border:2px solid var(--ink);padding:10px 12px;overflow-x:auto}
+</style></head><body><main>
+<h1>The league line — critique</h1>
+<p>Proposed: <code>League 41% · 14th of 30</code> under <code>Succeeded in 11 of 26 (42%)</code>, the box coloured from the comparison, and an optional league mark on the tally strip.</p>
+
+<h2>Overall impression</h2>
+<p>The right idea: a number needs something to stand against. But the line mixes two yardsticks that measure different things, and the strip mark would say something false.</p>
+
+<h2>Usability</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr>
+<tr><td><b>The strip mark misleads.</b> The squares are in rank order, not sorted green-then-red. A tick at 41% of the width implies "green should reach here", which no strip ever does.</td><td class="c">Critical</td><td>Drop the mark. The strip shows <i>where</i> successes fell; the text says how many.</td></tr>
+<tr><td><b>Two yardsticks.</b> "41%" is every tense at-bat in baseball; "14th of 30" ranks each club's own top 25. They can disagree, and the reader can't tell which to trust.</td><td class="m">Moderate</td><td>Keep one comparison in the line. Rank is the quicker read; the average goes in the (i) text.</td></tr>
+<tr><td><b>"League" is ambiguous.</b> It reads as AL or NL.</td><td class="m">Moderate</td><td>Say "MLB".</td></tr>
+<tr><td><b>Pitching flips the baseline.</b> On Pitching the average is 59%, not 41%. A line that kept "41%" would be wrong.</td><td class="m">Moderate</td><td>Compute per view; never hard-code.</td></tr>
+<tr><td><b>Small samples.</b> 25 at-bats move about ±10 points by chance; a 1-point lead over average (42 vs 41) is a tie, and a rank makes it look like a placing.</td><td class="m">Moderate</td><td>Colour the box only past a margin (say 5 points from the MLB rate); inside it, plain ink.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><b>First:</b> "11 of 26" — right.</li>
+<li><b>Then:</b> the comparison should read as a qualifier of that number, not a second headline: same small label size as "Succeeded in".</li>
+<li><b>Order:</b> number → comparison → strip. The comparison belongs on the number's line, not between the number and the strip, so the strip stays attached to what it counts.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table><tr><th>Element</th><th>Issue</th><th>Fix</th></tr>
+<tr><td>Rank format</td><td>"14th of 30" breaks the house rank style ("78 of 89", no ordinal).</td><td>"14 of 30", or a plain phrase (below).</td></tr>
+<tr><td>Middle dots</td><td>A third dot-joined string on a row of them.</td><td>Use a phrase instead of a meta string.</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li>Box colour must not be the only cue: the words must say "above" or "below".</li>
+<li>Screen readers should hear one sentence: "Succeeded in 11 of 26, 42%, about MLB average."</li>
+</ul>
+
+<h2>Recommended</h2>
+<pre>SUCCEEDED IN  11 OF 26  (42%)
+ABOUT MLB AVERAGE (41%)
+■■□□■□■■□□□■□□■■□□□■□□□□■■</pre>
+<pre>SUCCEEDED IN  12 OF 25  (48%)
+WELL BELOW MLB (59%)
+■□■□□■■□□■□□■■□□■■□□□■■□□</pre>
+<p>Three words do the anchoring: <b>about</b> (within 5 points), <b>above</b> / <b>below</b> (5–10), <b>well above</b> / <b>well below</b> (10+). Green only for above, red only for below, ink for about. Rank moves to the (i) text.</p>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><b>Drop the strip mark</b> — it implies an order the strip doesn't have.</li>
+<li><b>One yardstick, in words</b> — "About MLB average (41%)", computed per view.</li>
+<li><b>Colour past a margin only</b> — a 1-point gap on 25 at-bats is a tie.</li>
+</ol>
+</main></body></html>

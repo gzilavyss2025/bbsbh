@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pressure Moments critique</title>
+<style>
+:root{--bg:#faf6ea;--ink:#1b2a3a;--rule:#d8cfb8;--red:#b23a2e;--amber:#b7791f;--green:#3d7a4a}
+@media (prefers-color-scheme:dark){:root{--bg:#151b22;--ink:#e8e2d2;--rule:#33404d}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:28px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}td,th{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.c{color:var(--red);font-weight:bold}.m{color:var(--amber);font-weight:bold}.n{color:var(--green);font-weight:bold}
+code{font-size:.9em}
+</style></head><body><main>
+<h1>Pressure Moments — design critique</h1>
+<p>The one-board redesign of <code>/pressure-moments</code>, checked live at 375 px and desktop width.</p>
+
+<h2>Overall impression</h2>
+<p>The single board fixes the old problem: one table, one question at a time, and the club strip reads as the obvious scope control. The biggest remaining issue is the phone: three full-width filter menus come before the first at-bat.</p>
+
+<h2>Usability</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr>
+<tr><td>On a phone, the switch plus three stacked menus (batter, pitcher, park) take about half the first screen before row 1.</td><td class="c">Critical</td><td>On narrow screens, fold the three menus behind one "Filter" button that opens them in a sheet, and show the filters that are on as chips.</td></tr>
+<tr><td>The ▶ is 24 × 24 px, under the 44 px tap minimum. The box score's ▶ widens its tap area with an invisible <code>::after</code>; this one doesn't.</td><td class="m">Moderate</td><td>Copy <code>.scoresum__watch::after</code> (an <code>inset</code> out to <code>--tap-min</code>).</td></tr>
+<tr><td>The MLB pin means "all of baseball", but nothing says so: the strip has no label.</td><td class="m">Moderate</td><td>The card's label already flips to "All of baseball"; a visible "All" under the pin would make it plain before the tap.</td></tr>
+<tr><td>A batting- or pitching-club filter set on all of baseball is hidden under a club, and comes back when you return to MLB.</td><td class="n">Minor</td><td>Clear those two filters when a club is picked.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><b>What draws the eye first:</b> the club strip and the stamped card label ("Milwaukee Brewers batting"). Right: they say what the table is.</li>
+<li><b>Reading flow:</b> strip → label → Batting/Pitching → filters → rows. On desktop it's one tidy band; on a phone the filters break the flow.</li>
+<li><b>Emphasis:</b> the pressure meter carries the page, as it should. The ▶ in solid ink is heavier than the "What happened" text it sits next to; that's fine, but 50 of them make a strong right-hand column.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table><tr><th>Element</th><th>Issue</th><th>Fix</th></tr>
+<tr><td>Count badge</td><td>A club board reads "26 at-bats" when it shows the top 25 (ties included).</td><td>Fine for ties, but the info text says "top 25"; say "25 and ties" in the info or keep the count.</td></tr>
+<tr><td>Controls</td><td>Batting/Pitching uses the house <code>Segmented</code>; filters use native selects. Both on-system.</td><td>None.</td></tr>
+<tr><td>Info text</td><td>Still says "Each club's top 25 batting and pitching are here, and the league's top 50" — accurate, but now describes three views of one board.</td><td>Reword to "Pick a club for its top 25, or MLB for the league's top 50."</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><b>Contrast:</b> ink on paper and white ▶ on ink both pass comfortably.</li>
+<li><b>Tap targets:</b> switch 44 px tall and menus 40 px pass; the ▶ (24 px) fails.</li>
+<li><b>Readability:</b> rows wrap to two lines at 375 px and stay readable; the table doesn't scroll sideways (339 of 339 px).</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>One table answers one question; the stacked three-card scroll is gone.</li>
+<li>The card label always names exactly what you're looking at.</li>
+<li>Filters carry across club changes, so "this pitcher against my club" is two taps.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><b>Fold the filters on phones</b> into a "Filter" button and sheet, so row 1 sits above the fold.</li>
+<li><b>Grow the ▶ tap area</b> to 44 px with the box score's <code>::after</code> pattern.</li>
+<li><b>Label the MLB pin</b> as "All" so the scope switch is clear before the tap.</li>
+</ol>
+</main></body></html>
