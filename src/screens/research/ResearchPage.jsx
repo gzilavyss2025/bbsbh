@@ -103,6 +103,10 @@ function pillsOf(q, people, clubName) {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
     return `${c.inv ? 'Not ' : ''}${c.vals.map((v) => labels[v]).join(' / ')}`
   })
+  if (q.mode === 'play') {
+    if (q.ranges?.ev) out.push(`EV ${rangeWords(q.ranges.ev)} mph`)
+    if (q.ranges?.la) out.push(`LA ${rangeWords(q.ranges.la)}°`)
+  }
   if (q.batter) out.push(people[q.batter] ?? 'Batter')
   if (q.pitcher) out.push(`vs ${people[q.pitcher] ?? 'pitcher'}`)
   if (q.team) out.push(`${clubName(q.team)} batting`)

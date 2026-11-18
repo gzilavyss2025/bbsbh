@@ -73,15 +73,15 @@ test('moments: walk-off, go-ahead, tying, and the game\'s first and last PA', ()
   assert.deepEqual(momentValues({ marginLast: 1, marginAfter: 2 }), [], 'adding to a lead is no moment')
 })
 
-test('count groups read the last pitch\'s count, from the batter\'s side; a full count is in none', () => {
+test('count groups read the last pitch\'s count, from the batter\'s side; a full count is even (Gary, 2026-11-18)', () => {
   assert.equal(countGroup([2, 1]), 'ahead')
   assert.equal(countGroup([1, 1]), 'even')
   assert.equal(countGroup([0, 0]), 'even')
   assert.equal(countGroup([1, 2]), 'behind')
-  assert.equal(countGroup([3, 2]), null)
+  assert.equal(countGroup([3, 2]), 'even')
   assert.equal(countGroup([null, null]), null)
-  assert.ok(only('?cnt=ahead', tying))
-  assert.ok(!only('?cnt=even', tying), 'passing through 0-0 does not make a PA even')
+  assert.ok(only('?fc=ahead', tying))
+  assert.ok(!only('?fc=even', tying), 'passing through 0-0 does not make a PA even')
   assert.ok(only('?cnt=0-0', tying), 'a plain count still means passed through')
 })
 

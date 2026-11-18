@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitch-by-pitch mode</title>
+<style>
+  :root { --paper:#f3ead6; --ink:#1d2a44; --pencil:#5b6170; --rule:#c9b98f; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 Georgia, serif; padding:24px 16px; }
+  main { max-width:760px; margin:0 auto; }
+  h1 { font:700 22px Arial, sans-serif; }
+  h2 { font:700 15px Arial, sans-serif; text-transform:uppercase; letter-spacing:.04em; margin-top:28px; border-bottom:1px solid var(--rule); }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  td, th { border-bottom:1px solid var(--rule); padding:6px 8px; text-align:left; vertical-align:top; }
+  .num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .tag { font:700 12px Arial, sans-serif; color:var(--pencil); }
+</style>
+</head>
+<body>
+<main>
+<h1>A pitch-by-pitch mode for the play log</h1>
+<p>Research only, nothing built. Today Pitch type and Horizontal location test the last pitch of the plate appearance, the one the result came on. A pitch mode would ask about every pitch.</p>
+
+<h2>What the store already holds</h2>
+<p>The 2015-on (Baseball Savant) store is already one row per pitch: pitch type, the count before it, plate_x (left-right), the call (ball, called strike, swinging strike, foul, in play), batter, pitcher, inning, outs, runners and score. The page throws the per-pitch rows away when it builds plate appearances, to save memory on a phone. So most of a pitch mode needs no new data.</p>
+<p>What the store does <b>not</b> hold: pitch speed, spin, height in the zone (plate_z), and break. The 1961–2014 history store has pitch sequences only (ball / strike / foul letters), no type or location.</p>
+
+<h2>Questions it unlocks</h2>
+<ul>
+  <li>How often does a batter chase (swing at) a pitch off the plate on 0-2? <span class="tag">needs only the current store</span></li>
+  <li>Whiff rate on sliders from lefties to righties. <span class="tag">current store</span></li>
+  <li>What did he throw on 3-2 with the bases loaded? <span class="tag">current store</span></li>
+  <li>First-pitch strike rate by a pitcher, or a club, by month. <span class="tag">current store</span></li>
+  <li>Who throws the most 100 mph pitches; whiffs on high fastballs. <span class="tag">needs speed and plate_z added to the store</span></li>
+</ul>
+
+<h2>Cost</h2>
+<table>
+  <tr><th>Piece</th><th>Work</th><th>Size / speed</th></tr>
+  <tr><td>Pitch mode on the current store</td><td>A fourth mode beside Plays, Games, Streaks: decode pitches instead of plate appearances, new cards (pitch call: swing, whiff, called strike, foul, in play), answers count pitches. About one PR the size of Streaks mode.</td><td class="num">~700,000 pitches a season in memory vs ~185,000 PAs: one season fits a phone; a 12-season range does not, so it would run season by season like "Last time".</td></tr>
+  <tr><td>Add pitch speed (also the Pitch speed filter asked for in this round)</td><td>One new column in the generator (release_speed) and a full rebuild of 2015–2026.</td><td class="num">Shards grow ~8–10%. Rebuild is a long one-time job against Savant.</td></tr>
+  <tr><td>Add height in the zone (plate_z)</td><td>Same rebuild, one more column; then "high / low" and a true strike-zone grid.</td><td class="num">Another ~8–10%.</td></tr>
+</table>
+
+<h2>Recommendation</h2>
+<p>If you want it: add speed and plate_z in one rebuild (that also unblocks the Pitch speed filter), then build the pitch mode on 2015-on only. If not, the speed column alone is the cheap win.</p>
+</main>
+</body>
+</html>

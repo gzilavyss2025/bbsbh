@@ -13,7 +13,7 @@
 //
 // SPOILER CLASSIFICATION: spoiler-free. 1961-2014, all long final.
 
-import { countBit } from './shard.js'
+import { countBit, markGameRoles } from './shard.js'
 import { teamAbbr } from '../../lib/teams.js'
 
 export const HISTORY_BASE = import.meta.env?.VITE_HISTORY_STORE || 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/retro/v1/'
@@ -141,7 +141,7 @@ export function decodeHistory(paFile, pitchFile, games) {
     pas.push(pa)
   }
   if (pas.length) settle(pas.at(-1), null, games)
-  return pas
+  return markGameRoles(pas)
 }
 
 // `prev`'s margin after the PA: the next PA's margin from prev's side, or the final score.

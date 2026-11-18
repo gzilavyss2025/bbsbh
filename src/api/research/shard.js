@@ -270,5 +270,28 @@ export function decodePlateAppearances(shard) {
     if (r != null && cols.sd[j] != null) finals.set(games[cols.g[j]][0], (cols.t[j] === 1 ? 1 : -1) * (cols.sd[j] + r))
   }
   for (const pa of pas) if (pa.last) pa.finalMargin = finals.get(pa.gamePk) ?? null
+  return markGameRoles(pas)
+}
+
+// THE PITCHER'S ROLE AND TIMES FACING HIM (Gary, 2026-11-18), from the PAs alone, oldest
+// first: `role` 'SP' for the first pitcher a fielding club used in the game, else 'RP';
+// `tto` the nth time this batter faces this pitcher in the game (Baseball-Reference's
+// "times facing"). A starter pulled mid-PA before any PA ended reads as a reliever's PA.
+export function markGameRoles(pas) {
+  let game = null
+  let starters = null
+  let faced = null
+  for (const pa of pas) {
+    if (pa.gamePk !== game) {
+      game = pa.gamePk
+      starters = new Map()
+      faced = new Map()
+    }
+    if (!starters.has(pa.fieldTeam)) starters.set(pa.fieldTeam, pa.pitcher)
+    pa.role = starters.get(pa.fieldTeam) === pa.pitcher ? 'SP' : 'RP'
+    const k = `${pa.pitcher}-${pa.batter}`
+    pa.tto = (faced.get(k) ?? 0) + 1
+    faced.set(k, pa.tto)
+  }
   return pas
 }
