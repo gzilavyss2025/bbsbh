@@ -237,6 +237,8 @@
 /* One depth's distribution rail — reuses the .team-score__track/dot/tooltip
    visuals (all 30 clubs plotted 0 → the MLB leader). */
 .cbk__rail {
+  /* The club's colour comes inline (ComebackCard); ink until it does. */
+  --cbk-club: var(--text-heading);
   margin: 2px 1px 0;
 }
 /* The pooled MLB-average rate — a bold dashed reference line with a flag cap so
