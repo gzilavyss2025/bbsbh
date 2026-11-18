@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Play Log Layout Spec</title>
+<style>:root{--paper:#F6EFDC;--card:#FBF6E9;--ink:#0F1822;--ink2:#3C4A5A;--clay:#B4453A;--rule:#D9CFB4}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,sans-serif}main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:2px solid var(--ink)}td,th{padding:7px 9px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top;font-size:14px}th{background:var(--ink);color:var(--paper);font-size:12px;text-transform:uppercase}
+code{background:var(--card);padding:0 3px}.q{border-left:3px solid var(--clay);padding:4px 10px;background:var(--card);margin:8px 0}</style></head><body><main>
+<h1>Ask the Play Log: filter layout spec</h1>
+<p>Agreed with Gary on 2026-11-18. Route <code>/research</code>, code in <code>src/screens/research/</code>. Mockup: <code>layout-directions.html</code> beside this file. Critique: <code>critique-layouts.html</code>. Design only; the data work (new filters, baseline, lead facts, row links) is the data stream, PR #3194.</p>
+
+<h2>Decisions</h2>
+<ul>
+<li><b>Users:</b> mid-game fans and researchers equally.</li>
+<li><b>Way in: filters only.</b> The typed question box (<code>AskBar.jsx</code>) is removed from the page.</li>
+<li><b>Old <code>?q=</code> links:</b> dropped. A typed question in the URL is ignored; the other filter keys still load.</li>
+<li><b>Quick-adds:</b> Plays mode only.</li>
+<li><b>Visible filters:</b> only the ones you've set, plus four quick-adds; everything else in one grouped drawer.</li>
+</ul>
+
+<h2>Page order (phone and desktop)</h2>
+<ol>
+<li><b>Mode tabs</b>: Plays · Games · Streaks, first thing under the page title. They move up from under the box.</li>
+<li><b>Filter row</b> (Plays mode), wrapping:
+ <ul><li>Each set filter is a solid marker-fill chip: value text + ×. Tap the chip to change the value; × clears it.</li>
+ <li>Then a dashed chip for each <b>unset</b> quick-add: <b>+ Batter · + Pitcher · + Result · + Seasons</b>. Setting one turns it into a solid chip.</li>
+ <li>Last, a dark <b>+ More filters</b> button. When drawer filters are set it reads "+ More (N set)".</li></ul></li>
+<li><b>Empty state</b> (nothing set): the "Try one" questions as whole-row doors (<b>Last time · How often · Leaders · What happened next</b>). No helper lines.</li>
+<li><b>Question switch</b> (<code>ASKS</code>, <code>?ask=</code>): stays, directly under the filter row once any filter is set; hidden on the empty page. Labels renamed in code: Who most → <b>Leaders</b>, What happens → <b>What happened next</b>. Games drops What happened next, as today. The Leaders rank control (Count | Rate, min PAs) sits with the Leaders answer, not in the drawer.</li>
+<li><b>Answer</b> once a filter is set: the lead facts card (data stream), then rows.</li>
+<li><b>Coverage note</b> (seasons searched, filters that skip older years): one line at the foot of results, not between tabs and card.</li>
+</ol>
+
+<h2>More filters drawer</h2>
+<ul>
+<li>Phone: bottom sheet. Desktop (≥ 768 px): a panel that opens in place under the filter row; the button reads "− Fewer filters" while open.</li>
+<li>Top: a <b>find box</b> that matches filter names and values ("100", "walk-off", "sinker").</li>
+<li>Five groups, in this order. ● = added by the data stream.
+<table><tr><th>Group</th><th>Filters</th></tr>
+<tr><td>Who</td><td>Batter hand, Pitcher hand, Batting slot, Pitcher role ● (<code>role</code>, single), Times facing pitcher ● (<code>tto</code>). <i>Later, not in PR #3194:</i> Position / pinch hitter, Rookie / debut</td></tr>
+<tr><td>Pitch</td><td>Final pitch type, Final pitch location (Inside / Middle / Away), Pitch speed ● (range), Count reached ● (<code>cnt</code>, exact counts), Final count ● (<code>fc</code>, ahead / even / behind / exact)</td></tr>
+<tr><td>Result</td><td>Batted ball type, Batted ball location, Exit velocity ● (range), Launch angle ● (range)</td></tr>
+<tr><td>Situation</td><td>Outs, Runners, Score, Moment, Leverage, Inning, Win prob (today's <code>wp=1</code> switch, as a row beside Leverage)</td></tr>
+<tr><td>Game</td><td>Clubs (three pickers: Batting club <code>team</code>, Pitching club <code>pteam</code>, Ballpark <code>park</code>), Game type, Series game, Month, Home or road</td></tr></table>
+Batter, Pitcher, PA result and Seasons are the quick-adds; they also appear in the drawer (Who / Result / Game) so find works on them.</li>
+<li><b>Range filters</b> (exit velocity, pitch speed, launch angle) open a min / max number pair, blank = open, not a value list. Chip reads "≥ 95 mph", "10°–30°", "≤ 80 mph". No Invert.</li>
+<li><b>Several values:</b> a second pick on a set filter joins the same chip ("Single, Double"); past two it reads "PA result: 3". <b>Invert</b> lives in the value editor; the chip reads "Not Home run". <code>single</code> filters (<code>bh</code>, <code>ph</code>, <code>ha</code>, <code>role</code>) swap value and never invert.</li>
+<li><b>Editing a chip:</b> tapping a set chip opens the drawer at that filter's row, expanded (bottom sheet on phone). Batter / Pitcher open the existing player search; Seasons opens the From / To selects (<code>SeasonsCard</code>).</li>
+<li>Groups start collapsed except any group holding a set filter. The find box matches filter names only in v1.</li>
+<li>A set filter shows a tick in the drawer. Picking a value adds its chip at once. The sheet's close button shows the live count ("Show 9 plays").</li>
+<li>A filter the season range can't answer (<code>unsupported()</code> in <code>filters.js</code>) shows muted in the drawer with "from 2015" or "not built yet". If it is already set, its chip stays, struck through, with the same words.</li>
+<li><b>Searching:</b> each pick searches at once, as today (Stop stays). The sheet button reads "Searching…" until the count is known, then "Show N plays". With 0 matches the answer area reads "No plays match" and the set chips stay above it to clear.</li>
+</ul>
+
+<h2>Games and Streaks</h2>
+<p>Same chip row and <b>+ More filters</b>, no quick-adds. The drawer lists only that mode's filters (<code>GAME_CHIPS</code> / <code>STREAK_CHIPS</code>) plus the game-total or streak cards (<code>g:</code> / <code>s:</code>) as their own group. The Streaks Players switch (Batters / Pitchers) stays under the tabs. Streak presets stay as the empty-page doors.</p>
+
+<h2>Removed</h2>
+<ul><li><code>AskBar.jsx</code>, its "For example" line, and the typed-question parser (<code>ask.js</code>, <code>parseAsk</code>). Do this after PR #3194 merges, since it edits the same files.</li><li>"Build your own: start with a filter on the left".</li><li>The left filter column and "Add a filter: Choose…" select.</li><li>The data line between tabs and card (moves to the foot).</li></ul>
+
+<h2>House rules that bite</h2>
+<ul>
+<li>Chips, drawer rows, doors: <b>44 px</b> min height.</li>
+<li>Marker yellow is a fill only (set chips), never text. Tokens, not hex; type roles from <code>tokens/typography.css</code>.</li>
+<li>Info text (the <code>info</code> strings in <code>filters.js</code>) opens by tap in <code>InfoPopover</code> from the drawer row, never shown by default.</li>
+<li>Words: "Any" everywhere (not "Anyone"); "Leaders"; "What happened next".</li>
+<li>Filter state stays in the URL with today's keys. Exception from PR #3194: old <code>cnt=ahead|even|behind</code> links should load as <code>fc</code> (data stream to confirm).</li>
+</ul>
+
+<h2>Check before calling it done</h2>
+<p>Render <code>/research?nointro</code> at 390 px and desktop: empty page, three filters set, drawer open, a range filter set, a multi-value and an inverted chip, 0 matches, a filter muted by season range, Leaders with Rate, Games and Streaks with a card added. Run <code>design:design-critique</code> on the build.</p>
+
+<h2>Note for the build</h2>
+<div class="q"><b>"Try one" doors</b> set filters directly (no typed text behind them). Their wording may change with the new filters; the data stream owns which questions appear.</div>
+</main></body></html>
