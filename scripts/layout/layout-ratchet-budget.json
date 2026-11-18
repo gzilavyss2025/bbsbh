@@ -183,7 +183,6 @@
   },
   "src/styles/39-manager-page.css": {
     "column": 2,
-    "wrap": 2,
     "grid": 1
   },
   "src/styles/40-game-modals.css": {

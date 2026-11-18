@@ -6,6 +6,8 @@ import { Card } from '../ui/frame/Card.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { ManagerLink } from './ManagerLink.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
+import '../../styles/manager/staff.css'
 
 // A band shows this many names; the rest wait behind a "more" button.
 const SHOWN = 8
@@ -75,12 +77,12 @@ function LaterManaged({ people }) {
   return (
     <ul className="mgrstaff__names mgrstaff__names--later">
       {people.map((p, i) => (
-        <li key={p.personId} className="mgrstaff__laterone">
+        <Stack as="li" gap="tight" key={p.personId} className="mgrstaff__laterone">
           <ManagerLink id={p.personId} name={p.name || undefined} className="mgrstaff__name mgrstaff__name--mgr">
             {p.name || 'Coach'}
           </ManagerLink>
           {data?.[i] && <span className="mgrstaff__laterrec">{data[i]}</span>}
-        </li>
+        </Stack>
       ))}
     </ul>
   )

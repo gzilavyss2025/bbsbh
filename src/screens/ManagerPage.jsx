@@ -113,7 +113,11 @@ function ManagerHero({ id, name, stints, record, awards, teamId }) {
   const seasons = new Set(stints.filter((s) => s.isManager).map((s) => s.season)).size
   const titles = awards.filter((a) => /world series champion/i.test(a.name ?? '')).length
   const facts = [
-    { key: 'team', label: active ? 'Team' : 'Last team', value: teamId ? <TeamLink id={teamId}>{active?.teamName ?? stints[stints.length - 1]?.teamName}</TeamLink> : DASH },
+    (() => {
+      // Not on a staff now: the last club he managed, not his last coaching job.
+      const club = active ?? lastManagerialStint(stints) ?? stints[stints.length - 1]
+      return { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <TeamLink id={club.teamId}>{club.teamName}</TeamLink> : DASH }
+    })(),
     { key: 'rec', label: 'Record', value: w + l > 0 ? `${w}-${l} ${pct}` : DASH },
     { key: 'seasons', label: 'Seasons managed', value: seasons || DASH },
     { key: 'titles', label: 'Titles', value: titles || DASH },
