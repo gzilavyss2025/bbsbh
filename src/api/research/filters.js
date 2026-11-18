@@ -171,7 +171,7 @@ export const FILTERS = [
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
   { key: 'cnt', label: 'Count reached', options: COUNTS.map((c) => [c, c]), values: (pa) => COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2]))), info: 'A count matches a plate appearance that passed through it on any pitch. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
-  { key: 'fc', label: 'Final count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), Number.isInteger(pa.count?.[0]) ? `${pa.count[0]}-${pa.count[1]}` : null], info: 'The count the last pitch of the plate appearance came in. Batter ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1, 2-2 or 3-2; behind is 0-1, 0-2 or 1-2.' },
+  { key: 'fc', label: 'Final count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), Number.isInteger(pa.count?.[0]) ? `${pa.count[0]}-${pa.count[1]}` : null], info: 'The count the last pitch of the plate appearance came in. Batter ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1, 2-2 or 3-2; behind is 0-1, 0-2 or 1-2. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
   { key: 'role', label: 'Pitcher role', single: true, options: [['SP', 'Starter'], ['RP', 'Reliever']], values: (pa) => [pa.role], info: 'The pitcher’s role that game: the first pitcher his club used is the starter.' },
   { key: 'tto', label: 'Times facing pitcher', options: [['1', '1st'], ['2', '2nd'], ['3', '3rd'], ['4', '4th+']], values: (pa) => [pa.tto == null ? null : String(Math.min(pa.tto, 4))], info: 'The batter’s 1st, 2nd, 3rd or later plate appearance against this pitcher in the game.' },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
@@ -228,8 +228,10 @@ export function parseQuery(search) {
     if (vals.length) chips[f.key] = { vals, inv: inv && !f.single }
   }
   // An old Count card link (before Final count split off) kept its last-pitch groups in cnt.
-  const oldGroups = (p.get('cnt') ?? '').replace(/^!/, '').split('.').filter((v) => COUNT_GROUPS.some(([g]) => g === v))
-  if (oldGroups.length && !chips.fc) chips.fc = { vals: oldGroups, inv: false }
+  // A mixed old link (`cnt=ahead.0-2`, either one) now asks both cards (and), not either.
+  const oldCnt = p.get('cnt') ?? ''
+  const oldGroups = oldCnt.replace(/^!/, '').split('.').filter((v) => COUNT_GROUPS.some(([g]) => g === v))
+  if (oldGroups.length && !chips.fc) chips.fc = { vals: oldGroups, inv: oldCnt.startsWith('!') }
   const ranges = {}
   for (const r of RANGES) {
     const b = parseBound(p.get(r.key))

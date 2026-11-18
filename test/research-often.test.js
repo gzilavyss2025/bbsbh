@@ -58,7 +58,8 @@ test('3-2 is even; Final count reads the last pitch, Count reached any pitch', (
   assert.deepEqual(hits('?fc=even'), [1, 2, 3, 4])
   assert.deepEqual(hits('?fc=3-2'), [3])
   assert.deepEqual(hits('?cnt=3-1'), [5])
-  assert.deepEqual(parseQuery('?cnt=ahead.0-2').chips, { cnt: { vals: ['0-2'], inv: false }, fc: { vals: ['ahead'], inv: false } }, 'an old link keeps its meaning')
+  assert.deepEqual(parseQuery('?cnt=ahead.0-2').chips, { cnt: { vals: ['0-2'], inv: false }, fc: { vals: ['ahead'], inv: false } }, 'an old link keeps both cards (now and, not or)')
+  assert.deepEqual(parseQuery('?cnt=!ahead').chips.fc, { vals: ['ahead'], inv: true }, 'an inverted old group stays inverted')
 })
 
 test("the pitcher's role that game, and times facing him", () => {

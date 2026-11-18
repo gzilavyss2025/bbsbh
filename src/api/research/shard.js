@@ -295,7 +295,8 @@ export function markGameRoles(pas) {
     }
     if (!starters.has(pa.fieldTeam)) starters.set(pa.fieldTeam, pa.pitcher)
     pa.role = starters.get(pa.fieldTeam) === pa.pitcher ? 'SP' : 'RP'
-    const k = `${pa.pitcher}-${pa.batter}`
+    // Person ids are under 10 million, so one number keys the pair.
+    const k = pa.pitcher * 1e7 + pa.batter
     pa.tto = (faced.get(k) ?? 0) + 1
     faced.set(k, pa.tto)
   }

@@ -45,6 +45,8 @@ const CLIP_FIELDS = 'liveData,plays,allPlays,about,atBatIndex,playEvents,isPitch
 const hasClip = (m) => !m.history && m.date >= '2016' && m.gameType !== 'A'
 async function openClip(m) {
   const tab = window.open('', '_blank')
+  // The clip page gets no handle back to this tab.
+  if (tab) tab.opener = null
   try {
     const feed = await fetchGameFeed(m.gamePk, { fields: CLIP_FIELDS })
     const play = feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === m.atBat - 1)
@@ -186,7 +188,7 @@ function Rows({ rows, people, wp }) {
           <span className="research__result">{resultName(m.event)}</span>
           <span><Name id={m.batter} people={people} /> v <Name id={m.pitcher} people={people} /> · {m.top ? '▲' : '▼'}{m.inning}</span>
           <span className="research__ord">{nth(m.ordinal)} in {m.date.slice(0, 4)}</span>
-          {m.launchSpeed != null && <span className="research__ord">{mph(m)} mph · {deg(m)}</span>}
+          {m.launchSpeed != null && <span className="research__ev">{mph(m)} mph · {deg(m)}</span>}
           <PlayLinks m={m} />
           {wp && m.wpa != null && <span className="research__wp">{wpLine(m)}</span>}
         </li>

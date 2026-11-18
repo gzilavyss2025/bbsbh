@@ -23,7 +23,7 @@
 
 <h2>What the store already holds</h2>
 <p>The 2015-on (Baseball Savant) store is already one row per pitch: pitch type, the count before it, plate_x (left-right), the call (ball, called strike, swinging strike, foul, in play), batter, pitcher, inning, outs, runners and score. The page throws the per-pitch rows away when it builds plate appearances, to save memory on a phone. So most of a pitch mode needs no new data.</p>
-<p>What the store does <b>not</b> hold: pitch speed, spin, height in the zone (plate_z), and break. The 1961–2014 history store has pitch sequences only (ball / strike / foul letters), no type or location.</p>
+<p>Update: pitch speed and height in the zone (plate_z) were added to the store builder in the same PR (store v3); they fill in once 2015–2026 is rebuilt (issue #3195). Still not held: spin and break. The 1961–2014 history store has pitch sequences only (ball / strike / foul letters), no type or location.</p>
 
 <h2>Questions it unlocks</h2>
 <ul>

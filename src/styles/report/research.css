@@ -79,6 +79,17 @@
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
+.research__ev {
+  grid-column: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.research__links {
+  grid-column: 2;
+  font-size: var(--fs-cell);
+  text-align: right;
+}
 .research__ord {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
