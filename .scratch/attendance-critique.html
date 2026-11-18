@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendance critique</title>
+<style>
+:root{--bg:#faf6ea;--ink:#1b2a3a;--rule:#d8cfb8;--red:#b23a2e;--amber:#b7791f;--green:#3d7a4a}
+@media (prefers-color-scheme:dark){:root{--bg:#151b22;--ink:#e8e2d2;--rule:#33404d}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:28px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}td,th{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.c{color:var(--red);font-weight:bold}.m{color:var(--amber);font-weight:bold}.n{color:var(--green);font-weight:bold}
+</style></head><body><main>
+<h1>Attendance (/attendance) — critique</h1>
+<p>Checked live at desktop width against the house rules (<code>src/styles/CLAUDE.md</code>) and the stamped look Pressure Moments now uses.</p>
+
+<h2>Overall impression</h2>
+<p>Strong data and a real point of view ("fill rate measures a town"). But the page speaks a different visual language from Pressure Moments: rounded, soft-shadowed report cards instead of square stamped frames, and it explains itself in paragraphs the house rules say to cut.</p>
+
+<h2>Usability</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr>
+<tr><td><b>Explanation shown by default.</b> A 4-line thesis in the masthead, a 3-line note above the board, and 4-line captions under the stat tiles. House rule: "Cut taglines, helper text, and secondary labels… Explanation the reader must opt into goes in InfoPopover."</td><td class="c">Critical</td><td>One line under the title; everything else behind one (i), as Pressure Moments does.</td></tr>
+<tr><td>The sort row (Fill rate / Average / Season total / Best night / Swing) is a row of separate chips for a one-of-five choice.</td><td class="m">Moderate</td><td>The house <code>Segmented</code> control, as the Batting / Pitching switch.</td></tr>
+<tr><td>"Swing" names nothing a reader knows; only the board note explains it.</td><td class="m">Moderate</td><td>Rename to what it is (e.g. "Range": best night minus worst).</td></tr>
+<tr><td>A long page (~6,600 px, five sections) with no way to jump.</td><td class="n">Minor</td><td>Fine for a report; revisit only if readers miss the lower sections.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><b>First:</b> the navy masthead. Right element, but it carries a paragraph, so the title competes with its own deck.</li>
+<li><b>Then:</b> four stat tiles of equal weight, then a second heading ("The board") and a second paragraph before the data starts. The board, the page's reason to exist, starts ~520 px down.</li>
+<li><b>Emphasis:</b> the eyebrow pill ("On the field / The gate") is template chrome; the title already says where you are.</li>
+</ul>
+
+<h2>Consistency with Pressure Moments</h2>
+<table><tr><th>Element</th><th>Attendance now</th><th>Pressure Moments</th><th>Fix</th></tr>
+<tr><td>Frames</td><td>6–10 px radius, soft grey shadow (masthead, tiles, table)</td><td>Square, heavy ink edge, hard ink shadow</td><td>Stamped frame on the board; square tiles</td></tr>
+<tr><td>Title block</td><td>Navy band with eyebrow + paragraph + meta row</td><td>Title with a one-line deck tight under it</td><td>Keep the band if this is a report, but one deck line</td></tr>
+<tr><td>Choice control</td><td>Chips</td><td>Segmented</td><td>Segmented</td></tr>
+<tr><td>Tile accent</td><td>Only the first tile has a red top rule</td><td>—</td><td>All the same, or no rule</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><b>Contrast:</b> white on navy and ink on paper pass. The grey fill bars behind the percentage are low-contrast as a mark but the number carries the value.</li>
+<li><b>Tap targets:</b> chips ~44 px, fine.</li>
+<li><b>Readability:</b> the all-caps mono paragraphs are the slowest text on the page, another reason to move them behind (i).</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>Ranking by fill rate is a real editorial choice, stated once in the title area.</li>
+<li>The by-month mini bars make each row's season shape readable at a glance.</li>
+<li>The four tiles pick the right four numbers.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><b>Cut the paragraphs</b> — one deck line, the rest in an (i).</li>
+<li><b>Move to the stamped frame</b> — square tiles and a stamped board card, matching Pressure Moments.</li>
+<li><b>Segmented sort control, and rename "Swing"</b>.</li>
+</ol>
+</main></body></html>

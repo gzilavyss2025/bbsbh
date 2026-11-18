@@ -1,0 +1,1000 @@
+diff --git a/scripts/gen-tensest.mjs b/scripts/gen-tensest.mjs
+index be04e45af..01d1530ab 100644
+--- a/scripts/gen-tensest.mjs
++++ b/scripts/gen-tensest.mjs
+@@ -29,12 +29,13 @@ import { getJson } from './lib/statsapi.mjs'
+ import { mapConcurrent } from './lib/concurrency.mjs'
+ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+ import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
+-import { gameNumbers, gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
++import { clipIds, gameNumbers, gameRowsOrThrow, isPlayedFinal, mergePlays } from './lib/tensest/tensest.mjs'
+ import { cutoffsFromHist, emptyHist, foldHist, histOrNull } from './lib/tensest/cutoffs.mjs'
+ import { parseArgs, strOpt } from './lib/args.mjs'
+ 
+ const here = import.meta.dirname
+ const OUT = join(here, '..', 'public', 'data', 'tensest.json')
++const CLIPS = join(here, '..', 'public', 'data', 'tensest-clips.json')
+ const CUTOFFS = join(here, '..', 'public', 'data', 'tensest-cutoffs.json')
+ const STATE = join(here, 'data', 'tensest-state.json')
+ const CONCURRENCY = 8
+@@ -60,8 +61,14 @@ const byPk = new Map(finals.map((g) => [g.gamePk, g]))
+ let plays = (carried ? prev.plays : []).map((r) => (byPk.has(r.pk) ? { ...r, ...gameNumbers(byPk.get(r.pk)) } : r))
+ 
+ // A suspended game is listed on both dates; read it once, or its plays count twice.
++const prevClips = await readJsonOr(CLIPS, null)
++let clips = carried && prevClips?.season === season ? prevClips.clips : {}
++// A game with rows and no clip ids was read before clips were kept: read it again for
++// its ids alone (a one-time backfill; its rows and histogram are already counted).
++const clipped = new Set(Object.keys(clips).map((k) => Number(k.split(':')[0])))
++const backfill = [...new Set(plays.map((r) => r.pk))].filter((pk) => !clipped.has(pk) && byPk.has(pk)).map((pk) => byPk.get(pk))
+ const todo = [...new Map(finals.filter((g) => !done.has(g.gamePk)).map((g) => [g.gamePk, g])).values()]
+-if (todo.length === 0) {
++if (todo.length === 0 && backfill.length === 0) {
+   // Restamp both files anyway: the freshness guard reads the stamp, and the nightly
+   // commit drops a stamp-only change (nightly/drop-stamp-only.mjs), so this commits nothing.
+   if (carried) {
+@@ -79,15 +86,21 @@ async function writeCutoffs(cutoffs) {
+   await writeJsonAtomic(CUTOFFS, { season, generatedAt: new Date().toISOString(), cutoffs })
+ }
+ 
++if (backfill.length) {
++  const got = await mapConcurrent(backfill, CONCURRENCY, async (g) => clipIds(g, await getJson(`/api/v1/game/${g.gamePk}/winProbability`)))
++  for (const c of got) if (c) clips = { ...clips, ...c }
++  console.log(`tensest: backfilled clip ids for ${got.filter(Boolean).length} of ${backfill.length} games`)
++}
++
+ const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
+   const plays = await getJson(`/api/v1/game/${g.gamePk}/winProbability`)
+   const rows = gameRowsOrThrow(g, plays)
+   // Folded here, not after: holding every game's whole feed runs out of memory.
+   hist = foldHist(hist, plays)
+-  return { g, rows }
++  return { g, rows, clips: clipIds(g, plays) }
+ })
+ const ok = read.filter(Boolean)
+-if (ok.length === 0) throw new Error('tensest: every winProbability read failed')
++if (todo.length && ok.length === 0) throw new Error('tensest: every winProbability read failed')
+ 
+ plays = mergePlays(plays, ok.flatMap((r) => r.rows))
+ // The page cuts each club's top 25 batting and pitching from this list, which stops at
+@@ -104,5 +117,10 @@ const cutoffs = cutoffsFromHist(hist)
+ const last = finals.map((g) => g.officialDate).sort().at(-1) ?? null
+ await writeJsonAtomic(OUT, { season, generatedAt: new Date().toISOString(), through: last, games: done.size, plays })
+ await writeCutoffs(cutoffs)
++// Only the plays still on the board keep a clip id.
++for (const r of ok) clips = { ...clips, ...r.clips }
++const live = new Set(plays.map((r) => `${r.pk}:${r.i}`))
++clips = Object.fromEntries(Object.entries(clips).filter(([k]) => live.has(k)))
++await writeJsonAtomic(CLIPS, { season, generatedAt: new Date().toISOString(), clips })
+ await writeJsonAtomic(STATE, { season, done: [...done].sort((a, b) => a - b), hist })
+ console.log(`tensest: ${season}, read ${ok.length} of ${todo.length} new games; ${done.size} in all; ${plays.length} tense plays; bar edges ${cutoffs?.li.join(' ')}`)
+diff --git a/scripts/lib/tensest/tensest.mjs b/scripts/lib/tensest/tensest.mjs
+index 19a06452c..02c9f8043 100644
+--- a/scripts/lib/tensest/tensest.mjs
++++ b/scripts/lib/tensest/tensest.mjs
+@@ -111,6 +111,15 @@ export function gameNumbers(game) {
+   return out
+ }
+ 
++// `sc`: [[id, full name], …] for each runner the play scored, in the feed's order; kept
++// off the row when none did.
++export function scoredOn(play) {
++  const sc = (play?.runners ?? [])
++    .filter((r) => r?.details?.isScoringEvent && r.details.runner?.id)
++    .map((r) => [r.details.runner.id, r.details.runner.fullName])
++  return sc.length ? { sc } : {}
++}
++
+ // One game's plays -> the rows worth keeping. `game` is a schedule row
+ // ({ gamePk, gameType, officialDate, teams: { away, home } }).
+ export function playRows(game, plays) {
+@@ -138,6 +147,10 @@ export function playRows(game, plays) {
+       pid: p.matchup.pitcher.id,
+       pn: p.matchup.pitcher.fullName,
+       what: describePlay(p),
++      // The runners who scored, whole, so the page can name and link them; and the
++      // home club's win-probability swing, which tints the row for the club that gained.
++      ...scoredOn(p),
++      ...(Number.isFinite(p.homeTeamWinProbabilityAdded) ? { wpa: Math.round(p.homeTeamWinProbabilityAdded * 10) / 10 } : {}),
+       // The park, from the schedule game: not the home club's, because of neutral sites.
+       vid: game.venue?.id ?? null,
+       vn: game.venue?.name ?? null,
+@@ -171,3 +184,16 @@ export function mergePlays(existing, incoming) {
+   for (const r of incoming) byKey.set(keyOf(r), r)
+   return [...byKey.values()].sort(byTense)
+ }
++
++// The clip of each tense play: its last pitch's playId, keyed `pk:i` like the rows.
++// Written to its own file (tensest-clips.json) so the page downloads it only when a
++// reader taps a play's ▶, never on load.
++export function clipIds(game, plays) {
++  const out = {}
++  ;(plays ?? []).forEach((p, i) => {
++    if (!(Number(p?.leverageIndex) >= LI_FLOOR)) return
++    const id = (p.playEvents ?? []).findLast((e) => e?.playId)?.playId
++    if (id) out[`${game.gamePk}:${i}`] = id
++  })
++  return out
++}
+diff --git a/src/api/spoiler-manifest.json b/src/api/spoiler-manifest.json
+index 0f53cbf6c..8ce17fb74 100644
+--- a/src/api/spoiler-manifest.json
++++ b/src/api/spoiler-manifest.json
+@@ -550,7 +550,7 @@
+     },
+     "game/highlights.js": {
+       "class": "mixed",
+-      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why the open surfaces that format a clip length need no place on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip.",
++      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why the open surfaces that format a clip length need no place on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip. screens/tensest/TensestWatch.jsx joins one tense play to its package on a ▶ tap: Pressure Moments is an open surface of Final games, not a scoring surface (ADR-0034).",
+       "revealOnlyExports": [
+         "highlightForPlay",
+         "eligibleHighlightForPlay",
+@@ -562,7 +562,8 @@
+         "components/charts/winprob/useSwingClip.js",
+         "screens/boxscore/revealBoxScore.js",
+         "screens/logbook/RetrospectiveSections.jsx",
+-        "screens/player/next/modules/pitchlog/gameDetail.js"
++        "screens/player/next/modules/pitchlog/gameDetail.js",
++        "screens/tensest/TensestWatch.jsx"
+       ]
+     },
+     "hitchart.js": {
+diff --git a/src/api/tensest/tensest.js b/src/api/tensest/tensest.js
+index adb5474a3..c00247433 100644
+--- a/src/api/tensest/tensest.js
++++ b/src/api/tensest/tensest.js
+@@ -54,3 +54,87 @@ export function boardBars(li) {
+   if (typeof li !== 'number' || !Number.isFinite(li)) return null
+   return Math.min(10, Math.max(1, 1 + Math.floor((li - BOARD_FLOOR + 1e-9) / BOARD_STEP)))
+ }
++
++// Each tense play's clip id (`pk:i` -> playId), from its own file so the board's load
++// never pays for it: the first ▶ tap reads it, once (staticJson memoizes the request).
++export const loadTensestClips = staticJson('/data/tensest-clips.json', {
++  shape: (d) => d.clips ?? {},
++  fallback: {},
++})
++
++// "9th", "10th", "11th", "21st": an inning as a game story writes it.
++export function ordinal(n) {
++  const t = n % 100
++  if (t >= 11 && t <= 13) return `${n}th`
++  return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`
++}
++
++// What the batter did, as the generator wrote it, against the words around it. A hit,
++// a walk or a hit batter happened OFF the pitcher; anything else, AGAINST him.
++const BATTER_VERB = /^(singled|doubled|tripled|hit |grounded|flew|lined|popped|struck|walked|was |reached|bunted)/
++const OFF = /^(singled|doubled|tripled|hit a (solo|two-run|three-run) homer|hit a grand slam|walked|was walked|was hit)/
++
++// One row as one sentence (a baseball writer's review, 2026-11-17): the batter, what he
++// did, off whom, any runs, and the inning. Parts, so the page can link the two names:
++// { lead, verb, prep, scoring, when }. A play the batter did not make (a wild pitch, a
++// pickoff) leads with the play. `runners` is [[id, full name], …] when the file names
++// who scored (the page links each); null on an older file, which keeps `scoring` text.
++export function momentParts(row) {
++  const what = String(row?.what ?? '').trim()
++  const cut = what.search(/,\s*scoring /)
++  const verb = (cut === -1 ? what : what.slice(0, cut)).replace(/,\s*$/, '')
++  const scoring = cut === -1 ? '' : what.slice(cut).replace(/^,\s*/, ', ')
++  const runners = scoring && Array.isArray(row?.sc) && row.sc.length ? row.sc : null
++  const when = `in the ${row?.top ? 'top' : 'bottom'} of the ${ordinal(row?.inn ?? 9)}`
++  if (!BATTER_VERB.test(verb)) {
++    return { lead: 'play', verb: verb.charAt(0).toUpperCase() + verb.slice(1), prep: 'with', scoring, runners, when } // caps-js-exempt: sentence case
++  }
++  return { lead: 'batter', verb, prep: OFF.test(verb) ? 'off' : 'against', scoring, runners, when }
++}
++
++// "NLDS Game 2": the round written out for the citation line under a moment.
++export const postseasonCitation = (row) => postseasonLabel(row).replace(/ G(\d+)$/, ' Game $1')
++
++// Whether the picked club's side won the at-bat: 'up' or 'down', null with no club.
++// The batter wins it with a hit, a walk, a hit-by-pitch, a run that scored or a time he
++// reached; anything else is the pitcher's. On the Pitching view that flips.
++export function batterWon(row) {
++  const m = momentParts(row)
++  return m.prep === 'off' || Boolean(m.scoring) || /^reached/.test(m.verb)
++}
++export function swingFor(row, teamId, side = 'bat') {
++  if (teamId == null) return null
++  return batterWon(row) === (side === 'bat') ? 'up' : 'down'
++}
++
++// The club's record in the at-bats on its board, by the same rule as the row tints:
++// how many its side succeeded in, of how many. `tone` is 'up' past half, 'down' under.
++export function boardRecord(rows, side = 'bat') {
++  const list = rows ?? []
++  const of = list.length
++  const succeeded = list.filter((r) => batterWon(r) === (side === 'bat')).length
++  const tone = succeeded * 2 > of ? 'up' : succeeded * 2 < of ? 'down' : null
++  return { succeeded, of, tone }
++}
++
++// The MLB rate for one side across every tense at-bat in the file (the record's yardstick):
++// how often the batter succeeded, or the pitcher. A whole percent; null with no plays.
++export function mlbRate(plays, side = 'bat') {
++  const list = plays ?? []
++  if (!list.length) return null
++  const bat = list.filter(batterWon).length / list.length
++  return Math.round((side === 'bat' ? bat : 1 - bat) * 100)
++}
++
++// The record against that yardstick, in words a reader can say aloud (copy review,
++// 2026-11-17). Within 5 points is "near": 25 at-bats swing about that much by chance, so
++// it takes no colour. 5-10 is above/below, past 10 "well". `tone` colours the line.
++export function versusMlb(pct, mlb) {
++  if (pct == null || mlb == null) return null
++  const gap = pct - mlb
++  const size = Math.abs(gap)
++  if (size < 5) return { text: `Near the MLB average of ${mlb}%`, tone: null }
++  const dir = gap > 0 ? 'above' : 'below'
++  const word = size > 10 ? `Well ${dir}` : dir.charAt(0).toUpperCase() + dir.slice(1) // caps-js-exempt: sentence case
++  return { text: `${word} the MLB average of ${mlb}%`, tone: gap > 0 ? 'up' : 'down' }
++}
+diff --git a/src/api/transactions/cutline.js b/src/api/transactions/cutline.js
+index 64a2d6304..e5ce95944 100644
+--- a/src/api/transactions/cutline.js
++++ b/src/api/transactions/cutline.js
+@@ -278,8 +278,9 @@ function cutlineTrade(story, ctx) {
+   }
+   if (clearRow) {
+     const cName = nameFor(clearRow)
+-    const cRaw = stripLeadingClub(clearRow.description, ownClubNames(clearRow, ctx))
+-    const cClause = stripPeriod(leadsWithOwnClub(clearRow, ctx) ? lowerFirstClause(cRaw) : cRaw)
++    // Kept with its club: a trade names two clubs, so a bare "designated …"
++    // after it leaves the reader guessing which one made the move.
++    const cClause = stripPeriod(clearRow.description || '')
+     segs.push({ text: '; ' })
+     segs.push(...emphasizeClause(cClause, cName, 'secondary', clearRow.person?.id))
+   }
+diff --git a/src/api/transactions/templates.js b/src/api/transactions/templates.js
+index c08e58a48..5f020dbaa 100644
+--- a/src/api/transactions/templates.js
++++ b/src/api/transactions/templates.js
+@@ -296,7 +296,7 @@ function originSentence(facts, name, moveDate) {
+     if (signed) parts.push(`${name} signed with ${the(signed.teamId)} in ${signed.date.slice(0, 4)}`)
+   }
+   for (const a of before.filter((x) => x.how === 'trade' || x.how === 'waiver claim')) {
+-    const when = `${apDate(a.date)}${a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`}`
++    const when = `${apDate(a.date)}, ${a.date.slice(0, 4)}`
+     parts.push(a.how === 'trade' ? `${the(a.teamId)} got him in ${aMonth(when)} ${when} trade` : `${the(a.teamId)} claimed him on ${when}`)
+   }
+   if (!parts.length) return null
+@@ -321,10 +321,10 @@ function arrivalSentence(facts, who, moveDate) {
+   const a = facts.arrival
+   // A claim is its own arrival: the move already says how he got here.
+   if (!a || (moveDate && daysBetween(a.date, moveDate) <= 1)) return null
+-  const year = a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`
++  const year = `, ${a.date.slice(0, 4)}`
+   const when = `${apDate(a.date)}${year}`
+   let s
+-  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
++  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
+   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
+   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
+   else if (a.how === 'Rule 5 draft')
+diff --git a/src/components/team/TeamFilterStrip.jsx b/src/components/team/TeamFilterStrip.jsx
+index 48368b2e7..adb1ed281 100644
+--- a/src/components/team/TeamFilterStrip.jsx
++++ b/src/components/team/TeamFilterStrip.jsx
+@@ -33,6 +33,8 @@ export function TeamFilterStrip({
+   onSelect,
+   ariaLabel,
+   showMlbPin = true,
++  // A word under the MLB pin ("All") for a page where the pin means every club.
++  pinLabel = null,
+   showArrows = false,
+   centerTeamId = null,
+   markedTeamId = null,
+@@ -96,6 +98,7 @@ export function TeamFilterStrip({
+                 height={36}
+                 aria-hidden="true"
+               />
++              {pinLabel && <span className="teamfilterstrip__pinlabel" aria-hidden="true">{pinLabel}</span>}
+             </button>
+             <span className="teamfilterstrip__divider" aria-hidden="true" />
+           </>
+diff --git a/src/screens/tensest/TensestFilters.jsx b/src/screens/tensest/TensestFilters.jsx
+index 2c445134e..5d23b0cff 100644
+--- a/src/screens/tensest/TensestFilters.jsx
++++ b/src/screens/tensest/TensestFilters.jsx
+@@ -1,4 +1,4 @@
+-import { useId } from 'react'
++import { useId, useState } from 'react'
+ import { Button } from '../../components/ui/control/Button.jsx'
+ import { Stack } from '../../components/ui/layout/Stack.jsx'
+ import { Cluster } from '../../components/ui/layout/Cluster.jsx'
+@@ -16,15 +16,23 @@ const FIELDS = [
+   ['pitching', 'Pitching club', 'clubs', 'Any club'],
+ ]
+ 
+-export function TensestFilters({ value, options, onChange }) {
++// `clubs` false drops the two club pickers, for a board the club strip already scopes.
++export function TensestFilters({ value, options, onChange, clubs = true }) {
+   const uid = useId()
++  // On a phone the pickers fold behind one button, so the first at-bat is on the
++  // first screen; wide, they always show and the button is hidden (tensest.css).
++  const [open, setOpen] = useState(false)
+   const set = (key, v) => onChange({ ...value, [key]: v })
+   const nameOf = (list, id) => options[list].find((o) => o.id === id)?.name ?? ''
+-  const active = FIELDS.filter(([key]) => value[key] != null)
++  const fields = clubs ? FIELDS : FIELDS.filter(([key]) => key !== 'batting' && key !== 'pitching')
++  const active = fields.filter(([key]) => value[key] != null)
+   return (
+     <Stack gap="snug" className="tensest__filters">
+-      <Cluster className="tensest__fields">
+-        {FIELDS.map(([key, label, list, any]) => (
++      <Button size="control" className="tensest__filtertoggle" aria-expanded={open} aria-controls={`${uid}-fields`} onClick={() => setOpen(!open)}>
++        {open ? 'Hide filters' : 'Filter'}
++      </Button>
++      <Cluster id={`${uid}-fields`} className={`tensest__fields${open ? ' is-open' : ''}`}>
++        {fields.map(([key, label, list, any]) => (
+           <Stack gap="tight" key={key} className="tensest__field">
+             <label className="t-label" htmlFor={`${uid}-${key}`}>{label}</label>
+             <select id={`${uid}-${key}`} value={value[key] ?? ''} onChange={(e) => set(key, e.target.value === '' ? null : Number(e.target.value))}>
+diff --git a/src/screens/tensest/TensestMomentsPage.jsx b/src/screens/tensest/TensestMomentsPage.jsx
+index 0c23064d7..4aefc9609 100644
+--- a/src/screens/tensest/TensestMomentsPage.jsx
++++ b/src/screens/tensest/TensestMomentsPage.jsx
+@@ -1,10 +1,12 @@
+ import '../../styles/report/tensest.css'
+ import { useMemo, useState } from 'react'
+-import { boardBars, loadTensest, rankLabel, postseasonLabel } from '../../api/tensest/tensest.js'
++import { boardBars, loadTensest, momentParts, postseasonCitation, rankLabel, swingFor, boardRecord, mlbRate, versusMlb } from '../../api/tensest/tensest.js'
+ import { clubTop, filterOptions, filterPlays, leagueTop } from '../../api/tensest/slices.js'
+ import { PressureMeter } from '../../components/charts/PressureMeter.jsx'
+ import { TensestFilters } from './TensestFilters.jsx'
+-import { Stack } from '../../components/ui/layout/Stack.jsx'
++import { Cluster } from '../../components/ui/layout/Cluster.jsx'
++import { Segmented } from '../../components/ui/control/Segmented.jsx'
++import { TensestWatch } from './TensestWatch.jsx'
+ import { useAsync } from '../../hooks/useAsync.js'
+ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
+ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+@@ -35,7 +37,8 @@ function Club({ id }) {
+   )
+ }
+ 
+-// "W 4-3 vs [CHC]" for the selected club's own games, "[PIT] 7, [WSH] 8" for the rest.
++// "won 4-3 vs [CHC]" for the selected club's own games (the winner's runs first, as a
++// game story writes it), "[PIT] 7, [WSH] 8" for the rest.
+ function GameLabel({ row, teamId }) {
+   const hasScore = row.as != null && row.hs != null
+   if (teamId && (row.aw === teamId || row.hm === teamId)) {
+@@ -45,7 +48,8 @@ function GameLabel({ row, teamId }) {
+     const where = home ? 'vs' : 'at'
+     const other = <Club id={home ? row.aw : row.hm} />
+     if (!hasScore) return <>{where} {other}</>
+-    return <>{mine > theirs ? 'W' : 'L'} {mine}-{theirs} {where} {other}</>
++    const won = mine > theirs
++    return <>{won ? 'won' : 'lost'} {Math.max(mine, theirs)}-{Math.min(mine, theirs)} {where} {other}</>
+   }
+   if (!hasScore) return <><Club id={row.aw} /> at <Club id={row.hm} /></>
+   return <><Club id={row.aw} /> {row.as}, <Club id={row.hm} /> {row.hs}</>
+@@ -53,69 +57,82 @@ function GameLabel({ row, teamId }) {
+ 
+ const boxPath = (r) => gamePath(r.d, teamAbbr({ id: r.aw }), teamAbbr({ id: r.hm }), 'boxscore', r.gn ?? 1)
+ 
+-const countOf = (rows) => (rows?.length ? `${rows.length} at-bats` : undefined)
+ 
+-function TensestTable({ rows, teamId, label }) {
++// One row, one moment (a baseball writer's review, 2026-11-17): a sentence a game story
++// would print, "Jarren Duran singled to right off Devin Williams, scoring Cheng, in the
++// 9th.", over a small citation line naming the game: "July 12 at [NYM] · won 3-2".
++function Moment({ r, teamId, routeLink }) {
++  const m = momentParts(r)
++  const batter = <PlayerLink id={r.bid}>{r.bn}</PlayerLink>
++  const pitcher = <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
++  const round = postseasonCitation(r)
++  // Each runner who scored, by full name and linked, joined as a sentence lists them.
++  const scoring = m.runners
++    ? <>, scoring {m.runners.map(([id, n], i) => (
++        <span key={id}>{i === 0 ? '' : i === m.runners.length - 1 ? ' and ' : ', '}<span className="tensest__nobreak"><PlayerLink id={id}>{n}</PlayerLink>{i === m.runners.length - 1 ? ',' : ''}</span></span>
++      ))}</>
++    : null
++  // The comma rides with the word before it: a name is a button, and a line may break
++  // after a button, which left a comma alone at the start of a line.
++  const tail = scoring
++    ? <>{pitcher}{scoring}</>
++    : m.scoring
++      ? <>{pitcher}{m.scoring},</>
++      : <span className="tensest__nobreak">{pitcher},</span>
++  return (
++    <>
++      <p className="tensest__moment">
++        {m.lead === 'batter'
++          ? <>{batter} {m.verb} {m.prep} {tail} {m.when}.</>
++          : <>{m.verb} with {batter} up against {tail} {m.when}.</>}
++      </p>
++      <p className="tensest__cite">
++        {monthDay(r.d) || DASH}{' '}
++        <a className="tensest__gamelink" {...routeLink(boxPath(r))}><GameLabel row={r} teamId={teamId} /></a>
++        {round && <> · {round}</>}
++      </p>
++    </>
++  )
++}
++
++function TensestTable({ rows, teamId, side, label }) {
+   const routeLink = useRouteLink()
+   return (
+     <Table frame="bare" label={label} className="tensest">
+       <thead>
+         <tr>
+           <th>Rank</th>
+-          <th>Pressure</th>
+-          <th>Date</th>
+-          <th className="game">Game</th>
+-          <th>Inning</th>
+-          <th className="batter">At-bat</th>
+-          <th className="what">What happened</th>
++          <th className="moment">Moment</th>
++          <th className="tensest__pressure">Pressure</th>
++          <th><span className="sr-only">Watch</span></th>
+         </tr>
+       </thead>
+       <tbody>
+-        {rows.map((r) => {
+-          const round = postseasonLabel(r)
+-          return (
+-          <tr key={`${r.pk}:${r.i}`}>
++        {rows.map((r) => (
++          // A faint green or red wash: the picked club's side won or lost the at-bat.
++          <tr key={`${r.pk}:${r.i}`} className={swingFor(r, teamId, side) ? `tensest__row--${swingFor(r, teamId, side)}` : undefined}>
+             <td className="rank"><span className="sr-only tensest__cue">Rank </span>{rankLabel(r, rows)}</td>
++            <td className="moment"><Moment r={r} teamId={teamId} routeLink={routeLink} /></td>
+             {/* The meter spreads this board's own range (boardBars), not the season's: on the
+                 season scale every row here is full. The number beside it is what a screen
+                 reader hears, so the meter is decorative. */}
+-            <td className="tensest__pressure"><PressureMeter bars={boardBars(r.li)} decorative /> <span className="sr-only tensest__cue">Pressure </span>{r.li.toFixed(2)}</td>
+-            <td className="date">{monthDay(r.d) || DASH}</td>
+-            <td className="game">
+-              <a className="tensest__gamelink" {...routeLink(boxPath(r))}><GameLabel row={r} teamId={teamId} /></a>
+-              {round && <span className="tensest__post"> · {round}</span>}
+-            </td>
+-            {/* ▲ top / ▼ bottom, as the box score and Gameday mark the half. */}
+-            <td className="inn" aria-label={`${r.top ? 'Top' : 'Bottom'} ${r.inn}`}>
+-              {r.top ? '▲' : '▼'}
+-              {r.inn}
+-            </td>
+-            <td className="batter">
+-              <PlayerLink id={r.bid}>{r.bn}</PlayerLink>{' '}
+-              {/* "vs" rides with the pitcher, so a wrap never leaves it dangling. */}
+-              <span className="tensest__vs">
+-                vs <PlayerLink id={r.pid}>{r.pn}</PlayerLink>
+-              </span>
+-            </td>
+-            <td className="what">{r.what}</td>
++            <td className="tensest__pressure"><span className="sr-only tensest__cue">Pressure </span>{r.li.toFixed(2)} <PressureMeter bars={boardBars(r.li)} decorative /></td>
++            <td className="watch"><TensestWatch row={r} /></td>
+           </tr>
+-          )
+-        })}
++        ))}
+       </tbody>
+     </Table>
+   )
+ }
+ 
+-// The season's tensest at-bats by MLB's pressure score: a club batting, the same club
+-// pitching, and all of baseball, which filters by batter, pitcher, park and club
+-// (#2981). Every list is ranked here from the file's flat list (slices.js). Postseason
+-// games are included and marked. The page opens on the favorite club; the strip picks
+ // another. Not a scoring surface, so it opens live with no seal (ADR-0034).
+ export function TensestMomentsPage() {
+   useDocumentTitle('Biggest At-Bats')
+   const { loading, error, data } = useAsync(() => loadTensest(), [])
+   const { favoriteTeamId } = useFavoriteTeam()
+-  const [picked, setPicked] = useState(null)
++  // undefined = the opening club; null = all of baseball (the strip's MLB pin).
++  const [picked, setPicked] = useState(undefined)
++  const [side, setSide] = useState('bat')
+   const [filters, setFilters] = useState({})
+   const plays = data?.plays
+   const clubs = useMemo(() => {
+@@ -124,15 +141,22 @@ export function TensestMomentsPage() {
+   }, [plays])
+   const options = useMemo(() => ({ ...filterOptions(plays), clubs }), [plays, clubs])
+   // The file holds MLB clubs only. A favorite that is a minor-league club (or any id it
+-  // does not know) falls back to the pinned club rather than showing empty tables.
++  // does not know) falls back to the pinned club rather than showing an empty board.
+   const known = (id) => id != null && clubs.some((c) => c.id === id)
+-  const teamId = picked ?? (known(favoriteTeamId) ? favoriteTeamId : PINNED_TEAM_ID)
+-  const mine = useMemo(() => ({ bat: clubTop(plays, teamId, 'bat'), pit: clubTop(plays, teamId, 'pit') }), [plays, teamId])
+-  const filtering = Object.values(filters).some((v) => v != null)
+-  const league = useMemo(() => leagueTop(filtering ? filterPlays(plays, filters) : plays), [plays, filters, filtering])
++  const teamId = picked !== undefined ? picked : known(favoriteTeamId) ? favoriteTeamId : PINNED_TEAM_ID
++  // ONE board: the strip scopes it (a club, or all of baseball), the switch picks the
++  // club's side, and the filters narrow it. A club's two pickers drop out under a club.
++  const filtering = Object.values(teamId == null ? filters : { ...filters, batting: null, pitching: null }).some((v) => v != null)
++  const rows = useMemo(() => {
++    if (teamId == null) return leagueTop(filterPlays(plays, filters))
++    return clubTop(filterPlays(plays, { ...filters, batting: null, pitching: null }), teamId, side)
++  }, [plays, teamId, side, filters])
++  const record = boardRecord(rows, side)
++  const mlb = useMemo(() => mlbRate(plays, side), [plays, side])
++  const pct = record.of ? Math.round((record.succeeded / record.of) * 100) : null
++  const versus = versusMlb(pct, mlb)
+   const hasData = (plays?.length ?? 0) > 0
+   const name = teamFullName(teamId) || 'This club'
+-  const updated = monthDay(data?.through)
+ 
+   return (
+     <div className="screen">
+@@ -147,8 +171,11 @@ export function TensestMomentsPage() {
+         <InfoPopover label="About biggest at-bats" className="infopop--paper infopop--down">
+           MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
+           the runners. A normal at-bat is 1.0 and the scale stops at 9.99. Every at-bat here scores 4 or more;
+-          the meter runs from 4 (one bar) to 9.99 (full). Each club’s top 25 batting and pitching are here, and
+-          the league’s top 50, which you can narrow by batter, pitcher, park or club. Ties are marked T, and
++          the meter runs from 4 (one bar) to 9.99 (full). Pick a club for its top 25 batting or pitching, or All
++          for the league’s top 50 (a tie for the last place can add one); narrow either by batter, pitcher or park.
++          With a club picked, each row is green when its side succeeded in the at-bat and red when it didn’t, and
++          the box counts them: each square is one at-bat, in rank order. The MLB average beside it is every at-bat
++          in baseball this season at a pressure of 4 or more; within 5 points of it reads as near. Ties are marked T, and
+           postseason games carry their round and game.
+         </InfoPopover>
+       </p>
+@@ -167,37 +194,54 @@ export function TensestMomentsPage() {
+             <TeamFilterStrip
+               selectedTeamId={teamId}
+               onSelect={setPicked}
+-              showMlbPin={false}
+-              ariaLabel="Pick a club for its batting and pitching tables"
++              pinLabel="All"
++              ariaLabel="Show one club, or all of baseball"
+             />
+           </div>
+-          {/* Stamped cards stack in a Stack, never on sibling margins: margins collapse and
+-              leave the name tab no air (ADR-0132). */}
+-          <Stack gap="loose">
+-          <Card frame="stamped" body="flush" label={`${name} batting`} count={countOf(mine?.bat)} className="tensest__section">
+-            {mine?.bat?.length ? (
+-              <TensestTable rows={mine.bat} teamId={teamId} label={`${name} batting, tensest at-bats`} />
+-            ) : (
+-              <p className="hint">No tense at-bats for this club yet.</p>
+-            )}
+-          </Card>
+-          <Card frame="stamped" body="flush" label={`${name} pitching`} count={countOf(mine?.pit)} className="tensest__section">
+-            {mine?.pit?.length ? (
+-              <TensestTable rows={mine.pit} teamId={teamId} label={`${name} pitching, tensest at-bats`} />
+-            ) : (
+-              <p className="hint">No tense at-bats for this club yet.</p>
+-            )}
+-          </Card>
+-          <Card frame="stamped" body="flush" label="All of baseball" count={countOf(league)} className="tensest__section">
+-            <TensestFilters value={filters} options={options} onChange={setFilters} />
+-            {league.length ? (
+-              <TensestTable rows={league} teamId={null} label="All of baseball, tensest at-bats" />
++          <Card
++            frame="stamped"
++            body="flush"
++            className="tensest__section"
++          >
++            <div className="tensest__controls">
++              {teamId != null && (
++                <Cluster gap="snug" align="center" className="tensest__sidebar">
++                  <Segmented
++                    label="Which side"
++                    value={side}
++                    onChange={setSide}
++                    options={[{ value: 'bat', label: 'Batting' }, { value: 'pit', label: 'Pitching' }]}
++                    className="tensest__side"
++                  />
++                  {/* How the club's side did in these at-bats, by the row tints' own rule —
++                      never the games' won-lost record, which every row already carries. */}
++                  {record.of > 0 && (
++                    <div className="tensest__record">
++                      <p className="tensest__recordline">
++                        <span className="tensest__recordlabel">Succeeded in</span>{' '}
++                        <span className="tensest__recordfig">{record.succeeded} of {record.of}</span>{' '}
++                        <span className="tensest__recordlabel">({pct}%)</span>
++                      </p>
++                      {versus && (
++                        <p className={`tensest__versus${versus.tone ? ` tensest__versus--${versus.tone}` : ''}`}>{versus.text}</p>
++                      )}
++                      {/* One square per at-bat, in rank order, in its row's green or red: the
++                          count, and where on the list the successes fell. */}
++                      <span className="tensest__tally" aria-hidden="true">
++                        {rows.map((r) => <i key={`${r.pk}:${r.i}`} className={`tensest__tick tensest__tick--${swingFor(r, teamId, side)}`} />)}
++                      </span>
++                    </div>
++                  )}
++                </Cluster>
++              )}
++              <TensestFilters value={filters} options={options} onChange={setFilters} clubs={teamId == null} />
++            </div>
++            {rows.length ? (
++              <TensestTable rows={rows} teamId={teamId} side={side} label={`${teamId == null ? 'All of baseball' : name}, tensest at-bats`} />
+             ) : (
+               <p className="hint">{filtering ? 'No tense at-bats match these filters.' : 'No tense at-bats yet.'}</p>
+             )}
+           </Card>
+-          </Stack>
+-          {updated && <p className="hint">Games through {updated}.</p>}
+         </>
+       )}
+ 
+diff --git a/src/screens/tensest/TensestWatch.jsx b/src/screens/tensest/TensestWatch.jsx
+new file mode 100644
+index 000000000..8ed9a8f17
+--- /dev/null
++++ b/src/screens/tensest/TensestWatch.jsx
+@@ -0,0 +1,61 @@
++import { useEffect, useRef, useState } from 'react'
++import { loadTensestClips } from '../../api/tensest/tensest.js'
++import { resolveRawClip } from '../../components/highlights/watchClip.js'
++import { fetchHighlights, highlightForPlay } from '../../api/game/highlights.js'
++import { HighlightSheet } from '../../components/playbyplay/HighlightSheet.jsx'
++
++const NO_CLIP = 'No clip for this at-bat.'
++
++// The ▶ on one Pressure Moments row. It costs nothing until tapped: the tap reads the
++// clip-id file (once for the page), then asks for this one play's film (watchClip.js
++// has the one-lookup-per-tap rule). This page is not a scoring surface, so the clip's
++// burned-in scorebug is no leak here (ADR-0034).
++export function TensestWatch({ row }) {
++  const [open, setOpen] = useState(false)
++  const [item, setItem] = useState(null)
++  const [src, setSrc] = useState(null)
++  const [notice, setNotice] = useState('')
++  const [loading, setLoading] = useState(false)
++  const live = useRef(true)
++  const abort = useRef(null)
++  useEffect(() => {
++    live.current = true
++    return () => {
++      live.current = false
++      abort.current?.abort()
++    }
++  }, [])
++
++  const watch = async () => {
++    setOpen(true)
++    if (item || src || loading) return
++    setNotice('')
++    setLoading(true)
++    const playId = (await loadTensestClips())[`${row.pk}:${row.i}`]
++    // MLB's own cut wins when there is one, as on the box score and Gameday: it carries
++    // the play's title and blurb. The raw pitch clip is the floor under it.
++    const pkg = playId ? highlightForPlay(await fetchHighlights(row.pk), playId) : null
++    if (pkg) {
++      if (!live.current) return
++      setItem(pkg)
++      setLoading(false)
++      return
++    }
++    const controller = (abort.current = new AbortController())
++    const res = playId ? await resolveRawClip(playId, { signal: controller.signal }) : { src: null, notice: NO_CLIP }
++    abort.current = null
++    if (!live.current) return
++    setSrc(res.src)
++    setNotice(res.notice)
++    setLoading(false)
++  }
++
++  return (
++    <>
++      <button type="button" className="tensest__watch" onClick={watch} aria-label={`Watch ${row.bn} vs ${row.pn}`}>
++        <span aria-hidden="true">▶</span>
++      </button>
++      {open && <HighlightSheet item={item} src={src} notice={loading ? 'Loading the clip…' : notice} title={`${row.bn} vs ${row.pn}: ${row.what}`} onClose={() => setOpen(false)} />}
++    </>
++  )
++}
+diff --git a/src/styles/report/tensest.css b/src/styles/report/tensest.css
+index e0fd3f139..d5bd395de 100644
+--- a/src/styles/report/tensest.css
++++ b/src/styles/report/tensest.css
+@@ -1,34 +1,58 @@
+ /* ---------------------------------------------------------------- tensest moments
+-   Three ranked tables (TensestMomentsPage): a club batting, a club pitching, and the
+-   league. The cells, head row and row rules are the Table's (system/table.css); this
++   One ranked board (TensestMomentsPage): rank, the moment as a sentence, pressure, ▶. The cells, head row and row rules are the Table's (system/table.css); this
+    block keeps the text columns left-aligned and the rank number readable. */
+ /* No margin on the cards: they stack in a Stack (TensestMomentsPage), which owns the gap
+    between them. Sibling margins collapsed with the name tab's own margin and left the
+    cards touching (ADR-0132). */
+-.tensest .what,
+-.tensest .game,
+-.tensest .batter {
++.tensest .moment {
+   text-align: left;
+-  /* The Table's cells are nowrap; these three are prose and wrap, so the table fits the
+-     card on desktop instead of scrolling sideways. */
++  /* The Table's cells are nowrap; the moment is prose and wraps, so the table fits the
++     card instead of scrolling sideways. */
+   white-space: normal;
+-  min-width: 9rem;
++  width: 100%;
+ }
+ .tensest thead th {
+   white-space: normal;
+ }
+ .tensest .rank {
+   font-weight: var(--w-semibold);
++  vertical-align: top;
+ }
+-.tensest__gamelink,
+-.tensest__post,
+-.tensest__vs {
+-  white-space: nowrap;
++.tensest__moment,
++.tensest__cite {
++  margin: 0;
+ }
+-.tensest__post,
+-.tensest .what {
++/* The names carry the row: heading ink against softer prose, so a reader can scan down
++   the list by name (the fonts ship one weight, so contrast does the work, not bold). */
++.tensest__moment {
+   color: var(--text-muted);
+ }
++.tensest__moment .plink {
++  color: var(--text-heading);
++  text-decoration: underline dotted;
++  text-decoration-thickness: var(--bw-hair);
++  text-underline-offset: 3px;
++}
++/* The citation names the game under the moment: date, opponent, final, round. */
++.tensest__cite {
++  margin-block-start: var(--space-1);
++  font-family: var(--font-mono);
++  font-size: var(--fs-cell);
++  color: var(--text-muted);
++}
++.tensest__gamelink {
++  white-space: nowrap;
++  text-decoration: underline dotted;
++  text-decoration-thickness: var(--bw-hair);
++  text-underline-offset: 3px;
++}
++.tensest__gamelink:focus-visible {
++  outline: 2px solid var(--focus-ring);
++  outline-offset: 2px;
++}
++.tensest .tensest__pressure {
++  text-align: right;
++}
+ 
+ /* The (i) tip on this page wears the stamped frame too: square, a heavy ink edge and the
+    hard ink shadow, like the picker and the cards. Scoped here, as the picker is, so the tip
+@@ -101,9 +125,8 @@
+   outline-offset: 2px;
+ }
+ 
+-/* On a phone the seven columns don't fit, so each row stacks as a small card: rank,
+-   pressure, date and inning on the first line, then the game, the at-bat and what
+-   happened, each on its own line. The head row hides; the cells say what they are. */
++/* On a phone the head row hides and each row is rank, moment, ▶ — pressure moves up
++   beside the rank. The hidden cues say what each figure is. */
+ @media (max-width: 739.98px) {
+   .tensest thead {
+     display: none;
+@@ -111,36 +134,24 @@
+   /* layout-exempt: a table row restacked as a card on a phone has no layout primitive */
+   .tensest tbody tr {
+     display: grid;
+-    grid-template-columns: auto 1fr auto auto;
++    grid-template-columns: auto 1fr auto;
+     grid-template-areas:
+-      'rank pressure date inn'
+-      'game game game game'
+-      'batter batter batter batter'
+-      'what what what what';
++      'rank pressure watch'
++      'moment moment watch';
+     column-gap: var(--space-2);
+-    row-gap: var(--space-2);
++    row-gap: var(--space-1);
+     padding-block: var(--space-2);
+     border-bottom: var(--bw-hair) solid var(--border-rule);
+   }
+-  .tensest tbody td,
+-  .tensest .what,
+-  .tensest .game,
+-  .tensest .batter {
++  .tensest tbody td {
+     padding: 0 var(--space-3);
+     border: 0;
+     text-align: left;
+-    min-width: 0;
+   }
+   .tensest .rank { grid-area: rank; }
+-  .tensest .tensest__pressure { grid-area: pressure; }
+-  .tensest .date { grid-area: date; }
+-  .tensest .inn { grid-area: inn; }
+-  .tensest .game { grid-area: game; }
+-  .tensest .batter { grid-area: batter; }
+-  .tensest .what { grid-area: what; }
+-  /* A bigger thumb target on the game and the names: padding grows the tap area, the
+-     negative margin keeps the card's lines where they were. With the row gap above,
+-     two stacked targets meet but never overlap. */
++  .tensest .tensest__pressure { grid-area: pressure; text-align: left; }
++  .tensest .moment { grid-area: moment; }
++  .tensest .watch { grid-area: watch; align-self: center; }
+   .tensest__gamelink,
+   .tensest .plink {
+     display: inline-block;
+@@ -162,3 +173,181 @@
+   display: inline-flex;
+   vertical-align: text-bottom;
+ }
++
++/* The ▶ for a play's clip, in the last column (TensestWatch.jsx). */
++.tensest__watch {
++  flex: none;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 24px;
++  height: 24px;
++  padding: 0;
++  border-radius: var(--radius-square);
++  background: var(--accent-primary);
++  border: var(--bw-hair) solid var(--accent-primary);
++  color: var(--text-on-ink);
++  font-size: var(--fs-label);
++  cursor: pointer;
++}
++.tensest__watch:focus-visible {
++  outline: var(--bw-heavy) solid var(--focus-ring);
++  outline-offset: 2px;
++}
++
++/* The board's Batting / Pitching switch, above the filters when a club is picked. */
++.tensest__side {
++  margin: var(--space-2) var(--space-3) 0;
++  max-width: 320px;
++}
++
++/* "All" under the MLB pin: the pin means every club here (TeamFilterStrip pinLabel). */
++.teamfilterstrip__pinlabel {
++  display: block;
++  margin-block-start: var(--space-1);
++  font-family: var(--font-display);
++  font-size: var(--fs-label);
++}
++
++/* The ▶'s tap area grows to --tap-min without growing the mark (as .scoresum__watch). */
++.tensest__watch {
++  position: relative;
++}
++.tensest__watch::after {
++  content: '';
++  position: absolute;
++  /* Not past its right edge: it is the table's last cell, and 1px over scrolls the table. */
++  inset: calc((var(--tap-min) - 24px) / -2) 0 calc((var(--tap-min) - 24px) / -2) calc((var(--tap-min) - 24px) / -2);
++}
++
++/* Phone: the pickers fold behind "Filter"; wide: always open, no button. */
++.tensest__filtertoggle {
++  align-self: flex-start;
++}
++@media (max-width: 739.98px) {
++  .tensest__fields:not(.is-open) {
++    display: none;
++  }
++}
++@media (min-width: 740px) {
++  .tensest__filtertoggle {
++    display: none;
++  }
++}
++
++/* The club strip's scrollbar, in the scorebook's ink: a thin graphite thumb on a
++   paper rule, square like the cards (Chromium ignores the ::-webkit rules when scrollbar-width is set, so that is Firefox-only). */
++.tensest__picker .vsteam__strip {
++  scrollbar-width: auto; /* undo the strip's base `thin`, which turns these rules off */
++}
++@supports not selector(::-webkit-scrollbar) {
++  .tensest__picker .vsteam__strip {
++    scrollbar-width: thin;
++    scrollbar-color: var(--border-stamped) var(--surface-inset);
++  }
++}
++.tensest__picker .vsteam__strip::-webkit-scrollbar-button {
++  display: none;
++}
++.tensest__picker .vsteam__strip::-webkit-scrollbar {
++  height: 6px;
++}
++.tensest__picker .vsteam__strip::-webkit-scrollbar-track {
++  background: var(--surface-inset);
++  margin-inline: var(--space-3);
++}
++.tensest__picker .vsteam__strip::-webkit-scrollbar-thumb {
++  background: var(--border-stamped);
++  border-radius: 0;
++}
++.tensest__picker .vsteam__strip::-webkit-scrollbar-thumb:hover {
++  background: var(--graphite);
++}
++
++
++/* The last row's ▶ tap area reaches 3px under the table; clip it rather than scroll. */
++.tensest__section .table {
++  overflow-y: clip;
++}
++
++/* The picked club's side won or lost the at-bat (swingFor): a wash light enough that the row still
++   reads as paper. */
++.tensest tbody tr.tensest__row--up {
++  background: color-mix(in srgb, var(--accent-positive) 7%, transparent);
++}
++.tensest tbody tr.tensest__row--down {
++  background: color-mix(in srgb, var(--accent-negative) 7%, transparent);
++}
++
++.tensest__nobreak {
++  white-space: nowrap;
++}
++
++/* The record, right of the switch: a stamped box holding the count over a tally strip,
++   one square per at-bat in its row's colour (a scorebook's tick marks). */
++.tensest__sidebar {
++  margin: var(--space-2) var(--space-3) 0;
++}
++.tensest__sidebar .tensest__side {
++  margin: 0;
++}
++.tensest__record {
++  margin-inline-start: auto;
++  padding: var(--space-2) var(--space-3);
++  /* A plain ink frame: it sits inside a stamped card, so no second hard shadow. */
++  border: var(--bw-hair) solid var(--border-stamped);
++  text-align: right;
++}
++.tensest__recordline {
++  margin: 0 0 var(--space-1);
++}
++.tensest__recordlabel {
++  font-family: var(--font-display);
++  font-size: var(--fs-label);
++  color: var(--text-muted);
++}
++.tensest__recordfig {
++  font-family: var(--font-mono);
++  font-size: var(--fs-num-lg);
++  color: var(--text-heading);
++}
++.tensest__tally {
++  display: block;
++}
++.tensest__tick {
++  display: inline-block;
++  width: 9px;
++  height: 9px;
++  margin-inline-start: 2px;
++  vertical-align: top;
++  border: var(--bw-hair) solid var(--border-stamped);
++}
++.tensest__tick--up {
++  background: var(--accent-positive);
++}
++.tensest__tick--down {
++  background: var(--accent-negative);
++}
++@media (max-width: 739.98px) {
++  .tensest__record {
++    margin-inline-start: 0;
++    text-align: left;
++  }
++  .tensest__tick {
++    margin-inline: 0 2px;
++  }
++}
++
++/* The record against MLB, in words; green or red only past the 5-point margin. */
++.tensest__versus {
++  margin: 0 0 var(--space-1);
++  font-family: var(--font-display);
++  font-size: var(--fs-label);
++  color: var(--text-muted);
++}
++.tensest__versus--up {
++  color: var(--accent-positive);
++}
++.tensest__versus--down {
++  color: var(--accent-negative);
++}
