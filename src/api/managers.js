@@ -243,10 +243,11 @@ export async function coachedUnder(managerId) {
       }
     }),
   )
-  return rows.map(([personId, seasons, later]) => ({
+  return rows.map(([personId, seasons, later, interim = 0]) => ({
     personId,
     name: names[personId] ?? '',
     seasons,
+    interimSeasons: interim,
     laterManaged: later === 1,
   }))
 }
