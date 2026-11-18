@@ -155,14 +155,6 @@
    baseline, so "better/worse than a typical club" is legible without a rank
    table. Fixed 0–100% bar scale (comebacks ARE rare, so the short fill is the
    honest picture). Reuses the .tstats card. */
-.cbk__gloss {
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-body);
-  color: var(--text-caption);
-  padding: var(--space-2) var(--space-2) 2px;
-  margin: 0;
-}
 .cbk__rows {
   display: flex;
   flex-direction: column;
@@ -199,15 +191,30 @@
 .cbk__post .cbk__head {
   margin-bottom: 2px;
 }
-.cbk__frac {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.cbk__lead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
 }
 .cbk__rate {
-  font-size: var(--fs-ui);
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
   color: var(--text-heading);
+}
+.cbk__lead .cbk__of {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+/* The club's own dot: larger, in its colour, so it is found at a glance. */
+.cbk__rail .team-score__dot--us {
+  width: var(--space-3h);
+  height: var(--space-3h);
+  margin-left: calc(var(--space-3h) / -2);
+  background: var(--cbk-club);
+  box-shadow: 0 0 0 var(--bw-heavy) var(--border-stamped);
+  z-index: 1;
 }
 .cbk__rate--over {
   color: var(--accent-positive);

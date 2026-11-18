@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { beeswarmRows } from '../../../lib/beeswarm.js'
-import { teamClubName } from '../../../lib/teams.js'
+import { teamClubName, teamPrimaryColor } from '../../../lib/teams.js'
+import { ordinal } from '../../../lib/format.js'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
-import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
-import { Card } from '../../../components/ui/frame/Card.jsx'
+import { InfoPopover } from '../../../components/ui/InfoPopover.jsx'
 
 const DASH = '—'
 
@@ -50,7 +50,11 @@ function ComebackRail({ t, teamId, clubName }) {
   const nameFor = (tid) => (tid === teamId ? clubName : teamClubName(tid)) ?? DASH
 
   return (
-    <div className="team-score__track team-score__track--compact cbk__rail">
+    <div
+      className="team-score__track team-score__track--compact cbk__rail"
+      // The club's own dot wears its colour (ADR-0030: a club may colour what names it).
+      style={{ '--cbk-club': teamPrimaryColor(teamId) || 'var(--text-heading)' }}
+    >
       <div className="team-score__track-base" />
       {t.leagueRate != null && (
         <div className="cbk__avg" style={{ left: `${toPct(t.leagueRate)}%` }} aria-hidden="true" />
@@ -109,38 +113,36 @@ function PostseasonRows({ post }) {
 }
 export function ComebackCard({ data, teamId, clubName }) {
   return (
-    <Card
-      as="div"
-      frame="ledger"
-      body="flush"
-      className="tstats cbk"
-      head={
-        <SectionHead look="band" club note="all 30 teams">
-          Comeback wins
-        </SectionHead>
-      }
-    >
+    // The Ranks band's stamped card (StandingsRankCards) is the frame and names it, so this
+    // draws only what goes inside: no second head.
+    <div className="tstats cbk">
       <div className="tstats__body">
-        <p className="cbk__gloss">
-          How often {clubName || 'they'} rallied to win after their chance of winning the game
-          sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; ● is{' '}
-          {clubName || 'this club'}, and the tick marks the MLB average.
-        </p>
         <div className="cbk__rows">
-          {data.thresholds.map((t) => {
+          {data.thresholds.map((t, i) => {
             const beatsLeague = t.rate != null && t.leagueRate != null && t.rate > t.leagueRate
             return (
-              <div key={t.key} className="cbk__row">
+              <div key={t.key} className={`cbk__row${i === 0 ? ' infopop-row' : ''}`}>
                 <div className="cbk__head">
-                  <span className="cbk__label">{CBK_LABELS[t.key]}</span>
-                  <span className="cbk__frac">
-                    <span className={`cbk__rate${beatsLeague ? ' cbk__rate--over' : ''}`}>
-                      {pctLabel(t.rate)}
-                    </span>
-                    <span className="cbk__of"> · {t.wins} of {t.att || DASH}</span>
-                    {t.rank === 1 && t.wins > 0 && (
-                      <Pill className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</Pill>
+                  <span className="cbk__label">
+                    {CBK_LABELS[t.key]}
+                    {i === 0 && (
+                      <InfoPopover label="About comeback wins" className="infopop--paper infopop--down">
+                        How often {clubName || 'they'} rallied to win after their chance of winning
+                        the game sank this low. Each rail plots all 30 clubs from 0% to the MLB
+                        leader; the large dot is {clubName || 'this club'}, and the tick marks the MLB
+                        average.
+                      </InfoPopover>
                     )}
+                  </span>
+                  {t.rank === 1 && t.wins > 0 && (
+                    <Pill className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</Pill>
+                  )}
+                </div>
+                <div className="cbk__lead">
+                  <span className={`cbk__rate${beatsLeague ? ' cbk__rate--over' : ''}`}>{pctLabel(t.rate)}</span>
+                  <span className="cbk__of">
+                    {t.wins} of {t.att || DASH}
+                    {t.rank ? ` · ${ordinal(t.rank)} of 30` : ''}
                   </span>
                 </div>
                 <ComebackRail t={t} teamId={teamId} clubName={clubName} />
@@ -155,6 +157,6 @@ export function ComebackCard({ data, teamId, clubName }) {
         </div>
         {data.post && <PostseasonRows post={data.post} />}
       </div>
-    </Card>
+    </div>
   )
 }
