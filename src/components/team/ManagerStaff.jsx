@@ -26,7 +26,7 @@ export function ManagerStaff({ staff, interimLabel }) {
   const years = [...new Set(staff.filter((p) => p.seasons > 0).map((p) => p.seasons))].sort((a, b) => b - a)
   const interim = staff.filter((p) => p.interimSeasons > 0)
   return (
-    <Card frame="stamped" label="His staff" count={`${staff.length} coaches`} body="flush" className="mgrpage__card mgrstaff">
+    <Card frame="stamped" label="His staff" count={`${staff.length} ${staff.length === 1 ? 'coach' : 'coaches'}`} body="flush" className="mgrpage__card mgrstaff">
       {later.length > 0 && (
         <div className="mgrstaff__band mgrstaff__later">
           <h3 className="mgrstaff__key mgrstaff__key--word">Later managed</h3>

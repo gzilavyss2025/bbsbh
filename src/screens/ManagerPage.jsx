@@ -22,6 +22,7 @@ import { Stack } from '../components/ui/layout/Stack.jsx'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 import { Fact, DASH } from './player/parts.jsx'
 import { rate3 } from '../api/person/shared.js'
+import { teamClubName } from '../lib/teams.js'
 
 // One person's career coaching page: a header (photo, current role or "last
 // managed"), an awards strip, a compact per-team managerial win-loss record,
@@ -109,16 +110,13 @@ function ManagerHero({ id, name, stints, record, awards, teamId }) {
   const active = currentStint(stints)
   const w = record.reduce((t, r) => t + (r.w ?? 0), 0)
   const l = record.reduce((t, r) => t + (r.l ?? 0), 0)
-  const pct = w + l > 0 ? (w / (w + l)).toFixed(3).replace(/^0/, '') : null
-  const seasons = new Set(stints.filter((s) => s.isManager).map((s) => s.season)).size
+    const seasons = new Set(stints.filter((s) => s.isManager).map((s) => s.season)).size
   const titles = awards.filter((a) => /world series champion/i.test(a.name ?? '')).length
+  // Not on a staff now: the last club he managed, not his last coaching job.
+  const club = active ?? lastManagerialStint(stints) ?? stints[stints.length - 1]
   const facts = [
-    (() => {
-      // Not on a staff now: the last club he managed, not his last coaching job.
-      const club = active ?? lastManagerialStint(stints) ?? stints[stints.length - 1]
-      return { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <TeamLink id={club.teamId}>{club.teamName}</TeamLink> : DASH }
-    })(),
-    { key: 'rec', label: 'Record', value: w + l > 0 ? `${w}-${l} ${pct}` : DASH },
+    { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <TeamLink id={club.teamId}>{club.teamName}</TeamLink> : DASH },
+    { key: 'rec', label: 'Record', value: w + l > 0 ? `${w}-${l} ${rate3(w / (w + l))}` : DASH },
     { key: 'seasons', label: 'Seasons managed', value: seasons || DASH },
     { key: 'titles', label: 'Titles', value: titles || DASH },
   ]
@@ -131,7 +129,7 @@ function ManagerHero({ id, name, stints, record, awards, teamId }) {
           <h1 className="mgrpage__name">{name}</h1>
           {teamId && (
             <p className="mgrpage__club">
-              <TeamLink id={teamId}>
+              <TeamLink id={teamId} ariaLabel={teamClubName(teamId) || 'Club'}>
                 <TeamLogo teamId={teamId} name={active?.teamName ?? ''} size={28} />
               </TeamLink>
             </p>
