@@ -78,8 +78,9 @@
   color: var(--text-caption);
 }
 .mgrstaff__band--interim .mgrstaff__name:not(.mgrstaff__name--mgr) {
-  border-style: dashed;
+  border-color: var(--border-hairline);
   background: transparent;
+  color: var(--text-caption);
 }
 @media (min-width: 740px) {
   .mgrstaff__name {

@@ -1563,7 +1563,7 @@ const C6B = [
   { css: '32-milestone-watch.css', sel: '.milestonewatch-page__card', jsx: ['screens/MilestoneWatchPage.jsx'], ns: 'milestonewatch-page__card', as: 'article' },
   { css: '38-umpire-pages.css', sel: '.umpage__card', jsx: ['screens/UmpirePage.jsx'], ns: 'umpage__card' },
   { css: '38-umpire-pages.css', sel: '.umpage__list', jsx: ['screens/UmpirePage.jsx'], ns: 'umpage__list', mode: 'wrap', as: 'div' },
-  { css: '39-manager-page.css', sel: '.mgrpage__card', jsx: ['screens/ManagerPage.jsx'], ns: 'mgrpage__card' },
+  { css: '39-manager-page.css', sel: '.mgrpage__card', jsx: ['screens/ManagerPage.jsx'], ns: 'mgrpage__card', frame: 'stamped' }, // stamped like the player page (2026-11-18)
   { css: '47-trade-deadline.css', sel: '.trade', jsx: ['components/transactions/TradeCard.jsx'], ns: 'trade', as: 'article' },
   { css: '53-umpire-tendencies.css', sel: '.umptend', jsx: ['components/umpire/UmpireTendencies.jsx'], ns: 'umptend', gone: true },
   { css: '59-more-directory.css', sel: '.moredir__card', jsx: ['screens/MorePage.jsx'], ns: 'moredir__card', frame: 'ledger' },
@@ -1627,7 +1627,7 @@ test('C6b: each block keeps its own margin, inset and own edge', () => {
     ['38-umpire-pages.css', '.umpage__list', 'margin', '0'],
     ['38-umpire-pages.css', '.umpage__list', 'padding', '0'],
     ['39-manager-page.css', '.mgrpage__card', 'padding', 'var(--space-3)'],
-    ['39-manager-page.css', '.mgrpage__card', 'margin-bottom', '12px'],
+    ['39-manager-page.css', '.mgrpage__card', 'margin-bottom', '0'], // the page's Stack spaces the stamped cards (ADR-0132)
     ['47-trade-deadline.css', '.trade', 'padding', 'var(--space-3) var(--space-4)'],
     ['59-more-directory.css', '.moredir__card', 'padding', 'var(--space-3)'],
     ['66-situational-records.css', '.trrank__tile', 'display', 'flex'],
@@ -2106,7 +2106,6 @@ const H3_RENAMED = [
   ['coverpick__heading', 'coverpick__title'],
   ['lookupdeck__heading', 'lookupdeck__title'],
   ['leaders__sub', 'leaders__note'],
-  ['mgrpage__sub', 'mgrpage__note'],
   ['psoddsmodal__sub', 'psoddsmodal__note'],
   ['rpt__sub', 'rpt__note'],
   ['searchbox__sub', 'searchbox__note'],
@@ -2141,7 +2140,8 @@ const H3_RENAMED = [
 // Two classes left with no successor: `.cover__sub` had no call site (its rule
 // and its seal-scope allowlist entry went together), and the between-innings
 // eyebrow repeated its block's name.
-const H3_DELETED = ['cover__sub', 'betweeninnings__eyebrow']
+// mgrpage__note went with the manager page's old header (the stamped hero replaced it).
+const H3_DELETED = ['cover__sub', 'betweeninnings__eyebrow', 'mgrpage__sub', 'mgrpage__note']
 
 // Text files of the four trees, this file excluded (it names the old classes).
 // Read once for the whole block.
