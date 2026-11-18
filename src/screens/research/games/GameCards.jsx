@@ -12,25 +12,26 @@ import { Stack } from '../../../components/ui/layout/Stack.jsx'
 // club). Either end of a range may be blank; a field applies on blur or Enter, the way the
 // "Who most" PA minimum does, so typing 12 never searches for 1.
 
-const toNum = (v) => (/^\d{1,3}$/.test(v) ? Number(v) : null)
+// `signed`: a bound may be negative (the play cards' Launch angle).
+const toNum = (v, signed) => ((signed ? /^-?\d{1,3}$/ : /^\d{1,3}$/).test(v) ? Number(v) : null)
 
-function Bound({ label, value, onCommit }) {
+function Bound({ label, value, onCommit, signed = false }) {
   const id = useId()
   const [draft, setDraft] = useState(value == null ? '' : String(value))
   const commit = () => {
-    const n = toNum(draft.trim())
+    const n = toNum(draft.trim(), signed)
     if (n !== value) onCommit(n)
     setDraft(n == null ? '' : String(n))
   }
   return (
     <span className="research__min">
       <label className="t-label" htmlFor={id}>{label}</label>
-      <input id={id} type="number" inputMode="numeric" min="0" placeholder="Any" value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && commit()} />
+      <input id={id} type="number" inputMode={signed ? 'text' : 'numeric'} min={signed ? undefined : '0'} placeholder="Any" value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && commit()} />
     </span>
   )
 }
 
-export function RangeCard({ label, range, onRange }) {
+export function RangeCard({ label, range, onRange, signed = false }) {
   // Clearing both ends keeps the card open with no bound, like an emptied chip card.
   const set = (i) => (n) => {
     const next = [...range]
@@ -45,8 +46,8 @@ export function RangeCard({ label, range, onRange }) {
           <IconButton label={`Remove ${label}`} mark="sm" onClick={() => onRange(null)}>✕</IconButton>
         </Cluster>
         <Cluster>
-          <Bound key={`f${range[0]}`} label="From" value={range[0]} onCommit={set(0)} />
-          <Bound key={`t${range[1]}`} label="To" value={range[1]} onCommit={set(1)} />
+          <Bound key={`f${range[0]}`} label="From" value={range[0]} onCommit={set(0)} signed={signed} />
+          <Bound key={`t${range[1]}`} label="To" value={range[1]} onCommit={set(1)} signed={signed} />
         </Cluster>
         <p className="t-label t-label--nocaps">Leave either end blank for “or more” or “or fewer”.</p>
       </Stack>

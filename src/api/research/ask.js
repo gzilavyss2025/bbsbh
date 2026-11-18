@@ -146,9 +146,9 @@ const BASE = [
   [['cutters', 'cut fastball'], set('pt', ['FC'])],
   // Count.
   [['full count'], set('cnt', ['3-2'])],
-  [['ahead in the count', 'batter ahead', 'hitters count', 'ahead in count'], set('cnt', ['ahead'])],
-  [['behind in the count', 'batter behind', 'pitchers count', 'behind in count'], set('cnt', ['behind'])],
-  [['even count', 'even in the count'], set('cnt', ['even'])],
+  [['ahead in the count', 'batter ahead', 'hitters count', 'ahead in count'], set('fc', ['ahead'])],
+  [['behind in the count', 'batter behind', 'pitchers count', 'behind in count'], set('fc', ['behind'])],
+  [['even count', 'even in the count'], set('fc', ['even'])],
   [['two strikes', 'two strike count', '2 strikes'], set('cnt', ['0-2', '1-2', '2-2', '3-2'])],
   // Outs (a number word or digit + out/outs, and "nobody out").
   [['nobody out', 'none out', 'no outs', 'no out'], set('out', ['0'])],

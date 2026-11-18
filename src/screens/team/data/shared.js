@@ -179,6 +179,13 @@ export function injuredListFrom(ilRoster, nameOf) {
     .sort((a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name))
 }
 
+// The injured list is an in-season list. Clubs reinstate 60-day IL players to the 40-man
+// within days of the World Series, but statsapi can keep reporting them as D60 for weeks
+// (Gary, 2026-11-18), so a club whose season is over shows none.
+export function injuredShown(injured, seasonOver) {
+  return seasonOver ? [] : injured
+}
+
 // Just the ids — what a surface that only FLAGS a hurt player needs (the ✚ on a
 // leaders row or a lineup diamond spot), without shaping the list itself.
 export function injuredIdsFrom(ilRoster) {

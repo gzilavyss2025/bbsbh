@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>His staff mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F6EFDC;--card:#FBF6E9;--hi:#FFFDF6;--ink:#0F1822;--ink2:#3C4A5A;--gr:#6B6F73;--marker:#F2C14E;--rule:#D9CFB4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:500 13px/1.4 "JetBrains Mono",monospace;text-transform:uppercase}
+h1,h2{font-family:"Barlow Condensed",sans-serif;font-weight:700;letter-spacing:.04em}
+h1{font-size:34px;margin:24px 16px 4px}.intro{margin:0 16px 24px;text-transform:none;max-width:70ch;color:var(--ink2)}
+.concept{margin:0 16px 48px}.concept>h2{font-size:24px;margin:0}
+.pair{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}.w{font:700 11px "JetBrains Mono";color:var(--gr);margin-bottom:6px}
+.phone{width:390px;max-width:100%}.desk{width:760px;max-width:100%}
+.card{position:relative;background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:24px 14px 14px;margin-top:12px}
+.tab{position:absolute;top:-12px;left:10px;background:var(--ink);color:var(--hi);font:700 13px "Barlow Condensed";letter-spacing:.06em;padding:3px 8px}
+.count{position:absolute;top:-12px;right:10px;background:var(--hi);border:2px solid var(--ink);font:700 11px "JetBrains Mono";padding:1px 6px}
+a{color:inherit;text-decoration:none}
+.later{display:grid;grid-template-columns:58px 1fr;gap:10px;padding-bottom:12px;margin-bottom:4px;border-bottom:2px solid var(--ink)}
+.later .lbl{font:700 13px/1.1 "Barlow Condensed";letter-spacing:.04em;align-self:center}
+.band{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--rule)}.band.first{border:0}
+.yr{font:700 30px/1 "Barlow Condensed"}.yr small{display:block;font:700 10px "JetBrains Mono";color:var(--gr)}
+.yr.int{font-size:16px;line-height:1.1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{display:flex;align-items:center;min-height:44px;border:1.5px solid var(--ink);background:var(--hi);padding:0 10px;font-size:12px}
+.desk .chip{min-height:34px}.chip.m{background:var(--marker)}.chip small{margin-left:6px;color:var(--ink2);font-size:10px}
+.more{border-style:dashed;background:transparent;color:var(--ink2)}
+.interim .chip{border-style:dashed;background:transparent}.interim .chip.m{background:var(--marker);border-style:solid}
+</style></head><body>
+<h1>His staff</h1>
+<p class="intro">No tree and no branches: the card only claims what the data says, who worked on his staff while he managed. Full seasons are grouped by how many he had together with each coach. His 2015 interim stretch with the Padres sits apart in its own lighter group, because that staff was there before he took over. Coaches who later managed are listed at the top and marked yellow where they appear below. Dave Roberts and Mark Kotsay really were on the 2015 Padres staff and later managed; the other names are filler.</p>
+
+<section class="concept"><h2>A manager whose staff produced managers</h2>
+<div class="pair"><div class="phone"><div class="w">390 px</div><div class="card" id="a1"></div></div>
+<div class="desk"><div class="w">Desktop</div><div class="card" id="a2"></div></div></div></section>
+
+<section class="concept"><h2>No later managers, no interim stretch</h2>
+<div class="pair"><div class="phone"><div class="w">390 px</div><div class="card" id="n1"></div></div>
+<div class="desk"><div class="w">Desktop</div><div class="card" id="n2"></div></div></div></section>
+
+<script>
+const FULL=[["Charlie Greene",3],["Chris Hook",3],["Jason Lane",3],["Jim Henderson",3],["Néstor Corredor",3],["Christian Correa",3],["Daniel de Mondesert",3],["Matt Erickson",2],["Rickie Weeks Jr.",2],["Eric Theisen",2],["Adam Weisenburger",2],["Connor Dawson",2],["Walker McKinven",2],["Quintin Berry",2],["Joe Crawford",1],["Ozzie Timmons",1],["Marcus Hanel",1],["Ryan Garko",1],["Tom Lawless",1],["Jeff Datz",1],["Mike Guerrero",1],["Andy Haines",1],["Al LeBoeuf",1],["Lee Tunnell",1],["Steve Karsay",1],["Carlos Subero",1],["Pat Listach",1],["Ed Sedar",1],["Rick Kranitz",1],["Chris Getz",1]];
+const INTERIM=[["Dave Roberts",1],["Mark Kotsay",1],["Darren Balsley",0],["Glenn Hoffman",0],["Tarrik Brock",0],["Willie Blair",0]];
+const SHOW=8;
+const chips=p=>p.slice(0,SHOW).map(([n,m])=>`<a class="chip ${m?'m':''}">${n}</a>`).join('')+(p.length>SHOW?`<a class="chip more">+ ${p.length-SHOW} more</a>`:'');
+function card(full,interim){
+  const later=interim.filter(x=>x[1]);
+  let h=`<span class="tab">HIS STAFF</span><span class="count">${full.length+interim.length} coaches</span>`;
+  if(later.length)h+=`<div class="later"><div class="lbl">LATER MANAGED</div><div class="chips">${later.map(([n])=>`<a class="chip m">${n}</a>`).join('')}</div></div>`;
+  [...new Set(full.map(x=>x[1]))].sort((a,b)=>b-a).forEach((y,i)=>{h+=`<div class="band ${i||later.length?'':'first'}"><div class="yr">${y}<small>SEASON${y>1?'S':''}</small></div><div class="chips">${chips(full.filter(x=>x[1]===y).map(([n])=>[n,0]))}</div></div>`});
+  if(interim.length)h+=`<div class="band interim"><div class="yr int">INTERIM<small>2015 PADRES</small></div><div class="chips">${chips(interim)}</div></div>`;
+  return h;
+}
+a1.innerHTML=a2.innerHTML=card(FULL,INTERIM);n1.innerHTML=n2.innerHTML=card(FULL,[]);
+</script></body></html>

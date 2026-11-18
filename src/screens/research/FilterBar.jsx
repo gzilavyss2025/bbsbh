@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { FILTERS, FILTER_BY_KEY, basesOf, clubName } from '../../api/research/filters.js'
+import { FILTERS, FILTER_BY_KEY, RANGES, RANGE_BY_KEY, basesOf, clubName } from '../../api/research/filters.js'
 import { BaseState } from '../../components/scoring/BaseState.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
@@ -9,7 +9,7 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { GAME_CHIPS } from '../../api/research/games.js'
-import { GameCards, gameAddOptions, openGameCard } from './games/GameCards.jsx'
+import { GameCards, RangeCard, gameAddOptions, openGameCard } from './games/GameCards.jsx'
 import { STREAK_CHIPS } from '../../api/research/streaks.js'
 import { StreakCards, openStreakCard, streakAddOptions } from './streaks/StreakView.jsx'
 
@@ -177,6 +177,14 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
   const active = Object.keys(q.chips).filter((k) => !blockedKeys.has(k) && inMode(k))
   const addable = FILTERS.filter((f) => !q.chips[f.key] && !blockedKeys.has(f.key) && inMode(f.key))
   const gameAdd = game ? gameAddOptions(q) : streak ? streakAddOptions(q) : []
+  // The range cards (Exit velocity, Launch angle): play mode only, 2015 on.
+  const rangeKeys = game || streak ? [] : RANGES.map((r) => r.key).filter((k) => !blockedKeys.has(k))
+  const setRange = (key, r) => {
+    const ranges = { ...q.ranges }
+    if (r) ranges[key] = r
+    else delete ranges[key]
+    onChange({ ...q, ranges })
+  }
   const pit = q.s?.side === 'pit'
   return (
     <Stack>
@@ -199,10 +207,13 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
       {game && <GameCards q={q} onChange={onChange} />}
       {streak && <StreakCards q={q} onChange={onChange} />}
       {q.years && <SeasonsCard years={q.years} seasons={seasons} onYears={(years) => onChange({ ...q, years })} />}
+      {rangeKeys.filter((k) => q.ranges?.[k]).map((k) => (
+        <RangeCard key={k} label={RANGE_BY_KEY[k].label} range={q.ranges[k]} signed={RANGE_BY_KEY[k].signed} onRange={(r) => setRange(k, r)} />
+      ))}
       {active.map((key) => (
         <FilterCard key={key} f={FILTER_BY_KEY[key]} chip={q.chips[key]} onChip={(chip) => setChip(key, chip)} />
       ))}
-      {(addable.length > 0 || gameAdd.length > 0 || (!q.years && seasons.length > 1)) && (
+      {(addable.length > 0 || gameAdd.length > 0 || rangeKeys.some((k) => !q.ranges?.[k]) || (!q.years && seasons.length > 1)) && (
         <Stack gap="tight" className="research__field">
           <label className="t-label" htmlFor={addId}>Add a filter</label>
           <select
@@ -212,6 +223,7 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
               if (e.target.value === 'yr') return onChange({ ...q, years: [latest, latest] })
               if (e.target.value.startsWith('g:')) return onChange(openGameCard(q, e.target.value))
               if (e.target.value.startsWith('s:')) return onChange(openStreakCard(q, e.target.value))
+              if (e.target.value.startsWith('r:')) return setRange(e.target.value.slice(2), RANGE_BY_KEY[e.target.value.slice(2)].start)
               const f = FILTER_BY_KEY[e.target.value]
               if (f) setChip(f.key, { vals: [f.options[0][0]], inv: false })
             }}
@@ -220,6 +232,7 @@ export function FilterBar({ q, people, clubs, seasons, latest, blocked, onChange
             {gameAdd.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
             {!q.years && seasons.length > 1 && <option value="yr">Seasons</option>}
             {addable.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+            {rangeKeys.filter((k) => !q.ranges?.[k]).map((k) => <option key={k} value={`r:${k}`}>{RANGE_BY_KEY[k].label}</option>)}
           </select>
         </Stack>
       )}

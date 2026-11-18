@@ -22,7 +22,18 @@ const TABLE = {
 test('a shared club-season credits its coaches to both managers', () => {
   const idx = buildStaffIndex(TABLE)
   assert.deepEqual(idx[10], [[30, 2, 1], [31, 1, 0]])
-  assert.deepEqual(idx[11], [[31, 2, 0], [30, 1, 1]])
+  // 11's 1990 was an interim stint: it counts apart, as a 4th element.
+  assert.deepEqual(idx[11], [[31, 1, 0, 1], [30, 0, 1, 1]])
+})
+
+test('interim seasons count apart from full ones; the 4th element is left off at zero', () => {
+  const idx = buildStaffIndex({
+    10: [mgr(1, 2015, 'NTRM'), mgr(2, 2024), mgr(2, 2025)],
+    60: [coach(1, 2015), coach(2, 2024)],
+    61: [coach(2, 2024), coach(2, 2025)],
+    62: [coach(1, 2015)],
+  })
+  assert.deepEqual(idx[10], [[61, 2, 0], [60, 1, 0, 1], [62, 0, 0, 1]])
 })
 
 test('a manager is never listed as staff, and a club with no manager row adds no key', () => {
@@ -48,7 +59,7 @@ test('a person who held two coach jobs in one season counts that season once', (
 })
 
 test('coachedUnder joins the shard, then names the staff; no staff gives []', async () => {
-  const shard = { byManagerId: { 10: [[30, 2, 1], [31, 1, 0]] } }
+  const shard = { byManagerId: { 10: [[30, 2, 1], [31, 1, 0, 1]] } }
   const f = mock.method(globalThis, 'fetch', async (url) => {
     const u = String(url)
     if (u.includes('manager-staff/10.json')) return Response.json(shard)
@@ -59,8 +70,8 @@ test('coachedUnder joins the shard, then names the staff; no staff gives []', as
   })
   assert.deepEqual(await coachedUnder(110), []) // shard 10 has no key 110
   assert.deepEqual(await coachedUnder(10), [
-    { personId: 30, name: 'Bench B', seasons: 2, laterManaged: true },
-    { personId: 31, name: 'Pitch P', seasons: 1, laterManaged: false },
+    { personId: 30, name: 'Bench B', seasons: 2, interimSeasons: 0, laterManaged: true },
+    { personId: 31, name: 'Pitch P', seasons: 1, interimSeasons: 1, laterManaged: false },
   ])
   f.mock.restore()
 })

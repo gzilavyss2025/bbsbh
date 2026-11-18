@@ -1,0 +1,640 @@
+diff --git a/scripts/gen-gate.mjs b/scripts/gen-gate.mjs
+index 4a5eb4bdf..0d39db0f0 100644
+--- a/scripts/gen-gate.mjs
++++ b/scripts/gen-gate.mjs
+@@ -234,6 +234,22 @@ function gateFor(rows) {
+   }
+ }
+ 
++// The road half: the crowds this club drew as the VISITOR, kept per host park and split
++// weekend (Fri-Sun, as gateFor splits a host) / weekday, as { we: [games, total],
++// wd: [games, total] } — facts only. The reader (api/around-the-game/gate.js roadBoard)
++// reads each against the host's own weekend or weekday average.
++export function roadFor(awayRows) {
++  const byHost = {}
++  for (const r of awayRows) {
++    if (r.attendance == null) continue
++    const host = (byHost[r.homeId] ??= { we: [0, 0], wd: [0, 0] })
++    const t = host[[0, 5, 6].includes(r.dow) ? 'we' : 'wd']
++    t[0] += 1
++    t[1] += r.attendance
++  }
++  return Object.keys(byHost).length ? { byHost } : null
++}
++
+ // The clock half: home AND road, for the reason in this file's header.
+ function paceFor(rows) {
+   const counted = rows.filter((r) => r.minutes != null)
+@@ -278,6 +294,14 @@ function monthSplit(rows, field) {
+   return split
+ }
+ 
++// The row naming the venue a club hosts at most often.
++function homePark(hostRows) {
++  const n = new Map()
++  for (const r of hostRows) if (r.venue) n.set(r.venueId, (n.get(r.venueId) ?? 0) + 1)
++  const id = [...n].sort((a, b) => b[1] - a[1])[0]?.[0]
++  return hostRows.find((r) => r.venue && r.venueId === id) ?? null
++}
++
+ // Fold every usable row into per-club aggregates. `rows` is the flat list
+ // toRow produced; the return value is gate.json's `clubs` map.
+ export function aggregate(rows) {
+@@ -300,9 +324,11 @@ export function aggregate(rows) {
+     const hostRows = home.get(teamId) ?? []
+     const playedRows = all.get(teamId) ?? []
+     clubs[teamId] = {
+-      venue: hostRows.find((r) => r.venue)?.venue ?? null,
+-      venueId: hostRows.find((r) => r.venue)?.venueId ?? null,
++      // The park it hosts at most: the first game listed can be a neutral site.
++      venue: homePark(hostRows)?.venue ?? null,
++      venueId: homePark(hostRows)?.venueId ?? null,
+       gate: gateFor(hostRows),
++      road: roadFor(rows.filter((r) => r.awayId === teamId)),
+       pace: paceFor(playedRows),
+     }
+   }
+@@ -350,7 +376,28 @@ export function leagueFor(rows) {
+   }
+ }
+ 
+-export function buildSeason(rows) {
++// A home game played away from the club's own park — the Little League Classic in
++// Williamsport, Field of Dreams, a Tokyo or London series — is not a fact about that
++// club's gate, so its crowd is dropped (attendance null) before anything is counted.
++// The game still counts for pace. A club's own park is the venue it hosts most often.
++export function homeParkOnly(rows) {
++  const counts = new Map()
++  for (const r of rows) {
++    if (r.venueId == null) continue
++    const byVenue = counts.get(r.homeId) ?? new Map()
++    byVenue.set(r.venueId, (byVenue.get(r.venueId) ?? 0) + 1)
++    counts.set(r.homeId, byVenue)
++  }
++  const park = new Map([...counts].map(([id, byVenue]) => [id, [...byVenue].sort((a, b) => b[1] - a[1])[0][0]]))
++  return rows.map((r) =>
++    r.attendance != null && r.venueId != null && park.has(r.homeId) && r.venueId !== park.get(r.homeId)
++      ? { ...r, attendance: null }
++      : r,
++  )
++}
++
++export function buildSeason(allRows) {
++  const rows = homeParkOnly(allRows)
+   return {
+     games: rows.length,
+     through: rows.reduce((a, r) => (r.date > a ? r.date : a), ''),
+diff --git a/src/api/around-the-game/gate.js b/src/api/around-the-game/gate.js
+index 3be30e495..f0e9d72b6 100644
+--- a/src/api/around-the-game/gate.js
++++ b/src/api/around-the-game/gate.js
+@@ -275,3 +275,42 @@ export function monthsIn(rows) {
+   for (const r of rows ?? []) for (const m of Object.keys(r.byMonth ?? {})) seen.add(m)
+   return [...seen].sort()
+ }
++
++// WHO DRAWS ON THE ROAD. Each visiting club's crowds, read against the host's own
++// season average for the same kind of date — its weekend average for a Fri-Sun crowd,
++// its weekday average otherwise — so a club is credited neither for the size of the
++// parks it visits nor for drawing more Saturdays. `lift` is the mean of (crowd / that
++// average) over its road games, as a percent above (+) or below (-); `avg` is the raw
++// road gate. A host with no split on file falls back to its season average. Best first.
++export function roadBoard(data, season) {
++  const clubs = data?.seasons?.[season]?.clubs
++  if (!clubs) return []
++  const yardstick = (hostId, part) => {
++    const g = clubs[hostId]?.gate
++    return (part === 'we' ? g?.weekend?.avg : g?.weekday?.avg) || g?.avg || null
++  }
++  const rows = []
++  for (const [teamId, c] of Object.entries(clubs)) {
++    let games = 0
++    let total = 0
++    let ratio = 0
++    for (const [hostId, parts] of Object.entries(c?.road?.byHost ?? {})) {
++      for (const part of ['we', 'wd']) {
++        const [g, sum] = parts?.[part] ?? [0, 0]
++        const avg = yardstick(hostId, part)
++        if (!g || !avg) continue
++        games += g
++        total += sum
++        ratio += sum / avg
++      }
++    }
++    if (!games) continue
++    rows.push({
++      teamId: Number(teamId),
++      games,
++      avg: Math.round(total / games),
++      lift: Math.round((ratio / games - 1) * 1000) / 10,
++    })
++  }
++  return rows.sort((a, b) => b.lift - a.lift).map((r, i) => ({ ...r, rank: i + 1 }))
++}
+diff --git a/src/screens/around-the-game/AttendancePage.jsx b/src/screens/around-the-game/AttendancePage.jsx
+index 31ed3f94f..fafd1c426 100644
+--- a/src/screens/around-the-game/AttendancePage.jsx
++++ b/src/screens/around-the-game/AttendancePage.jsx
+@@ -1,7 +1,7 @@
+ import '../../styles/68-around-the-game.css'
+ import '../../styles/report/attendance.css'
+ import { useMemo, useState } from 'react'
+-import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn, postseasonBoard } from '../../api/around-the-game/gate.js'
++import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn, postseasonBoard, roadBoard } from '../../api/around-the-game/gate.js'
+ import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
+ import { humanDate } from '../../lib/dates.js'
+ import { commas } from './abs/format.js'
+@@ -72,6 +72,11 @@ export function AttendancePage() {
+   const post = useMemo(() => (data && season ? postseasonBoard(data, season) : null), [data, season])
+ 
+   const rows = board?.rows ?? []
++  // Who draws on the road: each visitor's crowds against the hosts' own averages.
++  const road = useMemo(() => (data && season ? roadBoard(data, season) : []), [data, season])
++  const lifts = road.map((r) => r.lift)
++  const liftMin = lifts.length ? Math.min(...lifts) : 0
++  const liftMax = lifts.length ? Math.max(...lifts) : 1
+   const league = board?.league
+   const months = useMemo(() => monthsIn(rows), [rows])
+ 
+@@ -91,7 +96,6 @@ export function AttendancePage() {
+   const monthMin = monthValues.length ? Math.min(...monthValues) * 0.9 : 0
+   const monthMax = monthValues.length ? Math.max(...monthValues) : 1
+ 
+-  const widestSwing = [...rows].filter((r) => r.swing != null).sort((a, b) => b.swing - a.swing)[0]
+ 
+   return (
+     <div className="screen gate">
+@@ -108,7 +112,10 @@ export function AttendancePage() {
+             A club’s average crowd mostly measures how many seats it built; the share of the park
+             that fills measures a town, so fill rate leads. Fill rate is against the park’s listed
+             capacity, so standing room can push a real crowd past 100%. Bars are scaled across the
+-            league’s own range, not from zero. Range is a club’s biggest night minus its smallest.
++            league’s own range, not from zero. Range is a club’s biggest night minus its smallest. On the road board, each visiting club’s
++            crowds are measured against the host park’s own weekend or weekday average, so a club is not
++            credited for the size of the parks it visits or for its share of Saturdays. A park that sells
++            out most nights can’t show much of a visitor’s pull.
+             {league?.attGames ? ` ${commas(league.attGames)} home dates so far.` : ''}
+           </InfoPopover>
+         </p>
+@@ -124,7 +131,8 @@ export function AttendancePage() {
+ 
+       {rows.length > 0 && (
+         <>
+-          <BroadcastSection title="The board">
++          {/* The board needs no heading: it is what the title names. */}
++          <section className="gate__board" aria-label="Attendance board">
+             <Segmented
+               label="Sort the board"
+               value={sortBy}
+@@ -177,7 +185,7 @@ export function AttendancePage() {
+                 ))}
+               </tbody>
+             </Table>
+-          </BroadcastSection>
++          </section>
+ 
+           <BroadcastSection title="When the house fills">
+             <Table sticky label="Weekend and weekday attendance by club" className="rpt">
+@@ -209,38 +217,32 @@ export function AttendancePage() {
+             </Table>
+           </BroadcastSection>
+ 
+-          <BroadcastSection title="Who fills the place">
+-            <Table sticky label="Best-drawing opponents and quietest night by club" className="rpt">
+-              <thead>
+-                <tr>
+-                  <th className="team">Home club</th>
+-                  <th className="team">Best draws</th>
+-                  <th>Quietest night</th>
+-                </tr>
+-              </thead>
+-              <tbody>
+-                {rows.map((r) => (
+-                  <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+-                    <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
+-                    <td className="team">
+-                      {r.topOpponents.map((o) => (
+-                        <span key={o.teamId} className="rpt__note">
+-                          {clubShort(clubs, o.teamId)} — {commas(o.avg)}
+-                        </span>
+-                      ))}
+-                    </td>
+-                    <td>
+-                      {commas(r.worst)}
+-                      <span className="rpt__note">
+-                        {r.worstDate ? humanDate(r.worstDate) : ''}
+-                        {r.worstOppId ? ` vs ${clubShort(clubs, r.worstOppId)}` : ''}
+-                      </span>
+-                    </td>
++          {road.length > 0 && (
++            <BroadcastSection title="Who draws on the road">
++              <Table sticky label="Visiting clubs ranked by the crowds they draw on the road" className="rpt">
++                <thead>
++                  <tr>
++                    <th className="team">Visiting club</th>
++                    <th>Vs. the usual house</th>
++                    <th>Road average</th>
+                   </tr>
+-                ))}
+-              </tbody>
+-            </Table>
+-          </BroadcastSection>
++                </thead>
++                <tbody>
++                  {road.map((r) => (
++                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
++                      <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} rank={r.rank} />
++                      <td>
++                        <BarCell value={r.lift} min={liftMin} max={liftMax}>
++                          {r.lift > 0 ? '+' : ''}{r.lift.toFixed(1)}%
++                        </BarCell>
++                      </td>
++                      <td>{commas(r.avg)}</td>
++                    </tr>
++                  ))}
++                </tbody>
++              </Table>
++            </BroadcastSection>
++          )}
+ 
+           {post && (
+             <BroadcastSection
+@@ -293,41 +295,6 @@ export function AttendancePage() {
+             </BroadcastSection>
+           )}
+ 
+-          <section className="method">
+-            <h2>How this was counted</h2>
+-            <p>
+-              <strong>The unit is people, per home game.</strong> Attendance is the figure each
+-              club reports to the league for a home date, read off the MLB schedule feed. It is
+-              tickets distributed, not a turnstile count — a rainy Wednesday with 30,000 sold and
+-              12,000 in the seats is filed here as 30,000. Every club counts it the same way, so
+-              the board compares fairly; it simply does not measure how full the place looked.
+-            </p>
+-            <p>
+-              <strong>Only the home club is counted.</strong> A gate is a fact about a club’s own
+-              ballpark, so a road game folds nothing into that club’s figures. The season total is
+-              every home date added together, which is why a club with a few more home dates
+-              played can lead that column without leading the average.
+-            </p>
+-            <p>
+-              <strong>Fill rate divides the average by the park’s listed capacity.</strong> That
+-              capacity is a published number rather than a physical limit, which is why the
+-              leaders sit above 100 per cent: standing room, club seats and a generous listing all
+-              push past it. Those are printed as they came in rather than trimmed back to 100,
+-              because trimming them would erase exactly the clubs the column exists to find. A
+-              club whose park is not on file shows no fill rate and still ranks on every other
+-              column.
+-            </p>
+-            <p>
+-              <strong>Range is the distance between a club’s biggest night and its smallest.</strong>{' '}
+-              A wide range means the crowd depends on the opponent and the day of the week; a
+-              narrow one means the club sells much the same house whoever is in town.
+-              {widestSwing
+-                ? ` The widest in the league belongs to ${clubName(clubs, widestSwing.teamId)}, at
+-                   ${commas(widestSwing.swing)} people.`
+-                : ''}{' '}
+-              Regular season only, and only games already final.
+-            </p>
+-          </section>
+         </>
+       )}
+ 
+diff --git a/src/styles/68-around-the-game.css b/src/styles/68-around-the-game.css
+index 82250e39e..fa6263418 100644
+--- a/src/styles/68-around-the-game.css
++++ b/src/styles/68-around-the-game.css
+@@ -409,9 +409,12 @@
+ 
+ .rpt td.team,
+ .rpt th.team {
+-  font-family: var(--font-body);
+   text-align: left;
+ }
++/* The club NAME reads in the body face; its column head stays a head like the rest. */
++.rpt td.team {
++  font-family: var(--font-body);
++}
+ 
+ .rpt__rank {
+   display: inline-block;
+diff --git a/src/styles/report/attendance.css b/src/styles/report/attendance.css
+index a4d591a7b..e42196bda 100644
+--- a/src/styles/report/attendance.css
++++ b/src/styles/report/attendance.css
+@@ -33,3 +33,6 @@
+ .gate .gate__sort {
+   margin-block-end: var(--space-3);
+ }
++.gate__board {
++  margin-block: var(--space-4) var(--space-6);
++}
+diff --git a/test/attendance.test.js b/test/attendance.test.js
+index 200677fee..976f635ab 100644
+--- a/test/attendance.test.js
++++ b/test/attendance.test.js
+@@ -192,3 +192,18 @@ test('attendanceRatesFor: null for a missing club, a missing file, or no games i
+   assert.equal(attendanceRatesFor(empty, 200, 2026), null)
+ })
+ 
++
++import { roadFor } from '../scripts/gen-gate.mjs'
++
++test('roadFor keeps a visitor’s road crowds per host park, weekend and weekday apart', () => {
++  const rows = [
++    { homeId: 1, dow: 6, attendance: 44000 }, // Saturday
++    { homeId: 2, dow: 2, attendance: 18000 }, // Tuesday
++    { homeId: 2, dow: 5, attendance: 26000 }, // Friday
++    { homeId: 1, dow: 3, attendance: null },
++  ]
++  assert.deepEqual(roadFor(rows), {
++    byHost: { 1: { we: [1, 44000], wd: [0, 0] }, 2: { we: [1, 26000], wd: [1, 18000] } },
++  })
++  assert.equal(roadFor([]), null)
++})
+diff --git a/test/gate.test.js b/test/gate.test.js
+index ccaa049f5..88248a39d 100644
+--- a/test/gate.test.js
++++ b/test/gate.test.js
+@@ -423,3 +423,33 @@ test('the postseason crowd table prints the game number only when there is one',
+   const page = readFileSync(new URL('../src/screens/around-the-game/AttendancePage.jsx', import.meta.url), 'utf8')
+   assert.match(page, /r\.bestSeriesGame != null/)
+ })
++
++import { roadBoard } from '../src/api/around-the-game/gate.js'
++
++test('roadBoard reads each road crowd against the host’s weekend or weekday average', () => {
++  const data = { seasons: { 2026: { clubs: {
++    // Host 2: 30,000 on weekends, 20,000 on weekdays. Club 1 drew 33,000 on a Saturday
++    // (+10%) and 22,000 on a Tuesday (+10%): +10%, not credited for the Saturday.
++    1: { gate: { avg: 40000 }, road: { byHost: { 2: { we: [1, 33000], wd: [1, 22000] } } } },
++    2: { gate: { avg: 25000, weekend: { avg: 30000 }, weekday: { avg: 20000 } }, road: { byHost: { 1: { we: [0, 0], wd: [1, 36000] } } } },
++    3: { road: { byHost: { 9: { we: [3, 90000], wd: [0, 0] } } } }, // host with no average: left out
++  } } } }
++  assert.deepEqual(roadBoard(data, 2026), [
++    { teamId: 1, games: 2, avg: 27500, lift: 10, rank: 1 },
++    { teamId: 2, games: 1, avg: 36000, lift: -10, rank: 2 }, // host 1 has no split: its 40,000 season average
++  ])
++  assert.deepEqual(roadBoard(null, 2026), [])
++})
++
++import { homeParkOnly } from '../scripts/gen-gate.mjs'
++
++test('homeParkOnly drops the crowd of a home game played away from the club’s own park', () => {
++  const rows = [
++    { homeId: 158, venueId: 32, attendance: 40000 },
++    { homeId: 158, venueId: 32, attendance: 38000 },
++    { homeId: 158, venueId: 5340, attendance: 2500 }, // Little League Classic, Williamsport
++    { homeId: 112, venueId: 17, attendance: 39000 },
++  ]
++  const out = homeParkOnly(rows)
++  assert.deepEqual(out.map((r) => r.attendance), [40000, 38000, null, 39000])
++})
+diff --git a/src/api/around-the-game/gate.js b/src/api/around-the-game/gate.js
+index ab7287e88..3be30e495 100644
+--- a/src/api/around-the-game/gate.js
++++ b/src/api/around-the-game/gate.js
+@@ -95,7 +95,7 @@ export const GATE_SORTS = [
+   { key: 'avg', label: 'Average', lowIsBest: false },
+   { key: 'total', label: 'Season total', lowIsBest: false },
+   { key: 'best', label: 'Best night', lowIsBest: false },
+-  { key: 'swing', label: 'Swing', lowIsBest: false },
++  { key: 'swing', label: 'Range', lowIsBest: false },
+ ]
+ 
+ export function gateBoard(data, season, sortBy = 'fill') {
+diff --git a/src/screens/around-the-game/AttendancePage.jsx b/src/screens/around-the-game/AttendancePage.jsx
+index 7aee3db79..31ed3f94f 100644
+--- a/src/screens/around-the-game/AttendancePage.jsx
++++ b/src/screens/around-the-game/AttendancePage.jsx
+@@ -1,4 +1,5 @@
+ import '../../styles/68-around-the-game.css'
++import '../../styles/report/attendance.css'
+ import { useMemo, useState } from 'react'
+ import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn, postseasonBoard } from '../../api/around-the-game/gate.js'
+ import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
+@@ -10,12 +11,14 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
+ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
+-import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
++import { BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+ import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
+ import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+ import { Card } from '../../components/ui/frame/Card.jsx'
+ import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
+ import { Table } from '../../components/ui/table/Table.jsx'
++import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
++import { Segmented } from '../../components/ui/control/Segmented.jsx'
+ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
+ 
+ // THE GATE — who is actually going to the ballpark.
+@@ -47,7 +50,7 @@ const COLUMNS = [
+   { key: 'avg', label: 'Average', render: (r) => commas(r.avg) },
+   { key: 'total', label: 'Season', render: (r) => commas(r.total) },
+   { key: 'best', label: 'Best', render: (r) => commas(r.best) },
+-  { key: 'swing', label: 'Swing', render: (r) => commas(r.swing) },
++  { key: 'swing', label: 'Range', render: (r) => commas(r.swing) },
+ ]
+ 
+ export function AttendancePage() {
+@@ -88,26 +91,28 @@ export function AttendancePage() {
+   const monthMin = monthValues.length ? Math.min(...monthValues) * 0.9 : 0
+   const monthMax = monthValues.length ? Math.max(...monthValues) : 1
+ 
+-  const fullest = [...rows].filter((r) => r.fill != null).sort((a, b) => b.fill - a.fill)[0]
+-  const biggestNight = [...rows].filter((r) => r.best != null).sort((a, b) => b.best - a.best)[0]
+   const widestSwing = [...rows].filter((r) => r.swing != null).sort((a, b) => b.swing - a.swing)[0]
+ 
+   return (
+-    <div className="screen">
++    <div className="screen gate">
+       <SiteHeader />
+ 
+-      <BroadcastMasthead
+-        eyebrow="The Gate"
+-        title="Attendance"
+-        dek="Every club’s home gate, ranked by the share of the park that fills rather than by
+-             the number of seats it built. Average attendance mostly measures architecture;
+-             fill rate measures a town."
+-        meta={[
+-          { label: 'Season', value: season ?? '—' },
+-          { label: 'Through', value: board?.through ? humanDate(board.through) : '—' },
+-          { label: 'Games', value: commas(league?.attGames) },
+-        ]}
+-      />
++      {/* The title and one line, as Pressure Moments opens; the explanation is opt-in,
++          behind the (i) (src/styles/CLAUDE.md). The season and its last day ride in the line. */}
++      <header className="topbar gate__head">
++        <h1 className="topbar__title">Attendance{season ? `, ${season}` : ''}</h1>
++        <p className="hint infopop-row gate__dek">
++          Every club’s home gate, ranked by how full the park gets
++          {board?.through ? `, through ${humanDate(board.through)}` : ''}.{' '}
++          <InfoPopover label="About attendance" className="infopop--paper infopop--down">
++            A club’s average crowd mostly measures how many seats it built; the share of the park
++            that fills measures a town, so fill rate leads. Fill rate is against the park’s listed
++            capacity, so standing room can push a real crowd past 100%. Bars are scaled across the
++            league’s own range, not from zero. Range is a club’s biggest night minus its smallest.
++            {league?.attGames ? ` ${commas(league.attGames)} home dates so far.` : ''}
++          </InfoPopover>
++        </p>
++      </header>
+ 
+       <AsyncStatus
+         loading={loading}
+@@ -119,55 +124,14 @@ export function AttendancePage() {
+ 
+       {rows.length > 0 && (
+         <>
+-          <SlabRow>
+-            <Slab
+-              tone="lead"
+-              value={commas(league?.attAvg)}
+-              label="League average"
+-              note={`Median ${commas(league?.attMedian)} — the gap between the two is the
+-                     handful of clubs drawing 45,000 a night.`}
+-            />
+-            <Slab
+-              value={commas(league?.attTotal)}
+-              label="Tickets, season to date"
+-              note={`Across ${commas(league?.attGames)} home dates.`}
+-            />
+-            <Slab
+-              value={fullest ? pct1(fullest.fill) : '—'}
+-              label="Fullest park"
+-              note={fullest ? clubName(clubs, fullest.teamId) : ''}
++          <BroadcastSection title="The board">
++            <Segmented
++              label="Sort the board"
++              value={sortBy}
++              onChange={setSortBy}
++              options={GATE_SORTS.map((s) => ({ value: s.key, label: s.label }))}
++              className="gate__sort"
+             />
+-            <Slab
+-              value={commas(biggestNight?.best)}
+-              label="Biggest single gate"
+-              note={
+-                biggestNight
+-                  ? `${clubName(clubs, biggestNight.teamId)}, ${humanDate(biggestNight.bestDate)}`
+-                  : ''
+-              }
+-            />
+-          </SlabRow>
+-
+-          <BroadcastSection
+-            title="The board"
+-            note="Bars are scaled across the league’s own range on the sorted column, not from
+-                  zero — off a zero floor thirty clubs draw as thirty identical bars. Fill rate
+-                  is against the park’s listed capacity, so standing room and a sold-out club
+-                  level can push a real crowd past 100%; those are printed as they came in."
+-          >
+-            <div className="rpt-controls" role="group" aria-label="Sort the board">
+-              {GATE_SORTS.map((s) => (
+-                <button
+-                  key={s.key}
+-                  type="button"
+-                  className={`rpt-chip${s.key === sortBy ? ' is-on' : ''}`}
+-                  aria-pressed={s.key === sortBy}
+-                  onClick={() => setSortBy(s.key)}
+-                >
+-                  {s.label}
+-                </button>
+-              ))}
+-            </div>
+ 
+             <Table sticky label="Attendance board, every club ranked" className="rpt">
+               <thead>
+@@ -215,12 +179,7 @@ export function AttendancePage() {
+             </Table>
+           </BroadcastSection>
+ 
+-          <BroadcastSection
+-            title="When the house fills"
+-            note="Every club draws better on a Saturday than on a Tuesday. What separates them
+-                  is by how much — a club whose weekend and weekday lines nearly meet sells the
+-                  same house whoever is in town and whenever they come."
+-          >
++          <BroadcastSection title="When the house fills">
+             <Table sticky label="Weekend and weekday attendance by club" className="rpt">
+               <thead>
+                 <tr>
+@@ -250,12 +209,7 @@ export function AttendancePage() {
+             </Table>
+           </BroadcastSection>
+ 
+-          <BroadcastSection
+-            title="Who fills the place"
+-            note="The three visiting clubs each park draws best for, by average gate. Three
+-                  dates is a small sample and a single sold-out weekend can carry one — read
+-                  it as who the town turns out for, not as a ranking."
+-          >
++          <BroadcastSection title="Who fills the place">
+             <Table sticky label="Best-drawing opponents and quietest night by club" className="rpt">
+               <thead>
+                 <tr>
+@@ -291,10 +245,7 @@ export function AttendancePage() {
+           {post && (
+             <BroadcastSection
+               title="Postseason"
+-              note={`${commas(post.games)} postseason home dates with a crowd on file, through
+-                    ${post.through ? humanDate(post.through) : '—'}. Kept apart from every figure
+-                    above: clubs are ranked here only against the other clubs that played in
+-                    October.`}
++              note={`${commas(post.games)} home dates, through ${post.through ? humanDate(post.through) : '—'}; ranked only against other October clubs.`}
+             >
+               <SlabRow>
+                 <Slab value={commas(post.league?.attAvg)} label="Postseason average" />
+@@ -367,8 +318,8 @@ export function AttendancePage() {
+               column.
+             </p>
+             <p>
+-              <strong>Swing is the distance between a club’s biggest night and its smallest.</strong>{' '}
+-              A wide swing means the crowd depends on the opponent and the day of the week; a
++              <strong>Range is the distance between a club’s biggest night and its smallest.</strong>{' '}
++              A wide range means the crowd depends on the opponent and the day of the week; a
+               narrow one means the club sells much the same house whoever is in town.
+               {widestSwing
+                 ? ` The widest in the league belongs to ${clubName(clubs, widestSwing.teamId)}, at
+diff --git a/src/styles/report/attendance.css b/src/styles/report/attendance.css
+new file mode 100644
+index 000000000..a4d591a7b
+--- /dev/null
++++ b/src/styles/report/attendance.css
+@@ -0,0 +1,35 @@
++/* ---------------------------------------------------------------- attendance
++   The Attendance page (AttendancePage.jsx) in the stamped frame Pressure Moments wears:
++   square, a heavy ink edge and the hard ink shadow (Gary, 2026-11-17). Scoped to .gate,
++   so the other report pages keep the broadcast look. */
++
++/* The title and its one-line deck read as one headline block, as on Pressure Moments. */
++.gate__head {
++  display: block;
++}
++.gate__head .gate__dek {
++  margin: var(--space-1) 0 0;
++  padding: 0;
++  font-family: var(--font-display);
++  color: var(--text-body);
++}
++.gate__dek .infopop__tip {
++  border: var(--bw-heavy) solid var(--border-stamped);
++  border-radius: 0;
++  box-shadow: var(--shadow-stamped);
++  background: var(--surface-card);
++}
++
++.gate .slab {
++  border: var(--bw-heavy) solid var(--border-stamped);
++  border-radius: 0;
++  box-shadow: var(--shadow-stamped);
++}
++.gate .table:has(.rpt) {
++  border: var(--bw-heavy) solid var(--border-stamped);
++  border-radius: 0;
++  box-shadow: var(--shadow-stamped);
++}
++.gate .gate__sort {
++  margin-block-end: var(--space-3);
++}

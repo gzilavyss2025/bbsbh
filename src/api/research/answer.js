@@ -53,6 +53,31 @@ export function answer(pas, q, cutoff, { matchesOnly = false } = {}) {
   return { ...summarize(matches, base), baseBy }
 }
 
+// THE LEAGUE RATE (Gary, 2026-11-18): the result card alone over the same PAs (same seasons,
+// no situation filter), so "How often" reads beside the league's rate. { n, base }, or null
+// with no result card. useResearch adds a history season's counts before it filters it.
+export function leagueCounts(pas, q, cutoff) {
+  const res = q.chips?.res
+  if (!res?.vals.length) return null
+  const any = matcher({ chips: {} }, cutoff)
+  const hit = matcher({ chips: { res } }, cutoff)
+  let n = 0
+  let base = 0
+  for (const pa of pas) {
+    if (!any(pa)) continue
+    base++
+    if (hit(pa)) n++
+  }
+  return { n, base }
+}
+
+// Under this many PAs a share reads as counts, not a percent (Gary, 2026-11-18).
+export const SHARE_MIN = 50
+export function shareText(n, base) {
+  const pas = `${base.toLocaleString()} ${base === 1 ? 'PA' : 'PAs'}`
+  return base < SHARE_MIN ? `${n.toLocaleString()} of ${pas}` : `${((100 * n) / base).toFixed(1)}% of ${pas}`
+}
+
 // The answer for a list of matches, newest first. "Last time" across seasons joins each
 // season's matches (newest season first) and calls this with base null: a share is
 // never computed from part of a search.

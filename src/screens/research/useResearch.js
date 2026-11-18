@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { answer, summarize } from '../../api/research/answer.js'
+import { answer, leagueCounts, summarize } from '../../api/research/answer.js'
 import { isBlank, matcher, mayMatch, needsWinProb, searchKey, seasonsFor, unsupported } from '../../api/research/filters.js'
 import { HISTORY_LAST } from '../../api/research/history.js'
 import { GAME_CHIPS, answerGames, isGameBlank, playerGames, summarizeGames } from '../../api/research/games.js'
 import { STREAK_CHIPS, isStreakBlank, streakRun } from '../../api/research/streaks.js'
 import { attachSeries, attachWinProbSeason, coverage, dropSeason, dropSeasonsExcept, fetchIndex, hasWinProb, loadSeason, seasonEvents, seasonsOnFile, storeVersion } from '../../api/research/store.js'
+
+const addLeague = (a, b) => (b ? { n: a.n + b.n, base: a.base + b.base } : a)
 
 // The first season game mode's Pitches total answers in (#3163).
 const PITCHES_SINCE = 1988
@@ -90,18 +92,21 @@ export function useResearch(q, cutoff) {
   const live = useMemo(() => {
     const chips = { ...q.chips }
     for (const b of blocked) delete chips[b.key]
+    // The range cards (Exit velocity, Launch angle) are play mode's, and 2015 on.
+    const ranges = game || streak ? {} : { ...q.ranges }
+    for (const b of blocked) delete ranges[b.key]
     if (streak) {
       // A streak query keeps the Game type card, the one person on its side and the club.
       for (const k of Object.keys(chips)) if (!STREAK_CHIPS.includes(k)) delete chips[k]
       const pit = q.s.side === 'pit'
-      return { ...q, chips, wp: false, batter: pit ? null : q.batter, pitcher: pit ? q.pitcher : null, pitchTeam: null, park: null, ask: 'last' }
+      return { ...q, chips, ranges, wp: false, batter: pit ? null : q.batter, pitcher: pit ? q.pitcher : null, pitchTeam: null, park: null, ask: 'last' }
     }
-    if (!game) return { ...q, chips, wp: q.wp && winProb }
+    if (!game) return { ...q, chips, ranges, wp: q.wp && winProb }
     const totals = { ...q.g?.totals }
     for (const b of blocked) if (b.total) delete totals[b.key]
     // A game query keeps only the cards that describe a whole game, and no person.
     for (const k of Object.keys(chips)) if (!GAME_CHIPS.includes(k)) delete chips[k]
-    return { ...q, chips, g: { ...q.g, totals }, wp: false, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
+    return { ...q, chips, ranges, g: { ...q.g, totals }, wp: false, batter: null, pitcher: null, ask: q.ask === 'what' ? 'last' : q.ask }
   }, [q, blocked, game, streak, winProb])
   const blank = streak ? isStreakBlank(live) : game ? isGameBlank(live) : isBlank(live)
 
@@ -123,6 +128,10 @@ export function useResearch(q, cutoff) {
     // season's PAs (a club-game needs both sides). `gameBase`: club-games in scope.
     const perSeason = !bySeason && game && live.years?.[0] <= HISTORY_LAST
     let gameBase = 0
+    // "How often" beside the league (answer.js leagueCounts), summed season by season before a
+    // history season is thinned to its base PAs.
+    const oftenLeague = live.mode === 'play' && live.ask === 'often' && live.chips.res?.vals.length
+    let league = oftenLeague ? { n: 0, base: 0 } : null
     const people = { ...head.people }
     const searched = []
     const found = []
@@ -192,15 +201,18 @@ export function useResearch(q, cutoff) {
           gameBase += part.base
           leftOut += part.leftOut
           if (season !== latest) dropSeason(season)
-        } else if (season > HISTORY_LAST) pools.unshift(data.pas)
-        else {
+        } else if (season > HISTORY_LAST) {
+          pools.unshift(data.pas)
+          if (league) league = addLeague(league, leagueCounts(data.pas, live, cutoff))
+        } else {
+          if (league) league = addLeague(league, leagueCounts(data.pas, live, cutoff))
           // A history season keeps only the PAs the answer can read (the query without its
           // result card: answer.js's base) and is freed, so a range back to 1961 fits a phone.
           pools.unshift(data.pas.filter(keep))
           dropSeason(season)
         }
       }
-      const result = bySeason ? mode.sum(found, leftOut, live) : perSeason ? summarizeGames(found, gameBase, leftOut, live) : mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff)
+      const result = bySeason ? mode.sum(found, leftOut, live) : perSeason ? summarizeGames(found, gameBase, leftOut, live) : { ...mode.all(pools.length === 1 ? pools[0] : pools.flat(), live, cutoff), league }
       // Free every season but the latest once answered (Gary, 2026-11-14): re-asking a
       // range downloads it again rather than holding twelve seasons on a phone.
       pools.length = 0

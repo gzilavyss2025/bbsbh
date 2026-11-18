@@ -226,10 +226,11 @@
 }
 
 .slatedate__short {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
   line-height: var(--lh-solid);
-  letter-spacing: var(--ls-wide);
+  letter-spacing: var(--ls-label);
   color: var(--text-heading);
   white-space: nowrap;
 }
@@ -239,8 +240,23 @@
   display: flex;
   align-items: center;
   flex: 1 1 auto;
-  gap: var(--space-1h);
   min-width: 0;
+}
+/* One control, not islands: the level chip, the arrows and the date share
+   one stamped outline and one height. The parts draw only inner rules. */
+.slatecompact .slatedate--mini {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-left: 0;
+  background: var(--surface-card);
+}
+.slatecompact .slatedate--mini .slatedate__arrow {
+  height: calc(var(--tap-min) - 2 * var(--bw-heavy));
+}
+.slatecompact .slatedate--mini .slatedate__arrow:first-child {
+  border-right: var(--bw-hair) solid var(--border-hairline);
+}
+.slatecompact .slatedate--mini .slatedate__arrow:last-child {
+  border-left: var(--bw-hair) solid var(--border-hairline);
 }
 
 .slatecompact__level {
@@ -255,8 +271,8 @@
   height: var(--tap-min);
   padding: 0 var(--space-2h) 0 var(--space-3);
   border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--surface-stamped-ink);
-  color: var(--text-on-ink);
+  background: var(--surface-card);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--w-bold);

@@ -99,10 +99,11 @@ const RESULTS = [
 ]
 const RESULT_GROUPS = { strikeout: ['strikeout', 'strikeout_double_play'], sac_fly: ['sac_fly', 'sac_fly_double_play'], fielders_choice: ['fielders_choice', 'fielders_choice_out'] }
 
-// The count the last pitch came in, from the batter's side. 3-2 is in no group.
+// The count the last pitch came in, from the batter's side. 3-2 is even (Gary, 2026-11-18).
 export function countGroup([b, s] = []) {
-  if (!Number.isInteger(b) || !Number.isInteger(s) || (b === 3 && s === 2)) return null
-  return b > s ? 'ahead' : b === s ? 'even' : 'behind'
+  if (!Number.isInteger(b) || !Number.isInteger(s)) return null
+  if (b === s || (b === 3 && s === 2)) return 'even'
+  return b > s ? 'ahead' : 'behind'
 }
 const COUNT_GROUPS = [['ahead', 'Batter ahead'], ['even', 'Even'], ['behind', 'Batter behind']]
 
@@ -169,7 +170,10 @@ export const FILTERS = [
   { key: 'fld', label: 'Batted ball location', options: [['pull', 'Pull'], ['center', 'Center'], ['oppo', 'Opp field']], values: (pa) => [fieldOf(pa.hcX, pa.hcY, pa.stand)], since: 2015, info: 'Opp field is a ball hit more than 15° from center toward the batter’s opposite side. Pull is the mirror. Center is within 15°.' },
   { key: 'bh', label: 'Batter hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.stand] },
   { key: 'ph', label: 'Pitcher hand', single: true, options: [['L', 'Lefty'], ['R', 'Righty']], values: (pa) => [pa.throws] },
-  { key: 'cnt', label: 'Count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), ...COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2])))], info: 'A count matches a plate appearance that passed through it on any pitch. Batter ahead, Even and Batter behind read the count of the last pitch instead: ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1 or 2-2; behind is 0-1, 0-2 or 1-2. A full count is in none. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
+  { key: 'cnt', label: 'Count reached', options: COUNTS.map((c) => [c, c]), values: (pa) => COUNTS.filter((c) => pa.counts & countBit(Number(c[0]), Number(c[2]))), info: 'A count matches a plate appearance that passed through it on any pitch. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
+  { key: 'fc', label: 'Final count', options: [...COUNT_GROUPS, ...COUNTS.map((c) => [c, c])], values: (pa) => [countGroup(pa.count), Number.isInteger(pa.count?.[0]) ? `${pa.count[0]}-${pa.count[1]}` : null], info: 'The count the last pitch of the plate appearance came in. Batter ahead is 1-0, 2-0, 3-0, 2-1 or 3-1; even is 0-0, 1-1, 2-2 or 3-2; behind is 0-1, 0-2 or 1-2. Before 1988, most plate appearances have no pitch-by-pitch record, so a count finds few of them.' },
+  { key: 'role', label: 'Pitcher role', single: true, options: [['SP', 'Starter'], ['RP', 'Reliever']], values: (pa) => [pa.role], info: 'The pitcher’s role that game: the first pitcher his club used is the starter.' },
+  { key: 'tto', label: 'Times facing pitcher', options: [['1', '1st'], ['2', '2nd'], ['3', '3rd'], ['4', '4th+']], values: (pa) => [pa.tto == null ? null : String(Math.min(pa.tto, 4))], info: 'The batter’s 1st, 2nd, 3rd or later plate appearance against this pitcher in the game.' },
   { key: 'out', label: 'Outs', options: [['0', '0 out'], ['1', '1 out'], ['2', '2 out']], values: (pa) => [String(pa.outs)] },
   { key: 'run', label: 'Runners', glyphs: true, options: RUNNER_STATES, values: (pa) => [runnersTag(pa.runners)] },
   { key: 'sc', label: 'Score', options: SCORES, values: (pa) => scoreValues(pa.margin), info: 'The batting club’s margin when the plate appearance began. Up 3+ and Down 3+ are three runs or more.' },
@@ -183,6 +187,22 @@ export const FILTERS = [
 ]
 
 export const FILTER_BY_KEY = Object.fromEntries(FILTERS.map((f) => [f.key, f]))
+
+// RANGE CARDS (Gary, 2026-11-18): a From/To bound on a batted ball's number, either end
+// open; a card opens on `start`, and clearing both ends closes it. URL `ev=95-`, `la=-10-25` (a bound may be negative). Statcast only: 2015 on.
+// Pitch speed reads the last pitch, and needs a store built at v3 (shard.js).
+export const RANGES = [
+  { key: 'ev', label: 'Exit velocity (mph)', since: 2015, start: [95, null], value: (pa) => pa.launchSpeed },
+  { key: 'ps', label: 'Pitch speed (mph)', since: 2015, v: 3, start: [95, null], value: (pa) => pa.pitchSpeed },
+  { key: 'la', label: 'Launch angle (°)', since: 2015, signed: true, start: [10, 30], value: (pa) => pa.launchAngle },
+]
+export const RANGE_BY_KEY = Object.fromEntries(RANGES.map((r) => [r.key, r]))
+const parseBound = (v) => {
+  const m = /^(-?\d{1,3})?-(-?\d{1,3})?$/.exec(v ?? '')
+  return m && (m[1] || m[2]) ? [m[1] ? Number(m[1]) : null, m[2] ? Number(m[2]) : null] : null
+}
+const inRange = (x, [lo, hi]) => x != null && (lo == null || x >= lo) && (hi == null || x <= hi)
+const hasBound = (b) => Boolean(b) && (b[0] != null || b[1] != null)
 
 // An event's name as the PA result card groups it (fielders_choice_out reads
 // "Fielder's choice"), for the outcome table and the match rows.
@@ -207,6 +227,16 @@ export function parseQuery(search) {
     const vals = expanded.filter((v) => f.options.some(([o]) => o === v))
     if (vals.length) chips[f.key] = { vals, inv: inv && !f.single }
   }
+  // An old Count card link (before Final count split off) kept its last-pitch groups in cnt.
+  // A mixed old link (`cnt=ahead.0-2`, either one) now asks both cards (and), not either.
+  const oldCnt = p.get('cnt') ?? ''
+  const oldGroups = oldCnt.replace(/^!/, '').split('.').filter((v) => COUNT_GROUPS.some(([g]) => g === v))
+  if (oldGroups.length && !chips.fc) chips.fc = { vals: oldGroups, inv: oldCnt.startsWith('!') }
+  const ranges = {}
+  for (const r of RANGES) {
+    const b = parseBound(p.get(r.key))
+    if (b) ranges[r.key] = b
+  }
   const id = (k) => (/^\d+$/.test(p.get(k) ?? '') ? Number(p.get(k)) : null)
   const club = (k) => (/^[A-Z]{2,3}$/.test(p.get(k) ?? '') ? p.get(k) : null)
   const yr = /^(\d{4})(?:-(\d{4}))?$/.exec(p.get('yr') ?? '')
@@ -217,7 +247,7 @@ export function parseQuery(search) {
   const g = parseGameQuery(search)
   // Streaks mode (#3142, streaks.js): `mode=streak`; `s` is null in the other modes.
   const s = g ? null : parseStreakQuery(search)
-  return { mode: g ? 'game' : s ? 'streak' : 'play', g, s, chips, wp: p.get('wp') === '1', years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
+  return { mode: g ? 'game' : s ? 'streak' : 'play', g, s, chips, ranges, wp: p.get('wp') === '1', years, batter: id('bat'), pitcher: id('pit'), team: club('team'), pitchTeam: club('pteam'), park: club('park'), ask: ASKS.some((a) => a.key === p.get('ask')) ? p.get('ask') : 'last', rank: p.get('rank') === 'rate' ? 'rate' : 'count', min }
 }
 
 export function buildQuery(q, keep = {}) {
@@ -235,6 +265,7 @@ export function buildQuery(q, keep = {}) {
     const c = q.chips?.[f.key]
     if (c?.vals?.length) p.set(f.key, `${c.inv ? '!' : ''}${c.vals.join('.')}`)
   }
+  for (const r of RANGES) if (hasBound(q.ranges?.[r.key])) p.set(r.key, `${q.ranges[r.key][0] ?? ''}-${q.ranges[r.key][1] ?? ''}`)
   if (q.years) p.set('yr', q.years[0] === q.years[1] ? `${q.years[0]}` : q.years.join('-'))
   if (q.batter) p.set('bat', q.batter)
   if (q.pitcher) p.set('pit', q.pitcher)
@@ -270,7 +301,7 @@ export const searchKey = ({ rank, min, ...q }) => JSON.stringify({ ...q, g: q.g 
 export const needsWinProb = (q) => Boolean(q.wp || q.chips?.lev?.vals.length)
 
 // The query is blank: no chip, person or club. The page shows presets, not an answer.
-export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
+export const isBlank = (q) => !Object.values(q.chips ?? {}).some((c) => c.vals.length) && !Object.values(q.ranges ?? {}).some(hasBound) && !q.batter && !q.pitcher && !q.team && !q.pitchTeam && !q.park
 
 // The predicate for a whole query. `cutoff` ('YYYY-MM-DD', optional) holds out that day and later.
 export function matcher(q, cutoff) {
@@ -285,6 +316,7 @@ export function matcher(q, cutoff) {
   // count or leader board stays official games.
   const gt = q.chips?.gt
   if (!(gt && !gt.inv && gt.vals.includes('A'))) tests.push((pa) => pa.gameType !== 'A')
+  for (const [k, b] of Object.entries(q.ranges ?? {})) if (RANGE_BY_KEY[k] && hasBound(b)) tests.push((pa) => inRange(RANGE_BY_KEY[k].value(pa), b))
   if (q.batter) tests.push((pa) => pa.batter === q.batter)
   if (q.pitcher) tests.push((pa) => pa.pitcher === q.pitcher)
   if (q.team) tests.push((pa) => pa.batTeam === q.team)
@@ -299,7 +331,7 @@ export function matcher(q, cutoff) {
 // `version`: the lowest store version among the searched seasons (store.js storeVersion);
 // `winProb`: every searched month has its win-probability file (store.js hasWinProb).
 export function unsupported(firstSeason, version = Infinity, winProb = true) {
-  return FILTERS.filter((f) => (f.since && firstSeason < f.since) || (f.v && version < f.v) || (f.wp && !winProb)).map(({ key, label, since }) =>
+  return [...FILTERS, ...RANGES].filter((f) => (f.since && firstSeason < f.since) || (f.v && version < f.v) || (f.wp && !winProb)).map(({ key, label, since }) =>
     since && firstSeason < since ? { key, label, since } : { key, label, rebuild: true },
   )
 }

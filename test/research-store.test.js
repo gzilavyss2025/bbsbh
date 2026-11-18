@@ -110,7 +110,7 @@ test('the answer is newest first, with ordinals and the any-result base', () => 
 
 test('a season range before the tracking era blocks the pitch cards', () => {
   assert.deepEqual(unsupported(2026), [])
-  assert.deepEqual(unsupported(2000).map((u) => u.key), ['pt', 'loc', 'fld', 'bb'])
+  assert.deepEqual(unsupported(2000).map((u) => u.key), ['pt', 'loc', 'fld', 'bb', 'ev', 'ps', 'la'])
 })
 
 test('the generator never asks Savant with the ignored hand params, and never for today', () => {

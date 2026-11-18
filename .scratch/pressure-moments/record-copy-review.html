@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>At-bat record copy</title>
+<style>
+:root{--bg:#faf6ea;--ink:#1b2a3a;--rule:#d8cfb8;--mute:#5b6570}
+@media (prefers-color-scheme:dark){:root{--bg:#151b22;--ink:#e8e2d2;--rule:#33404d;--mute:#9aa4ad}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:28px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}td,th{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.mock{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.02em;border:2px solid var(--ink);padding:10px 12px;display:inline-block;margin:4px 0}
+.small{color:var(--mute)}
+</style></head><body><main>
+<h1>At-bat record — copy review</h1>
+<p>The writer's proposal for the Pressure Moments board, checked against how the page already uses words.</p>
+
+<h2>Recommended copy</h2>
+<p><b>Batting</b><br><span class="mock">Came through 11 of 25 · 9 runs scored</span></p>
+<p><b>Pitching</b><br><span class="mock">Came through 14 of 25 · 8 strikeouts</span></p>
+<p><b>Fewer than 25 at-bats:</b> the real count, e.g. "Came through 6 of 9".</p>
+
+<h2>What changed, and why</h2>
+<table><tr><th>Proposed</th><th>Problem</th><th>Now</th></tr>
+<tr><td>"11 for 25"</td><td>"X for Y" is how readers count <i>hits</i>. Walks, errors and sac flies are in this count, so a reader who knows box scores reads it wrong. The writer's own advice says not to call these hits.</td><td>"11 of 25"</td></tr>
+<tr><td>"In the clutch" / "Held on"</td><td>Two labels for one idea makes the switch look like it measures two different things. "Clutch" is also a loaded stat word.</td><td>"Came through" on both sides: it fits a hitter and a pitcher.</td></tr>
+<tr><td>(any "won")</td><td>Every row's game line already says "won 4-3". A second "won" in the record is exactly the W-L confusion to avoid.</td><td>No "won" in the record.</td></tr>
+<tr><td>"Runs in 9"</td><td>Next to "9th or later" it reads as "runs in the 9th".</td><td>"9 runs scored"</td></tr>
+<tr><td>"Strikeouts 8"</td><td>Label-then-number reads like a table header.</td><td>"8 strikeouts"</td></tr>
+<tr><td>"9th or later 4 for 9"</td><td>Nearly every row is the 9th or later, so the split says little; and a third figure crowds a phone line.</td><td>Cut.</td></tr>
+</table>
+
+<h2>Alternatives</h2>
+<table><tr><th>Option</th><th>Batting</th><th>Pitching</th><th>Best for</th></tr>
+<tr><td>A (recommended)</td><td>Came through 11 of 25</td><td>Came through 14 of 25</td><td>One term both sides; plain</td></tr>
+<tr><td>B</td><td>Delivered 11 of 25</td><td>Stopped 14 of 25</td><td>Punchier, but two terms</td></tr>
+<tr><td>C</td><td>11 of 25 went our way</td><td>14 of 25 went our way</td><td>Fan voice; "our" assumes the reader's club</td></tr>
+</table>
+
+<h2>Notes</h2>
+<ul>
+<li>Keep the green/red on the box tied to the same rule as the row tints, so the record and the rows agree at a glance.</li>
+<li>The (i) text should gain one line: "Came through: a hit, walk, hit-by-pitch, a run scoring or reaching base when batting; the out, with no run, when pitching."</li>
+<li>Avoid idioms in a translated build: "came through" may need "succeeded in".</li>
+</ul>
+</main></body></html>

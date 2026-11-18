@@ -1,4 +1,5 @@
 import { Component, Fragment, Suspense, useMemo } from 'react'
+import { combineBatches } from './combineMoves.js'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { reportCrash } from '../../lib/crash/report.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -111,7 +112,8 @@ export function flattenDays(days) {
   for (const day of days ?? []) {
     if (!day.stories?.length) continue
     items.push({ kind: 'date', key: `d-${day.date}`, date: day.date, count: day.stories.length })
-    for (const story of day.stories) {
+    // A club's run of same-kind one-player moves reads as one card (combineMoves.js).
+    for (const story of combineBatches(day.stories)) {
       items.push({ kind: 'story', key: story.id, story, date: day.date })
     }
   }
@@ -321,8 +323,8 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
                       <Cutline segments={story.cutline} tail={tail} className="wire__cutline wire__cutline--joined" />
                       <div className="wire__split">
                         {splitClauses(story.cutline).map((clause, i, all) => {
-                          const id = clause.find((seg) => seg.playerId)?.playerId
-                          const note = notes.get(id)
+                          // A combined card's clause names several players: each keeps his note.
+                          const note = clause.filter((seg) => seg.playerId).map((seg) => notes.get(seg.playerId)).filter(Boolean).join(' ')
                           return (
                             <Cutline
                               key={i}
