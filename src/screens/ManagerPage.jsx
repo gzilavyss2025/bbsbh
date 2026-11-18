@@ -55,9 +55,11 @@ async function loadManager(id) {
 }
 
 // "2015 San Diego Padres": the stints he managed only as interim, for the staff card.
+// A season he also held the full job there counts as full, as in the staff index.
 function interimLabel(stints) {
+  const full = new Set(stints.filter((s) => s.isManager && !/interim/i.test(s.job)).map((s) => `${s.teamId}:${s.season}`))
   const seen = new Set()
-  for (const s of stints) if (s.isManager && /interim/i.test(s.job)) seen.add(`${s.season} ${s.teamName}`)
+  for (const s of stints) if (s.isManager && /interim/i.test(s.job) && !full.has(`${s.teamId}:${s.season}`)) seen.add(`${s.season} ${s.teamName}`)
   return [...seen].join(', ')
 }
 
@@ -115,7 +117,7 @@ function ManagerHero({ id, name, stints, record, awards, teamId }) {
   // Not on a staff now: the last club he managed, not his last coaching job.
   const club = active ?? lastManagerialStint(stints) ?? stints[stints.length - 1]
   const facts = [
-    { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <TeamLink id={club.teamId}>{club.teamName}</TeamLink> : DASH },
+    { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <><TeamLink id={club.teamId}>{club.teamName}</TeamLink>{active ? '' : `, ${club.season}`}</> : DASH },
     { key: 'rec', label: 'Record', value: w + l > 0 ? `${w}-${l} ${rate3(w / (w + l))}` : DASH },
     { key: 'seasons', label: 'Seasons managed', value: seasons || DASH },
     { key: 'titles', label: 'Titles', value: titles || DASH },
