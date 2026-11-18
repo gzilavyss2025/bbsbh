@@ -30,7 +30,7 @@ const [leadoff, walkoff, tying] = decodePlateAppearances(shard)
 const only = (search, pa) => matcher(parseQuery(search))(pa)
 
 test('a v2 shard keeps runs on the pitch, the batted-ball type, and lineups for its own games', () => {
-  assert.equal(shard.v, 2)
+  assert.equal(shard.v, 3, 'v3 (2026-11-18) added pitch speed and height')
   assert.deepEqual(shard.order, { 1: { 10: 1, 11: 4 } }, 'a lineup for a game not in the shard is dropped')
   assert.equal(walkoff.marginAfter, 1)
   assert.equal(walkoff.bbType, 'fly_ball')
@@ -73,15 +73,15 @@ test('moments: walk-off, go-ahead, tying, and the game\'s first and last PA', ()
   assert.deepEqual(momentValues({ marginLast: 1, marginAfter: 2 }), [], 'adding to a lead is no moment')
 })
 
-test('count groups read the last pitch\'s count, from the batter\'s side; a full count is in none', () => {
+test('count groups read the last pitch\'s count, from the batter\'s side; a full count is even (Gary, 2026-11-18)', () => {
   assert.equal(countGroup([2, 1]), 'ahead')
   assert.equal(countGroup([1, 1]), 'even')
   assert.equal(countGroup([0, 0]), 'even')
   assert.equal(countGroup([1, 2]), 'behind')
-  assert.equal(countGroup([3, 2]), null)
+  assert.equal(countGroup([3, 2]), 'even')
   assert.equal(countGroup([null, null]), null)
-  assert.ok(only('?cnt=ahead', tying))
-  assert.ok(!only('?cnt=even', tying), 'passing through 0-0 does not make a PA even')
+  assert.ok(only('?fc=ahead', tying))
+  assert.ok(!only('?fc=even', tying), 'passing through 0-0 does not make a PA even')
   assert.ok(only('?cnt=0-0', tying), 'a plain count still means passed through')
 })
 
@@ -98,12 +98,13 @@ test('batted ball type, batting slot, month, and home or road', () => {
 
 test('a card needing store v2 is blocked until every searched month is rebuilt', () => {
   const index = mergeIndex(null, 2026, '06', shard, [], 'x')
-  assert.equal(index.seasons[2026].months['06'].v, 2)
+  assert.equal(index.seasons[2026].months['06'].v, 3)
   index.seasons[2025] = { months: { '06': { through: '2025-06-30', pitches: 1, pas: 1 } } }
-  assert.equal(storeVersion(index, [2026]), 2)
+  assert.equal(storeVersion(index, [2026]), 3)
   assert.equal(storeVersion(index, [2025, 2026]), 1, 'a month with no v was built as v1')
-  assert.deepEqual(unsupported(2025, 1).filter((b) => b.rebuild).map((b) => b.key), ['mom', 'bb', 'slot'])
-  assert.deepEqual(unsupported(2025, 2), [])
+  assert.deepEqual(unsupported(2025, 1).filter((b) => b.rebuild).map((b) => b.key), ['mom', 'bb', 'slot', 'ps'])
+  assert.deepEqual(unsupported(2025, 2).map((b) => b.key), ['ps'], 'a v2 month waits for its v3 rebuild')
+  assert.deepEqual(unsupported(2025, 3), [])
   assert.deepEqual(unsupported(2005, 2).find((b) => b.key === 'bb'), { key: 'bb', label: 'Batted ball type', since: 2015 }, 'a season before the card reads its since year')
   for (const k of ['sc', 'mom', 'bb', 'slot', 'mon', 'ha']) assert.ok(FILTER_BY_KEY[k], k)
 })

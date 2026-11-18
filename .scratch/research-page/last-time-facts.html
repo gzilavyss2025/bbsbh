@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last time: three facts</title>
+<style>
+  :root { --paper:#f3ead6; --card:#fbf6ea; --ink:#1d2a44; --pencil:#5b6170; --rule:#c9b98f; }
+  body { margin:0; background:#e6dcc4; color:var(--ink); font:15px/1.4 "Courier New", monospace; padding:24px 16px; }
+  h1 { font:700 18px/1.2 Arial Narrow, Arial, sans-serif; text-transform:uppercase; letter-spacing:.04em; }
+  h2 { font:700 13px Arial, sans-serif; text-transform:uppercase; color:var(--pencil); margin:28px 0 8px; }
+  .row { display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start; }
+  .frame { background:var(--paper); border:1px solid var(--rule); padding:16px; }
+  .phone { width:390px; max-width:100%; box-sizing:border-box; }
+  .desk { width:760px; max-width:100%; box-sizing:border-box; }
+  .card { background:var(--card); border:2px solid var(--ink); padding:12px 14px; }
+  .label { font:700 11px Arial, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--pencil); }
+  .facts { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:8px 0 12px; border-bottom:1px solid var(--rule); padding-bottom:10px; }
+  .fact .v { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .answer { font-size:20px; font-weight:700; margin:0; }
+  .summary { color:var(--pencil); font-size:13px; margin:6px 0 0; }
+  .desk .facts { grid-template-columns:repeat(3, max-content); gap:40px; }
+  .note { max-width:760px; color:var(--pencil); font-size:13px; }
+</style>
+</head>
+<body>
+<h1>"Last time" answer: three labeled facts on top</h1>
+<p class="note">Mock-up only, not built. Example query: home run, batter ahead, reliever. The three facts sit above the current answer line. No sentence. Times since 2015 counts every match in the Savant seasons (2015 on).</p>
+
+<h2>Phone · 390 px</h2>
+<div class="row">
+  <div class="frame phone">
+    <div class="card">
+      <div class="label">Last time</div>
+      <div class="facts">
+        <div class="fact"><div class="label">Last</div><div class="v">Oct 24, 2026</div></div>
+        <div class="fact"><div class="label">Before that</div><div class="v">Oct 15, 2026</div></div>
+        <div class="fact"><div class="label">Times since 2015</div><div class="v">8,412</div></div>
+      </div>
+      <p class="answer">Sal Frelick off Ian Seymour, Oct 24</p>
+      <p class="summary">8,412 matches · .000/.000/4.000</p>
+    </div>
+  </div>
+</div>
+
+<h2>Desktop</h2>
+<div class="row">
+  <div class="frame desk">
+    <div class="card">
+      <div class="label">Last time</div>
+      <div class="facts">
+        <div class="fact"><div class="label">Last</div><div class="v">Oct 24, 2026</div></div>
+        <div class="fact"><div class="label">Before that</div><div class="v">Oct 15, 2026</div></div>
+        <div class="fact"><div class="label">Times since 2015</div><div class="v">8,412</div></div>
+      </div>
+      <p class="answer">Sal Frelick off Ian Seymour, Oct 24</p>
+      <p class="summary">8,412 matches</p>
+    </div>
+  </div>
+</div>
+<p class="note">Open points for Gary: (1) with a Seasons range that reaches 1961, the third fact would read "Times since 1961"; (2) a "Last time" search that was stopped part-way has no true total, so the third fact would read "at least N" or be left off.</p>
+</body>
+</html>

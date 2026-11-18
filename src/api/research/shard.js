@@ -12,7 +12,7 @@
 //     people: { id: 'First Last' }          every batter and pitcher in the shard
 //     order:  { gamePk: { batterId: slot } } batting order slot 1-9, from the MLB box score (v2)
 //     dict:   { pt: [...], call: [...], ev: ['', ...], bb: [...] }
-//     cols:   { g, ab, pn, b, s, o, r, i, t, bat, pit, h, pt, call, ev, px, hx, hy, ls, la, sd, rs, bb } }
+//     cols:   { g, ab, pn, b, s, o, r, i, t, bat, pit, h, pt, call, ev, px, hx, hy, ls, la, sd, rs, bb, ps, pz } }
 //
 //   g    index into games          ab   at_bat_number      pn  pitch_number
 //   b/s  balls/strikes BEFORE the pitch                    o   outs when up
@@ -22,8 +22,9 @@
 //        see gen-spray.mjs), ls launch_speed (mph), la launch_angle, sd bat_score_diff
 //   rs   runs the batting club scored on the pitch (post_bat_score - bat_score)   (v2)
 //   bb   bb_type, an index into dict.bb (ground_ball, line_drive, fly_ball, popup) (v2)
+//   ps   release_speed (mph), pz plate_z (ft above the ground)                     (v3)
 //
-// VERSIONS. v2 (#3140) added rs, bb and order. A v1 shard still decodes: those read as
+// VERSIONS. v3 (Gary, 2026-11-18) added ps and pz. v2 (#3140) added rs, bb and order. A v1 shard still decodes: those read as
 // null, and the cards that need them are blocked for its season (filters.js `v`).
 //
 // A pitch-clock row with no plate_x is dropped unless it ends the plate appearance
@@ -40,7 +41,7 @@ import { NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
 // inning without a result. Same set as scout/headToHead.js's NOT_A_PA.
 const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 
-export const SHARD_VERSION = 2
+export const SHARD_VERSION = 3
 
 // Could this play have made the third out? Then a game that ends on it with the home club
 // behind is a loss, not a walk-off the scores missed (decodePlateAppearances runsAt).
@@ -52,8 +53,8 @@ const thirdOut = (ev, outs) => ev === 'triple_play' || (ONE_OUT.has(ev) && outs 
 // (null, which `>= 0` would read as 0).
 export const countBit = (balls, strikes) => (Number.isInteger(balls) && Number.isInteger(strikes) && balls >= 0 && balls <= 3 && strikes >= 0 && strikes <= 2 ? 1 << (balls * 3 + strikes) : 0)
 
-const SCALE = { px: 100, hx: 100, hy: 100, ls: 10 }
-const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd', 'rs', 'bb']
+const SCALE = { px: 100, hx: 100, hy: 100, ls: 10, ps: 10, pz: 100 }
+const COLS = ['g', 'ab', 'pn', 'b', 's', 'o', 'r', 'i', 't', 'bat', 'pit', 'h', 'pt', 'call', 'ev', 'px', 'hx', 'hy', 'ls', 'la', 'sd', 'rs', 'bb', 'ps', 'pz']
 
 // Runs the batting club scored on a pitch; null with either score missing.
 const runsOn = (r) => {
@@ -120,6 +121,8 @@ export function encodeMonth(rows, { season, month, names = {}, order = {} }) {
       sd: numOrNull(r.bat_score_diff),
       rs: runsOn(r),
       bb: code('bb', r.bb_type),
+      ps: scaled(r.release_speed, 'ps'),
+      pz: scaled(r.plate_z, 'pz'),
     }
     for (const c of COLS) cols[c].push(row[c])
     for (const id of [row.bat, row.pit]) if (id != null && names[id]) people[id] = names[id]
@@ -238,6 +241,9 @@ export function decodePlateAppearances(shard) {
     cur.runs = rsj == null || cur.runs == null ? null : cur.runs + rsj
     cur.pitchType = cols.pt[j] == null ? null : dict.pt[cols.pt[j]]
     cur.px = unscale('px', cols.px[j])
+    // The last pitch's speed and height (v3); null on an older shard.
+    cur.pitchSpeed = unscale('ps', cols.ps?.[j] ?? null)
+    cur.pz = unscale('pz', cols.pz?.[j] ?? null)
     const ev = dict.ev[cols.ev[j]]
     if (ev && !NOT_A_PA.has(ev)) {
       cur.event = ev
@@ -270,5 +276,29 @@ export function decodePlateAppearances(shard) {
     if (r != null && cols.sd[j] != null) finals.set(games[cols.g[j]][0], (cols.t[j] === 1 ? 1 : -1) * (cols.sd[j] + r))
   }
   for (const pa of pas) if (pa.last) pa.finalMargin = finals.get(pa.gamePk) ?? null
+  return markGameRoles(pas)
+}
+
+// THE PITCHER'S ROLE AND TIMES FACING HIM (Gary, 2026-11-18), from the PAs alone, oldest
+// first: `role` 'SP' for the first pitcher a fielding club used in the game, else 'RP';
+// `tto` the nth time this batter faces this pitcher in the game (Baseball-Reference's
+// "times facing"). A starter pulled mid-PA before any PA ended reads as a reliever's PA.
+export function markGameRoles(pas) {
+  let game = null
+  let starters = null
+  let faced = null
+  for (const pa of pas) {
+    if (pa.gamePk !== game) {
+      game = pa.gamePk
+      starters = new Map()
+      faced = new Map()
+    }
+    if (!starters.has(pa.fieldTeam)) starters.set(pa.fieldTeam, pa.pitcher)
+    pa.role = starters.get(pa.fieldTeam) === pa.pitcher ? 'SP' : 'RP'
+    // Person ids are under 10 million, so one number keys the pair.
+    const k = pa.pitcher * 1e7 + pa.batter
+    pa.tto = (faced.get(k) ?? 0) + 1
+    faced.set(k, pa.tto)
+  }
   return pas
 }

@@ -87,7 +87,7 @@ test('pitch-tracking cards are blocked for any range that starts before 2015', (
   for (const k of ['pt', 'loc', 'fld', 'bb']) assert.ok(keys.includes(k), k)
   assert.ok(!keys.includes('cnt'))
   assert.ok(!keys.includes('mom'))
-  assert.deepEqual(unsupported(2015, 2), [])
+  assert.deepEqual(unsupported(2015, 3), [])
 })
 
 test('history seasons are searched only by a range that reaches them', () => {

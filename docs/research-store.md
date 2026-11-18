@@ -76,6 +76,11 @@ in). A rebuilt month keeps the lineups of the shard on file and fetches only new
 box scores. The index records each month's `v`; a card with `v: 2` is blocked, and named
 "not built yet" in the coverage line, while any searched month is older.
 
+**Store v3** (2026-11-18). Adds `ps` (Savant `release_speed`, mph) and `pz` (`plate_z`, feet)
+for every pitch. The Pitch speed card (`v: 3`) stays blocked until every searched month is
+rebuilt; the nightly run rebuilds only its recent window, so older months need a hand run of
+`research-store.yml`. `pz` has no card yet: it is there for a pitch-by-pitch mode.
+
 ## Game mode (#3137, Gary 2026-11-16/17)
 
 `mode=game` groups plays by game and batting club (`src/api/research/games.js`) and tests that

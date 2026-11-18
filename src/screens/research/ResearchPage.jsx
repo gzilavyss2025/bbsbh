@@ -103,6 +103,11 @@ function pillsOf(q, people, clubName) {
     const labels = HANDS[k] ?? Object.fromEntries(FILTER_BY_KEY[k].options)
     return `${c.inv ? 'Not ' : ''}${c.vals.map((v) => labels[v]).join(' / ')}`
   })
+  if (q.mode === 'play') {
+    if (q.ranges?.ev) out.push(`EV ${rangeWords(q.ranges.ev)} mph`)
+    if (q.ranges?.ps) out.push(`Pitch ${rangeWords(q.ranges.ps)} mph`)
+    if (q.ranges?.la) out.push(`LA ${rangeWords(q.ranges.la)}°`)
+  }
   if (q.batter) out.push(people[q.batter] ?? 'Batter')
   if (q.pitcher) out.push(`vs ${people[q.pitcher] ?? 'pitcher'}`)
   if (q.team) out.push(`${clubName(q.team)} batting`)
@@ -136,7 +141,7 @@ export function ResearchPage() {
   const streak = q.mode === 'streak'
   // The Win prob toggle is set but a searched season has no side file yet (#3141).
   const wpBlocked = q.wp && !game && !streak && !winProb
-  const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key]) && (streak ? STREAK_CHIPS.includes(b.key) : !game || b.total || GAME_CHIPS.includes(b.key)))
+  const shownBlocked = blocked.filter((b) => (b.since || q.chips[b.key] || q.ranges?.[b.key]) && (streak ? STREAK_CHIPS.includes(b.key) : !game || b.total || GAME_CHIPS.includes(b.key)))
   const asks = game ? ASKS.filter((x) => x.key !== 'what') : ASKS
   const data = head
   const people = run?.people ?? head?.people ?? {}

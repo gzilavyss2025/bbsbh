@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
-import { rateLeaders } from '../../../api/research/answer.js'
+import { rateLeaders, shareText } from '../../../api/research/answer.js'
+import { fetchGameFeed } from '../../../api/game/fetch.js'
 import { ASKS, parseMin, resultName } from '../../../api/research/filters.js'
 import { rate3 } from '../../../api/person/shared.js'
 import { winProbTotals } from '../../../api/research/winprob.js'
@@ -29,6 +30,49 @@ const pct = (r) => `${(100 * r).toFixed(1)}%`
 const signed = (x, places) => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(places)}`
 const wpLine = (m) => (m.wpa == null ? '' : `WPA ${signed(m.wpa, 3)} · RE24 ${signed(m.re24, 2)}${m.li == null ? '' : ` · LI ${m.li.toFixed(2)}`}`)
 const boxHref = (m) => gamePath(m.date, m.away, m.home, 'boxscore', m.gameNumber)
+// The match's half-inning in the play-by-play (the innings viewer), where its at-bat sits.
+const halfHref = (m) => gamePath(m.date, m.away, m.home, `${m.top ? 'top' : 'bottom'}${m.inning}`, m.gameNumber)
+const mph = (m) => (m.launchSpeed == null ? '—' : m.launchSpeed.toFixed(1))
+const deg = (m) => (m.launchAngle == null ? '—' : `${m.launchAngle}°`)
+
+// THE PITCH'S VIDEO (Gary, 2026-11-18): Baseball Savant's single-pitch clip page for the PA's
+// last pitch, the same link the pitch log's game detail opens. The clip rules
+// (expresslane/clipIndex.js): Savant has clips from 2016, none for the All-Star Game, and
+// the lookup is one request on one tap, never prefetched. Savant's at_bat_number is the
+// feed's atBatIndex + 1. The tab opens on the tap (a popup blocker allows that), then goes
+// to the clip once the feed answers; with no playId it closes.
+const CLIP_FIELDS = 'liveData,plays,allPlays,about,atBatIndex,playEvents,isPitch,playId'
+const hasClip = (m) => !m.history && m.date >= '2016' && m.gameType !== 'A'
+async function openClip(m) {
+  const tab = window.open('', '_blank')
+  // The clip page gets no handle back to this tab.
+  if (tab) tab.opener = null
+  try {
+    const feed = await fetchGameFeed(m.gamePk, { fields: CLIP_FIELDS })
+    const play = feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === m.atBat - 1)
+    const id = play?.playEvents?.findLast((e) => e.isPitch)?.playId
+    if (!id) throw new Error('no playId')
+    if (tab) tab.location.href = `https://baseballsavant.mlb.com/sporty-videos?playId=${id}`
+  } catch {
+    tab?.close()
+  }
+}
+
+// The match's links beyond the box score: its half in the play-by-play, and its video.
+function PlayLinks({ m }) {
+  const link = useRouteLink()
+  return (
+    <span className="research__links">
+      <a {...link(halfHref(m))}>Play-by-play</a>
+      {hasClip(m) && (
+        <>
+          {' · '}
+          <a href="#video" onClick={(e) => { e.preventDefault(); openClip(m) }}>Video</a>
+        </>
+      )}
+    </span>
+  )
+}
 
 // A name opens the player page the app's own way (PlayerLink: the canonical
 // /player/{name-id} address, in-app navigation, the desktop hover card).
@@ -71,7 +115,9 @@ function summary(a, ask, q, wp) {
   const n = a.matches.length
   const parts = []
   if (ask !== 'often') parts.push(plural(n, 'match', 'matches'))
-  if (a.base) parts.push(`${((100 * n) / a.base).toFixed(1)}% of ${plural(a.base, 'PA', 'PAs')} with these filters and any result`)
+  // Under 50 PAs the share reads as counts (answer.js shareText); the league rate beside it.
+  if (a.base) parts.push(`${shareText(n, a.base)} with these filters and any result`)
+  if (ask === 'often' && a.league?.base) parts.push(`League: ${pct(a.league.n / a.league.base)}`)
   const kinds = new Set(a.matches.map((m) => m.event)).size
   const t = a.totals
   if (kinds > 1) parts.push(`${rate3(t.avg)}/${rate3(t.obp)}/${rate3(t.slg)}`)
@@ -142,6 +188,8 @@ function Rows({ rows, people, wp }) {
           <span className="research__result">{resultName(m.event)}</span>
           <span><Name id={m.batter} people={people} /> v <Name id={m.pitcher} people={people} /> · {m.top ? '▲' : '▼'}{m.inning}</span>
           <span className="research__ord">{nth(m.ordinal)} in {m.date.slice(0, 4)}</span>
+          {m.launchSpeed != null && <span className="research__ev">{mph(m)} mph · {deg(m)}</span>}
+          <PlayLinks m={m} />
           {wp && m.wpa != null && <span className="research__wp">{wpLine(m)}</span>}
         </li>
       ))}
@@ -152,7 +200,7 @@ function Rows({ rows, people, wp }) {
 function MatchTable({ rows, people, wp }) {
   return (
     <Table label="Matches" className="research__table">
-      <thead><tr><th>Date</th><th>Batter</th><th>Pitcher</th><th>Result</th><th>Inn</th><th className="research__num">His</th>{wp && <><th className="research__num">WPA</th><th className="research__num">RE24</th><th className="research__num">LI</th></>}</tr></thead>
+      <thead><tr><th>Date</th><th>Batter</th><th>Pitcher</th><th>Result</th><th>Inn</th><th className="research__num">His</th><th className="research__num">EV</th><th className="research__num">LA</th><th>Links</th>{wp && <><th className="research__num">WPA</th><th className="research__num">RE24</th><th className="research__num">LI</th></>}</tr></thead>
       <tbody>
         {rows.map((m) => (
           <tr key={m.key}>
@@ -162,6 +210,9 @@ function MatchTable({ rows, people, wp }) {
             <td>{resultName(m.event)}</td>
             <td>{m.top ? '▲' : '▼'}{m.inning}</td>
             <td className="research__num">{nth(m.ordinal)} in {m.date.slice(0, 4)}</td>
+            <td className="research__num">{mph(m)}</td>
+            <td className="research__num">{deg(m)}</td>
+            <td><PlayLinks m={m} /></td>
             {wp && <><td className="research__num">{m.wpa == null ? '—' : signed(m.wpa, 3)}</td><td className="research__num">{m.re24 == null ? '—' : signed(m.re24, 2)}</td><td className="research__num">{m.li == null ? '—' : m.li.toFixed(2)}</td></>}
           </tr>
         ))}
