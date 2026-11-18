@@ -1,8 +1,8 @@
 // One club's run of same-kind, one-player moves on one day reads as one card
-// (src/api/transactions/batch.js). Rows are the shape the wire's stories carry.
+// (src/components/transactions/combineMoves.js). Rows are the shape the wire's stories carry.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { combineBatches } from '../src/api/transactions/batch.js'
+import { combineBatches } from '../src/components/transactions/combineMoves.js'
 
 const solo = (id, teamId, verb, pos, name, playerId, tail) => ({
   id,

@@ -1,4 +1,5 @@
 // One club's run of same-kind, one-player moves on one day, read as ONE card.
+// Lives beside MoveRow, its one caller: src/api/transactions/ is at its file cap.
 //
 // A club calling up five minor leaguers files five rows, and the wire drew five
 // near-identical lines ("Selected the contract of LHP Spencer Giesting from Reno

@@ -1423,10 +1423,6 @@
       "class": "spoiler-free",
       "why": "Completed trades and their dates carry no score — as spoiler-free as transactions/team.js."
     },
-    "transactions/batch.js": {
-      "class": "spoiler-free",
-      "why": "Folds a club-day's one-player stories of the same action into one story for the wire's rows. Pure, over finished stories: roster moves, clubs and dates only, no score."
-    },
     "transactions/clubFeed.js": {
       "class": "spoiler-free",
       "why": "The club Transactions card's live window, laid over the nightly per-club file so a move filed today reaches the club's own page as fast as it reaches the home slate's wire. Runs the generator's own bucket/de-dupe/filter/group steps over live /transactions rows and merges by day. Roster moves, clubs and dates only — no linescore, no game feed, no score anywhere on the path."

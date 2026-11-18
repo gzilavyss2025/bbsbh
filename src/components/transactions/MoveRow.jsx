@@ -1,5 +1,5 @@
 import { Component, Fragment, Suspense, useMemo } from 'react'
-import { combineBatches } from '../../api/transactions/batch.js'
+import { combineBatches } from './combineMoves.js'
 import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { reportCrash } from '../../lib/crash/report.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -112,7 +112,7 @@ export function flattenDays(days) {
   for (const day of days ?? []) {
     if (!day.stories?.length) continue
     items.push({ kind: 'date', key: `d-${day.date}`, date: day.date, count: day.stories.length })
-    // A club's run of same-kind one-player moves reads as one card (batch.js).
+    // A club's run of same-kind one-player moves reads as one card (combineMoves.js).
     for (const story of combineBatches(day.stories)) {
       items.push({ kind: 'story', key: story.id, story, date: day.date })
     }
