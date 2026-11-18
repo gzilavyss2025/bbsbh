@@ -155,7 +155,6 @@ const S14 = {
 const S15 = {
   trrank__detail: { file: 'situational-records/66a-detail.css', gap: 'loose', sites: 2 },
   'standings-ctrl': { file: '30-standings.css', gap: 'snug' },
-  coachtree__node: { file: '39-manager-page.css', gap: 'tight' },
 }
 
 // S16: `.colorlab__logodrop` keeps its align-items, flex and max-width.

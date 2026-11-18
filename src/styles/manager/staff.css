@@ -1,0 +1,89 @@
+/* The manager page's "His staff" card, imported by components/team/ManagerStaff.jsx
+   (split out of 39-manager-page.css, which sits at the file-size cap). */
+/* His staff (ManagerStaff.jsx): one band per group, a key column on the left
+   (a big season count, or a word) and the names wrapping beside it. */
+/* layout-exempt: the key column beside the names, two fixed parts */
+.mgrstaff__band {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: var(--space-2h);
+  align-items: start;
+  padding: var(--space-2h) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.mgrstaff__band:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.mgrstaff__later {
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  padding-bottom: var(--space-3);
+}
+.mgrstaff__later + .mgrstaff__band {
+  border-top: none;
+}
+.mgrstaff__key {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.mgrstaff__key--word {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-tight);
+  padding-top: var(--space-2);
+}
+.mgrstaff__key small {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* layout-exempt: names wrap as chips */
+.mgrstaff__names {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h);
+}
+.mgrstaff__name {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2h);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-decoration: none;
+}
+.mgrstaff__name--mgr {
+  background: var(--marker);
+  color: var(--text-on-bright);
+}
+.mgrstaff__names--later {
+  gap: var(--space-2) var(--space-4);
+}
+.mgrstaff__laterrec {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.mgrstaff__band--interim .mgrstaff__name:not(.mgrstaff__name--mgr) {
+  border-color: var(--border-hairline);
+  background: transparent;
+  color: var(--text-caption);
+}
+@media (min-width: 740px) {
+  .mgrstaff__name {
+    min-height: var(--space-8);
+  }
+}

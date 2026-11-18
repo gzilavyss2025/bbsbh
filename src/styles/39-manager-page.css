@@ -2,38 +2,75 @@
    ManagerPage.jsx — mirrors the umpire page's card layout (.umpage__card
    above), with a photo header like the player page. No SealBox: a coaching
    career/awards carry no live score. */
-.mgrpage__head {
+/* THE HERO: the player page's top card in miniature (player-next/page.css). */
+/* layout-exempt: photo beside the identity, two fixed parts */
+.mgrpage__id {
   display: flex;
+  gap: var(--space-3h);
   align-items: center;
-  gap: var(--space-4);
-  margin: 6px 0 14px;
+  padding: var(--space-3h);
 }
-.mgrpage__shot {
+.shot.mgrpage__shot {
   flex: none;
-  /* No size override — same page-header treatment as the player page's
-     `.shot` (base rule, --shot-xl), the biggest rung in the app. */
+  width: 96px;
+  height: 112px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
 }
-.mgrpage__ident {
+.mgrpage__who {
   min-width: 0;
 }
-.mgrpage__name {
+.mgrpage__role {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-  color: var(--text-heading);
+  color: var(--clay);
+  font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display);
 }
-.mgrpage__note {
-  margin: 4px 0 0;
-  font-size: var(--fs-small);
-  color: var(--text-caption);
+.mgrpage__name {
+  margin: var(--space-1) 0 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.mgrpage__club {
+  margin: var(--space-2) 0 0;
+}
+.factgrid--strip.mgrpage__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.mgrpage__facts .fact__value {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+}
+.mgrpage__facts .fact__value a {
+  color: inherit;
+  text-decoration: none;
+}
+@media (min-width: 740px) {
+  .mgrpage__id {
+    gap: var(--space-5);
+    padding: var(--space-4);
+  }
+  /* layout-exempt: the fact strip's four columns at the wide step */
+  .factgrid--strip.mgrpage__facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .shot.mgrpage__shot {
+    width: 112px;
+    height: 132px;
+  }
+  .mgrpage__name {
+    font-size: var(--fs-hero-xl);
+  }
 }
 
 .mgrpage__card {
   padding: var(--space-3);
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 .mgrpage__cardtitle {
   margin: 0 0 10px;
@@ -108,11 +145,12 @@
   flex-direction: column;
   gap: var(--space-2h);
 }
+/* layout-exempt: a two-line row, club and W-L over years and pct */
 .mgrpage__recordrow {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1h) var(--space-2h);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
   padding-top: var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
@@ -121,6 +159,8 @@
   border-top: none;
 }
 .mgrpage__recordteam {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -139,8 +179,19 @@
   font-size: var(--fs-compact);
   color: var(--text-caption);
 }
+.mgrpage__recordmeta {
+  grid-column: 1;
+  grid-row: 2;
+  /* lines up under the name: the 28px logo plus its 8px gap */
+  padding-left: calc(var(--space-8) + var(--space-1));
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
 .mgrpage__recordwl {
-  margin-left: auto;
+  grid-column: 2;
+  grid-row: 1;
+  text-align: right;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-ui);
@@ -148,14 +199,18 @@
   color: var(--text-heading);
 }
 .mgrpage__recordpct {
-  flex: none;
+  grid-column: 2;
+  grid-row: 2;
+  text-align: right;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .mgrpage__recordcaveat {
-  margin-left: auto;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  text-align: right;
   font-size: var(--fs-compact);
   font-style: italic;
   color: var(--text-muted);
@@ -489,56 +544,3 @@
   font-size: var(--fs-cell);
 }
 
-/* Coaching tree: manager box, short stem, staff wrapping below. Plain flex. */
-.coachtree__top,
-.coachtree__node {
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-}
-.coachtree__top {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-inset);
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.coachtree__stem {
-  width: 0;
-  height: var(--space-3);
-  margin: 0 auto;
-  border-left: var(--bw-hair) solid var(--border-hairline);
-}
-.coachtree__row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2);
-}
-.coachtree__node {
-  padding: var(--space-2) var(--space-2h);
-  font-size: var(--fs-small);
-}
-.coachtree__name {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-.coachtree__meta {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.coachtree__more {
-  margin-top: var(--space-2);
-  text-align: center;
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-}
-.coachtree__more > summary { cursor: pointer; margin-bottom: var(--space-2); }

@@ -82,7 +82,9 @@ function usePlayerLink(id, displayName) {
 // almost no caller has to say anything. A caller whose children are ART (a
 // headshot, a club mark) has no string to borrow and should pass `name`
 // explicitly; without it the link still works, just at the bare-id address.
-export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
+// `hover={false}` drops the desktop hover card: for a name whose season line
+// would say nothing, such as a coach on a manager's staff.
+export function PlayerLink({ id, name, className = '', ariaLabel, hover = true, children }) {
   const navigate = useNav()
   const displayName = name ?? nameFromChildren(children)
   const { path, hoverProps } = usePlayerLink(id, displayName)
@@ -95,7 +97,7 @@ export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
       className={`plink ${className}`}
       aria-label={ariaLabel}
       onClick={() => navigate(path)}
-      {...hoverProps}
+      {...(hover ? hoverProps : null)}
     >
       {children}
     </button>

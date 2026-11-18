@@ -13,12 +13,14 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
-import { CoachingTree } from '../components/team/CoachingTree.jsx'
+import { ManagerStaff } from '../components/team/ManagerStaff.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
+import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
+import { Fact, DASH } from './player/parts.jsx'
 import { rate3 } from '../api/person/shared.js'
 
 // One person's career coaching page: a header (photo, current role or "last
@@ -51,22 +53,15 @@ async function loadManager(id) {
   return { bio, awards, stints, staff, generatedAt, playing, playingTeams }
 }
 
-function seasonLabel(startSeason, endSeason) {
-  return startSeason === endSeason ? String(startSeason) : `${startSeason}–${endSeason}`
+// "2015 San Diego Padres": the stints he managed only as interim, for the staff card.
+function interimLabel(stints) {
+  const seen = new Set()
+  for (const s of stints) if (s.isManager && /interim/i.test(s.job)) seen.add(`${s.season} ${s.teamName}`)
+  return [...seen].join(', ')
 }
 
-// The header's role/team line: this year's role if he's currently on a
-// staff, else "Last managed {team}, {year}." off his most recent managerial
-// stint, else (a career assistant who never managed) "Last coached {team},
-// {year}." so the page never reads as a dead end.
-function roleLine(stints) {
-  const active = currentStint(stints)
-  if (active) return `${active.job} · ${active.teamName}`
-  const last = stints[stints.length - 1]
-  if (!last) return ''
-  const lastMgr = lastManagerialStint(stints)
-  if (lastMgr) return `Last managed ${lastMgr.teamName}, ${lastMgr.season}.`
-  return `Last coached ${last.teamName}, ${last.season}.`
+function seasonLabel(startSeason, endSeason) {
+  return startSeason === endSeason ? String(startSeason) : `${startSeason}–${endSeason}`
 }
 
 export function ManagerPage({ id }) {
@@ -88,26 +83,67 @@ export function ManagerPage({ id }) {
       <SiteHeader />
       <BackBtn onClick={back} />
 
-      <header className="mgrpage__head">
-        <Headshot personId={id} name={name} teamId={headshotTeamId} coach className="mgrpage__shot" />
-        <div className="mgrpage__ident">
-          <h1 className="mgrpage__name">{name}</h1>
-          <p className="mgrpage__note">{roleLine(stints)}</p>
-        </div>
-      </header>
+      <Stack gap="section">
+        <ManagerHero id={id} name={name} stints={stints} record={record} awards={awards} teamId={headshotTeamId} />
 
-      {awards.length > 0 && <AwardsStrip awards={awards} />}
+        {awards.length > 0 && <AwardsStrip awards={awards} />}
 
-      {playing && <PlayingCareer playing={playing} />}
+        {playing && <PlayingCareer playing={playing} />}
 
-      {playingTeams?.length > 0 && <PlayingTeams entries={playingTeams} />}
+        {playingTeams?.length > 0 && <PlayingTeams entries={playingTeams} />}
 
-      {record.length > 0 && <RecordTable rows={record} />}
+        {record.length > 0 && <RecordTable rows={record} />}
 
-      <CoachingTree name={name} staff={staff} />
+        <ManagerStaff staff={staff} interimLabel={interimLabel(stints)} />
 
-      {stints.length > 0 && <CoachingTimeline stints={stints} />}
+        {stints.length > 0 && <CoachingTimeline stints={stints} />}
+      </Stack>
     </div>
+  )
+}
+
+// The page's top card, the player page's hero in miniature: a squared photo
+// beside the role, the name and the club's logo, then a strip of the four
+// facts a reader comes for. Titles counts World Series wins from his awards.
+function ManagerHero({ id, name, stints, record, awards, teamId }) {
+  const active = currentStint(stints)
+  const w = record.reduce((t, r) => t + (r.w ?? 0), 0)
+  const l = record.reduce((t, r) => t + (r.l ?? 0), 0)
+  const pct = w + l > 0 ? (w / (w + l)).toFixed(3).replace(/^0/, '') : null
+  const seasons = new Set(stints.filter((s) => s.isManager).map((s) => s.season)).size
+  const titles = awards.filter((a) => /world series champion/i.test(a.name ?? '')).length
+  const facts = [
+    (() => {
+      // Not on a staff now: the last club he managed, not his last coaching job.
+      const club = active ?? lastManagerialStint(stints) ?? stints[stints.length - 1]
+      return { key: 'team', label: active ? 'Team' : 'Last team', value: club ? <TeamLink id={club.teamId}>{club.teamName}</TeamLink> : DASH }
+    })(),
+    { key: 'rec', label: 'Record', value: w + l > 0 ? `${w}-${l} ${pct}` : DASH },
+    { key: 'seasons', label: 'Seasons managed', value: seasons || DASH },
+    { key: 'titles', label: 'Titles', value: titles || DASH },
+  ]
+  return (
+    <Card as="div" frame="stamped" body="flush" className="mgrpage__hero">
+      <div className="mgrpage__id">
+        <Headshot personId={id} name={name} teamId={teamId} coach className="mgrpage__shot" />
+        <div className="mgrpage__who">
+          <p className="mgrpage__role">{active?.job ?? (seasons ? 'Former manager' : 'Coach')}</p>
+          <h1 className="mgrpage__name">{name}</h1>
+          {teamId && (
+            <p className="mgrpage__club">
+              <TeamLink id={teamId}>
+                <TeamLogo teamId={teamId} name={active?.teamName ?? ''} size={28} />
+              </TeamLink>
+            </p>
+          )}
+        </div>
+      </div>
+      <FactGrid look="strip" as="div" className="mgrpage__facts">
+        {facts.map((f) => (
+          <Fact key={f.key} label={f.label} value={f.value} />
+        ))}
+      </FactGrid>
+    </Card>
   )
 }
 
@@ -117,8 +153,7 @@ export function ManagerPage({ id }) {
 function AwardsStrip({ awards }) {
   const sorted = [...awards].sort((a, b) => (b.season ?? 0) - (a.season ?? 0))
   return (
-    <Card body="flush" className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">Awards</h2>
+    <Card frame="stamped" label="Awards" body="flush" className="mgrpage__card">
       <Stack gap="snug" as="ul" className="mgrpage__awards">
         {sorted.map((a, i) => (
           <li key={`${a.id}-${a.season}-${i}`} className="mgrpage__award">
@@ -187,8 +222,7 @@ function PlayingCareer({ playing }) {
   const { group, lines } = playing
   const showLevels = lines.length > 1
   return (
-    <Card body="flush" className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">Playing career</h2>
+    <Card frame="stamped" label="Playing career" body="flush" className="mgrpage__card">
       {lines.map((line) => (
         <div key={line.level} className="mgrpage__playline">
           {showLevels && (
@@ -214,8 +248,7 @@ function PlayingCareer({ playing }) {
 // with the record/timeline cards. Reuses the shared .careertl__* stop styling.
 function PlayingTeams({ entries }) {
   return (
-    <Card body="flush" className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">Teams played for</h2>
+    <Card frame="stamped" label="Teams played for" body="flush" className="mgrpage__card">
       <ol className="careertl__track">
         {entries.map((e) => (
           <li
@@ -245,8 +278,7 @@ function PlayingTeams({ entries }) {
 // graceful-degradation convention as the rest of this app's MiLB/umpire gaps.
 function RecordTable({ rows }) {
   return (
-    <Card body="flush" className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">Managerial record</h2>
+    <Card frame="stamped" label="Managerial record" body="flush" className="mgrpage__card">
       <ul className="mgrpage__recordlist">
         {rows.map((r, i) => {
           const decisions = (r.w ?? 0) + (r.l ?? 0)
@@ -257,7 +289,10 @@ function RecordTable({ rows }) {
                 <TeamLogo teamId={r.teamId} name={r.teamName} size={28} />
                 <span className="mgrpage__recordteamname">{r.teamName}</span>
               </TeamLink>
-              <span className="mgrpage__recordyears">{seasonLabel(r.startSeason, r.endSeason)}</span>
+              <span className="mgrpage__recordmeta">
+                <span className="mgrpage__recordyears">{seasonLabel(r.startSeason, r.endSeason)}</span>
+                {r.interim && <span className="mgrpage__recordinterim">Interim</span>}
+              </span>
               {r.sharedSeason ? (
                 <span className="mgrpage__recordcaveat">Shared season — split not yet recorded</span>
               ) : (
@@ -268,7 +303,6 @@ function RecordTable({ rows }) {
                   <span className="mgrpage__recordpct">{pct}</span>
                 </>
               )}
-              {r.interim && <span className="mgrpage__recordinterim">Interim</span>}
             </li>
           )
         })}
@@ -282,8 +316,7 @@ function RecordTable({ rows }) {
 // roles (Bench Coach, Pitching Coach, …) penciled in a lighter weight.
 function CoachingTimeline({ stints }) {
   return (
-    <Card body="flush" className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">Coaching career</h2>
+    <Card frame="stamped" label="Coaching career" body="flush" className="mgrpage__card">
       <Stack gap="snug" as="ul" className="mgrpage__timeline">
         {stints.map((s, i) => (
           <li
