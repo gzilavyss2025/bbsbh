@@ -190,9 +190,10 @@ export const FILTER_BY_KEY = Object.fromEntries(FILTERS.map((f) => [f.key, f]))
 
 // RANGE CARDS (Gary, 2026-11-18): a From/To bound on a batted ball's number, either end
 // open; a card opens on `start`, and clearing both ends closes it. URL `ev=95-`, `la=-10-25` (a bound may be negative). Statcast only: 2015 on.
-// Pitch speed waits on the store: the shards carry no release speed.
+// Pitch speed reads the last pitch, and needs a store built at v3 (shard.js).
 export const RANGES = [
   { key: 'ev', label: 'Exit velocity (mph)', since: 2015, start: [95, null], value: (pa) => pa.launchSpeed },
+  { key: 'ps', label: 'Pitch speed (mph)', since: 2015, v: 3, start: [95, null], value: (pa) => pa.pitchSpeed },
   { key: 'la', label: 'Launch angle (°)', since: 2015, signed: true, start: [10, 30], value: (pa) => pa.launchAngle },
 ]
 export const RANGE_BY_KEY = Object.fromEntries(RANGES.map((r) => [r.key, r]))

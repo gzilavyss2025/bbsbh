@@ -105,6 +105,7 @@ function pillsOf(q, people, clubName) {
   })
   if (q.mode === 'play') {
     if (q.ranges?.ev) out.push(`EV ${rangeWords(q.ranges.ev)} mph`)
+    if (q.ranges?.ps) out.push(`Pitch ${rangeWords(q.ranges.ps)} mph`)
     if (q.ranges?.la) out.push(`LA ${rangeWords(q.ranges.la)}°`)
   }
   if (q.batter) out.push(people[q.batter] ?? 'Batter')

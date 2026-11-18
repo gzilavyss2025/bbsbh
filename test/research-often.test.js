@@ -71,3 +71,15 @@ test("the pitcher's role that game, and times facing him", () => {
   assert.deepEqual(hits('?role=RP'), [5])
   assert.deepEqual(hits('?tto=2'), [4])
 })
+
+test('a v3 shard keeps pitch speed and height; Pitch speed waits for a v3 season', () => {
+  const s = encodeMonth([row({ release_speed: '97.4', plate_z: '3.21', events: 'strikeout' })], { season: 2026, month: '06' })
+  assert.equal(s.v, 3)
+  const [pa] = decodePlateAppearances(s)
+  assert.equal(pa.pitchSpeed, 97.4)
+  assert.equal(pa.pz, 3.21)
+  assert.ok(matcher(parseQuery('?ps=97-'))(pa))
+  assert.ok(!matcher(parseQuery('?ps=98-'))(pa))
+  assert.ok(unsupported(2026, 2).some((b) => b.key === 'ps' && b.rebuild), 'a v2 season blocks it')
+  assert.ok(!unsupported(2026, 3).some((b) => b.key === 'ps'))
+})
