@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Play Log Layouts</title>
+<style>
+:root{--paper:#F6EFDC;--card:#FBF6E9;--ink:#0F1822;--ink2:#3C4A5A;--gr:#5f6368;--clay:#B4453A;--marker:#F2C14E;--rule:#D9CFB4;--new:#2F6B4F}
+*{box-sizing:border-box}body{margin:0;background:#e9e2cd;color:var(--ink);font:14px/1.4 system-ui,sans-serif}
+header.top{max-width:1400px;margin:0 auto;padding:20px 16px 0}h1{margin:0;font-size:26px}
+.legend{font-size:13px;color:var(--ink2)}.newdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--new);margin-right:4px;vertical-align:1px}
+section.dir{max-width:1400px;margin:28px auto;padding:0 16px}
+section.dir>h2{font-size:21px;margin:0 0 2px;border-bottom:3px solid var(--ink);padding-bottom:4px}
+.pitch{margin:6px 0 12px;color:var(--ink2);max-width:900px}
+.pitch b{color:var(--ink)}
+.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.frame{background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);overflow:hidden}
+.phone{width:390px;min-height:760px}.desk{flex:1;min-width:760px;min-height:560px}
+.cap{font:700 11px system-ui;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px;color:var(--gr)}
+.bar{background:var(--ink);color:var(--paper);padding:10px 14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:13px}
+.pad{padding:12px 14px}
+.tabs{display:flex;border:2px solid var(--ink)}.tabs span{flex:1;text-align:center;padding:9px 0;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-right:2px solid var(--ink)}.tabs span:last-child{border-right:0}.tabs .on{background:var(--ink);color:var(--paper)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 10px;border:2px solid var(--ink);background:var(--card);font-weight:700;font-size:13px;margin:0 6px 6px 0;white-space:nowrap}
+.chip.set{background:var(--marker)}.chip .x{font-weight:900;opacity:.6}
+.chip.add{border-style:dashed;background:transparent}
+.chip small{font-weight:500;color:var(--ink2)}
+.chip.new{box-shadow:inset 0 -3px 0 var(--new)}
+.ask{display:flex;border:2px solid var(--ink);background:#fff;min-height:44px;align-items:center}.ask span{flex:1;padding:0 10px;color:var(--gr)}.ask b{background:var(--ink);color:var(--paper);padding:12px 14px;font-size:12px;text-transform:uppercase}
+.ask.slim{min-height:38px}.ask.slim b{padding:9px 12px}
+.card{background:var(--card);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 12px;margin:10px 0}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.facts div{border-left:3px solid var(--clay);padding-left:8px}.facts i{display:block;font-style:normal;font:700 10px system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--gr)}.facts b{font-size:15px}
+.res{border-top:1px solid var(--rule);padding:7px 0;display:flex;justify-content:space-between;font-size:13px}.res span:last-child{color:var(--ink2)}
+.grp{border:2px solid var(--ink);background:var(--card);margin:0 0 8px}.grp h4{margin:0;padding:8px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;border-bottom:2px solid var(--ink)}
+.grp h4 em{font-style:normal;font-weight:600;color:var(--clay)}
+.grp.shut h4{border-bottom:0}.grp .body{padding:8px 8px 2px}
+.grp .f{display:flex;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--rule);font-size:13px}.grp .f:first-child{border-top:0}.grp .f b{font-weight:600}.grp .f span{color:var(--gr)}.grp .f.set span{color:var(--ink);background:var(--marker);padding:0 4px;font-weight:700}
+.btn{display:inline-block;border:2px solid var(--ink);padding:9px 12px;font-weight:800;font-size:12px;text-transform:uppercase;background:var(--card)}
+.btn.dark{background:var(--ink);color:var(--paper)}
+.split{display:grid;grid-template-columns:300px 1fr;gap:16px}
+.split3{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.sheet{border:2px solid var(--ink);border-bottom:0;background:var(--card);margin:0 -14px;padding:10px 14px;box-shadow:0 -4px 0 rgba(0,0,0,.08)}
+.sheet .handle{width:40px;height:4px;background:var(--rule);margin:0 auto 8px}
+.picker{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 14px;font-size:13px}.picker h5{grid-column:1/-1;margin:8px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--clay)}.picker div{padding:7px 0;border-bottom:1px solid var(--rule)}
+.dim{opacity:.35}
+.note{font-size:12px;color:var(--gr);margin-top:6px}
+.pro,.con{font-size:13px;margin:2px 0}.pro::before{content:"+ ";font-weight:900;color:var(--new)}.con::before{content:"– ";font-weight:900;color:var(--clay)}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;max-width:900px;margin-bottom:12px}
+.lbl{font:700 11px system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--gr);margin:10px 0 4px}
+.scrollrow{display:flex;overflow:hidden;white-space:nowrap}
+.sent{font-size:20px;line-height:1.9;font-weight:600}.sent .slot{border-bottom:3px solid var(--ink);padding:0 4px;background:var(--marker)}.sent .slot.empty{background:transparent;color:var(--gr);border-bottom-style:dashed}
+@media (max-width:820px){.desk{min-width:0;width:100%}.split,.split3{grid-template-columns:1fr}.pc{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top">
+<h1>Ask the Play Log: filter layout (direction D)</h1>
+<p class="legend">Sample question: <b>Brewers batters · Home runs · off 100+ mph · 2-out · since 2015</b>. <span class="newdot"></span>green underline = a filter the data stream is adding. No typed question box: filters are the only way in.</p>
+<p class="legend"><b>All 30 filters, in five groups</b> :
+Who — Batter, Pitcher, Batter hand, Pitcher hand, Batting slot, <span class="newdot"></span>Position / pinch hitter, <span class="newdot"></span>Starter or reliever, <span class="newdot"></span>Times through order, <span class="newdot"></span>Rookie / debut ·
+Pitch — Final pitch type, Final pitch location, <span class="newdot"></span>Pitch speed, <span class="newdot"></span>Count reached, <span class="newdot"></span>Final count ·
+Result — PA result, Batted ball type, Batted ball location, <span class="newdot"></span>Exit velocity, <span class="newdot"></span>Launch angle ·
+Situation — Outs, Runners, Score, Moment, Leverage, Inning ·
+Game — Seasons, Clubs, Game type, Series game, Month, Home or road.</p>
+</header>
+
+<!-- ================= D ================= -->
+<style>.D .chip{min-height:44px}.D .chip.q{border-style:dashed;background:transparent;font-weight:600}.D .picker div{padding:12px 0}.D .slimline{display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--ink);min-height:44px;color:var(--gr);margin:4px 0 0}.D .slimline b{margin-left:auto;color:var(--ink);font-size:12px;text-transform:uppercase}.D .door{display:flex;justify-content:space-between;align-items:center;min-height:48px;border-bottom:1px solid var(--rule)}.D .door:last-child{border-bottom:0}.D .door span{color:var(--ink2)}</style>
+<section class="dir D" id="d">
+<h2>Set chips + quick-adds + grouped drawer</h2>
+<p class="pitch">C's row of <b>set filters as yellow chips</b>, then <b>four dashed quick-adds</b> (Batter, Pitcher, Result, Seasons) while they're unset, then <b>+ More filters</b> opening A's grouped drawer with a find box. Chips and picker rows are 44 px.</p>
+<div class="row">
+<div><p class="cap">Phone · empty</p><div class="frame phone">
+<div class="bar">Ask the Play Log</div><div class="pad">
+<div class="tabs"><span class="on">Plays</span><span>Games</span><span>Streaks</span></div>
+<div style="margin-top:12px"><span class="chip q">+ Batter</span><span class="chip q">+ Pitcher</span><span class="chip q">+ Result</span><span class="chip q">+ Seasons</span><span class="chip add" style="background:var(--ink);color:var(--paper);border-style:solid">+ More filters</span></div>
+<div class="lbl" style="margin-top:18px">Try one</div>
+<div class="card" style="margin-top:0;padding:2px 12px">
+<div class="door"><b>Last time</b><span>a Brewer homered off 100+ ›</span></div>
+<div class="door"><b>How often</b><span>walk-off hits in extras ›</span></div>
+<div class="door"><b>Leaders</b><span>2-strike homers ›</span></div>
+<div class="door"><b>What happened next</b><span>after a leadoff walk ›</span></div></div>
+</div></div></div>
+
+<div><p class="cap">Phone · question built</p><div class="frame phone">
+<div class="bar">Ask the Play Log</div><div class="pad">
+<div class="tabs"><span class="on">Plays</span><span>Games</span><span>Streaks</span></div>
+<div style="margin-top:12px"><span class="chip set">Brewers batters <span class="x">×</span></span><span class="chip set">Home run <span class="x">×</span></span><span class="chip set new">Pitch 100+ <span class="x">×</span></span><span class="chip set">2 out <span class="x">×</span></span><span class="chip q">+ Pitcher</span><span class="chip q">+ Seasons</span><span class="chip add" style="background:var(--ink);color:var(--paper);border-style:solid">+ More (2 set)</span></div>
+<div class="card"><div class="facts"><div><i>Last</i><b>Jun 14 '26</b></div><div><i>Before</i><b>Aug 2 '24</b></div><div><i>Since 2015</i><b>9 times</b></div></div></div>
+<div class="res"><span>Jun 14 2026 · Chourio off Díaz</span><span>101.2</span></div>
+<div class="res"><span>Aug 2 2024 · Adames off Bautista</span><span>100.4</span></div>
+<div class="res"><span>May 9 2023 · Tellez off Hader</span><span>100.1</span></div>
+</div></div></div>
+
+<div><p class="cap">Phone · More filters</p><div class="frame phone">
+<div class="bar">Ask the Play Log</div>
+<div class="pad dim"><div class="tabs"><span class="on">Plays</span><span>Games</span><span>Streaks</span></div><div style="height:90px"></div></div>
+<div class="pad" style="padding-top:0"><div class="sheet"><div class="handle"></div>
+<div class="ask slim" style="min-height:44px"><span>Find a filter or value…</span></div>
+<div class="picker">
+<h5>Who</h5><div>Batter hand</div><div>Pitcher hand</div><div>Batting slot</div><div>Position / PH ●</div><div>Starter / reliever ●</div><div>Times through ●</div><div>Rookie / debut ●</div><div></div>
+<h5>Pitch</h5><div>Final pitch type</div><div>Final location</div><div style="background:var(--marker)">Pitch speed ✓</div><div>Count reached ●</div><div>Final count ●</div><div></div>
+<h5>Result</h5><div>Batted ball type</div><div>Ball location</div><div>Exit velocity ●</div><div>Launch angle ●</div>
+<h5>Situation · Game</h5><div style="background:var(--marker)">Outs ✓</div><div>Runners · Score · …</div>
+</div>
+<p style="text-align:right;margin:8px 0 4px"><span class="btn dark">Show 9 plays</span></p>
+</div></div></div></div>
+
+<div style="flex:1;min-width:760px"><p class="cap">Desktop · More filters open</p><div class="frame desk">
+<div class="bar">Ask the Play Log</div><div class="pad">
+<div class="tabs" style="max-width:420px"><span class="on">Plays</span><span>Games</span><span>Streaks</span></div>
+<div style="margin-top:12px"><span class="chip set">Brewers batters <span class="x">×</span></span><span class="chip set">Home run <span class="x">×</span></span><span class="chip set new">Pitch 100+ mph <span class="x">×</span></span><span class="chip set">2 out <span class="x">×</span></span><span class="chip q">+ Pitcher</span><span class="chip q">+ Seasons</span><span class="chip add" style="background:var(--ink);color:var(--paper);border-style:solid">− Fewer filters</span></div>
+<div class="card" style="max-width:none">
+<div class="ask slim" style="max-width:320px"><span>Find a filter or value…</span></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;font-size:13px;line-height:2">
+<div><h5 style="margin:6px 0;color:var(--clay);font-size:11px;text-transform:uppercase">Who</h5>Batter hand<br>Pitcher hand<br>Batting slot<br>Position / PH ●<br>Starter / reliever ●<br>Times through ●<br>Rookie / debut ●</div>
+<div><h5 style="margin:6px 0;color:var(--clay);font-size:11px;text-transform:uppercase">Pitch</h5>Final pitch type<br>Final location<br><b>Pitch speed ✓</b><br>Count reached ●<br>Final count ●</div>
+<div><h5 style="margin:6px 0;color:var(--clay);font-size:11px;text-transform:uppercase">Result</h5>Batted ball type<br>Ball location<br>Exit velocity ●<br>Launch angle ●</div>
+<div><h5 style="margin:6px 0;color:var(--clay);font-size:11px;text-transform:uppercase">Situation</h5><b>Outs ✓</b><br>Runners<br>Score<br>Moment<br>Leverage<br>Inning</div>
+<div><h5 style="margin:6px 0;color:var(--clay);font-size:11px;text-transform:uppercase">Game</h5>Clubs<br>Game type<br>Series game<br>Month<br>Home or road</div>
+</div></div>
+<div class="card" style="max-width:520px"><div class="facts"><div><i>Last</i><b>Jun 14 '26</b></div><div><i>Before</i><b>Aug 2 '24</b></div><div><i>Since 2015</i><b>9 times</b></div></div></div>
+<div class="res"><span>Jun 14 2026 · Chourio off Díaz · 7th</span><span>101.2 mph · 108 EV</span></div>
+<div class="res"><span>Aug 2 2024 · Adames off Bautista · 9th</span><span>100.4 mph · 104 EV</span></div>
+</div></div></div>
+</div>
+<p class="note">Batter / Pitcher / Result / Seasons are the quick-adds; each disappears from the dashed set once it becomes a yellow chip. Picking a value in the sheet adds its chip; the button shows the live count.</p>
+</section>
+</body></html>

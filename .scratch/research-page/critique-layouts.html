@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Layout Critique</title>
+<style>:root{--paper:#F6EFDC;--card:#FBF6E9;--ink:#0F1822;--ink2:#3C4A5A;--clay:#B4453A;--marker:#F2C14E;--rule:#D9CFB4}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,sans-serif}main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 6px}h2{font-size:18px;margin:28px 0 8px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:2px solid var(--ink)}td,th{padding:7px 9px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top;font-size:14px}th{background:var(--ink);color:var(--paper);font-size:12px;text-transform:uppercase}
+.c{color:var(--clay);font-weight:800}.m{font-weight:800;color:#8a6a00}.g{font-weight:800;color:#2F6B4F}
+.rec{background:var(--card);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:12px 14px}</style></head><body><main>
+<h1>Critique: three filter layouts</h1>
+<p>Stage: exploration. Users: mid-game fans and researchers equally; start from filters.</p>
+
+<h2>Overall</h2>
+<p>All three fix the big problems (tabs on top, filters before results, results on screen). The difference is how much you see before you set anything. <b>C has the best empty page and the best "built" page; A has the best drawer.</b> B pushes results off a phone screen.</p>
+
+<h2>Scorecard</h2>
+<table><tr><th></th><th>A · Common + drawer</th><th>B · All grouped</th><th>C · Set + Add</th></tr>
+<tr><td>Phone: results above the fold</td><td class="g">Yes</td><td class="c">No — start ~2 screens down once a group is open</td><td class="g">Yes</td></tr>
+<tr><td>First-timer sees what's possible</td><td class="m">Six of 30</td><td class="g">All</td><td class="m">Try one only</td></tr>
+<tr><td>Researcher: taps per extra filter</td><td>2 (More → pick)</td><td class="g">1</td><td>2 (Add → pick)</td></tr>
+<tr><td>Set filters read as the question</td><td class="m">Mixed with unset "Any" chips</td><td class="c">Scattered across groups</td><td class="g">Yes, one row of yellow chips</td></tr>
+<tr><td>Fits 11 new filters</td><td class="g">Drawer absorbs them</td><td class="m">Groups get long (Who = 9)</td><td class="g">Picker absorbs them</td></tr></table>
+
+<h2>Usability</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr>
+<tr><td>The typed box is still in all three, in three different places. That keeps "two ways in".</td><td class="c">Critical</td><td>Put it in one place: a slim line under the filters (as in C). It fills chips; it never replaces them.</td></tr>
+<tr><td>A: unset chips ("Pitcher Any") look almost like set chips.</td><td class="m">Moderate</td><td>Unset = dashed outline, label only ("+ Pitcher"); set = solid yellow with ×.</td></tr>
+<tr><td>A: "Situation" as one chip hides six filters behind a vague word.</td><td class="m">Moderate</td><td>Common slots should be single filters, not groups.</td></tr>
+<tr><td>B: the box sits above the filters, against "start from filters".</td><td class="m">Moderate</td><td>Moot if B is not picked.</td></tr>
+<tr><td>C: empty page shows no filters at all, so a researcher must open the picker to learn the list.</td><td class="m">Moderate</td><td>Show 4 dashed quick-add chips (Batter, Pitcher, Result, Seasons) above "Try one".</td></tr>
+<tr><td>Picker: 30 items needs a find box — A and C have one; keep it.</td><td class="g">Minor</td><td>Find also matches values ("100 mph", "walk-off").</td></tr></table>
+
+<h2>Visual hierarchy</h2>
+<ul><li><b>Eye goes first to</b> the dark tabs, then yellow chips — correct: mode, then the question.</li>
+<li>The three-fact card (Last · Before · Since) is the strongest element below; good as the answer's lead.</li>
+<li>A desktop: the typed box floats right of the chip row and competes with it.</li></ul>
+
+<h2>Consistency &amp; accessibility</h2>
+<table><tr><th>Element</th><th>Issue</th><th>Fix</th></tr>
+<tr><td>Chips</td><td>36 px tall — under the 44 px tap rule</td><td>44 px min height; row may wrap to 2–3 lines on a phone, which is fine</td></tr>
+<tr><td>Picker rows</td><td>~30 px tall in the mockup</td><td>44 px rows on phone</td></tr>
+<tr><td>Grey "Any" text on paper</td><td>Likely under 4.5:1</td><td>Use the caption token; check-contrast will judge</td></tr>
+<tr><td>Colours</td><td>Mockup uses raw hex</td><td>Build uses tokens; marker yellow is a fill only (chips), as house rule says</td></tr></table>
+
+<h2>What works</h2>
+<ul><li>One set of five groups (Who · Pitch · Result · Situation · Game) shared by every direction — keep it whichever wins.</li>
+<li>Tabs above everything; Streaks/Games keep their own cards under the same tabs.</li>
+<li>C's empty state turns "Try one" into the starting doors.</li></ul>
+
+<div class="rec"><h2 style="margin-top:0">Recommendation: C with A's drawer</h2>
+<ol><li><b>Top:</b> Plays / Games / Streaks tabs.</li>
+<li><b>Filter row:</b> set filters as yellow chips (tap to change, × to clear), then dashed quick-add chips for the four most common unset ones (Batter, Pitcher, Result, Seasons), then <b>+ More filters</b>.</li>
+<li><b>More filters:</b> A's grouped drawer with a find box — bottom sheet on phone, a five-column panel under the row on desktop.</li>
+<li><b>Typed box:</b> one slim line under the row; it turns into chips.</li>
+<li><b>Empty page:</b> Try one doors. <b>Built page:</b> three-fact card, then rows.</li></ol>
+<p>Fan: tap Batter + Result, done. Researcher: More filters, one sheet, every lever grouped.</p></div>
+</main></body></html>
