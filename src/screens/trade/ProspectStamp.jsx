@@ -25,7 +25,7 @@ export function ProspectStamp({ p, teamId, big = false }) {
         </span>
       </span>
       <span className="prospectstamp__text">
-        <span className="prospectstamp__what">{top ? 'Top 100 prospect' : `${club ? `${club}' ` : 'Club '}No. ${n}`}</span>
+        <span className="prospectstamp__what">{top ? 'Top 100 prospect' : `${club ?? 'Club'} prospect`}</span>
         {p.value && !big && <span className="prospectstamp__worth">{money(p.value.surplusUsd)} value</span>}
       </span>
       <span className="sr-only">{top ? `MLB's No. ${n} prospect` : `No. ${n} prospect in the ${club ?? 'club'} system`}</span>

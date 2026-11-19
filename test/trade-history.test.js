@@ -2,7 +2,7 @@
 // the White Sox wire for 2025-06-13, trimmed: Vaughn to Milwaukee for Civale and cash.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { groupTrade } from '../src/lib/trade/history.js'
+import { groupTrade, tradeLead } from '../src/lib/trade/history.js'
 
 const CWS = 145, MIL = 158
 const desc = 'Chicago White Sox traded 1B Andrew Vaughn to Milwaukee Brewers for RHP Aaron Civale and cash.'
@@ -37,4 +37,13 @@ test('a trade that names affiliates still splits by direction', () => {
   const t = groupTrade(affRows, 10, MIL)
   assert.deepEqual(t.got.map((p) => p.name), ['Prospect'])
   assert.deepEqual(t.gave.map((p) => p.name), ['Reliever'])
+})
+
+test('the trade reads as one sentence from the player\'s side', () => {
+  const izzi = { id: 1, name: 'Ashton Izzi' }
+  const trade = { date: '2025-07-24', got: [izzi, { id: 2, name: 'Brandyn Garcia' }], gave: [{ id: 3, name: 'Josh Naylor' }] }
+  assert.equal(tradeLead(trade, izzi.id, 'Seattle'), 'Came from Seattle on July 24, 2025, with Brandyn Garcia, for Josh Naylor.')
+  // Alone, and for cash.
+  assert.equal(tradeLead({ date: '2025-07-24', got: [izzi], gave: [] }, izzi.id, 'Seattle', ['cash']), 'Came from Seattle on July 24, 2025, for cash.')
+  assert.equal(tradeLead({ date: '2025-07-24', got: [izzi], gave: [] }, izzi.id, 'Seattle'), 'Came from Seattle on July 24, 2025.')
 })

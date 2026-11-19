@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { loadTradeSide, loadMinorLines } from '../../api/trade/side.js'
+import { loadTradeSide, loadMinorLines, valueTradeSide } from '../../api/trade/side.js'
 import { fetchLevelLines } from '../../api/trade/levelLines.js'
 import { dealSummary, money, applyRetain, unsetSalary, wireSentence } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -63,6 +63,15 @@ function writeLink({ a, b, picked, cashA, cashB, dp }) {
   window.history.replaceState(window.history.state, '', `${pathOf('trade')}${s ? `?${s}` : ''}`)
 }
 
+// One club's side in two steps: the roster draws as soon as it loads, and each
+// player's value (valueTradeSide) fills in when the WAR history arrives.
+// Until then the side reads as unvalued: no surplus, no estimated pay.
+function useTradeSide(teamId) {
+  const roster = useAsync(() => (teamId ? loadTradeSide(teamId) : Promise.resolve(null)), [teamId])
+  const valued = useAsync(() => valueTradeSide(roster.data), [roster.data])
+  return { ...roster, data: valued.data?.teamId === roster.data?.teamId && valued.data ? valued.data : roster.data }
+}
+
 // The trade card (/trade). Pick a partner, add players or cash from each side,
 // and the card states what moves: payroll, WAR, years of control, 40-man spots.
 // No grade on who wins. Open surface (ADR-0034): rosters and contracts only.
@@ -95,8 +104,8 @@ export function TradePage() {
 
   useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
 
-  const sideA = useAsync(() => loadTradeSide(a), [a])
-  const sideB = useAsync(() => (b ? loadTradeSide(b) : Promise.resolve(null)), [b])
+  const sideA = useTradeSide(a)
+  const sideB = useTradeSide(b)
   // Each club's minor-league lines load the first time its roster reaches past
   // the 40-man; the page holds them so the other column can read them too.
   const [wantFarm, setWantFarm] = useState({ a: false, b: false })
@@ -232,7 +241,7 @@ export function TradePage() {
       </header>
 
       <Stack gap="section">
-        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} />}
+        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} />}
 
         <div className="tradedesk__sides" ref={movesRef}>
           {b ? (

@@ -36,9 +36,11 @@ function Club({ teamId, gets, grade, side, ready }) {
   )
 }
 
-export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0 }) {
+export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true }) {
   // A side is in once it sends a player, cash or a draft pick.
-  const ready = Boolean((sendsA.length || cashA || picksA) && (sendsB.length || cashB || picksB))
+  const built = Boolean((sendsA.length || cashA || picksA) && (sendsB.length || cashB || picksB))
+  // The grade waits for both sides' values (valueTradeSide), so it never flashes a provisional one.
+  const ready = built && valued
   const value = deal.value.a
   const verdict = verdictOf(value)
   const winner = value > 0 ? a : b
@@ -52,7 +54,7 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
       <div className="tradeboard__mid">
         <span className="tradeboard__k">Trade meter</span>
         <span className={`tradeboard__score tradeboard__score--${ready ? verdict : 'wait'}`}>
-          {!ready ? 'Build a deal' : VERDICT[verdict](teamClubName(winner))}
+          {!built ? 'Build a deal' : !valued ? 'Weighing the deal…' : VERDICT[verdict](teamClubName(winner))}
         </span>
         <span className="tradeboard__meter" aria-hidden="true" style={{ '--tug-a': colorA, '--tug-b': colorB, '--tug-share': `${share}%` }}>
           <span className="tradeboard__tug" />

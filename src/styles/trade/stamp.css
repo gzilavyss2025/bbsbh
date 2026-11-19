@@ -16,6 +16,7 @@
 
 /* layout-exempt: "No." over the number inside the round seal */
 .prospectstamp__seal {
+  container-type: inline-size;
   --ink: var(--stamp-ink, var(--border-stamped));
   flex: 0 0 auto;
   display: inline-flex;
@@ -32,15 +33,18 @@
   line-height: var(--lh-solid);
 }
 
+/* The figures size with the seal, not the page: the seal is a size
+   container, and "No." and the rank are fractions of its width, so a small
+   stamp in a row and the big one on a sheet read alike. */
 .prospectstamp__no {
   font-family: var(--font-display);
-  font-size: var(--fs-label);
+  font-size: clamp(var(--fs-label), 22cqi, var(--fs-title-sm));
   letter-spacing: var(--ls-label);
 }
 
 .prospectstamp__n {
   font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
+  font-size: clamp(var(--fs-title-sm), 42cqi, var(--fs-score-md));
 }
 
 /* layout-exempt: what the rank means over his worth */
@@ -184,20 +188,16 @@
   border-width: calc(var(--bw-heavy) * 3);
 }
 
-.prospectstamp--big .prospectstamp__no {
-  font-size: var(--fs-small);
-}
-
-.prospectstamp--big .prospectstamp__n {
-  font-size: var(--fs-title-lg);
-}
-
 .prospectstamp--big .prospectstamp__text {
   align-items: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .prospectstamp--big .prospectstamp__what {
   font-size: var(--fs-title-sm);
+  /* A long club name wraps on a phone rather than running off the sheet. */
+  white-space: normal;
 }
 
 .prospectstamp--big .prospectstamp__badge {

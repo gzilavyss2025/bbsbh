@@ -20,51 +20,41 @@
   border-bottom: var(--bw-heavy) solid var(--border-stamped);
 }
 
-.tradesheet__date {
-  margin: var(--space-1) 0 0;
-  color: var(--text-caption);
+/* The trade in place (TradeSheet.jsx TradeRecap): one lead sentence, then the
+   two sides as one-line rows. Side by side at the wide step, stacked below it. */
+.traderecap__lead {
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
 }
 
-/* layout-exempt: the two clubs side by side with the exchange between, at every width */
+#root .traderecap__lead { text-transform: none } /* caps-exempt: a sentence, read as prose */
+
+/* layout-exempt: the two sides, stacked on a phone */
 .tradesheet__sides {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: var(--space-3);
-  margin-top: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
 }
 
-/* layout-exempt: the club's logo over its heading */
+@media (min-width: 740px) {
+  .tradesheet__sides {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+/* layout-exempt: logo, the club, and the WAR column head at the right */
 .tradesheet__club {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
   border-bottom: var(--bw-rule) solid var(--border-stamped);
 }
 
-.tradesheet__arrow {
-  width: var(--space-8);
-  height: var(--space-3);
-  color: var(--text-heading);
-  flex: none;
-}
-
-/* layout-exempt: the two arrows of the exchange, stacked */
-.tradesheet__swap {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.tradesheet__arrow--back {
-  transform: scaleX(-1);
-}
-
-
 .tradesheet__club h3 {
+  flex: 1 1 auto;
   margin: 0;
   color: var(--text-heading);
 }
@@ -75,11 +65,11 @@
   padding: 0;
 }
 
-/* layout-exempt: face beside the name, WAR under it */
+/* layout-exempt: face | name over its line | WAR, one line a player */
 .tradesheet__player {
   display: grid;
-  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr);
-  gap: var(--space-1) var(--space-2);
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+  gap: var(--space-2);
   align-items: center;
   padding: var(--space-2) 0;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
@@ -92,24 +82,17 @@
   grid-area: auto;
 }
 
-/* The player the reader tapped, marked the house way: highlighter. */
+/* The player the sheet is about: his name in bold ink, and "this player" in words. */
 .tradesheet__player--this .tradedesk__name {
-  align-self: flex-start;
+  font-weight: var(--w-bold);
   background: var(--surface-event-wash);
-}
-
-/* layout-exempt: the WAR label beside its figure, under the name */
-.tradesheet__war {
-  grid-column: 2;
-  display: flex;
-  gap: var(--space-2);
-  align-items: baseline;
 }
 
 .tradesheet__num {
   font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
+  font-size: var(--fs-num-md);
   font-variant-numeric: tabular-nums;
+  text-align: right;
   color: var(--text-heading);
 }
 
@@ -118,24 +101,6 @@
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-}
-
-/* layout-exempt: the total's label beside its figure */
-.tradesheet__total {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: var(--space-2) 0 0;
-}
-
-.tradesheet__source {
-  margin: var(--space-5) 0 0;
-  padding-top: var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
   color: var(--text-muted);
 }
 
@@ -344,8 +309,10 @@
 }
 
 @media (min-width: 740px) {
-  /* The photo and its sentence stay put while the column beside it scrolls. */
-  .playersheet__side {
+  /* The photo and its sentence stay put while the column beside it scrolls,
+     but only as a column beside a photo: without one the side is a plain line
+     in the flow, and pinning it laid it over everything that scrolled under. */
+  .playersheet__grid:has(> .playersheet__side > .playersheet__photo:not(.playersheet__photo--loading)) > .playersheet__side {
     position: sticky;
     top: 0;
   }

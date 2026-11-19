@@ -117,23 +117,6 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     // Throwing hand, for the wire's RHP / LHP.
     p.throws = orgById.get(p.id)?.pitchHand?.code ?? null
   }
-  // What each player is worth to a club that gets him (lib/trade/value.js): his
-  // WAR by season from the stored history and this season's file, then the
-  // projection and surplus over his years of control. Every 40-man player and
-  // every ranked prospect; anyone else is valued as an unranked minor leaguer.
-  const pitcherPos = (p) => ['P', 'SP', 'RP', 'TWP', 'RHP', 'LHP'].includes(p.pos)
-  await Promise.all([...forty, ...minors].map(async (p) => {
-    const history = await fetchWarHistory(p.id).catch(() => null)
-    p.warByYear = warByYearFor(p.id, pitcherPos(p) ? 'pitching' : 'hitting', war, history)
-  }))
-  const warSeason = war?.season ?? season
-  for (const p of [...forty, ...minors, ...others]) {
-    p.role = p.line?.role ?? null
-    p.value = playerValue(p, { nextYear, warSeason, contractYears })
-    // Next season's pay when the ledger has no figure: the estimate, marked as one.
-    if (p.payUsd == null && p.onForty && p.value.payEstUsd != null) p.payEstUsd = p.value.payEstUsd
-  }
-
   // A minor-league player's position for the depth grid comes from the org roster,
   // which writes pitchers as P; the prospect list writes RHP/LHP.
   const depth = org
@@ -141,6 +124,34 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     .map((r) => ({ id: r.person.id, name: r.person.fullName, pos: r.position?.abbreviation, level: levelAt(r.person.id), war: warOf(r.person.id) }))
 
   return { teamId, nextYear, warSeason: war?.season ?? null, fortyCount: forty.length, forty, minors, others, depth }
+}
+
+// What each player is worth to a club that gets him (lib/trade/value.js),
+// added after the roster draws: his WAR by season from the stored history
+// (one shard per hundred ids, so a club's 40-man and ranked prospects read up
+// to ~50 small files) and this season's file, then the projection and surplus
+// over his years of control. Answers a new side with new player rows, so a
+// page holding the first answer re-renders when this one lands.
+const pitcherPos = (p) => ['P', 'SP', 'RP', 'TWP', 'RHP', 'LHP'].includes(p.pos)
+export async function valueTradeSide(side) {
+  if (!side) return null
+  const war = await fetchWarData().catch(() => null)
+  const warSeason = war?.season ?? side.nextYear - 1
+  const value = async (p, withHistory) => {
+    const history = withHistory ? await fetchWarHistory(p.id).catch(() => null) : null
+    const row = { ...p, role: p.line?.role ?? null }
+    if (withHistory) row.warByYear = warByYearFor(p.id, pitcherPos(p) ? 'pitching' : 'hitting', war, history)
+    row.value = playerValue(row, { nextYear: side.nextYear, warSeason, contractYears })
+    // Next season's pay when the ledger has no figure: the estimate.
+    if (row.payUsd == null && row.onForty && row.value.payEstUsd != null) row.payEstUsd = row.value.payEstUsd
+    return row
+  }
+  const [forty, minors, others] = await Promise.all([
+    Promise.all(side.forty.map((p) => value(p, true))),
+    Promise.all(side.minors.map((p) => value(p, true))),
+    Promise.all(side.others.map((p) => value(p, false))),
+  ])
+  return { ...side, forty, minors, others, valued: true }
 }
 
 // Minor-league lines for the whole farm, loaded only when the card lists

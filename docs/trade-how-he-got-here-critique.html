@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>"How he got here" critique</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:860px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.93em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+.hi{color:#a1301c;font-weight:bold}.mid{color:#8a5a00;font-weight:bold}.lo{color:#2f6b3a;font-weight:bold}
+pre{background:#fffaf0;border:1px solid #cbbf9f;padding:10px;font-size:.85em;overflow-x:auto}
+</style></head><body>
+<h1>Design critique: "How he got here" on the player sheet</h1>
+<p>Reviewed live on Ashton Izzi (traded from Seattle to Arizona, July 24, 2025), at desktop width and at 375px. It is the trade drawn in place under the heading, which a turn ago was a "See the trade" button.</p>
+
+<h2>Overall impression</h2>
+<p>The facts are right and the two-sided picture is the right idea, but the section <strong>says the trade three times</strong> (a coded line, a date line, the wire's sentence) and then, on a phone, <strong>crushes two columns into 140px each</strong>. Names wrap onto two lines, "Now Arizona Diamondbacks" onto three, and "2026 WAR" splits from its number. It reads like a desktop table that was shrunk, not one built for the screen it's on.</p>
+
+<h2>Usability</h2>
+<table>
+<tr><th>Finding</th><th>Severity</th><th>Recommendation</th></tr>
+<tr><td>On a phone, the two side-by-side columns are ~140px each. Every name wraps, "P · Now Arizona Diamondbacks" runs to three lines, and each "2026 WAR" label breaks onto two lines beside its figure. A two-for-one trade becomes a tall, ragged block.</td><td class="hi">High</td><td>Under the wide step, stack the sides: "Diamondbacks got" over "Mariners got", each a single-column list, one line per player.</td></tr>
+<tr><td>The trade is stated three times: the coded line "Trade · SEA '25 · R4 #126 '22", the date line "Trade · July 24, 2025", and "From the wire: Arizona Diamondbacks traded…" at the bottom.</td><td class="hi">High</td><td>One plain sentence at the top replaces the code and the date: "Came from Seattle on July 24, 2025, with Brandyn Garcia, for Josh Naylor." Drop the wire sentence; it says the same thing.</td></tr>
+<tr><td>"R4 #126 '22" is shorthand a reader has to decode, and it is about his draft, not this trade. The sheet already says it in words under his photo ("The Mariners drafted him… fourth round (126th overall) in 2022").</td><td class="mid">Medium</td><td>Remove the coded line from this section.</td></tr>
+<tr><td>"Now Arizona Diamondbacks" sits on every player, though the useful case is only a player who has <em>moved since</em> the trade.</td><td class="mid">Medium</td><td>Show "now [club]" only when it differs from the club he was traded to.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the two club logos and the swap arrows. Those are fine signposts, but the player this sheet is about (Izzi) is marked only by a faint highlighter on his name.</li>
+<li><strong>Reading flow:</strong> heading → code line → date → logos → rows → totals → the wire sentence. That is four lines before any player, and the last line repeats the first.</li>
+<li><strong>Emphasis:</strong> the totals ("Total 2026 WAR 1.3") are set as large as anything in the section, but they are the least useful number here. A 2025 trade's 2026 WAR total says little about the player.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<tr><th>Element</th><th>Issue</th><th>Recommendation</th></tr>
+<tr><td>Rows</td><td>Each player row is name / position·now / "2026 WAR" label / figure, a different shape from the sheet's own seasons and contract tables right above it.</td><td>Draw each side as the same ledger rows the sheet already uses: face, name with position, WAR right-aligned, a "2026 WAR" column head once per side.</td></tr>
+<tr><td>Labels</td><td>"2026 WAR" repeats on every row.</td><td>Say it once, as the column head.</td></tr>
+<tr><td>Type</td><td>The date line and source line are small display caps; the coded line is mono body text. Three type treatments in the first three lines.</td><td>One lead sentence in body text.</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Contrast:</strong> ink and caption on paper pass. The highlighter on Izzi's name is the only "this is him" cue, and it carries no text. A screen reader gets no signal.</li>
+<li><strong>Touch targets:</strong> names are links. On mobile, the two-line wrapped names give tall but very narrow targets.</li>
+<li><strong>Readability:</strong> three-line wraps of "Now Arizona Diamondbacks" at 12px caps are the hardest text on the sheet.</li>
+</ul>
+
+<h2>What works</h2>
+<ul>
+<li>Both sides of the trade, with faces, in place. No modal, no extra tap.</li>
+<li>Club logos as side headers make "who got whom" scannable at a glance.</li>
+<li>The player the sheet is about is marked within his side.</li>
+</ul>
+
+<h2>Proposed layout (phone)</h2>
+<pre>HOW HE GOT HERE
+Came from Seattle on July 24, 2025, with Brandyn Garcia,
+for Josh Naylor.
+
+[D-backs logo] DIAMONDBACKS GOT              2026 WAR
+  [face] Ashton Izzi  · P   (this player)        —
+  [face] Brandyn Garcia · P                    1.3
+[Mariners logo] MARINERS GOT
+  [face] Josh Naylor · 1B                      0.6</pre>
+<p>On a wide screen the two sides can stay side by side, using the same one-line rows.</p>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><strong>Stack the sides on a phone, one line per player</strong>, with WAR right-aligned under one column head. This fixes the wrapping, which is the "looks bad on mobile" problem.</li>
+<li><strong>Replace the coded line, the date line and the wire sentence with one plain sentence</strong> at the top.</li>
+<li><strong>Mark the player in words</strong> ("this player", or his row first and set in bold) instead of with the highlighter only. Show "now [club]" only for someone who has moved since.</li>
+</ol>
+<h2>Follow-up: the Contract section for a minor leaguer</h2>
+<p>Built: a player with no contract on file (most minor leaguers) gets no Contract section at all, instead of "No contract on file yet." Cot's covers 40-man contracts only, and a minor leaguer's pay is the level minimum, not tracked per player.</p>
+<p>What front offices and team sites track for a minor leaguer instead is <strong>his Rule 5 status</strong>: when his club has to add him to the 40-man or risk losing him. The rule (MLB's glossary): a player signed at 18 or younger must be protected within five seasons, one signed at 19 or older within four. That is the minor-league equivalent of "years of control" and could be one line on his sheet ("Rule 5 eligible: December 2026"). It needs his age on June 5 of his signing year, which the person feed carries (birth date), so it can be computed rather than guessed. Not built yet.</p>
+<p class="cap">Sources: <a href="https://www.mlb.com/glossary/transactions/rule-5-draft">MLB glossary: Rule 5 Draft</a>; <a href="https://en.wikipedia.org/wiki/Rule_5_draft">Rule 5 draft (Wikipedia)</a>; <a href="https://www.milb.com/news/the-rule-5-draft-explained-311955076">MiLB: The Rule 5 Draft explained</a>.</p>
+</body></html>

@@ -10,7 +10,7 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { Numbers } from './Numbers.jsx'
-import { TradeSheet } from './TradeSheet.jsx'
+import { TradeRecap } from './TradeSheet.jsx'
 import { ProspectStamp } from './ProspectStamp.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Ledger } from '../../components/player/Ledger.jsx'
@@ -29,12 +29,10 @@ const DASH = '—'
 export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picked, onToggle, onClose, children = null }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
-  const [trade, setTrade] = useState(false)
   // His seasons, the way the transactions wire's sheet draws them: MLB, Minors
   // and Postseason, each by club with a career total. One read, shared with the wire.
   const today = isoToday()
   const facts = useAsync(() => fetchPlayerFacts(p.id, { season: Number(today.slice(0, 4)), teamId, asOf: today }).catch(() => null), [p.id, teamId, today])
-  if (trade) return <TradeSheet player={p} toId={teamId} onClose={() => setTrade(false)} />
   const pedigree = pedigreeLine(p.how, p.draft, (id) => (isMlbTeamId(id) ? teamAbbr({ id }) : null))
 
   return (
@@ -83,12 +81,15 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           {pedigree && (p.how?.kind === 'trade' || !facts.data) && (
             <div className="playersheet__section">
               <h3 className="t-label">How he got here</h3>
-              <p className="playersheet__pedigree">{pedigree}</p>
-              {p.how?.kind === 'trade' && <Button size="control" onClick={() => setTrade(true)}>See the trade</Button>}
+              {/* A trade tells itself below; the short line is for every other way in. */}
+              {p.how?.kind !== 'trade' && <p className="playersheet__pedigree">{pedigree}</p>}
+              {/* The trade that brought him, in place: who went each way and the wire's sentence. */}
+              {p.how?.kind === 'trade' && <TradeRecap player={p} toId={teamId} />}
             </div>
           )}
 
-          {(p.contract || p.onForty) && (
+          {/* No ledger on file (most minor leaguers): no section, rather than one saying so. */}
+          {p.contract && (
             <div className="playersheet__section">
               <h3 className="t-label">Contract</h3>
               <ContractDetail c={p.contract} value={p.value} age={p.age} />

@@ -31,3 +31,17 @@ export function groupTrade(rows, playerId, toId) {
     other: deal.some((r) => !r.person),
   }
 }
+
+// The trade as one sentence from the player's side, for the player sheet's
+// "How he got here": "Came from Seattle on July 24, 2025, with Brandyn Garcia,
+// for Josh Naylor." `extras` are the wire's non-player pieces ("cash",
+// "a player to be named later") the other club got.
+const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
+const longDate = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+export function tradeLead(trade, playerId, from, extras = []) {
+  const with_ = trade.got.filter((p) => p.id !== playerId).map((p) => p.name)
+  const for_ = [...trade.gave.map((p) => p.name), ...extras]
+  const withText = with_.length ? `, with ${listOf(with_)}` : ''
+  const forText = for_.length ? `, for ${listOf(for_)}` : ''
+  return `Came from ${from} on ${longDate(trade.date)}${withText}${forText}.`
+}

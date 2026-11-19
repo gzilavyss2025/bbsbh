@@ -63,6 +63,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
       </li>
     )
   }
+  const stamped = p.war == null && Boolean(p.topRank || p.orgRank)
   return (
     <li className={['tradedesk__row', enter && 'tradedesk__row--enter', goingTo && 'tradedesk__row--going'].filter(Boolean).join(' ')}>
       <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -74,19 +75,24 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           <span className="tradedesk__name">{p.name}</span>
           <span className="t-label tradedesk__meta">
             {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
-            {p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : ''}
+            {!stamped && (p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : '')}
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
           {p.retainedUsd ? <span className="tradedesk__kept">Keeps {money(p.retainedUsd)}</span> : null}
         </span>
-        <span className="tradedesk__money">
-          <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-          <span className="tradedesk__years">{yearsText(p)}</span>
-        </span>
-        <span className="tradedesk__figcol">
-          <span className="tradedesk__war">{figText(p, farm).value}</span>
-          <span className="tradedesk__warlabel">{figText(p, farm).label}</span>
-        </span>
+        {/* A ranked prospect with no big-league record: the deal row's stamp, the same rule. */}
+        {stamped ? <ProspectStamp p={p} teamId={teamId} /> : (
+          <>
+            <span className="tradedesk__money">
+              <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+              <span className="tradedesk__years">{yearsText(p)}</span>
+            </span>
+            <span className="tradedesk__figcol">
+              <span className="tradedesk__war">{figText(p, farm).value}</span>
+              <span className="tradedesk__warlabel">{figText(p, farm).label}</span>
+            </span>
+          </>
+        )}
       </button>
       {/* + and − take less room than words, so the row keeps its figures. */}
       {goingTo ? <span className="tradedesk__going">Being traded to {goingTo}</span> : null}
