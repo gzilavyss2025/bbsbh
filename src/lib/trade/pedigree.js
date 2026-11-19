@@ -83,3 +83,23 @@ export function pedigreeLine(how, draft, abbr = () => null) {
   const head = [HOW_LABEL[how.kind] ?? 'Joined', from].filter(Boolean).join(' · ')
   return [`${head} ${yy(how.date.slice(0, 4))}`, pick].filter(Boolean).join(' · ')
 }
+
+// The December he first becomes eligible for the Rule 5 draft if his club has
+// not added him to its 40-man roster (MLB's rule): a player 18 or younger on
+// June 5 before he signed his first contract is eligible from the fifth Rule 5
+// draft after signing, one 19 or older from the fourth. Rule 5 drafts are held
+// each December, so a player who signs in year Y meets his first that December.
+// His first contract is the draft he signed out of, else his first free-agent
+// signing (an international amateur). Null without a birth date or a signing.
+export function rule5Year(person) {
+  const draft = draftOf(person)
+  const firstSigning = (person?.transactions ?? [])
+    .filter((t) => t.typeCode === 'SFA' && t.date)
+    .map((t) => Number(t.date.slice(0, 4)))
+    .sort((a, b) => a - b)[0]
+  const signYear = draft?.year ?? firstSigning ?? null
+  if (!signYear || !person?.birthDate) return null
+  const age = ageOn(person.birthDate, `${signYear}-06-05`)
+  if (age == null) return null
+  return signYear + (age <= 18 ? 4 : 3)
+}

@@ -113,6 +113,7 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   for (const p of [...forty, ...minors, ...others]) {
     p.how = pedigree[p.id]?.how ?? null
     p.draft = pedigree[p.id]?.draft ?? null
+    p.rule5 = pedigree[p.id]?.rule5 ?? null
     p.levelCode = levelAt(p.id) ?? (p.onForty ? 'MLB' : null)
     // Throwing hand, for the wire's RHP / LHP.
     p.throws = orgById.get(p.id)?.pitchHand?.code ?? null

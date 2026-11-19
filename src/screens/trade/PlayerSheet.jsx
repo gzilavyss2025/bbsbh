@@ -61,6 +61,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
             <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full />
             {/* Whether a club can send him down sits with his other roster facts. */}
             {p.contract && optionStatus(p.contract.service, p.contract.options) && <span>{optionStatus(p.contract.service, p.contract.options)}</span>}
+            {rule5Text(p) && <span><span className="tradedesk__k">Rule 5</span> {rule5Text(p)}</span>}
           </p>}
 
           <div className="playersheet__grid">
@@ -191,6 +192,18 @@ function ValueTiles({ p, nextYear }) {
   )
 }
 
+// A minor leaguer's Rule 5 line: when his club must add him to the 40-man or
+// risk losing him in December's Rule 5 draft (lib/trade/pedigree.js rule5Year).
+// A 40-man player is protected, so he has none.
+function rule5Text(p, now = new Date()) {
+  if (p.onForty || !p.rule5) return null
+  const year = now.getFullYear()
+  // The Rule 5 draft is held in December: before it, this year's class is still ahead.
+  if (p.rule5 > year) return `Eligible Dec ${p.rule5}`
+  if (p.rule5 === year && now.getMonth() < 11) return 'Eligible this December'
+  return 'Eligible now'
+}
+
 // A prospect's lead, in place of the contract tiles he has no figures for:
 // the deal card's rubber stamp drawn big (his rank, its tier, whose list),
 // then the four facts a prospect has instead: his value by rank, where he
@@ -200,6 +213,7 @@ function ProspectLead({ p, teamId, farm, pedigree }) {
   const facts = [
     ['Prospect value', money(p.value.surplusUsd)],
     (farm?.level ?? p.level) ? ['Plays at', farm?.level ?? p.level] : null,
+    rule5Text(p) ? ['Rule 5', rule5Text(p)] : null,
     pedigree ? ['Came up', pedigree] : null,
   ].filter(Boolean)
   return (

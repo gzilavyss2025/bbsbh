@@ -3,7 +3,7 @@
 // Rows are shaped like statsapi's /people?hydrate=draft,transactions, trimmed.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { acquisitionOf, draftOf, pedigreeLine } from '../src/lib/trade/pedigree.js'
+import { acquisitionOf, draftOf, pedigreeLine, rule5Year } from '../src/lib/trade/pedigree.js'
 import { depthGrid, thinnest, needBy } from '../src/lib/trade/depth.js'
 
 const MIL = 158
@@ -95,4 +95,19 @@ test('need by WAR and by starter read the players left near the majors', () => {
   const starter = needBy(rows, 'starter', { count: 6 })
   assert.equal(starter.find((n) => n.slot === '2B').starter, false)
   assert.equal(starter.find((n) => n.slot === 'SS').best.name, 'Ortiz')
+})
+
+test('a minor leaguer is Rule 5 eligible four or five drafts after he signs, by his age then', () => {
+  // A high-schooler drafted in July 2022, 18 on June 5: the fifth December after he signs.
+  const hs = { birthDate: '2004-02-10', drafts: [{ year: '2022', team: { id: 136 } }], transactions: [] }
+  assert.equal(rule5Year(hs), 2026)
+  // A college pick, 21 on June 5 of his draft year: the fourth.
+  const college = { birthDate: '2001-01-15', drafts: [{ year: '2024', team: { id: 158 } }], transactions: [] }
+  assert.equal(rule5Year(college), 2027)
+  // An international amateur signed at 16 in January 2024: his first signing, the fifth.
+  const intl = { birthDate: '2007-05-01', drafts: [], transactions: [{ typeCode: 'SFA', date: '2024-01-15', toTeam: { id: 158 } }] }
+  assert.equal(rule5Year(intl), 2028)
+  // No birth date or no signing on file: nothing to say.
+  assert.equal(rule5Year({ drafts: [{ year: '2024' }], transactions: [] }), null)
+  assert.equal(rule5Year({ birthDate: '2001-01-15', drafts: [], transactions: [] }), null)
 })

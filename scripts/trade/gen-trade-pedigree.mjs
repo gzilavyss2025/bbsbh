@@ -24,7 +24,7 @@ import { mkdir } from 'node:fs/promises'
 import { writeJsonAtomic } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
-import { acquisitionOf, draftOf } from '../../src/lib/trade/pedigree.js'
+import { acquisitionOf, draftOf, rule5Year } from '../../src/lib/trade/pedigree.js'
 
 const here = import.meta.dirname
 const outDir = join(here, '..', '..', 'public', 'data', 'trade-pedigree')
@@ -51,6 +51,8 @@ for (const team of teams) {
       players[p.id] = {
         how: acquisitionOf(p, team.id, { orgOf }),
         draft: draftOf(p),
+        // The December he is first Rule 5 eligible off the 40-man (null when unknown).
+        rule5: rule5Year(p),
       }
     }
   }
