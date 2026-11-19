@@ -1,6 +1,7 @@
 // The trade simulator's value model (src/lib/trade/value.js).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { salaryText, money } from '../src/lib/trade/deal.js'
 import { marcel, playerValue, prospectValue, gradeOf, verdictOf, VALUE } from '../src/lib/trade/value.js'
 
 test('the projection weights recent seasons 5/4/3 and regresses toward the mean', () => {
@@ -63,4 +64,20 @@ test('retained salary raises the receiving club\'s surplus by what it no longer 
 test('a side’s surplus reads as a letter grade and the deal as one verdict', () => {
   assert.deepEqual([150e6, 60e6, 25e6, 0, -30e6, -60e6, -150e6].map(gradeOf), ['A+', 'A', 'B+', 'B', 'C', 'D', 'F'])
   assert.deepEqual([5e6, -30e6, 70e6, 114.5e6].map(verdictOf), ['fair', 'win', 'big', 'steal'])
+})
+
+// The roster row's salary (deal.js salaryText) and the player sheet's contract
+// ledger (value.years) must name the same 2027 figure. The row reads payEstUsd,
+// which side.js copies from the value; the sheet reads the value's first year.
+test('the roster row salary matches the sheet\'s first contract year', () => {
+  const arb = star({ contract: { regime: 'arbitration', service: { years: 4 }, cells: [{ year: 2026, kind: 'salary', value: 3e6 }, { year: 2027, kind: 'arbitration', code: 'A2' }] } })
+  const pre = star({ contract: { regime: 'pre_arb', service: { years: 1 }, cells: [{ year: 2026, kind: 'none' }] } })
+  for (const p of [arb, pre]) {
+    const v = playerValue(p, { nextYear: 2027, warSeason: 2026 })
+    const row = { ...p, payUsd: null, payLabel: p === arb ? 'Arb 2' : 'Pre-arb', payEstUsd: v.payEstUsd }
+    assert.equal(v.years[0].year, 2027)
+    assert.equal(salaryText(row), money(v.years[0].pay))
+  }
+  // Before values load, a pre-arb row still shows the minimum, never pay earned this year.
+  assert.equal(salaryText({ onForty: true, payUsd: null, payLabel: 'Pre-arb', lastSalaryUsd: 75e3 }), money(VALUE.minSalary))
 })

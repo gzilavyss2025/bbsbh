@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { money } from '../../lib/trade/deal.js'
-import { VALUE } from '../../lib/trade/value.js'
+import { money, salaryText } from '../../lib/trade/deal.js'
 import { ordinal } from '../../lib/format.js'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
@@ -106,19 +105,6 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
   )
 }
 
-// The salary column: next season's (the deal's season) contract salary, or the
-// card's estimate once values load (value.js). Never the pay earned so far this
-// year, which reads below the minimum for a call-up. A pre-arb player is at the
-// minimum; an arbitration or option year not yet set says so until estimated.
-function salaryText(p) {
-  if (p.payUsd != null) return money(p.payUsd)
-  if (p.payEstUsd != null) return money(p.payEstUsd)
-  if (p.onForty) return p.payLabel && p.payLabel !== 'Pre-arb' ? p.payLabel : money(VALUE.minSalary)
-  // A minor leaguer has no salary on file (MiLB pay is the level minimum, not
-  // tracked per player), so the column says so rather than guessing a figure.
-  if (!p.onForty) return 'MiLB'
-  return '—'
-}
 
 // The line under the salary, as the Trade Machine wrote it: "3 Years", how
 // long the club holds him (a signed deal's years, or an arbitration or pre-arb

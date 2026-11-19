@@ -6,7 +6,7 @@
 // and cash. The card states what moves; it never grades who wins.
 
 import { moneyLabel } from '../format.js'
-import { PICK_VALUE } from './value.js'
+import { PICK_VALUE, VALUE } from './value.js'
 
 // Next season's pay. A guaranteed figure is a number; an arbitration year, a
 // club option or a pre-arbitration year has no fixed figure yet, so it
@@ -291,4 +291,17 @@ export function cbPicksOf(data, year) {
     }
   }
   return picks
+}
+
+// The salary column: next season's (the deal's season) contract salary, or the
+// card's estimate once values load (value.js). Never the pay earned so far this
+// year, which reads below the minimum for a call-up. A pre-arb player is at the
+// minimum; an arbitration or option year not yet set says so until estimated.
+export function salaryText(p) {
+  if (p.payUsd != null) return money(p.payUsd)
+  if (p.payEstUsd != null) return money(p.payEstUsd)
+  if (p.onForty) return p.payLabel && p.payLabel !== 'Pre-arb' ? p.payLabel : money(VALUE.minSalary)
+  // A minor leaguer has no salary on file (MiLB pay is the level minimum, not
+  // tracked per player), so the column says so rather than guessing a figure.
+  return 'MiLB'
 }
