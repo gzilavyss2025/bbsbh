@@ -215,7 +215,30 @@
   line-height: var(--lh-prose);
 }
 
-/* The roster card's club bar runs edge to edge across the top of the card. */
-.tradedesk__band {
+/* The roster card's club bar: the Identity Lab's main bar (17-identity-lab-
+   workbench.css's .idlab__barmock), edge to edge across the top of the card. */
+/* layout-exempt: the mark beside the club name, centred in the bar */
+.tradedesk__clubbar {
+  height: var(--space-12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  background: var(--clubbar-fill, var(--navy));
+  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: var(--clubbar-ink, var(--text-on-ink-bright));
+}
+
+.tradedesk__clubbarmark {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+/* A light bar re-inks the flat mono mark dark, as the lab and the lineup bar do (ADR-0030). */
+.tradedesk__clubbar--darkmark .tradedesk__clubbarmark {
+  filter: brightness(0);
 }

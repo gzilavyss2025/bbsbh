@@ -13,8 +13,7 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
-import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
-import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/colors/headerTheme.js'
+import { headerThemeFor, barMarkTone, themeKeyFor } from '../../lib/colors/headerTheme.js'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
@@ -407,11 +406,17 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
   if (part === 'roster') {
     return (
       <Card frame="stamped" className="tradedesk__side tradedesk__rostercard">
-        {/* The club's own bar, as the team hub wears it: Identity Lab's tuned
-            colours for its main jersey, and its one-colour mark on the right. */}
-        <div className={`tradedesk__band ${headerThemeClass(theme)}`} style={headerThemeStyle(theme)}>
-          <SectionHead look="band" club as="h2" mark={<TeamLogo teamId={teamId} variant="mono" size={28} />}>{club} roster</SectionHead>
-        </div>
+        {/* The club's main bar, the one the Identity Lab tunes and the lineup page
+            wears: its bar colour, accent edge and ink, the mono mark bleeding the
+            bar's full height, the full club name centred. Default navy when the
+            club has no tuned bar. */}
+        <h2
+          className={`tradedesk__clubbar${barMarkTone(theme?.onBar) === 'dark' ? ' tradedesk__clubbar--darkmark' : ''}`}
+          style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
+        >
+          <TeamLogo teamId={teamId} variant="mono" crop="bar" className="tradedesk__clubbarmark" />
+          <span>{teamFullName(teamId)}</span>
+        </h2>
       {state.loading && !data && <p className="hint" role="status">Reading the {club} roster…</p>}
       {state.error && !data && (
         <EmptyState role="alert"><p>The {club} roster did not load.</p><Button skin="ink" onClick={state.reload}>Try again</Button></EmptyState>
