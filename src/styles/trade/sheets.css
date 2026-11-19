@@ -250,3 +250,44 @@
   font-size: var(--fs-small);
   font-variant-numeric: tabular-nums;
 }
+
+/* The player sheet takes most of the page: his action photo in a column at
+   the wide step, his numbers, seasons and contract beside it. */
+.sheet.tradesheet.playersheet {
+  max-width: min(72rem, calc(100vw - var(--space-4) * 2));
+}
+
+.playersheet__photo {
+  margin: var(--space-3) 0 0;
+}
+
+.playersheet__photo img {
+  display: block;
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+  object-position: top;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.playersheet__photo--loading {
+  display: none;
+}
+
+.playersheet__main {
+  min-width: 0;
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: a fixed photo column beside the sheet's body */
+  .playersheet__grid:has(> .playersheet__photo:not(.playersheet__photo--loading)) {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .playersheet__photo img {
+    max-height: none;
+  }
+}

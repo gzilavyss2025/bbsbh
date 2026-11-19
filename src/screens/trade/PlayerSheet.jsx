@@ -15,6 +15,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { FactSheet } from '../../components/transactions/FactSheet.jsx'
 import { isoToday } from '../../lib/dates.js'
+import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 
 const DASH = '—'
 
@@ -36,7 +37,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
   return (
     <ModalPortal>
       <div className="scrim" onClick={(e) => e.target.classList.contains('scrim') && onClose()}>
-        <div className="sheet tradesheet" role="dialog" aria-modal="true" aria-label={p.name}>
+        <div className="sheet tradesheet playersheet" role="dialog" aria-modal="true" aria-label={p.name}>
           <div className="tradesheet__head">
             <div className="playersheet__id">
               <Headshot personId={p.id} name={p.name} teamId={teamId} isMlb={p.onForty} className="tradedesk__face" />
@@ -51,6 +52,9 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
 
+          <div className="playersheet__grid">
+          <ActionPhoto id={p.id} name={p.name} />
+          <div className="playersheet__main">
           <p className="tradedesk__nums playersheet__nums"><Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full /></p>
 
           {p.value && <ValueLine v={p.value} nextYear={nextYear} />}
@@ -83,6 +87,9 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
               {children}
             </div>
           )}
+
+          </div>
+          </div>
 
           <div className="playersheet__actions">
             <Button skin={picked ? 'ink' : 'outline'} pressed={picked} onClick={() => onToggle(p.id)}>
@@ -145,5 +152,19 @@ function ValueLine({ v, nextYear }) {
       <span><span className="tradedesk__k">{v.prospect ? 'Prospect value' : 'Surplus value'}</span> {surplus}</span>
       {v.years.length > 0 && <span><span className="tradedesk__k">Over</span> {v.years.length} {v.years.length === 1 ? 'year' : 'years'}</span>}
     </p>
+  )
+}
+
+// His action photo (the player page's hero art, lib/headshot/actionPhoto.js),
+// shown only once it loads: a minor leaguer or a player with none keeps a
+// sheet with no empty frame.
+function ActionPhoto({ id, name }) {
+  const [state, setState] = useState('loading')
+  const url = actionPhotoUrl(id)
+  if (!url || state === 'gone') return null
+  return (
+    <figure className={`playersheet__photo${state === 'ready' ? '' : ' playersheet__photo--loading'}`}>
+      <img src={url} alt={name} onLoad={() => setState('ready')} onError={() => setState('gone')} />
+    </figure>
   )
 }
