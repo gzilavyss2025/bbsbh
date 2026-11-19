@@ -5,7 +5,6 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerSheet } from './PlayerSheet.jsx'
-import { Numbers } from './Numbers.jsx'
 
 const DASH = '—'
 
@@ -13,7 +12,7 @@ const DASH = '—'
 // attribute line and one line of numbers open the player sheet (contract,
 // pedigree, the trade that brought him, retained salary). Add or Remove is the
 // row's only other control.
-export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeason = null, enter = false, rank = null, compact = false, children = null }) {
+export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeason = null, enter = false, rank = null, compact = false, goingTo = null, children = null }) {
   const [open, setOpen] = useState(false)
   const sheet = open && (
     <PlayerSheet p={p} teamId={teamId} nextYear={nextYear} farm={farm} warSeason={warSeason} picked={picked} onToggle={onToggle} onClose={() => setOpen(false)}>
@@ -51,21 +50,30 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     )
   }
   return (
-    <li className={enter ? 'tradedesk__row tradedesk__row--enter' : 'tradedesk__row'}>
+    <li className={['tradedesk__row', enter && 'tradedesk__row--enter', goingTo && 'tradedesk__row--going'].filter(Boolean).join(' ')}>
       <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
         {/* A prospect off the 40-man has only a minor-league photo: isMlb={false} lets Headshot try that rung. */}
         <Headshot personId={p.id} name={p.name} teamId={teamId} isMlb={p.onForty} className="tradedesk__face" />
+        {/* The Trade Machine's roster line: name over position, salary over
+            years, then the one figure (WAR here, PER there). */}
         <span className="tradedesk__who">
           <span className="tradedesk__name">{p.name}</span>
           <span className="t-label tradedesk__meta">
-            {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
-            {p.topRank ? ` · No. ${p.topRank} MLB prospect` : p.orgRank ? ` · No. ${p.orgRank} club prospect` : ''}
+            {p.pos || DASH}{p.age != null ? ` · ${p.age}` : ''}
+            {p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : ''}
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
-          <span className="tradedesk__nums">
-            <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} />
-          </span>
           {p.retainedUsd ? <span className="tradedesk__kept">Keeps {money(p.retainedUsd)}</span> : null}
+          {/* The Trade Machine's "Being Traded To": he stays on his roster, marked. */}
+          {goingTo ? <span className="tradedesk__going">In the deal → {goingTo}</span> : null}
+        </span>
+        <span className="tradedesk__money">
+          <span className="tradedesk__salary">{salaryText(p, farm)}</span>
+          <span className="tradedesk__years">{yearsText(p)}</span>
+        </span>
+        <span className="tradedesk__figcol">
+          <span className="tradedesk__war">{figText(p, farm).value}</span>
+          <span className="tradedesk__warlabel">{figText(p, farm).label}</span>
         </span>
       </button>
       <Button size="tap" skin={picked ? 'ink' : 'outline'} pressed={picked} onClick={() => onToggle(p.id)}>
@@ -74,4 +82,31 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
       {sheet}
     </li>
   )
+}
+
+// The salary column: next season's pay, or what kind of year it is, or the
+// minor-league level for a player with no big-league contract.
+function salaryText(p, farm) {
+  if (p.payUsd != null) return money(p.payUsd)
+  if (p.payLabel) return p.payLabel
+  if (!p.onForty) return farm?.level ?? p.level ?? 'Minors'
+  return '—'
+}
+
+// The line under the salary, as the Trade Machine wrote it: "3 Years", how
+// long the club holds him (a signed deal's years, or an arbitration or pre-arb
+// player's years until free agency). "~" marks a count estimated from service time.
+function yearsText(p) {
+  if (p.control == null || (!p.onForty && !p.contract)) return ''
+  const n = p.control
+  const est = p.controlRough ? '~' : ''
+  return `${est}${n} ${n === 1 ? 'Year' : 'Years'}`
+}
+
+// The one figure: last season's WAR, or a minor leaguer's OPS or ERA.
+function figText(p, farm) {
+  if (p.war != null) return { value: p.war.toFixed(1), label: 'WAR' }
+  if (farm?.ops) return { value: farm.ops, label: 'OPS' }
+  if (farm?.era) return { value: farm.era, label: 'ERA' }
+  return { value: '—', label: 'WAR' }
 }

@@ -1,6 +1,5 @@
 /* The trade card's sheets (src/screens/trade/): the trade that brought a
-   player (TradeSheet), one player's details (PlayerSheet) and a club's roster
-   (RosterSheet). Each is a stamped card on the app's .scrim/.sheet contract.
+   player (TradeSheet), and one player's details (PlayerSheet). Each is a stamped card on the app's .scrim/.sheet contract.
    Imported by the page. */
 
 /* The trade sheet: a stamped card (square, 2px ink, hard shadow) like the

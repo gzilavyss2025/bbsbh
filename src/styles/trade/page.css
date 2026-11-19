@@ -383,12 +383,75 @@
   color: var(--text-caption);
 }
 
-.tradedesk__retainlink,
-.tradedesk__retainbar,
-.tradedesk__moves .tradedesk__actions {
-  max-width: 40rem;
-  margin-inline: auto;
+/* The banner on top: one line, centred, one colour, like the Trade
+   Machine's "This Trade is Successful!" but stating a fact. */
+.tradedesk__verdict {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-label);
+  text-align: center;
 }
+
+.tradedesk__verdict--go {
+  background: var(--accent-tint);
+  color: var(--accent-positive-deep);
+}
+
+.tradedesk__verdict--stop {
+  background: var(--surface-event-wash);
+  color: var(--text-heading);
+}
+
+.tradedesk__verdict--stop p {
+  margin: 0;
+}
+
+.tradedesk__verdict--stop ul {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: normal;
+  color: var(--accent-negative);
+}
+
+.tradedesk__verdict--wait {
+  background: var(--surface-card);
+  color: var(--text-muted);
+}
+
+/* What the deal does for one club, under its haul. */
+.tradedesk__effect {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-inset);
+  border-top: var(--bw-rule) solid var(--border-stamped);
+}
+
+/* layout-exempt: the club's three figures on one line, wrapping on a phone */
+.tradedesk__effectfigs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+
+/* layout-exempt: a figure's label over its value */
+.tradedesk__effectfigs > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.tradedesk__sentence {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
 
 .tradedesk__info {
   max-width: 40rem;
@@ -410,14 +473,96 @@
 }
 
 .tradedesk__clubactions > .tradedesk__cash,
-.tradedesk__clubactions > .tradedesk__browse {
+.tradedesk__clubactions > /* The club's own roster, inside its column, in a box that scrolls. */
+.tradedesk__roster {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* layout-exempt: the roster's name, its (i) and the cash button on one line */
+.tradedesk__rosterhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradedesk__rosterhead h3 {
+  margin: 0;
+  color: var(--text-heading);
+}
+
+.tradedesk__rosterhead > .tradedesk__cash {
+  margin: 0 0 0 auto;
+}
+
+.tradedesk__rosterlist {
+  max-height: 34rem;
+  overflow-y: auto;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The roster row, Trade Machine style: face | name over position |
+   salary over years | WAR | Add. Columns line up down the list. */
+.tradedesk__rosterlist .tradedesk__open {
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) 6.5rem 3rem;
+  gap: var(--space-2);
+}
+
+/* layout-exempt: the salary over its years, both on one left edge */
+.tradedesk__money,
+.tradedesk__figcol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__figcol {
+  align-items: flex-end;
+}
+
+.tradedesk__salary {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.tradedesk__years,
+.tradedesk__warlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+.tradedesk__war {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+/* A player in the deal stays on his roster, dimmed and marked where he goes. */
+.tradedesk__row--going .tradedesk__open {
+  opacity: 0.6;
+}
+
+.tradedesk__going {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.tradedesk__browse {
   margin-top: 0;
 }
 
 .tradedesk__notes {
-  max-width: 40rem;
-  margin-inline: auto;
-  margin: var(--space-4) 0 0;
+  margin: 0;
   padding-left: var(--space-5);
   font-size: var(--fs-small);
   line-height: var(--lh-prose);

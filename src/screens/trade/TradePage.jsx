@@ -18,7 +18,6 @@ import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
 import { DepthCard } from './DepthCard.jsx'
-import { RosterSheet } from './RosterSheet.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/motion.css'
@@ -155,6 +154,11 @@ export function TradePage() {
 
   const sideA = useAsync(() => loadTradeSide(a), [a])
   const sideB = useAsync(() => (b ? loadTradeSide(b) : Promise.resolve(null)), [b])
+  // Each club's minor-league lines load the first time its roster reaches past
+  // the 40-man; the page holds them so the other column can read them too.
+  const [wantFarm, setWantFarm] = useState({ a: false, b: false })
+  const farmA = useAsync(() => (wantFarm.a ? loadMinorLines(a) : Promise.resolve(null)), [wantFarm.a, a])
+  const farmB = useAsync(() => (wantFarm.b && b ? loadMinorLines(b) : Promise.resolve(null)), [wantFarm.b, b])
 
   const toggle = (id) => setPicked((s) => {
     const n = new Set(s)
@@ -208,7 +212,7 @@ export function TradePage() {
       <Button size="control" skin="ghost" onClick={() => setPending(null)}>Keep the deal</Button>
     </p>
   )
-  // The pinned strip repeats What moves, so it hides while that card is on screen.
+  // The pinned strip repeats the columns' figures, so it hides while they are on screen.
   const movesRef = useRef(null)
   const hasDeal = Boolean(sideA.data && sideB.data)
   const [movesInView, setMovesInView] = useState(false)
@@ -232,6 +236,26 @@ export function TradePage() {
       setShared('')
     }
   }
+  const changeA = choosingA
+    ? (
+      <>
+        <TeamFilterStrip chips showMlbPin={false} selectedTeamId={a} centerTeamId={a} onSelect={pickA} ariaLabel="Your club" />
+        <Button size="control" skin="ghost" onClick={() => { setChoosingA(false); setPending(null) }}>Cancel</Button>
+        {pending?.side === 'a' && confirm}
+      </>
+    )
+    : <Button size="control" skin="ghost" onClick={() => setChoosingA(true)}>Change club</Button>
+  const changeB = choosingB
+    ? (
+      <>
+        <TeamFilterStrip chips showMlbPin={false} selectedTeamId={b} centerTeamId={b}
+          teams={ALL_MLB_TEAM_IDS.filter((id) => id !== a).map((id) => ({ id, name: teamClubName(id) }))}
+          onSelect={pickB} ariaLabel="Trade partner" />
+        <Button size="control" skin="ghost" onClick={() => { setChoosingB(false); setPending(null) }}>Cancel</Button>
+        {pending?.side === 'b' && confirm}
+      </>
+    )
+    : <Button size="control" skin="ghost" onClick={() => setChoosingB(true)}>Change partner</Button>
   const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (
@@ -242,109 +266,98 @@ export function TradePage() {
       </header>
 
       <Stack gap="section">
-        <div className="tradedesk__sides">
-          <Side
-            teamId={a}
-            state={sideA}
-            sends={sends(sideA.data)}
-            picked={picked}
-            onToggle={toggle}
-            cash={cashA}
-            onCash={setCashA}
-            after={deal?.fortyAfter.a}
-            retainUI={retainUI}
-            change={
-              choosingA
-                ? (
-                  <>
-                    <TeamFilterStrip chips showMlbPin={false} selectedTeamId={a} centerTeamId={a} onSelect={pickA} ariaLabel="Your club" />
-                    <Button size="control" skin="ghost" onClick={() => { setChoosingA(false); setPending(null) }}>Cancel</Button>
-                    {pending?.side === 'a' && confirm}
-                  </>
-                )
-                : <Button size="control" skin="ghost" onClick={() => setChoosingA(true)}>Change club</Button>
-            }
-          />
+        {deal && <Verdict deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} />}
+
+        <div className="tradedesk__sides" ref={movesRef}>
           {b ? (
-            <Side
-              teamId={b}
-              state={sideB}
-              sends={sends(sideB.data)}
-              picked={picked}
-              onToggle={toggle}
-              cash={cashB}
-              onCash={setCashB}
-              after={deal?.fortyAfter.b}
-              retainUI={retainUI}
-              change={
-                choosingB
-                  ? (
-                    <>
-                      <TeamFilterStrip chips showMlbPin={false} selectedTeamId={b} centerTeamId={b}
-                        teams={ALL_MLB_TEAM_IDS.filter((id) => id !== a).map((id) => ({ id, name: teamClubName(id) }))}
-                        onSelect={pickB} ariaLabel="Trade partner" />
-                      <Button size="control" skin="ghost" onClick={() => { setChoosingB(false); setPending(null) }}>Cancel</Button>
-                      {pending?.side === 'b' && confirm}
-                    </>
-                  )
-                  : <Button size="control" skin="ghost" onClick={() => setChoosingB(true)}>Change partner</Button>
-              }
-            />
-          ) : (
-            <Card frame="stamped" label="Trade partner" className="tradedesk__side">
-              <TeamFilterStrip
-                chips
-                showMlbPin={false}
-                teams={ALL_MLB_TEAM_IDS.filter((id) => id !== a).map((id) => ({ id, name: teamClubName(id) }))}
-                selectedTeamId={b}
-                onSelect={pickB}
-                ariaLabel="Trade partner"
+            <>
+              {/* Each column is one club: what it gets, what that does for it, then its own roster. */}
+              <Side
+                teamId={a}
+                state={sideA}
+                incoming={sends(sideB.data)}
+                incomingTeamId={b}
+                incomingCash={cashB}
+                partner={teamClubName(b)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashA}
+                onCash={setCashA}
+                after={deal?.fortyAfter.a}
+                effect={deal && <Effect club={teamClubName(a)} pay={deal.payroll.a} unset={deal.unpriced.a} war={deal.war.a} inYrs={deal.control.aIn} outYrs={deal.control.aOut} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                retainUI={retainUI}
+                change={changeA}
+                farm={farmA.data}
+                incomingFarm={farmB.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
               />
-            </Card>
+              <Side
+                teamId={b}
+                state={sideB}
+                incoming={sends(sideA.data)}
+                incomingTeamId={a}
+                incomingCash={cashA}
+                partner={teamClubName(a)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashB}
+                onCash={setCashB}
+                after={deal?.fortyAfter.b}
+                effect={deal && <Effect club={teamClubName(b)} pay={deal.payroll.b} unset={deal.unpriced.b} war={deal.war.b} inYrs={deal.control.aOut} outYrs={deal.control.aIn} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                retainUI={retainUI}
+                change={changeB}
+                farm={farmB.data}
+                incomingFarm={farmA.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, b: true }))}
+              />
+            </>
+          ) : (
+            <>
+              <Side
+                teamId={a}
+                state={sideA}
+                incoming={[]}
+                incomingTeamId={null}
+                incomingCash={0}
+                partner={null}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashA}
+                onCash={setCashA}
+                change={changeA}
+                farm={farmA.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
+              />
+              <Card frame="stamped" label="Trade partner" className="tradedesk__side">
+                <TeamFilterStrip
+                  chips
+                  showMlbPin={false}
+                  teams={ALL_MLB_TEAM_IDS.filter((id) => id !== a).map((id) => ({ id, name: teamClubName(id) }))}
+                  selectedTeamId={b}
+                  onSelect={pickB}
+                  ariaLabel="Trade partner"
+                />
+              </Card>
+            </>
           )}
         </div>
 
-
         {deal && (
-          <div ref={movesRef}>
-          <Card frame="stamped" label="What moves" className="tradedesk__moves">
-            <table className="tradedesk__totals">
-              <thead>
-                <tr>
-                  <th scope="col"><TeamLogo teamId={a} size={28} /><span>{teamClubName(a)}</span></th>
-                  <th scope="col"><span className="sr-only">Measure</span></th>
-                  <th scope="col"><span>{teamClubName(b)}</span><TeamLogo teamId={b} size={28} /></th>
-                </tr>
-              </thead>
-              <tbody>
-                <Row label={`${sideA.data.nextYear} payroll`} a={signedMoney(deal.payroll.a)} b={signedMoney(deal.payroll.b)} noteA={tbd(deal.unpriced.a)} noteB={tbd(deal.unpriced.b)} />
-                <Row label={`${sideA.data.warSeason ?? 'Last season'} WAR`} a={signedNum(deal.war.a)} b={signedNum(deal.war.b)} toneA={tone(deal.war.a)} toneB={tone(deal.war.b)} />
-                <Row label="Years of control" a={`+${deal.control.aIn} / −${deal.control.aOut}`} b={`+${deal.control.aOut} / −${deal.control.aIn}`} />
-                <Row label="40-man after" a={`${deal.fortyAfter.a}/40`} b={`${deal.fortyAfter.b}/40`} toneA={deal.fortyAfter.a > 40 ? 'down' : ''} toneB={deal.fortyAfter.b > 40 ? 'down' : ''}
-                  noteA={deal.fortyAfter.a > 40 ? `clear ${deal.fortyAfter.a - 40}` : null} noteB={deal.fortyAfter.b > 40 ? `clear ${deal.fortyAfter.b - 40}` : null} />
-              </tbody>
-            </table>
-            {deal.notes.filter((n) => !/no set salary/.test(n)).length > 0 && (
+          <Card frame="stamped" label="The deal" className="tradedesk__moves">
+            {otherNotes(deal.notes).length > 0 && (
               <ul className="tradedesk__notes" aria-live="polite">
-                {deal.notes.filter((n) => !/no set salary/.test(n)).map((n) => <li key={n}>{n}</li>)}
+                {otherNotes(deal.notes).map((n) => <li key={n}>{n}</li>)}
               </ul>
-            )}
-            {deal.unpriced.a > 0 && (
-              <div className="infopop-row tradedesk__info">
-                <InfoPopover label="What TBD means" className="infopop--paper">
-                  TBD is a big-league salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.
-                </InfoPopover>
-              </div>
             )}
             {retainOpen ? (
               <div className="tradedesk__retainbar">
-              <Chips label="Retained salary" layout="wrap" value={retainMode} onChange={setRetainMode}
-                options={[{ value: 'pct', label: 'Retain % per player' }, { value: 'usd', label: 'Retain $ per player' }, { value: 'side', label: 'Retain % per side' }]} />
-              {retainMode === 'side' && [['a', a], ['b', b]].map(([key, id]) => (
-                <Chips key={key} label={`${teamClubName(id)} keep`} layout="wrap" value={sidePct[key]} onChange={(v) => setSidePct((x) => ({ ...x, [key]: v }))}
-                  options={PCTS.map((v) => ({ value: v, label: `${teamClubName(id)} keep ${v * 100}%` }))} />
-              ))}
-            </div>
+                <Chips label="Retained salary" layout="wrap" value={retainMode} onChange={setRetainMode}
+                  options={[{ value: 'pct', label: 'Retain % per player' }, { value: 'usd', label: 'Retain $ per player' }, { value: 'side', label: 'Retain % per side' }]} />
+                {retainMode === 'side' && [['a', a], ['b', b]].map(([key, id]) => (
+                  <Chips key={key} label={`${teamClubName(id)} keep`} layout="wrap" value={sidePct[key]} onChange={(v) => setSidePct((x) => ({ ...x, [key]: v }))}
+                    options={PCTS.map((v) => ({ value: v, label: `${teamClubName(id)} keep ${v * 100}%` }))} />
+                ))}
+              </div>
             ) : (
               <Button size="control" skin="ghost" className="tradedesk__retainlink" onClick={() => setRetainOpen(true)}>Retain salary…</Button>
             )}
@@ -353,7 +366,6 @@ export function TradePage() {
               <Button onClick={swap}>Swap sides</Button>
             </div>
           </Card>
-          </div>
         )}
         {deal && (showDepth
           ? (
@@ -381,7 +393,10 @@ export function TradePage() {
   )
 }
 
-function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, change, retainUI = null }) {
+// One club's column, the Trade Machine's shape: the club, what it gets from
+// the other club (and what that does for it), then its own roster right
+// there, where a tap sends a player across. No modal: the roster is the page.
+function Side({ teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
   const club = teamClubName(teamId)
   const data = state.data
   const [group, setGroup] = useState('all')
@@ -390,21 +405,17 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
   const [sort, setSort] = useState('name')
   const [minimum, setMinimum] = useState(true)
   const [query, setQuery] = useState('')
-  const [browsing, setBrowsing] = useState(false)
-  // The farm's season lines load the first time the list reaches past the 40-man.
-  const [wantFarm, setWantFarm] = useState(false)
-  const pickShow = (v) => { setShow(v); if (v !== 'forty') setWantFarm(true); if (v === 'prospects' && sort === 'name') setSort('prospect') }
-  const farm = useAsync(() => (wantFarm ? loadMinorLines(teamId) : Promise.resolve(null)), [wantFarm, teamId])
+  const pickShow = (v) => { setShow(v); if (v !== 'forty') requestFarm(); if (v === 'prospects' && sort === 'name') setSort('prospect') }
   const byLevel = sort === 'level'
   const cuts = useAsync(() => (byLevel ? fetchLevelLines() : Promise.resolve(null)), [byLevel])
-  // A player the reader adds stamps into the sends list. The ones a shared link
-  // or a reload brought are already there and do not replay it (docs/motion.md).
-  // The set is taken once, the first render the roster is in; adjusting state
-  // during render is React's documented pattern for this.
+  // A player the reader adds stamps into the column that gets him. The ones a
+  // shared link or a reload brought are already there and do not replay it
+  // (docs/motion.md). The set is taken once, the first render the deal is in;
+  // adjusting state during render is React's documented pattern for this.
   const [arrived, setArrived] = useState(null)
-  if (data && arrived === null) setArrived(new Set(sends.map((p) => p.id)))
+  if (data && arrived === null) setArrived(new Set(incoming.map((p) => p.id)))
   return (
-    <Card frame="stamped" label={`${club} send`} className="tradedesk__side">
+    <Card frame="stamped" label={club} className="tradedesk__side">
       {/* The club line: its mark, its 40-man count now and after the deal, and the switch. */}
       <div className="tradedesk__club">
         <TeamLogo teamId={teamId} size={40} />
@@ -427,42 +438,44 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
 
       {data && (
         <>
-          <div className="tradedesk__sends">
-            {/* The side's sends at a glance: how many, what they cost next season, and any cash. */}
-            <p className="tradedesk__sendshead">
-              <span className="t-label t-label--bold">Sends</span>
-              <span className="tradedesk__sendssum">{sendsSummary(sends, cash, data.nextYear)}</span>
-            </p>
-            {sends.length === 0 && !cash ? <p className="tradedesk__none">No one yet. Add a player from the {club} roster.</p> : (
-              <ul className="tradedesk__list">
-                {sends.map((p) => (
-                  <PlayerRow compact key={p.id} p={p} teamId={teamId} picked onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={farm.data?.get(p.id)} enter={arrived != null && !arrived.has(p.id)}>
-                    {retainUI && (p.payUsd != null || p.retainedUsd) ? retainUI(p) : null}
-                  </PlayerRow>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="tradedesk__clubactions">
-          <Button size="control" skin="ink" className="tradedesk__browse" onClick={() => { setBrowsing(true) }}>+ Add a player</Button>
-          {cash || addingCash ? (
-            <label className="tradedesk__cash">
-              <span className="t-label">Cash in {data.nextYear} ($M)</span>
-              <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
-                onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
-                onBlur={() => { if (!cash) setAddingCash(false) }} />
-            </label>
-          ) : (
-            <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ Cash</Button>
+          {partner && (
+            <div className="tradedesk__sends">
+              {/* What this club gets: the other club's players and cash, at a glance. */}
+              <p className="tradedesk__sendshead">
+                <span className="t-label t-label--bold">Gets from the {partner}</span>
+                <span className="tradedesk__sendssum">{sendsSummary(incoming, incomingCash, data.nextYear)}</span>
+              </p>
+              {incoming.length === 0 && !incomingCash ? <p className="tradedesk__none">Nothing yet. Tap a player on the {partner} roster.</p> : (
+                <ul className="tradedesk__list">
+                  {incoming.map((p) => (
+                    <PlayerRow compact key={p.id} p={p} teamId={incomingTeamId} picked onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={incomingFarm?.get(p.id)} enter={arrived != null && !arrived.has(p.id)}>
+                      {retainUI && (p.payUsd != null || p.retainedUsd) ? retainUI(p) : null}
+                    </PlayerRow>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
-          </div>
-          {browsing && (
-            <RosterSheet title={`${club} roster`} onClose={() => setBrowsing(false)}>
-            <div className="infopop-row tradedesk__info">
+
+          {effect}
+
+          {/* The club's own roster, in the column: tap Add to send a player across. */}
+          <div className="tradedesk__roster">
+            <div className="tradedesk__rosterhead infopop-row">
+              <h3 className="t-label t-label--bold">{club} roster</h3>
               <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
                 A ~ marks a year estimated from service time. WAR is from last season.
               </InfoPopover>
+              {cash || addingCash ? (
+                <label className="tradedesk__cash">
+                  <span className="t-label">{club} cash in {data.nextYear} ($M)</span>
+                  <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
+                    onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
+                    onBlur={() => { if (!cash) setAddingCash(false) }} />
+                </label>
+              ) : (
+                <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ {club} cash</Button>
+              )}
             </div>
             <div className="tradedesk__controls">
               <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
@@ -471,7 +484,7 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
                 placeholder={`Find a ${club} player`} aria-label={`Find a ${club} player`} />
               <label className="tradedesk__sort">
                 <span className="t-label">Sort</span>
-                <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') setWantFarm(true) }}>
+                <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
                   {SORT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </label>
@@ -480,11 +493,13 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
                   options={[{ value: 'min', label: '50 PA / 20 IP to count' }, { value: 'any', label: 'Any sample' }]} />
               )}
             </div>
-            <ul className="tradedesk__list">
-              {rosterList(data, { show, group, sort, query, farm: farm.data, minimum, cuts: cuts.data }).map((p) => <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={farm.data?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm.data, cuts.data) : null} />)}
+            <ul className="tradedesk__list tradedesk__rosterlist">
+              {rosterList(data, { show, group, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
+                <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason}
+                  farm={farm?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
+              ))}
             </ul>
-            </RosterSheet>
-          )}
+          </div>
         </>
       )}
     </Card>
@@ -522,6 +537,57 @@ function sendsSummary(sends, cash, nextYear) {
   ].filter(Boolean).join(' · ')
 }
 
+// The one banner on top, Trade Machine style, but a fact rather than a ruling:
+// what has to happen before this deal can go through. Green when nothing does.
+function Verdict({ deal, a, b, sendsA, sendsB, cashA, cashB }) {
+  if ((!sendsA.length && !cashA) || (!sendsB.length && !cashB)) {
+    return <p className="tradedesk__verdict tradedesk__verdict--wait" role="status">Add a player or cash from each club to see the deal.</p>
+  }
+  const blocks = []
+  if (deal.fortyAfter.a > 40) blocks.push(`The ${teamClubName(a)} must clear ${deal.fortyAfter.a - 40} 40-man ${deal.fortyAfter.a - 40 === 1 ? 'spot' : 'spots'}`)
+  if (deal.fortyAfter.b > 40) blocks.push(`The ${teamClubName(b)} must clear ${deal.fortyAfter.b - 40} 40-man ${deal.fortyAfter.b - 40 === 1 ? 'spot' : 'spots'}`)
+  for (const p of [...sendsA, ...sendsB]) {
+    if ((p.serviceYears ?? 0) >= 10) blocks.push(`${p.name} may be able to block it (10-and-5 rights)`)
+  }
+  if (!blocks.length) {
+    return <p className="tradedesk__verdict tradedesk__verdict--go" role="status">This trade fits: both 40-man rosters have room</p>
+  }
+  return (
+    <div className="tradedesk__verdict tradedesk__verdict--stop" role="status">
+      <p>Before this trade can happen</p>
+      <ul>{blocks.map((t) => <li key={t}>{t}</li>)}</ul>
+    </div>
+  )
+}
+
+// What the deal does for one club, under its haul: WAR, money and control,
+// then the same thing said in a sentence (the Trade Machine's "you have
+// increased this team's projected wins by 3").
+function Effect({ club, pay, unset, war, inYrs, outYrs, nextYear, warSeason }) {
+  const warText = Math.abs(war) < 0.05 ? 'no change in WAR' : `${war > 0 ? 'add' : 'lose'} ${Math.abs(war).toFixed(1)} WAR`
+  const payText2 = Math.abs(pay) < 1 ? 'no change in payroll' : `${pay > 0 ? 'take on' : 'shed'} ${money(Math.abs(pay))}`
+  return (
+    <div className="tradedesk__effect">
+      <p className="tradedesk__effectfigs">
+        <span><span className="tradedesk__k">{warSeason ?? 'Last season'} WAR</span> <span className={`tradedesk__fig tradedesk__fig--${tone(war) || 'flat'}`}>{signedNum(war)}</span></span>
+        <span><span className="tradedesk__k">{nextYear} payroll</span> <span className="tradedesk__fig">{signedMoney(pay)}</span>{unset ? (
+          <span className="tradedesk__fignote infopop-row">
+            {tbd(unset)}{' '}
+            <InfoPopover label="What TBD means" className="infopop--paper">
+              TBD is a big-league salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.
+            </InfoPopover>
+          </span>
+        ) : null}</span>
+        <span><span className="tradedesk__k">Control</span> <span className="tradedesk__fig">+{inYrs} / −{outYrs}</span></span>
+      </p>
+      <p className="tradedesk__sentence">The {club} {warText} and {payText2} for {nextYear}{unset ? `, plus ${unset} salary not set yet` : ''}.</p>
+    </div>
+  )
+}
+
+// The notes the banner has not already said.
+const otherNotes = (notes) => notes.filter((n) => !/no set salary|must clear|10\+ years/.test(n))
+
 function StripSide({ name, pay, war, forty }) {
   return (
     <p className="tradedesk__stripside">
@@ -533,14 +599,6 @@ function StripSide({ name, pay, war, forty }) {
   )
 }
 
-function Row({ label, a, b, toneA = '', toneB = '', noteA = null, noteB = null }) {
-  const cell = (v, t, note) => (
-    <td className={t ? `tradedesk__fig tradedesk__fig--${t}` : 'tradedesk__fig'}>
-      {v}{note && <span className="tradedesk__fignote">{note}</span>}
-    </td>
-  )
-  return <tr>{cell(a, toneA, noteA)}<th scope="row">{label}</th>{cell(b, toneB, noteB)}</tr>
-}
 
 const tone = (v) => (v > 0.05 ? 'up' : v < -0.05 ? 'down' : '')
 const tbd = (n) => (n ? `+ ${n} TBD` : null)
