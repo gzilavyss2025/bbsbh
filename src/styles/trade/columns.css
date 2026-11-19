@@ -242,3 +242,11 @@
 .tradedesk__clubbar--darkmark .tradedesk__clubbarmark {
   filter: brightness(0);
 }
+
+/* At the wide step the page takes the slate's wide measure (report/research.css
+   does the same), so each club's roster column has room for its figures. */
+@media (min-width: 740px) {
+  .screen.tradedesk {
+    max-width: 1272px;
+  }
+}
