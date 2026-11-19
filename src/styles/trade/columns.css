@@ -412,7 +412,7 @@
   display: block;
   width: 100%;
   height: var(--space-3);
-  background: linear-gradient(to right, var(--tug-a) 0 var(--tug-share), var(--tug-b) var(--tug-share) 100%);
+  background: linear-gradient(to right, var(--tug-a, var(--navy)) 0 var(--tug-share, 50%), var(--tug-b, var(--graphite)) var(--tug-share, 50%) 100%);
   border: var(--bw-hair) solid var(--text-on-ink);
 }
 
@@ -420,7 +420,7 @@
 .tradeboard__tug {
   position: absolute;
   inset-block: calc(var(--space-1) * -1);
-  left: var(--tug-share);
+  left: var(--tug-share, 50%);
   width: var(--space-2);
   margin-left: calc(var(--space-1) * -1);
   background: var(--marker);
