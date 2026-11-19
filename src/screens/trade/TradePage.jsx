@@ -466,13 +466,18 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
     )
   }
   return (
-    <Card frame="stamped" label={club} className="tradedesk__side">
-      {/* The club line: its mark, its 40-man count now and after the deal, and the switch. */}
-      <div className="tradedesk__club">
-        <TeamLogo teamId={teamId} size={40} />
-        <p className="tradedesk__count">
-          <span className="tradedesk__k">40-man</span>
-          <span className="tradedesk__countfig">
+    <Card frame="stamped" className="tradedesk__side">
+      {/* The Trade Machine's team bar: the club's colour, its name at the left,
+          its figures at the right (40-man now and after), and the switch. */}
+      <div
+        className={`tradedesk__dealbar${barMarkTone(theme?.onBar) === 'dark' ? ' tradedesk__clubbar--darkmark' : ''}`}
+        style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
+      >
+        <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />
+        <h2 className="tradedesk__dealname">{club}</h2>
+        <p className="tradedesk__dealfig">
+          <span className="tradedesk__dealk">40-man</span>
+          <span>
             {data ? `${data.fortyCount}/40` : DASH}
             {data && after != null && after !== data.fortyCount && (
               <span className={after > 40 ? 'tradedesk__after tradedesk__after--over' : 'tradedesk__after'}> → {after}/40</span>

@@ -271,6 +271,55 @@
   filter: brightness(0);
 }
 
+/* The deal card's head, the 2014 Trade Machine's team bar: club colour,
+   name at the left, figures stacked label-over-number at the right. */
+.tradedesk__dealbar {
+  height: var(--space-12);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  padding-right: var(--space-3);
+  background: var(--clubbar-fill, var(--navy));
+  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
+  color: var(--clubbar-ink, var(--text-on-ink-bright));
+}
+
+.tradedesk__dealname {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: inherit;
+}
+
+/* layout-exempt: a bar figure, its label over its number */
+.tradedesk__dealfig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__dealk {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradedesk__dealbar .tradedesk__after {
+  color: inherit;
+}
+
+.tradedesk__dealbar .btn {
+  --btn-ink: currentColor;
+  color: inherit;
+}
+
 /* At the wide step the page takes the slate's wide measure (report/research.css
    does the same), so each club's roster column has room for its figures. */
 @media (min-width: 740px) {
