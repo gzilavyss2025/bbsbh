@@ -73,7 +73,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           {facts.data && (
             <div className="playersheet__section">
               <h3 className="t-label">Seasons</h3>
-              <FactSheet people={[{ facts: facts.data, note: null }]} warByYear={p.warByYear} />
+              <FactSheet people={[{ facts: facts.data, note: null }]} warByYear={p.warByYear} frame="ledger" />
             </div>
           )}
 

@@ -73,7 +73,9 @@ function linkNames(text, ids) {
 // the trade simulator's player sheet passes it; the wire does not. A season
 // split between two clubs carries its WAR on its first row only, since the
 // figure is the season's, not one club's.
-export function FactSheet({ people, warByYear = null }) {
+// `frame` is the Card's frame: the wire's stamped card by default; the trade
+// simulator's player sheet, already a framed sheet, asks for the flat ledger.
+export function FactSheet({ people, warByYear = null, frame = 'stamped' }) {
   const [at, setAt] = useState(0)
   const [scope, setScope] = useState(people[0].facts.rows.length ? 'mlb' : 'milb')
   const [read, setRead] = useState({})
@@ -102,7 +104,7 @@ export function FactSheet({ people, warByYear = null }) {
   const draft = note && /-round pick|draft pick|drafted/.test(note) ? null : draftSentence(facts)
   const who = <PlayerLink id={facts.id} className="factsheet__name">{facts.name}</PlayerLink>
   return (
-    <Card frame="stamped" className="factsheet">
+    <Card frame={frame} className="factsheet">
       <div className="factsheet__head">
         <Segmented
           label="Show seasons for"

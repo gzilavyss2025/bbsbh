@@ -312,12 +312,6 @@
 
 /* The seasons table sits flat in the sheet: no stamp, no second shadow, and no
    second copy of the name the sheet's title already gives. */
-.playersheet .factsheet.card {
-  border: 0;
-  box-shadow: none;
-  background: none;
-}
-
 .playersheet .factsheet .card__body {
   padding: 0;
 }
