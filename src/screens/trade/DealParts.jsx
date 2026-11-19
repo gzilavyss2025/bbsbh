@@ -84,6 +84,8 @@ export function Effect({ club, side, deal, nextYear }) {
           </div>
         )
       })}
+      {/* A player who can veto the deal is the one roster rule worth stating here. */}
+      {deal.notes.filter((n) => /10-and-5/.test(n)).map((n) => <p key={n} className="dealsheet__fine dealsheet__veto">{n}</p>)}
       <p className="dealsheet__fine infopop-row">
         {unset ? `${unset} salary not set yet is left out of payroll. ` : ''}How it’s figured{' '}
         <InfoPopover label="How the deal sheet is figured" className="infopop--paper">

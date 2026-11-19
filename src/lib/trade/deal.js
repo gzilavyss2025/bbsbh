@@ -6,6 +6,7 @@
 // and cash. The card states what moves; it never grades who wins.
 
 import { moneyLabel } from '../format.js'
+import { PICK_VALUE } from './value.js'
 
 // Next season's pay. A guaranteed figure is a number; an arbitration year, a
 // club option or a pre-arbitration year has no fixed figure yet, so it
@@ -85,7 +86,9 @@ export function dealSummary(a, b) {
   // Surplus value (value.js): what a club gets less what it gives, each player
   // carrying the salary his old club keeps paying; cash counts dollar for dollar.
   const worth = (r) => (r.value?.surplusUsd ?? 0) + (r.retainedUsd ?? 0)
-  const valueA = sum(b.sends, worth) - sum(a.sends, worth) - (a.cashUsd || 0) + (b.cashUsd || 0)
+  // A Competitive Balance pick is worth its round's rule-of-thumb value (value.js).
+  const picksOf = (side) => sum(side.draftPicks ?? [], (pk) => PICK_VALUE[pk.round] ?? 0)
+  const valueA = sum(b.sends, worth) - sum(a.sends, worth) - (a.cashUsd || 0) + (b.cashUsd || 0) + picksOf(b) - picksOf(a)
   const projA = sum(b.sends, (r) => r.value?.projWar) - sum(a.sends, (r) => r.value?.projWar)
   const controlIn = (side) => sum(side.sends, (r) => r.control)
   const fortyAfterA = a.fortyCount - forty(a.sends) + forty(b.sends)

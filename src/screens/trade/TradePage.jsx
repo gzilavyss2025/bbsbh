@@ -124,8 +124,8 @@ export function TradePage() {
   )
   const deal = sideA.data && sideB.data
     ? dealSummary(
-        { name: teamClubName(a), fortyCount: sideA.data.fortyCount, sends: sends(sideA.data), cashUsd: cashA * 1e6 },
-        { name: teamClubName(b), fortyCount: sideB.data.fortyCount, sends: sends(sideB.data), cashUsd: cashB * 1e6 },
+        { name: teamClubName(a), fortyCount: sideA.data.fortyCount, sends: sends(sideA.data), draftPicks: sentPicks(a), cashUsd: cashA * 1e6 },
+        { name: teamClubName(b), fortyCount: sideB.data.fortyCount, sends: sends(sideB.data), draftPicks: sentPicks(b), cashUsd: cashB * 1e6 },
       )
     : null
   // The deal as the wire prints it, and as a wire story the news story is built on.
@@ -232,7 +232,7 @@ export function TradePage() {
       </header>
 
       <Stack gap="section">
-        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} />}
+        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} />}
 
         <div className="tradedesk__sides" ref={movesRef}>
           {b ? (

@@ -236,3 +236,8 @@
 .tradedesk__spots {
   min-width: 0;
 }
+
+/* A player in the deal who can block it (10-and-5 rights). */
+.dealsheet__veto {
+  color: var(--text-heading);
+}

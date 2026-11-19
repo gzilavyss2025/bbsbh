@@ -51,7 +51,13 @@ function Segments({ segs }) {
 // wire row was. Until the facts arrive it shows the plain wire sentence.
 export function TradeStory({ fallback, ...deal }) {
   const date = isoToday()
-  const key = [deal.a, deal.b, ...deal.sendsA.map((p) => p.id), '|', ...deal.sendsB.map((p) => p.id), deal.story?.cutline?.length ?? 0].join(',')
+  // Everything the story says: the players, the wire's sentence (picks and cash
+  // ride in it), and the deal's payroll and 40-man counts.
+  const key = [
+    deal.a, deal.b, ...deal.sendsA.map((p) => p.id), '|', ...deal.sendsB.map((p) => p.id),
+    (deal.story?.cutline ?? []).map((s) => s.text).join(''),
+    deal.deal?.payroll.a, deal.deal?.fortyAfter.a, deal.deal?.fortyAfter.b,
+  ].join(',')
   const state = useAsync(() => loadStory(deal, date), [key, date])
   const s = state.data
   // The art: one game photo of the headline player, loaded after the words so it never holds them up.

@@ -139,3 +139,7 @@ export function verdictOf(usd) {
   const v = Math.abs(usd)
   return v < 20e6 ? 'fair' : v < 50e6 ? 'win' : v < 100e6 ? 'big' : 'steal'
 }
+
+// A Competitive Balance pick's surplus, a rule of thumb like the rest: Round A
+// sits after the first round, Round B after the second.
+export const PICK_VALUE = { A: 8e6, B: 5e6 }

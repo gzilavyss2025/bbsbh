@@ -3,6 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, farmLine, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence, farmIsPitcher, cbPicksOf } from '../src/lib/trade/deal.js'
+import { PICK_VALUE } from '../src/lib/trade/value.js'
 import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 
 const cells = (...kinds) => kinds.map(([kind, extra], i) => ({ year: 2026 + i, kind, ...extra }))
@@ -205,4 +206,12 @@ test('a deal counts estimated salaries and nets surplus value both ways', () => 
   assert.equal(d.value.a, -5e6 - 60e6 + 2e6)
   assert.equal(d.value.b, -d.value.a)
   assert.equal(d.projWar.a, -0.5)
+})
+
+test('a Competitive Balance pick in the deal carries surplus value', () => {
+  const vet = { id: 1, name: 'Vet', payUsd: 20e6, onForty: true, value: { surplusUsd: 10e6, projWar: 2 } }
+  // A sends the veteran; B sends only its Round A pick.
+  const d = dealSummary({ name: 'A', fortyCount: 40, sends: [vet], cashUsd: 0 }, { name: 'B', fortyCount: 40, sends: [], draftPicks: [{ round: 'A' }], cashUsd: 0 })
+  assert.equal(d.value.a, PICK_VALUE.A - 10e6)
+  assert.equal(d.value.b, -d.value.a)
 })
