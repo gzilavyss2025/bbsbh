@@ -170,3 +170,69 @@
   font-size: var(--fs-small);
   color: var(--text-caption);
 }
+
+/* The stamp drawn big at the head of a prospect's sheet (PlayerSheet.jsx
+   ProspectLead): the same tiered seal, sized to lead. */
+.prospectstamp--big {
+  grid-column: auto;
+  justify-content: flex-start;
+  gap: var(--space-3);
+}
+
+.prospectstamp--big .prospectstamp__seal {
+  width: calc(var(--space-12) * 2);
+  border-width: calc(var(--bw-heavy) * 3);
+}
+
+.prospectstamp--big .prospectstamp__no {
+  font-size: var(--fs-small);
+}
+
+.prospectstamp--big .prospectstamp__n {
+  font-size: var(--fs-title-lg);
+}
+
+.prospectstamp--big .prospectstamp__text {
+  align-items: flex-start;
+}
+
+.prospectstamp--big .prospectstamp__what {
+  font-size: var(--fs-title-sm);
+}
+
+.prospectstamp--big .prospectstamp__badge {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+.prospectstamp--big .prospectstamp__badge img,
+.prospectstamp--big .prospectstamp__badge .teamlogo {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+/* layout-exempt: the big stamp beside the prospect's fact tiles, stacking on a phone */
+.playersheet__prospect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.playersheet__tiles--prospect {
+  flex: 1 1 20rem;
+  margin: 0;
+}
+
+/* layout-exempt: the picked group's chip, then its positions beside it */
+.tradedesk__posrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradedesk__spots {
+  min-width: 0;
+}

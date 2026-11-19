@@ -94,9 +94,6 @@ export function Effect({ club, side, deal, nextYear }) {
   )
 }
 
-// The notes the banner has not already said.
-export const otherNotes = (notes) => notes.filter((n) => !/no set salary|must clear|10\+ years/.test(n))
-
 export function StripSide({ name, pay, war, forty }) {
   return (
     <p className="tradedesk__stripside">

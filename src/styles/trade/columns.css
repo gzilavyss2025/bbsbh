@@ -271,6 +271,14 @@
   color: inherit;
 }
 
+/* Over 40 after the deal: the count in a highlighter chip, which reads on any
+   club's bar (the scoreboard no longer says it). */
+.tradedesk__dealbar .tradedesk__after--over {
+  padding: 0 var(--space-1);
+  background: var(--marker);
+  color: var(--text-on-bright);
+}
+
 .tradedesk__dealbar .btn {
   --btn-ink: currentColor;
   color: inherit;
@@ -391,8 +399,7 @@
   text-align: center;
 }
 
-.tradeboard__k,
-.tradeboard__status {
+.tradeboard__k {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -464,10 +471,6 @@
 
 .tradeboard__score--steal,
 .tradeboard__score--big {
-  color: var(--marker);
-}
-
-.tradeboard__status--stop {
   color: var(--marker);
 }
 

@@ -44,3 +44,20 @@
     animation: tradesheet-push var(--dur-stamp-in) var(--ease-out) calc(var(--stagger-step) * 2) backwards;
   }
 }
+
+/* A position group's positions slide out beside its chip when it is picked
+   (TradePage.jsx): a reader's own tap, so the motion answers it. */
+@keyframes tradedesk-spots-out {
+  from { opacity: 0; transform: translateX(calc(var(--space-6) * -1)); }
+  to { opacity: 1; transform: none; }
+}
+
+.tradedesk__spots {
+  animation: tradedesk-spots-out var(--dur-base, 200ms) var(--ease-out, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tradedesk__spots {
+    animation: none;
+  }
+}

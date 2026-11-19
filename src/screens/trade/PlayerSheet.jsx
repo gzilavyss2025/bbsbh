@@ -11,6 +11,7 @@ import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { Numbers } from './Numbers.jsx'
 import { TradeSheet } from './TradeSheet.jsx'
+import { ProspectStamp } from './PlayerRow.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Ledger } from '../../components/player/Ledger.jsx'
 import { fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
@@ -55,12 +56,14 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           </div>
 
           {/* The trade case first: what he projects to, what he is worth, how long, for what. */}
-          <ValueTiles p={p} nextYear={nextYear} />
-          <p className="tradedesk__nums playersheet__nums">
+          {p.value?.prospect && (p.topRank || p.orgRank)
+            ? <ProspectLead p={p} teamId={teamId} farm={farm} pedigree={facts.data && draftSentence(facts.data) ? null : pedigree} />
+            : <ValueTiles p={p} nextYear={nextYear} />}
+          {!(p.value?.prospect && (p.topRank || p.orgRank)) && <p className="tradedesk__nums playersheet__nums">
             <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full />
             {/* Whether a club can send him down sits with his other roster facts. */}
             {p.contract && optionStatus(p.contract.service, p.contract.options) && <span>{optionStatus(p.contract.service, p.contract.options)}</span>}
-          </p>
+          </p>}
 
           <div className="playersheet__grid">
           <div className="playersheet__side">
@@ -184,6 +187,32 @@ function ValueTiles({ p, nextYear }) {
         </div>
       ))}
     </dl>
+  )
+}
+
+// A prospect's lead, in place of the contract tiles he has no figures for:
+// the deal card's rubber stamp drawn big (his rank, its tier, whose list),
+// then the four facts a prospect has instead: his value by rank, where he
+// plays now, and how his club got him (unless the draft sentence under his
+// photo already says so).
+function ProspectLead({ p, teamId, farm, pedigree }) {
+  const facts = [
+    ['Prospect value', money(p.value.surplusUsd)],
+    (farm?.level ?? p.level) ? ['Plays at', farm?.level ?? p.level] : null,
+    pedigree ? ['Came up', pedigree] : null,
+  ].filter(Boolean)
+  return (
+    <div className="playersheet__prospect">
+      <ProspectStamp p={p} teamId={teamId} big />
+      <dl className="playersheet__tiles playersheet__tiles--prospect">
+        {facts.map(([label, value]) => (
+          <div key={label} className="playersheet__tile">
+            <dt className="tradedesk__k">{label}</dt>
+            <dd className="playersheet__tilefig">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   )
 }
 

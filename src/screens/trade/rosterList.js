@@ -22,9 +22,9 @@ const inGroup = (p, g) => g === 'all' || groupOf(p.pos) === g
 // this season's starts and saves (roleFromCounts), so a pitcher with no big-
 // league games this year shows only under All.
 export const SPOTS = {
-  IF: [{ value: 'all', label: 'All infield' }, ...['1B', '2B', '3B', 'SS', 'UTIL'].map((v) => ({ value: v, label: v }))],
-  OF: [{ value: 'all', label: 'All outfield' }, ...['LF', 'CF', 'RF'].map((v) => ({ value: v, label: v }))],
-  P: [{ value: 'all', label: 'All pitchers' }, ...['SP', 'RP', 'CL'].map((v) => ({ value: v, label: v }))],
+  IF: [{ value: 'all', label: 'All' }, ...['1B', '2B', '3B', 'SS', 'UTIL'].map((v) => ({ value: v, label: v }))],
+  OF: [{ value: 'all', label: 'All' }, ...['LF', 'CF', 'RF'].map((v) => ({ value: v, label: v }))],
+  P: [{ value: 'all', label: 'All' }, ...['SP', 'RP', 'CL'].map((v) => ({ value: v, label: v }))],
 }
 const UTIL = new Set(['IF', 'UT', 'UI'])
 const atSpot = (p, spot) => spot === 'all'

@@ -13,14 +13,13 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
-import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { headerThemeFor, themeKeyFor } from '../../lib/colors/headerTheme.js'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
 import { DepthCard } from './DepthCard.jsx'
 import { POS_GROUPS, SPOTS, SHOW, SORT, levelRank, rosterList } from './rosterList.js'
-import { PCTS, RetainControl, Wire, Effect, otherNotes, StripSide, payText } from './DealParts.jsx'
+import { PCTS, RetainControl, Wire, Effect, StripSide, payText } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
@@ -376,11 +375,6 @@ export function TradePage() {
                 <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} nextYear={sideA.data.nextYear} fallback={wireText} />
               )}
             </Wire>
-            {otherNotes(deal.notes).length > 0 && (
-              <ul className="tradedesk__notes" aria-live="polite">
-                {otherNotes(deal.notes).map((n) => <li key={n}>{n}</li>)}
-              </ul>
-            )}
             {retainOpen ? (
               <div className="tradedesk__retainbar">
                 <Chips label="Retained salary" layout="wrap" value={retainMode} onChange={setRetainMode}
@@ -471,17 +465,25 @@ function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, in
       )}
         {data && (
           <div className="tradedesk__roster">
-            <div className="tradedesk__rosterhead infopop-row">
-              <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
-                A ~ marks a year estimated from service time. WAR is from last season.
-              </InfoPopover>
-            </div>
             <div className="tradedesk__controls">
               {/* Players, then the club's tradable picks and its cash, as one row of tabs. */}
               <Chips label={`${club} list`} options={[...SHOW, ...(draftPicks.length ? [{ value: 'picks', label: 'Draft picks' }] : []), { value: 'cash', label: cash ? `Cash · ${money(cash * 1e6)}` : 'Cash' }]}
                 value={show} onChange={pickShow} layout="wrap" />
-              {players && <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={(g) => { setGroup(g); setSpot('all') }} layout="wrap" />}
-              {players && SPOTS[group] && <Chips label={`${club} positions within the group`} options={SPOTS[group]} value={spot} onChange={setSpot} layout="wrap" />}
+              {/* A group with positions under it (infield, outfield, pitchers) folds the
+                  row to that one chip and slides its positions out beside it; tapping
+                  the chip again folds them back in. */}
+              {players && (SPOTS[group] ? (
+                <div className="tradedesk__posrow">
+                  <Button size="control" skin="ink" pressed onClick={() => { setGroup('all'); setSpot('all') }}>
+                    {POS_GROUPS.find((g) => g.value === group).label}
+                  </Button>
+                  <div className="tradedesk__spots">
+                    <Chips label={`${club} positions within the group`} options={SPOTS[group]} value={spot} onChange={setSpot} layout="wrap" />
+                  </div>
+                </div>
+              ) : (
+                <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={(g) => { setGroup(g); setSpot('all') }} layout="wrap" />
+              ))}
               {players && <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
                 placeholder={`Search ${club} players`} aria-label={`Search ${club} players`} />}
               {players && <label className="tradedesk__sort">

@@ -1,4 +1,4 @@
-import { teamClubName, teamFullName } from '../../../lib/teams.js'
+import { teamClubName, teamFullName, teamLocationName } from '../../../lib/teams.js'
 import { num, word, variant } from '../../../api/transactions/voice.js'
 import { money } from '../../../lib/trade/deal.js'
 import { HONORS, honorWeight } from './honors.js'
@@ -12,7 +12,6 @@ import { HONORS, honorWeight } from './honors.js'
 // when its facts are missing and drops out: a story never prints a blank, a
 // guess, "undefined" or a number it didn't read. Plan: docs/trade-story-plan.html.
 
-const ORDINAL_WORDS = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth']
 const lastName = (name) => String(name ?? '').trim().split(/\s+/).slice(1).join(' ') || name
 const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
 const club = (id) => teamClubName(id) ?? teamFullName(id)
@@ -58,28 +57,43 @@ function prospectSentence(p) {
   return null
 }
 
-// One paragraph per player: the wire's own note, then his honors, then his rank.
-function playerParagraph(p) {
-  const text = [p.note, honorsSentence(p, !!p.note), prospectSentence(p)].filter(Boolean).join(' ')
-  return text ? [{ text }] : null
-}
-
-// "The Brewers went 103-59 in 2026, first in the NL Central, and won the World Series."
-function clubSentence(id, c) {
+// A club's season as a clause the lede and the turn can carry: "Coming off
+// an 86-76 season that ended short of the postseason, " / "fresh off a World
+// Series title". Null without a record.
+function seasonLead(c) {
   if (!c?.w && !c?.l) return null
-  const finish = c.rank && ORDINAL_WORDS[c.rank] && c.division ? `, ${ORDINAL_WORDS[c.rank]} in the ${c.division},` : ''
-  const october = c.postseason === 'champion' ? ' and won the World Series'
-    : c.postseason === 'out' ? ' and missed the postseason'
-      : c.postseason ? ` and lost in the ${c.postseason}` : ''
-  return `The ${club(id)} went ${c.w}-${c.l} in ${c.season}${finish}${october}.`.replace(',.', '.')
+  if (c.postseason === 'champion') return `Fresh off a World Series title, `
+  const rec = `${c.w}-${c.l}`
+  if (c.postseason === 'out') return `Coming off ${/^8|^11|^18/.test(rec) ? 'an' : 'a'} ${rec} season that ended short of the postseason, `
+  if (c.postseason) return `A season after losing in the ${c.postseason}, `
+  return `Coming off ${/^8|^11|^18/.test(rec) ? 'an' : 'a'} ${rec} season, `
+}
+function seasonAside(c) {
+  if (!c?.w && !c?.l) return ''
+  if (c.postseason === 'champion') return `, ${c.w}-${c.l} and the reigning World Series champions,`
+  if (c.postseason === 'out') return `, ${c.w}-${c.l} and out of the postseason,`
+  return `, ${c.w}-${c.l} last season,`
 }
 
-// What the deal does to one club's payroll and 40-man roster.
-function meansSentence(id, payroll, fortyAfter, nextYear) {
-  const parts = []
-  if (Math.abs(payroll) >= 1e5) parts.push(`${payroll > 0 ? 'adds' : 'takes'} ${money(payroll)} ${payroll > 0 ? 'to' : 'off'} the ${club(id)}' ${nextYear} payroll`)
-  if (fortyAfter > 40) parts.push(`leaves them ${num(fortyAfter - 40)} over the 40-man limit`)
-  return parts.length ? `The deal ${listOf(parts)}.` : null
+// The honor the lede hangs on the star: his best major award, newest first.
+function starTag(p) {
+  const best = (p.honors ?? []).find((h) => HONORS.find((x) => x.key === h.key)?.major)
+  if (!best) return null
+  const h = HONORS.find((x) => x.key === best.key)
+  return `the ${best.season} ${best.league ? `${best.league} ` : ''}${h.words.replace(/ Award$/, '')} winner`
+}
+
+// One player's paragraph: the wire's note, his honors, his rank.
+const playerText = (p) => [p.note, honorsSentence(p, !!p.note), prospectSentence(p)].filter(Boolean).join(' ')
+
+// The rest of a side, grouped: "The Diamondbacks also get X, Y and Z." then each one's line.
+function groupParagraph(lead, players) {
+  if (!players.length) return null
+  const lines = players.map(playerText).filter(Boolean).join(' ')
+  return [{ text: `${lead} ` }, ...players.flatMap((p, i) => [
+    ...(i ? [{ text: i === players.length - 1 ? ' and ' : ', ' }] : []),
+    { text: p.name, playerId: p.id },
+  ]), { text: `.${lines ? ` ${lines}` : ''}` }]
 }
 
 export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = null, nextYear, date }) {
@@ -100,14 +114,55 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
     ? `The ${club(otherClub)} land ${otherStar.name}${otherHonor ? `, who ${otherHonor},` : ''} in a deal that moves ${word(n)} players.`
     : null
 
-  // The lede is the wire's own sentence with the club as its subject.
-  const lede = cutline?.length
-    ? [{ text: `The ${teamFullName(a)} ` }, ...cutline.map((s, i) => (i === 0 ? { ...s, text: s.text.replace(/^Acquired/, 'acquired').replace(/^Traded/, 'traded') } : s))]
-    : null
+  // Who gets the star (the lede's subject) and who gives him up (the turn's).
+  const taker = starIsB ? a : b
+  const giver = starIsB ? b : a
+  const takerGets = starIsB ? sendsB : sendsA
+  const giverGets = starIsB ? sendsA : sendsB
 
-  const players = [...sendsB, ...sendsA].map(playerParagraph)
-  const season = [clubSentence(a, clubs[a]), clubSentence(b, clubs[b])].filter(Boolean)
-  const means = deal ? [meansSentence(a, deal.payroll.a, deal.fortyAfter.a, nextYear), meansSentence(b, deal.payroll.b, deal.fortyAfter.b, nextYear)].filter(Boolean) : []
+  // Lede: the news and the motive in one sentence.
+  const tag = starTag(star)
+  const leadIn = seasonLead(clubs[taker])
+  const lede = [
+    { text: `${leadIn ?? ''}${leadIn ? 'the' : 'The'} ` },
+    { text: teamFullName(taker), teamId: taker },
+    { text: ` ${variant({ id: star.id }, date, 2) ? 'acquired' : 'landed'} ` },
+    { text: star.name, playerId: star.id },
+    { text: `${tag ? `, ${tag},` : ''} from the ` },
+    { text: teamFullName(giver), teamId: giver },
+    { text: ` in ${/^(eight|eleven|eighteen)/.test(word(n)) ? 'an' : 'a'} ${word(n)}-player deal.` },
+  ]
+
+  const starPara = playerText(star) ? [{ text: playerText(star) }] : null
+  const takerRest = groupParagraph(`The ${club(taker)} also get`, takerGets.filter((p) => p.id !== star.id))
+
+  // The turn: what the other club gets back, led by its best player.
+  const back = starOf(giverGets)
+  const turn = back
+    ? [
+        { text: `In return, the ${club(giver)}${seasonAside(clubs[giver])} get ${word(giverGets.length)} ${giverGets.length === 1 ? 'player' : 'players'}${giverGets.length > 1 ? ', led by ' : ': '}` },
+        { text: back.name, playerId: back.id },
+        { text: `.${playerText(back) ? ` ${playerText(back)}` : ''}` },
+      ]
+    : null
+  const giverRest = back ? groupParagraph(`They also get`, giverGets.filter((p) => p.id !== back.id)) : null
+
+  // The money and the roster, in one sentence.
+  let money_ = null
+  if (deal) {
+    const gainer = deal.payroll.a > 0 ? a : b
+    const moved = Math.abs(deal.payroll.a)
+    const over = [a, b].map((id) => [id, (id === a ? deal.fortyAfter.a : deal.fortyAfter.b) - 40]).find(([, k]) => k > 0)
+    const parts = []
+    if (moved >= 1e5) parts.push(`The deal moves ${money(moved)} of ${nextYear} payroll to ${teamLocationName(gainer) ?? club(gainer)}`)
+    if (over) parts.push(`${parts.length ? ', and the' : 'The'} ${club(over[0])} will have to clear ${num(over[1])} 40-man ${over[1] === 1 ? 'spot' : 'spots'}`)
+    money_ = parts.length ? [{ text: `${parts.join('')}.` }] : null
+  }
+
+  // The record, as the wire prints it, set last.
+  const record = cutline?.length
+    ? [{ text: 'The full trade: ' }, { text: `the ${teamFullName(a)} ` }, ...cutline.map((s, i) => (i === 0 ? { ...s, text: s.text.replace(/^Acquired/, 'acquired').replace(/^Traded/, 'traded') } : s))]
+    : null
 
   // The kicker: a champion's title defense, else nothing.
   const champ = [a, b].find((id) => clubs[id]?.postseason === 'champion')
@@ -119,13 +174,7 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
     : []
   const kicker = kickers.length ? kickers[variant({ id: star.id }, date, kickers.length)] : null
 
-  const paragraphs = [
-    lede,
-    ...players,
-    season.length ? [{ text: season.join(' ') }] : null,
-    means.length ? [{ text: means.join(' ') }] : null,
-    kicker ? [{ text: kicker }] : null,
-  ].filter(Boolean)
+  const paragraphs = [lede, starPara, takerRest, turn, giverRest, money_, record, kicker ? [{ text: kicker }] : null].filter(Boolean)
   // The star rides along for the story's photo (photo.js).
   return { headline, dek, paragraphs, star: { id: star.id, name: star.name, pos: star.pos ?? null } }
 }

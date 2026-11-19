@@ -40,10 +40,14 @@ test('a full deal reads as a beat writer files it', () => {
   // The dek names the other side's best honor, one only.
   assert.equal(s.dek, 'The Brewers land Corbin Carroll, who won the 2023 NL Rookie of the Year Award, in a deal that moves three players.')
   assert.match(t, /He is MLB Pipeline's No\. 84 prospect\./)
-  assert.match(t, /The Brewers went 103-59 in 2026, first in the National League Central, and won the World Series\./)
-  assert.match(t, /The Diamondbacks went 86-76 in 2026, third in the National League West, and missed the postseason\./)
-  assert.match(t, /leaves them three over the 40-man limit/)
-  assert.match(s.paragraphs[0].map((x) => x.text).join(''), /^The Milwaukee Brewers acquired Corbin Carroll\./)
+  // The lede is the news and the motive: the taker's season, then the star and his award.
+  assert.match(s.paragraphs[0].map((x) => x.text).join(''), /^Coming off an 86-76 season that ended short of the postseason, the Arizona Diamondbacks (landed|acquired) Jacob Misiorowski, the 2026 NL Cy Young winner, from the Milwaukee Brewers in a three-player deal\.$/)
+  // The turn: the other side, led by its best player, the club's season as an aside.
+  assert.match(t, /In return, the Brewers, 103-59 and the reigning World Series champions, get two players, led by Corbin Carroll\./)
+  assert.match(t, /They also get Demetrio Crisantes\./)
+  assert.match(t, /The deal moves \$21\.6M of 2027 payroll to Milwaukee, and the Brewers will have to clear three 40-man spots\./)
+  // The wire's record comes last, before the kicker.
+  assert.match(t, /The full trade: the Milwaukee Brewers acquired Corbin Carroll\./)
 })
 
 test('missing facts drop their sentences and never print a blank', () => {
