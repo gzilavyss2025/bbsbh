@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
+import { VALUE } from '../../lib/trade/value.js'
 import { ordinal } from '../../lib/format.js'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
@@ -48,7 +49,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           ) : (
             <>
               <span className="tradedesk__money">
-                <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+                <span className={!p.onForty && p.payUsd == null ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
                 <span className="tradedesk__years">{yearsText(p)}</span>
               </span>
               <span className="tradedesk__figcol">
@@ -84,12 +85,12 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         {stamped ? <ProspectStamp p={p} teamId={teamId} /> : (
           <>
             <span className="tradedesk__money">
-              <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+              <span className={!p.onForty && p.payUsd == null ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
               <span className="tradedesk__years">{yearsText(p)}</span>
             </span>
             <span className="tradedesk__figcol">
-              <span className="tradedesk__war">{figText(p, farm).value}</span>
-              <span className="tradedesk__warlabel">{figText(p, farm).label}</span>
+              <span className="tradedesk__war">{figText(p, farm, warSeason).value}</span>
+              <span className="tradedesk__warlabel">{figText(p, farm, warSeason).label}</span>
             </span>
           </>
         )}
@@ -105,11 +106,14 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
   )
 }
 
-// The salary column: the last salary he was paid (next season's is often not
-// set yet: arbitration, pre-arb), or the minor-league level for a player with
-// no big-league contract.
+// The salary column: next season's (the deal's season) contract salary, or the
+// card's estimate once values load (value.js). Never the pay earned so far this
+// year, which reads below the minimum for a call-up. A pre-arb player is at the
+// minimum; an arbitration or option year not yet set says so until estimated.
 function salaryText(p) {
-  if (p.lastSalaryUsd != null) return money(p.lastSalaryUsd)
+  if (p.payUsd != null) return money(p.payUsd)
+  if (p.payEstUsd != null) return money(p.payEstUsd)
+  if (p.onForty) return p.payLabel && p.payLabel !== 'Pre-arb' ? p.payLabel : money(VALUE.minSalary)
   // A minor leaguer has no salary on file (MiLB pay is the level minimum, not
   // tracked per player), so the column says so rather than guessing a figure.
   if (!p.onForty) return 'MiLB'
@@ -125,10 +129,14 @@ function yearsText(p) {
   return `${n} ${n === 1 ? 'Year' : 'Years'}`
 }
 
-// The one figure: last season's WAR, or a minor leaguer's OPS or ERA.
-function figText(p, farm) {
-  if (p.war != null) return { value: p.war.toFixed(1), label: 'WAR' }
-  if (farm?.ops) return { value: farm.ops, label: 'OPS' }
-  if (farm?.era) return { value: farm.era, label: 'ERA' }
-  return { value: '—', label: 'WAR' }
+// The one figure: WAR for the season war.json holds (this season until the next
+// one starts), or a player with no big-league WAR's minor-league line, its level named.
+function figText(p, farm, warSeason) {
+  const war = warSeason ? `${warSeason} WAR` : 'WAR'
+  // A season across levels ("AA · AAA") names the highest, to fit the column.
+  const level = farm?.level?.split(' · ').at(-1)
+  if (p.war != null) return { value: p.war.toFixed(1), label: war }
+  if (farm?.ops) return { value: farm.ops, label: [level, 'OPS'].filter(Boolean).join(' ') }
+  if (farm?.era) return { value: farm.era, label: [level, 'ERA'].filter(Boolean).join(' ') }
+  return { value: '—', label: war }
 }

@@ -42,7 +42,7 @@ export const SORT = [
   { value: 'name', label: 'Name' },
   { value: 'war', label: 'WAR' },
   { value: 'line', label: 'OPS / ERA' },
-  { value: 'level', label: 'OPS / ERA vs level' },
+  { value: 'level', label: 'Vs. his level' },
   { value: 'pay', label: 'Salary' },
   { value: 'control', label: 'Control' },
   { value: 'age', label: 'Age' },

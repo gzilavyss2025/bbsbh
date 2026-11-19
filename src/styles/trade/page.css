@@ -540,3 +540,10 @@
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
+
+/* The trade-partner picker: every club in view, wrapping into rows, not a strip that scrolls off the edge. */
+/* layout-exempt: 29 logos wrap into rows */
+.tradedesk__partners .vsteam__strip {
+  flex-wrap: wrap;
+  overflow: visible;
+}

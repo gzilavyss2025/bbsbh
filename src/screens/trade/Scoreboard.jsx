@@ -31,7 +31,12 @@ function Club({ teamId, gets, grade, side, ready }) {
         <span className="tradeboard__name">{teamClubName(teamId)}</span>
         <span className="tradeboard__sub">{gets ? `Gets ${gets}` : 'Nobody yet'}</span>
       </div>
-      {ready && <span className={`tradeboard__grade tradeboard__grade--${GRADE_TONE[grade[0]]}`} aria-label={`Grade ${grade}`}>{grade}</span>}
+      {ready && (
+        <span className="tradeboard__gradebox">
+          <span className={`tradeboard__grade tradeboard__grade--${GRADE_TONE[grade[0]]}`} aria-label={`Deal grade ${grade}`}>{grade}</span>
+          <span className="tradeboard__gradecap" aria-hidden="true">Deal grade</span>
+        </span>
+      )}
     </div>
   )
 }

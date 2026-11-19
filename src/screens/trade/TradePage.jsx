@@ -355,6 +355,7 @@ export function TradePage() {
                   selectedTeamId={b}
                   onSelect={pickB}
                   ariaLabel="Trade partner"
+                  className="tradedesk__partners"
                 />
               </Card>
               <Side
@@ -443,6 +444,8 @@ function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, in
   const [query, setQuery] = useState('')
   // The tabs past Everyone are not players: picks and cash hide the player filters.
   const players = show !== 'picks' && show !== 'cash'
+  // A 40-man player with no big-league WAR shows his minor-league line, so the farm loads for him.
+  useEffect(() => { if (part === 'roster' && data?.forty?.some((p) => p.war == null)) requestFarm() }, [part, data]) // eslint-disable-line react-hooks/exhaustive-deps
   const pickShow = (v) => { setShow(v); if (v === 'prospects' || v === 'all') requestFarm(); if (v === 'prospects' && sort === 'name') setSort('prospect') }
   const byLevel = sort === 'level'
   const cuts = useAsync(() => (byLevel ? fetchLevelLines() : Promise.resolve(null)), [byLevel])
@@ -554,6 +557,7 @@ function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, in
 
       {data && (
         <>
+          {!partner && part === 'deal' && <p className="tradedesk__none">Pick a trade partner to start.</p>}
           {partner && (
             <div className="tradedesk__sends">
               {/* What this club gets: the other club's players and cash, at a glance. */}
