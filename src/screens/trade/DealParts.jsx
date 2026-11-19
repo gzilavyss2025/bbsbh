@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
-import { teamClubName } from '../../lib/teams.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
+import { MoveRow } from '../../components/transactions/MoveRow.jsx'
 
 // The trade card's deal pieces (src/screens/trade/TradePage.jsx): the banner,
 // each club's effect line, the wire sentence, the pinned strip and the retain
@@ -30,7 +30,10 @@ export function RetainControl({ mode, p, value, onChange }) {
 
 // The deal as the transaction wire would print it, and a button that copies
 // it as plain text. The copy names what happened in its own label.
-export function Wire({ text }) {
+// With a `story` (dealStory.js), the deal is drawn as the home page's
+// offseason feed draws a major trade: MoveRow's faces, marks, cutline and
+// each player's note. The Copy button still copies the plain wire sentence.
+export function Wire({ text, story = null }) {
   const [copied, setCopied] = useState(false)
   const copy = async () => {
     try {
@@ -41,8 +44,14 @@ export function Wire({ text }) {
     }
   }
   return (
-    <div className="tradedesk__wire">
-      <p className="tradedesk__wiretext">{text}</p>
+    <div className={story ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
+      {story ? (
+        <ul className="oseason__list tradedesk__wirelist">
+          <MoveRow story={story} marks date={new Date().toISOString().slice(0, 10)} />
+        </ul>
+      ) : (
+        <p className="tradedesk__wiretext">{text}</p>
+      )}
       <Button size="control" onClick={copy}>{copied ? 'Copied' : 'Copy'}</Button>
     </div>
   )
@@ -50,26 +59,6 @@ export function Wire({ text }) {
 
 // The one banner on top, Trade Machine style, but a fact rather than a ruling:
 // what has to happen before this deal can go through. Green when nothing does.
-export function Verdict({ deal, a, b, sendsA, sendsB, cashA, cashB }) {
-  if ((!sendsA.length && !cashA) || (!sendsB.length && !cashB)) {
-    return <p className="tradedesk__verdict tradedesk__verdict--wait" role="status">Add a player or cash from each club to see the deal.</p>
-  }
-  const blocks = []
-  if (deal.fortyAfter.a > 40) blocks.push(`The ${teamClubName(a)} must clear ${deal.fortyAfter.a - 40} 40-man ${deal.fortyAfter.a - 40 === 1 ? 'spot' : 'spots'}`)
-  if (deal.fortyAfter.b > 40) blocks.push(`The ${teamClubName(b)} must clear ${deal.fortyAfter.b - 40} 40-man ${deal.fortyAfter.b - 40 === 1 ? 'spot' : 'spots'}`)
-  for (const p of [...sendsA, ...sendsB]) {
-    if ((p.serviceYears ?? 0) >= 10) blocks.push(`${p.name} may be able to block it (10-and-5 rights)`)
-  }
-  if (!blocks.length) {
-    return <p className="tradedesk__verdict tradedesk__verdict--go" role="status">This trade fits: both 40-man rosters have room</p>
-  }
-  return (
-    <div className="tradedesk__verdict tradedesk__verdict--stop" role="status">
-      <p>Before this trade can happen</p>
-      <ul>{blocks.map((t) => <li key={t}>{t}</li>)}</ul>
-    </div>
-  )
-}
 
 // What the deal does for one club, under its haul: WAR, money and control,
 // then the same thing said in a sentence (the Trade Machine's "you have

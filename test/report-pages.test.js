@@ -76,7 +76,7 @@ const PATHS_BEFORE_GROUPING = [
   '/postseason-records',
   '/trade-deadline',
   // The trade card (/trade): build a trade between two clubs, beside the deadline.
-  '/trade',
+  '/trade-simulator',
   // The free-agent class (#2509), beside Salaries.
   '/free-agents',
   '/all-star-rosters',

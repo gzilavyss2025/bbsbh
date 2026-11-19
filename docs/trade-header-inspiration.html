@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade header inspiration</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono&family=Libre+Caslon+Text:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f7f1e3;--card:#fbf6ea;--navy:#1b2a3a;--rule:#cbbf9f;--clay:#b5462f;--gold:#ffc52f;--red:#a71930;--muted:#6b5d3e}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px 64px;background:var(--paper);color:var(--navy);font:16px/1.55 Georgia,serif}
+main{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:'Barlow Condensed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.04em;margin:0}
+h1{font-size:32px}h2{font-size:24px;margin-top:40px;border-bottom:3px solid var(--navy);padding-bottom:4px}h3{font-size:18px;margin:20px 0 8px}
+p{margin:.5em 0}
+.src{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:12px}
+.src div{background:var(--card);border:2px solid var(--navy);padding:12px 14px}
+.src b{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.04em;font-size:17px}
+.mock{border:2px dashed var(--rule);padding:16px;background:#fff8;margin:10px 0 6px}
+.cap{font-size:14px;color:var(--muted)}
+.k{font:600 11px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase}
+.mono{font-family:'JetBrains Mono',monospace}
+/* Option A */
+.a-bar{display:flex;align-items:center;gap:16px;background:var(--navy);color:#f7f1e3;padding:10px 14px;border-bottom:4px solid var(--clay)}
+.a-bar h3{margin:0;font-size:24px;color:#f7f1e3}
+.a-teams{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.a-pill{border:1px solid #f7f1e366;padding:2px 10px;font:600 14px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase}
+.a-pill span{opacity:.6;margin-right:6px}
+.a-act{font:600 13px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;border:1px solid #f7f1e3;padding:4px 10px}
+.a-status{display:flex;justify-content:center;gap:10px;align-items:center;background:#f6e3c8;border:2px solid var(--navy);border-top:0;padding:8px;font:600 15px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase}
+.a-status em{font-style:normal;color:var(--clay)}
+/* Option B */
+.b-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:3px solid var(--navy);padding-bottom:10px}
+.b-eye{font:600 12px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;color:var(--clay)}
+.b-title{font:700 34px/1 'Barlow Condensed';text-transform:uppercase;letter-spacing:.02em}
+.b-title i{font-style:normal;color:var(--muted);margin:0 8px}
+.b-chips{display:flex;gap:8px;flex-wrap:wrap}
+.b-chip{border:2px solid var(--navy);padding:4px 10px;background:var(--card)}
+.b-chip.warn{border-color:var(--clay);color:var(--clay)}
+.b-chip .v{font:15px 'JetBrains Mono'}
+/* Option C */
+.c-board{display:grid;grid-template-columns:1fr auto 1fr;border:2px solid var(--navy);background:var(--card)}
+.c-side{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.c-side.r{justify-content:flex-end;text-align:right}
+.c-mark{width:44px;height:44px;display:grid;place-items:center;font:700 18px 'Barlow Condensed';color:#fff}
+.c-name{font:700 22px/1 'Barlow Condensed';text-transform:uppercase}
+.c-sub{font:13px 'JetBrains Mono';color:var(--muted)}
+.c-mid{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px 18px;background:var(--navy);color:#f7f1e3;text-align:center;min-width:220px}
+.c-mid .big{font:700 20px 'Barlow Condensed';letter-spacing:.05em;text-transform:uppercase}
+.c-mid .warn{font:600 13px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase;color:#ffb199}
+.pick{display:inline-block;background:var(--navy);color:var(--paper);font:600 12px 'Barlow Condensed';letter-spacing:.08em;padding:1px 8px;text-transform:uppercase;margin-left:8px;vertical-align:middle}
+table{border-collapse:collapse;width:100%;font-size:15px;margin-top:8px}td,th{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font:600 13px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase}
+@media (max-width:620px){.c-board{grid-template-columns:1fr}.c-side.r{justify-content:flex-start;text-align:left}.a-bar{flex-wrap:wrap}}
+</style></head><body><main>
+<h1>Trade card header: inspiration</h1>
+<p>Today the top of <code>/trade</code> stacks three things that don't talk to each other. There's a bare "TRADE CARD" page title, then a boxed banner that's either an instruction ("Add a player or cash from each club…") or a blocker ("Before this trade can happen: the Brewers must clear 3 40-man spots"), then the two club bars. The title says nothing about <em>this</em> trade, and the banner reads like a separate notice instead of part of the deal.</p>
+
+<h2>What the trade tools do</h2>
+<div class="src">
+<div><b>ESPN Trade Machine, 2014 (archived)</b><p>A dark title band runs the full width. It holds the name, then a row of team pickers ("Team 1: Atlanta Hawks ▾ · Team 2: Boston Celtics ▾ · Add Team 3"), with Start Over at the right. The verdict is one big button under the band, "Try This Trade", and the result replaces it. The header is a <em>control panel</em> for the matchup.</p></div>
+<div><b>Fanspo Trade Machine, today</b><p>A small coloured eyebrow ("Fanspo Front Office") sits over a large title. The context chips sit at the right: the season "2026-27" with the cap figure "$165.0M cap", plus Rulebook and Full width. The rules the deal is checked against are always on screen, as one compact chip.</p></div>
+<div><b>Spotrac Trade Machine, today</b><p>A navy hero band holds the title, then three step tabs: Teams, Players and Team Needs. A sticky footer says "Choose at least 2 teams to continue" next to a <em>Build a trade →</em> button. What's missing is told as the next step, not as a warning box.</p></div>
+</div>
+<p class="cap">Seen live in the browser pane on 2026-11-19. ESPN's live page today is still the 2014 tool's "How to use" screen; its layout notes come from the archived copy studied earlier (docs/trade-machine-2014-study.html).</p>
+
+<h2>Three directions for our header</h2>
+<p class="cap">Each mock shows the case in your screenshot, Brewers and Diamondbacks with the Brewers over the 40-man. The colours and type are close to the app's tokens, but these are sketches, not the build.</p>
+
+<h3>A · The broadcast band <span class="pick">closest to the 2014 tool</span></h3>
+<div class="mock">
+  <div class="a-bar">
+    <h3>Trade card</h3>
+    <div class="a-teams"><span class="a-pill"><span>Club 1</span>Brewers</span><span class="a-pill"><span>Club 2</span>Diamondbacks</span></div>
+    <span class="a-act">Share</span><span class="a-act">Start over</span>
+  </div>
+  <div class="a-status">Can't happen yet <em>· Brewers must clear 3 40-man spots</em></div>
+</div>
+<p>The title becomes a navy band like a broadcast lower-third, holding the two clubs and the page actions (Share, Start over). The banner shrinks to a thin status strip fixed to the band's underside, so the verdict reads as the band's own line. When the deal works, the strip turns green: "Works on the 40-man · Brewers add 8.7 WAR". Before a deal exists, it gives the next step: "Add a player from each club".</p>
+
+<h3>B · Front-office title with chips <span class="pick">the Fanspo idea</span></h3>
+<div class="mock">
+  <div class="b-head">
+    <div><div class="b-eye">Trade card · 2027 season</div><div class="b-title">Brewers <i>⇄</i> Diamondbacks</div></div>
+    <div class="b-chips">
+      <div class="b-chip warn"><div class="k">40-man</div><div class="v">MIL 43/40</div></div>
+      <div class="b-chip"><div class="k">Payroll swing</div><div class="v">$21.6M</div></div>
+      <div class="b-chip"><div class="k">Players</div><div class="v">5 for 2</div></div>
+    </div>
+  </div>
+</div>
+<p>The page title names the trade itself, "Brewers ⇄ Diamondbacks", with a small eyebrow over it. The banner becomes three chips at the right: the 40-man check, in clay when it fails; the payroll swing; and the count. Nothing is boxed, and the club bars below carry the colour. This is the quietest option and the most "stat sheet".</p>
+
+<h3>C · The scoreboard <span class="pick">most baseball</span></h3>
+<div class="mock">
+  <div class="c-board">
+    <div class="c-side"><div class="c-mark" style="background:var(--gold);color:var(--navy)">MIL</div><div><div class="c-name">Brewers</div><div class="c-sub">gets 5 · +8.7 WAR</div></div></div>
+    <div class="c-mid"><div class="big">Not yet</div><div class="warn">Brewers: clear 3 40-man spots</div></div>
+    <div class="c-side r"><div><div class="c-name">Diamondbacks</div><div class="c-sub">gets 2 · −8.7 WAR</div></div><div class="c-mark" style="background:var(--red)">AZ</div></div>
+  </div>
+</div>
+<p>The header is laid out like the score header of a game page: the two clubs face each other, and the middle cell holds the verdict where the score would be ("Not yet", "Works", "Add players"). It answers "who gets what, and can it happen" in one glance. The club bars below can then drop their duplicated numbers.</p>
+
+<h2>Side by side</h2>
+<table>
+<tr><th></th><th>A · Band</th><th>B · Title + chips</th><th>C · Scoreboard</th></tr>
+<tr><td>Names this trade</td><td>Yes, in the pills</td><td>Yes, as the title</td><td>Yes, both sides</td></tr>
+<tr><td>Verdict reads as</td><td>A status strip</td><td>A clay chip</td><td>The centre "score"</td></tr>
+<tr><td>Phone width</td><td>Band wraps to two lines</td><td>Chips wrap under the title</td><td>Stacks into three rows</td></tr>
+<tr><td>Repeats the club bars</td><td>No</td><td>No</td><td>Partly (WAR, counts)</td></tr>
+<tr><td>Build size</td><td>Small</td><td>Small</td><td>Medium</td></tr>
+</table>
+
+<h2>My pick</h2>
+<p><strong>A, the broadcast band.</strong> It's the same family as the 2014 Trade Machine bars you already chose for the club cards. It gives Share and Start over a home, which today sit inside the deal card. It also keeps the verdict one line tall. C is the strongest idea if you want the header to carry the deal's figures, but it repeats the club cards right below it.</p>
+<p class="cap">Sources: <a href="https://fanspo.com/nba/trade-machine">Fanspo Trade Machine</a>, <a href="https://www.spotrac.com/nba/trade-machine/">Spotrac Trade Machine</a>, <a href="https://www.espn.com/nba/tradeMachine">ESPN Trade Machine</a>, <a href="https://web.archive.org/web/20140101033704/http://espn.go.com/nba/tradeMachine">ESPN Trade Machine, Jan 2014 (Internet Archive)</a>.</p>
+</main></body></html>

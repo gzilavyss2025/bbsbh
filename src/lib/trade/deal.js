@@ -241,7 +241,7 @@ export function optionStatus(service, options) {
 // The deal as the transaction wire would print it (MLB's own sentence shape,
 // e.g. "Chicago White Sox traded 1B Andrew Vaughn to Milwaukee Brewers for RHP
 // Aaron Civale and cash."). A pitcher is RHP or LHP by his throwing hand.
-const wirePos = (p) => (p.pos === 'P' || p.pos === 'TWP' ? (p.throws === 'L' ? 'LHP' : 'RHP') : p.pos || '')
+export const wirePos = (p) => (p.pos === 'P' || p.pos === 'TWP' ? (p.throws === 'L' ? 'LHP' : 'RHP') : p.pos || '')
 const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
 // A Competitive Balance pick as the wire prints one: "a 2027 Competitive Balance Round A pick".
 export const pickText = (pick) => `a ${pick.year} Competitive Balance Round ${pick.round} pick`

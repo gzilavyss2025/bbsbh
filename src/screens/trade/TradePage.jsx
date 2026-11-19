@@ -4,6 +4,7 @@ import { fetchLevelLines } from '../../api/trade/levelLines.js'
 import { dealSummary, money, applyRetain, unsetSalary, wireSentence } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
+import { pathOf } from '../../lib/route/table.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { isMlbTeamId, teamAbbr, teamClubName, teamFullName, ALL_MLB_TEAM_IDS } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
@@ -19,7 +20,7 @@ import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
 import { DepthCard } from './DepthCard.jsx'
 import { POS_GROUPS, SPOTS, SHOW, SORT, levelRank, rosterList } from './rosterList.js'
-import { PCTS, RetainControl, Wire, Verdict, Effect, otherNotes, StripSide, payText } from './DealParts.jsx'
+import { PCTS, RetainControl, Wire, Effect, otherNotes, StripSide, payText } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
@@ -27,6 +28,8 @@ import '../../styles/trade/motion.css'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { DraftPicks } from './DraftPicks.jsx'
+import { Scoreboard } from './Scoreboard.jsx'
+import { dealStory } from './dealStory.js'
 import { fetchCbPicks } from '../../api/trade/cbPicks.js'
 import '../../styles/trade/page.css'
 
@@ -35,7 +38,7 @@ const DASH = '—'
 const idOf = (abbr) => ALL_MLB_TEAM_IDS.find((id) => teamAbbr({ id }) === abbr?.toUpperCase()) ?? null // caps-js-exempt: matches a URL key, renders nothing
 
 // The deal lives in the address, so a link rebuilds it:
-// /trade?team=MIL&with=BOS&p=1,2,3&ca=0&cb=2.5&dp=2027-A-33 (cash in $M; dp: draft picks).
+// /trade-simulator?team=MIL&with=BOS&p=1,2,3&ca=0&cb=2.5&dp=2027-A-33 (cash in $M; dp: draft picks).
 function readLink() {
   const q = new URLSearchParams(window.location.search)
   return {
@@ -56,14 +59,14 @@ function writeLink({ a, b, picked, cashA, cashB, dp }) {
   if (cashB) q.set('cb', String(cashB))
   if (dp.size) q.set('dp', [...dp].join(','))
   const s = q.toString()
-  window.history.replaceState(window.history.state, '', `${window.location.pathname}${s ? `?${s}` : ''}`)
+  window.history.replaceState(window.history.state, '', `${pathOf('trade')}${s ? `?${s}` : ''}`)
 }
 
 // The trade card (/trade). Pick a partner, add players or cash from each side,
 // and the card states what moves: payroll, WAR, years of control, 40-man spots.
 // No grade on who wins. Open surface (ADR-0034): rosters and contracts only.
 export function TradePage() {
-  useDocumentTitle('Trade Card')
+  useDocumentTitle('Trade Simulator')
   const { favoriteTeamId } = useFavoriteTeam()
   const start = useMemo(() => readLink(), [])
   const [a, setA] = useState(start.a ?? (isMlbTeamId(favoriteTeamId) ? favoriteTeamId : 158))
@@ -201,11 +204,11 @@ export function TradePage() {
     <div className="screen tradedesk">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Trade Card</h1>
+        <h1 className="topbar__title">Trade Simulator</h1>
       </header>
 
       <Stack gap="section">
-        {deal && <Verdict deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} />}
+        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} warSeason={sideA.data?.warSeason} />}
 
         <div className="tradedesk__sides" ref={movesRef}>
           {b ? (
@@ -346,7 +349,7 @@ export function TradePage() {
             <Wire text={wireSentence(
               { club: teamFullName(a), sends: sends(sideA.data), draftPicks: sentPicks(a), cashUsd: cashA * 1e6 },
               { club: teamFullName(b), sends: sends(sideB.data), draftPicks: sentPicks(b), cashUsd: cashB * 1e6 },
-            )} />
+            )} story={dealStory({ a, b, sendsA: sends(sideA.data), sendsB: sends(sideB.data), picksA: sentPicks(a), picksB: sentPicks(b), cashA, cashB })} />
             {otherNotes(deal.notes).length > 0 && (
               <ul className="tradedesk__notes" aria-live="polite">
                 {otherNotes(deal.notes).map((n) => <li key={n}>{n}</li>)}

@@ -3,47 +3,6 @@
    under its haul, and its roster inline with Trade Machine rows. Imported by
    the page. */
 
-/* The banner on top: one line, centred, one colour, like the Trade
-   Machine's "This Trade is Successful!" but stating a fact. */
-.tradedesk__verdict {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  letter-spacing: var(--ls-label);
-  text-align: center;
-}
-
-.tradedesk__verdict--go {
-  background: var(--accent-tint);
-  color: var(--accent-positive-deep);
-}
-
-.tradedesk__verdict--stop {
-  background: var(--surface-event-wash);
-  color: var(--text-heading);
-}
-
-.tradedesk__verdict--stop p {
-  margin: 0;
-}
-
-.tradedesk__verdict--stop ul {
-  list-style: none;
-  margin: var(--space-1) 0 0;
-  padding: 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-none);
-  color: var(--accent-negative);
-}
-
-.tradedesk__verdict--wait {
-  background: var(--surface-card);
-  color: var(--text-muted);
-}
-
 /* What the deal does for one club, under its haul. */
 .tradedesk__effect {
   margin-top: var(--space-3);
@@ -120,6 +79,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
+  line-height: var(--lh-solid);
   font-variant-numeric: tabular-nums;
 }
 
@@ -375,4 +336,180 @@
 /* The bar's ✕ is the drawn + turned a quarter, so it sits dead centre too. */
 .tradedesk__pmglyph--x {
   transform: rotate(45deg);
+}
+
+/* The scoreboard header (Scoreboard.jsx): club | WAR swing | club, the game
+   page's score header turned to a deal. */
+/* layout-exempt: three cells, club | swing | club, the middle sized to its figure */
+.tradeboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, auto) minmax(0, 1fr);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+
+/* layout-exempt: logo, name over its line, the WAR figure */
+.tradeboard__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 0;
+}
+
+.tradeboard__club--b {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* layout-exempt: the name over its line */
+.tradeboard__clubtext {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tradeboard__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.tradeboard__sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.tradeboard__war {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.tradeboard__war--up {
+  color: var(--accent-positive-deep);
+}
+
+.tradeboard__war--down {
+  color: var(--accent-negative);
+}
+
+/* layout-exempt: the middle cell stacks its label, figure, meter and status */
+.tradeboard__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  text-align: center;
+}
+
+.tradeboard__k,
+.tradeboard__status {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradeboard__score {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink-bright);
+}
+
+/* A track with its centre marked; the fill grows from the centre toward the club that gains. */
+.tradeboard__meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--space-2);
+  background: color-mix(in srgb, var(--text-on-ink) 25%, transparent);
+}
+
+.tradeboard__meter::after {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--space-1) * -1);
+  left: 50%;
+  width: var(--bw-heavy);
+  background: var(--text-on-ink-bright);
+}
+
+.tradeboard__fill {
+  position: absolute;
+  inset-block: 0;
+  background: var(--marker);
+}
+
+.tradeboard__status--stop {
+  color: var(--marker);
+}
+
+/* A phone stacks the board: club, swing, club. */
+@media (max-width: 739px) {
+  .tradeboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tradeboard__club--b {
+    flex-direction: row;
+    text-align: left;
+  }
+}
+
+/* A phone has no room for name, salary and WAR side by side: the name takes
+   the first line, salary and WAR share the second, the face spans both. */
+@media (max-width: 739px) {
+  /* layout-exempt: named areas, name over salary and WAR on a phone */
+  .tradedesk__rosterlist .tradedesk__open,
+  .tradedesk__sent > .tradedesk__open.tradedesk__open {
+    grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+    grid-template-areas:
+      'face who who'
+      'face money fig';
+    row-gap: var(--space-1);
+  }
+
+  .tradedesk__open > .tradedesk__face {
+    grid-area: face;
+  }
+
+  .tradedesk__open > .tradedesk__who {
+    grid-area: who;
+  }
+
+  .tradedesk__open > .tradedesk__money {
+    grid-area: money;
+    flex-direction: row;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .tradedesk__open > .tradedesk__figcol {
+    grid-area: fig;
+    flex-direction: row;
+    gap: var(--space-1);
+    align-items: baseline;
+  }
+}
+
+/* The deal drawn as a wire story: the feed's own row, the Copy button beside it. */
+.tradedesk__wire--story {
+  align-items: flex-start;
+}
+
+.tradedesk__wirelist {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }

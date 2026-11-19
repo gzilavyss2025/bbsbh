@@ -58,7 +58,7 @@ export const ROUTE_TABLE = [
   // '/bullpen-availability' and '/pace-of-play' are the phrases people search
   // for (ADR-0053), while App.jsx and the preview cards key on the shorter name.
   { name: 'salaries', path: '/salaries' },
-  { name: 'trade', path: '/trade' },
+  { name: 'trade', path: '/trade-simulator', aliases: ['/trade'] },
   { name: 'run-value', path: '/run-value' },
   { name: 'run-differential', path: '/run-differential' },
   { name: 'attendance', path: '/attendance' },
