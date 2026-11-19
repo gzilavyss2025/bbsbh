@@ -13,6 +13,7 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
@@ -328,7 +329,13 @@ export function TradePage() {
                 {deal.notes.filter((n) => !/no set salary/.test(n)).map((n) => <li key={n}>{n}</li>)}
               </ul>
             )}
-            {deal.unpriced.a > 0 && <p className="tradedesk__tbdnote"><b>TBD</b> a salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.</p>}
+            {deal.unpriced.a > 0 && (
+              <div className="infopop-row tradedesk__info">
+                <InfoPopover label="What TBD means" className="infopop--paper">
+                  TBD is a big-league salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.
+                </InfoPopover>
+              </div>
+            )}
             {retainOpen ? (
               <div className="tradedesk__retainbar">
               <Chips label="Retained salary" layout="wrap" value={retainMode} onChange={setRetainMode}
@@ -452,7 +459,11 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
           </div>
           {browsing && (
             <RosterSheet title={`${club} roster`} onClose={() => setBrowsing(false)}>
-            <p className="tradedesk__legend">~ a year estimated from service time · WAR is from last season</p>
+            <div className="infopop-row tradedesk__info">
+              <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
+                A ~ marks a year estimated from service time. WAR is from last season.
+              </InfoPopover>
+            </div>
             <div className="tradedesk__controls">
               <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
               <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={setGroup} layout="wrap" />

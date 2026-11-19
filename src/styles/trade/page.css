@@ -390,6 +390,11 @@
   margin-inline: auto;
 }
 
+.tradedesk__info {
+  max-width: 40rem;
+  margin: var(--space-2) auto 0;
+}
+
 .btn.tradedesk__retainlink {
   display: flex;
   justify-content: flex-start;
@@ -407,13 +412,6 @@
 .tradedesk__clubactions > .tradedesk__cash,
 .tradedesk__clubactions > .tradedesk__browse {
   margin-top: 0;
-}
-
-.tradedesk__tbdnote {
-  max-width: 40rem;
-  margin: var(--space-2) auto 0;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
 }
 
 .tradedesk__notes {
@@ -467,12 +465,6 @@
   padding: var(--space-2) var(--space-3);
   background: var(--surface-event-wash);
   font-size: var(--fs-small);
-}
-
-.tradedesk__legend {
-  margin: var(--space-2) 0 0;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
 }
 
 .tradedesk__strip .tradedesk__stripshare {
