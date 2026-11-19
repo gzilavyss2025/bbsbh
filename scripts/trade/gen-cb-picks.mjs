@@ -16,21 +16,14 @@ import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { writeJsonAtomic } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
+import { cbPicksOf } from '../../src/lib/trade/deal.js'
 
 const out = join(import.meta.dirname, '..', '..', 'public', 'data', 'cb-picks.json')
 // The draft is in July: from August on, the next one is next year's.
 const now = new Date()
 const year = Number(process.argv[2]) || now.getUTCFullYear() + (now.getUTCMonth() >= 7 ? 1 : 0)
 
-const data = await getJson(`/api/v1/draft/${year}`)
-const picks = []
-for (const r of data.drafts?.rounds ?? []) {
-  const round = { 'CB-A': 'A', 'CB-B': 'B' }[r.round]
-  if (!round) continue
-  for (const p of r.picks ?? []) {
-    if (p.team?.id) picks.push({ key: `${year}-${round}-${p.pickNumber}`, year, round, number: p.pickNumber, teamId: p.team.id })
-  }
-}
+const picks = cbPicksOf(await getJson(`/api/v1/draft/${year}`), year)
 
 // Only rewrite when the picks change, so the nightly run doesn't churn the file.
 const prev = JSON.parse(await readFile(out, 'utf8').catch(() => '{}'))

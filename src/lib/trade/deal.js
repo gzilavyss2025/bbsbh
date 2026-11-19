@@ -257,3 +257,23 @@ export function wireSentence(a, b) {
   const gets = sideText(b) || 'future considerations'
   return `${a.club} traded ${gives} to ${b.club} for ${gets}.`
 }
+
+// Whether a farm entry (statsLevels.js's pool) is a pitcher: his position
+// says so, or pitching is the only line he has. A pitcher who batted once is
+// still a pitcher; a position player who pitched in a blowout is not.
+export const farmIsPitcher = (e) => !!e.pitching && (e.position === 'P' || e.position === 'TWP' || !e.hitting)
+
+// The draft order's Competitive Balance picks (statsapi /draft/{year}),
+// leaving out any pick already made: between the July draft and the next
+// order, the year's picks are spent, not tradable.
+export function cbPicksOf(data, year) {
+  const picks = []
+  for (const r of data?.drafts?.rounds ?? []) {
+    const round = { 'CB-A': 'A', 'CB-B': 'B' }[r.round]
+    if (!round) continue
+    for (const p of r.picks ?? []) {
+      if (p.team?.id && !p.isDrafted) picks.push({ key: `${year}-${round}-${p.pickNumber}`, year, round, number: p.pickNumber, teamId: p.team.id })
+    }
+  }
+  return picks
+}

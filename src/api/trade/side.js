@@ -4,13 +4,13 @@
 // trade as often as anyone on it. Every source degrades to "not posted yet":
 // a missing ledger row is a player with no pay line, never a failed page.
 import { getJson } from '../statsapi.js'
-import { roleFromCounts } from '../../screens/team/data/loadRoster.js'
+import { roleFromCounts } from '../../lib/roster/pitcherRole.js'
 import { fetchTeamRoster, fetchAffiliates, fetchComplexAffiliates } from '../team/fetch.js'
 import { loadCombinedPoolForTeams } from '../statsLevels.js'
 import { fetchTeamContracts } from '../salaries.js'
 import { fetchWarData } from '../war.js'
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
-import { tradePlayer, farmLine } from '../../lib/trade/deal.js'
+import { tradePlayer, farmLine, farmIsPitcher } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
 import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
@@ -32,7 +32,12 @@ function fetchOrgClubs(teamId, season) {
   const key = `${teamId}:${season}`
   if (!orgClubsLoad.has(key)) {
     orgClubsLoad.set(key, Promise.all([fetchAffiliates(teamId, season), fetchComplexAffiliates(teamId, season)])
-      .then(([full, complex]) => [...full, ...complex].filter((t) => LEVEL[t.sportId])))
+      .then(([full, complex]) => {
+        const clubs = [...full, ...complex].filter((t) => LEVEL[t.sportId])
+        // The readers answer [] on a failure: don't keep that, so the next call tries again.
+        if (!clubs.length) orgClubsLoad.delete(key)
+        return clubs
+      }))
   }
   return orgClubsLoad.get(key)
 }
@@ -130,7 +135,7 @@ export async function loadMinorLines(teamId, { season = new Date().getFullYear()
   const pool = await loadCombinedPoolForTeams(clubs, season)
   const lines = new Map()
   for (const e of pool) {
-    const isPitcher = !!e.pitching && !e.hitting
+    const isPitcher = farmIsPitcher(e)
     // His line at his highest level, for the "By level" percentile: a
     // population is one level, so a combined line would rank AA-and-A+ at-bats
     // against AA alone (prospect-trend's rule, #1279).

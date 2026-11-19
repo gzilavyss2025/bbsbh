@@ -27,6 +27,7 @@ import {
   rosterPitchingStat,
 } from './shared.js'
 import { DIRECT } from './sources.js'
+import { roleFromCounts } from '../../../lib/roster/pitcherRole.js'
 import { ipToOuts } from '../../../lib/math/innings.js'
 
 const DASH = '—'
@@ -38,15 +39,6 @@ function comparePitchers(a, b) {
     (b.war ?? -Infinity) - (a.war ?? -Infinity) ||
     Number(a.jersey) - Number(b.jersey)
   )
-}
-// Also the trade card's pitcher role (src/api/trade/side.js).
-export function roleFromCounts(gamesStarted, gamesPitched, saves) {
-  const g = Number(gamesPitched) || 0
-  if (g === 0) return null
-  const gs = Number(gamesStarted) || 0
-  if (gs / g >= 0.5) return 'SP'
-  if ((Number(saves) || 0) >= 8) return 'CL'
-  return 'RP'
 }
 
 // `src`: the shared reads (sources.js); a tab passes nothing.

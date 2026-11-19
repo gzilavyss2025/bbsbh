@@ -14,7 +14,7 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
-import { headerThemeFor, barMarkTone, themeKeyFor } from '../../lib/colors/headerTheme.js'
+import { headerThemeFor, themeKeyFor } from '../../lib/colors/headerTheme.js'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
@@ -433,7 +433,7 @@ function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, in
             bar's full height, the full club name centred. Default navy when the
             club has no tuned bar. */}
         <h2
-          className={`tradedesk__clubbar${barMarkTone(theme?.onBar) === 'dark' ? ' tradedesk__clubbar--darkmark' : ''}`}
+          className="tradedesk__clubbar"
           style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
         >
           <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />
@@ -493,7 +493,7 @@ function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, in
       {/* The Trade Machine's team bar: the club's colour, its name at the left,
           its figures at the right (40-man now and after), and the switch. */}
       <div
-        className={`tradedesk__dealbar${barMarkTone(theme?.onBar) === 'dark' ? ' tradedesk__clubbar--darkmark' : ''}`}
+        className="tradedesk__dealbar"
         style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
       >
         <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />

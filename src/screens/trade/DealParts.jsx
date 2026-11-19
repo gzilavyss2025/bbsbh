@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { MoveRow } from '../../components/transactions/MoveRow.jsx'
+import { isoToday } from '../../lib/dates.js'
 
 // The trade card's deal pieces (src/screens/trade/TradePage.jsx): the banner,
 // each club's effect line, the wire sentence, the pinned strip and the retain
@@ -47,7 +48,7 @@ export function Wire({ text, story = null }) {
     <div className={story ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
       {story ? (
         <ul className="oseason__list tradedesk__wirelist">
-          <MoveRow story={story} marks date={new Date().toISOString().slice(0, 10)} />
+          <MoveRow story={story} marks date={isoToday()} />
         </ul>
       ) : (
         <p className="tradedesk__wiretext">{text}</p>

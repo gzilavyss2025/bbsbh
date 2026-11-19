@@ -21,8 +21,13 @@
    The mono asset has already been through that reduction — it is one opaque
    shape plus transparency — so darkening it is exact, losing nothing there was
    left to lose. Applied only here, only to art that is already a silhouette. */
-img.sectionhead__mark {
+.sectionhead__mark {
   filter: var(--mark-filter, none);
+}
+
+/* A tinted mark (TeamLogo's `tint`) is already the text's colour: no re-ink. */
+.sectionhead__mark:has(.teamlogo--tint) {
+  filter: none;
 }
 
 /* A club's own uploaded City Connect masthead override (teams.js's

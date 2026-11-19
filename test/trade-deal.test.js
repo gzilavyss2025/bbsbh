@@ -2,7 +2,7 @@
 // like public/data/team-contracts.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, farmLine, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence } from '../src/lib/trade/deal.js'
+import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, farmLine, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence, farmIsPitcher, cbPicksOf } from '../src/lib/trade/deal.js'
 import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 
 const cells = (...kinds) => kinds.map(([kind, extra], i) => ({ year: 2026 + i, kind, ...extra }))
@@ -170,3 +170,25 @@ test('a Competitive Balance pick reads like the wire prints it', () => {
   )
 })
 
+
+test('a farm pitcher who batted once is still a pitcher', () => {
+  // The stats pool's entry for an arm with one plate appearance at the complex level.
+  const arm = {
+    position: 'P',
+    hitting: { plateAppearances: 1, ops: 0, homeRuns: 0 },
+    pitching: { era: 3.5, outs: 90, inningsPitched: '30.0', strikeOuts: 33 },
+  }
+  assert.equal(farmIsPitcher(arm), true)
+  // A position player who pitched in a blowout stays a hitter.
+  assert.equal(farmIsPitcher({ position: 'SS', hitting: { plateAppearances: 300 }, pitching: { outs: 3 } }), false)
+  assert.equal(farmIsPitcher({ position: '', hitting: null, pitching: { outs: 30 } }), true)
+})
+
+test('only picks not yet made are tradable', () => {
+  const data = { drafts: { rounds: [
+    { round: '1', picks: [{ pickNumber: 1, team: { id: 1 } }] },
+    { round: 'CB-A', picks: [{ pickNumber: 31, team: { id: 109 }, isDrafted: true }, { pickNumber: 32, team: { id: 158 }, isDrafted: false }] },
+    { round: 'CB-B', picks: [{ pickNumber: 67, team: { id: 111 } }] },
+  ] } }
+  assert.deepEqual(cbPicksOf(data, 2027).map((p) => p.key), ['2027-A-32', '2027-B-67'])
+})

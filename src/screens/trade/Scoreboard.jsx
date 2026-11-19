@@ -25,7 +25,8 @@ function blockers(deal, a, b, sendsA, sendsB) {
 }
 
 const sign = (v) => (v > 0.05 ? '+' : v < -0.05 ? '−' : '')
-const toneOf = (v) => (v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat')
+// The sides colour only past the same line the middle calls Even.
+const toneOf = (v) => (v >= EVEN ? 'up' : v <= -EVEN ? 'down' : 'flat')
 
 function Club({ teamId, gets, pay, war, side }) {
   return (

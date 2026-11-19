@@ -227,11 +227,6 @@
   height: 100%;
 }
 
-/* A light bar re-inks the flat mono mark dark, as the lab and the lineup bar do (ADR-0030). */
-.tradedesk__clubbar--darkmark img.tradedesk__clubbarmark {
-  filter: brightness(0);
-}
-
 /* The deal card's head, the 2014 Trade Machine's team bar: club colour,
    name at the left, figures stacked label-over-number at the right. */
 .tradedesk__dealbar {
