@@ -330,6 +330,7 @@ const BARE_ROUTES = {
   teammates: TeammatesPage,
   standings: StandingsPage,
   salaries: SalariesPage,
+  trade: lazyNamed(() => import('./screens/trade/TradePage.jsx'), 'TradePage'),
   fouls: FoulTrackerPage,
   'admin-research': ResearchDiaryPage,
   'admin-contenders': ContenderDiaryPage,

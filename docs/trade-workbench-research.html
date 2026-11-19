@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Workbench Research</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#222;--mute:#6b6457;--rule:#d8cfbd;--accent:#8a2b1d;--ok:#2f6b3a;--warn:#9a6a00}
+@media (prefers-color-scheme:dark){:root{--paper:#1b1a17;--ink:#ece6da;--mute:#a49c8c;--rule:#3a372f;--accent:#e08a6f;--ok:#7fc28c;--warn:#e0b44f}}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 Georgia,serif;margin:0;padding:24px 16px}
+main{max-width:860px;margin:auto}h1{font-size:1.8rem;margin:.2em 0}h2{border-bottom:2px solid var(--ink);padding-bottom:4px;margin-top:2em}
+h3{margin:1.4em 0 .3em}.lede{font-size:1.1rem}.mute{color:var(--mute)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:.6em 0}th,td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-family:system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
+.c{color:var(--ok);font-weight:bold;font-family:system-ui;font-size:.75rem}.u{color:var(--warn);font-family:system-ui;font-size:.75rem}
+.box{border:1px solid var(--rule);padding:12px 16px;margin:1em 0}ul{padding-left:1.2em}code{font-size:.85em}
+.scroll{overflow-x:auto}
+</style></head><body><main>
+<h1>Trade Workbench: what other trade tools do</h1>
+<p class="mute">Research for a page where you pick players from two clubs' rosters and look at a possible trade · 2026-11-18</p>
+
+<p class="lede"><b>The short answer:</b> every baseball trade tool turns the question into one money number and a verdict saying who wins. Fans still say the verdicts are wrong. The NBA and NHL tools succeed because they check real rules, such as whether the salaries match. No tool in any sport handles a trade that has been reported but is not yet on the transaction wire. Tally can be the trade tool that <i>shows the facts</i> (who each club controls, for how long, at what cost, and the roster consequences) <i>without grading the trade</i>, and it can be the first to track a reported trade until it becomes official.</p>
+
+<p class="mute">Marks: <span class="c">CONFIRMED</span> = checked in a web search this session. <span class="u">UNCONFIRMED</span> = from background knowledge and not re-checked; details may be out of date. No tool page was opened directly. Check the key tools by hand before you build.</p>
+
+<h2>1 · The tools, sport by sport</h2>
+<div class="scroll"><table>
+<tr><th>Tool</th><th>Sport</th><th>How it judges</th><th>Does well</th><th>Does poorly</th></tr>
+<tr><td><b>Baseball Trade Values</b><br><span class="c">CONFIRMED</span></td><td>MLB</td><td>Gives one surplus-value $ per player (projected value minus salary over years of control, with arbitration estimated at 25/40/60%). Accepts the trade if the values fall inside a tolerance band.</td><td>Years of control and the arbitration ramp are explicit · a public method page · value timelines · share links · three-team trades</td><td>It approves lopsided "ridiculous" trades (Rumbunter). Fans doubt its prospect values. It admits it undervalues salary dumps. Its "93% accurate" claim is its own. Paywalled extras.</td></tr>
+<tr><td>FanGraphs (Trade Value series, RosterResource) · BP<br><span class="u">UNCONFIRMED</span></td><td>MLB</td><td>Articles, not a simulator</td><td>The most rigorous source on years of control, option years, service time and the 40-man roster</td><td>You cannot build a trade on them</td></tr>
+<tr><td><b>ESPN NBA Trade Machine</b><br><span class="u">UNCONFIRMED</span></td><td>NBA</td><td>Says "trade successful" or "failed" under the league's salary-matching rules, plus a projected change in wins</td><td>Famous and shareable; up to 4–5 teams</td><td>Bugs, lags behind rule changes (aprons), weak on phones, limited draft-pick support</td></tr>
+<tr><td><b>Fanspo Trade Machine</b><br><span class="c">CONFIRMED</span> (NBA rules)</td><td>NBA (NFL?)</td><td>Checks the current NBA labor-deal rules: aprons, hard caps, trade exceptions</td><td>The most up-to-date rules · built for phones · share as an image · a "counter-offer" link</td><td>NBA-centred; no MLB tool</td></tr>
+<tr><td>CapFriendly → PuckPedia / CapWages<br><span class="c">CONFIRMED</span> CapFriendly shut down in 2024</td><td>NHL</td><td>Checks salary-cap validity: retained salary, no-trade and no-move clauses, the 50-contract limit</td><td>CapFriendly was the gold standard because it checked <i>roster legality</i></td><td>Its successors are still less complete <span class="u">UNCONFIRMED</span></td></tr>
+<tr><td>Spotrac / OverTheCap<br><span class="u">UNCONFIRMED</span></td><td>NFL (+MLB pages)</td><td>Cap-effect calculators: dead money, savings</td><td>Before/after payroll; Spotrac tracks the MLB tax payroll and service time</td><td>Not really trade builders</td></tr>
+<tr><td>KeepTradeCut · FantasyPros<br><span class="u">UNCONFIRMED</span></td><td>Fantasy</td><td>Crowd-voted values (KTC) or rest-of-season projections; value bar</td><td>A "consolidation" adjustment for 2-for-1 trades; phone-first; synced league rosters</td><td>Herd bias; fantasy value ≠ real club value</td></tr>
+</table></div>
+
+<h2>2 · Patterns across every sport</h2>
+<ol>
+<li><b>Rules engine vs. value engine.</b> NBA and NHL tools answer "is this legal?" MLB has no salary cap, so every MLB tool answers "is this fair?", which is an opinion. (The labor deal expires December 2026, and fans expect a fight over a salary cap <span class="c">CONFIRMED</span>.)</li>
+<li><b>One number per player plus a balance bar plus a verdict</b> is the standard screen.</li>
+<li><b>The top complaint everywhere:</b> "the model accepts absurd trades." Users want the verdict explained, or no verdict at all.</li>
+<li><b>Share links and images drive growth.</b> Fanspo's counter-offer link turns one trade into a conversation.</li>
+<li><b>In baseball, years of control are the column that matters,</b> ahead of age and prospect rank.</li>
+<li><b>Data freshness wins.</b> ESPN lost ground to Fanspo by falling behind rule changes.</li>
+<li><b>Legacy tools were built for desktop</b>; newer ones work on phones. <span class="u">UNCONFIRMED</span></li>
+</ol>
+
+<h2>3 · Baseball details nobody models</h2>
+<p>None of these tools appear to show any of the following <span class="u">UNCONFIRMED</span>. Each one is a fact, not an opinion, so each fits Tally's tone:</p>
+<ul>
+<li>Room on the 40-man roster after the trade (does a club have to cut someone?)</li>
+<li>Option years left, and Rule 5 eligibility for prospects</li>
+<li>No-trade clauses and 10-and-5 rights (the player can block the deal)</li>
+<li>Competitive balance picks, the only MLB draft picks a club can trade</li>
+<li>Payroll before and after against the luxury-tax (CBT) thresholds</li>
+<li>Cash considerations, and players to be named later (PTBNL)</li>
+</ul>
+
+<h2>4 · What Tally already has to work with</h2>
+<p class="mute">Found in <code>public/data/</code> and <code>src/api/</code>:</p>
+<table>
+<tr><th>Need</th><th>Already built</th></tr>
+<tr><td>Contract, years left, pay rank</td><td><code>player-contracts/</code>, <code>pay-ranks.json</code>, <code>src/api/person/contracts.js</code></td></tr>
+<tr><td>Club payroll before and after</td><td><code>team-contracts/</code>, <code>salaries.json</code></td></tr>
+<tr><td>Player value</td><td><code>war.json</code>, <code>war-history/</code>, <code>ovr/</code>, <code>savant-percentiles.json</code></td></tr>
+<tr><td>Prospects</td><td><code>top-prospects.json</code>, <code>prospect-trend.json</code>, <code>farm-system.json</code></td></tr>
+<tr><td>Rosters (40-man, options, status)</td><td>statsapi roster calls (see the roster-exposure traps note in memory)</td></tr>
+<tr><td>Real trades, when official</td><td><code>team-transactions/</code>, <code>trade-deadline/</code>, <code>docs/transactions-wire.md</code></td></tr>
+</table>
+<p>The data is mostly there. Service time and option years need checking against a live statsapi response first. Per CLAUDE.md, do not guess field paths.</p>
+
+<h2>5 · What I recommend</h2>
+<div class="box">
+<b>Build a "trade card," not a trade grader.</b> Pick two clubs, tap players from each roster, and the page lays out both sides like a scorebook ledger. For each player it shows age, position, salary this year, years of control, WAR (last season and 3-year), and prospect rank. Totals sit at the bottom: WAR moved, salary moved, years of control moved, 40-man room after the trade, and any no-trade or 10-and-5 flags. No "who wins" verdict. That avoids the complaint every value tool gets, and it matches the app's facts-first voice.
+</div>
+<ul>
+<li><b>Version 1:</b> two clubs, MLB rosters only, a share URL (<code>?a=158&amp;b=…&amp;p=…</code>). It is not a scoring surface, so the spoiler rule does not apply.</li>
+<li><b>Later: reported trades.</b> A "reported" mode for a deal you heard about. When the trade shows up on the wire, the card flips to "official" and links the transaction. No other tool does this, and it fits the second-screen use of the app.</li>
+<li><b>Later:</b> a third club, prospects pulled from affiliate rosters, payroll against the tax lines, competitive balance picks.</li>
+<li><b>Skip:</b> surplus-$ grades, paywalls, crowd-voted values.</li>
+</ul>
+
+<h2>6 · If you want to test it with people (user-research plan)</h2>
+<p><b>Method:</b> 5–6 short interviews with fans who follow trade rumors, then a usability test of a wireframe.</p>
+<ol>
+<li><b>Warm-up:</b> Which team do you follow? Where do you hear about trades first?</li>
+<li><b>Current habits:</b> The last time you heard about a trade, what did you look up? Where did you look?</li>
+<li><b>Deep dive:</b> Have you used BTV or the ESPN machine? When did you trust the verdict, and when didn't you? Do years of control, the 40-man roster or no-trade clauses ever come up for you?</li>
+<li><b>Reaction:</b> Show the trade card with no grade. Is anything missing? Do you miss a "who wins" verdict?</li>
+<li><b>Wrap-up:</b> Would you share it? Where?</li>
+</ol>
+<p><b>What would settle it:</b> if 4 of 6 people ask for a verdict, add a plain-language explanation. Still no single number.</p>
+
+<h2>Sources</h2>
+<ul class="mute" style="font-size:.85rem">
+<li>baseballtradevalues.com/valuing-major-leaguers · /trade-simulator · /player-value-timelines · /articles/mailbag-we-get-questions-a-lot</li>
+<li>rumbunter.com (Pirates "ridiculous trades" piece) · brewerfanatic.com forum topic 35069</li>
+<li>fanspo.com/nba/trade-machine/rules · spotrac.com NBA trade rules piece</li>
+<li>Not opened: ESPN Trade Machine, PuckPedia, CapWages, OverTheCap, KeepTradeCut, FantasyPros</li>
+</ul>
+</main></body></html>

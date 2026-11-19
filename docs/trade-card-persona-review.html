@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Card Persona Review</title>
+<style>
+:root{--bg:#F6EFDC;--card:#FBF6E9;--ink:#1B2A3A;--mute:#6B6558;--rule:#CBC1A7;--clay:#B4453A;--field:#2F6E4F}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#121212;--ink:#E3E3E3;--mute:#8C8C8C;--rule:#3D3D3D;--clay:#EB7A6C;--field:#5DB88A;color-scheme:dark}}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 ui-monospace,"JetBrains Mono",monospace;margin:0;padding:24px 16px}
+main{max-width:920px;margin:auto}h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.06em}
+h1{font-size:2rem;margin:0}h2{border-bottom:2px solid var(--ink);padding-bottom:4px;margin-top:2em}
+.box{background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 16px;margin:1em 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+th{color:var(--mute)}.who{white-space:nowrap;color:var(--mute)}.n{font-weight:700}.scroll{overflow-x:auto}li{margin:.35em 0}code{font-size:.9em}
+</style></head><body><main>
+<h1>Trade card: two reviewers</h1>
+<p>Two critical ease-of-use reviews of <code>/trade</code>, each run by a separate agent on the live dev server, 2026-11-19.</p>
+<ul>
+<li><b>Dana:</b> a dynasty fantasy manager, phone on the couch, wants answers in two taps.</li>
+<li><b>Marcus:</b> a retired pro scout with front-office years, tablet, distrusts any number he can't vouch for.</li>
+</ul>
+<p>Both said the browser's emulated width kept jumping, so a few layout notes are tentative. Neither reached every view.</p>
+
+<div class="box"><b>Where they agree:</b>
+<ul>
+<li>One tap can silently wipe half the deal.</li>
+<li>The depth grid's before-and-after counts read as one number ("32", "2122").</li>
+<li>The deal summary sits too far down.</li>
+</ul>
+<b>Where they differ:</b> Dana wants fewer controls (hide the retain options). Marcus wants more precision: real arbitration estimates, option status, and the season and source for WAR.</div>
+
+<h2>Ranked changes</h2>
+<div class="scroll"><table>
+<tr><th>#</th><th>Change</th><th>Raised by</th><th>What they saw</th></tr>
+<tr><td class="n">1</td><td><b>Never drop players silently.</b> "Change partner" should open the picker without touching the deal, and warn before players are dropped ("Drops Crochet. Change?"). Escape closes the picker; it doesn't navigate.</td><td class="who">Dana, Marcus</td><td>Change partner removed <code>with=BOS</code> and Crochet with it, with no message. Marcus saw the partner vanish after tapping a player's name too. That may be the same path or a second one; I haven't reproduced it yet.</td></tr>
+<tr><td class="n">2</td><td><b>Make depth changes readable.</b> "3 → 2" with an arrow, not a struck digit beside the new one. Spell out a thin spot in words ("1B/DH down to 2 in MLB + AAA").</td><td class="who">Dana, Marcus</td><td>Both read "32" and "2122". The strike-through is too faint at phone width, and screen readers say "thirty-two" too.</td></tr>
+<tr><td class="n">3</td><td><b>Don't let the payroll headline overstate.</b> When a player has no set salary, show it on the number itself ("+$28.7M + 1 arb year"), in the strip as well.</td><td class="who">Marcus</td><td>"+$28.7M" counted Vaughn's Arb 3 year as $0. The caveat sat three lines below, and the strip had none.</td></tr>
+<tr><td class="n">4</td><td><b>Deal summary right under the two sides;</b> depth below it, folded by default.</td><td class="who">Dana</td><td>What moves came after both cards and the whole depth grid. The pinned strip helps, but "MIL PAY +$28.7M" reads as cryptic.</td></tr>
+<tr><td class="n">5</td><td><b>Choosing Prospects switches the sort to Prospect rank.</b></td><td class="who">Dana</td><td>The No. 1 MLB prospect came 5th, sorted by name.</td></tr>
+<tr><td class="n">6</td><td><b>Answer "is a 40-man spot needed?" outright:</b> "Spots to clear: 0". Flag an arriving minor leaguer who isn't on the 40-man.</td><td class="who">Marcus</td><td>"40/40 · 40/40" is correct, but makes him do the arithmetic.</td></tr>
+<tr><td class="n">7</td><td><b>Option status that's true for veterans:</b> "Can't be optioned without consent (5+ years service)" or "Out of options". Say whose option it is (club, player, mutual) and the amount.</td><td class="who">Marcus</td><td>The sheet showed "2 option years left" on a veteran (Marcus named Vaughn, at 4.142 years of service, just under 5). Contreras's 2027 read just "Option".</td></tr>
+<tr><td class="n">8</td><td><b>Label every figure:</b> "2026 WAR (FanGraphs)", a legend for "~", and plain words where a dash appears ("No MLB service", "Not on 40-man").</td><td class="who">Marcus</td><td>A row of "2027 —" with no age (Wagoner, O'Rae, Wood and others). "WAR 0.3" on Crochet looks like a data error without the season.</td></tr>
+<tr><td class="n">9</td><td><b>A real Share button</b> (the phone's share sheet, copy as the fallback) at the top or on the strip.</td><td class="who">Dana</td><td>Only "Copy link", far down the page.</td></tr>
+<tr><td class="n">10</td><td><b>Fewer retain controls:</b> one "Retain salary…" link that opens the choices. Make the row's tap area visibly separate from Add/Remove.</td><td class="who">Dana</td><td>The three retain mode buttons read as rule-book clutter, and she had to look twice to see the row opens a sheet.</td></tr>
+</table></div>
+
+<h2>What both liked</h2>
+<ul>
+<li><b>"How he got here"</b> ("Trade · CWS '25 · R1 #3 '19"), with See the trade one tap away.</li>
+<li><b>What moves, mirrored,</b> with no "who wins" grade.</li>
+<li><b>The roster sheet:</b> search, position filters, the prospect-rank and level sorts, prospect ranks on the rows, and the 40-man count in each card's header. Dana: "better than KTC for whether a deal is realistic."</li>
+</ul>
+
+<h2>Notes on their findings</h2>
+<ul>
+<li>The "32" / "2122" read is the old count struck through, right beside the new one. Both reviewers misread it, so it's a real readability failure even though the numbers are right.</li>
+<li>Marcus's "Vaughn 5+ years" is a little off: the ledger has Vaughn at 4.142 years of service. The point holds for players at 5+ years, and the sheet does show option years for anyone under 5.</li>
+<li>WAR comes from the app's <code>war.json</code>. I haven't confirmed which source's WAR it is, so the label in change 8 needs that checked first.</li>
+</ul>
+</main></body></html>

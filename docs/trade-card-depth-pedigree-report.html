@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Card Depth Report</title>
+<style>
+:root{--bg:#F6EFDC;--card:#FBF6E9;--ink:#1B2A3A;--mute:#6B6558;--rule:#CBC1A7;--clay:#B4453A;--field:#2F6E4F}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#121212;--ink:#E3E3E3;--mute:#8C8C8C;--rule:#3D3D3D;--clay:#EB7A6C;--field:#5DB88A;color-scheme:dark}}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 ui-monospace,"JetBrains Mono",monospace;margin:0;padding:24px 16px}
+main{max-width:860px;margin:auto}h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.06em}
+h1{font-size:2rem;margin:0}h2{border-bottom:2px solid var(--ink);padding-bottom:4px;margin-top:2em}
+.box{background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 16px;margin:1em 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+th{color:var(--mute);font-weight:600}.c{color:var(--field)}.u{color:var(--clay)}code{font-size:.9em}.scroll{overflow-x:auto}
+li{margin:.3em 0}
+</style></head><body><main>
+<h1>Trade card: depth, how acquired, draft pedigree</h1>
+<p>90-minute unattended run, 2026-11-18. Route: <code>/trade?team=MIL&amp;with=BOS&amp;p=683734,676979</code> on the dev server. Nothing committed.</p>
+
+<div class="box"><b>The short version.</b> Every player on the card now says how he joined his club and where he was drafted: "Trade · CWS '25 · R1 #3 '19", "Drafted R1 #15 '21", "Intl signing '24". A new <b>Organization depth</b> card shows each club's players by position and level, before and after the deal, as a <b>Grid</b> of counts or a <b>Ladder</b> of names, plus the club's thinnest spots near the majors. Added players stamp into the deal, and changed depth counts tick. No value score anywhere: that's the one thing OOTP players complain about most.</div>
+
+<h2>What OOTP does, and what I took</h2>
+<p>The research was thin (OOTP's manual pages and forums, not the game itself). <span class="c">Confirmed</span> = read on a source page; <span class="u">unconfirmed</span> = general knowledge.</p>
+<div class="scroll"><table>
+<tr><th>OOTP practice</th><th>Taken?</th></tr>
+<tr><td>The trade screen lists each team's needs ("team weaknesses") <span class="c">confirmed</span></td><td>Yes: "Thinnest near the majors", recomputed after the deal; a spot the deal newly thins shows in clay</td></tr>
+<tr><td>Org-wide depth across levels <span class="u">unconfirmed</span></td><td>Yes: the depth card, MLB → Rk</td></tr>
+<tr><td>Draft year/round/pick and acquisition history on player pages <span class="u">unconfirmed</span></td><td>Yes: one pedigree line per player, coloured by how he came</td></tr>
+<tr><td>AI value judgments and "Make This Work" <span class="c">confirmed</span>, and the most complained-about part</td><td>No, on purpose. The card stays facts only</td></tr>
+<tr><td>Retained salary as part of a deal <span class="c">confirmed</span></td><td>Not yet: see questions</td></tr>
+</table></div>
+
+<h2>Changed</h2>
+<ul>
+<li><b>New nightly data:</b> <code>scripts/trade/gen-trade-pedigree.mjs</code> writes <code>public/data/trade-pedigree/{orgId}.json</code> for all 30 organizations (7,610 players, 805 KB total, about 25 KB a club). Fetching this live would be 1.6–2.4 MB per club, measured. It's wired into the nightly workflow's structural block (about 150 requests) and listed in <code>docs/scripts/generators.md</code>. It's stamped through <code>index.json</code> for the freshness guard.</li>
+<li><b>The acquisition rule:</b> <code>src/lib/trade/pedigree.js</code> picks the latest move into the organization from outside it. That can be a trade, waiver claim, Rule 5, purchase or signing as a free agent, or a draft pick by this organization. A free-agent signing at 18 or younger by a player born outside the US is an "Intl signing". The draft pick is his latest draft. 7 tests.</li>
+<li><b>Depth:</b> <code>src/lib/trade/depth.js</code> counts players per position and level, before and after the deal, and finds the thinnest positions (a staff counts against 13 arms, OF against 5, the rest against 2). The level comes from each player's current club in the organization's full roster.</li>
+<li><b>UI:</b> <code>PlayerRow.jsx</code> (split out of the page) gets the pedigree line. <code>DepthCard.jsx</code> lets you switch between the two clubs and between Grid and Ladder. Styles are in <code>styles/trade/depth.css</code>. Motion is in <code>styles/trade/motion.css</code>, listed in <code>docs/motion.md</code>.</li>
+<li><b>Motion, gated:</b> only a player you add stamps in. Players a link or a reload restores don't, which I checked. Depth counts the deal changes drop in from above. Both are off with reduced motion.</li>
+</ul>
+
+<h2>Decisions I made for you (the forks)</h2>
+<ul>
+<li><b>Grid and Ladder both ship, behind a switch.</b> Grid is the scan view: struck old count, clay where depth thins, green where it fills. Ladder is the scouting view: names by level, departures struck, arrivals marked +. Pick one and I'll drop the other, or keep both.</li>
+<li><b>One depth card for both clubs, with a club switch</b>, rather than one card per club. On a phone two cards would stack into a long scroll.</li>
+<li><b>"MLB" in the grid means the players assigned to the big-league club.</b> In the offseason that's the 40-man roster, so AAA looks thin until spring.</li>
+<li><b>Pedigree colours:</b> traded in (and waivers, Rule 5, purchase) is clay, an international signing is green, drafted or free agent is plain ink.</li>
+</ul>
+
+<h2>Found</h2>
+<ul>
+<li>statsapi's <code>drafts[]</code> hydrate is clean (round, overall pick, team). But draft "DR" transactions almost never appear (1 for the whole Brewers org), so a draftee's draft is dated from the draft year, July 1.</li>
+<li>Re-drafted players carry two drafts (Aaron Ashby: 2017 R25 by Texas, then 2018 R4 by Milwaukee). The card shows the latest.</li>
+<li>The organization's full roster lists 247 Brewers, each with his current affiliate. That is the source for the depth levels.</li>
+<li>Tiny MLB samples (Quero .500 OPS) still sort above every minor-league line. A minimum of 50 PA / 20 IP would fix it (question 3).</li>
+</ul>
+
+<h2>Not confirmed</h2>
+<ul>
+<li>The "Intl signing" rule (18 or younger, born outside the US) is a heuristic. A US high-schooler who signed as an undrafted free agent at 18 reads as "Free agent", which is right, but an older international signing reads as "Free agent" too.</li>
+<li>I haven't run the nightly workflow step in CI. I ran the generator locally with the sandbox off.</li>
+<li>I haven't run the full <code>npm test</code>. The trade, route-table and data-freshness tests pass (41).</li>
+<li>At phone width (375 px) the depth card fits with no sideways scroll. In the sample trade, sending Vaughn and Turang flips 1B/DH 3→2 and 2B 2→1, and 2B becomes the thinnest spot.</li>
+</ul>
+
+<h2>Blocked on me / questions for you</h2>
+<ol>
+<li><b>Grid, Ladder, or both?</b></li>
+<li><b>Should "thinnest" be smarter?</b> It's a simple count today (MLB + AAA against 13 / 5 / 2). It could weight by WAR, or count only players with an MLB line.</li>
+<li><b>Add a minimum sample for the OPS / ERA sort?</b> 50 PA / 20 IP before a big-league line outranks a minor-league one.</li>
+<li><b>Retained salary:</b> OOTP treats it as part of the deal. Add a "retain %" per player next to cash?</li>
+<li><b>Ready to commit and open a PR?</b> The change now includes a nightly data job, a new data folder and a workflow edit.</li>
+</ol>
+</main></body></html>

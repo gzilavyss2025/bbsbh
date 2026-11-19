@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Card Critique</title>
+<style>
+:root{--bg:#F6EFDC;--card:#FBF6E9;--ink:#1B2A3A;--mute:#6B6558;--rule:#CBC1A7;--clay:#B4453A;--field:#2F6E4F;--marker:#F2C14E}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#121212;--ink:#E3E3E3;--mute:#8C8C8C;--rule:#3D3D3D;--clay:#EB7A6C;--field:#5DB88A;color-scheme:dark}}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 ui-monospace,"JetBrains Mono",monospace;margin:0;padding:24px 16px}
+main{max-width:900px;margin:auto}h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.06em}
+h1{font-size:2rem;margin:0}h2{border-bottom:2px solid var(--ink);padding-bottom:4px;margin-top:2em}
+.box{background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 16px;margin:1em 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+th{color:var(--mute)}.hi{color:var(--clay);font-weight:700;white-space:nowrap}.md{color:#9a6a00;font-weight:700;white-space:nowrap}.lo{color:var(--field);font-weight:700;white-space:nowrap}
+.scroll{overflow-x:auto}code{font-size:.9em}li{margin:.35em 0}
+</style></head><body><main>
+<h1>Trade card critique</h1>
+<p>Everything built on <code>/trade</code> this session: the two club cards, the player row, the roster controls, the depth card, What moves and the trade sheet. I looked at it on the dev server at desktop and 375 px. 2026-11-18.</p>
+
+<div class="box"><b>Overall:</b> the parts are right and they look like Tally: stamped cards, mono figures, facts and no verdict. The page as a whole has stopped telling one story, though. The deal you're building, which is the point of the page, ends up under two long rosters and a depth table, and every row and roster carries more controls than a phone reader needs. <b>The biggest win is putting the deal first and moving each roster behind a tap.</b></div>
+
+<h2>Usability</h2>
+<div class="scroll"><table>
+<tr><th>Severity</th><th>Finding</th><th>Recommendation</th></tr>
+<tr><td class="hi">High</td><td>Opening a roster expands it inline inside its club card: 40 rows on the 40-man, up to 247 on Everyone. "What moves" and the depth card then sit thousands of pixels down, so you add a player and can't see what changed.</td><td>Open the roster in a sheet (the same <code>.scrim/.sheet</code> as the trade sheet) with its filters at the top. Adding a player closes the sheet, or leaves it open with an "Added" toast.</td></tr>
+<tr><td class="hi">High</td><td>The deal summary is at the bottom of the page.</td><td>Put a compact "What moves" strip at the top or pinned to the bottom: payroll ±, WAR ±, 40-man after for each side. Keep the full card below for the notes. This is what OOTP pins too.</td></tr>
+<tr><td class="md">Medium</td><td>Each roster has four control rows: list (40-man / Prospects / Everyone), position, search, Sort, and a fifth for the sample minimum. On a phone that's about 300 px of controls before the first player.</td><td>One row: search plus a "Filter" button that opens the list, position and sort choices, showing what's set ("Prospects · OF · WAR").</td></tr>
+<tr><td class="md">Medium</td><td>A player row can run six lines: name, attributes, salary and control, WAR and OPS, pedigree, then the retain buttons. It has two separate tap targets (the numbers open the contract; the pedigree opens the trade) with nothing to tell them apart.</td><td>Make the whole row open one player sheet holding the contract, pedigree and trade, plus the Add button. Keep one line of numbers on the row itself.</td></tr>
+<tr><td class="md">Medium</td><td>In "Retain % per player" mode every player you send gets three Keep buttons, even when you never retain.</td><td>Show a small "Retain salary" link under a player you send. Open the buttons only when tapped.</td></tr>
+<tr><td class="lo">Low</td><td>The depth card stacks three groups of buttons (club, Grid/Ladder, Need by).</td><td>Put the club switch in the card's tab ("Brewers depth ▾") and Need by under the table, where its answer shows.</td></tr>
+<tr><td class="lo">Low</td><td>"MLB" in the depth grid means the 40-man roster in the offseason, so AAA looks empty until spring.</td><td>Label the column "40-man" until Opening Day.</td></tr>
+</table></div>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><b>What draws the eye first:</b> the club logos and the first player's name. They should come second; the deal summary should come first.</li>
+<li><b>Reading flow:</b> club card → roster (long) → other club → roster → depth → What moves. The answer comes last.</li>
+<li><b>Emphasis:</b> the trade sheet gets it right: a large WAR figure and a total for each side. The player rows don't: salary, control, WAR and OPS all share one small weight. Give the row one hero figure (WAR, or the sort's figure) and let the others drop back.</li>
+<li><b>Colour:</b> clay means a traded-in player, a depth count dropping, a 40-man crunch, and a no-trade flag. That's four meanings in one ink. Keep clay for "this deal makes something worse". Draw the pedigree in plain ink with a small kind label.</li>
+</ul>
+
+<h2>Consistency</h2>
+<div class="scroll"><table>
+<tr><th>Element</th><th>Issue</th><th>Recommendation</th></tr>
+<tr><td>Stripes</td><td>Zebra rows in the depth grid sit under the change washes, so a changed cell on a striped row reads muddy.</td><td>No stripes in the grid. Hairline rows instead, the way the card rows are drawn.</td></tr>
+<tr><td>Rank and percentile marks</td><td>The "93rd · AA" marker chip is the only marker fill on the page. Good, but it sits above the name and pushes the row taller.</td><td>Put it at the end of the attribute line.</td></tr>
+<tr><td>Controls</td><td>The search field and the Sort menu are styled by hand in the page's stylesheet.</td><td>Use the app's field and select styles, if <code>system/</code> has them, so they match other pages.</td></tr>
+<tr><td>Headshots</td><td>The empty square before a headshot loads looks broken at phone width.</td><td>Fill the empty square with the club's mark, the way the free-agent page does.</td></tr>
+</table></div>
+
+<h2>Accessibility</h2>
+<ul>
+<li><b>Contrast:</b> the body text and labels follow the tokens, which the contrast guard checks. I didn't measure the clay pedigree text on the card or the green-on-mint depth cells; they look close to 4.5:1 and are worth a check.</li>
+<li><b>Touch targets:</b> buttons, chips, the cash field and the trade link are all 44 px. The Grid and Ladder switch and the depth club switch are too.</li>
+<li><b>Screen readers:</b> the notes and needs lists announce changes. The depth grid's struck old count reads as two numbers ("3 2"); add visually hidden "was 3, now 2" text.</li>
+<li><b>Motion:</b> every animation is off under reduced motion.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>Facts, never a verdict. The trade sheet's two totals let a reader judge an old deal without being told what to think.</li>
+<li>The pedigree line ("Trade · CWS '25 · R1 #3 '19") packs a career into one scan.</li>
+<li>Depth before and after, with old counts struck through, makes the deal's effect on each organization visible at a glance.</li>
+<li>Minor-league lines combined across levels, plus the level percentile, make prospects comparable with each other.</li>
+<li>Motion is narrow and earned: only things the reader caused move.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><b>Deal first:</b> a pinned summary strip (payroll, WAR, 40-man for each side), so every add shows its effect right away.</li>
+<li><b>Each roster in a sheet:</b> the page becomes deal → two short club cards → depth, and the long list stops pushing everything down.</li>
+<li><b>One tap target per player row,</b> opening a player sheet for the contract, pedigree, trade and retain. The row keeps name, attributes, one line of numbers and Add.</li>
+<li><b>One filter row per roster:</b> search plus a Filter button.</li>
+<li><b>Clay means "worse" only;</b> no stripes in the depth grid.</li>
+</ol>
+</main></body></html>

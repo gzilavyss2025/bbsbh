@@ -1549,6 +1549,22 @@
       "class": "spoiler-free",
       "why": "The wsSeriesOdds notes (entering-tense). The Series state heading in comes from the callouts bundle's series block, which holds only games Final before the slate date (ADR-0087); the history it quotes is cut strictly before that date by lib/worldSeries/lastBefore.js. It reads no linescore, no feed and no reveal mark, so it clears the pre-half strip and Between Innings without a gate of its own."
     },
+    "trade/history.js": {
+      "class": "spoiler-free",
+      "why": "One past trade from the transaction wire, with where each player is now and war.json's season WAR. Roster history, no game result (ADR-0034)."
+    },
+    "trade/levelLines.js": {
+      "class": "spoiler-free",
+      "why": "Each level's season OPS and ERA percentile cut points (level-lines.json). Season totals, no game result (ADR-0034)."
+    },
+    "trade/pedigree.js": {
+      "class": "spoiler-free",
+      "why": "How each player joined his organization and his draft pick (trade-pedigree/{orgId}.json). Roster history, no game result (ADR-0034)."
+    },
+    "trade/side.js": {
+      "class": "spoiler-free",
+      "why": "The trade card's one side: the live 40-man and organization rosters joined to Cot's contracts, war.json, org prospect ranks and each affiliate's season lines. Roster state, contracts and season totals, no game result (ADR-0034)."
+    },
     "free-agents/freeAgents.js": {
       "class": "spoiler-free",
       "why": "Live free-agent class (/people/freeAgents) joined to war.json, season stat lines and Cot's contracts. Roster state and season stats, no game result (ADR-0034)."

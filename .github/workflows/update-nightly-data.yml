@@ -278,6 +278,17 @@ jobs:
         id: top-prospects
         continue-on-error: true
         run: node scripts/fetch-top-prospects.mjs
+      - name: Trade pedigree
+        id: trade-pedigree
+        continue-on-error: true
+        # ~150 requests (30 orgs: roster, then people in chunks of 60 with
+        # draft + transactions). Feeds /trade's how-acquired and draft lines.
+        run: node scripts/trade/gen-trade-pedigree.mjs
+      - name: Level lines
+        id: level-lines
+        continue-on-error: true
+        # 12 requests (six levels x hitting, pitching). Feeds /trade's "By level" sort.
+        run: node scripts/trade/gen-level-lines.mjs
       # ---- End structural data -------------------------------------------
 
       - name: Game notes
