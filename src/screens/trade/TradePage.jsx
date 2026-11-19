@@ -30,6 +30,7 @@ import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { DraftPicks } from './DraftPicks.jsx'
 import { Scoreboard } from './Scoreboard.jsx'
 import { dealStory } from './dealStory.js'
+import { TradeStory } from './story/TradeStory.jsx'
 import { fetchCbPicks } from '../../api/trade/cbPicks.js'
 import '../../styles/trade/page.css'
 
@@ -127,6 +128,12 @@ export function TradePage() {
         { name: teamClubName(b), fortyCount: sideB.data.fortyCount, sends: sends(sideB.data), cashUsd: cashB * 1e6 },
       )
     : null
+  // The deal as the wire prints it, and as a wire story the news story is built on.
+  const wireText = deal ? wireSentence(
+    { club: teamFullName(a), sends: sends(sideA.data), draftPicks: sentPicks(a), cashUsd: cashA * 1e6 },
+    { club: teamFullName(b), sends: sends(sideB.data), draftPicks: sentPicks(b), cashUsd: cashB * 1e6 },
+  ) : ''
+  const wireStory = deal ? dealStory({ a, b, sendsA: sends(sideA.data), sendsB: sends(sideB.data), picksA: sentPicks(a), picksB: sentPicks(b), cashA, cashB }) : null
 
   // Tapping the club already picked just closes the strip.
   const named = (side) => picks(side).map((p) => p.name)
@@ -346,10 +353,11 @@ export function TradePage() {
 
         {deal && (
           <Card frame="stamped" label="The deal" className="tradedesk__moves">
-            <Wire text={wireSentence(
-              { club: teamFullName(a), sends: sends(sideA.data), draftPicks: sentPicks(a), cashUsd: cashA * 1e6 },
-              { club: teamFullName(b), sends: sends(sideB.data), draftPicks: sentPicks(b), cashUsd: cashB * 1e6 },
-            )} story={dealStory({ a, b, sendsA: sends(sideA.data), sendsB: sends(sideB.data), picksA: sentPicks(a), picksB: sentPicks(b), cashA, cashB })} />
+            <Wire text={wireText}>
+              {wireStory && (
+                <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} nextYear={sideA.data.nextYear} fallback={wireText} />
+              )}
+            </Wire>
             {otherNotes(deal.notes).length > 0 && (
               <ul className="tradedesk__notes" aria-live="polite">
                 {otherNotes(deal.notes).map((n) => <li key={n}>{n}</li>)}

@@ -175,3 +175,56 @@
   margin-top: var(--space-5);
 }
 
+
+/* The trade story (story/TradeStory.jsx): a newspaper column in the deal card. */
+.tradestory__body {
+  max-width: 40rem;
+}
+
+.tradestory__headline {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.tradestory__dek {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.tradestory__graf {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+#root .tradestory__dek, #root .tradestory__graf, #root .tradestory__graf * { text-transform: none } /* caps-exempt: the story reads as prose */
+/* A name in the story reads as the wire's names do. */
+.tradestory__graf .plink {
+  font-weight: var(--w-bold);
+}
+
+/* The story's art: one game photo of the headline player, full column width. */
+.tradestory__art {
+  margin: 0 0 var(--space-3);
+}
+
+.tradestory__art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.tradestory__credit {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}

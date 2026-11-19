@@ -3,8 +3,6 @@ import { money } from '../../lib/trade/deal.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
-import { MoveRow } from '../../components/transactions/MoveRow.jsx'
-import { isoToday } from '../../lib/dates.js'
 
 // The trade card's deal pieces (src/screens/trade/TradePage.jsx): the banner,
 // each club's effect line, the wire sentence, the pinned strip and the retain
@@ -31,10 +29,9 @@ export function RetainControl({ mode, p, value, onChange }) {
 
 // The deal as the transaction wire would print it, and a button that copies
 // it as plain text. The copy names what happened in its own label.
-// With a `story` (dealStory.js), the deal is drawn as the home page's
-// offseason feed draws a major trade: MoveRow's faces, marks, cutline and
-// each player's note. The Copy button still copies the plain wire sentence.
-export function Wire({ text, story = null }) {
+// The deal's sentence and its Copy button. `children` (the trade story)
+// stands in the sentence's place; Copy still copies the plain wire sentence.
+export function Wire({ text, children = null }) {
   const [copied, setCopied] = useState(false)
   const copy = async () => {
     try {
@@ -45,14 +42,8 @@ export function Wire({ text, story = null }) {
     }
   }
   return (
-    <div className={story ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
-      {story ? (
-        <ul className="oseason__list tradedesk__wirelist">
-          <MoveRow story={story} marks date={isoToday()} />
-        </ul>
-      ) : (
-        <p className="tradedesk__wiretext">{text}</p>
-      )}
+    <div className={children ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
+      {children ?? <p className="tradedesk__wiretext">{text}</p>}
       <Button size="control" onClick={copy}>{copied ? 'Copied' : 'Copy'}</Button>
     </div>
   )

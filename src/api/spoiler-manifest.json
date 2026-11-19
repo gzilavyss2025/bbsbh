@@ -1553,6 +1553,10 @@
       "class": "spoiler-free",
       "why": "The next draft's Competitive Balance picks and who holds them (cb-picks.json). Draft order, no game result (ADR-0034)."
     },
+    "trade/storyData.js": {
+      "class": "spoiler-free",
+      "why": "The trade simulator's news story: stored awards, All-Star rosters and postseason history, plus a finished season's final standings. Honors and season records, no game in progress (ADR-0034)."
+    },
     "trade/history.js": {
       "class": "spoiler-free",
       "why": "One past trade from the transaction wire, with where each player is now and war.json's season WAR. Roster history, no game result (ADR-0034)."
