@@ -314,7 +314,7 @@ test('an override reaches the header triad, the tile background, the brand pair 
     },
     () => {
       assert.equal(treatmentHeaderColorOverride(158, 'main').onBar, '#FFFFFF')
-      assert.equal(treatmentHeaderColorOverride(158, 'main').bar, '#12284B', 'the rest of the triad still ships')
+      assert.equal(treatmentHeaderColorOverride(158, 'main').bar, '#ffc52f', 'the rest of the triad still ships')
       assert.equal(treatmentBgColor(158, 'city-connect'), '#ABCDEF')
       assert.equal(TEAM_COLOR_PAIRS[BREWERS][0], '#010203')
       assert.equal(resolveMarkPlacement(stampLogoTuningRecord(158, 'away')).offsetY, -12)
@@ -480,18 +480,18 @@ test('effectiveStore is memoized per overlay version', () => {
 // --- the endpoint's write rule ---------------------------------------------
 
 test('a save that clears a header triad below AA is refused, by the same number lint asserts', () => {
-  // #7A8B99 on #12284B is ~3.5:1 — the plausible-looking pair the browser check
-  // and this one both exist to catch.
+  // #7A8B99 on the Brewers' gold #ffc52f is well under 4.5:1 — the plausible-looking pair
+  // the browser check and this one both exist to catch.
   const refusal = identityWriteRefusal({ 'identity.mlbHeader.158.main.onBar': '#7A8B99' })
   assert.match(refusal, /mlbHeader 158 main/)
   assert.match(refusal, new RegExp(String(HEADER_CONTRAST_MIN)))
-  assert.equal(identityWriteRefusal({ 'identity.mlbHeader.158.main.onBar': '#FFFFFF' }), null)
+  assert.equal(identityWriteRefusal({ 'identity.mlbHeader.158.main.onBar': '#000000' }), null)
 })
 
 test('the contrast gate judges the EFFECTIVE triad, not the patch', () => {
-  // Overriding only the bar, to one the shipped ink cannot be read on, must be
-  // refused — which is only knowable by reading what ships.
-  assert.ok(identityWriteRefusal({ 'identity.mlbHeader.158.main.bar': '#F2F2F2' }))
+  // Overriding only the bar, to one the shipped ink (the Brewers' navy) cannot
+  // be read on, must be refused — which is only knowable by reading what ships.
+  assert.ok(identityWriteRefusal({ 'identity.mlbHeader.158.main.bar': '#0F2140' }))
   // A half-written triad on a club with no header at all is not a failure; the
   // resolver answers null and the club keeps default navy chrome.
   assert.equal(headerTriadRefusal({ bar: '#12284B' }), null)

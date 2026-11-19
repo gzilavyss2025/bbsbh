@@ -59,7 +59,7 @@ test('the bar group edits the record treatmentHeaderColorOverride reads', () => 
   const bar = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'alternate' }), 'bar')
   assert.equal(bar.triad, true)
   assert.equal(bar.title, 'Main bar', 'an alternate jersey wears the club shared Main bar')
-  assert.equal(fieldNamed(bar, 'bar').landed, '#12284B')
+  assert.equal(fieldNamed(bar, 'bar').landed, '#ffc52f')
   assert.deepEqual(parseIdentityFieldId(fieldNamed(bar, 'onBar').id).path, [
     '158',
     'treatments',
