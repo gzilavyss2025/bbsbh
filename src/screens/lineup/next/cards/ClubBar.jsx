@@ -17,6 +17,7 @@ export function ClubBar({ title, teamId, teamName, masthead, season, children })
           size={22}
           variant="mono"
           crop="bar"
+          tint
           overrideUrl={masthead.url}
           season={season}
           className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}

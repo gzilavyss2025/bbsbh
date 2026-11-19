@@ -414,7 +414,7 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
           className={`tradedesk__clubbar${barMarkTone(theme?.onBar) === 'dark' ? ' tradedesk__clubbar--darkmark' : ''}`}
           style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
         >
-          <TeamLogo teamId={teamId} variant="mono" crop="bar" className="tradedesk__clubbarmark" />
+          <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />
           <span>{teamFullName(teamId)}</span>
         </h2>
       {state.loading && !data && <p className="hint" role="status">Reading the {club} roster…</p>}

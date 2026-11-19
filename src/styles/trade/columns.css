@@ -181,9 +181,36 @@
   color: var(--text-on-ink);
 }
 
+/* The + and − are drawn, not typed: a font's glyph sits off its own centre,
+   two crossed bars sit dead centre in the circle. */
 .tradedesk__pmglyph {
+  position: relative;
   display: block;
-  line-height: var(--lh-zero);
+  width: 0.75em;
+  height: 0.75em;
+}
+
+.tradedesk__pmglyph::before,
+.tradedesk__pmglyph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  background: currentColor;
+}
+
+.tradedesk__pmglyph::before {
+  width: 100%;
+  height: var(--bw-heavy);
+}
+
+.tradedesk__pmglyph::after {
+  width: var(--bw-heavy);
+  height: 100%;
+}
+
+.tradedesk__pmglyph--minus::after {
+  content: none;
 }
 
 .tradedesk__rosterlist {
@@ -240,7 +267,7 @@
 }
 
 /* A light bar re-inks the flat mono mark dark, as the lab and the lineup bar do (ADR-0030). */
-.tradedesk__clubbar--darkmark .tradedesk__clubbarmark {
+.tradedesk__clubbar--darkmark img.tradedesk__clubbarmark {
   filter: brightness(0);
 }
 

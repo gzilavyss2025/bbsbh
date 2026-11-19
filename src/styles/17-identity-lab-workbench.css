@@ -152,7 +152,7 @@
   height: 100%;
 }
 
-.idlab__barmock--darkmark .idlab__barmock__logo {
+.idlab__barmock--darkmark img.idlab__barmock__logo {
   filter: brightness(0);
 }
 

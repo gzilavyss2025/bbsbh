@@ -21,7 +21,7 @@
    The mono asset has already been through that reduction — it is one opaque
    shape plus transparency — so darkening it is exact, losing nothing there was
    left to lose. Applied only here, only to art that is already a silhouette. */
-.sectionhead__mark {
+img.sectionhead__mark {
   filter: var(--mark-filter, none);
 }
 

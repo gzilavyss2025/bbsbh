@@ -67,8 +67,6 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
           {p.retainedUsd ? <span className="tradedesk__kept">Keeps {money(p.retainedUsd)}</span> : null}
-          {/* The Trade Machine's "Being Traded To": he stays on his roster, marked. */}
-          {goingTo ? <span className="tradedesk__going">In the deal → {goingTo}</span> : null}
         </span>
         <span className="tradedesk__money">
           <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
@@ -80,9 +78,10 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         </span>
       </button>
       {/* + and − take less room than words, so the row keeps its figures. */}
+      {goingTo ? <span className="tradedesk__going">Being traded to {goingTo}</span> : null}
       <IconButton mark="sm" className={picked ? 'tradedesk__pm tradedesk__pm--on' : 'tradedesk__pm'} onClick={() => onToggle(p.id)}
         label={picked ? `Take ${p.name} out of the deal` : `Add ${p.name} to the deal`}>
-        <span className="tradedesk__pmglyph">{picked ? '−' : '+'}</span>
+        <span className={picked ? 'tradedesk__pmglyph tradedesk__pmglyph--minus' : 'tradedesk__pmglyph'} aria-hidden="true" />
       </IconButton>
       {sheet}
     </li>
