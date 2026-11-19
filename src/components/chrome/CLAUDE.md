@@ -10,8 +10,9 @@ Read ADR-0037 before consolidating it back. Three things there are load-bearing 
 reports where a keyboard starts; `100dvh` tracks browser chrome, not the
 keyboard), the document scroll lock, and a result row cancelling its own
 `pointerdown` so the keyboard can't retract mid-tap and reflow a different row
-under the finger. It is deliberately **not** portalled: the ALL-CAPS invariant is
-a `#root *` rule, and a portal to `<body>` lands outside it. `--fs-field` (16px)
+under the finger. It portals into `#root`, never `<body>` (so not `ModalPortal`): that
+lifts it out of a header's sticky stacking context while keeping it under the
+ALL-CAPS invariant, a `#root *` rule a portal to `<body>` lands outside of. `--fs-field` (16px)
 is the iOS auto-zoom floor, not a taste call. The recents shelf is pure and
 shape-gated in `lib/recentSearches.js` (identity fields only, never a score) with
 `hooks/useRecentSearches.js` over it; `e2e/site-search.spec.js` is the guard.

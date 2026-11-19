@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { searchPeople, fetchTeamDirectory, searchTeams, disambiguateNames } from '../../api/search.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js'
@@ -12,7 +13,6 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { Stack } from '../ui/layout/Stack.jsx'
-import { ModalPortal } from '../ui/ModalPortal.jsx'
 
 // The site-wide search trigger — a persistent icon button (not an always-open
 // input; on a phone-width header there's no room to dock one, and this is the
@@ -31,11 +31,7 @@ export function SiteSearchButton({ className = '' }) {
       >
         <SearchGlyph />
       </button>
-      {/* Rendered in place, NOT through ModalPortal: both hosts (SiteHeader and
-          the slate topbar) are already in the root stacking context, and the
-          ALL-CAPS invariant is a `#root *` rule — a portal to <body> would land
-          the whole search surface outside it and quietly break the app's casing
-          (see the Clerk note in index.css). */}
+      {/* SiteSearchModal portals itself into #root (see RootPortal below). */}
       {open && <SiteSearchModal onClose={() => setOpen(false)} />}
     </>
   )
@@ -270,7 +266,7 @@ export function SiteSearchModal({ onClose, pick = null }) {
   // Portalled: opened from the header, the overlay was trapped in its stacking
   // context and the slate's sticky date card painted over the results.
   return (
-    <ModalPortal>
+    <RootPortal>
       <div
         className="searchoverlay"
         style={frame}
@@ -383,8 +379,17 @@ export function SiteSearchModal({ onClose, pick = null }) {
           </p>
         </div>
       </div>
-    </ModalPortal>
+    </RootPortal>
   )
+}
+
+// Into #root, NOT <body> (so not ModalPortal): a direct child of #root sits in
+// the root stacking context, out of any header's sticky layer, and still
+// answers to the ALL-CAPS invariant, which is a `#root *` rule — a portal to
+// <body> would quietly drop the whole surface's casing (the Clerk note in
+// index.css). Same target as the team page's SeasonPicker.
+function RootPortal({ children }) {
+  return createPortal(children, document.getElementById('root') ?? document.body)
 }
 
 // A row is an option in a combobox listbox, so the <li> IS the control — no
