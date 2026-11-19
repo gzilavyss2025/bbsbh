@@ -24,6 +24,11 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     // A player already in the deal: one line of who he is, his WAR as the
     // figure to read, and a small remove. The sheet holds the rest.
     const contract = p.payUsd != null ? money(p.payUsd) : p.payLabel
+    // The figure to read: WAR, or for a minor leaguer his OPS or ERA, labelled as what it is.
+    const fig = p.war != null ? { label: warSeason ? `${warSeason} WAR` : 'WAR', value: p.war.toFixed(1) }
+      : farm?.ops ? { label: `${farm.level} OPS`, value: farm.ops }
+        : farm?.era ? { label: `${farm.level} ERA`, value: farm.era }
+          : { label: warSeason ? `${warSeason} WAR` : 'WAR', value: '—' }
     return (
       <li className={enter ? 'tradedesk__sent tradedesk__row--enter' : 'tradedesk__sent'}>
         <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -36,8 +41,8 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
             </span>
           </span>
           <span className="tradedesk__sentwar">
-            <span className="tradedesk__k">{warSeason ? `${warSeason} WAR` : 'WAR'}</span>
-            <span className="tradedesk__sentfig">{p.war != null ? p.war.toFixed(1) : (farm?.ops ?? farm?.era ?? '—')}</span>
+            <span className="tradedesk__k">{fig.label}</span>
+            <span className="tradedesk__sentfig">{fig.value}</span>
           </span>
         </button>
         <IconButton mark="md" onClick={() => onToggle(p.id)} label={`Remove ${p.name} from the deal`}>✕</IconButton>

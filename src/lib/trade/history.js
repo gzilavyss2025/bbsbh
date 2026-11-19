@@ -12,14 +12,21 @@ export function groupTrade(rows, playerId, toId) {
   const deal = rows.filter((r) => r.typeCode === 'TR' && r.id === mine.id)
   const player = (r) => ({ id: r.person.id, name: r.person.fullName, fromId: r.fromTeam?.id ?? null, toId: r.toTeam?.id ?? null })
   const moved = deal.filter((r) => r.person)
+  // A row may name an affiliate (a prospect traded straight to Double-A), so
+  // the sides are read off the player's own row, not the MLB club's id: what
+  // went where he went, or left where he left, came to his club; what left
+  // his club (or went to the club he came from) is what it gave up.
+  const into = mine.toTeam?.id, from = mine.fromTeam?.id
+  const got = moved.filter((r) => r.toTeam?.id === into || r.fromTeam?.id === from)
+  const wentOut = (r) => r.fromTeam?.id === toId || r.fromTeam?.id === into || r.toTeam?.id === from
   return {
     id: mine.id,
     date: mine.date,
     description: mine.description ?? '',
     toId,
     fromId: mine.fromTeam?.id ?? null,
-    got: moved.filter((r) => r.toTeam?.id === toId).map(player),
-    gave: moved.filter((r) => r.fromTeam?.id === toId).map(player),
+    got: got.map(player),
+    gave: moved.filter((r) => !got.includes(r) && wentOut(r)).map(player),
     // A row with no player: cash, or a player to be named later.
     other: deal.some((r) => !r.person),
   }

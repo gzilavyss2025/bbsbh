@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadTradeSide, loadMinorLines } from '../../api/trade/side.js'
 import { fetchLevelLines } from '../../api/trade/levelLines.js'
 import { percentileFromCuts, LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
-import { dealSummary, money, sortPlayers, applyRetain, lineIsSmall } from '../../lib/trade/deal.js'
+import { dealSummary, money, sortPlayers, applyRetain, lineIsSmall, unsetSalary } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -209,6 +209,7 @@ export function TradePage() {
   )
   // The pinned strip repeats What moves, so it hides while that card is on screen.
   const movesRef = useRef(null)
+  const hasDeal = Boolean(sideA.data && sideB.data)
   const [movesInView, setMovesInView] = useState(false)
   useEffect(() => {
     const el = movesRef.current
@@ -216,7 +217,7 @@ export function TradePage() {
     const io = new IntersectionObserver(([e]) => setMovesInView(e.isIntersecting), { threshold: 0.2 })
     io.observe(el)
     return () => io.disconnect()
-  })
+  }, [hasDeal])
   // The phone's share sheet where there is one; otherwise copy the link.
   const [shared, setShared] = useState('')
   const share = async () => {
@@ -230,7 +231,7 @@ export function TradePage() {
       setShared('')
     }
   }
-  const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA) }
+  const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (
     <div className="screen tradedesk">
@@ -502,7 +503,7 @@ function RetainControl({ mode, p, value, onChange }) {
 function sendsSummary(sends, cash, nextYear) {
   if (!sends.length && !cash) return 'Nobody yet'
   const pay = sends.reduce((t, p) => t + (p.payUsd ?? 0), 0)
-  const unset = sends.filter((p) => p.payUsd == null).length
+  const unset = sends.filter(unsetSalary).length
   return [
     sends.length ? `${sends.length} ${sends.length === 1 ? 'player' : 'players'}` : null,
     pay ? `${money(pay)} in ${nextYear}${unset ? ` + ${unset} TBD` : ''}` : unset ? `${unset} TBD` : null,

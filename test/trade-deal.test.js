@@ -12,7 +12,9 @@ const preArbBlank = { regime: 'pre_arb', service: { years: 0 }, cells: cells(['s
 test('next year pay is a number only when it is guaranteed', () => {
   assert.deepEqual(nextYearPay(signed.cells, 2027), { usd: 23.9e6, label: null })
   assert.deepEqual(nextYearPay(arb.cells, 2027), { usd: null, label: 'Arb 3' })
-  assert.deepEqual(nextYearPay(preArbBlank.cells, 2027), { usd: null, label: 'Pre-arb' })
+  assert.deepEqual(nextYearPay(preArbBlank.cells, 2027, 'pre_arb'), { usd: null, label: 'Pre-arb' })
+  // A blank year on a signed or arbitration player is not pre-arb: it says nothing.
+  assert.deepEqual(nextYearPay(preArbBlank.cells, 2027, 'signed'), { usd: null, label: null })
 })
 
 test('control counts ledger years, and falls back to service time for a blank pre-arb', () => {
@@ -39,8 +41,13 @@ test('a deal moves payroll, WAR, control and 40-man spots both ways', () => {
   assert.deepEqual(d.control, { aIn: 1, aOut: 7 })
   // The kid is off the 40-man, so only one spot moves each way.
   assert.deepEqual(d.fortyAfter, { a: 40, b: 40 })
-  // Bat's arb year and Kid's pre-arb year have no set pay; both payroll figures leave them out.
+  // Bat's arb year and Kid's pre-arb year (he has a contract on file) have no set pay.
   assert.deepEqual(d.unpriced, { a: 2, b: 2 })
+  // A minor leaguer off the 40-man with no contract on file draws no MLB salary: not a TBD.
+  const farmhand = tradePlayer({ id: 4, name: 'Farmhand', position: 'SS', onForty: false }, { nextYear: 2027 })
+  const d2 = dealSummary({ name: 'Brewers', fortyCount: 40, sends: [farmhand], cashUsd: 0 }, { name: 'Red Sox', fortyCount: 40, sends: [], cashUsd: 0 })
+  assert.deepEqual(d2.unpriced, { a: 0, b: 0 })
+  assert.ok(!d2.notes.some((n) => n.includes('no set salary')))
   assert.ok(d.notes.some((n) => n.startsWith('Kid is not on the 40-man')))
   assert.ok(d.notes.some((n) => n.includes('Red Sox send $2M')))
   assert.ok(d.notes.some((n) => n.includes('2 players have no set salary')))

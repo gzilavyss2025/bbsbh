@@ -27,3 +27,14 @@ test('a trade groups by its transaction id, seen from the club the player joined
 test('a player who was not traded that day has no trade', () => {
   assert.equal(groupTrade(rows, 2, MIL), null)
 })
+
+test('a trade that names affiliates still splits by direction', () => {
+  // A prospect traded straight to Double-A Biloxi (5015) for a big-league reliever from Milwaukee.
+  const affRows = [
+    { id: 7, typeCode: 'TR', date: '2025-07-30', person: { id: 10, fullName: 'Prospect' }, fromTeam: { id: 580 }, toTeam: { id: 5015 } },
+    { id: 7, typeCode: 'TR', date: '2025-07-30', person: { id: 11, fullName: 'Reliever' }, fromTeam: { id: MIL }, toTeam: { id: 140 } },
+  ]
+  const t = groupTrade(affRows, 10, MIL)
+  assert.deepEqual(t.got.map((p) => p.name), ['Prospect'])
+  assert.deepEqual(t.gave.map((p) => p.name), ['Reliever'])
+})

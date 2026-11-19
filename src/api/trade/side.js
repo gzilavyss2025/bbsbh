@@ -10,6 +10,7 @@ import { fetchWarData } from '../war.js'
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
 import { tradePlayer, combineLines } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
+import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
 // Everyone the organization holds, every level (rosterType=fullRoster: ~250
 // for an MLB club), each with his current affiliate. Verified against
@@ -19,13 +20,25 @@ async function fetchOrgRoster(teamId, season) {
   return data.roster ?? []
 }
 
-const LEVEL = { 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'Rk' }
+const LEVEL = LEVEL_OF_SPORT
+
+// The organization's clubs (/teams/affiliates), fetched once per club and
+// season: the level map and the farm lines both read it.
+const affiliatesLoad = new Map()
+function fetchOrgClubs(teamId, season) {
+  const key = `${teamId}:${season}`
+  if (!affiliatesLoad.has(key)) {
+    affiliatesLoad.set(key, getJson(`/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}`)
+      .then((d) => d.teams ?? [])
+      .catch(() => { affiliatesLoad.delete(key); return [] }))
+  }
+  return affiliatesLoad.get(key)
+}
 
 // teamId -> level ('MLB' for the parent club) for every club in the organization.
 async function fetchOrgLevels(teamId, season) {
-  const aff = await getJson(`/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}`).catch(() => null)
   const levels = new Map([[teamId, 'MLB']])
-  for (const t of aff?.teams ?? []) if (LEVEL[t.sport?.id]) levels.set(t.id, LEVEL[t.sport.id])
+  for (const t of await fetchOrgClubs(teamId, season)) if (t.id !== teamId && LEVEL[t.sport?.id]) levels.set(t.id, LEVEL[t.sport.id])
   return levels
 }
 
@@ -110,8 +123,7 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
 // Verified 2026-11-18 on teams/158: /teams/affiliates names each club and its
 // sport; a club's fullSeason roster hydrates that sport's season stats.
 export async function loadMinorLines(teamId, { season = new Date().getFullYear() } = {}) {
-  const aff = await getJson(`/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}`).catch(() => null)
-  const clubs = (aff?.teams ?? []).filter((t) => LEVEL[t.sport?.id])
+  const clubs = (await fetchOrgClubs(teamId, season)).filter((t) => t.id !== teamId && LEVEL[t.sport?.id])
   const rosters = await Promise.all(clubs.map((t) =>
     getJson(`/api/v1/teams/${t.id}/roster?rosterType=fullSeason&season=${season}&hydrate=person(stats(type=season,group=[hitting,pitching],season=${season},sportId=${t.sport.id}))`)
       .then((d) => ({ club: t, roster: d.roster ?? [] }))

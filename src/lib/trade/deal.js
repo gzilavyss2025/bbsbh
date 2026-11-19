@@ -8,14 +8,15 @@
 // Next season's pay. A guaranteed figure is a number; an arbitration year, a
 // club option or a pre-arbitration year has no fixed figure yet, so it
 // carries a label instead and stays out of the payroll sum.
-export function nextYearPay(cells, year) {
+export function nextYearPay(cells, year, regime = null) {
   const cell = cells?.find((c) => c.year === year)
   if (!cell) return { usd: null, label: null }
   if (cell.kind === 'salary' || cell.kind === 'guaranteed') return { usd: cell.value ?? null, label: null }
   if (cell.kind === 'arbitration') return { usd: null, label: `Arb ${cell.code?.replace('A', '') ?? ''}`.trim() }
   if (cell.kind === 'option') return { usd: null, label: 'Option' }
   if (cell.kind === 'free') return { usd: null, label: 'Free agent' }
-  return { usd: null, label: 'Pre-arb' }
+  // A blank year is pre-arb only for a pre-arb player; on anyone else it says nothing.
+  return { usd: null, label: regime === 'pre_arb' ? 'Pre-arb' : null }
 }
 
 // Seasons the club holds him from `fromYear` on, and the last of them. Read
@@ -28,7 +29,7 @@ export function controlYears(ledger, fromYear) {
 
 // One row on the card.
 export function tradePlayer({ id, name, position, onForty = true }, { ledger = null, war = null, orgRank = null, topRank = null, line = null, nextYear }) {
-  const pay = nextYearPay(ledger?.cells, nextYear)
+  const pay = nextYearPay(ledger?.cells, nextYear, ledger?.regime)
   const control = controlYears(ledger, nextYear)
   return {
     id,
@@ -61,6 +62,10 @@ const forty = (rows) => rows.filter((r) => r.onForty).length
 
 // Both sides' totals and the plain-language notes. `a` and `b` are
 // { name, fortyCount, sends: [player rows], cashUsd }.
+// A big-league salary not set yet (arbitration, option, pre-arb). A minor
+// leaguer off the 40-man draws no MLB salary at all, so he is not one.
+export const unsetSalary = (r) => r.payUsd == null && (r.onForty || r.contract != null)
+
 export function dealSummary(a, b) {
   const payOut = (side) => sum(side.sends, (r) => r.payUsd)
   // A club's payroll moves by the salaries it takes in, less those it sends,
@@ -85,7 +90,7 @@ export function dealSummary(a, b) {
   }
   if (fortyAfterA > 40) notes.push(`The ${a.name} go to ${fortyAfterA} on the 40-man and must clear a spot.`)
   if (fortyAfterB > 40) notes.push(`The ${b.name} go to ${fortyAfterB} on the 40-man and must clear a spot.`)
-  const unpriced = [...a.sends, ...b.sends].filter((r) => r.payUsd == null).length
+  const unpriced = [...a.sends, ...b.sends].filter(unsetSalary).length
   if (unpriced) notes.push(`${unpriced} ${unpriced === 1 ? 'player has' : 'players have'} no set salary yet (arbitration, option or pre-arb), so the payroll line leaves them out.`)
 
   return {
@@ -93,10 +98,7 @@ export function dealSummary(a, b) {
     // Players in the deal whose next-season pay is not set yet (arbitration,
     // option, pre-arb). Both clubs' payroll figures leave them out: one sheds
     // that salary and the other takes it on, so the flag goes on both.
-    unpriced: (() => {
-      const n = [...a.sends, ...b.sends].filter((r) => r.payUsd == null).length
-      return { a: n, b: n }
-    })(),
+    unpriced: { a: unpriced, b: unpriced },
     war: { a: warA, b: -warA },
     control: { aIn: controlIn(b), aOut: controlIn(a) },
     fortyAfter: { a: fortyAfterA, b: fortyAfterB },

@@ -4,8 +4,21 @@
 // its own cleanup, so the hook is just two effects that hand it back.
 
 // Escape calls `onClose`. Listens on `window`, so it fires wherever focus sits.
-export function bindEscape(onClose) {
-  const onKey = (e) => e.key === 'Escape' && onClose()
+// `getEl` (optional) returns an element inside this dialog. With it, Escape
+// closes this dialog only when it is the topmost one on the page, so a sheet
+// opened over another (a player over a roster) closes alone; a dialog whose
+// element is not on the page does nothing. Portalled dialogs mount in order,
+// so the last [role="dialog"] in the document is the one on top.
+function isTopDialog(el) {
+  if (!el) return false
+  const own = el.closest?.('[role="dialog"]')
+  if (!own) return true
+  const all = document.querySelectorAll('[role="dialog"]')
+  return all[all.length - 1] === own
+}
+
+export function bindEscape(onClose, getEl = null) {
+  const onKey = (e) => e.key === 'Escape' && (!getEl || isTopDialog(getEl())) && onClose()
   window.addEventListener('keydown', onKey)
   return () => window.removeEventListener('keydown', onKey)
 }

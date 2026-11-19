@@ -132,22 +132,6 @@
   overflow: hidden;
 }
 
-.tradedesk__pedigree {
-  grid-area: ped;
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-}
-
-/* The way he came, in one ink each: drafted (ink), traded (clay), signed abroad (field). */
-
-
-.tradedesk__row > .btn {
-  grid-area: btn;
-}
-
 /* layout-exempt: name over its attribute line in one grid cell */
 .tradedesk__who {
   grid-area: who;
@@ -197,10 +181,6 @@
   cursor: pointer;
 }
 
-.tradedesk__farm {
-  cursor: default;
-}
-
 .tradedesk__nums:focus-visible {
   outline: none;
   box-shadow: var(--ring);
@@ -210,10 +190,6 @@
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.tradedesk__caret {
   color: var(--text-caption);
 }
 
@@ -540,11 +516,6 @@
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
-}
-
-.tradedesk__retain {
-  grid-column: 2 / -1;
-  margin-top: var(--space-1);
 }
 
 /* layout-exempt: the retain switches stack */

@@ -7,6 +7,7 @@ import { bindEscape, focusIn } from './dialogFocusCore.js'
 // close button. A dialog that also traps Tab, or opens and closes inside one
 // mounted component, keeps its own effects instead.
 export function useDialogFocus(focusRef, onClose) {
-  useEffect(() => bindEscape(onClose), [onClose])
+  // Escape closes this dialog only while it is the topmost one (dialogFocusCore.js).
+  useEffect(() => bindEscape(onClose, () => focusRef.current), [onClose, focusRef])
   useEffect(() => focusIn(focusRef.current), [focusRef])
 }
