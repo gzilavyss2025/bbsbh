@@ -58,11 +58,13 @@ the field on open and back to the trigger on close.
 
 ## Three things that follow from it
 
-- **It is not rendered through `ModalPortal`.** Both hosts (`SiteHeader`, the
-  slate topbar) are already in the root stacking context, so it doesn't need
-  one — and the ALL-CAPS invariant is a `#root *` rule, so a portal to `<body>`
-  would land the whole surface outside it and silently break the app's casing,
-  the same way Clerk's portals do (see the note in `index.css`).
+- **It is not rendered through `ModalPortal`.** The ALL-CAPS invariant is a
+  `#root *` rule, so a portal to `<body>` would land the whole surface outside it
+  and silently break the app's casing, the same way Clerk's portals do (see the
+  note in `index.css`). *Amended 2026-11-19:* the hosts are NOT always in the
+  root stacking context (the slate's wide bar is `position: sticky` with a
+  z-index, so its sticky card painted over the results), so it now portals into
+  `#root` itself — out of the header's layer, still under `#root *`.
 
 - **`--fs-field: 16px` exists for this.** Mobile Safari zooms the page in on a
   focused field whose text is under 16px, which throws the layout off centre and

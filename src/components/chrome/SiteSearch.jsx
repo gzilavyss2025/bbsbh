@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { searchPeople, fetchTeamDirectory, searchTeams, disambiguateNames } from '../../api/search.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js'
@@ -30,11 +31,7 @@ export function SiteSearchButton({ className = '' }) {
       >
         <SearchGlyph />
       </button>
-      {/* Rendered in place, NOT through ModalPortal: both hosts (SiteHeader and
-          the slate topbar) are already in the root stacking context, and the
-          ALL-CAPS invariant is a `#root *` rule — a portal to <body> would land
-          the whole search surface outside it and quietly break the app's casing
-          (see the Clerk note in index.css). */}
+      {/* SiteSearchModal portals itself into #root (see RootPortal below). */}
       {open && <SiteSearchModal onClose={() => setOpen(false)} />}
     </>
   )
@@ -266,120 +263,133 @@ export function SiteSearchModal({ onClose, pick = null }) {
     setActiveIndex((i) => (i + step + rows.length) % rows.length)
   }
 
+  // Portalled: opened from the header, the overlay was trapped in its stacking
+  // context and the slate's sticky date card painted over the results.
   return (
-    <div
-      className="searchoverlay"
-      style={frame}
-      onClick={(e) => e.target.classList.contains('searchoverlay') && onClose()}
-    >
+    <RootPortal>
       <div
-        className="searchoverlay__panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label={pick ? pick.label : 'Search players and teams'}
+        className="searchoverlay"
+        style={frame}
+        onClick={(e) => e.target.classList.contains('searchoverlay') && onClose()}
       >
-        <form
-          className="searchoverlay__bar"
-          role="search"
-          onSubmit={(e) => {
-            e.preventDefault()
-            open(active)
-          }}
+        <div
+          className="searchoverlay__panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label={pick ? pick.label : 'Search players and teams'}
         >
-          <div className="searchfield">
-            <span className="searchfield__glyph" aria-hidden="true">
-              <SearchGlyph size={16} />
-            </span>
-            <input
-              ref={inputRef}
-              type="search"
-              inputMode="search"
-              enterKeyHint="go"
-              className="searchfield__input"
-              placeholder={pick ? pick.placeholder : 'Players or teams'}
-              aria-label={pick ? pick.label : 'Search players and teams'}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onFieldKeyDown}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              role="combobox"
-              aria-expanded={rows.length > 0}
-              aria-controls={`${uid}-results`}
-              aria-autocomplete="list"
-              aria-activedescendant={active ? optionId(active) : undefined}
-            />
-            {query !== '' && (
-              <IconButton
-                className="searchfield__clear"
-                label="Clear search"
-                // Cancel the press so the field never loses focus — clearing
-                // the box should leave you typing, not dismiss the keyboard.
-                onPointerDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setQuery('')
-                  inputRef.current?.focus()
-                }}
-              >
-                ✕
-              </IconButton>
-            )}
+          <form
+            className="searchoverlay__bar"
+            role="search"
+            onSubmit={(e) => {
+              e.preventDefault()
+              open(active)
+            }}
+          >
+            <div className="searchfield">
+              <span className="searchfield__glyph" aria-hidden="true">
+                <SearchGlyph size={16} />
+              </span>
+              <input
+                ref={inputRef}
+                type="search"
+                inputMode="search"
+                enterKeyHint="go"
+                className="searchfield__input"
+                placeholder={pick ? pick.placeholder : 'Players or teams'}
+                aria-label={pick ? pick.label : 'Search players and teams'}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onFieldKeyDown}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                role="combobox"
+                aria-expanded={rows.length > 0}
+                aria-controls={`${uid}-results`}
+                aria-autocomplete="list"
+                aria-activedescendant={active ? optionId(active) : undefined}
+              />
+              {query !== '' && (
+                <IconButton
+                  className="searchfield__clear"
+                  label="Clear search"
+                  // Cancel the press so the field never loses focus — clearing
+                  // the box should leave you typing, not dismiss the keyboard.
+                  onPointerDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setQuery('')
+                    inputRef.current?.focus()
+                  }}
+                >
+                  ✕
+                </IconButton>
+              )}
+            </div>
+            <button type="button" className="searchoverlay__cancel" onClick={onClose}>
+              Cancel
+            </button>
+          </form>
+
+          <div className="searchoverlay__progress" aria-hidden="true">
+            {searching && <span className="searchoverlay__progressbar" />}
           </div>
-          <button type="button" className="searchoverlay__cancel" onClick={onClose}>
-            Cancel
-          </button>
-        </form>
 
-        <div className="searchoverlay__progress" aria-hidden="true">
-          {searching && <span className="searchoverlay__progressbar" />}
+          <Stack
+            gap="loose"
+            className="searchoverlay__results"
+            id={`${uid}-results`}
+            aria-busy={searching || undefined}
+          >
+            {noResults && <p className="searchoverlay__hint">No matches for “{trimmed}”.</p>}
+
+            {groups.map((group) => (
+              <Stack gap="tight" as="section" key={group.id} className="searchoverlay__group">
+                <div className="searchoverlay__grouphead">
+                  <h3 className="t-label t-label--bold searchoverlay__grouptitle">{group.label}</h3>
+                  {group.id === 'recent' && (
+                    <button type="button" className="searchoverlay__clearrecent" onClick={clear}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <ul className="searchoverlay__list" role="listbox" aria-label={group.label}>
+                  {group.rows.map((row) => (
+                    <ResultRow
+                      key={row.key}
+                      row={row}
+                      id={optionId(row)}
+                      active={active?.key === row.key}
+                      showCursor={cursorVisible}
+                      onOpen={open}
+                      onHover={() => {
+                        setCursorVisible(true)
+                        setActiveIndex(rows.indexOf(row))
+                      }}
+                    />
+                  ))}
+                </ul>
+              </Stack>
+            ))}
+          </Stack>
+
+          <p className="sr-only" role="status" aria-live="polite">
+            {hasQuery && !searching ? `${rows.length} results` : ''}
+          </p>
         </div>
-
-        <Stack
-          gap="loose"
-          className="searchoverlay__results"
-          id={`${uid}-results`}
-          aria-busy={searching || undefined}
-        >
-          {noResults && <p className="searchoverlay__hint">No matches for “{trimmed}”.</p>}
-
-          {groups.map((group) => (
-            <Stack gap="tight" as="section" key={group.id} className="searchoverlay__group">
-              <div className="searchoverlay__grouphead">
-                <h3 className="t-label t-label--bold searchoverlay__grouptitle">{group.label}</h3>
-                {group.id === 'recent' && (
-                  <button type="button" className="searchoverlay__clearrecent" onClick={clear}>
-                    Clear
-                  </button>
-                )}
-              </div>
-              <ul className="searchoverlay__list" role="listbox" aria-label={group.label}>
-                {group.rows.map((row) => (
-                  <ResultRow
-                    key={row.key}
-                    row={row}
-                    id={optionId(row)}
-                    active={active?.key === row.key}
-                    showCursor={cursorVisible}
-                    onOpen={open}
-                    onHover={() => {
-                      setCursorVisible(true)
-                      setActiveIndex(rows.indexOf(row))
-                    }}
-                  />
-                ))}
-              </ul>
-            </Stack>
-          ))}
-        </Stack>
-
-        <p className="sr-only" role="status" aria-live="polite">
-          {hasQuery && !searching ? `${rows.length} results` : ''}
-        </p>
       </div>
-    </div>
+    </RootPortal>
   )
+}
+
+// Into #root, NOT <body> (so not ModalPortal): a direct child of #root sits in
+// the root stacking context, out of any header's sticky layer, and still
+// answers to the ALL-CAPS invariant, which is a `#root *` rule — a portal to
+// <body> would quietly drop the whole surface's casing (the Clerk note in
+// index.css). Same target as the team page's SeasonPicker.
+function RootPortal({ children }) {
+  return createPortal(children, document.getElementById('root') ?? document.body)
 }
 
 // A row is an option in a combobox listbox, so the <li> IS the control — no
