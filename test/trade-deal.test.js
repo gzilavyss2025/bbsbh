@@ -215,3 +215,8 @@ test('a Competitive Balance pick in the deal carries surplus value', () => {
   assert.equal(d.value.a, PICK_VALUE.A - 10e6)
   assert.equal(d.value.b, -d.value.a)
 })
+
+test('the Salary sort ranks an estimated salary as the column shows it', () => {
+  const rows = [{ id: 1, payUsd: 1e6 }, { id: 2, payUsd: null, payEstUsd: 2.3e6 }, { id: 3, payUsd: null }]
+  assert.deepEqual(sortPlayers(rows, 'pay').map((r) => r.id), [2, 1, 3])
+})

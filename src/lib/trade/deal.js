@@ -40,9 +40,6 @@ export function tradePlayer({ id, name, position, onForty = true }, { ledger = n
     pos: position || ledger?.pos || '',
     age: ledger?.age ?? null,
     payUsd: pay.usd,
-    // The salary he was last paid (the ledger's season), shown on the roster row
-    // where next season's figure is not set yet.
-    lastSalaryUsd: ledger?.salary ?? null,
     lastSeason: ledger?.cells?.[0]?.year ?? null,
     payLabel: pay.label,
     control: control.years,
@@ -135,7 +132,8 @@ export const money = (usd) => moneyLabel(Math.abs(usd))
 // rank, lowest ERA); a player with no value for the key sorts last either way.
 const SORTS = {
   war: { get: (p) => p.war, desc: true },
-  pay: { get: (p) => p.payUsd, desc: true },
+  // The figure the Salary column shows: the contract's, else the estimate.
+  pay: { get: (p) => p.payUsd ?? p.payEstUsd, desc: true },
   control: { get: (p) => p.control, desc: true },
   age: { get: (p) => p.age, desc: false },
   prospect: { get: (p) => p.topRank ?? (p.orgRank != null ? 100 + p.orgRank : null), desc: false },

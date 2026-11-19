@@ -26,11 +26,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     // A prospect with no big-league record reads as one: his value by rank
     // (value.js) where the salary goes, and his rank where the WAR goes.
     const prospect = p.war == null && (p.topRank || p.orgRank)
-    const fig = p.war != null ? { label: warSeason ? `${warSeason} WAR` : 'WAR', value: p.war.toFixed(1) }
-      : prospect ? null
-      : farm?.ops ? { label: `${farm.level} OPS`, value: farm.ops }
-        : farm?.era ? { label: `${farm.level} ERA`, value: farm.era }
-            : { label: warSeason ? `${warSeason} WAR` : 'WAR', value: '—' }
+    const fig = prospect ? null : figText(p, farm, warSeason)
     return (
       <li className={enter ? 'tradedesk__sent tradedesk__row--enter' : 'tradedesk__sent'}>
         <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -64,6 +60,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     )
   }
   const stamped = p.war == null && Boolean(p.topRank || p.orgRank)
+  const fig = figText(p, farm, warSeason)
   return (
     <li className={['tradedesk__row', enter && 'tradedesk__row--enter', goingTo && 'tradedesk__row--going'].filter(Boolean).join(' ')}>
       <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -88,8 +85,8 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
               <span className="tradedesk__years">{yearsText(p)}</span>
             </span>
             <span className="tradedesk__figcol">
-              <span className="tradedesk__war">{figText(p, farm, warSeason).value}</span>
-              <span className="tradedesk__warlabel">{figText(p, farm, warSeason).label}</span>
+              <span className="tradedesk__war">{fig.value}</span>
+              <span className="tradedesk__warlabel">{fig.label}</span>
             </span>
           </>
         )}
