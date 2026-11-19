@@ -24,6 +24,7 @@ import { PCTS, RetainControl, Wire, Effect, otherNotes, StripSide, payText } fro
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
+import '../../styles/trade/stamp.css'
 import '../../styles/trade/motion.css'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
@@ -205,6 +206,22 @@ export function TradePage() {
       </>
     )
     : <IconButton mark="sm" className="tradedesk__barx" onClick={() => setChoosingB(true)} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
+  // Start over: the partner, every player, pick and cash amount, and any
+  // retained salary go; the reader's own club stays, ready for a new deal.
+  const dirty = Boolean(b || picked.size || dp.size || cashA || cashB)
+  const startOver = () => {
+    setB(null)
+    setPicked(new Set())
+    setDp(new Set())
+    setCashA(0)
+    setCashB(0)
+    setRetain({})
+    setSidePct({ a: 0, b: 0 })
+    setRetainOpen(false)
+    setChoosingA(false)
+    setChoosingB(false)
+    setPending(null)
+  }
   const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (
@@ -212,6 +229,7 @@ export function TradePage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Trade Simulator</h1>
+        {dirty && <Button size="control" skin="ghost" onClick={startOver}>Start over</Button>}
       </header>
 
       <Stack gap="section">

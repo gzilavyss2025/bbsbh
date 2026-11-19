@@ -55,30 +55,41 @@ export function Wire({ text, children = null }) {
 // What the deal does for one club, under its haul: WAR, money and control,
 // then the same thing said in a sentence (the Trade Machine's "you have
 // increased this team's projected wins by 3").
+// The deal sheet for one club: the three questions a front office asks, in
+// the order it asks them (better next year, better long-term, what it costs),
+// each as a bar pulled left or right of even, the way the scoreboard's meter
+// is. Green is better, red worse; cost is drawn in plain ink, since spending
+// is neither. The method sits behind the info button.
+const SHEET = [
+  { key: 'projWar', ask: (y) => `Better in ${y}`, reach: 15, fmt: (v) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)} WAR`, toned: true },
+  { key: 'value', ask: () => 'Long-term value', reach: 150e6, fmt: (v) => signedMoney(v), toned: true },
+  { key: 'payroll', ask: (y) => `${y} payroll`, reach: 60e6, fmt: (v) => signedMoney(v), toned: false },
+]
+
 export function Effect({ club, side, deal, nextYear }) {
-  const value = deal.value[side]
-  const proj = deal.projWar[side]
-  const pay = deal.payroll[side]
   const unset = deal.unpriced[side]
-  const est = deal.estimated[side]
-  const valueText = Math.abs(value) < 1e6 ? 'come out about even in value' : `${value > 0 ? 'gain' : 'give up'} ${money(Math.abs(value))} in surplus value`
-  const projText = Math.abs(proj) < 0.05 ? 'no change in projected WAR' : `${proj > 0 ? 'add' : 'lose'} ${Math.abs(proj).toFixed(1)} projected WAR`
-  const payText2 = Math.abs(pay) < 1 ? 'no change in payroll' : `${pay > 0 ? 'take on' : 'shed'} ${est ? '~' : ''}${money(Math.abs(pay))}`
   return (
-    <div className="tradedesk__effect">
-      <p className="tradedesk__effectfigs">
-        <span><span className="tradedesk__k">Surplus value</span> <span className={`tradedesk__fig tradedesk__fig--${tone(value / 1e6) || 'flat'}`}>{signedMoney(value)}</span></span>
-        <span><span className="tradedesk__k">{nextYear} proj. WAR</span> <span className={`tradedesk__fig tradedesk__fig--${tone(proj) || 'flat'}`}>{signedNum(proj)}</span></span>
-        <span><span className="tradedesk__k">{nextYear} payroll</span> <span className="tradedesk__fig">{est ? '~' : ''}{signedMoney(pay)}</span>{unset || est ? (
-          <span className="tradedesk__fignote infopop-row">
-            {[est ? `~ ${est} est.` : null, tbd(unset)].filter(Boolean).join(' ')}{' '}
-            <InfoPopover label="How the payroll is figured" className="infopop--paper">
-              A pre-arbitration salary is taken as the league minimum and an arbitration salary as a share of the player’s projected value; those are marked ~. TBD is a salary with no estimate (an option year), left out.
-            </InfoPopover>
-          </span>
-        ) : null}</span>
+    <div className="tradedesk__effect dealsheet" aria-label={`What the deal does for the ${club}`}>
+      {SHEET.map(({ key, ask, reach, fmt, toned }) => {
+        const v = deal[key][side]
+        const pull = Math.max(-1, Math.min(1, v / reach)) * 50
+        const tone = !toned ? 'ink' : Math.abs(v) < reach / 100 ? 'flat' : v > 0 ? 'up' : 'down'
+        return (
+          <div key={key} className={`dealsheet__line dealsheet__line--${tone}`}>
+            <span className="dealsheet__ask">{ask(nextYear)}</span>
+            <span className="dealsheet__bar" aria-hidden="true">
+              <span className="dealsheet__fill" style={{ left: `${pull < 0 ? 50 + pull : 50}%`, width: `${Math.abs(pull)}%` }} />
+            </span>
+            <span className="dealsheet__fig">{fmt(v)}</span>
+          </div>
+        )
+      })}
+      <p className="dealsheet__fine infopop-row">
+        {unset ? `${unset} salary not set yet is left out of payroll. ` : ''}How it’s figured{' '}
+        <InfoPopover label="How the deal sheet is figured" className="infopop--paper">
+          Better in {nextYear}: the projected WAR the {club} gain or lose next season. Long-term value: surplus value, each player’s projected worth less his salary over the years his new club controls him (a rough estimate, give or take $15M). Payroll: next season’s salaries in less salaries out, with pre-arbitration years at the league minimum and arbitration years estimated from projected value.
+        </InfoPopover>
       </p>
-      <p className="tradedesk__sentence">The {club} {valueText}, {projText} and {payText2} for {nextYear}.</p>
     </div>
   )
 }
@@ -98,8 +109,6 @@ export function StripSide({ name, pay, war, forty }) {
 }
 
 
-const tone = (v) => (v > 0.05 ? 'up' : v < -0.05 ? 'down' : '')
-const tbd = (n) => (n ? `+ ${n} TBD` : null)
 
 // "+$28.7M · 1 salary not set": the figure, and how many players in the deal it leaves out.
 export const payText = (v, unset) => `${signedMoney(v)}${unset ? ` + ${unset} TBD` : ''}`

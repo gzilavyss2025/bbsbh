@@ -1,0 +1,172 @@
+/* The prospect stamp (PlayerRow.jsx ProspectStamp): a prospect's rank in the
+   deal card as a rubber stamp, its weight his tier, a logo tag for whose list
+   he is on. Imported by the trade page. */
+
+/* A prospect in the deal: his rank as a rubber stamp in his club's ink
+   (PlayerRow.jsx ProspectStamp), across the salary and WAR columns. */
+/* layout-exempt: stamp beside its two lines, spanning the row's two figure columns */
+.prospectstamp {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* layout-exempt: "No." over the number inside the round seal */
+.prospectstamp__seal {
+  --ink: var(--stamp-ink, var(--border-stamped));
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-12);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* Two inked rings, the way a rubber stamp's rim prints. */
+  border: calc(var(--bw-heavy) * 2) double var(--ink);
+  color: var(--ink);
+  transform: rotate(-8deg);
+  line-height: var(--lh-solid);
+}
+
+.prospectstamp__no {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.prospectstamp__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+}
+
+/* layout-exempt: what the rank means over his worth */
+.prospectstamp__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.prospectstamp__what {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.prospectstamp__worth {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* The stamp's weight is the prospect's tier (ProspectStamp). MLB's top 100:
+   pressed solid, the number in paper on the club's ink. */
+.prospectstamp--mlb .prospectstamp__seal {
+  background: var(--ink);
+  color: var(--surface-card);
+  border-color: var(--surface-card);
+  box-shadow: 0 0 0 var(--bw-heavy) var(--ink);
+}
+
+/* A deeper club prospect: a light press, one thin ring in faded ink. */
+.prospectstamp--deep .prospectstamp__seal {
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--ink) 55%, transparent);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  transform: rotate(-4deg);
+}
+
+/* Whose list he is on, pinned to the stamp's edge like a tag: MLB's logo for
+   the top 100, his club's for its own list. */
+.prospectstamp__mark {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.prospectstamp__badge {
+  position: absolute;
+  right: calc(var(--space-1) * -1);
+  bottom: calc(var(--space-1) * -1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: 50%;
+}
+
+.prospectstamp__badge img,
+.prospectstamp__badge .teamlogo {
+  width: var(--space-4);
+  height: var(--space-4);
+  object-fit: contain;
+}
+
+/* The deal sheet (DealParts.jsx Effect): three lines, each a question, a bar
+   pulled left or right of even, and its figure. */
+/* layout-exempt: question | bar | figure, the same three columns on every line */
+.dealsheet__line {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) minmax(0, 6.5rem);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.dealsheet__ask {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.dealsheet__bar {
+  position: relative;
+  display: block;
+  height: var(--space-2);
+  background: var(--surface-inset);
+}
+
+/* Even, marked in the middle of every bar. */
+.dealsheet__bar::after {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--space-1) * -1);
+  left: 50%;
+  width: var(--bw-hair);
+  background: var(--text-caption);
+}
+
+.dealsheet__fill {
+  position: absolute;
+  inset-block: 0;
+  background: var(--text-heading);
+}
+
+.dealsheet__fig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.dealsheet__line--up .dealsheet__fill { background: var(--accent-positive-deep); }
+.dealsheet__line--up .dealsheet__fig { color: var(--accent-positive-deep); }
+.dealsheet__line--down .dealsheet__fill { background: var(--accent-negative); }
+.dealsheet__line--down .dealsheet__fig { color: var(--accent-negative); }
+
+.dealsheet__fine {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}

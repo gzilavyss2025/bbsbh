@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
+import { teamPrimaryColor, teamClubName, leagueLogoUrl } from '../../lib/teams.js'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { ordinal } from '../../lib/format.js'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
@@ -25,7 +27,6 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     // A prospect with no big-league record reads as one: his value by rank
     // (value.js) where the salary goes, and his rank where the WAR goes.
     const prospect = p.war == null && (p.topRank || p.orgRank)
-    const rank = prospect ? { label: p.topRank ? 'Top 100' : 'Club rank', value: String(p.topRank || p.orgRank) } : null
     const fig = p.war != null ? { label: warSeason ? `${warSeason} WAR` : 'WAR', value: p.war.toFixed(1) }
       : prospect ? null
       : farm?.ops ? { label: `${farm.level} OPS`, value: farm.ops }
@@ -44,20 +45,19 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           </span>
           {/* The same columns as the roster rows: salary over years, then the figure over its label. */}
           {prospect ? (
-            <span className="tradedesk__money">
-              <span className="tradedesk__salary">{p.value ? money(p.value.surplusUsd) : '—'}</span>
-              <span className="tradedesk__years">Value</span>
-            </span>
+            <ProspectStamp p={p} teamId={teamId} />
           ) : (
-            <span className="tradedesk__money">
-              <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-              <span className="tradedesk__years">{yearsText(p)}</span>
-            </span>
+            <>
+              <span className="tradedesk__money">
+                <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+                <span className="tradedesk__years">{yearsText(p)}</span>
+              </span>
+              <span className="tradedesk__figcol">
+                <span className="tradedesk__war">{fig.value}</span>
+                <span className="tradedesk__warlabel">{fig.label}</span>
+              </span>
+            </>
           )}
-          <span className="tradedesk__figcol">
-            <span className="tradedesk__war">{(rank ?? fig).value}</span>
-            <span className="tradedesk__warlabel">{(rank ?? fig).label}</span>
-          </span>
         </button>
         <IconButton mark="md" onClick={() => onToggle(p.id)} label={`Remove ${p.name} from the deal`}>✕</IconButton>
         {sheet}
@@ -127,4 +127,35 @@ function figText(p, farm) {
   if (farm?.ops) return { value: farm.ops, label: 'OPS' }
   if (farm?.era) return { value: farm.era, label: 'ERA' }
   return { value: '—', label: 'WAR' }
+}
+
+// A prospect's rank as a scout's rubber stamp, inked in his club's colour and
+// set a few degrees off true, with what the rank means and what he is worth
+// beside it. It takes the salary and WAR columns, which he has no figures for.
+// The stamp's weight is the tier: MLB's top 100 is a solid stamp, a club's top
+// 10 a double ring, a deeper club prospect a light single ring.
+function ProspectStamp({ p, teamId }) {
+  const top = Boolean(p.topRank)
+  const n = p.topRank || p.orgRank
+  const tier = top ? 'mlb' : n <= 10 ? 'club' : 'deep'
+  const club = teamClubName(teamId)
+  return (
+    <span className={`prospectstamp prospectstamp--${tier}`} style={{ '--stamp-ink': teamPrimaryColor(teamId) || undefined }}>
+      <span className="prospectstamp__mark" aria-hidden="true">
+        <span className="prospectstamp__seal">
+          <span className="prospectstamp__no">No.</span>
+          <span className="prospectstamp__n">{n}</span>
+        </span>
+        {/* Whose list he is on: MLB's logo for the top 100, his club's for its own list. */}
+        <span className="prospectstamp__badge">
+          {top ? <img src={leagueLogoUrl()} alt="" /> : <TeamLogo teamId={teamId} size={16} />}
+        </span>
+      </span>
+      <span className="prospectstamp__text">
+        <span className="prospectstamp__what">{top ? 'Top 100 prospect' : `${club ? `${club}' ` : 'Club '}No. ${n}`}</span>
+        {p.value && <span className="prospectstamp__worth">{money(p.value.surplusUsd)} value</span>}
+      </span>
+      <span className="sr-only">{top ? `MLB's No. ${n} prospect` : `No. ${n} prospect in the ${club ?? 'club'} system`}</span>
+    </span>
+  )
 }
