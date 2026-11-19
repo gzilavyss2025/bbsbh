@@ -37,6 +37,10 @@ export function tradePlayer({ id, name, position, onForty = true }, { ledger = n
     pos: position || ledger?.pos || '',
     age: ledger?.age ?? null,
     payUsd: pay.usd,
+    // The salary he was last paid (the ledger's season), shown on the roster row
+    // where next season's figure is not set yet.
+    lastSalaryUsd: ledger?.salary ?? null,
+    lastSeason: ledger?.cells?.[0]?.year ?? null,
     payLabel: pay.label,
     control: control.years,
     controlRough: control.rough,
@@ -246,4 +250,17 @@ export function optionStatus(service, options) {
   if (options?.remaining == null) return null
   if (options.remaining === 0) return 'Out of options: must clear waivers to be sent down'
   return `${options.remaining} option ${options.remaining === 1 ? 'year' : 'years'} left`
+}
+
+// The deal as the transaction wire would print it (MLB's own sentence shape,
+// e.g. "Chicago White Sox traded 1B Andrew Vaughn to Milwaukee Brewers for RHP
+// Aaron Civale and cash."). A pitcher is RHP or LHP by his throwing hand.
+const wirePos = (p) => (p.pos === 'P' || p.pos === 'TWP' ? (p.throws === 'L' ? 'LHP' : 'RHP') : p.pos || '')
+const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
+const sideText = (side) => listOf([...side.sends.map((p) => `${wirePos(p)} ${p.name}`.trim()), ...(side.cashUsd ? ['cash'] : [])])
+
+export function wireSentence(a, b) {
+  const gives = sideText(a) || 'future considerations'
+  const gets = sideText(b) || 'future considerations'
+  return `${a.club} traded ${gives} to ${b.club} for ${gets}.`
 }

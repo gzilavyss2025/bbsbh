@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
 import { ordinal } from '../../lib/trade/levelPct.js'
-import { Button } from '../../components/ui/control/Button.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerSheet } from './PlayerSheet.jsx'
@@ -59,7 +58,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         <span className="tradedesk__who">
           <span className="tradedesk__name">{p.name}</span>
           <span className="t-label tradedesk__meta">
-            {p.pos || DASH}{p.age != null ? ` · ${p.age}` : ''}
+            {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
             {p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : ''}
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
@@ -68,7 +67,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           {goingTo ? <span className="tradedesk__going">In the deal → {goingTo}</span> : null}
         </span>
         <span className="tradedesk__money">
-          <span className="tradedesk__salary">{salaryText(p, farm)}</span>
+          <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
           <span className="tradedesk__years">{yearsText(p)}</span>
         </span>
         <span className="tradedesk__figcol">
@@ -76,20 +75,24 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           <span className="tradedesk__warlabel">{figText(p, farm).label}</span>
         </span>
       </button>
-      <Button size="tap" skin={picked ? 'ink' : 'outline'} pressed={picked} onClick={() => onToggle(p.id)}>
-        {picked ? 'Remove' : 'Add'}
-      </Button>
+      {/* + and − take less room than words, so the row keeps its figures. */}
+      <IconButton mark="sm" className={picked ? 'tradedesk__pm tradedesk__pm--on' : 'tradedesk__pm'} onClick={() => onToggle(p.id)}
+        label={picked ? `Take ${p.name} out of the deal` : `Add ${p.name} to the deal`}>
+        <span className="tradedesk__pmglyph">{picked ? '−' : '+'}</span>
+      </IconButton>
       {sheet}
     </li>
   )
 }
 
-// The salary column: next season's pay, or what kind of year it is, or the
-// minor-league level for a player with no big-league contract.
-function salaryText(p, farm) {
-  if (p.payUsd != null) return money(p.payUsd)
-  if (p.payLabel) return p.payLabel
-  if (!p.onForty) return farm?.level ?? p.level ?? 'Minors'
+// The salary column: the last salary he was paid (next season's is often not
+// set yet: arbitration, pre-arb), or the minor-league level for a player with
+// no big-league contract.
+function salaryText(p) {
+  if (p.lastSalaryUsd != null) return money(p.lastSalaryUsd)
+  // A minor leaguer has no salary on file (MiLB pay is the level minimum, not
+  // tracked per player), so the column says so rather than guessing a figure.
+  if (!p.onForty) return 'MiLB'
   return '—'
 }
 

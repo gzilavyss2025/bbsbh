@@ -2,7 +2,7 @@
 // like public/data/team-contracts.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, combineLines, applyRetain, lineIsSmall, optionKind, optionStatus } from '../src/lib/trade/deal.js'
+import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, combineLines, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence } from '../src/lib/trade/deal.js'
 
 const cells = (...kinds) => kinds.map(([kind, extra], i) => ({ year: 2026 + i, kind, ...extra }))
 const signed = { regime: 'signed', cells: cells(['salary', { value: 24e6 }], ['guaranteed', { value: 23.9e6 }], ['guaranteed', { value: 23.8e6 }], ['none']) }
@@ -140,4 +140,19 @@ test('option type reads from the terms, and option status from service and optio
   assert.match(optionStatus({ years: 12 }, { remaining: 3 }), /consent/)
   assert.match(optionStatus({ years: 3 }, { remaining: 0 }), /Out of options/)
   assert.equal(optionStatus({ years: 2 }, { remaining: 1 }), '1 option year left')
+})
+
+test('the deal reads like the transaction wire', () => {
+  const vaughn = { name: 'Andrew Vaughn', pos: '1B' }
+  const civale = { name: 'Aaron Civale', pos: 'P', throws: 'R' }
+  const ashby = { name: 'Aaron Ashby', pos: 'P', throws: 'L' }
+  // MLB's own wording for 2025-06-13, rebuilt from the pieces.
+  assert.equal(
+    wireSentence({ club: 'Chicago White Sox', sends: [vaughn], cashUsd: 0 }, { club: 'Milwaukee Brewers', sends: [civale], cashUsd: 1e6 }),
+    'Chicago White Sox traded 1B Andrew Vaughn to Milwaukee Brewers for RHP Aaron Civale and cash.',
+  )
+  assert.equal(
+    wireSentence({ club: 'Milwaukee Brewers', sends: [vaughn, civale, ashby], cashUsd: 0 }, { club: 'Boston Red Sox', sends: [], cashUsd: 0 }),
+    'Milwaukee Brewers traded 1B Andrew Vaughn, RHP Aaron Civale and LHP Aaron Ashby to Boston Red Sox for future considerations.',
+  )
 })

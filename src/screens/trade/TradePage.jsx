@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadTradeSide, loadMinorLines } from '../../api/trade/side.js'
 import { fetchLevelLines } from '../../api/trade/levelLines.js'
-import { percentileFromCuts, LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
-import { dealSummary, money, sortPlayers, applyRetain, lineIsSmall, unsetSalary } from '../../lib/trade/deal.js'
+import { dealSummary, money, applyRetain, unsetSalary, wireSentence } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
-import { isMlbTeamId, teamAbbr, teamClubName, ALL_MLB_TEAM_IDS } from '../../lib/teams.js'
+import { isMlbTeamId, teamAbbr, teamClubName, teamFullName, ALL_MLB_TEAM_IDS } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
@@ -14,99 +13,23 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
+import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/colors/headerTheme.js'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
 import { DepthCard } from './DepthCard.jsx'
+import { POS_GROUPS, SHOW, SORT, levelRank, rosterList } from './rosterList.js'
+import { PCTS, RetainControl, Wire, Verdict, Effect, otherNotes, StripSide, payText } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
+import '../../styles/trade/columns.css'
 import '../../styles/trade/motion.css'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import '../../styles/trade/page.css'
 
 const DASH = '—'
 
-// Roster position filter. statsapi's 40-man calls every pitcher 'P'.
-const POS_GROUPS = [
-  { value: 'all', label: 'All' },
-  { value: 'P', label: 'Pitchers' },
-  { value: 'C', label: 'Catchers' },
-  { value: 'IF', label: 'Infield' },
-  { value: 'OF', label: 'Outfield' },
-]
-// Prospect lists write pitchers as RHP/LHP; the roster writes P.
-const GROUP_OF = { P: 'P', SP: 'P', RP: 'P', RHP: 'P', LHP: 'P', TWP: 'P', C: 'C', '1B': 'IF', '2B': 'IF', '3B': 'IF', SS: 'IF', IF: 'IF', DH: 'IF', LF: 'OF', CF: 'OF', RF: 'OF', OF: 'OF' }
-const inGroup = (p, g) => g === 'all' || GROUP_OF[p.pos] === g
-
-// Which players the roster list holds: the 40-man, the club's ranked
-// prospects (on the 40-man or not), or the whole organization.
-const SHOW = [
-  { value: 'forty', label: '40-man' },
-  { value: 'prospects', label: 'Prospects' },
-  { value: 'all', label: 'Everyone' },
-]
-// Sort keys; 'line' reads OPS for hitters and ERA for pitchers.
-const SORT = [
-  { value: 'name', label: 'Name' },
-  { value: 'war', label: 'WAR' },
-  { value: 'line', label: 'OPS / ERA' },
-  { value: 'level', label: 'OPS / ERA vs level' },
-  { value: 'pay', label: 'Salary' },
-  { value: 'control', label: 'Control' },
-  { value: 'age', label: 'Age' },
-  { value: 'prospect', label: 'Prospect rank' },
-]
-const isPitcher = (p) => GROUP_OF[p.pos] === 'P'
-// Accent- and case-blind, so "pena" finds Peña.
-const fold = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() // caps-js-exempt: compares names, renders nothing
-// A player's percentile within his own level (Q3, option C): a big-league
-// line against MLB, else his line at his highest minor-league level. Below the
-// level floor (40 PA, 30 outs) there is no percentile.
-function levelRank(p, farm, cuts) {
-  if (!cuts) return null
-  const mlb = p.line && (p.line.pa != null ? Number(p.line.pa) >= 40 : parseFloat(p.line.ip) >= 10)
-  const pitcher = isPitcher(p)
-  if (mlb) {
-    const v = Number(pitcher ? p.line.era : p.line.ops)
-    const pct = percentileFromCuts(v, cuts.levels?.[1]?.[pitcher ? 'era' : 'ops'], !pitcher)
-    return pct == null ? null : { pct, level: 'MLB' }
-  }
-  const r = farm?.get(p.id)?.ranked
-  if (!r || (r.isPitcher ? Number(r.outs) < 30 : Number(r.pa) < 40)) return null
-  const pct = percentileFromCuts(Number(r.isPitcher ? r.era : r.ops), cuts.levels?.[r.sport]?.[r.isPitcher ? 'era' : 'ops'], !r.isPitcher)
-  return pct == null ? null : { pct, level: LEVEL_OF_SPORT[r.sport] }
-}
-
-function rosterList(data, { show, group, sort, query = '', farm = null, minimum = false, cuts = null }) {
-  const prospect = (p) => p.orgRank != null || p.topRank != null
-  let list = show === 'forty' ? data.forty
-    : show === 'prospects' ? [...data.forty.filter(prospect), ...data.minors]
-    : [...data.forty, ...data.minors, ...data.others]
-  const q = fold(query.trim())
-  list = list.filter((p) => inGroup(p, group) && (!q || fold(p.name).includes(q)))
-  if (sort === 'line') {
-    // Hitters by OPS, then pitchers by ERA, so neither number is compared with
-    // the other. Within each, big-league lines come before minor-league ones:
-    // a .900 OPS in Double-A is not a .900 OPS in the majors.
-    const milb = (p) => (!p.line && farm?.get(p.id) ? { ...p, line: farm.get(p.id) } : null)
-    // With the minimum on, a big-league line under 50 PA / 20 IP sorts after
-    // the minor-league lines, as a small sample (still shown).
-    const small = (p) => minimum && lineIsSmall(p.line)
-    const tiers = (rows, key) => [
-      ...sortPlayers(rows.filter((p) => p.line && !small(p)), key),
-      ...sortPlayers(rows.map(milb).filter(Boolean), key),
-      ...sortPlayers(rows.filter(small), key),
-      ...rows.filter((p) => !p.line && !farm?.get(p.id)),
-    ].map((p) => list.find((x) => x.id === p.id))
-    return [...tiers(list.filter((p) => !isPitcher(p)), 'ops'), ...tiers(list.filter(isPitcher), 'era')]
-  }
-  if (sort === 'level') {
-    // One list, hitters and pitchers together: each ranked only against his own level.
-    const ranked = list.map((p) => ({ p, r: levelRank(p, farm, cuts) }))
-    return [...ranked.filter((x) => x.r).sort((a, b) => b.r.pct - a.r.pct), ...ranked.filter((x) => !x.r)].map((x) => x.p)
-  }
-  return sort === 'name' ? list : sortPlayers(list, sort)
-}
 const idOf = (abbr) => ALL_MLB_TEAM_IDS.find((id) => teamAbbr({ id }) === abbr?.toUpperCase()) ?? null // caps-js-exempt: matches a URL key, renders nothing
 
 // The deal lives in the address, so a link rebuilds it:
@@ -271,8 +194,10 @@ export function TradePage() {
         <div className="tradedesk__sides" ref={movesRef}>
           {b ? (
             <>
-              {/* Each column is one club: what it gets, what that does for it, then its own roster. */}
+              {/* Row one: each club's deal card (what it gets, what that does for it).
+                  Row two: each club's roster, so the two rosters start level. */}
               <Side
+                part="deal"
                 teamId={a}
                 state={sideA}
                 incoming={sends(sideB.data)}
@@ -292,6 +217,47 @@ export function TradePage() {
                 requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
               />
               <Side
+                part="deal"
+                teamId={b}
+                state={sideB}
+                incoming={sends(sideA.data)}
+                incomingTeamId={a}
+                incomingCash={cashA}
+                partner={teamClubName(a)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashB}
+                onCash={setCashB}
+                after={deal?.fortyAfter.b}
+                effect={deal && <Effect club={teamClubName(b)} pay={deal.payroll.b} unset={deal.unpriced.b} war={deal.war.b} inYrs={deal.control.aOut} outYrs={deal.control.aIn} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                retainUI={retainUI}
+                change={changeB}
+                farm={farmB.data}
+                incomingFarm={farmA.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, b: true }))}
+              />
+              <Side
+                part="roster"
+                teamId={a}
+                state={sideA}
+                incoming={sends(sideB.data)}
+                incomingTeamId={b}
+                incomingCash={cashB}
+                partner={teamClubName(b)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashA}
+                onCash={setCashA}
+                after={deal?.fortyAfter.a}
+                effect={deal && <Effect club={teamClubName(a)} pay={deal.payroll.a} unset={deal.unpriced.a} war={deal.war.a} inYrs={deal.control.aIn} outYrs={deal.control.aOut} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                retainUI={retainUI}
+                change={changeA}
+                farm={farmA.data}
+                incomingFarm={farmB.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
+              />
+              <Side
+                part="roster"
                 teamId={b}
                 state={sideB}
                 incoming={sends(sideA.data)}
@@ -314,6 +280,7 @@ export function TradePage() {
           ) : (
             <>
               <Side
+                part="deal"
                 teamId={a}
                 state={sideA}
                 incoming={[]}
@@ -338,12 +305,32 @@ export function TradePage() {
                   ariaLabel="Trade partner"
                 />
               </Card>
+              <Side
+                part="roster"
+                teamId={a}
+                state={sideA}
+                incoming={[]}
+                incomingTeamId={null}
+                incomingCash={0}
+                partner={null}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashA}
+                onCash={setCashA}
+                change={changeA}
+                farm={farmA.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
+              />
             </>
           )}
         </div>
 
         {deal && (
           <Card frame="stamped" label="The deal" className="tradedesk__moves">
+            <Wire text={wireSentence(
+              { club: teamFullName(a), sends: sends(sideA.data), cashUsd: cashA * 1e6 },
+              { club: teamFullName(b), sends: sends(sideB.data), cashUsd: cashB * 1e6 },
+            )} />
             {otherNotes(deal.notes).length > 0 && (
               <ul className="tradedesk__notes" aria-live="polite">
                 {otherNotes(deal.notes).map((n) => <li key={n}>{n}</li>)}
@@ -396,9 +383,10 @@ export function TradePage() {
 // One club's column, the Trade Machine's shape: the club, what it gets from
 // the other club (and what that does for it), then its own roster right
 // there, where a tap sends a player across. No modal: the roster is the page.
-function Side({ teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
+function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
   const club = teamClubName(teamId)
   const data = state.data
+  const theme = useMemo(() => headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')), [teamId])
   const [group, setGroup] = useState('all')
   const [addingCash, setAddingCash] = useState(false)
   const [show, setShow] = useState('forty')
@@ -414,6 +402,64 @@ function Side({ teamId, state, incoming, incomingTeamId, incomingCash, partner, 
   // adjusting state during render is React's documented pattern for this.
   const [arrived, setArrived] = useState(null)
   if (data && arrived === null) setArrived(new Set(incoming.map((p) => p.id)))
+  // The roster card sits in its own row under the deal cards, so both clubs'
+  // rosters start at the same height, whatever each deal card holds.
+  if (part === 'roster') {
+    return (
+      <Card frame="stamped" className="tradedesk__side tradedesk__rostercard">
+        {/* The club's own bar, as the team hub wears it: Identity Lab's tuned
+            colours for its main jersey, and its one-colour mark on the right. */}
+        <div className={`tradedesk__band ${headerThemeClass(theme)}`} style={headerThemeStyle(theme)}>
+          <SectionHead look="band" club as="h2" mark={<TeamLogo teamId={teamId} variant="mono" size={28} />}>{club} roster</SectionHead>
+        </div>
+      {state.loading && !data && <p className="hint" role="status">Reading the {club} roster…</p>}
+      {state.error && !data && (
+        <EmptyState role="alert"><p>The {club} roster did not load.</p><Button skin="ink" onClick={state.reload}>Try again</Button></EmptyState>
+      )}
+        {data && (
+          <div className="tradedesk__roster">
+            <div className="tradedesk__rosterhead infopop-row">
+              <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
+                A ~ marks a year estimated from service time. WAR is from last season.
+              </InfoPopover>
+              {cash || addingCash ? (
+                <label className="tradedesk__cash">
+                  <span className="t-label">{club} cash in {data.nextYear} ($M)</span>
+                  <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
+                    onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
+                    onBlur={() => { if (!cash) setAddingCash(false) }} />
+                </label>
+              ) : (
+                <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ {club} cash</Button>
+              )}
+            </div>
+            <div className="tradedesk__controls">
+              <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
+              <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={setGroup} layout="wrap" />
+              <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
+                placeholder={`Find a ${club} player`} aria-label={`Find a ${club} player`} />
+              <label className="tradedesk__sort">
+                <span className="t-label">Sort</span>
+                <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
+                  {SORT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </label>
+              {sort === 'line' && (
+                <Chips label="Big-league lines" layout="wrap" value={minimum ? 'min' : 'any'} onChange={(v) => setMinimum(v === 'min')}
+                  options={[{ value: 'min', label: '50 PA / 20 IP to count' }, { value: 'any', label: 'Any sample' }]} />
+              )}
+            </div>
+            <ul className="tradedesk__list tradedesk__rosterlist">
+              {rosterList(data, { show, group, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
+                <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason}
+                  farm={farm?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
+    )
+  }
   return (
     <Card frame="stamped" label={club} className="tradedesk__side">
       {/* The club line: its mark, its 40-man count now and after the deal, and the switch. */}
@@ -459,69 +505,9 @@ function Side({ teamId, state, incoming, incomingTeamId, incomingCash, partner, 
 
           {effect}
 
-          {/* The club's own roster, in the column: tap Add to send a player across. */}
-          <div className="tradedesk__roster">
-            <div className="tradedesk__rosterhead infopop-row">
-              <h3 className="t-label t-label--bold">{club} roster</h3>
-              <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
-                A ~ marks a year estimated from service time. WAR is from last season.
-              </InfoPopover>
-              {cash || addingCash ? (
-                <label className="tradedesk__cash">
-                  <span className="t-label">{club} cash in {data.nextYear} ($M)</span>
-                  <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
-                    onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
-                    onBlur={() => { if (!cash) setAddingCash(false) }} />
-                </label>
-              ) : (
-                <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ {club} cash</Button>
-              )}
-            </div>
-            <div className="tradedesk__controls">
-              <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
-              <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={setGroup} layout="wrap" />
-              <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
-                placeholder={`Find a ${club} player`} aria-label={`Find a ${club} player`} />
-              <label className="tradedesk__sort">
-                <span className="t-label">Sort</span>
-                <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
-                  {SORT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </label>
-              {sort === 'line' && (
-                <Chips label="Big-league lines" layout="wrap" value={minimum ? 'min' : 'any'} onChange={(v) => setMinimum(v === 'min')}
-                  options={[{ value: 'min', label: '50 PA / 20 IP to count' }, { value: 'any', label: 'Any sample' }]} />
-              )}
-            </div>
-            <ul className="tradedesk__list tradedesk__rosterlist">
-              {rosterList(data, { show, group, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
-                <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason}
-                  farm={farm?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
-              ))}
-            </ul>
-          </div>
         </>
       )}
     </Card>
-  )
-}
-
-const PCTS = [0, 0.25, 0.5]
-
-// The per-player retain control under a player the reader is sending.
-function RetainControl({ mode, p, value, onChange }) {
-  if (mode === 'pct') {
-    return (
-      <Chips label={`Share of ${p.name}'s salary kept`} layout="wrap" value={value?.pct ?? 0} onChange={(v) => onChange({ pct: v })}
-        options={PCTS.map((v) => ({ value: v, label: `Keep ${v * 100}%` }))} />
-    )
-  }
-  return (
-    <label className="tradedesk__cash">
-      <span className="t-label">Keep a year ($M)</span>
-      <input type="number" min="0" step="0.5" inputMode="decimal" value={value?.usd || ''} placeholder="0"
-        onChange={(e) => onChange({ usd: Math.max(0, Number(e.target.value) || 0) })} />
-    </label>
   )
 }
 
@@ -536,74 +522,3 @@ function sendsSummary(sends, cash, nextYear) {
     cash ? `+ ${money(cash * 1e6)} cash` : null,
   ].filter(Boolean).join(' · ')
 }
-
-// The one banner on top, Trade Machine style, but a fact rather than a ruling:
-// what has to happen before this deal can go through. Green when nothing does.
-function Verdict({ deal, a, b, sendsA, sendsB, cashA, cashB }) {
-  if ((!sendsA.length && !cashA) || (!sendsB.length && !cashB)) {
-    return <p className="tradedesk__verdict tradedesk__verdict--wait" role="status">Add a player or cash from each club to see the deal.</p>
-  }
-  const blocks = []
-  if (deal.fortyAfter.a > 40) blocks.push(`The ${teamClubName(a)} must clear ${deal.fortyAfter.a - 40} 40-man ${deal.fortyAfter.a - 40 === 1 ? 'spot' : 'spots'}`)
-  if (deal.fortyAfter.b > 40) blocks.push(`The ${teamClubName(b)} must clear ${deal.fortyAfter.b - 40} 40-man ${deal.fortyAfter.b - 40 === 1 ? 'spot' : 'spots'}`)
-  for (const p of [...sendsA, ...sendsB]) {
-    if ((p.serviceYears ?? 0) >= 10) blocks.push(`${p.name} may be able to block it (10-and-5 rights)`)
-  }
-  if (!blocks.length) {
-    return <p className="tradedesk__verdict tradedesk__verdict--go" role="status">This trade fits: both 40-man rosters have room</p>
-  }
-  return (
-    <div className="tradedesk__verdict tradedesk__verdict--stop" role="status">
-      <p>Before this trade can happen</p>
-      <ul>{blocks.map((t) => <li key={t}>{t}</li>)}</ul>
-    </div>
-  )
-}
-
-// What the deal does for one club, under its haul: WAR, money and control,
-// then the same thing said in a sentence (the Trade Machine's "you have
-// increased this team's projected wins by 3").
-function Effect({ club, pay, unset, war, inYrs, outYrs, nextYear, warSeason }) {
-  const warText = Math.abs(war) < 0.05 ? 'no change in WAR' : `${war > 0 ? 'add' : 'lose'} ${Math.abs(war).toFixed(1)} WAR`
-  const payText2 = Math.abs(pay) < 1 ? 'no change in payroll' : `${pay > 0 ? 'take on' : 'shed'} ${money(Math.abs(pay))}`
-  return (
-    <div className="tradedesk__effect">
-      <p className="tradedesk__effectfigs">
-        <span><span className="tradedesk__k">{warSeason ?? 'Last season'} WAR</span> <span className={`tradedesk__fig tradedesk__fig--${tone(war) || 'flat'}`}>{signedNum(war)}</span></span>
-        <span><span className="tradedesk__k">{nextYear} payroll</span> <span className="tradedesk__fig">{signedMoney(pay)}</span>{unset ? (
-          <span className="tradedesk__fignote infopop-row">
-            {tbd(unset)}{' '}
-            <InfoPopover label="What TBD means" className="infopop--paper">
-              TBD is a big-league salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.
-            </InfoPopover>
-          </span>
-        ) : null}</span>
-        <span><span className="tradedesk__k">Control</span> <span className="tradedesk__fig">+{inYrs} / −{outYrs}</span></span>
-      </p>
-      <p className="tradedesk__sentence">The {club} {warText} and {payText2} for {nextYear}{unset ? `, plus ${unset} salary not set yet` : ''}.</p>
-    </div>
-  )
-}
-
-// The notes the banner has not already said.
-const otherNotes = (notes) => notes.filter((n) => !/no set salary|must clear|10\+ years/.test(n))
-
-function StripSide({ name, pay, war, forty }) {
-  return (
-    <p className="tradedesk__stripside">
-      <span className="t-label t-label--bold">{name}</span>
-      <span><span className="tradedesk__k">Pay</span> {pay}</span>
-      <span><span className="tradedesk__k">WAR</span> {signedNum(war)}</span>
-      <span className={forty > 40 ? 'tradedesk__over' : ''}><span className="tradedesk__k">40-man</span> {forty}</span>
-    </p>
-  )
-}
-
-
-const tone = (v) => (v > 0.05 ? 'up' : v < -0.05 ? 'down' : '')
-const tbd = (n) => (n ? `+ ${n} TBD` : null)
-
-// "+$28.7M · 1 salary not set": the figure, and how many players in the deal it leaves out.
-const payText = (v, unset) => `${signedMoney(v)}${unset ? ` + ${unset} TBD` : ''}`
-const signedMoney = (v) => (v === 0 ? '$0' : `${v < 0 ? '−' : '+'}${money(v)}`)
-const signedNum = (v) => (v === 0 ? '0.0' : `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)}`)
