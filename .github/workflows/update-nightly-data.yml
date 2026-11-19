@@ -289,6 +289,11 @@ jobs:
         continue-on-error: true
         # 12 requests (six levels x hitting, pitching). Feeds /trade's "By level" sort.
         run: node scripts/trade/gen-level-lines.mjs
+      - name: Competitive Balance picks
+        id: cb-picks
+        continue-on-error: true
+        # 1 request. The next draft's tradable picks for /trade; empty until MLB posts the order.
+        run: node scripts/trade/gen-cb-picks.mjs
       # ---- End structural data -------------------------------------------
 
       - name: Game notes

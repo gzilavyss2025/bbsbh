@@ -1,4 +1,5 @@
 import { sortPlayers, lineIsSmall } from '../../lib/trade/deal.js'
+import { positionGroup } from '../../api/free-agents/freeAgents.js'
 import { percentileFromCuts, LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
 // The trade card's roster list (src/screens/trade/TradePage.jsx): which
@@ -13,9 +14,21 @@ export const POS_GROUPS = [
   { value: 'IF', label: 'Infield' },
   { value: 'OF', label: 'Outfield' },
 ]
-// Prospect lists write pitchers as RHP/LHP; the roster writes P.
-const GROUP_OF = { P: 'P', SP: 'P', RP: 'P', RHP: 'P', LHP: 'P', TWP: 'P', C: 'C', '1B': 'IF', '2B': 'IF', '3B': 'IF', SS: 'IF', IF: 'IF', DH: 'IF', LF: 'OF', CF: 'OF', RF: 'OF', OF: 'OF' }
-const inGroup = (p, g) => g === 'all' || GROUP_OF[p.pos] === g
+// The free-agent page's position groups; the card folds DH into the infield.
+const groupOf = (pos) => (positionGroup(pos) === 'DH' ? 'IF' : positionGroup(pos))
+const inGroup = (p, g) => g === 'all' || groupOf(p.pos) === g
+// Each group's second row. Infield: one base, or the utility men (statsapi's
+// IF, UT and UI). Outfield: one field. Pitchers: the team page's role from
+// this season's starts and saves (roleFromCounts), so a pitcher with no big-
+// league games this year shows only under All.
+export const SPOTS = {
+  IF: [{ value: 'all', label: 'All infield' }, ...['1B', '2B', '3B', 'SS', 'UTIL'].map((v) => ({ value: v, label: v }))],
+  OF: [{ value: 'all', label: 'All outfield' }, ...['LF', 'CF', 'RF'].map((v) => ({ value: v, label: v }))],
+  P: [{ value: 'all', label: 'All pitchers' }, ...['SP', 'RP', 'CL'].map((v) => ({ value: v, label: v }))],
+}
+const UTIL = new Set(['IF', 'UT', 'UI'])
+const atSpot = (p, spot) => spot === 'all'
+  || (spot === 'UTIL' ? UTIL.has(p.pos) : ['SP', 'RP', 'CL'].includes(spot) ? p.line?.role === spot : p.pos === spot)
 
 // Which players the roster list holds: the 40-man, the club's ranked
 // prospects (on the 40-man or not), or the whole organization.
@@ -35,7 +48,7 @@ export const SORT = [
   { value: 'age', label: 'Age' },
   { value: 'prospect', label: 'Prospect rank' },
 ]
-const isPitcher = (p) => GROUP_OF[p.pos] === 'P'
+const isPitcher = (p) => groupOf(p.pos) === 'P'
 // Accent- and case-blind, so "pena" finds Peña.
 const fold = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() // caps-js-exempt: compares names, renders nothing
 // A player's percentile within his own level (Q3, option C): a big-league
@@ -56,13 +69,13 @@ export function levelRank(p, farm, cuts) {
   return pct == null ? null : { pct, level: LEVEL_OF_SPORT[r.sport] }
 }
 
-export function rosterList(data, { show, group, sort, query = '', farm = null, minimum = false, cuts = null }) {
+export function rosterList(data, { show, group, spot = 'all', sort, query = '', farm = null, minimum = false, cuts = null }) {
   const prospect = (p) => p.orgRank != null || p.topRank != null
   let list = show === 'forty' ? data.forty
     : show === 'prospects' ? [...data.forty.filter(prospect), ...data.minors]
     : [...data.forty, ...data.minors, ...data.others]
   const q = fold(query.trim())
-  list = list.filter((p) => inGroup(p, group) && (!q || fold(p.name).includes(q)))
+  list = list.filter((p) => inGroup(p, group) && (!SPOTS[group] || atSpot(p, spot)) && (!q || fold(p.name).includes(q)))
   if (sort === 'line') {
     // Hitters by OPS, then pitchers by ERA, so neither number is compared with
     // the other. Within each, big-league lines come before minor-league ones:

@@ -2,6 +2,8 @@
 // generator (scripts/trade/gen-trade-pedigree.mjs) runs it over statsapi's
 // /people?hydrate=draft,transactions, and the trade card reads its output.
 
+import { ageOn } from '../person/rosterStatus.js'
+
 // Transaction codes that bring a player into a club from somewhere else.
 const INTO = {
   TR: 'trade',
@@ -9,16 +11,14 @@ const INTO = {
   R5: 'rule5',
   R5M: 'rule5',
   PUR: 'purchase',
+  // ACQ, OBT and CP are the same purchase from outside affiliated ball
+  // (api/transactions/playerFacts.js, ARRIVALS).
+  ACQ: 'purchase',
+  OBT: 'purchase',
+  CP: 'purchase',
   SFA: 'fa',
 }
 
-const ageOn = (birthDate, date) => {
-  if (!birthDate || !date) return null
-  const b = new Date(birthDate), d = new Date(date)
-  let a = d.getUTCFullYear() - b.getUTCFullYear()
-  if (d.getUTCMonth() < b.getUTCMonth() || (d.getUTCMonth() === b.getUTCMonth() && d.getUTCDate() < b.getUTCDate())) a -= 1
-  return a
-}
 
 // The pick that counts: the most recent draft he was taken in.
 export function draftOf(person) {

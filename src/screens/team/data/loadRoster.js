@@ -39,7 +39,8 @@ function comparePitchers(a, b) {
     Number(a.jersey) - Number(b.jersey)
   )
 }
-function roleFromCounts(gamesStarted, gamesPitched, saves) {
+// Also the trade card's pitcher role (src/api/trade/side.js).
+export function roleFromCounts(gamesStarted, gamesPitched, saves) {
   const g = Number(gamesPitched) || 0
   if (g === 0) return null
   const gs = Number(gamesStarted) || 0

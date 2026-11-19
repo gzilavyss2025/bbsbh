@@ -1,7 +1,8 @@
 // A line's percentile within its own level (src/lib/trade/levelPct.js).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cutPoints, percentileFromCuts, ordinal } from '../src/lib/trade/levelPct.js'
+import { cutPoints, percentileFromCuts } from '../src/lib/trade/levelPct.js'
+import { ordinal } from '../src/lib/format.js'
 
 test('cut points cover a level from its lowest value to its highest', () => {
   const cuts = cutPoints(Array.from({ length: 201 }, (_, i) => 0.5 + i * 0.002))

@@ -5,7 +5,11 @@
 // them with `percentileFromCuts`. The floor matches prospect-trend's: 40 PA,
 // 30 outs (scripts/lib/prospectPercentile.mjs).
 
-export const LEVEL_OF_SPORT = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'Rk' }
+import { SPORT_LABEL } from '../teams/levels.js'
+import { percentileOf } from '../../api/hotcold/rule.js'
+
+// The six levels with a season to rank against, labelled as the rest of the app labels them.
+export const LEVEL_OF_SPORT = Object.fromEntries([1, 11, 12, 13, 14, 16].map((id) => [id, SPORT_LABEL[id]]))
 
 // values: a level's qualified metric values. Returns 101 numbers, the value
 // at each whole percentile of the sorted list (0 = lowest, 100 = highest).
@@ -17,17 +21,11 @@ export function cutPoints(values) {
 
 // The share of the level a value beats, 0-100, oriented so higher is better
 // for both stats: a high OPS and a low ERA both rank high. Null without cuts.
+// The placing is the hot/cold rule's (percentileOf): it interpolates between
+// cut points and answers the middle of a tie.
 export function percentileFromCuts(value, cuts, higherIsBetter) {
-  if (!Number.isFinite(value) || !cuts?.length) return null
-  const below = cuts.filter((c) => c < value).length
-  const above = cuts.filter((c) => c > value).length
-  const pct = higherIsBetter ? below : above
+  const p = percentileOf(value, cuts)
+  if (p == null) return null
   // Capped at 99: a line can lead its level, but "100th" reads as an error.
-  return Math.max(0, Math.min(99, Math.round((pct / cuts.length) * 100)))
-}
-
-// "93rd", "1st", "12th".
-export function ordinal(n) {
-  const s = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] ?? 'th'
-  return `${n}${s}`
+  return Math.max(0, Math.min(99, Math.round(higherIsBetter ? p : 100 - p)))
 }

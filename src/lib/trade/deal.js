@@ -5,6 +5,8 @@
 // one cell per season), and war.json. A deal is two sides, each sending players
 // and cash. The card states what moves; it never grades who wins.
 
+import { moneyLabel } from '../format.js'
+
 // Next season's pay. A guaranteed figure is a number; an arbitration year, a
 // club option or a pre-arbitration year has no fixed figure yet, so it
 // carries a label instead and stays out of the payroll sum.
@@ -110,10 +112,9 @@ export function dealSummary(a, b) {
   }
 }
 
-export function money(usd) {
-  const m = Math.abs(usd) / 1e6
-  return `$${m >= 10 ? m.toFixed(1) : String(Number(m.toFixed(2)))}M`
-}
+// The app's one money rule (lib/format.js): millions to one place, thousands
+// under a million. The card signs its own figures, so this is the size alone.
+export const money = (usd) => moneyLabel(Math.abs(usd))
 
 // The roster sort. Each key names the better end first (most WAR, best prospect
 // rank, lowest ERA); a player with no value for the key sorts last either way.
@@ -185,28 +186,13 @@ export function contractYears(contract, from) {
   return rows
 }
 
-// One season line across every minor-league level a player reached. Rates are
-// rebuilt from the summed counts, never averaged: OPS = (H+BB+HBP)/(AB+BB+HBP+SF)
-// + TB/AB, ERA = 27*ER/outs. `parts` are statsapi stat objects, one per level.
-const outsOf = (ip) => {
-  if (ip == null) return 0
-  const [whole, frac = '0'] = String(ip).split('.')
-  return Number(whole) * 3 + Number(frac)
-}
-const rate = (v, digits) => (Number.isFinite(v) ? v.toFixed(digits) : null)
-
-export function combineLines(parts, isPitcher) {
-  const sum = (k) => parts.reduce((t, p) => t + (Number(p?.[k]) || 0), 0)
-  if (isPitcher) {
-    const outs = parts.reduce((t, p) => t + outsOf(p?.inningsPitched), 0)
-    if (!outs) return { era: null, ip: null, so: sum('strikeOuts') || null }
-    return { era: rate((27 * sum('earnedRuns')) / outs, 2), ip: `${Math.floor(outs / 3)}.${outs % 3}`, so: sum('strikeOuts') }
-  }
-  const ab = sum('atBats'), onBaseDen = ab + sum('baseOnBalls') + sum('hitByPitch') + sum('sacFlies')
-  const obp = onBaseDen ? (sum('hits') + sum('baseOnBalls') + sum('hitByPitch')) / onBaseDen : NaN
-  const slg = ab ? sum('totalBases') / ab : NaN
-  const ops = rate(obp + slg, 3)
-  return { ops: ops?.replace(/^0/, '') ?? null, hr: sum('homeRuns'), pa: sum('plateAppearances') }
+// The card's farm line from a summed season (statsLevels.js's sumHitting /
+// sumPitching, which rebuild the rates from the summed counts across levels):
+// OPS as ".755", ERA to two places, null when he has no line of that kind.
+export function farmLine(hitting, pitching) {
+  if (pitching) return { era: pitching.era == null ? null : pitching.era.toFixed(2), ip: pitching.outs ? pitching.inningsPitched : null, so: pitching.strikeOuts }
+  if (!hitting) return {}
+  return { ops: hitting.plateAppearances ? hitting.ops.toFixed(3).replace(/^0/, '') : null, hr: hitting.homeRuns, pa: hitting.plateAppearances }
 }
 
 // Salary the sending club keeps. `retain` maps a player id to { pct } (0-1)
@@ -257,7 +243,14 @@ export function optionStatus(service, options) {
 // Aaron Civale and cash."). A pitcher is RHP or LHP by his throwing hand.
 const wirePos = (p) => (p.pos === 'P' || p.pos === 'TWP' ? (p.throws === 'L' ? 'LHP' : 'RHP') : p.pos || '')
 const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
-const sideText = (side) => listOf([...side.sends.map((p) => `${wirePos(p)} ${p.name}`.trim()), ...(side.cashUsd ? ['cash'] : [])])
+// A Competitive Balance pick as the wire prints one: "a 2027 Competitive Balance Round A pick".
+export const pickText = (pick) => `a ${pick.year} Competitive Balance Round ${pick.round} pick`
+
+const sideText = (side) => listOf([
+  ...side.sends.map((p) => `${wirePos(p)} ${p.name}`.trim()),
+  ...(side.draftPicks ?? []).map(pickText),
+  ...(side.cashUsd ? ['cash'] : []),
+])
 
 export function wireSentence(a, b) {
   const gives = sideText(a) || 'future considerations'

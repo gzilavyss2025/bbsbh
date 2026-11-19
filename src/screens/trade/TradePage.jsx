@@ -18,13 +18,16 @@ import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerRow } from './PlayerRow.jsx'
 import { DepthCard } from './DepthCard.jsx'
-import { POS_GROUPS, SHOW, SORT, levelRank, rosterList } from './rosterList.js'
+import { POS_GROUPS, SPOTS, SHOW, SORT, levelRank, rosterList } from './rosterList.js'
 import { PCTS, RetainControl, Wire, Verdict, Effect, otherNotes, StripSide, payText } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
 import '../../styles/trade/motion.css'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
+import { IconButton } from '../../components/ui/control/IconButton.jsx'
+import { DraftPicks } from './DraftPicks.jsx'
+import { fetchCbPicks } from '../../api/trade/cbPicks.js'
 import '../../styles/trade/page.css'
 
 const DASH = '—'
@@ -32,7 +35,7 @@ const DASH = '—'
 const idOf = (abbr) => ALL_MLB_TEAM_IDS.find((id) => teamAbbr({ id }) === abbr?.toUpperCase()) ?? null // caps-js-exempt: matches a URL key, renders nothing
 
 // The deal lives in the address, so a link rebuilds it:
-// /trade?team=MIL&with=BOS&p=1,2,3&ca=0&cb=2.5 (cash in $M).
+// /trade?team=MIL&with=BOS&p=1,2,3&ca=0&cb=2.5&dp=2027-A-33 (cash in $M; dp: draft picks).
 function readLink() {
   const q = new URLSearchParams(window.location.search)
   return {
@@ -41,15 +44,17 @@ function readLink() {
     picked: new Set((q.get('p') || '').split(',').filter(Boolean).map(Number)),
     cashA: Number(q.get('ca')) || 0,
     cashB: Number(q.get('cb')) || 0,
+    dp: new Set((q.get('dp') || '').split(',').filter(Boolean)),
   }
 }
-function writeLink({ a, b, picked, cashA, cashB }) {
+function writeLink({ a, b, picked, cashA, cashB, dp }) {
   const q = new URLSearchParams()
   if (a) q.set('team', teamAbbr({ id: a }))
   if (b) q.set('with', teamAbbr({ id: b }))
   if (picked.size) q.set('p', [...picked].join(','))
   if (cashA) q.set('ca', String(cashA))
   if (cashB) q.set('cb', String(cashB))
+  if (dp.size) q.set('dp', [...dp].join(','))
   const s = q.toString()
   window.history.replaceState(window.history.state, '', `${window.location.pathname}${s ? `?${s}` : ''}`)
 }
@@ -66,13 +71,25 @@ export function TradePage() {
   const [picked, setPicked] = useState(start.picked)
   const [cashA, setCashA] = useState(start.cashA)
   const [cashB, setCashB] = useState(start.cashB)
+  // Competitive Balance picks in the deal, by key. A pick goes with the club
+  // that holds it, so a club switch leaves the other club's keys inert.
+  const [dp, setDp] = useState(start.dp)
+  const cbPicks = useAsync(() => fetchCbPicks(), [])
+  const ownPicks = (id) => (cbPicks.data?.picks ?? []).filter((pk) => pk.teamId === id)
+  const sentPicks = (id) => ownPicks(id).filter((pk) => dp.has(pk.key))
+  const togglePick = (key) => setDp((s) => {
+    const n = new Set(s)
+    n.has(key) ? n.delete(key) : n.add(key)
+    return n
+  })
+  const pickProps = (id, other) => ({ draftPicks: ownPicks(id), dp, onTogglePick: togglePick, incomingPicks: other ? sentPicks(other) : [] })
   const [choosingA, setChoosingA] = useState(false)
   const [choosingB, setChoosingB] = useState(false)
   const [showDepth, setShowDepth] = useState(false)
   // A club change that would drop players waits here until the reader confirms it.
   const [pending, setPending] = useState(null)
 
-  useEffect(() => writeLink({ a, b, picked, cashA, cashB }), [a, b, picked, cashA, cashB])
+  useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
 
   const sideA = useAsync(() => loadTradeSide(a), [a])
   const sideB = useAsync(() => (b ? loadTradeSide(b) : Promise.resolve(null)), [b])
@@ -166,7 +183,7 @@ export function TradePage() {
         {pending?.side === 'a' && confirm}
       </>
     )
-    : <Button size="control" skin="ghost" onClick={() => setChoosingA(true)}>Change club</Button>
+    : <IconButton mark="sm" className="tradedesk__barx" onClick={() => setChoosingA(true)} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
   const changeB = choosingB
     ? (
       <>
@@ -177,7 +194,7 @@ export function TradePage() {
         {pending?.side === 'b' && confirm}
       </>
     )
-    : <Button size="control" skin="ghost" onClick={() => setChoosingB(true)}>Change partner</Button>
+    : <IconButton mark="sm" className="tradedesk__barx" onClick={() => setChoosingB(true)} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
   const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (
@@ -197,7 +214,7 @@ export function TradePage() {
                   Row two: each club's roster, so the two rosters start level. */}
               <Side
                 part="deal"
-                teamId={a}
+                teamId={a} {...pickProps(a, b)}
                 state={sideA}
                 incoming={sends(sideB.data)}
                 incomingTeamId={b}
@@ -217,7 +234,7 @@ export function TradePage() {
               />
               <Side
                 part="deal"
-                teamId={b}
+                teamId={b} {...pickProps(b, a)}
                 state={sideB}
                 incoming={sends(sideA.data)}
                 incomingTeamId={a}
@@ -237,7 +254,7 @@ export function TradePage() {
               />
               <Side
                 part="roster"
-                teamId={a}
+                teamId={a} {...pickProps(a, b)}
                 state={sideA}
                 incoming={sends(sideB.data)}
                 incomingTeamId={b}
@@ -257,7 +274,7 @@ export function TradePage() {
               />
               <Side
                 part="roster"
-                teamId={b}
+                teamId={b} {...pickProps(b, a)}
                 state={sideB}
                 incoming={sends(sideA.data)}
                 incomingTeamId={a}
@@ -280,7 +297,7 @@ export function TradePage() {
             <>
               <Side
                 part="deal"
-                teamId={a}
+                teamId={a} {...pickProps(a, b)}
                 state={sideA}
                 incoming={[]}
                 incomingTeamId={null}
@@ -306,7 +323,7 @@ export function TradePage() {
               </Card>
               <Side
                 part="roster"
-                teamId={a}
+                teamId={a} {...pickProps(a, b)}
                 state={sideA}
                 incoming={[]}
                 incomingTeamId={null}
@@ -327,8 +344,8 @@ export function TradePage() {
         {deal && (
           <Card frame="stamped" label="The deal" className="tradedesk__moves">
             <Wire text={wireSentence(
-              { club: teamFullName(a), sends: sends(sideA.data), cashUsd: cashA * 1e6 },
-              { club: teamFullName(b), sends: sends(sideB.data), cashUsd: cashB * 1e6 },
+              { club: teamFullName(a), sends: sends(sideA.data), draftPicks: sentPicks(a), cashUsd: cashA * 1e6 },
+              { club: teamFullName(b), sends: sends(sideB.data), draftPicks: sentPicks(b), cashUsd: cashB * 1e6 },
             )} />
             {otherNotes(deal.notes).length > 0 && (
               <ul className="tradedesk__notes" aria-live="polite">
@@ -382,17 +399,19 @@ export function TradePage() {
 // One club's column, the Trade Machine's shape: the club, what it gets from
 // the other club (and what that does for it), then its own roster right
 // there, where a tap sends a player across. No modal: the roster is the page.
-function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
+function Side({ part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, incomingPicks = [], teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
   const club = teamClubName(teamId)
   const data = state.data
   const theme = useMemo(() => headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')), [teamId])
   const [group, setGroup] = useState('all')
-  const [addingCash, setAddingCash] = useState(false)
+  const [spot, setSpot] = useState('all')
   const [show, setShow] = useState('forty')
   const [sort, setSort] = useState('name')
   const [minimum, setMinimum] = useState(true)
   const [query, setQuery] = useState('')
-  const pickShow = (v) => { setShow(v); if (v !== 'forty') requestFarm(); if (v === 'prospects' && sort === 'name') setSort('prospect') }
+  // The tabs past Everyone are not players: picks and cash hide the player filters.
+  const players = show !== 'picks' && show !== 'cash'
+  const pickShow = (v) => { setShow(v); if (v === 'prospects' || v === 'all') requestFarm(); if (v === 'prospects' && sort === 'name') setSort('prospect') }
   const byLevel = sort === 'level'
   const cuts = useAsync(() => (byLevel ? fetchLevelLines() : Promise.resolve(null)), [byLevel])
   // A player the reader adds stamps into the column that gets him. The ones a
@@ -427,39 +446,40 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
               <InfoPopover label="How to read the numbers" className="infopop--paper infopop--down">
                 A ~ marks a year estimated from service time. WAR is from last season.
               </InfoPopover>
-              {cash || addingCash ? (
-                <label className="tradedesk__cash">
-                  <span className="t-label">{club} cash in {data.nextYear} ($M)</span>
-                  <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
-                    onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
-                    onBlur={() => { if (!cash) setAddingCash(false) }} />
-                </label>
-              ) : (
-                <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ {club} cash</Button>
-              )}
             </div>
             <div className="tradedesk__controls">
-              <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
-              <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={setGroup} layout="wrap" />
-              <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
-                placeholder={`Find a ${club} player`} aria-label={`Find a ${club} player`} />
-              <label className="tradedesk__sort">
+              {/* Players, then the club's tradable picks and its cash, as one row of tabs. */}
+              <Chips label={`${club} list`} options={[...SHOW, ...(draftPicks.length ? [{ value: 'picks', label: 'Draft picks' }] : []), { value: 'cash', label: cash ? `Cash · ${money(cash * 1e6)}` : 'Cash' }]}
+                value={show} onChange={pickShow} layout="wrap" />
+              {players && <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={(g) => { setGroup(g); setSpot('all') }} layout="wrap" />}
+              {players && SPOTS[group] && <Chips label={`${club} positions within the group`} options={SPOTS[group]} value={spot} onChange={setSpot} layout="wrap" />}
+              {players && <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
+                placeholder={`Search ${club} players`} aria-label={`Search ${club} players`} />}
+              {players && <label className="tradedesk__sort">
                 <span className="t-label">Sort</span>
                 <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
                   {SORT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
-              </label>
-              {sort === 'line' && (
+              </label>}
+              {players && sort === 'line' && (
                 <Chips label="Big-league lines" layout="wrap" value={minimum ? 'min' : 'any'} onChange={(v) => setMinimum(v === 'min')}
                   options={[{ value: 'min', label: '50 PA / 20 IP to count' }, { value: 'any', label: 'Any sample' }]} />
               )}
             </div>
-            <ul className="tradedesk__list tradedesk__rosterlist">
-              {rosterList(data, { show, group, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
+            {show === 'picks' && <DraftPicks picks={draftPicks} chosen={dp} onToggle={onTogglePick} partner={partner} />}
+            {show === 'cash' && (
+              <label className="tradedesk__cash">
+                <span className="t-label">{club} cash in {data.nextYear} ($M)</span>
+                <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0"
+                  onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))} />
+              </label>
+            )}
+            {players && <ul className="tradedesk__list tradedesk__rosterlist">
+              {rosterList(data, { show, group, spot, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
                 <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason}
                   farm={farm?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
               ))}
-            </ul>
+            </ul>}
           </div>
         )}
       </Card>
@@ -499,9 +519,9 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
               {/* What this club gets: the other club's players and cash, at a glance. */}
               <p className="tradedesk__sendshead">
                 <span className="t-label t-label--bold">Gets from the {partner}</span>
-                <span className="tradedesk__sendssum">{sendsSummary(incoming, incomingCash, data.nextYear)}</span>
+                <span className="tradedesk__sendssum">{sendsSummary(incoming, incomingCash, data.nextYear, incomingPicks.length)}</span>
               </p>
-              {incoming.length === 0 && !incomingCash ? <p className="tradedesk__none">Nothing yet. Tap a player on the {partner} roster.</p> : (
+              {incoming.length === 0 && !incomingCash && !incomingPicks.length ? <p className="tradedesk__none">Nothing yet. Tap a player on the {partner} roster.</p> : (
                 <ul className="tradedesk__list">
                   {incoming.map((p) => (
                     <PlayerRow compact key={p.id} p={p} teamId={incomingTeamId} picked onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={incomingFarm?.get(p.id)} enter={arrived != null && !arrived.has(p.id)}>
@@ -510,6 +530,7 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
                   ))}
                 </ul>
               )}
+              <DraftPicks compact picks={incomingPicks} chosen={dp} onToggle={onTogglePick} />
             </div>
           )}
 
@@ -522,13 +543,14 @@ function Side({ part = 'deal', teamId, state, incoming, incomingTeamId, incoming
 }
 
 // "1 player · $28.7M in 2027 · + $2M cash", or "Nobody yet".
-function sendsSummary(sends, cash, nextYear) {
-  if (!sends.length && !cash) return 'Nobody yet'
+function sendsSummary(sends, cash, nextYear, picks = 0) {
+  if (!sends.length && !cash && !picks) return 'Nobody yet'
   const pay = sends.reduce((t, p) => t + (p.payUsd ?? 0), 0)
   const unset = sends.filter(unsetSalary).length
   return [
     sends.length ? `${sends.length} ${sends.length === 1 ? 'player' : 'players'}` : null,
     pay ? `${money(pay)} in ${nextYear}${unset ? ` + ${unset} TBD` : ''}` : unset ? `${unset} TBD` : null,
+    picks ? `${picks} ${picks === 1 ? 'draft pick' : 'draft picks'}` : null,
     cash ? `+ ${money(cash * 1e6)} cash` : null,
   ].filter(Boolean).join(' · ')
 }

@@ -3,14 +3,14 @@
 // grouped by the transaction id (src/lib/trade/history.js), then one people
 // call for where each player in it is now. Season WAR comes from war.json.
 import { getJson } from '../statsapi.js'
+import { fetchTradeCohort } from '../person-fetch.js'
 import { fetchWarData } from '../war.js'
 import { groupTrade } from '../../lib/trade/history.js'
 
 export async function loadTrade(playerId, how, toId) {
   if (!how?.fromId || !how?.date) return null
   const day = how.date.slice(0, 10)
-  const wire = await getJson(`/api/v1/transactions?teamId=${how.fromId}&startDate=${day}&endDate=${day}`)
-  const trade = groupTrade(wire.transactions ?? [], playerId, toId)
+  const trade = groupTrade(await fetchTradeCohort(how.fromId, day), playerId, toId)
   if (!trade) return null
   const ids = [...trade.got, ...trade.gave].map((p) => p.id)
   const [people, war] = await Promise.all([

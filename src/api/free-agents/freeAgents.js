@@ -23,9 +23,9 @@ const MINOR_LEAGUE_NOTE = 'Minor League Free Agent'
 export const POSITION_GROUPS = ['P', 'C', 'IF', 'OF', 'DH']
 
 const GROUP_OF = {
-  P: 'P', SP: 'P', RP: 'P', TWP: 'P',
+  P: 'P', SP: 'P', RP: 'P', TWP: 'P', RHP: 'P', LHP: 'P',
   C: 'C',
-  '1B': 'IF', '2B': 'IF', '3B': 'IF', SS: 'IF', IF: 'IF',
+  '1B': 'IF', '2B': 'IF', '3B': 'IF', SS: 'IF', IF: 'IF', UT: 'IF', UI: 'IF',
   LF: 'OF', CF: 'OF', RF: 'OF', OF: 'OF',
   DH: 'DH',
 }

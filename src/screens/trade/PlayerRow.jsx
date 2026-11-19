@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
-import { ordinal } from '../../lib/trade/levelPct.js'
+import { ordinal } from '../../lib/format.js'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerSheet } from './PlayerSheet.jsx'

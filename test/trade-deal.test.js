@@ -2,7 +2,8 @@
 // like public/data/team-contracts.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, combineLines, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence } from '../src/lib/trade/deal.js'
+import { nextYearPay, controlYears, tradePlayer, dealSummary, money, sortPlayers, contractYears, farmLine, applyRetain, lineIsSmall, optionKind, optionStatus, wireSentence } from '../src/lib/trade/deal.js'
+import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 
 const cells = (...kinds) => kinds.map(([kind, extra], i) => ({ year: 2026 + i, kind, ...extra }))
 const signed = { regime: 'signed', cells: cells(['salary', { value: 24e6 }], ['guaranteed', { value: 23.9e6 }], ['guaranteed', { value: 23.8e6 }], ['none']) }
@@ -49,7 +50,7 @@ test('a deal moves payroll, WAR, control and 40-man spots both ways', () => {
   assert.deepEqual(d2.unpriced, { a: 0, b: 0 })
   assert.ok(!d2.notes.some((n) => n.includes('no set salary')))
   assert.ok(d.notes.some((n) => n.startsWith('Kid is not on the 40-man')))
-  assert.ok(d.notes.some((n) => n.includes('Red Sox send $2M')))
+  assert.ok(d.notes.some((n) => n.includes('Red Sox send $2.0M')))
   assert.ok(d.notes.some((n) => n.includes('2 players have no set salary')))
 })
 
@@ -62,7 +63,9 @@ test('a side over 40 is told to clear a spot', () => {
 
 test('money reads like the rest of the site', () => {
   assert.equal(money(23.9e6), '$23.9M')
-  assert.equal(money(2e6), '$2M')
+  assert.equal(money(2e6), '$2.0M')
+  // A league-minimum deal reads in thousands, as on the money pages.
+  assert.equal(money(780e3), '$780k')
   assert.equal(money(2.5e6), '$2.5M')
 })
 
@@ -105,9 +108,10 @@ test('a minor-league line across two levels rebuilds its rates from the summed c
   const aPlus = { atBats: 100, hits: 30, baseOnBalls: 10, hitByPitch: 0, sacFlies: 0, totalBases: 50, homeRuns: 4, plateAppearances: 110 }
   const aa = { atBats: 300, hits: 75, baseOnBalls: 30, hitByPitch: 0, sacFlies: 0, totalBases: 120, homeRuns: 10, plateAppearances: 330 }
   // OBP (105+40)/440 = .3295, SLG 170/400 = .425 -> .755; averaging the two OPS would give .787.
-  assert.deepEqual(combineLines([aPlus, aa], false), { ops: '.755', hr: 14, pa: 440 })
-  // 10.1 IP is 31 outs; 20.2 IP is 62. 93 outs, 9 ER -> 27*9/93 = 2.61.
-  const p = combineLines([{ inningsPitched: '10.1', earnedRuns: 3, strikeOuts: 12 }, { inningsPitched: '20.2', earnedRuns: 6, strikeOuts: 20 }], true)
+  // The sum is statsLevels.js's, the one the team page's minors list uses.
+  assert.deepEqual(farmLine(sumHitting([{ stat: aPlus }, { stat: aa }]), null), { ops: '.755', hr: 14, pa: 440 })
+  // 31 outs + 62 outs = 93, 9 ER -> 27*9/93 = 2.61.
+  const p = farmLine(null, sumPitching([{ stat: { outs: 31, earnedRuns: 3, strikeOuts: 12 } }, { stat: { outs: 62, earnedRuns: 6, strikeOuts: 20 } }]))
   assert.deepEqual(p, { era: '2.61', ip: '31.0', so: 32 })
 })
 
@@ -122,7 +126,7 @@ test('retained salary stays with the sending club', () => {
   const d = dealSummary({ name: 'Brewers', fortyCount: 40, sends: [], cashUsd: 0 }, { name: 'Red Sox', fortyCount: 40, sends, cashUsd: 0 })
   // Milwaukee takes on only half; Boston sheds only half.
   assert.equal(d.payroll.a, 14.35e6)
-  assert.ok(d.notes.includes("The Red Sox keep $14.3M of Crochet's salary."))
+  assert.ok(d.notes.includes("The Red Sox keep $14.4M of Crochet's salary."))
 })
 
 test('a big-league line under 50 PA or 20 IP is a small sample', () => {
@@ -156,3 +160,13 @@ test('the deal reads like the transaction wire', () => {
     'Milwaukee Brewers traded 1B Andrew Vaughn, RHP Aaron Civale and LHP Aaron Ashby to Boston Red Sox for future considerations.',
   )
 })
+
+test('a Competitive Balance pick reads like the wire prints it', () => {
+  const vaughn = { name: 'Andrew Vaughn', pos: '1B' }
+  const pick = { year: 2027, round: 'A', number: 33 }
+  assert.equal(
+    wireSentence({ club: 'Milwaukee Brewers', sends: [], draftPicks: [pick], cashUsd: 0 }, { club: 'Chicago White Sox', sends: [vaughn], cashUsd: 0 }),
+    'Milwaukee Brewers traded a 2027 Competitive Balance Round A pick to Chicago White Sox for 1B Andrew Vaughn.',
+  )
+})
+

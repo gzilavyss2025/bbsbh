@@ -4,11 +4,13 @@
 // trade as often as anyone on it. Every source degrades to "not posted yet":
 // a missing ledger row is a player with no pay line, never a failed page.
 import { getJson } from '../statsapi.js'
-import { fetchTeamRoster } from '../team/fetch.js'
+import { roleFromCounts } from '../../screens/team/data/loadRoster.js'
+import { fetchTeamRoster, fetchAffiliates, fetchComplexAffiliates } from '../team/fetch.js'
+import { loadCombinedPoolForTeams } from '../statsLevels.js'
 import { fetchTeamContracts } from '../salaries.js'
 import { fetchWarData } from '../war.js'
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
-import { tradePlayer, combineLines } from '../../lib/trade/deal.js'
+import { tradePlayer, farmLine } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
 import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
@@ -22,24 +24,22 @@ async function fetchOrgRoster(teamId, season) {
 
 const LEVEL = LEVEL_OF_SPORT
 
-// The organization's clubs (/teams/affiliates), fetched once per club and
-// season: the level map and the farm lines both read it.
-const affiliatesLoad = new Map()
+// The organization's clubs, AAA through the complex leagues, from the team
+// page's own readers (static affiliates.json first, then live): fetched once
+// per club and season, since the level map and the farm lines both read it.
+const orgClubsLoad = new Map()
 function fetchOrgClubs(teamId, season) {
   const key = `${teamId}:${season}`
-  if (!affiliatesLoad.has(key)) {
-    affiliatesLoad.set(key, getJson(`/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}`)
-      .then((d) => d.teams ?? [])
-      .catch(() => { affiliatesLoad.delete(key); return [] }))
+  if (!orgClubsLoad.has(key)) {
+    orgClubsLoad.set(key, Promise.all([fetchAffiliates(teamId, season), fetchComplexAffiliates(teamId, season)])
+      .then(([full, complex]) => [...full, ...complex].filter((t) => LEVEL[t.sportId])))
   }
-  return affiliatesLoad.get(key)
+  return orgClubsLoad.get(key)
 }
 
 // teamId -> level ('MLB' for the parent club) for every club in the organization.
 async function fetchOrgLevels(teamId, season) {
-  const levels = new Map([[teamId, 'MLB']])
-  for (const t of await fetchOrgClubs(teamId, season)) if (t.id !== teamId && LEVEL[t.sport?.id]) levels.set(t.id, LEVEL[t.sport.id])
-  return levels
+  return new Map([[teamId, 'MLB'], ...(await fetchOrgClubs(teamId, season)).map((t) => [t.id, LEVEL[t.sportId]])])
 }
 
 export async function loadTradeSide(teamId, { season = new Date().getFullYear() } = {}) {
@@ -67,7 +67,7 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     const group = (person.stats ?? []).find((g) => g.group?.displayName === (isPitcher ? 'pitching' : 'hitting'))
     const stat = group?.splits?.[0]?.stat
     if (!stat) return null
-    return isPitcher ? { era: stat.era ?? null, ip: stat.inningsPitched ?? null } : { ops: stat.ops ?? null, pa: stat.plateAppearances ?? null }
+    return isPitcher ? { era: stat.era ?? null, ip: stat.inningsPitched ?? null, role: roleFromCounts(stat.gamesStarted, stat.gamesPitched, stat.saves) } : { ops: stat.ops ?? null, pa: stat.plateAppearances ?? null }
   }
 
   const forty = roster
@@ -120,45 +120,26 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   return { teamId, nextYear, warSeason: war?.season ?? null, fortyCount: forty.length, forty, minors, others, depth }
 }
 
-// Minor-league 2026 lines for the whole farm, one call per affiliate (AAA to
-// the complex leagues), loaded only when the card lists players off the 40-man.
-// Verified 2026-11-18 on teams/158: /teams/affiliates names each club and its
-// sport; a club's fullSeason roster hydrates that sport's season stats.
+// Minor-league lines for the whole farm, loaded only when the card lists
+// players off the 40-man. The team page's stats pool (statsLevels.js) does the
+// work: each club's season stats, summed per player across the levels he
+// played, his club the highest level he reached.
 export async function loadMinorLines(teamId, { season = new Date().getFullYear() } = {}) {
-  const clubs = (await fetchOrgClubs(teamId, season)).filter((t) => t.id !== teamId && LEVEL[t.sport?.id])
-  const rosters = await Promise.all(clubs.map((t) =>
-    getJson(`/api/v1/teams/${t.id}/roster?rosterType=fullSeason&season=${season}&hydrate=person(stats(type=season,group=[hitting,pitching],season=${season},sportId=${t.sport.id}))`)
-      .then((d) => ({ club: t, roster: d.roster ?? [] }))
-      .catch(() => ({ club: t, roster: [] })),
-  ))
-  // A player who moved levels gets one line across all of them; his club is
-  // the highest level he reached, and `levels` lists them low to high.
-  const byPlayer = new Map()
-  for (const { club, roster } of rosters) {
-    for (const r of roster) {
-      const id = r.person?.id
-      if (!id) continue
-      const isPitcher = r.position?.type === 'Pitcher'
-      const stat = r.person.stats?.find((g) => g.group?.displayName === (isPitcher ? 'pitching' : 'hitting'))?.splits?.[0]?.stat
-      const e = byPlayer.get(id) ?? { isPitcher, stints: [] }
-      e.stints.push({ sport: club.sport.id, club: club.teamName ?? club.name, stat })
-      byPlayer.set(id, e)
-    }
-  }
+  const clubs = await fetchOrgClubs(teamId, season)
+  const nameOf = new Map(clubs.map((t) => [t.id, t.name]))
+  const pool = await loadCombinedPoolForTeams(clubs, season)
   const lines = new Map()
-  for (const [id, { isPitcher, stints }] of byPlayer) {
-    const played = stints.filter((x) => x.stat)
-    const order = [...stints].sort((a, b) => b.sport - a.sport)
-    const top = order.at(-1)
-    // His line at his highest level that he played at, for the "By level"
-    // percentile: a population is one level, so a combined line would rank
-    // AA-and-A+ at-bats against AA alone (prospect-trend's rule, #1279).
-    const ranked = [...played].sort((a, b) => a.sport - b.sport)[0]
-    lines.set(id, {
-      level: [...new Set(order.map((x) => LEVEL[x.sport]))].join(' · '),
-      club: top.club,
-      ranked: ranked ? { sport: ranked.sport, isPitcher, ops: ranked.stat.ops ?? null, era: ranked.stat.era ?? null, pa: ranked.stat.plateAppearances ?? null, outs: ranked.stat.outs ?? null } : null,
-      ...(played.length ? combineLines(played.map((x) => x.stat), isPitcher) : {}),
+  for (const e of pool) {
+    const isPitcher = !!e.pitching && !e.hitting
+    // His line at his highest level, for the "By level" percentile: a
+    // population is one level, so a combined line would rank AA-and-A+ at-bats
+    // against AA alone (prospect-trend's rule, #1279).
+    const top = [...(isPitcher ? e.pitchingSplits : e.hittingSplits)].sort((a, b) => a.sport.id - b.sport.id)[0]
+    lines.set(e.id, {
+      level: e.levels.map((id) => LEVEL[id]).filter(Boolean).join(' · '),
+      club: nameOf.get(e.teamId) ?? null,
+      ranked: top ? { sport: top.sport.id, isPitcher, ops: top.stat.ops ?? null, era: top.stat.era ?? null, pa: top.stat.plateAppearances ?? null, outs: top.stat.outs ?? null } : null,
+      ...farmLine(isPitcher ? null : e.hitting, isPitcher ? e.pitching : null),
     })
   }
   return lines

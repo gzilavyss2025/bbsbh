@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Draft picks in MLB trades</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:760px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif;letter-spacing:.02em}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left}
+code{background:#ece3cc;padding:0 4px}.note{color:#6b5d3e;font-size:.9em}
+</style></head><body>
+<h1>Can MLB clubs trade draft picks?</h1>
+<p><strong>Mostly no.</strong> Under the current labour agreement, the only picks a club can trade are its <strong>Competitive Balance picks</strong>: Round A, which comes after the first round, and Round B, which comes after the second. Picks in every other round cannot be traded.</p>
+
+<h2>The rules on a Competitive Balance pick</h2>
+<ul>
+<li>A pick can be traded <strong>once</strong>, and only by the club that was awarded it. The club that receives it can't trade it on.</li>
+<li>It can't be traded for cash alone.</li>
+<li>Picks are awarded the winter before the draft and can be traded from then until the draft, both in the offseason and up to the July deadline.</li>
+<li>Some picks that sit in those rounds still can't be traded. One case is a first-round pick dropped into Round A as a tax penalty (in 2025 the Dodgers, Yankees and Mets). Another is a compensation pick for a pick the club failed to sign.</li>
+<li>Each year that's roughly 15 picks, about 7 in Round A and 8 in Round B, spread across smaller-market and lower-revenue clubs.</li>
+</ul>
+<p class="note">Possible change: Baseball America reported that MLB proposed making every pick tradable in the current labour talks, mostly from the 2028 draft. I could not confirm where that stands.</p>
+
+<h2>Is there an easy way to tell which picks a club has?</h2>
+<table>
+<tr><th>Source</th><th>What it gives</th></tr>
+<tr><td>MLB.com draft order page (<code>mlb.com/draft/2026/order</code>)</td><td>The full order, with Competitive Balance picks marked. MLB publishes it once the December lottery is done.</td></tr>
+<tr><td>MLB Trade Rumors</td><td>Each winter and deadline it runs a "which picks can still be traded" post that lists who holds one.</td></tr>
+<tr><td>statsapi <code>/api/v1/draft/{year}</code></td><td>Checked live. It returns rounds labelled <code>1</code>, <code>PPI</code>, <code>CB-A</code>, <code>2</code>, <code>SUP-2</code>, <code>CB-B</code>…, each pick with its team. For 2026 it has 7 CB-A and 8 CB-B picks. <strong>But</strong> <code>/draft/2027</code> comes back empty today: the order isn't loaded until the draft gets close. So it's good for history and not for the next draft.</td></tr>
+</table>
+
+<h2>What it means for the trade card</h2>
+<p>A "draft pick" chip would only ever apply to the ~15 Competitive Balance picks. For the next draft, the list would have to come from the order MLB publishes after the December lottery, because statsapi doesn't have it yet. A small nightly generator could read <code>/draft/{next year}</code> and use it as soon as it fills, with a hand-kept list until then.</p>
+
+<h2>Sources</h2>
+<ul>
+<li><a href="https://www.mlb.com/glossary/transactions/competitive-balance-draft-picks">MLB glossary: Competitive Balance picks</a></li>
+<li><a href="https://www.mlb.com/news/mlb-draft-competitive-balance-rounds-set-for-2026">MLB.com: Competitive Balance rounds set for 2026</a></li>
+<li><a href="https://www.mlbtraderumors.com/2025/07/which-other-draft-picks-are-eligible-to-be-traded-before-sunday.html">MLBTR: which picks are eligible to be traded</a></li>
+<li><a href="https://www.cbssports.com/mlb/news/2025-mlb-draft-explained-what-to-know-about-pool-money-slotting-system-cbt-penalties-trading-picks-more">CBS Sports: 2025 draft explained</a></li>
+<li><a href="https://bucsondeck.substack.com/p/mlb-proposes-major-changes-to-draft">Bucs on Deck: MLB proposes draft changes (unconfirmed)</a></li>
+</ul>
+</body></html>

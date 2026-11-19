@@ -1549,6 +1549,10 @@
       "class": "spoiler-free",
       "why": "The wsSeriesOdds notes (entering-tense). The Series state heading in comes from the callouts bundle's series block, which holds only games Final before the slate date (ADR-0087); the history it quotes is cut strictly before that date by lib/worldSeries/lastBefore.js. It reads no linescore, no feed and no reveal mark, so it clears the pre-half strip and Between Innings without a gate of its own."
     },
+    "trade/cbPicks.js": {
+      "class": "spoiler-free",
+      "why": "The next draft's Competitive Balance picks and who holds them (cb-picks.json). Draft order, no game result (ADR-0034)."
+    },
     "trade/history.js": {
       "class": "spoiler-free",
       "why": "One past trade from the transaction wire, with where each player is now and war.json's season WAR. Roster history, no game result (ADR-0034)."

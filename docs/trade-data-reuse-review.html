@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade data reuse review</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:900px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.92em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+th{font-family:system-ui,sans-serif}code{background:#ece3cc;padding:0 3px;font-size:.9em}.tag{font:600 .75em system-ui;padding:1px 6px;border:1px solid}
+</style></head><body>
+<h1>Trade card data: what's already in the repo</h1>
+<p>This review went through everything the trade card fetches or calculates and checked it against existing code. It used <code>/simplify</code>, reuse only, with two read-only agents. Each function named below was confirmed to exist. <strong>Nothing has been changed yet.</strong> In total, roughly <strong>150–180 lines</strong> could be replaced by calls to existing code, and one of the swaps also fixes a real bug.</p>
+
+<h2>Swap for the existing code (most code removed first)</h2>
+<table>
+<tr><th>#</th><th>Trade card code</th><th>Use instead</th><th>Match</th><th>Lines</th></tr>
+<tr><td>1</td><td><code>loadMinorLines</code> in <code>api/trade/side.js</code> (affiliate rosters → one minor-league line per player, plus the "AA · A+" level list) and <code>combineLines</code> / <code>outsOf</code> in <code>lib/trade/deal.js</code></td><td><code>loadCombinedPoolForTeams</code>, <code>sumHitting</code> and <code>sumPitching</code> in <code>api/statsLevels.js</code>. These already group by player, take the highest level, and rebuild OPS and ERA from the summed counts. The team page's minors list already uses them.</td><td>near / exact</td><td>45–50</td></tr>
+<tr><td>2</td><td>The <code>INTO</code> map and <code>acquisitionOf</code> in <code>lib/trade/pedigree.js</code> (how a player joined his club)</td><td>The arrival logic in <code>api/transactions/playerFacts.js</code>. It also handles ACQ, OBT and CP, which the trade map misses. The trade version adds the affiliate-as-part-of-the-org rule, a fallback to the draft date, and an "international" label, so those should move into a shared function.</td><td>near</td><td>~30</td></tr>
+<tr><td>3</td><td><code>fetchOrgClubs</code> / <code>fetchOrgLevels</code> in <code>side.js</code> (calls <code>/teams/affiliates</code> by hand, with its own cache)</td><td><code>fetchAffiliates</code> and <code>fetchComplexAffiliates</code> in <code>api/team/fetch.js</code>. They read the static <code>affiliates.json</code> first and fall back to the live call.</td><td>near</td><td>~15</td></tr>
+<tr><td>4</td><td><code>percentileFromCuts</code> / <code>cutPoints</code> in <code>lib/trade/levelPct.js</code></td><td><code>percentileOf</code> in <code>api/hotcold/rule.js</code>, plus the quantile helpers in <code>scripts/lib/prospectPercentile.mjs</code>. The trade version adds flipping ERA so lower is better and a cap at 99.</td><td>near</td><td>10–15</td></tr>
+<tr><td>5</td><td><code>draftOf</code> in <code>lib/trade/pedigree.js</code></td><td><code>draftInfo</code> in <code>api/person/identity.js</code>. <span class="tag">bug</span> <code>draftOf</code> takes the most recent draft. <code>draftInfo</code> takes the draft the player actually signed from, so a player drafted out of high school and again later (Aaron Judge, 2010 then 2013) gets the right pick.</td><td>exact</td><td>~10</td></tr>
+<tr><td>6</td><td><code>optionKind</code> in <code>deal.js</code> (club, player or mutual option)</td><td><code>optionLabel</code> in <code>api/person/contract/history.js</code></td><td>partial</td><td>~8</td></tr>
+<tr><td>7</td><td><code>POS_GROUPS</code> / <code>GROUP_OF</code> in <code>screens/trade/rosterList.js</code></td><td><code>positionGroup()</code> in <code>api/free-agents/freeAgents.js</code>. The trade version adds RHP, LHP, UT and UI, so those should be added to the shared map.</td><td>near</td><td>~8</td></tr>
+<tr><td>8</td><td>The live <code>/transactions?teamId&amp;date</code> call in <code>api/trade/history.js</code></td><td><code>fetchTradeCohort</code> in <code>api/person-fetch.js</code>: the same query, and it also returns nothing rather than failing. The trade card's grouping of each trade into what each side gave and got is better than the existing version, so keep it.</td><td>exact (the fetch only)</td><td>~5</td></tr>
+<tr><td>9</td><td><code>money</code> in <code>deal.js</code></td><td><code>moneyLabel</code> in <code>components/salaries/Money.jsx</code>, the format the rest of the app uses. <span class="tag">style</span> The trade card writes a league-minimum salary as "$0.78M". The rest of the app writes amounts under $1M as thousands ("$780K").</td><td>near</td><td>~4</td></tr>
+<tr><td>10</td><td><code>ordinal</code> in <code>levelPct.js</code></td><td><code>ordinal</code> in <code>lib/format.js</code></td><td>exact</td><td>4</td></tr>
+<tr><td>11</td><td><code>LEVEL_OF_SPORT</code> in <code>levelPct.js</code></td><td><code>SPORT_LABEL</code> in <code>lib/teams/levels.js</code>. The only difference is "ROK" there versus "Rk" here.</td><td>exact</td><td>1–3</td></tr>
+<tr><td>12</td><td><code>ageOn</code> in <code>pedigree.js</code></td><td><code>ageOn</code> in <code>lib/person/rosterStatus.js</code>. It isn't exported yet, so it would need an export first.</td><td>near</td><td>~6</td></tr>
+</table>
+
+<h2>Two places that repeat a rule instead of a function</h2>
+<ul>
+<li><strong>Years of control.</strong> <code>contractYears</code> / <code>controlYears</code> in <code>deal.js</code> repeat the arbitration-at-3-years, free-agency-at-6-years rule that already lives in <code>api/person/contract/view.js</code> (<code>FREE_AGENCY_SERVICE</code>). The trade card's "~" estimate, which projects past the contract records from service time, is new and worth keeping. The constants should come from one place.</li>
+<li><strong>Pitcher role.</strong> This already uses the team page's <code>roleFromCounts</code>.</li>
+</ul>
+
+<h2>Already reusing existing code</h2>
+<p>The 40-man roster (<code>fetchTeamRoster</code>), contracts (<code>fetchTeamContracts</code>), WAR (<code>fetchWarData</code>), prospect ranks (<code>fetchTopProspects</code> / <code>prospectRankById</code>), pitcher role (<code>roleFromCounts</code>), and the level-lines script, which uses <code>qualifiedMetrics</code>.</p>
+
+<h2>Genuinely new (nothing to reuse)</h2>
+<ul>
+<li>The whole-organization roster read that includes each player's current affiliate. <code>fetchTeamRoster</code> can't request that detail, though an option on it would make this reuse instead.</li>
+<li>The how-acquired script (<code>gen-trade-pedigree.mjs</code>), the level-percentile file, and the draft-pick list (<code>gen-cb-picks.mjs</code>).</li>
+<li>Next season's pay, the minor-league option text, salary retention, the deal summary, the wire sentence, the before-and-after depth chart, and the row display helpers.</li>
+</ul>
+
+<h2>Suggested order</h2>
+<ol>
+<li>#5 <code>draftInfo</code>: it fixes a bug and is a one-line swap.</li>
+<li>#10, #11, #8: exact matches, safe.</li>
+<li>#1 and #3: the biggest cut. Each touches the trade card's data loader, so check the result in the browser.</li>
+<li>#9: decide whether the trade card should follow the app's "$780K" money format.</li>
+<li>#2, #4, #6, #7, #12: shared functions that need a small extension first.</li>
+</ol>
+</body></html>

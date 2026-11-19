@@ -327,3 +327,52 @@
     max-width: 1272px;
   }
 }
+
+/* A Competitive Balance pick on the roster card (DraftPicks.jsx): a lettered
+   badge where a face would be, then the pick, over the players. */
+.tradedesk__picks {
+  margin-bottom: var(--space-3);
+}
+
+/* layout-exempt: the head line, label and its info button on one row */
+.tradedesk__pickshead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* layout-exempt: badge then the pick's name, as a player row's face then name */
+.tradedesk__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  grid-area: open;
+}
+
+.tradedesk__pickbadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--shot-xs-w);
+  aspect-ratio: 1;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-tint);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+
+/* The Trade Machine's small ✕ in the bar's corner: take this club out and pick another. */
+.btn.tradedesk__barx {
+  --btn-edge: currentColor;
+  align-self: flex-start;
+  margin-top: var(--space-1);
+  font-size: var(--fs-label);
+}
+
+/* The bar's ✕ is the drawn + turned a quarter, so it sits dead centre too. */
+.tradedesk__pmglyph--x {
+  transform: rotate(45deg);
+}
