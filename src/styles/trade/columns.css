@@ -108,7 +108,8 @@
 
 /* The roster row, Trade Machine style: face | name over position |
    salary over years | WAR | Add. Columns line up down the list. */
-.tradedesk__rosterlist .tradedesk__open {
+.tradedesk__rosterlist .tradedesk__open,
+.tradedesk__sent > .tradedesk__open.tradedesk__open {
   grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) 6.5rem 3rem;
   gap: var(--space-2);
 }

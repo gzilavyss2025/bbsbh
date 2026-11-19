@@ -21,7 +21,6 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
   if (compact) {
     // A player already in the deal: one line of who he is, his WAR as the
     // figure to read, and a small remove. The sheet holds the rest.
-    const contract = p.payUsd != null ? money(p.payUsd) : p.payLabel
     // The figure to read: WAR, or for a minor leaguer his OPS or ERA, labelled as what it is.
     const fig = p.war != null ? { label: warSeason ? `${warSeason} WAR` : 'WAR', value: p.war.toFixed(1) }
       : farm?.ops ? { label: `${farm.level} OPS`, value: farm.ops }
@@ -34,13 +33,18 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           <span className="tradedesk__who">
             <span className="tradedesk__name">{p.name}</span>
             <span className="t-label tradedesk__meta">
-              {[p.pos, p.age != null ? `${p.age} yrs` : null, contract, p.thru ? `thru ${p.controlRough ? '~' : ''}${p.thru}` : null].filter(Boolean).join(' · ')}
+              {[p.pos, p.age != null ? `${p.age} yrs` : null].filter(Boolean).join(' · ')}
               {p.retainedUsd ? ` · keeps ${money(p.retainedUsd)}` : ''}
             </span>
           </span>
-          <span className="tradedesk__sentwar">
-            <span className="tradedesk__k">{fig.label}</span>
-            <span className="tradedesk__sentfig">{fig.value}</span>
+          {/* The same columns as the roster rows: salary over years, then the figure over its label. */}
+          <span className="tradedesk__money">
+            <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+            <span className="tradedesk__years">{yearsText(p)}</span>
+          </span>
+          <span className="tradedesk__figcol">
+            <span className="tradedesk__war">{fig.value}</span>
+            <span className="tradedesk__warlabel">{fig.label}</span>
           </span>
         </button>
         <IconButton mark="md" onClick={() => onToggle(p.id)} label={`Remove ${p.name} from the deal`}>✕</IconButton>

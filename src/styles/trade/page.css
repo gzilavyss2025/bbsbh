@@ -142,6 +142,7 @@
 
 .tradedesk__name {
   font-family: var(--font-read);
+  font-size: var(--fs-field);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
