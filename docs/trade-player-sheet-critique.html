@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player sheet critique</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:860px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.93em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+.hi{color:#a1301c;font-weight:bold}.mid{color:#8a5a00;font-weight:bold}.lo{color:#2f6b3a;font-weight:bold}
+</style></head><body>
+<h1>Design critique: the trade simulator's player sheet</h1>
+<p>Reviewed live on Corbin Carroll at 1280px wide, after the fix that stops the sheet clipping at the top: it now caps at the window height and scrolls inside.</p>
+
+<h2>Overall impression</h2>
+<p>The wide layout and the action photo make the sheet feel like a player card, a real step up from the 440px column. The weakest part is the top. The figures a trade decision turns on (projected WAR, surplus value, pay, years of control) sit in two thin rows of small mono text that read as a footnote, while the photo and the seasons table take all the visual weight.</p>
+
+<h2>Usability</h2>
+<table>
+<tr><th>Finding</th><th>Severity</th><th>Recommendation</th></tr>
+<tr><td>The value figures (2027 proj. WAR 4.7, surplus $78.4M, 4 years) are the reason to open the sheet, but they are the smallest text on it.</td><td class="hi">High</td><td>Make them a row of three stat tiles under the header: big number, small label. The same treatment as the deal cards' effect figures.</td></tr>
+<tr><td>"Add to deal" / "Remove from deal" sits at the very bottom, below the contract and retained salary. On a long sheet you scroll to find it.</td><td class="mid">Medium</td><td>Move it into the header beside ✕, or make the bottom action bar stick to the sheet's foot.</td></tr>
+<tr><td>The Seasons card repeats his name ("Corbin Carroll") under the tabs, one line below the sheet's own title.</td><td class="mid">Medium</td><td>Hide the factsheet name when it is a single player inside a sheet that already names him.</td></tr>
+<tr><td>The draft sentence appears twice: in the Seasons card ("The Diamondbacks drafted him out of Lakeside HS…") and again as "How he got here: Drafted R1 #16 '19".</td><td class="lo">Low</td><td>Keep one. The sentence reads better, so drop the "How he got here" block when the card already says it (keep the "See the trade" button for a traded player).</td></tr>
+<tr><td>The photo column ends a third of the way down, leaving a tall empty column beside the contract.</td><td class="lo">Low</td><td>Make the photo stick at the top while the right column scrolls, or put the contract and retained-salary blocks under the photo.</td></tr>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the action photo, then the stamped Seasons card. The photo is right for a player card. The Seasons card should rank below the value tiles, not above everything else.</li>
+<li><strong>Reading flow:</strong> name → photo → (skips the two small lines) → seasons table → contract. The two lines that summarise the trade case get skipped.</li>
+<li><strong>Emphasis:</strong> the heaviest frame on the sheet (the stamped card with its drop shadow) holds historical stats, and the forward-looking numbers have no frame at all. Reverse that weight.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<tr><th>Element</th><th>Issue</th><th>Recommendation</th></tr>
+<tr><td>Cards</td><td>The Seasons card is a stamped Card with a drop shadow inside a sheet that already has one, so there are two shadows deep. The Contract block is a plain bordered box. Two framing styles sit side by side.</td><td>Draw the seasons table flat inside the sheet (no stamped card), like the contract table.</td></tr>
+<tr><td>Body text</td><td>The factsheet's draft note is large mono body text (~16px). The rest of the sheet's copy is small mono.</td><td>Size the note to the sheet's small text inside this sheet.</td></tr>
+<tr><td>Labels</td><td>"2027" (pay), "2027 proj. WAR" and "2026 WAR" all use the same small label style in one run, so the two years blur together.</td><td>Group the next-season figures and the last-season figures, with the tiles from the first finding.</td></tr>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Colour contrast:</strong> text is navy and caption ink on paper, which the app's contrast guard covers. The table's alternating rows hold up.</li>
+<li><strong>Touch targets:</strong> the MLB / Minors / Postseason tabs and the Keep 0/25/50% chips are full controls. The ✕ is the standard icon button.</li>
+<li><strong>Text readability:</strong> the value line's small mono text is the hardest to read on the sheet, and it is the most important text on it.</li>
+<li><strong>Alt text:</strong> the action photo carries the player's name. The header headshot is marked decorative, which is right because the name sits beside it.</li>
+<li><strong>Scrolling:</strong> fixed. The sheet now scrolls inside itself, and the page behind no longer scrolls under it.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>The action photo gives the sheet a real sense of the player, and it disappears cleanly when there is no photo (Crisantes).</li>
+<li>One seasons table with MLB, Minors and Postseason tabs answers "how has he played" without leaving the page.</li>
+<li>The contract table with years and dollars is clear and scannable.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><strong>Turn the value line into stat tiles</strong> under the header: Proj. WAR · Surplus value · Years of control · 2027 pay. It's the trade case, and it should be the first thing read after the name.</li>
+<li><strong>Flatten the Seasons card</strong> (no stamp or shadow) and drop its duplicate name. The stats then support the tiles instead of competing with them.</li>
+<li><strong>Put the add/remove action where it can always be reached</strong>: in the header, or stuck to the sheet's foot.</li>
+</ol>
+</body></html>

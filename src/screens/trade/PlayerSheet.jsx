@@ -12,8 +12,10 @@ import { Headshot } from '../../components/player/Headshot.jsx'
 import { Numbers } from './Numbers.jsx'
 import { TradeSheet } from './TradeSheet.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
+import { Ledger } from '../../components/player/Ledger.jsx'
 import { fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { FactSheet } from '../../components/transactions/FactSheet.jsx'
+import { draftSentence } from '../../api/transactions/templates.js'
 import { isoToday } from '../../lib/dates.js'
 import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 
@@ -52,21 +54,30 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
 
-          <div className="playersheet__grid">
-          <ActionPhoto id={p.id} name={p.name} />
-          <div className="playersheet__main">
-          <p className="tradedesk__nums playersheet__nums"><Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full /></p>
+          {/* The trade case first: what he projects to, what he is worth, how long, for what. */}
+          <ValueTiles p={p} nextYear={nextYear} />
+          <p className="tradedesk__nums playersheet__nums">
+            <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full />
+            {/* Whether a club can send him down sits with his other roster facts. */}
+            {p.contract && optionStatus(p.contract.service, p.contract.options) && <span>{optionStatus(p.contract.service, p.contract.options)}</span>}
+          </p>
 
-          {p.value && <ValueLine v={p.value} nextYear={nextYear} />}
+          <div className="playersheet__grid">
+          <div className="playersheet__side">
+            <ActionPhoto id={p.id} name={p.name} />
+            {/* How he came up, under his picture: the sentence the seasons card would otherwise lead with. */}
+            {facts.data && draftSentence(facts.data) && <p className="playersheet__draft">{draftSentence(facts.data)}</p>}
+          </div>
+          <div className="playersheet__main">
 
           {facts.data && (
             <div className="playersheet__section">
               <h3 className="t-label">Seasons</h3>
-              <FactSheet people={[{ facts: facts.data, note: null }]} />
+              <FactSheet people={[{ facts: facts.data, note: null }]} warByYear={p.warByYear} />
             </div>
           )}
 
-          {pedigree && (
+          {pedigree && (p.how?.kind === 'trade' || !facts.data) && (
             <div className="playersheet__section">
               <h3 className="t-label">How he got here</h3>
               <p className="playersheet__pedigree">{pedigree}</p>
@@ -77,7 +88,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           {(p.contract || p.onForty) && (
             <div className="playersheet__section">
               <h3 className="t-label">Contract</h3>
-              <ContractDetail c={p.contract} />
+              <ContractDetail c={p.contract} value={p.value} age={p.age} />
             </div>
           )}
 
@@ -106,7 +117,10 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
 // reaches free agency, then one row per year. The season already played, the
 // raw Cot's terms and service days are left out. The foot says whether he can
 // be sent down (optionStatus).
-function ContractDetail({ c }) {
+// Drawn as the seasons table is (the same Ledger): one row a year with what
+// kind of year it is, his salary, and what he projects to (lib/trade/value.js),
+// then the total. Unsigned years are estimates (value.js); the card says so once, in the summary.
+function ContractDetail({ c, value = null, age = null }) {
   if (!c) return <p className="tradedesk__none">No contract on file yet.</p>
   const from = (c.cells[0]?.year ?? 0) + 1
   const ahead = contractYears(c, from)
@@ -119,39 +133,57 @@ function ContractDetail({ c }) {
     years.length ? `${owed ? `${money(owed)}${unpriced ? '+' : ''} over` : ''} ${years.length} yr`.trim() : null,
     free ? `free agent in ${free.year}` : last ? `${c.regime === 'signed' ? 'signed' : 'control'} through ${last}` : 'free agent now',
   ].filter(Boolean).join(' · ')
-  const status = optionStatus(c.service, c.options)
+  const projected = new Map((value?.years ?? []).map((y) => [y.year, y]))
+  const kindText = (x) => (x.kind === 'arbitration' ? `Arb ${x.code?.slice(1) ?? ''}`.trim()
+    : x.kind === 'preArb' ? 'Pre-arb' : x.kind === 'option' ? (optionKind(c.terms) ?? 'Option')
+      : x.kind === 'salary' || x.kind === 'guaranteed' ? 'Signed' : CELL_LABELS[x.kind] ?? DASH)
+  const pay = (x) => (x.value != null ? money(x.value) : projected.get(x.year)?.pay != null ? money(projected.get(x.year).pay) : DASH)
+  const war = (x) => (projected.get(x.year) ? projected.get(x.year).war.toFixed(1) : DASH)
+  // His age that season: the ledger's age is as of its own season (cells[0]).
+  const ledgerSeason = c.cells[0]?.year ?? null
+  const ageIn = (year) => (age != null && ledgerSeason != null ? age + (year - ledgerSeason) : DASH)
+  const warTotal = [...projected.values()].reduce((t, y) => t + y.war, 0)
+  // Signed salaries plus the estimated ones, so the total covers every year shown.
+  const payTotal = years.reduce((t, x) => t + (x.value ?? projected.get(x.year)?.pay ?? 0), 0)
   return (
-    <div className="tradedesk__detail">
-      <p className="tradedesk__summary">{summary}</p>
+    <div className="playersheet__contract">
+      <p className="playersheet__contractsum">{summary}</p>
       {years.length > 0 && (
-        <table className="tradedesk__years">
-          <tbody>
-            {years.map((x) => (
-              <tr key={x.year}>
-                <th scope="row">{x.year}</th>
-                <td>{x.rough ? '~' : ''}{x.value != null ? money(x.value) : x.kind === 'arbitration' ? `Arb ${x.code?.slice(1) ?? ''}`.trim() : x.kind === 'preArb' ? 'Pre-arb' : x.kind === 'option' ? (optionKind(c.terms) ?? 'Option') : CELL_LABELS[x.kind] ?? DASH}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Ledger
+          label="Contract by year"
+          leftCols={3}
+          head={['Year', 'Age', 'Status', 'Salary', 'Proj. WAR']}
+          rows={years.map((x) => ({ key: x.year, cells: [x.year, ageIn(x.year), kindText(x), pay(x), war(x)] }))}
+          total={[payTotal ? money(payTotal) : DASH, projected.size ? warTotal.toFixed(1) : DASH]}
+          totalLabel="Total"
+        />
       )}
-      {ahead.some((x) => x.rough) && <p className="tradedesk__facts">~ estimated from service time</p>}
-      {status && <p className="tradedesk__facts">{status}</p>}
     </div>
   )
 }
 
-// What he is worth to a club that gets him (lib/trade/value.js): next
-// season's projected WAR and his surplus value over his years of control,
-// or a prospect's value by rank.
-function ValueLine({ v, nextYear }) {
-  const surplus = `${v.surplusUsd < 0 ? '−' : ''}${money(v.surplusUsd)}`
+// The sheet's lead: four tiles, big figure over small label, for the numbers a
+// trade turns on (lib/trade/value.js for the first two). A prospect's value is
+// his rank's; pay marked ~ is an estimate.
+function ValueTiles({ p, nextYear }) {
+  const v = p.value
+  if (!v) return null
+  const pay = p.payUsd ?? p.payEstUsd
+  const tiles = [
+    v.projWar != null ? [`${nextYear} proj. WAR`, v.projWar.toFixed(1)] : null,
+    [v.prospect ? 'Prospect value' : 'Surplus value', `${v.surplusUsd < 0 ? '−' : ''}${money(v.surplusUsd)}`],
+    p.thru ? ['Control', `thru ${p.thru}${p.control ? ` · ${p.control} yr` : ''}`] : null,
+    pay != null ? [`${nextYear} pay`, money(pay)] : p.payLabel ? [`${nextYear} pay`, p.payLabel] : null,
+  ].filter(Boolean)
   return (
-    <p className="playersheet__value">
-      {v.projWar != null && <span><span className="tradedesk__k">{nextYear} proj. WAR</span> {v.projWar.toFixed(1)}</span>}
-      <span><span className="tradedesk__k">{v.prospect ? 'Prospect value' : 'Surplus value'}</span> {surplus}</span>
-      {v.years.length > 0 && <span><span className="tradedesk__k">Over</span> {v.years.length} {v.years.length === 1 ? 'year' : 'years'}</span>}
-    </p>
+    <dl className="playersheet__tiles">
+      {tiles.map(([label, value]) => (
+        <div key={label} className="playersheet__tile">
+          <dt className="tradedesk__k">{label}</dt>
+          <dd className="playersheet__tilefig">{value}</dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 

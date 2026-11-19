@@ -69,7 +69,11 @@ function linkNames(text, ids) {
   return parts.map((part, i) => (ids[part] ? <PlayerLink key={i} id={ids[part]}>{part}</PlayerLink> : part))
 }
 
-export function FactSheet({ people }) {
+// `warByYear` ({ season: WAR }, optional) adds a WAR column to the MLB view:
+// the trade simulator's player sheet passes it; the wire does not. A season
+// split between two clubs carries its WAR on its first row only, since the
+// figure is the season's, not one club's.
+export function FactSheet({ people, warByYear = null }) {
   const [at, setAt] = useState(0)
   const [scope, setScope] = useState(people[0].facts.rows.length ? 'mlb' : 'milb')
   const [read, setRead] = useState({})
@@ -92,6 +96,8 @@ export function FactSheet({ people }) {
   }, [scope, key, read, facts.id, facts.pitcher])
   const view = scope === 'mlb' ? { rows: facts.rows, total: facts.careerLine } : read[key]
   const meta = SCOPES.find((s) => s.value === scope)
+  const withWar = scope === 'mlb' && warByYear && Object.keys(warByYear).length > 0
+  const warTotal = withWar ? Object.values(warByYear).reduce((t, w) => t + (Number.isFinite(w) ? w : 0), 0).toFixed(1) : null
   // A note that already says where he was drafted keeps its own wording.
   const draft = note && /-round pick|draft pick|drafted/.test(note) ? null : draftSentence(facts)
   const who = <PlayerLink id={facts.id} className="factsheet__name">{facts.name}</PlayerLink>
@@ -126,12 +132,17 @@ export function FactSheet({ people }) {
         <Ledger
           label={`${facts.name}'s ${meta.label} seasons`}
           leftCols={2}
-          head={['Year', 'Team', ...cols.map(([head]) => head)]}
-          rows={view.rows.map((r) => ({
+          head={['Year', 'Team', ...cols.map(([head]) => head), ...(withWar ? ['WAR'] : [])]}
+          rows={view.rows.map((r, i) => ({
             key: `${r.season}-${r.teamId}`,
-            cells: [r.season, <Club key="club" teamId={r.teamId} level={r.level} />, ...cols.map(([, get]) => get(r.line))],
+            cells: [
+              r.season,
+              <Club key="club" teamId={r.teamId} level={r.level} />,
+              ...cols.map(([, get]) => get(r.line)),
+              ...(withWar ? [view.rows.findIndex((x) => x.season === r.season) === i && Number.isFinite(warByYear[r.season]) ? warByYear[r.season].toFixed(1) : ''] : []),
+            ],
           }))}
-          total={view.total ? cols.map(([, get]) => get(view.total)) : null}
+          total={view.total ? [...cols.map(([, get]) => get(view.total)), ...(withWar ? [warTotal] : [])] : null}
           totalLabel={meta.total}
         />
       ) : (

@@ -22,7 +22,7 @@ export function Numbers({ p, nextYear, farm, warSeason = null, full = false }) {
   return (
     <>
       <span><span className="tradedesk__k">{nextYear}</span> {p.payUsd != null ? money(p.payUsd) : p.payLabel ?? 'No contract on file'}</span>
-      {p.thru && <span><span className="tradedesk__k">{p.signed ? 'Signed thru' : 'Thru'}</span> {p.controlRough ? '~' : ''}{p.thru}</span>}
+      {p.thru && <span><span className="tradedesk__k">{p.signed ? 'Signed thru' : 'Thru'}</span> {p.thru}</span>}
       <span><span className="tradedesk__k">{warSeason ? `${warSeason} WAR` : 'WAR'}</span> {p.war != null ? p.war.toFixed(1) : p.onForty ? 'No MLB time' : DASH}</span>
       {full && p.line?.ops && <span><span className="tradedesk__k">OPS</span> {p.line.ops}</span>}
       {full && p.line?.era && <span><span className="tradedesk__k">ERA</span> {p.line.era}</span>}

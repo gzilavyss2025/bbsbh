@@ -240,21 +240,16 @@
   color: var(--text-caption);
 }
 
-/* layout-exempt: the sheet's value figures on one wrapping line */
-.playersheet__value {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  font-variant-numeric: tabular-nums;
-}
 
 /* The player sheet takes most of the page: his action photo in a column at
    the wide step, his numbers, seasons and contract beside it. */
 .sheet.tradesheet.playersheet {
   max-width: min(72rem, calc(100vw - var(--space-4) * 2));
+  /* Taller than the window, it scrolls inside itself: the scrim docks a sheet
+     to the bottom, so without a cap its top runs off the screen. */
+  max-height: calc(100dvh - var(--space-8));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .playersheet__photo {
@@ -280,7 +275,7 @@
 
 @media (min-width: 740px) {
   /* layout-exempt: a fixed photo column beside the sheet's body */
-  .playersheet__grid:has(> .playersheet__photo:not(.playersheet__photo--loading)) {
+  .playersheet__grid:has(> .playersheet__side > .playersheet__photo:not(.playersheet__photo--loading)) {
     display: grid;
     grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
     gap: var(--space-5);
@@ -290,4 +285,88 @@
   .playersheet__photo img {
     max-height: none;
   }
+}
+
+/* The sheet's lead tiles: the trade case, big figure over small label. */
+/* layout-exempt: up to four tiles across, two on a phone */
+.playersheet__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.playersheet__tile {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.playersheet__tilefig {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+/* The seasons table sits flat in the sheet: no stamp, no second shadow, and no
+   second copy of the name the sheet's title already gives. */
+.playersheet .factsheet.card {
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+
+.playersheet .factsheet .card__body {
+  padding: 0;
+}
+
+.playersheet .factsheet__name {
+  display: none;
+}
+
+/* The draft sentence moves under the photo (.playersheet__draft). */
+.playersheet .factsheet__note {
+  display: none;
+}
+
+.playersheet__draft {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+#root .playersheet__draft { text-transform: none } /* caps-exempt: a sentence, read as prose */
+
+/* Add / Remove stays in reach: stuck to the foot of the scrolling sheet. */
+.playersheet .playersheet__actions {
+  position: sticky;
+  bottom: calc(var(--space-5) * -1);
+  margin-inline: calc(var(--space-5) * -1);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+@media (min-width: 740px) {
+  /* The photo and its sentence stay put while the column beside it scrolls. */
+  .playersheet__side {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* The contract, drawn like the seasons table above it: a summary line, the
+   Ledger, then its notes in the same small type. */
+.playersheet__contractsum {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+.playersheet__contract .table + .playersheet__contractsum {
+  margin-top: var(--space-2);
+  color: var(--text-caption);
 }
