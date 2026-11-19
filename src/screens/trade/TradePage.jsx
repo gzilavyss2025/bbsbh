@@ -201,7 +201,7 @@ export function TradePage() {
     else switchB(id)
   }
   const confirm = pending && (
-    <p className="tradecard__confirm" role="alert">
+    <p className="tradedesk__confirm" role="alert">
       Switching to the {teamClubName(pending.id)} drops {pending.drops.join(', ')}.{' '}
       <Button size="control" skin="ink" onClick={() => (pending.side === 'a' ? switchA(pending.id) : switchB(pending.id))}>Switch</Button>{' '}
       <Button size="control" skin="ghost" onClick={() => setPending(null)}>Keep the deal</Button>
@@ -233,14 +233,14 @@ export function TradePage() {
   const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA) }
 
   return (
-    <div className="screen tradecard">
+    <div className="screen tradedesk">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Trade Card</h1>
       </header>
 
       <Stack gap="section">
-        <div className="tradecard__sides">
+        <div className="tradedesk__sides">
           <Side
             teamId={a}
             state={sideA}
@@ -289,7 +289,7 @@ export function TradePage() {
               }
             />
           ) : (
-            <Card frame="stamped" label="Trade partner" className="tradecard__side">
+            <Card frame="stamped" label="Trade partner" className="tradedesk__side">
               <TeamFilterStrip
                 chips
                 showMlbPin={false}
@@ -305,8 +305,8 @@ export function TradePage() {
 
         {deal && (
           <div ref={movesRef}>
-          <Card frame="stamped" label="What moves" className="tradecard__moves">
-            <table className="tradecard__totals">
+          <Card frame="stamped" label="What moves" className="tradedesk__moves">
+            <table className="tradedesk__totals">
               <thead>
                 <tr>
                   <th scope="col"><TeamLogo teamId={a} size={28} /><span>{teamClubName(a)}</span></th>
@@ -323,13 +323,13 @@ export function TradePage() {
               </tbody>
             </table>
             {deal.notes.filter((n) => !/no set salary/.test(n)).length > 0 && (
-              <ul className="tradecard__notes" aria-live="polite">
+              <ul className="tradedesk__notes" aria-live="polite">
                 {deal.notes.filter((n) => !/no set salary/.test(n)).map((n) => <li key={n}>{n}</li>)}
               </ul>
             )}
-            {deal.unpriced.a > 0 && <p className="tradecard__tbdnote"><b>TBD</b> a salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.</p>}
+            {deal.unpriced.a > 0 && <p className="tradedesk__tbdnote"><b>TBD</b> a salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.</p>}
             {retainOpen ? (
-              <div className="tradecard__retainbar">
+              <div className="tradedesk__retainbar">
               <Chips label="Retained salary" layout="wrap" value={retainMode} onChange={setRetainMode}
                 options={[{ value: 'pct', label: 'Retain % per player' }, { value: 'usd', label: 'Retain $ per player' }, { value: 'side', label: 'Retain % per side' }]} />
               {retainMode === 'side' && [['a', a], ['b', b]].map(([key, id]) => (
@@ -338,9 +338,9 @@ export function TradePage() {
               ))}
             </div>
             ) : (
-              <Button size="control" skin="ghost" className="tradecard__retainlink" onClick={() => setRetainOpen(true)}>Retain salary…</Button>
+              <Button size="control" skin="ghost" className="tradedesk__retainlink" onClick={() => setRetainOpen(true)}>Retain salary…</Button>
             )}
-            <div className="tradecard__actions">
+            <div className="tradedesk__actions">
               <Button skin="ink" onClick={share}>{shared || 'Share this deal'}</Button>
               <Button onClick={swap}>Swap sides</Button>
             </div>
@@ -357,15 +357,15 @@ export function TradePage() {
               onClose={() => setShowDepth(false)}
             />
           )
-          : <Button className="tradecard__showdepth" onClick={() => setShowDepth(true)}>Show organization depth</Button>
+          : <Button className="tradedesk__showdepth" onClick={() => setShowDepth(true)}>Show organization depth</Button>
         )}
       </Stack>
       {deal && !movesInView && (
         // The deal's three numbers, pinned so every add shows what it changed.
-        <div className="tradecard__strip" aria-live="polite">
+        <div className="tradedesk__strip" aria-live="polite">
           <StripSide name={teamAbbr({ id: a })} pay={payText(deal.payroll.a, deal.unpriced.a)} war={deal.war.a} forty={deal.fortyAfter.a} />
           <StripSide name={teamAbbr({ id: b })} pay={payText(deal.payroll.b, deal.unpriced.b)} war={deal.war.b} forty={deal.fortyAfter.b} />
-          <Button size="control" skin="outline" className="tradecard__stripshare" onClick={share}>{shared || 'Share'}</Button>
+          <Button size="control" skin="outline" className="tradedesk__stripshare" onClick={share}>{shared || 'Share'}</Button>
         </div>
       )}
       <ReportFooter />
@@ -396,16 +396,16 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
   const [arrived, setArrived] = useState(null)
   if (data && arrived === null) setArrived(new Set(sends.map((p) => p.id)))
   return (
-    <Card frame="stamped" label={`${club} send`} className="tradecard__side">
+    <Card frame="stamped" label={`${club} send`} className="tradedesk__side">
       {/* The club line: its mark, its 40-man count now and after the deal, and the switch. */}
-      <div className="tradecard__club">
+      <div className="tradedesk__club">
         <TeamLogo teamId={teamId} size={40} />
-        <p className="tradecard__count">
-          <span className="tradecard__k">40-man</span>
-          <span className="tradecard__countfig">
+        <p className="tradedesk__count">
+          <span className="tradedesk__k">40-man</span>
+          <span className="tradedesk__countfig">
             {data ? `${data.fortyCount}/40` : DASH}
             {data && after != null && after !== data.fortyCount && (
-              <span className={after > 40 ? 'tradecard__after tradecard__after--over' : 'tradecard__after'}> → {after}/40</span>
+              <span className={after > 40 ? 'tradedesk__after tradedesk__after--over' : 'tradedesk__after'}> → {after}/40</span>
             )}
           </span>
         </p>
@@ -419,14 +419,14 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
 
       {data && (
         <>
-          <div className="tradecard__sends">
+          <div className="tradedesk__sends">
             {/* The side's sends at a glance: how many, what they cost next season, and any cash. */}
-            <p className="tradecard__sendshead">
+            <p className="tradedesk__sendshead">
               <span className="t-label t-label--bold">Sends</span>
-              <span className="tradecard__sendssum">{sendsSummary(sends, cash, data.nextYear)}</span>
+              <span className="tradedesk__sendssum">{sendsSummary(sends, cash, data.nextYear)}</span>
             </p>
-            {sends.length === 0 && !cash ? <p className="tradecard__none">No one yet. Add a player from the {club} roster.</p> : (
-              <ul className="tradecard__list">
+            {sends.length === 0 && !cash ? <p className="tradedesk__none">No one yet. Add a player from the {club} roster.</p> : (
+              <ul className="tradedesk__list">
                 {sends.map((p) => (
                   <PlayerRow compact key={p.id} p={p} teamId={teamId} picked onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={farm.data?.get(p.id)} enter={arrived != null && !arrived.has(p.id)}>
                     {retainUI && (p.payUsd != null || p.retainedUsd) ? retainUI(p) : null}
@@ -436,28 +436,28 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
             )}
           </div>
 
-          <div className="tradecard__clubactions">
-          <Button size="control" skin="ink" className="tradecard__browse" onClick={() => { setBrowsing(true) }}>+ Add a player</Button>
+          <div className="tradedesk__clubactions">
+          <Button size="control" skin="ink" className="tradedesk__browse" onClick={() => { setBrowsing(true) }}>+ Add a player</Button>
           {cash || addingCash ? (
-            <label className="tradecard__cash">
+            <label className="tradedesk__cash">
               <span className="t-label">Cash in {data.nextYear} ($M)</span>
               <input type="number" min="0" step="0.5" inputMode="decimal" value={cash || ''} placeholder="0" autoFocus={addingCash && !cash}
                 onChange={(e) => onCash(Math.max(0, Number(e.target.value) || 0))}
                 onBlur={() => { if (!cash) setAddingCash(false) }} />
             </label>
           ) : (
-            <Button size="control" skin="ghost" className="tradecard__cash" onClick={() => setAddingCash(true)}>+ Cash</Button>
+            <Button size="control" skin="ghost" className="tradedesk__cash" onClick={() => setAddingCash(true)}>+ Cash</Button>
           )}
           </div>
           {browsing && (
             <RosterSheet title={`${club} roster`} onClose={() => setBrowsing(false)}>
-            <p className="tradecard__legend">~ a year estimated from service time · WAR is from last season</p>
-            <div className="tradecard__controls">
+            <p className="tradedesk__legend">~ a year estimated from service time · WAR is from last season</p>
+            <div className="tradedesk__controls">
               <Chips label={`${club} list`} options={SHOW} value={show} onChange={pickShow} layout="wrap" />
               <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={setGroup} layout="wrap" />
-              <input type="search" className="tradecard__search" value={query} onChange={(e) => setQuery(e.target.value)}
+              <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
                 placeholder={`Find a ${club} player`} aria-label={`Find a ${club} player`} />
-              <label className="tradecard__sort">
+              <label className="tradedesk__sort">
                 <span className="t-label">Sort</span>
                 <select value={sort} onChange={(e) => { setSort(e.target.value); if (e.target.value === 'level') setWantFarm(true) }}>
                   {SORT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -468,7 +468,7 @@ function Side({ teamId, state, sends, picked, onToggle, cash, onCash, after, cha
                   options={[{ value: 'min', label: '50 PA / 20 IP to count' }, { value: 'any', label: 'Any sample' }]} />
               )}
             </div>
-            <ul className="tradecard__list">
+            <ul className="tradedesk__list">
               {rosterList(data, { show, group, sort, query, farm: farm.data, minimum, cuts: cuts.data }).map((p) => <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason} farm={farm.data?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm.data, cuts.data) : null} />)}
             </ul>
             </RosterSheet>
@@ -490,7 +490,7 @@ function RetainControl({ mode, p, value, onChange }) {
     )
   }
   return (
-    <label className="tradecard__cash">
+    <label className="tradedesk__cash">
       <span className="t-label">Keep a year ($M)</span>
       <input type="number" min="0" step="0.5" inputMode="decimal" value={value?.usd || ''} placeholder="0"
         onChange={(e) => onChange({ usd: Math.max(0, Number(e.target.value) || 0) })} />
@@ -512,19 +512,19 @@ function sendsSummary(sends, cash, nextYear) {
 
 function StripSide({ name, pay, war, forty }) {
   return (
-    <p className="tradecard__stripside">
+    <p className="tradedesk__stripside">
       <span className="t-label t-label--bold">{name}</span>
-      <span><span className="tradecard__k">Pay</span> {pay}</span>
-      <span><span className="tradecard__k">WAR</span> {signedNum(war)}</span>
-      <span className={forty > 40 ? 'tradecard__over' : ''}><span className="tradecard__k">40-man</span> {forty}</span>
+      <span><span className="tradedesk__k">Pay</span> {pay}</span>
+      <span><span className="tradedesk__k">WAR</span> {signedNum(war)}</span>
+      <span className={forty > 40 ? 'tradedesk__over' : ''}><span className="tradedesk__k">40-man</span> {forty}</span>
     </p>
   )
 }
 
 function Row({ label, a, b, toneA = '', toneB = '', noteA = null, noteB = null }) {
   const cell = (v, t, note) => (
-    <td className={t ? `tradecard__fig tradecard__fig--${t}` : 'tradecard__fig'}>
-      {v}{note && <span className="tradecard__fignote">{note}</span>}
+    <td className={t ? `tradedesk__fig tradedesk__fig--${t}` : 'tradedesk__fig'}>
+      {v}{note && <span className="tradedesk__fignote">{note}</span>}
     </td>
   )
   return <tr>{cell(a, toneA, noteA)}<th scope="row">{label}</th>{cell(b, toneB, noteB)}</tr>

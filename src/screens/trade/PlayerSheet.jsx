@@ -31,10 +31,10 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
         <div className="sheet tradesheet" role="dialog" aria-modal="true" aria-label={p.name}>
           <div className="tradesheet__head">
             <div className="playersheet__id">
-              <Headshot personId={p.id} name={p.name} teamId={teamId} isMlb={p.onForty} className="tradecard__face" />
+              <Headshot personId={p.id} name={p.name} teamId={teamId} isMlb={p.onForty} className="tradedesk__face" />
               <div>
                 <h2 className="sheet__title"><PlayerLink id={p.id} name={p.name}>{p.name}</PlayerLink></h2>
-                <p className="t-label tradecard__meta">
+                <p className="t-label tradedesk__meta">
                   {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
                   {p.topRank ? ` · No. ${p.topRank} MLB prospect` : p.orgRank ? ` · No. ${p.orgRank} club prospect` : ''}
                 </p>
@@ -43,7 +43,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
 
-          <p className="tradecard__nums playersheet__nums"><Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full /></p>
+          <p className="tradedesk__nums playersheet__nums"><Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full /></p>
 
           {pedigree && (
             <div className="playersheet__section">
@@ -83,7 +83,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
 // raw Cot's terms and service days are left out. The foot says whether he can
 // be sent down (optionStatus).
 function ContractDetail({ c }) {
-  if (!c) return <p className="tradecard__none">No contract on file yet.</p>
+  if (!c) return <p className="tradedesk__none">No contract on file yet.</p>
   const from = (c.cells[0]?.year ?? 0) + 1
   const ahead = contractYears(c, from)
   const free = ahead.find((x) => x.kind === 'free')
@@ -97,10 +97,10 @@ function ContractDetail({ c }) {
   ].filter(Boolean).join(' · ')
   const status = optionStatus(c.service, c.options)
   return (
-    <div className="tradecard__detail">
-      <p className="tradecard__summary">{summary}</p>
+    <div className="tradedesk__detail">
+      <p className="tradedesk__summary">{summary}</p>
       {years.length > 0 && (
-        <table className="tradecard__years">
+        <table className="tradedesk__years">
           <tbody>
             {years.map((x) => (
               <tr key={x.year}>
@@ -111,8 +111,8 @@ function ContractDetail({ c }) {
           </tbody>
         </table>
       )}
-      {ahead.some((x) => x.rough) && <p className="tradecard__facts">~ estimated from service time</p>}
-      {status && <p className="tradecard__facts">{status}</p>}
+      {ahead.some((x) => x.rough) && <p className="tradedesk__facts">~ estimated from service time</p>}
+      {status && <p className="tradedesk__facts">{status}</p>}
     </div>
   )
 }

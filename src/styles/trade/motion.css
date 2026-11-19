@@ -4,14 +4,14 @@
 
    - A player the reader adds stamps into his club's sends list, reusing the
      stamped card's keyframe (motion/stamp-in.css). PlayerRow sets
-     .tradecard__row--enter only for a player added after the page loaded; a
+     .tradedesk__row--enter only for a player added after the page loaded; a
      shared link or a reload does not replay it.
    - A depth-grid count that changes ticks: the cell is keyed by its count, so
      a change remounts it, and the new number drops in from above.
 
    The resting look is trade/page.css and trade/depth.css. */
 
-@keyframes tradecard-tick {
+@keyframes tradedesk-tick {
   from {
     opacity: 0;
     transform: translateY(calc(var(--space-1) * -1));
@@ -19,14 +19,14 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .tradecard__row--enter {
+  .tradedesk__row--enter {
     animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp-in) backwards;
   }
 
-  .tradecard__cell--up > span,
-  .tradecard__cell--down > span {
+  .tradedesk__cell--up > span,
+  .tradedesk__cell--down > span {
     display: inline-block;
-    animation: tradecard-tick var(--dur-med) var(--ease-out) backwards;
+    animation: tradedesk-tick var(--dur-med) var(--ease-out) backwards;
   }
 }
 

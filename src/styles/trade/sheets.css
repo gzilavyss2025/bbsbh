@@ -88,13 +88,13 @@
 
 /* The face and name borrow the card row's classes, and with them its named
    grid areas; in this three-column row they take the next cell instead. */
-.tradesheet__player > .shot.tradecard__face,
-.tradesheet__player > .tradecard__who {
+.tradesheet__player > .shot.tradedesk__face,
+.tradesheet__player > .tradedesk__who {
   grid-area: auto;
 }
 
 /* The player the reader tapped, marked the house way: highlighter. */
-.tradesheet__player--this .tradecard__name {
+.tradesheet__player--this .tradedesk__name {
   align-self: flex-start;
   background: var(--surface-event-wash);
 }

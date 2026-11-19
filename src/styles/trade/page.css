@@ -3,21 +3,21 @@
    the "What moves" card across the bottom. */
 
 /* layout-exempt: the two club cards, one column on a phone and two from 900px */
-.tradecard__sides {
+.tradedesk__sides {
   display: grid;
   gap: var(--space-8);
 }
 
 @media (min-width: 900px) {
   /* layout-exempt: the two club cards side by side */
-  .tradecard__sides {
+  .tradedesk__sides {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: stretch;
   }
 }
 
 /* layout-exempt: logo, roster count and the change button wrap on a phone */
-.tradecard__club {
+.tradedesk__club {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -25,35 +25,35 @@
 }
 
 /* layout-exempt: the 40-man label over its figure */
-.tradecard__count {
+.tradedesk__count {
   flex: 1;
   display: flex;
   flex-direction: column;
   margin: 0;
 }
 
-.tradecard__countfig {
+.tradedesk__countfig {
   font-family: var(--font-mono);
   font-size: var(--fs-num-md);
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
 }
 
-.tradecard__after {
+.tradedesk__after {
   color: var(--text-muted);
 }
 
-.tradecard__after--over {
+.tradedesk__after--over {
   color: var(--accent-negative);
 }
 
-.tradecard__sends {
+.tradedesk__sends {
   margin-top: var(--space-3);
   border-top: var(--bw-rule) solid var(--border-stamped);
 }
 
 /* layout-exempt: the Sends label and the side's sum on one line */
-.tradecard__sendshead {
+.tradedesk__sendshead {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -62,7 +62,7 @@
   margin: var(--space-3) 0 var(--space-1);
 }
 
-.tradecard__sendssum {
+.tradedesk__sendssum {
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-variant-numeric: tabular-nums;
@@ -70,7 +70,7 @@
 }
 
 /* layout-exempt: a player in the deal: the open button, then the remove */
-.tradecard__sent {
+.tradedesk__sent {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-2);
@@ -79,38 +79,38 @@
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
-.tradecard__sent > .tradecard__open {
+.tradedesk__sent > .tradedesk__open {
   grid-area: auto;
   grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
 }
 
 /* layout-exempt: the WAR label over its figure, at the row's right */
-.tradecard__sentwar {
+.tradedesk__sentwar {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
-.tradecard__sentfig {
+.tradedesk__sentfig {
   font-family: var(--font-mono);
   font-size: var(--fs-num-lg);
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
 }
 
-.tradecard__none {
+.tradedesk__none {
   margin: var(--space-3) 0;
   color: var(--text-muted);
 }
 
-.tradecard__list {
+.tradedesk__list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 /* layout-exempt: one player row is name, three figures, and its button */
-.tradecard__row {
+.tradedesk__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: 'open btn';
@@ -121,7 +121,7 @@
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
-.shot.tradecard__face {
+.shot.tradedesk__face {
   grid-area: shot;
   display: block;
   width: var(--shot-xs-w);
@@ -132,7 +132,7 @@
   overflow: hidden;
 }
 
-.tradecard__pedigree {
+.tradedesk__pedigree {
   grid-area: ped;
   margin: 0;
   font-family: var(--font-display);
@@ -144,26 +144,26 @@
 /* The way he came, in one ink each: drafted (ink), traded (clay), signed abroad (field). */
 
 
-.tradecard__row > .btn {
+.tradedesk__row > .btn {
   grid-area: btn;
 }
 
 /* layout-exempt: name over its attribute line in one grid cell */
-.tradecard__who {
+.tradedesk__who {
   grid-area: who;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.tradecard__name {
+.tradedesk__name {
   font-family: var(--font-read);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 
 /* The "By level" percentile: highlighter marker, the house rank emphasis. */
-.tradecard__rank {
+.tradedesk__rank {
   align-self: flex-start;
   padding: 0 var(--space-1);
   background: var(--marker);
@@ -173,12 +173,12 @@
   letter-spacing: var(--ls-label);
 }
 
-.tradecard__meta {
+.tradedesk__meta {
   color: var(--text-caption);
 }
 
 /* layout-exempt: the figures run on and wrap under the name on a narrow card */
-.tradecard__nums {
+.tradedesk__nums {
   grid-area: nums;
   display: flex;
   flex-wrap: wrap;
@@ -197,27 +197,27 @@
   cursor: pointer;
 }
 
-.tradecard__farm {
+.tradedesk__farm {
   cursor: default;
 }
 
-.tradecard__nums:focus-visible {
+.tradedesk__nums:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }
 
-.tradecard__k {
+.tradedesk__k {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 
-.tradecard__caret {
+.tradedesk__caret {
   color: var(--text-caption);
 }
 
-.tradecard__detail {
+.tradedesk__detail {
   grid-column: 2 / -1;
   margin: var(--space-1) 0 var(--space-2);
   padding: var(--space-2) var(--space-3);
@@ -225,19 +225,19 @@
   border: var(--bw-hair) solid var(--border-rule);
 }
 
-.tradecard__summary {
+.tradedesk__summary {
   margin: 0;
   font-size: var(--fs-small);
   color: var(--text-body);
 }
 
-.tradecard__facts {
+.tradedesk__facts {
   margin: 0;
   font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
-.tradecard__years {
+.tradedesk__years {
   width: 100%;
   margin-top: var(--space-2);
   border-collapse: collapse;
@@ -246,16 +246,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tradecard__years tr:nth-child(odd) {
+.tradedesk__years tr:nth-child(odd) {
   background: var(--surface-row-hover);
 }
 
-.tradecard__years th,
-.tradecard__years td {
+.tradedesk__years th,
+.tradedesk__years td {
   padding: var(--space-1) var(--space-2);
 }
 
-.tradecard__years th {
+.tradedesk__years th {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -263,18 +263,18 @@
   text-align: left;
 }
 
-.tradecard__years td {
+.tradedesk__years td {
   text-align: right;
 }
 
-.tradecard__cash {
+.tradedesk__cash {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-3);
 }
 
-.tradecard__cash input {
+.tradedesk__cash input {
   width: 6em;
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
@@ -285,11 +285,11 @@
   border: var(--bw-rule) solid var(--border-rule);
 }
 
-.tradecard__roster {
+.tradedesk__roster {
   margin-top: var(--space-4);
 }
 
-.tradecard__roster summary {
+.tradedesk__roster summary {
   min-height: var(--tap-min);
   display: flex;
   align-items: center;
@@ -297,20 +297,20 @@
 }
 
 /* layout-exempt: the roster's filter rows stack */
-.tradecard__controls {
+.tradedesk__controls {
   display: grid;
   gap: var(--space-2);
   margin: var(--space-2) 0 var(--space-3);
 }
 
 /* layout-exempt: the sort label beside its select */
-.tradecard__sort {
+.tradedesk__sort {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.tradecard__search {
+.tradedesk__search {
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
@@ -320,7 +320,7 @@
   border: var(--bw-rule) solid var(--border-rule);
 }
 
-.tradecard__sort select {
+.tradedesk__sort select {
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
@@ -330,15 +330,15 @@
   border: var(--bw-rule) solid var(--border-rule);
 }
 
-.tradecard__filter {
+.tradedesk__filter {
   margin: var(--space-2) 0 var(--space-3);
 }
 
-.tradecard__sub {
+.tradedesk__sub {
   margin: var(--space-4) 0 var(--space-1);
 }
 
-.tradecard__totals {
+.tradedesk__totals {
   width: 100%;
   max-width: 40rem;
   margin: 0 auto;
@@ -346,14 +346,14 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tradecard__totals th,
-.tradecard__totals td {
+.tradedesk__totals th,
+.tradedesk__totals td {
   padding: var(--space-2) var(--space-1);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
   vertical-align: middle;
 }
 
-.tradecard__totals thead th {
+.tradedesk__totals thead th {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -362,21 +362,21 @@
   border-bottom: var(--bw-rule) solid var(--border-stamped);
 }
 
-.tradecard__totals thead th > * {
+.tradedesk__totals thead th > * {
   vertical-align: middle;
   margin-right: var(--space-2);
 }
 
-.tradecard__totals thead th:last-child > * {
+.tradedesk__totals thead th:last-child > * {
   margin: 0 0 0 var(--space-2);
 }
 
-.tradecard__totals thead th:last-child,
-.tradecard__totals td:last-child {
+.tradedesk__totals thead th:last-child,
+.tradedesk__totals td:last-child {
   text-align: right;
 }
 
-.tradecard__totals tbody th {
+.tradedesk__totals tbody th {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -385,21 +385,21 @@
   width: 34%;
 }
 
-.tradecard__fig {
+.tradedesk__fig {
   font-family: var(--font-mono);
   font-size: var(--fs-num-lg);
   color: var(--text-heading);
 }
 
-.tradecard__fig--up {
+.tradedesk__fig--up {
   color: var(--accent-positive-deep);
 }
 
-.tradecard__fig--down {
+.tradedesk__fig--down {
   color: var(--accent-negative);
 }
 
-.tradecard__fignote {
+.tradedesk__fignote {
   display: block;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -407,40 +407,40 @@
   color: var(--text-caption);
 }
 
-.tradecard__retainlink,
-.tradecard__retainbar,
-.tradecard__moves .tradecard__actions {
+.tradedesk__retainlink,
+.tradedesk__retainbar,
+.tradedesk__moves .tradedesk__actions {
   max-width: 40rem;
   margin-inline: auto;
 }
 
-.btn.tradecard__retainlink {
+.btn.tradedesk__retainlink {
   display: flex;
   justify-content: flex-start;
   padding-inline: 0;
 }
 
 /* layout-exempt: a club card's two buttons share one row, wrapping on a phone */
-.tradecard__clubactions {
+.tradedesk__clubactions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-4);
 }
 
-.tradecard__clubactions > .tradecard__cash,
-.tradecard__clubactions > .tradecard__browse {
+.tradedesk__clubactions > .tradedesk__cash,
+.tradedesk__clubactions > .tradedesk__browse {
   margin-top: 0;
 }
 
-.tradecard__tbdnote {
+.tradedesk__tbdnote {
   max-width: 40rem;
   margin: var(--space-2) auto 0;
   font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
-.tradecard__notes {
+.tradedesk__notes {
   max-width: 40rem;
   margin-inline: auto;
   margin: var(--space-4) 0 0;
@@ -452,7 +452,7 @@
 /* The deal strip: pinned to the foot of the screen while a deal exists, one
    line per club. It sits above the page, below a sheet's scrim. */
 /* layout-exempt: the two clubs' lines stack in the strip */
-.tradecard__strip {
+.tradedesk__strip {
   position: sticky;
   bottom: 0;
   z-index: var(--z-sticky);
@@ -467,7 +467,7 @@
 }
 
 /* layout-exempt: a club's three numbers on one line */
-.tradecard__stripside {
+.tradedesk__stripside {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
@@ -478,38 +478,38 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tradecard__strip .tradecard__k {
+.tradedesk__strip .tradedesk__k {
   color: var(--text-on-ink-dim);
 }
 
-.tradecard__strip .tradecard__over {
+.tradedesk__strip .tradedesk__over {
   color: var(--marker);
 }
 
-.tradecard__confirm {
+.tradedesk__confirm {
   margin: var(--space-2) 0 0;
   padding: var(--space-2) var(--space-3);
   background: var(--surface-event-wash);
   font-size: var(--fs-small);
 }
 
-.tradecard__legend {
+.tradedesk__legend {
   margin: var(--space-2) 0 0;
   font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
-.tradecard__strip .tradecard__stripshare {
+.tradedesk__strip .tradedesk__stripshare {
   justify-self: start;
 }
 
-.tradecard__browse {
+.tradedesk__browse {
   margin-top: var(--space-4);
 }
 
 /* The row's one tap target: face, name, attribute line and numbers. */
 /* layout-exempt: face beside the name block, the whole thing one button */
-.tradecard__open {
+.tradedesk__open {
   grid-area: open;
   display: grid;
   grid-template-columns: var(--shot-xs-w) minmax(0, 1fr);
@@ -524,38 +524,38 @@
   cursor: pointer;
 }
 
-.tradecard__open:focus-visible {
+.tradedesk__open:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }
 
-.tradecard__open .shot.tradecard__face,
-.tradecard__open .tradecard__who,
-.tradecard__open .tradecard__nums {
+.tradedesk__open .shot.tradedesk__face,
+.tradedesk__open .tradedesk__who,
+.tradedesk__open .tradedesk__nums {
   grid-area: auto;
 }
 
-.tradecard__kept {
+.tradedesk__kept {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
 }
 
-.tradecard__retain {
+.tradedesk__retain {
   grid-column: 2 / -1;
   margin-top: var(--space-1);
 }
 
 /* layout-exempt: the retain switches stack */
-.tradecard__retainbar {
+.tradedesk__retainbar {
   display: grid;
   gap: var(--space-2);
   margin-top: var(--space-4);
 }
 
 /* layout-exempt: the two deal buttons wrap on a phone */
-.tradecard__actions {
+.tradedesk__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);

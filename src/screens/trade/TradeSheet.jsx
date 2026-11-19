@@ -97,13 +97,13 @@ function Side({ teamId, players, warSeason, extra = [], highlight = null }) {
       <ul className="tradesheet__list">
         {players.map((p) => (
           <li key={p.id} className={p.id === highlight ? 'tradesheet__player tradesheet__player--this' : 'tradesheet__player'}>
-            <Headshot personId={p.id} name={p.name} className="tradecard__face" />
-            <div className="tradecard__who">
-              <PlayerLink id={p.id} name={p.name} className="tradecard__name">{p.name}</PlayerLink>
-              <span className="t-label tradecard__meta">{p.pos ?? DASH} · now {p.active === false ? 'retired or released' : p.nowTeam ?? DASH}</span>
+            <Headshot personId={p.id} name={p.name} className="tradedesk__face" />
+            <div className="tradedesk__who">
+              <PlayerLink id={p.id} name={p.name} className="tradedesk__name">{p.name}</PlayerLink>
+              <span className="t-label tradedesk__meta">{p.pos ?? DASH} · now {p.active === false ? 'retired or released' : p.nowTeam ?? DASH}</span>
             </div>
             <span className="tradesheet__war">
-              <span className="tradecard__k">{warSeason} WAR</span>
+              <span className="tradedesk__k">{warSeason} WAR</span>
               <span className="tradesheet__num">{p.war != null ? p.war.toFixed(1) : DASH}</span>
             </span>
           </li>
@@ -112,7 +112,7 @@ function Side({ teamId, players, warSeason, extra = [], highlight = null }) {
         {!players.length && !extra.length && <li className="tradesheet__extra">Nobody</li>}
       </ul>
       <p className="tradesheet__total">
-        <span className="tradecard__k">Total {warSeason} WAR</span>
+        <span className="tradedesk__k">Total {warSeason} WAR</span>
         <span className="tradesheet__num">{total.toFixed(1)}</span>
       </p>
     </section>

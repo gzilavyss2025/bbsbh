@@ -43,8 +43,8 @@ export function DepthCard({ clubs, onClose = null }) {
   const options = clubs.map((c, i) => ({ value: i, label: teamClubName(c.teamId) }))
 
   return (
-    <Card frame="stamped" label="Organization depth" className="tradecard__depth">
-      <div className="tradecard__depthbar">
+    <Card frame="stamped" label="Organization depth" className="tradedesk__depth">
+      <div className="tradedesk__depthbar">
         {onClose && <Button size="control" skin="ghost" onClick={onClose}>Hide</Button>}
         <Chips label="Club" options={options} value={which} onChange={setWhich} layout="wrap" />
         <Chips label="View" options={VIEWS} value={view} onChange={setView} layout="wrap" />
@@ -52,23 +52,23 @@ export function DepthCard({ clubs, onClose = null }) {
 
       {view === 'grid' ? <Grid rows={rows} /> : <Ladder rows={rows} />}
 
-      <div className="tradecard__needbar">
+      <div className="tradedesk__needbar">
         <Chips label="Need by" options={NEEDS} value={needMode} onChange={setNeedMode} layout="wrap" />
       </div>
-      <ul className="tradecard__needs" aria-live="polite">
+      <ul className="tradedesk__needs" aria-live="polite">
         {needMode === 'count' && after.map((n) => (
-          <li key={n.slot} className={before.includes(n.slot) ? '' : 'tradecard__need--new'}>
+          <li key={n.slot} className={before.includes(n.slot) ? '' : 'tradedesk__need--new'}>
             <span className="t-label">{SLOT_LABEL[n.slot]}</span> {n.have} in MLB + AAA{beforeHave(n.slot) !== n.have ? ` (was ${beforeHave(n.slot)})` : ''}
           </li>
         ))}
         {needMode === 'war' && needBy(rows, 'war').map((n) => (
           <li key={n.slot}>
             <span className="t-label">{SLOT_LABEL[n.slot]}</span> {n.war.toFixed(1)} WAR in MLB + AAA
-            {Math.abs(n.change) >= 0.05 && <span className={n.change < 0 ? 'tradecard__out' : 'tradecard__in'}> ({one(n.change)})</span>}
+            {Math.abs(n.change) >= 0.05 && <span className={n.change < 0 ? 'tradedesk__out' : 'tradedesk__in'}> ({one(n.change)})</span>}
           </li>
         ))}
         {needMode === 'starter' && needBy(rows, 'starter').map((n) => (
-          <li key={n.slot} className={n.starter ? '' : 'tradecard__need--new'}>
+          <li key={n.slot} className={n.starter ? '' : 'tradedesk__need--new'}>
             <span className="t-label">{SLOT_LABEL[n.slot]}</span>{' '}
             {n.starter ? `${n.best.name}, ${n.best.war.toFixed(1)}` : n.best ? `No starter · best is ${n.best.name}, ${(n.best.war ?? 0).toFixed(1)}` : 'Nobody near the majors'}
           </li>
@@ -80,8 +80,8 @@ export function DepthCard({ clubs, onClose = null }) {
 
 function Grid({ rows }) {
   return (
-    <div className="tradecard__gridwrap">
-      <table className="tradecard__grid">
+    <div className="tradedesk__gridwrap">
+      <table className="tradedesk__grid">
         <thead>
           <tr>
             <th scope="col"><span className="sr-only">Position</span></th>
@@ -98,9 +98,9 @@ function Grid({ rows }) {
                 const tone = c.after > c.before ? 'up' : c.after < c.before ? 'down' : ''
                 return (
                   // The key carries the count, so a change remounts the cell and its tick plays.
-                  <td key={`${l}-${c.after}`} className={moved ? `tradecard__cell tradecard__cell--${tone}` : 'tradecard__cell'}>
-                    {moved && <span className="tradecard__was">{c.before}<span aria-hidden="true"> → </span><span className="sr-only"> before, now </span></span>}
-                    <span className={c.after ? '' : 'tradecard__zero'}>{c.after}</span>
+                  <td key={`${l}-${c.after}`} className={moved ? `tradedesk__cell tradedesk__cell--${tone}` : 'tradedesk__cell'}>
+                    {moved && <span className="tradedesk__was">{c.before}<span aria-hidden="true"> → </span><span className="sr-only"> before, now </span></span>}
+                    <span className={c.after ? '' : 'tradedesk__zero'}>{c.after}</span>
                   </td>
                 )
               })}
@@ -116,21 +116,21 @@ const SHOWN = 3
 
 function Ladder({ rows }) {
   return (
-    <ol className="tradecard__ladder">
+    <ol className="tradedesk__ladder">
       {rows.map((r) => (
-        <li key={r.slot} className="tradecard__rung">
-          <span className="t-label tradecard__rungslot">{SLOT_LABEL[r.slot]}</span>
-          <div className="tradecard__rungrow">
+        <li key={r.slot} className="tradedesk__rung">
+          <span className="t-label tradedesk__rungslot">{SLOT_LABEL[r.slot]}</span>
+          <div className="tradedesk__rungrow">
             {LEVELS.filter((l) => r.cells[l].after || r.cells[l].out.length).map((l) => {
               const c = r.cells[l]
               const extra = c.stay.length - SHOWN
               return (
-                <p key={l} className="tradecard__rungcell">
-                  <span className="tradecard__k">{l}</span>{' '}
-                  {c.in.map((p) => <span key={p.id} className="tradecard__in">+ {p.name}</span>)}
-                  {c.out.map((p) => <s key={p.id} className="tradecard__out">{p.name}</s>)}
+                <p key={l} className="tradedesk__rungcell">
+                  <span className="tradedesk__k">{l}</span>{' '}
+                  {c.in.map((p) => <span key={p.id} className="tradedesk__in">+ {p.name}</span>)}
+                  {c.out.map((p) => <s key={p.id} className="tradedesk__out">{p.name}</s>)}
                   {c.stay.slice(0, SHOWN).map((p) => <span key={p.id}>{p.name}</span>)}
-                  {extra > 0 && <span className="tradecard__more">+{extra} more</span>}
+                  {extra > 0 && <span className="tradedesk__more">+{extra} more</span>}
                 </p>
               )
             })}
