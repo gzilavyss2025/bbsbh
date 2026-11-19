@@ -22,10 +22,15 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     // A player already in the deal: one line of who he is, his WAR as the
     // figure to read, and a small remove. The sheet holds the rest.
     // The figure to read: WAR, or for a minor leaguer his OPS or ERA, labelled as what it is.
+    // A prospect with no big-league record reads as one: his value by rank
+    // (value.js) where the salary goes, and his rank where the WAR goes.
+    const prospect = p.war == null && (p.topRank || p.orgRank)
+    const rank = prospect ? { label: p.topRank ? 'Top 100' : 'Club rank', value: String(p.topRank || p.orgRank) } : null
     const fig = p.war != null ? { label: warSeason ? `${warSeason} WAR` : 'WAR', value: p.war.toFixed(1) }
+      : prospect ? null
       : farm?.ops ? { label: `${farm.level} OPS`, value: farm.ops }
         : farm?.era ? { label: `${farm.level} ERA`, value: farm.era }
-          : { label: warSeason ? `${warSeason} WAR` : 'WAR', value: '—' }
+            : { label: warSeason ? `${warSeason} WAR` : 'WAR', value: '—' }
     return (
       <li className={enter ? 'tradedesk__sent tradedesk__row--enter' : 'tradedesk__sent'}>
         <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -38,13 +43,20 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
             </span>
           </span>
           {/* The same columns as the roster rows: salary over years, then the figure over its label. */}
-          <span className="tradedesk__money">
-            <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-            <span className="tradedesk__years">{yearsText(p)}</span>
-          </span>
+          {prospect ? (
+            <span className="tradedesk__money">
+              <span className="tradedesk__salary">{p.value ? money(p.value.surplusUsd) : '—'}</span>
+              <span className="tradedesk__years">Value</span>
+            </span>
+          ) : (
+            <span className="tradedesk__money">
+              <span className={p.lastSalaryUsd == null && !p.onForty ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
+              <span className="tradedesk__years">{yearsText(p)}</span>
+            </span>
+          )}
           <span className="tradedesk__figcol">
-            <span className="tradedesk__war">{fig.value}</span>
-            <span className="tradedesk__warlabel">{fig.label}</span>
+            <span className="tradedesk__war">{(rank ?? fig).value}</span>
+            <span className="tradedesk__warlabel">{(rank ?? fig).label}</span>
           </span>
         </button>
         <IconButton mark="md" onClick={() => onToggle(p.id)} label={`Remove ${p.name} from the deal`}>✕</IconButton>

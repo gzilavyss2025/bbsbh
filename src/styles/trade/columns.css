@@ -378,21 +378,6 @@
   color: var(--text-caption);
 }
 
-.tradeboard__war {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-heading);
-}
-
-.tradeboard__war--up {
-  color: var(--accent-positive-deep);
-}
-
-.tradeboard__war--down {
-  color: var(--accent-negative);
-}
-
 /* layout-exempt: the middle cell stacks its label, figure, meter and status */
 .tradeboard__mid {
   display: flex;
@@ -420,28 +405,66 @@
   color: var(--text-on-ink-bright);
 }
 
-/* A track with its centre marked; the fill grows from the centre toward the club that gains. */
+/* The tug-of-war: club A's colour from the left, club B's from the right,
+   meeting where the deal pulls them (--tug-share, Scoreboard.jsx). */
 .tradeboard__meter {
   position: relative;
   display: block;
   width: 100%;
-  height: var(--space-2);
-  background: color-mix(in srgb, var(--text-on-ink) 25%, transparent);
+  height: var(--space-3);
+  background: linear-gradient(to right, var(--tug-a) 0 var(--tug-share), var(--tug-b) var(--tug-share) 100%);
+  border: var(--bw-hair) solid var(--text-on-ink);
 }
 
-.tradeboard__meter::after {
-  content: '';
+/* The knot in the rope: a bright mark where the two colours meet. */
+.tradeboard__tug {
   position: absolute;
   inset-block: calc(var(--space-1) * -1);
-  left: 50%;
-  width: var(--bw-heavy);
-  background: var(--text-on-ink-bright);
+  left: var(--tug-share);
+  width: var(--space-2);
+  margin-left: calc(var(--space-1) * -1);
+  background: var(--marker);
+  border: var(--bw-hair) solid var(--surface-stamped-ink);
+  transition: left var(--dur-base, 200ms) ease-out;
 }
 
-.tradeboard__fill {
-  position: absolute;
-  inset-block: 0;
-  background: var(--marker);
+@media (prefers-reduced-motion: reduce) {
+  .tradeboard__tug {
+    transition: none;
+  }
+}
+
+/* A club's grade for what it takes home, big, like a game's trade screen. */
+.tradeboard__grade {
+  flex: 0 0 auto;
+  min-width: var(--space-12);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
+  text-align: center;
+  color: var(--text-heading);
+}
+
+.tradeboard__grade--a {
+  color: var(--accent-positive-deep);
+}
+
+.tradeboard__grade--c,
+.tradeboard__grade--d,
+.tradeboard__grade--f {
+  color: var(--accent-negative);
+}
+
+/* layout-exempt: the verdict and its info button on one line */
+.tradeboard__score {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradeboard__score--steal,
+.tradeboard__score--big {
+  color: var(--marker);
 }
 
 .tradeboard__status--stop {
@@ -498,6 +521,7 @@
 
 /* The deal drawn as a wire story: the feed's own row, the Copy button beside it. */
 .tradedesk__wire--story {
+  flex-wrap: nowrap;
   align-items: flex-start;
 }
 

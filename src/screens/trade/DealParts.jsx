@@ -55,24 +55,30 @@ export function Wire({ text, children = null }) {
 // What the deal does for one club, under its haul: WAR, money and control,
 // then the same thing said in a sentence (the Trade Machine's "you have
 // increased this team's projected wins by 3").
-export function Effect({ club, pay, unset, war, inYrs, outYrs, nextYear, warSeason }) {
-  const warText = Math.abs(war) < 0.05 ? 'no change in WAR' : `${war > 0 ? 'add' : 'lose'} ${Math.abs(war).toFixed(1)} WAR`
-  const payText2 = Math.abs(pay) < 1 ? 'no change in payroll' : `${pay > 0 ? 'take on' : 'shed'} ${money(Math.abs(pay))}`
+export function Effect({ club, side, deal, nextYear }) {
+  const value = deal.value[side]
+  const proj = deal.projWar[side]
+  const pay = deal.payroll[side]
+  const unset = deal.unpriced[side]
+  const est = deal.estimated[side]
+  const valueText = Math.abs(value) < 1e6 ? 'come out about even in value' : `${value > 0 ? 'gain' : 'give up'} ${money(Math.abs(value))} in surplus value`
+  const projText = Math.abs(proj) < 0.05 ? 'no change in projected WAR' : `${proj > 0 ? 'add' : 'lose'} ${Math.abs(proj).toFixed(1)} projected WAR`
+  const payText2 = Math.abs(pay) < 1 ? 'no change in payroll' : `${pay > 0 ? 'take on' : 'shed'} ${est ? '~' : ''}${money(Math.abs(pay))}`
   return (
     <div className="tradedesk__effect">
       <p className="tradedesk__effectfigs">
-        <span><span className="tradedesk__k">{warSeason ?? 'Last season'} WAR</span> <span className={`tradedesk__fig tradedesk__fig--${tone(war) || 'flat'}`}>{signedNum(war)}</span></span>
-        <span><span className="tradedesk__k">{nextYear} payroll</span> <span className="tradedesk__fig">{signedMoney(pay)}</span>{unset ? (
+        <span><span className="tradedesk__k">Surplus value</span> <span className={`tradedesk__fig tradedesk__fig--${tone(value / 1e6) || 'flat'}`}>{signedMoney(value)}</span></span>
+        <span><span className="tradedesk__k">{nextYear} proj. WAR</span> <span className={`tradedesk__fig tradedesk__fig--${tone(proj) || 'flat'}`}>{signedNum(proj)}</span></span>
+        <span><span className="tradedesk__k">{nextYear} payroll</span> <span className="tradedesk__fig">{est ? '~' : ''}{signedMoney(pay)}</span>{unset || est ? (
           <span className="tradedesk__fignote infopop-row">
-            {tbd(unset)}{' '}
-            <InfoPopover label="What TBD means" className="infopop--paper">
-              TBD is a big-league salary not set yet (arbitration, option or pre-arb). The payroll figure leaves it out.
+            {[est ? `~ ${est} est.` : null, tbd(unset)].filter(Boolean).join(' ')}{' '}
+            <InfoPopover label="How the payroll is figured" className="infopop--paper">
+              A pre-arbitration salary is taken as the league minimum and an arbitration salary as a share of the player’s projected value; those are marked ~. TBD is a salary with no estimate (an option year), left out.
             </InfoPopover>
           </span>
         ) : null}</span>
-        <span><span className="tradedesk__k">Control</span> <span className="tradedesk__fig">+{inYrs} / −{outYrs}</span></span>
       </p>
-      <p className="tradedesk__sentence">The {club} {warText} and {payText2} for {nextYear}{unset ? `, plus ${unset} salary not set yet` : ''}.</p>
+      <p className="tradedesk__sentence">The {club} {valueText}, {projText} and {payText2} for {nextYear}.</p>
     </div>
   )
 }

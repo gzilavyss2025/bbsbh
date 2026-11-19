@@ -215,7 +215,7 @@ export function TradePage() {
       </header>
 
       <Stack gap="section">
-        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} warSeason={sideA.data?.warSeason} />}
+        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} />}
 
         <div className="tradedesk__sides" ref={movesRef}>
           {b ? (
@@ -235,7 +235,7 @@ export function TradePage() {
                 cash={cashA}
                 onCash={setCashA}
                 after={deal?.fortyAfter.a}
-                effect={deal && <Effect club={teamClubName(a)} pay={deal.payroll.a} unset={deal.unpriced.a} war={deal.war.a} inYrs={deal.control.aIn} outYrs={deal.control.aOut} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 change={changeA}
                 farm={farmA.data}
@@ -255,7 +255,7 @@ export function TradePage() {
                 cash={cashB}
                 onCash={setCashB}
                 after={deal?.fortyAfter.b}
-                effect={deal && <Effect club={teamClubName(b)} pay={deal.payroll.b} unset={deal.unpriced.b} war={deal.war.b} inYrs={deal.control.aOut} outYrs={deal.control.aIn} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 change={changeB}
                 farm={farmB.data}
@@ -275,7 +275,7 @@ export function TradePage() {
                 cash={cashA}
                 onCash={setCashA}
                 after={deal?.fortyAfter.a}
-                effect={deal && <Effect club={teamClubName(a)} pay={deal.payroll.a} unset={deal.unpriced.a} war={deal.war.a} inYrs={deal.control.aIn} outYrs={deal.control.aOut} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 change={changeA}
                 farm={farmA.data}
@@ -295,7 +295,7 @@ export function TradePage() {
                 cash={cashB}
                 onCash={setCashB}
                 after={deal?.fortyAfter.b}
-                effect={deal && <Effect club={teamClubName(b)} pay={deal.payroll.b} unset={deal.unpriced.b} war={deal.war.b} inYrs={deal.control.aOut} outYrs={deal.control.aIn} nextYear={sideA.data.nextYear} warSeason={sideA.data.warSeason} />}
+                effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 change={changeB}
                 farm={farmB.data}

@@ -8,9 +8,10 @@ import { roleFromCounts } from '../../lib/roster/pitcherRole.js'
 import { fetchTeamRoster, fetchAffiliates, fetchComplexAffiliates } from '../team/fetch.js'
 import { loadCombinedPoolForTeams } from '../statsLevels.js'
 import { fetchTeamContracts } from '../salaries.js'
-import { fetchWarData } from '../war.js'
+import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
+import { playerValue } from '../../lib/trade/value.js'
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
-import { tradePlayer, farmLine, farmIsPitcher } from '../../lib/trade/deal.js'
+import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
 import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
@@ -116,6 +117,23 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     // Throwing hand, for the wire's RHP / LHP.
     p.throws = orgById.get(p.id)?.pitchHand?.code ?? null
   }
+  // What each player is worth to a club that gets him (lib/trade/value.js): his
+  // WAR by season from the stored history and this season's file, then the
+  // projection and surplus over his years of control. Every 40-man player and
+  // every ranked prospect; anyone else is valued as an unranked minor leaguer.
+  const pitcherPos = (p) => ['P', 'SP', 'RP', 'TWP', 'RHP', 'LHP'].includes(p.pos)
+  await Promise.all([...forty, ...minors].map(async (p) => {
+    const history = await fetchWarHistory(p.id).catch(() => null)
+    p.warByYear = warByYearFor(p.id, pitcherPos(p) ? 'pitching' : 'hitting', war, history)
+  }))
+  const warSeason = war?.season ?? season
+  for (const p of [...forty, ...minors, ...others]) {
+    p.role = p.line?.role ?? null
+    p.value = playerValue(p, { nextYear, warSeason, contractYears })
+    // Next season's pay when the ledger has no figure: the estimate, marked as one.
+    if (p.payUsd == null && p.onForty && p.value.payEstUsd != null) p.payEstUsd = p.value.payEstUsd
+  }
+
   // A minor-league player's position for the depth grid comes from the org roster,
   // which writes pitchers as P; the prospect list writes RHP/LHP.
   const depth = org

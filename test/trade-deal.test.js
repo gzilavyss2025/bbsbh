@@ -192,3 +192,17 @@ test('only picks not yet made are tradable', () => {
   ] } }
   assert.deepEqual(cbPicksOf(data, 2027).map((p) => p.key), ['2027-A-32', '2027-B-67'])
 })
+
+test('a deal counts estimated salaries and nets surplus value both ways', () => {
+  const vet = { id: 1, name: 'Vet', payUsd: 20e6, war: 3, onForty: true, value: { surplusUsd: -5e6, projWar: 2 } }
+  const kid = { id: 2, name: 'Kid', payUsd: null, payEstUsd: 780e3, war: 1, onForty: true, contract: { cells: [] }, value: { surplusUsd: 60e6, projWar: 2.5 } }
+  const d = dealSummary({ name: 'A', fortyCount: 40, sends: [kid], cashUsd: 0 }, { name: 'B', fortyCount: 40, sends: [vet], cashUsd: 2e6 })
+  // A takes on 20M and sheds the kid's estimated 780k, and gets 2M cash.
+  assert.equal(d.payroll.a, 20e6 - 780e3 - 2e6)
+  assert.equal(d.estimated.a, 1)
+  assert.equal(d.unpriced.a, 0)
+  // A gives up 60M of surplus for a -5M contract, and gets 2M: -63M.
+  assert.equal(d.value.a, -5e6 - 60e6 + 2e6)
+  assert.equal(d.value.b, -d.value.a)
+  assert.equal(d.projWar.a, -0.5)
+})

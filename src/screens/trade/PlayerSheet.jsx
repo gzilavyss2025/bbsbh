@@ -11,6 +11,10 @@ import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { Numbers } from './Numbers.jsx'
 import { TradeSheet } from './TradeSheet.jsx'
+import { useAsync } from '../../hooks/useAsync.js'
+import { fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
+import { FactSheet } from '../../components/transactions/FactSheet.jsx'
+import { isoToday } from '../../lib/dates.js'
 
 const DASH = '—'
 
@@ -22,6 +26,10 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
   const [trade, setTrade] = useState(false)
+  // His seasons, the way the transactions wire's sheet draws them: MLB, Minors
+  // and Postseason, each by club with a career total. One read, shared with the wire.
+  const today = isoToday()
+  const facts = useAsync(() => fetchPlayerFacts(p.id, { season: Number(today.slice(0, 4)), teamId, asOf: today }).catch(() => null), [p.id, teamId, today])
   if (trade) return <TradeSheet player={p} toId={teamId} onClose={() => setTrade(false)} />
   const pedigree = pedigreeLine(p.how, p.draft, (id) => (isMlbTeamId(id) ? teamAbbr({ id }) : null))
 
@@ -44,6 +52,15 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           </div>
 
           <p className="tradedesk__nums playersheet__nums"><Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full /></p>
+
+          {p.value && <ValueLine v={p.value} nextYear={nextYear} />}
+
+          {facts.data && (
+            <div className="playersheet__section">
+              <h3 className="t-label">Seasons</h3>
+              <FactSheet people={[{ facts: facts.data, note: null }]} />
+            </div>
+          )}
 
           {pedigree && (
             <div className="playersheet__section">
@@ -114,5 +131,19 @@ function ContractDetail({ c }) {
       {ahead.some((x) => x.rough) && <p className="tradedesk__facts">~ estimated from service time</p>}
       {status && <p className="tradedesk__facts">{status}</p>}
     </div>
+  )
+}
+
+// What he is worth to a club that gets him (lib/trade/value.js): next
+// season's projected WAR and his surplus value over his years of control,
+// or a prospect's value by rank.
+function ValueLine({ v, nextYear }) {
+  const surplus = `${v.surplusUsd < 0 ? '−' : ''}${money(v.surplusUsd)}`
+  return (
+    <p className="playersheet__value">
+      {v.projWar != null && <span><span className="tradedesk__k">{nextYear} proj. WAR</span> {v.projWar.toFixed(1)}</span>}
+      <span><span className="tradedesk__k">{v.prospect ? 'Prospect value' : 'Surplus value'}</span> {surplus}</span>
+      {v.years.length > 0 && <span><span className="tradedesk__k">Over</span> {v.years.length} {v.years.length === 1 ? 'year' : 'years'}</span>}
+    </p>
   )
 }

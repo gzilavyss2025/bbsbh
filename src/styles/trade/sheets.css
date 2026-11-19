@@ -178,7 +178,9 @@
 
 /* The trade story (story/TradeStory.jsx): a newspaper column in the deal card. */
 .tradestory__body {
-  max-width: 40rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flow-root;
 }
 
 .tradestory__headline {
@@ -209,9 +211,18 @@
   font-weight: var(--w-bold);
 }
 
-/* The story's art: one game photo of the headline player, full column width. */
+/* The story's art: one game photo of the headline player. Full width on a
+   phone; at the wide step it sits right and the story wraps beside it. */
 .tradestory__art {
   margin: 0 0 var(--space-3);
+}
+
+@media (min-width: 740px) {
+  .tradestory__art {
+    float: right;
+    width: min(45%, 28rem);
+    margin: var(--space-1) 0 var(--space-3) var(--space-4);
+  }
 }
 
 .tradestory__art img {
@@ -227,4 +238,15 @@
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+/* layout-exempt: the sheet's value figures on one wrapping line */
+.playersheet__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
 }

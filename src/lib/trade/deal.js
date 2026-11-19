@@ -70,15 +70,23 @@ const forty = (rows) => rows.filter((r) => r.onForty).length
 // { name, fortyCount, sends: [player rows], cashUsd }.
 // A big-league salary not set yet (arbitration, option, pre-arb). A minor
 // leaguer off the 40-man draws no MLB salary at all, so he is not one.
-export const unsetSalary = (r) => r.payUsd == null && (r.onForty || r.contract != null)
+export const unsetSalary = (r) => r.payUsd == null && r.payEstUsd == null && (r.onForty || r.contract != null)
+// A salary the card estimated (value.js: the minimum for pre-arb, a share of
+// his worth in arbitration); the payroll counts it and marks it "~".
+export const estimatedSalary = (r) => r.payUsd == null && r.payEstUsd != null
 
 export function dealSummary(a, b) {
-  const payOut = (side) => sum(side.sends, (r) => r.payUsd)
+  const payOut = (side) => sum(side.sends, (r) => r.payUsd ?? r.payEstUsd)
   // A club's payroll moves by the salaries it takes in, less those it sends,
   // plus the cash it sends and less the cash it gets.
   // Retained salary already left the moving pay (applyRetain); the sending club keeps paying it.
   const payrollA = payOut(b) - payOut(a) + (a.cashUsd || 0) - (b.cashUsd || 0)
   const warA = sum(b.sends, (r) => r.war) - sum(a.sends, (r) => r.war)
+  // Surplus value (value.js): what a club gets less what it gives, each player
+  // carrying the salary his old club keeps paying; cash counts dollar for dollar.
+  const worth = (r) => (r.value?.surplusUsd ?? 0) + (r.retainedUsd ?? 0)
+  const valueA = sum(b.sends, worth) - sum(a.sends, worth) - (a.cashUsd || 0) + (b.cashUsd || 0)
+  const projA = sum(b.sends, (r) => r.value?.projWar) - sum(a.sends, (r) => r.value?.projWar)
   const controlIn = (side) => sum(side.sends, (r) => r.control)
   const fortyAfterA = a.fortyCount - forty(a.sends) + forty(b.sends)
   const fortyAfterB = b.fortyCount - forty(b.sends) + forty(a.sends)
@@ -98,6 +106,7 @@ export function dealSummary(a, b) {
   if (fortyAfterB > 40) notes.push(`The ${b.name} go to ${fortyAfterB} on the 40-man and must clear a spot.`)
   const unpriced = [...a.sends, ...b.sends].filter(unsetSalary).length
   if (unpriced) notes.push(`${unpriced} ${unpriced === 1 ? 'player has' : 'players have'} no set salary yet (arbitration, option or pre-arb), so the payroll line leaves them out.`)
+  const estimated = [...a.sends, ...b.sends].filter(estimatedSalary).length
 
   return {
     payroll: { a: payrollA, b: -payrollA },
@@ -105,7 +114,10 @@ export function dealSummary(a, b) {
     // option, pre-arb). Both clubs' payroll figures leave them out: one sheds
     // that salary and the other takes it on, so the flag goes on both.
     unpriced: { a: unpriced, b: unpriced },
+    estimated: { a: estimated, b: estimated },
     war: { a: warA, b: -warA },
+    value: { a: valueA, b: -valueA },
+    projWar: { a: projA, b: -projA },
     control: { aIn: controlIn(b), aOut: controlIn(a) },
     fortyAfter: { a: fortyAfterA, b: fortyAfterB },
     notes,
