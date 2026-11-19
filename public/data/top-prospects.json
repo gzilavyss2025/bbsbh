@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T07:54:40.859Z",
+  "generatedAt": "2026-11-19T07:55:58.523Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1623,7 +1623,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "130.0 IP, 5.26 ERA, 113 SO",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -4640,6 +4640,18 @@
     },
     {
       "orgRank": 20,
+      "playerId": 682785,
+      "name": "Angel Bastardo",
+      "teamId": 118,
+      "team": "kc",
+      "position": "RHP",
+      "levelRaw": "AAA",
+      "statLine": "54.1 IP, 4.64 ERA, 73 SO",
+      "age": 24,
+      "topRank": null
+    },
+    {
+      "orgRank": 21,
       "playerId": 701795,
       "name": "Drew Beam",
       "teamId": 118,
@@ -4651,7 +4663,7 @@
       "topRank": null
     },
     {
-      "orgRank": 21,
+      "orgRank": 22,
       "playerId": 702373,
       "name": "Felix Arronde",
       "teamId": 118,
@@ -4663,7 +4675,7 @@
       "topRank": null
     },
     {
-      "orgRank": 23,
+      "orgRank": 24,
       "playerId": 825128,
       "name": "Camden Johnson",
       "teamId": 118,
@@ -4675,7 +4687,7 @@
       "topRank": null
     },
     {
-      "orgRank": 24,
+      "orgRank": 25,
       "playerId": 829071,
       "name": "Warren Calcaño",
       "teamId": 118,
@@ -4687,7 +4699,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 27,
       "playerId": 829096,
       "name": "Ramcell Medina",
       "teamId": 118,
@@ -4699,7 +4711,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 29,
       "playerId": 804114,
       "name": "Luke Pelzer",
       "teamId": 118,
@@ -4711,7 +4723,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 30,
       "playerId": 806265,
       "name": "Blake Wolters",
       "teamId": 118,
@@ -4720,18 +4732,6 @@
       "levelRaw": "ALL (2)",
       "statLine": "103.0 IP, 7.08 ERA, 114 SO",
       "age": 22,
-      "topRank": null
-    },
-    {
-      "orgRank": 30,
-      "playerId": 692137,
-      "name": "L.P. Langevin",
-      "teamId": 118,
-      "team": "kc",
-      "position": "RHP",
-      "levelRaw": "A+",
-      "statLine": "55.1 IP, 3.42 ERA, 106 SO",
-      "age": 23,
       "topRank": null
     },
     {
@@ -5367,7 +5367,7 @@
       "position": "C",
       "levelRaw": "AA",
       "statLine": ".244, 14 HR, 51 RBI",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -5960,18 +5960,6 @@
     },
     {
       "orgRank": 23,
-      "playerId": 695761,
-      "name": "Kenya Huggins",
-      "teamId": 133,
-      "team": "oak",
-      "position": "RHP",
-      "levelRaw": "AA",
-      "statLine": "91.0 IP, 6.63 ERA, 103 SO",
-      "age": 23,
-      "topRank": null
-    },
-    {
-      "orgRank": 24,
       "playerId": 700579,
       "name": "Nathan Dettmer",
       "teamId": 133,
@@ -5983,7 +5971,7 @@
       "topRank": null
     },
     {
-      "orgRank": 25,
+      "orgRank": 24,
       "playerId": 829048,
       "name": "Darwing Ozuna",
       "teamId": 133,
@@ -5995,7 +5983,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 25,
       "playerId": 804119,
       "name": "Bobby Boser",
       "teamId": 133,
@@ -6007,7 +5995,7 @@
       "topRank": null
     },
     {
-      "orgRank": 27,
+      "orgRank": 26,
       "playerId": 686533,
       "name": "Jackson Finley",
       "teamId": 133,
@@ -6019,7 +6007,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 701548,
       "name": "Ali Camarillo",
       "teamId": 133,
@@ -6031,7 +6019,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 827759,
       "name": "Daniel Bucciero",
       "teamId": 133,
@@ -6039,6 +6027,18 @@
       "position": "3B",
       "levelRaw": "ALL (2)",
       "statLine": ".276, 13 HR, 59 RBI",
+      "age": 22,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 806227,
+      "name": "Alex Sosa",
+      "teamId": 133,
+      "team": "oak",
+      "position": "C",
+      "levelRaw": "A",
+      "statLine": ".290, 3 HR, 13 RBI",
       "age": 22,
       "topRank": null
     },
@@ -8403,7 +8403,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "100.2 IP, 4.83 ERA, 140 SO",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -10443,7 +10443,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".287, 24 HR, 89 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
