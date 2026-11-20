@@ -449,7 +449,7 @@
   box-sizing: border-box;
   height: var(--space-6);
   padding: 0 var(--space-2);
-  line-height: 1;
+  line-height: var(--lh-solid);
   border: var(--bw-rule) solid var(--border-stamped);
   background: var(--marker);
   font-family: var(--font-display);
