@@ -56,13 +56,14 @@ function Segments({ segs }) {
 const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
 function captionOf(star, clubId, photo) {
   const [m, d] = (photo.date ?? '').split('/').map(Number)
-  return [
-    star.name,
+  const rest = [
     clubId && `of the ${teamClubName(clubId)}`,
     photo.opponentId && `against the ${teamClubName(photo.opponentId)}`,
     photo.postseason && 'in the postseason',
     MONTHS[m - 1] && d && `on ${MONTHS[m - 1]} ${d}`,
-  ].filter(Boolean).join(' ') + '.'
+  ].filter(Boolean).join(' ')
+  // The subject's name leads in bold, as a newspaper caption sets it.
+  return <><b>{star.name}</b>{rest ? ` ${rest}` : ''}.</>
 }
 
 export function TradeStory({ fallback, ...deal }) {

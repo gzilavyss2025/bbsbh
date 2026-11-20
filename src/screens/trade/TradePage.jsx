@@ -89,6 +89,7 @@ export function TradePage() {
   const cbPicks = useAsync(() => fetchCbPicks(), [])
   const ownPicks = (id) => (cbPicks.data?.picks ?? []).filter((pk) => pk.teamId === id)
   const sentPicks = (id) => ownPicks(id).filter((pk) => dp.has(pk.key))
+  const pickName = (pk) => `${pk.year} Round ${pk.round} pick`
   const togglePick = (key) => setDp((s) => {
     const n = new Set(s)
     n.has(key) ? n.delete(key) : n.add(key)
@@ -96,7 +97,8 @@ export function TradePage() {
   })
   const pickProps = (id, other) => ({ draftPicks: ownPicks(id), dp, onTogglePick: togglePick, incomingPicks: other ? sentPicks(other) : [] })
   const [showDepth, setShowDepth] = useState(false)
-  const [showLineups, setShowLineups] = useState(false)
+  // null, or which club's lineup a phone shows first (0 or 1).
+  const [showLineups, setShowLineups] = useState(null)
 
   useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
 
@@ -280,6 +282,7 @@ export function TradePage() {
                 after={deal?.fortyAfter.a}
                 effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
+                onLineups={() => setShowLineups(0)}
                 change={changeA}
                 farm={farmA.data}
                 incomingFarm={farmB.data}
@@ -300,6 +303,7 @@ export function TradePage() {
                 after={deal?.fortyAfter.b}
                 effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
+                onLineups={() => setShowLineups(1)}
                 change={changeB}
                 farm={farmB.data}
                 incomingFarm={farmA.data}
@@ -399,25 +403,17 @@ export function TradePage() {
         // The deal at a glance (grades, the meter, who gets how many), pinned to
         // the foot of the screen while the reader picks players.
         <div className="tradedesk__tray">
-          <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started}
-            action={started && (
-              // A phone's one-row tray shows the glyph alone; the word comes back from 740px.
-              <Button size="control" skin="outline" className="tradeboard__lineups" aria-label="Lineups after the deal" onClick={() => setShowLineups(true)}>
-                <svg className="tradeboard__lineupsglyph" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M2 3h2M2 8h2M2 13h2M6 3h8M6 8h8M6 13h8" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
-                </svg>
-                <span className="tradeboard__lineupsword">Lineups</span>
-              </Button>
-            )} />
+          <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).map(pickName)} picksB={sentPicks(b).map(pickName)} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started} />
         </div>
       )}
-      {deal && showLineups && (
+      {deal && showLineups != null && (
         <LineupSheet
           clubs={[
             { teamId: a, data: sideA.data, sends: sends(sideA.data) },
             { teamId: b, data: sideB.data, sends: sends(sideB.data) },
           ]}
-          onClose={() => setShowLineups(false)}
+          start={showLineups}
+          onClose={() => setShowLineups(null)}
         />
       )}
       <ReportFooter />

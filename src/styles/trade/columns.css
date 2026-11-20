@@ -402,9 +402,15 @@
   color: var(--text-heading);
 }
 
-.tradeboard__sub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
+/* What the club takes home, one line each, under its name. */
+.tradeboard__gets {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-snug);
   color: var(--text-caption);
 }
 
@@ -563,6 +569,10 @@
 .tradedesk__wire--story {
   flex-wrap: nowrap;
   align-items: flex-start;
+  /* The story sits on the card's own paper: no inset fill, no ink bar. */
+  padding: 0;
+  background: transparent;
+  border-left: 0;
 }
 
 .tradedesk__wirelist {

@@ -14,13 +14,14 @@ import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { SearchGlyph } from '../../../components/chrome/SiteSearch.jsx'
 import { IconButton } from '../../../components/ui/control/IconButton.jsx'
 import { DraftPicks } from '../DraftPicks.jsx'
+import { LineupsGlyph } from './LineupSheet.jsx'
 
 const DASH = '—'
 
 // One club's column, the Trade Machine's shape: the club, what it gets from
 // the other club (and what that does for it), then its own roster right
 // there, where a tap sends a player across. No modal: the roster is the page.
-export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, incomingPicks = [], teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, farm = null, incomingFarm = null, requestFarm }) {
+export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, incomingPicks = [], teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, onLineups = null, farm = null, incomingFarm = null, requestFarm }) {
   const club = teamClubName(teamId)
   const data = state.data
   const theme = useMemo(() => headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')), [teamId])
@@ -174,6 +175,12 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
       <div className="tradedesk__dealbar">
         <TeamLogo teamId={teamId} size={28} />
         <h2 className="tradedesk__dealname">{club}</h2>
+        {/* This club's lineup after the deal, the same sheet the tray opens. */}
+        {onLineups && (
+          <Button size="control" skin="outline" className="tradedesk__lineups" aria-label={`${club} lineup after the deal`} onClick={onLineups}>
+            <LineupsGlyph /><span>Lineup</span>
+          </Button>
+        )}
         <p className="tradedesk__dealfig">
           <span className="tradedesk__dealk">40-man</span>
           <span>

@@ -209,43 +209,11 @@
   margin-top: var(--space-2);
 }
 
-/* The tray's Lineups button, under the trade meter. */
-.tradeboard__lineups {
-  margin-top: var(--space-1);
-}
-
+/* The deal card's own Lineup button, in its title row before the 40-man count. */
 /* layout-exempt: the glyph beside the word */
-.tradeboard__lineups {
+.tradedesk__lineups {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1h);
-}
-
-/* On a phone the tray stays one row: the button is its glyph alone, at the
-   meter's right, so it adds no height. */
-@media (max-width: 739px) {
-  .tradedesk__tray .tradeboard__mid {
-    position: relative;
-    padding-right: calc(var(--tap-min) + var(--space-2));
-  }
-
-  .tradedesk__tray .tradeboard__lineups {
-    position: absolute;
-    top: 50%;
-    right: var(--space-2);
-    margin: 0;
-    min-width: var(--tap-min);
-    min-height: var(--tap-min);
-    padding: 0;
-    justify-content: center;
-    transform: translateY(-50%);
-  }
-
-  .tradedesk__tray .tradeboard__lineupsword {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
+  margin-right: var(--space-2);
 }

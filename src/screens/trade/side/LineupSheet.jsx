@@ -59,10 +59,21 @@ function ClubLineup({ club, other, hidden }) {
   )
 }
 
-export function LineupSheet({ clubs, onClose }) {
+// The Lineups mark: a ball field's diamond with its bases (not the site menu's three bars).
+export function LineupsGlyph() {
+  return (
+    <svg className="tradeboard__lineupsglyph" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 2 14 8 8 14 2 8Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M8 1h0M15 8h0M8 15h0M1 8h0" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
+    </svg>
+  )
+}
+
+// `start`: which club a phone shows first (0 or 1), the one whose card opened it.
+export function LineupSheet({ clubs, start = 0, onClose }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
-  const [which, setWhich] = useState(0)
+  const [which, setWhich] = useState(start)
   const ready = clubs.every((c) => c.data?.depth)
   const totals = ready ? clubs.map((c, i) => {
     const v = lineupAfter(c.data.depth, { out: c.sends.map(asDepth), inn: clubs[1 - i].sends.map(asDepth) })

@@ -236,11 +236,22 @@
 }
 
 .tradestory__credit {
-  margin-top: var(--space-1);
+  /* A newspaper photo caption: a hairline over it, the subject's name in bold
+     leading a plain sentence, a step smaller than the story. */
+  margin-top: var(--space-1h);
+  padding-top: var(--space-1h);
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-read);
-  font-style: italic;
   font-size: var(--fs-small);
+  line-height: var(--lh-snug);
   color: var(--text-caption);
+}
+
+#root .tradestory__credit, #root .tradestory__credit * { text-transform: none } /* caps-exempt: a photo caption reads as a sentence, like the story */
+
+.tradestory__credit b {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
 
 
