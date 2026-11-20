@@ -178,3 +178,8 @@ test('a return with a big-leaguer in it is not "for prospects"', () => {
   const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [org, plain(4, 'Reg Ular', 4)], clubs: { [MIL]: { ...clubs[AZ] } }, date: '2026-11-19' })
   assert.notEqual(s.angle.key, 'restock')
 })
+
+test('the dateline is the city of the club that lands the headline player', () => {
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [miz], sendsB: [kid], clubs: {}, date: '2026-11-19' })
+  assert.equal(s.dateline, 'Arizona')
+})

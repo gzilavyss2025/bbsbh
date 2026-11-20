@@ -179,19 +179,51 @@
 }
 
 
-/* The trade story (story/TradeStory.jsx): a newspaper column in the deal card. */
+/* The trade story (story/TradeStory.jsx): a newspaper column in the deal card.
+   The card itself is the column's width, centred, so no empty strips flank it. */
+.tradedesk__moves {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
 .tradestory__body {
   flex: 1 1 auto;
   min-width: 0;
-  display: flow-root;
 }
 
+/* The headline is the hero: the biggest type on the card, as a sentence. */
 .tradestory__headline {
   margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
+  font-family: var(--font-read);
+  font-size: var(--fs-title-lg);
   line-height: var(--lh-tight);
   color: var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  .tradestory__headline {
+    font-size: var(--fs-display);
+  }
+}
+#root .tradestory__headline { text-transform: none } /* caps-exempt: a news headline reads as a sentence, like .gamestory__headline */
+
+.tradestory__byline {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.tradestory__byline time {
+  margin-left: var(--space-2);
+}
+
+/* "SAN DIEGO — ": the wire's dateline opens the first paragraph. */
+#root .tradestory__graf .tradestory__dateline {
+  text-transform: uppercase;
+  font-weight: var(--w-bold);
 }
 
 .tradestory__dek {
@@ -203,9 +235,9 @@
 }
 
 .tradestory__graf {
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-4);
   font-family: var(--font-read);
-  font-size: var(--fs-small);
+  font-size: var(--fs-body);
   line-height: var(--lh-prose);
 }
 #root .tradestory__dek, #root .tradestory__graf, #root .tradestory__graf * { text-transform: none } /* caps-exempt: the story reads as prose */
@@ -214,18 +246,10 @@
   font-weight: var(--w-bold);
 }
 
-/* The story's art: one game photo of the headline player. Full width on a
-   phone; at the wide step it sits right and the story wraps beside it. */
+/* The story's art: one game photo of the headline player, the column's
+   full width under the byline, as a news article leads. */
 .tradestory__art {
-  margin: 0 0 var(--space-3);
-}
-
-@media (min-width: 740px) {
-  .tradestory__art {
-    float: right;
-    width: min(45%, 28rem);
-    margin: var(--space-1) 0 var(--space-3) var(--space-4);
-  }
+  margin: 0 0 var(--space-4);
 }
 
 .tradestory__art img {

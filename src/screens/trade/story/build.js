@@ -249,5 +249,6 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups 
 
   const paragraphs = [lede, starPara, takerRest, turn, giverRest, money_, record, kicker ? [{ text: kicker }] : null].filter(Boolean)
   // The star rides along for the story's photo (photo.js).
-  return { headline, dek, paragraphs, angle: { key: angle.key, reason: angle.reason }, star: { id: star.id, name: star.name, pos: star.pos ?? null } }
+  // The dateline: the home of the club that lands the headline player.
+  return { headline, dek, dateline: teamLocationName(taker) ?? null, paragraphs, angle: { key: angle.key, reason: angle.reason }, star: { id: star.id, name: star.name, pos: star.pos ?? null } }
 }

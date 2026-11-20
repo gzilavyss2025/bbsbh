@@ -74,7 +74,7 @@
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
-     - the Trade Simulator story's photo caption — `.tradestory__credit`
+     - the Trade Simulator story's headline and photo caption — `.tradestory__headline`, `.tradestory__credit`
      - the roster-move card's cutline prose — `.wire__cutline`, and its club-name link `.wire__cutline .plink`
        (a player's `.wire__namelink` stays uppercase)
      - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`

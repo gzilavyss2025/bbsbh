@@ -58,6 +58,11 @@ function Segments({ segs }) {
 // The photo's caption, filled in like a newspaper's: "Jackson Chourio of the
 // Brewers against the Rays in the postseason on Oct. 28." Each blank drops out
 // when the game does not say it.
+// "Nov. 20, 2026" for the byline, AP style.
+const longDate = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${MONTHS[m - 1]} ${d}, ${y}`
+}
 const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
 function captionOf(star, clubId, photo) {
   const [m, d] = (photo.date ?? '').split('/').map(Number)
@@ -93,6 +98,7 @@ export function TradeStory({ fallback, ...deal }) {
     <article className="tradestory__body" aria-busy={state.loading}>
       <h3 className="tradestory__headline">{s.headline}</h3>
       {s.dek && <p className="tradestory__dek">{s.dek}</p>}
+      <p className="tradestory__byline">Tally Wire <time dateTime={date}>{longDate(date)}</time></p>
       {photo.data && (
         <figure className="tradestory__art">
           <a href={photo.data.href} target="_blank" rel="noreferrer">
@@ -101,7 +107,12 @@ export function TradeStory({ fallback, ...deal }) {
           <figcaption className="tradestory__credit">{captionOf(star, deal.sendsA.some((p) => p.id === star.id) ? deal.a : deal.b, photo.data)}</figcaption>
         </figure>
       )}
-      {s.paragraphs.map((p, i) => <p key={i} className="tradestory__graf"><Segments segs={p} /></p>)}
+      {s.paragraphs.map((p, i) => (
+        <p key={i} className="tradestory__graf">
+          {i === 0 && s.dateline && <span className="tradestory__dateline">{s.dateline} — </span>}
+          <Segments segs={p} />
+        </p>
+      ))}
     </article>
   )
 }
