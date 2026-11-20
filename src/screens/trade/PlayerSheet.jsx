@@ -49,9 +49,11 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
                 <h2 className="sheet__title"><PlayerLink id={p.id} name={p.name}>{p.name}</PlayerLink></h2>
                 <p className="t-label tradedesk__meta">
                   {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
-                  {p.topRank ? ` · No. ${p.topRank} MLB prospect` : p.orgRank ? ` · No. ${p.orgRank} club prospect` : ''}
                 </p>
               </div>
+              {/* A ranked prospect who has already debuted keeps his stamp up by his
+                  name; one who has not gets the big stamp in the prospect lead below. */}
+              {(p.topRank || p.orgRank) && p.war != null && <ProspectStamp p={p} teamId={teamId} />}
             </div>
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
