@@ -84,11 +84,11 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
                 the years as a figure, and the label only for a minor-league line. */}
             <span className="tradedesk__money">
               <span className={!p.onForty && p.payUsd == null ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-              <span className="tradedesk__years">{p.control != null && (p.onForty || p.contract) ? `${p.control} ${p.control === 1 ? 'yr' : 'yrs'}` : ''}</span>
+              <span className="tradedesk__years">{yearsText(p, true)}</span>
             </span>
             <span className="tradedesk__figcol">
               <span className="tradedesk__war">{fig.value}</span>
-              {fig.label !== (warSeason ? `${warSeason} WAR` : 'WAR') && <span className="tradedesk__warlabel">{fig.label}</span>}
+              {!fig.isWar && <span className="tradedesk__warlabel">{fig.label}</span>}
             </span>
           </>
         )}
@@ -108,10 +108,11 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
 // The line under the salary, as the Trade Machine wrote it: "3 Years", how
 // long the club holds him (a signed deal's years, or an arbitration or pre-arb
 // player's years until free agency). A count past the ledger is estimated from service time.
-function yearsText(p) {
+// `short` is the roster row's form ("4 yrs"), under a list head that names the column.
+function yearsText(p, short = false) {
   if (p.control == null || (!p.onForty && !p.contract)) return ''
   const n = p.control
-  return `${n} ${n === 1 ? 'Year' : 'Years'}`
+  return short ? `${n} ${n === 1 ? 'yr' : 'yrs'}` : `${n} ${n === 1 ? 'Year' : 'Years'}`
 }
 
 // The one figure: WAR for the season war.json holds (this season until the next
@@ -120,8 +121,8 @@ function figText(p, farm, warSeason) {
   const war = warSeason ? `${warSeason} WAR` : 'WAR'
   // A season across levels ("AA · AAA") names the highest, to fit the column.
   const level = farm?.level?.split(' · ').at(-1)
-  if (p.war != null) return { value: p.war.toFixed(1), label: war }
+  if (p.war != null) return { value: p.war.toFixed(1), label: war, isWar: true }
   if (farm?.ops) return { value: farm.ops, label: [level, 'OPS'].filter(Boolean).join(' ') }
   if (farm?.era) return { value: farm.era, label: [level, 'ERA'].filter(Boolean).join(' ') }
-  return { value: '—', label: war }
+  return { value: '—', label: war, isWar: true }
 }

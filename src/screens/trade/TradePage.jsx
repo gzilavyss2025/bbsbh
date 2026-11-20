@@ -93,11 +93,7 @@ export function TradePage() {
     return n
   })
   const pickProps = (id, other) => ({ draftPicks: ownPicks(id), dp, onTogglePick: togglePick, incomingPicks: other ? sentPicks(other) : [] })
-  const [choosingA, setChoosingA] = useState(false)
-  const [choosingB, setChoosingB] = useState(false)
   const [showDepth, setShowDepth] = useState(false)
-  // A club change that would drop players waits here until the reader confirms it.
-  const [pending, setPending] = useState(null)
 
   useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
 
@@ -141,32 +137,11 @@ export function TradePage() {
   ) : ''
   const wireStory = deal ? dealStory({ a, b, sendsA: sends(sideA.data), sendsB: sends(sideB.data), picksA: sentPicks(a), picksB: sentPicks(b), cashA, cashB }) : null
 
-  // Tapping the club already picked just closes the strip.
-  const named = (side) => picks(side).map((p) => p.name)
-  const switchA = (id) => { setA(id); setPicked((s) => new Set([...s].filter((x) => picks(sideB.data).some((p) => p.id === x)))); setCashA(0); if (id === b) setB(null); setChoosingA(false); setPending(null) }
-  const switchB = (id) => { setB(id); setPicked((s) => new Set([...s].filter((x) => picks(sideA.data).some((p) => p.id === x)))); setCashB(0); setChoosingB(false); setPending(null) }
-  // Tapping the club already picked just closes the strip. A switch that would
-  // drop players asks first; one that drops nobody happens at once.
-  const pickA = (id) => {
-    if (!id || id === a) { setChoosingA(false); return }
-    const drops = named(sideA.data)
-    if (drops.length) setPending({ side: 'a', id, drops })
-    else switchA(id)
-  }
-  const pickB = (id) => {
-    if (!id || id === a) return
-    if (id === b) { setChoosingB(false); return }
-    const drops = b ? named(sideB.data) : []
-    if (drops.length) setPending({ side: 'b', id, drops })
-    else switchB(id)
-  }
-  const confirm = pending && (
-    <p className="tradedesk__confirm" role="alert">
-      Switching to the {teamClubName(pending.id)} drops {pending.drops.join(', ')}.{' '}
-      <Button size="control" skin="ink" onClick={() => (pending.side === 'a' ? switchA(pending.id) : switchB(pending.id))}>Switch</Button>{' '}
-      <Button size="control" skin="ghost" onClick={() => setPending(null)}>Keep the deal</Button>
-    </p>
-  )
+  // A club is picked from a picker only while its side is empty, so a pick never drops anyone.
+  const switchA = (id) => { setA(id); setPicked((s) => new Set([...s].filter((x) => picks(sideB.data).some((p) => p.id === x)))); setCashA(0) }
+  const switchB = (id) => { setB(id); setPicked((s) => new Set([...s].filter((x) => picks(sideA.data).some((p) => p.id === x)))); setCashB(0) }
+  const pickA = (id) => { if (id && id !== b) switchA(id) }
+  const pickB = (id) => { if (id && id !== a) switchB(id) }
   // The pinned strip repeats the columns' figures, so it hides while they are on screen.
   const movesRef = useRef(null)
   const hasDeal = Boolean(sideA.data && sideB.data)
@@ -205,37 +180,18 @@ export function TradePage() {
     setRetain({})
     setSidePct({ a: 0, b: 0 })
     setRetainOpen(false)
-    setChoosingA(false)
-    setChoosingB(false)
-    setPending(null)
   }
   // X on your club: the partner (and what it sends) stays in its own column;
   // with no partner yet, the desk empties.
   const clearA = () => {
     if (!b) { startOver(); setA(null); return }
     setPicked((s) => new Set([...s].filter((x) => picks(sideB.data).some((p) => p.id === x))))
-    setA(null); setCashA(0); setSidePct((x) => ({ ...x, a: 0 })); setPending(null)
+    setA(null); setCashA(0); setSidePct((x) => ({ ...x, a: 0 }))
   }
-  const changeA = choosingA
-    ? (
-      <>
-        <TeamFilterStrip chips showMlbPin={false} selectedTeamId={a} centerTeamId={a} onSelect={pickA} ariaLabel="Your club" />
-        <Button size="control" skin="ghost" onClick={() => { setChoosingA(false); setPending(null) }}>Cancel</Button>
-        {pending?.side === 'a' && confirm}
-      </>
-    )
-    : <IconButton mark="sm" className="tradedesk__barx" onClick={clearA} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
-  const changeB = choosingB
-    ? (
-      <>
-        <TeamFilterStrip chips showMlbPin={false} selectedTeamId={b} centerTeamId={b}
-          teams={CLUBS_AZ.filter((id) => id !== a).map((id) => ({ id, name: teamClubName(id) }))}
-          onSelect={pickB} ariaLabel="Trade partner" />
-        <Button size="control" skin="ghost" onClick={() => { setChoosingB(false); setPending(null) }}>Cancel</Button>
-        {pending?.side === 'b' && confirm}
-      </>
-    )
-    : <IconButton mark="sm" className="tradedesk__barx" onClick={() => switchB(null)} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
+  // Each club bar's X: clears that side only.
+  const xButton = (onClick) => <IconButton mark="sm" className="tradedesk__barx" onClick={onClick} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
+  const changeA = xButton(clearA)
+  const changeB = xButton(() => switchB(null))
   const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (

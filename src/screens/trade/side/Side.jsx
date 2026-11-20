@@ -11,6 +11,7 @@ import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
 import { PlayerRow } from '../PlayerRow.jsx'
 import { POS_GROUPS, SPOTS, SHOW, SORT, levelRank, rosterList } from '../rosterList.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { SearchGlyph } from '../../../components/chrome/SiteSearch.jsx'
 import { IconButton } from '../../../components/ui/control/IconButton.jsx'
 import { DraftPicks } from '../DraftPicks.jsx'
 
@@ -98,10 +99,7 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
                 {players && (
                   <IconButton className="tradedesk__searchbtn" aria-expanded={searching} onClick={() => { if (searching) setQuery(''); setSearching(!searching) }}
                     label={searching ? `Close ${club} search` : `Search ${club} players`}>
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" />
-                      <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
+                    <SearchGlyph />
                   </IconButton>
                 )}
               </div>

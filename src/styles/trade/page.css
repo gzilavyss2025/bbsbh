@@ -280,24 +280,7 @@
   margin: var(--space-2) 0 var(--space-3);
 }
 
-/* layout-exempt: the sort label beside its select */
-.tradedesk__sort {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .tradedesk__search {
-  min-height: var(--tap-min);
-  padding: 0 var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--fs-field);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-rule) solid var(--border-rule);
-}
-
-.tradedesk__sort select {
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
@@ -474,13 +457,6 @@
 
 .tradedesk__strip .tradedesk__over {
   color: var(--marker);
-}
-
-.tradedesk__confirm {
-  margin: var(--space-2) 0 0;
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-event-wash);
-  font-size: var(--fs-small);
 }
 
 .tradedesk__strip .tradedesk__stripshare {
