@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lineup after the deal</title>
+<style>
+:root{--paper:#f7f1e3;--card:#fffaf0;--ink:#0f1822;--muted:#6b6558;--rule:#ded6c0;--mil:#ffc52f;--stl:#c41e3a;--hole:#b3261e;--new:#1f6b3a;--marker:#f2c14e}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 Georgia,serif;padding:24px 16px}
+.wrap{max-width:1040px;margin:0 auto}
+h1{font:700 22px system-ui;margin:0 0 4px}p.why{max-width:72ch;color:var(--muted);margin:0 0 18px}
+h2{font:700 15px system-ui;margin:32px 0 8px}
+.k{font:700 11px system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:700px){.cols{grid-template-columns:1fr}}
+.card{position:relative;background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:10px 10px 10px 18px}
+.card::before{content:'';position:absolute;inset-block:0;left:0;width:8px;background:var(--c)}
+.title{display:flex;align-items:center;gap:8px;font:700 14px system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.logo{width:22px;height:22px;border-radius:50%;background:var(--c)}
+/* The headline: what the deal does to the lineup. */
+.head{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline;margin:6px 0 10px;font:700 20px system-ui;text-transform:uppercase;letter-spacing:.02em}
+.head .hole{color:var(--hole)}.head .n{font-family:ui-monospace,monospace}
+.mut{color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font:700 11px system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--ink);padding:4px 6px}
+td{padding:7px 6px;border-bottom:1px solid var(--rule);vertical-align:middle}
+td.pos{font:700 12px system-ui;width:44px}td.war{text-align:right;font:22px ui-monospace,monospace;width:64px}
+td.who small{display:block;font:11px system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+/* A weak spot: the best man left fills it, on a red wash so it still stands out. */
+tr.gap td{background:#fbe7a6}tr.gap td.war{color:var(--hole)}
+/* On the highlighted row the NEW tag is a solid highlighter chip, like the award chips. */
+tr.gap .tag.new{background:var(--marker);color:var(--ink);border-color:var(--ink)}
+.tag{font:700 10px system-ui;text-transform:uppercase;letter-spacing:.06em;padding:1px 5px;border:1px solid currentColor;margin-left:6px;vertical-align:2px}
+.tag.new{color:var(--new)}
+.more{display:block;margin:8px 0 2px;font:700 12px system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.nudge{margin-top:10px;padding:8px 10px;border:2px solid var(--ink);background:var(--marker);font:700 12px system-ui;text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nudge button{font:inherit;background:var(--ink);color:#fff;border:0;padding:6px 10px;min-height:32px}
+.ph{color:var(--muted);font-style:italic}
+.phone{max-width:360px}
+.sw{display:flex;border:2px solid var(--ink);margin:8px 0}.sw span{flex:1;text-align:center;font:700 12px system-ui;text-transform:uppercase;letter-spacing:.04em;min-height:44px;display:flex;align-items:center;justify-content:center}
+.sw .on{background:var(--ink);color:#fff}
+/* Each tab carries its club's lineup WAR, so the switch is also the comparison. */
+.sw span{flex-direction:column;gap:2px;padding:6px 0}.sw em{font:13px ui-monospace,monospace;font-style:normal;text-transform:none;letter-spacing:0}
+.both{display:grid;grid-template-columns:1fr 1fr;gap:8px;font:700 13px system-ui;text-transform:uppercase}
+.both div{border:1px solid var(--rule);padding:6px 8px}
+.both .hole{color:var(--hole)}
+.grip{width:40px;height:4px;background:var(--rule);margin:2px auto 8px}
+.notes{max-width:72ch;color:var(--muted);font-size:14px}.notes li{margin:4px 0}
+</style></head><body><div class="wrap">
+<h1>Lineup after the deal, round two</h1>
+<p class="why">A rough sketch with no live data; most WARs and position moves are placeholders. The sheet opens from a <b>Lineups</b> button in the bottom tray. This round applies the critique:</p>
+<ul class="notes">
+ <li><b>Opens on what changed.</b> Only the new, moved and empty spots show at first, and "Show full lineup" opens the rest.</li>
+ <li><b>The headline is the answer:</b> lineup WAR, large, in the title type.</li>
+ <li><b>A weak spot names who would play:</b> the best man left fills it, tagged NEW like any new starter, on a highlighter-yellow wash (its NEW tag yellow too) that marks the weak spot, so it reads as "he'd start, and that's a problem".</li>
+ <li><b>Less doubling up:</b> the green edge mark is gone. The NEW tag carries it, and the WAR figure is 22px to match the roster.</li>
+ <li><b>On a phone,</b> each club's tab in the switch carries its lineup WAR, so the switch is the comparison.</li>
+</ul>
+
+<h2>The sheet on a computer</h2>
+<div class="cols">
+<section class="card" style="--c:var(--mil)">
+ <div class="title"><span class="logo"></span>Brewers after the deal</div>
+ <div class="head"><span>Lineup WAR <span class="n">+1.8</span></span></div>
+ <table>
+  <thead><tr><th>Spot</th><th>What changed</th><th style="text-align:right">WAR</th></tr></thead>
+  <tbody>
+   <tr><td class="pos">1B</td><td class="who">Alec Burleson<span class="tag new">new</span><small>from Cardinals</small></td><td class="war">3.2</td></tr>
+   <tr><td class="pos">2B</td><td class="who">JJ Wetherholt<span class="tag new">new</span><small>from Cardinals · Turang to SS</small></td><td class="war">4.6</td></tr>
+   <tr><td class="pos">LF</td><td class="who">Garrett Mitchell<small>was Chourio</small></td><td class="war">3.1</td></tr>
+   <tr class="gap"><td class="pos">3B</td><td class="who">David Hamilton<span class="tag new">new</span><small>best left · was Ortiz's backup</small></td><td class="war">0.4</td></tr>
+  </tbody>
+ </table>
+ <a class="more" href="#">Show full lineup (14 spots)</a>
+</section>
+
+<section class="card" style="--c:var(--stl)">
+ <div class="title"><span class="logo"></span>Cardinals after the deal</div>
+ <div class="head"><span>Lineup WAR <span class="n">−1.8</span></span></div>
+ <table>
+  <thead><tr><th>Spot</th><th>What changed</th><th style="text-align:right">WAR</th></tr></thead>
+  <tbody>
+   <tr><td class="pos">LF</td><td class="who">Jackson Chourio<span class="tag new">new</span><small>from Brewers</small></td><td class="war">4.6</td></tr>
+   <tr><td class="pos">SS</td><td class="who">Jett Williams<span class="tag new">new</span><small>from Brewers · Winn to 3B</small></td><td class="war">1.6</td></tr>
+   <tr><td class="pos">1B</td><td class="who">Next man up<small>was Burleson</small></td><td class="war">1.2</td></tr>
+   <tr><td class="pos">2B</td><td class="who">Brendan Donovan<small>was Wetherholt</small></td><td class="war">2.1</td></tr>
+  </tbody>
+ </table>
+ <a class="more" href="#">Show full lineup (14 spots)</a>
+</section>
+</div>
+
+<h2>The sheet on a phone, slid up</h2>
+<section class="card phone" style="--c:var(--mil)">
+ <div class="grip"></div>
+ <div class="sw"><span class="on">Brewers<em>+1.8 WAR</em></span><span>Cardinals<em>−1.8 WAR</em></span></div>
+ <table>
+  <thead><tr><th>Spot</th><th>What changed</th><th style="text-align:right">WAR</th></tr></thead>
+  <tr><td class="pos">1B</td><td class="who">Alec Burleson<span class="tag new">new</span></td><td class="war">3.2</td></tr>
+  <tr><td class="pos">2B</td><td class="who">JJ Wetherholt<span class="tag new">new</span></td><td class="war">4.6</td></tr>
+  <tr><td class="pos">LF</td><td class="who">Garrett Mitchell<small>was Chourio</small></td><td class="war">3.1</td></tr>
+  <tr class="gap"><td class="pos">3B</td><td class="who">David Hamilton<span class="tag new">new</span></td><td class="war">0.4</td></tr>
+ </table>
+ <a class="more" href="#">Show full lineup</a>
+</section>
+</div></body></html>

@@ -41,7 +41,7 @@ function Club({ teamId, gets, grade, side, ready, started = true }) {
   )
 }
 
-export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true, started = true }) {
+export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true, started = true, action = null }) {
   // A side is in once it sends a player, cash or a draft pick.
   const built = Boolean((sendsA.length || cashA || picksA) && (sendsB.length || cashB || picksB))
   // The grade waits for both sides' values (valueTradeSide), so it never flashes a provisional one.
@@ -69,6 +69,8 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
         <span className="tradeboard__meter" aria-hidden="true" style={{ '--tug-a': colorA, '--tug-b': colorB, '--tug-share': `${share}%` }}>
           <span className="tradeboard__tug" />
         </span>
+        {/* The tray's way into the Lineups sheet. */}
+        {action}
       </div>
       )}
       <Club side="b" teamId={b} gets={sendsA.length} grade={gradeOf(-value)} ready={ready} started={started} />

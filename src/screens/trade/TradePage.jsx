@@ -14,11 +14,13 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { DepthCard } from './DepthCard.jsx'
+import { LineupSheet } from './side/LineupSheet.jsx'
 import { PCTS, RetainControl, Wire, Effect } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
 import '../../styles/trade/roster.css'
+import '../../styles/trade/lineup.css'
 import '../../styles/trade/stamp.css'
 import '../../styles/trade/motion.css'
 import { Side } from './side/Side.jsx'
@@ -94,6 +96,7 @@ export function TradePage() {
   })
   const pickProps = (id, other) => ({ draftPicks: ownPicks(id), dp, onTogglePick: togglePick, incomingPicks: other ? sentPicks(other) : [] })
   const [showDepth, setShowDepth] = useState(false)
+  const [showLineups, setShowLineups] = useState(false)
 
   useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
 
@@ -396,8 +399,26 @@ export function TradePage() {
         // The deal at a glance (grades, the meter, who gets how many), pinned to
         // the foot of the screen while the reader picks players.
         <div className="tradedesk__tray">
-          <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started} />
+          <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started}
+            action={started && (
+              // A phone's one-row tray shows the glyph alone; the word comes back from 740px.
+              <Button size="control" skin="outline" className="tradeboard__lineups" aria-label="Lineups after the deal" onClick={() => setShowLineups(true)}>
+                <svg className="tradeboard__lineupsglyph" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M2 3h2M2 8h2M2 13h2M6 3h8M6 8h8M6 13h8" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+                </svg>
+                <span className="tradeboard__lineupsword">Lineups</span>
+              </Button>
+            )} />
         </div>
+      )}
+      {deal && showLineups && (
+        <LineupSheet
+          clubs={[
+            { teamId: a, data: sideA.data, sends: sends(sideA.data) },
+            { teamId: b, data: sideB.data, sends: sends(sideB.data) },
+          ]}
+          onClose={() => setShowLineups(false)}
+        />
       )}
       <ReportFooter />
     </div>
