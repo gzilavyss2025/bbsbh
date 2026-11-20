@@ -35,7 +35,7 @@ test('a full deal reads as a beat writer files it', () => {
   const t = text(s)
   // The Cy Young winner leads, sent away: the headline says trade.
   assert.equal(s.headline, 'Brewers trade Jacob Misiorowski to Diamondbacks in three-player deal')
-  assert.match(t, /Misiorowski, 24, posted a 1\.80 ERA\. He won the 2026 NL Cy Young Award and was an All-Star in 2026\./)
+  assert.match(t, /Misiorowski, 24, posted a 1\.80 ERA\. He won the NL Cy Young Award and was an All-Star in 2026\./)
   assert.match(t, /He won the 2023 NL Rookie of the Year Award, a Silver Slugger in 2025 and a Gold Glove in 2026\./)
   // The dek names the other side's best honor, one only.
   assert.equal(s.dek, 'The Brewers land Corbin Carroll, who won the 2023 NL Rookie of the Year Award, in a deal that moves three players.')
@@ -122,4 +122,59 @@ test('a star who takes over a weak starting spot leads on the hole he fills', ()
   const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [plain(2, 'Sam Arm', 1)], clubs: {}, lineups, date: '2026-11-19' })
   assert.equal(s.angle.key, 'fit')
   assert.match(lede(s), /in a two-player deal that fills their hole at third base\.$/)
+})
+
+test('a club out of the postseason that gets ranked prospects back leads on the restock', () => {
+  const org = { ...plain(3, 'Kid Two', null), orgRank: 4 }
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [org], clubs: { [MIL]: { ...clubs[AZ] } }, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'restock')
+  assert.match(lede(s), /in a two-player deal that restocks the Brewers with prospects\.$/)
+})
+
+// Example trades: each picks the angle it should, and none prints a hole.
+const EXAMPLES = [
+  ['star for prospects', { sendsA: [miz], sendsB: [kid] }, 'award'],
+  ['prospect cost', { sendsA: [plain(1, 'Joe Star', 5)], sendsB: [kid, plain(2, 'Sam Arm', 1)] }, 'prospects'],
+  ['salary dump', { sendsA: [plain(1, 'Big Contract', 0.5)], sendsB: [plain(2, 'Cheap Arm', 0.2)], deal: { ...deal, value: { a: 60e6, b: -60e6 } } }, 'value'],
+  ['reliever swap', { sendsA: [{ ...plain(1, 'Lefty Pen', 1.2), pos: 'P' }], sendsB: [{ ...plain(2, 'Righty Pen', 1.1), pos: 'P' }] }, 'season'],
+  ['champion sells for depth', { sendsA: [plain(1, 'Vet Bat', 2)], sendsB: [plain(2, 'Depth Guy', 0)] }, 'season'],
+]
+for (const [name, parts, key] of EXAMPLES) {
+  test(`example trade: ${name}`, () => {
+    const s = buildStory({ a: MIL, b: AZ, clubs, nextYear: 2027, date: '2026-11-19', ...parts })
+    assert.equal(s.angle.key, key, s.angle.reason)
+    assert.doesNotMatch(text(s), /undefined|null|NaN|\s\.(\s|$)|playoffs/m)
+  })
+}
+
+test('the headline follows the angle', () => {
+  const lineups = { [AZ]: { spots: [{ spot: 'LF', group: 'bat', before: { id: 70, war: 0.3 }, after: { id: 1, war: 5 } }] } }
+  const fit = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [plain(2, 'Sam Arm', 1)], clubs: {}, lineups, date: '2026-11-19' })
+  assert.equal(fit.headline, 'Diamondbacks fill left-field hole with Joe Star in two-player deal with Brewers')
+  const cost = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [kid], clubs: {}, date: '2026-11-19' })
+  assert.equal(cost.headline, 'Diamondbacks send top prospect Demetrio Crisantes to Brewers for Joe Star')
+  const org = { ...plain(3, 'Kid Two', null), orgRank: 4 }
+  const restock = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [org], clubs: { [MIL]: { ...clubs[AZ] } }, date: '2026-11-19' })
+  assert.equal(restock.headline, 'Brewers trade Joe Star to Diamondbacks for prospects')
+})
+
+test('honors that all come from one season name the year once, at the end', () => {
+  const one = { families: [
+    { key: 'Cy Young', years: { 2026: [{ league: 'AL', playerId: 8 }] } },
+    { key: 'All-MLB First Team', years: { 2026: [{ playerId: 8 }] } },
+  ] }
+  const ace = { id: 8, name: 'Cam Schlittler', war: 6, note: 'Schlittler, 25, posted a 1.95 ERA.', honors: honorsOf(8, one), allStars: [2026] }
+  const t = text(buildStory({ a: MIL, b: AZ, sendsA: [ace], sendsB: [kid], clubs: {}, date: '2026-11-19' }))
+  assert.match(t, /He won the AL Cy Young Award, made the All-MLB First Team and was an All-Star, all in 2026\./)
+})
+
+test('the prospect cost is named once up top: no dek repeats him', () => {
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [kid], clubs: {}, date: '2026-11-19' })
+  assert.equal(s.dek, null)
+})
+
+test('a return with a big-leaguer in it is not "for prospects"', () => {
+  const org = { ...plain(3, 'Kid Two', null), orgRank: 4 }
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [org, plain(4, 'Reg Ular', 4)], clubs: { [MIL]: { ...clubs[AZ] } }, date: '2026-11-19' })
+  assert.notEqual(s.angle.key, 'restock')
 })

@@ -57,6 +57,13 @@ function honorsSentence(p, afterNote) {
   const stars = p.allStars?.length ?? 0
   if (stars) clauses.push(stars === 1 ? `was an All-Star in ${p.allStars[0]}` : `is a ${word(stars)}-time All-Star`)
   if (!clauses.length) return null
+  // Every honor from one season: the year once, at the end ("…, all in 2026").
+  const years = new Set([...(p.honors ?? []).map((h) => h.season), ...(p.allStars ?? [])])
+  if (years.size === 1 && clauses.length > 1) {
+    const [y] = years
+    const bare = clauses.map((c) => c.replaceAll(` in ${y}`, '').replaceAll(`the ${y} `, 'the '))
+    return `${afterNote ? 'He' : lastName(p.name)} ${listOf(bare)}${clauses.length > 2 ? ',' : ''} ${clauses.length > 2 ? 'all ' : ''}in ${y}.`
+  }
   return `${afterNote ? 'He' : lastName(p.name)} ${listOf(clauses)}.`
 }
 
@@ -99,13 +106,17 @@ function starTag(p) {
 // that tilts well one way by surplus value; else the taker's season.
 const SPOT_WORDS = { C: 'behind the plate', '1B': 'at first base', '2B': 'at second base', SS: 'at shortstop', '3B': 'at third base', LF: 'in left field', CF: 'in center field', RF: 'in right field', DH: 'at designated hitter' }
 const WEAK_SPOT = 1
-function pickAngle({ star, giverGets, deal, lineup }) {
+// The same spots as a headline's modifier: "fill left-field hole".
+const SPOT_HEAD = { C: 'catcher', '1B': 'first-base', '2B': 'second-base', SS: 'shortstop', '3B': 'third-base', LF: 'left-field', CF: 'center-field', RF: 'right-field', DH: 'designated-hitter' }
+function pickAngle({ star, giverGets, deal, lineup, giverSeason, giver }) {
   if (starTag(star)) return { key: 'award', reason: `${star.name} has a major award` }
   const prospect = [...giverGets].filter((p) => p.topRank).sort((x, y) => x.topRank - y.topRank)[0]
   if (prospect) return { key: 'prospects', reason: `${prospect.name} is a top-100 prospect`, player: prospect }
   // The star takes over a starting spot the taker had weak (under 1.0 WAR) or empty.
   const hole = lineup?.spots?.find((x) => x.after?.id === star.id && SPOT_WORDS[x.spot] && (x.before?.war ?? -9) < WEAK_SPOT)
   if (hole) return { key: 'fit', reason: `${star.name} takes over a weak ${hole.spot}`, spot: hole.spot }
+  // A club out of the postseason that gets only ranked prospects back is restocking.
+  if (giverSeason?.postseason === 'out' && giverGets.length && giverGets.every((p) => p.orgRank || p.topRank)) return { key: 'restock', reason: `the ${club(giver)} missed the postseason and get ranked prospects`, club: giver }
   const v = deal?.value?.a
   if (Number.isFinite(v) && ['big', 'steal'].includes(verdictOf(v))) return { key: 'value', reason: `surplus value is ${verdictOf(v)}`, value: v }
   return { key: 'season', reason: 'nothing stronger to lead on' }
@@ -130,7 +141,7 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups 
   const star = starOf(all)
   const starIsB = sendsB.some((p) => p.id === star.id)
   const n = all.length
-  const headline = starIsB
+  const plainHead = starIsB
     ? `${club(a)} acquire ${star.name} in ${word(n)}-player deal with ${club(b)}`
     : `${club(a)} trade ${star.name} to ${club(b)} in ${word(n)}-player deal`
   // The dek turns to the other side: what it lands, and that player's best honor.
@@ -138,7 +149,7 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups 
   const otherClub = starIsB ? b : a
   const otherStar = starOf(other)
   const otherHonor = otherStar ? honorClauses((otherStar.honors ?? []).slice(0, 1)).find((c) => c.startsWith('won the')) : null
-  const dek = otherStar
+  const dekText = otherStar
     ? `The ${club(otherClub)} land ${otherStar.name}${otherHonor ? `, who ${otherHonor},` : ''} in a deal that moves ${word(n)} players.`
     : null
 
@@ -149,13 +160,15 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups 
   const giverGets = starIsB ? sendsA : sendsB
 
   // Lede: the news and the motive in one sentence.
-  const angle = pickAngle({ star, giverGets, deal, lineup: lineups[taker] })
+  const angle = pickAngle({ star, giverGets, deal, lineup: lineups[taker], giverSeason: clubs[giver], giver })
   const tag = starTag(star)
   const leadIn = seasonLead(clubs[taker])
   const dealWords = ` in ${/^(eight|eleven|eighteen)/.test(word(n)) ? 'an' : 'a'} ${word(n)}-player deal`
   const close = angle.key === 'prospects'
     ? [{ text: `${dealWords} that costs them ` }, { text: angle.player.name, playerId: angle.player.id }, { text: `, MLB Pipeline's No. ${angle.player.topRank} prospect.` }]
-    : angle.key === 'fit'
+    : angle.key === 'restock'
+      ? [{ text: `${dealWords} that restocks the ${club(angle.club)} with prospects.` }]
+      : angle.key === 'fit'
       ? [{ text: `${dealWords} that fills their hole ${SPOT_WORDS[angle.spot]}.` }]
       : angle.key === 'value'
       ? [{ text: `${dealWords} that tilts well toward the ${club(angle.value > 0 ? a : b)} by surplus value.` }]
@@ -169,6 +182,16 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups 
     { text: teamFullName(giver), teamId: giver },
     ...close,
   ]
+  // The headline follows the angle; award, value and season keep the plain one.
+  const headline = angle.key === 'fit'
+    ? `${club(taker)} fill ${SPOT_HEAD[angle.spot]} hole with ${star.name} in ${word(n)}-player deal with ${club(giver)}`
+    : angle.key === 'prospects'
+      ? `${club(taker)} send top prospect ${angle.player.name} to ${club(giver)} for ${star.name}`
+      : angle.key === 'restock'
+        ? `${club(giver)} trade ${star.name} to ${club(taker)} for prospects`
+        : plainHead
+  // The dek would name the prospect the headline and lede already name: drop it.
+  const dek = angle.key === 'prospects' && otherStar?.id === angle.player.id ? null : dekText
   // The lede named the prospect's rank; his own paragraph does not say it again.
   const said = (p) => (angle.key === 'prospects' && p.id === angle.player.id ? { ...p, topRank: null } : p)
 
