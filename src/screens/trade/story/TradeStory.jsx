@@ -49,6 +49,13 @@ function Segments({ segs }) {
 
 // The deal written up as a beat writer files it, in the deal card where the
 // wire row was. Until the facts arrive it shows the plain wire sentence.
+// The photo's caption reads like a newspaper's: "Gunnar Henderson on Sept. 21."
+const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
+function captionOf(name, date) {
+  const [m, d] = (date ?? '').split('/').map(Number)
+  return MONTHS[m - 1] && d ? `${name} on ${MONTHS[m - 1]} ${d}.` : `${name}.`
+}
+
 export function TradeStory({ fallback, ...deal }) {
   const date = isoToday()
   // Everything the story says: the players, the wire's sentence (picks and cash
@@ -76,7 +83,7 @@ export function TradeStory({ fallback, ...deal }) {
           <a href={photo.data.href} target="_blank" rel="noreferrer">
             <img src={photo.data.thumb} alt={`${star.name}${photo.data.caption ? `: ${photo.data.caption}` : ''}`} loading="lazy" />
           </a>
-          <figcaption className="tradestory__credit">{star.name}{photo.data.date ? ` · ${photo.data.date}` : ''}</figcaption>
+          <figcaption className="tradestory__credit">{captionOf(star.name, photo.data.date)}</figcaption>
         </figure>
       )}
       {s.paragraphs.map((p, i) => <p key={i} className="tradestory__graf"><Segments segs={p} /></p>)}

@@ -197,11 +197,13 @@
   border: var(--bw-heavy) solid var(--border-stamped);
 }
 
-.tradestory__credit {
+#root .tradestory__credit {
   margin-top: var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: var(--fs-small);
+  text-transform: none;
+  letter-spacing: normal;
   color: var(--text-caption);
 }
 
