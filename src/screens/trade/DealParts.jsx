@@ -95,20 +95,4 @@ export function Effect({ club, side, deal, nextYear }) {
   )
 }
 
-export function StripSide({ name, pay, war, forty }) {
-  return (
-    <p className="tradedesk__stripside">
-      <span className="t-label t-label--bold">{name}</span>
-      <span><span className="tradedesk__k">Pay</span> {pay}</span>
-      <span><span className="tradedesk__k">WAR</span> {signedNum(war)}</span>
-      <span className={forty > 40 ? 'tradedesk__over' : ''}><span className="tradedesk__k">40-man</span> {forty}</span>
-    </p>
-  )
-}
-
-
-
-// "+$28.7M · 1 salary not set": the figure, and how many players in the deal it leaves out.
-export const payText = (v, unset) => `${signedMoney(v)}${unset ? ` + ${unset} TBD` : ''}`
 const signedMoney = (v) => (v === 0 ? '$0' : `${v < 0 ? '−' : '+'}${money(v)}`)
-const signedNum = (v) => (v === 0 ? '0.0' : `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)}`)
