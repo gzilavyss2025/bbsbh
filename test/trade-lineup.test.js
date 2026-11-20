@@ -66,3 +66,9 @@ test('a spot with nobody of its own takes the best bat left before the DH', () =
   assert.equal(view.spots.find((s) => s.spot === '1B').after.id, 53)
   assert.equal(view.spots.find((s) => s.spot === 'DH').after, null)
 })
+
+test('a reliever does not start; the rotation is starters and arms with no known role', () => {
+  const staff = [{ ...p(60, 'P', 4.0), role: 'CL' }, { ...p(61, 'P', 3.0), role: 'RP' }, { ...p(62, 'P', 2.0), role: 'SP' }, p(63, 'P', 1.0)]
+  const arms = lineupAfter(staff, {}).spots.filter((s) => s.group === 'arm').map((s) => s.after?.id ?? null)
+  assert.deepEqual(arms, [62, 63, null, null, null])
+})

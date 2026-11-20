@@ -9,6 +9,7 @@ import { isoToday } from '../../../lib/dates.js'
 import { honorsOf, allStarSeasons } from './honors.js'
 import { clubSeason } from './clubs.js'
 import { buildStory } from './build.js'
+import { asDepth, lineupAfter } from '../../../lib/trade/lineup.js'
 import { storyPhoto } from './photo.js'
 import { storySeason } from '../../../api/trade/storyData.js'
 
@@ -24,7 +25,7 @@ async function notesFor(story, date) {
   return new Map(subjects.map((s, i) => [s.playerId, lines[i]]))
 }
 
-async function loadStory({ a, b, sendsA, sendsB, story, deal, nextYear }, date) {
+async function loadStory({ a, b, sendsA, sendsB, story, deal, nextYear, depthA, depthB }, date) {
   const [data, notes] = await Promise.all([loadStoryData(), notesFor(story, date)])
   const dress = (p, fromId) => ({
     ...p,
@@ -34,8 +35,12 @@ async function loadStory({ a, b, sendsA, sendsB, story, deal, nextYear }, date) 
     allStars: allStarSeasons(p.id, data.allStars),
   })
   const clubs = Object.fromEntries([a, b].map((id) => [id, clubSeason(id, data.season, data.standings, data.postseason)]))
+  const lineups = {
+    ...(depthA && { [a]: lineupAfter(depthA, { out: sendsA.map(asDepth), inn: sendsB.map(asDepth) }) }),
+    ...(depthB && { [b]: lineupAfter(depthB, { out: sendsB.map(asDepth), inn: sendsA.map(asDepth) }) }),
+  }
   return buildStory({
-    a, b, deal, nextYear, date, clubs,
+    a, b, deal, nextYear, date, clubs, lineups,
     sendsA: sendsA.map((p) => dress(p, a)),
     sendsB: sendsB.map((p) => dress(p, b)),
     cutline: story?.cutline ?? null,
@@ -71,7 +76,7 @@ export function TradeStory({ fallback, ...deal }) {
   // Everything the story says: the players, the wire's sentence (picks and cash
   // ride in it), and the deal's payroll and 40-man counts.
   const key = [
-    deal.a, deal.b, ...deal.sendsA.map((p) => p.id), '|', ...deal.sendsB.map((p) => p.id),
+    Boolean(deal.depthA), Boolean(deal.depthB), deal.a, deal.b, ...deal.sendsA.map((p) => p.id), '|', ...deal.sendsB.map((p) => p.id),
     (deal.story?.cutline ?? []).map((s) => s.text).join(''),
     deal.deal?.payroll.a, deal.deal?.fortyAfter.a, deal.deal?.fortyAfter.b,
   ].join(',')

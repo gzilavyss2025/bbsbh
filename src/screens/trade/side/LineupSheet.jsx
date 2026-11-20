@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { lineupAfter } from '../../../lib/trade/lineup.js'
+import { asDepth, lineupAfter } from '../../../lib/trade/lineup.js'
 import { teamClubName } from '../../../lib/teams.js'
 import { headerThemeFor, themeKeyFor } from '../../../lib/colors/headerTheme.js'
 import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
@@ -16,8 +16,6 @@ import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 
 const DASH = '—'
 const signed = (v) => `${v < 0 ? '−' : v > 0 ? '+' : ''}${Math.abs(v).toFixed(1)}`
-// A player as the lineup reads him; an arrival plays at the level he plays now.
-const asDepth = (p) => ({ id: p.id, name: p.name, pos: p.pos, level: p.levelCode, war: p.war })
 
 function ClubLineup({ club, other, hidden }) {
   const [full, setFull] = useState(false)

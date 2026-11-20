@@ -5,13 +5,14 @@
 // A rough lineup, said plainly in the sheet: the best player at each fielding
 // spot by last season's WAR, his own position first (an outfielder may slide
 // across the outfield); a spot with nobody of its own takes the best bat left;
-// the best bat after that is the DH; the five best arms are the rotation (the roster does not say who starts).
+// the best bat after that is the DH; the five best arms who are not known relievers are the rotation.
 // A spot under 1.0 WAR is weak, the same line the depth card's Starter view draws.
 
 export const BAT_SPOTS = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH']
 const ARMS = 5
 const WEAK = 1
 const NEAR = new Set(['MLB', 'AAA'])
+const BULLPEN = new Set(['RP', 'CL'])
 const PITCHER = new Set(['P', 'SP', 'RP', 'RHP', 'LHP', 'TWP'])
 // Where a player may start, in the order he is tried: his own spot, then the
 // spots a general label covers.
@@ -41,9 +42,13 @@ function field(players) {
     used.add(p.id)
   }
   at.DH = bats.find((p) => !used.has(p.id)) ?? null
-  const arms = pool.filter((p) => PITCHER.has(p.pos)).sort(byWar).slice(0, ARMS)
+  // A known reliever (RP, closer) stays in the pen; an arm with no role may start.
+  const arms = pool.filter((p) => PITCHER.has(p.pos) && !BULLPEN.has(p.role)).sort(byWar).slice(0, ARMS)
   return { at, arms }
 }
+
+// A trade-desk player as the lineup reads him; an arrival plays at the level he plays now.
+export const asDepth = (p) => ({ id: p.id, name: p.name, pos: p.pos, level: p.levelCode, war: p.war, role: p.line?.role ?? p.role ?? null })
 
 const warSum = (ps) => ps.reduce((t, p) => t + (p?.war ?? 0), 0)
 

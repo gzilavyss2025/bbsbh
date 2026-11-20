@@ -97,10 +97,15 @@ function starTag(p) {
 // The angle the lede hangs on, strongest first, with the reason it won:
 // the star's major award; a ranked prospect the taker gave up for him; a deal
 // that tilts well one way by surplus value; else the taker's season.
-function pickAngle({ star, giverGets, deal }) {
+const SPOT_WORDS = { C: 'behind the plate', '1B': 'at first base', '2B': 'at second base', SS: 'at shortstop', '3B': 'at third base', LF: 'in left field', CF: 'in center field', RF: 'in right field', DH: 'at designated hitter' }
+const WEAK_SPOT = 1
+function pickAngle({ star, giverGets, deal, lineup }) {
   if (starTag(star)) return { key: 'award', reason: `${star.name} has a major award` }
   const prospect = [...giverGets].filter((p) => p.topRank).sort((x, y) => x.topRank - y.topRank)[0]
-  if (prospect) return { key: 'prospects', reason: `the ${prospect.name} is a top-100 prospect`, player: prospect }
+  if (prospect) return { key: 'prospects', reason: `${prospect.name} is a top-100 prospect`, player: prospect }
+  // The star takes over a starting spot the taker had weak (under 1.0 WAR) or empty.
+  const hole = lineup?.spots?.find((x) => x.after?.id === star.id && SPOT_WORDS[x.spot] && (x.before?.war ?? -9) < WEAK_SPOT)
+  if (hole) return { key: 'fit', reason: `${star.name} takes over a weak ${hole.spot}`, spot: hole.spot }
   const v = deal?.value?.a
   if (Number.isFinite(v) && ['big', 'steal'].includes(verdictOf(v))) return { key: 'value', reason: `surplus value is ${verdictOf(v)}`, value: v }
   return { key: 'season', reason: 'nothing stronger to lead on' }
@@ -119,7 +124,7 @@ function groupParagraph(lead, players) {
   ]), { text: `.${lines ? ` ${lines}` : ''}` }]
 }
 
-export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = null, nextYear, date }) {
+export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, lineups = {}, deal = null, nextYear, date }) {
   const all = [...sendsA, ...sendsB]
   if (!all.length) return null
   const star = starOf(all)
@@ -144,13 +149,15 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
   const giverGets = starIsB ? sendsA : sendsB
 
   // Lede: the news and the motive in one sentence.
-  const angle = pickAngle({ star, giverGets, deal })
+  const angle = pickAngle({ star, giverGets, deal, lineup: lineups[taker] })
   const tag = starTag(star)
   const leadIn = seasonLead(clubs[taker])
   const dealWords = ` in ${/^(eight|eleven|eighteen)/.test(word(n)) ? 'an' : 'a'} ${word(n)}-player deal`
   const close = angle.key === 'prospects'
     ? [{ text: `${dealWords} that costs them ` }, { text: angle.player.name, playerId: angle.player.id }, { text: `, MLB Pipeline's No. ${angle.player.topRank} prospect.` }]
-    : angle.key === 'value'
+    : angle.key === 'fit'
+      ? [{ text: `${dealWords} that fills their hole ${SPOT_WORDS[angle.spot]}.` }]
+      : angle.key === 'value'
       ? [{ text: `${dealWords} that tilts well toward the ${club(angle.value > 0 ? a : b)} by surplus value.` }]
       : [{ text: `${dealWords}.` }]
   const lede = [

@@ -115,3 +115,11 @@ test('with no award, prospect or lopsided value, the season frames the lede', ()
   assert.equal(s.angle.key, 'season')
   assert.match(lede(s), /^Coming off an 86-76 season/)
 })
+
+test('a star who takes over a weak starting spot leads on the hole he fills', () => {
+  // The taker (AZ) started a 0.3 WAR third baseman; the arrival takes third.
+  const lineups = { [AZ]: { spots: [{ spot: '3B', group: 'bat', before: { id: 70, war: 0.3 }, after: { id: 1, war: 5 } }] } }
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [plain(2, 'Sam Arm', 1)], clubs: {}, lineups, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'fit')
+  assert.match(lede(s), /in a two-player deal that fills their hole at third base\.$/)
+})

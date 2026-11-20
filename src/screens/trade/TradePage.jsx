@@ -149,19 +149,6 @@ export function TradePage() {
   const pickB = (id) => { if (id && id !== a) switchB(id) }
   // Nothing is in the deal yet: the deal cards wait, the rosters lead.
   const started = Boolean(picked.size || dp.size || cashA || cashB)
-  // The phone's share sheet where there is one; otherwise copy the link.
-  const [shared, setShared] = useState('')
-  const share = async () => {
-    const url = window.location.href
-    const title = `${teamClubName(a)} – ${b ? teamClubName(b) : ''} trade`
-    try {
-      if (navigator.share) { await navigator.share({ title, url }); return }
-      await navigator.clipboard.writeText(url)
-      setShared('Link copied')
-    } catch {
-      setShared('')
-    }
-  }
   // Start over: the partner, every player, pick and cash amount, and any
   // retained salary go. The button also clears your club, for a blank desk.
   const dirty = Boolean(a || b || picked.size || dp.size || cashA || cashB)
@@ -188,7 +175,6 @@ export function TradePage() {
   const xButton = (onClick) => <IconButton mark="sm" className="tradedesk__barx" onClick={onClick} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
   const changeA = xButton(clearA)
   const changeB = xButton(() => switchB(null))
-  const swap = () => { setA(b); setB(a); setCashA(cashB); setCashB(cashA); setSidePct((x) => ({ a: x.b, b: x.a })) }
 
   return (
     <div className="screen tradedesk">
@@ -370,7 +356,7 @@ export function TradePage() {
           <Card frame="stamped" className="tradedesk__moves">
             <Wire text={wireText}>
               {wireStory && (
-                <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} nextYear={sideA.data.nextYear} fallback={wireText} />
+                <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} depthA={sideA.data.depth} depthB={sideB.data.depth} nextYear={sideA.data.nextYear} fallback={wireText} />
               )}
             </Wire>
             {retainOpen ? (
