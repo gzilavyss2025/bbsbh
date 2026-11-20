@@ -60,7 +60,7 @@
   inset-block: 0;
   left: 0;
   width: var(--space-2);
-  background: var(--club-edge);
+  background: var(--club-edge, var(--border-stamped));
 }
 
 /* layout-exempt: the logo beside the club's name */

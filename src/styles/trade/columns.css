@@ -252,11 +252,9 @@
 
 /* The club lives in its colour down each card's left edge: a stripe inside the
    ink frame, so the frame's corners stay square and unbroken. */
-.card.tradedesk__side {
-  position: relative;
-}
-
-.card.tradedesk__side::before {
+/* The stamped card is already the positioned box the stripe is placed from;
+   the stripe is not the card's frame, so it names the column, not .card. */
+.tradedesk__side::before {
   content: '';
   position: absolute;
   inset-block: 0;
