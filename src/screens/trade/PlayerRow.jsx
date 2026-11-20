@@ -38,18 +38,19 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
               {p.retainedUsd ? ` · keeps ${money(p.retainedUsd)}` : ''}
             </span>
           </span>
-          {/* The same columns as the roster rows: salary over years, then the figure over its label. */}
+          {/* The same columns and print as the roster rows: salary over years, then the figure. */}
           {prospect ? (
             <ProspectStamp p={p} teamId={teamId} />
           ) : (
             <>
               <span className="tradedesk__money">
                 <span className={!p.onForty && p.payUsd == null ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-                <span className="tradedesk__years">{yearsText(p)}</span>
+                <span className="tradedesk__years">{yearsText(p, true)}</span>
               </span>
               <span className="tradedesk__figcol">
                 <span className="tradedesk__war">{fig.value}</span>
-                <span className="tradedesk__warlabel">{fig.label}</span>
+                {/* No column head here, so the figure keeps a quiet label: "WAR". */}
+                <span className="tradedesk__warlabel">{fig.isWar ? 'WAR' : fig.label}</span>
               </span>
             </>
           )}

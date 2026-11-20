@@ -24,6 +24,8 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
   const club = teamClubName(teamId)
   const data = state.data
   const theme = useMemo(() => headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')), [teamId])
+  // The club is its colour down the card's left edge, not a bar across the top.
+  const edge = { '--club-edge': theme?.bar ?? 'var(--navy)' }
   const [group, setGroup] = useState('all')
   const [spot, setSpot] = useState('all')
   const [show, setShow] = useState('forty')
@@ -53,16 +55,13 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
   // rosters start at the same height, whatever each deal card holds.
   if (part === 'roster') {
     return (
-      <Card frame="stamped" className="tradedesk__side tradedesk__rostercard">
+      <Card frame="stamped" className="tradedesk__side tradedesk__rostercard" style={edge}>
         {/* The club's main bar, the one the Identity Lab tunes and the lineup page
             wears: its bar colour, accent edge and ink, the mono mark bleeding the
             bar's full height, the full club name centred. Default navy when the
             club has no tuned bar. */}
-        <h2
-          className="tradedesk__clubbar"
-          style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
-        >
-          <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />
+        <h2 className="tradedesk__clubbar">
+          <TeamLogo teamId={teamId} size={28} />
           <span>{teamFullName(teamId)}</span>
           {/* With the deal cards waiting, the roster bar carries the club's X. */}
           {bare && change}
@@ -152,7 +151,7 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
                     <SortHead value="pay" sort={sort} onSort={setSort}>Salary</SortHead>
                     <SortHead value="control" sort={sort} onSort={setSort}>Yrs</SortHead>
                   </span>
-                  <SortHead value="war" sort={sort} onSort={setSort} className="tradedesk__sortfig">{data.warSeason ? `${data.warSeason} WAR` : 'WAR'}</SortHead>
+                  <SortHead value="war" sort={sort} onSort={setSort} className="tradedesk__sortfig">WAR</SortHead>
                 </span>
                 <span className="tradedesk__sortpad" aria-hidden="true" />
               </div>
@@ -169,14 +168,11 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
     )
   }
   return (
-    <Card frame="stamped" className="tradedesk__side">
+    <Card frame="stamped" className="tradedesk__side" style={edge}>
       {/* The Trade Machine's team bar: the club's colour, its name at the left,
           its figures at the right (40-man now and after), and the switch. */}
-      <div
-        className="tradedesk__dealbar"
-        style={theme ? { '--clubbar-fill': theme.bar, '--clubbar-accent': theme.accent, '--clubbar-ink': theme.onBar } : undefined}
-      >
-        <TeamLogo teamId={teamId} variant="mono" crop="bar" tint className="tradedesk__clubbarmark" />
+      <div className="tradedesk__dealbar">
+        <TeamLogo teamId={teamId} size={28} />
         <h2 className="tradedesk__dealname">{club}</h2>
         <p className="tradedesk__dealfig">
           <span className="tradedesk__dealk">40-man</span>

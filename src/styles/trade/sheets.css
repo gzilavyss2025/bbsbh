@@ -44,24 +44,60 @@
   }
 }
 
-/* layout-exempt: logo, the club, and the WAR column head at the right */
+/* Each club's side, a small copy of the desk's club cards: stamped frame, the
+   club's colour down the left edge, title row, column heads, rows. */
+.tradesheet__side {
+  position: relative;
+  padding: var(--space-3) var(--space-2) 0 calc(var(--space-2) * 2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+
+/* The club stripe sits inside the ink frame, so the frame's corners stay square. */
+.tradesheet__side::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--space-2);
+  background: var(--club-edge);
+}
+
+/* layout-exempt: the logo beside the club's name */
 .tradesheet__club {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: var(--bw-rule) solid var(--border-stamped);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
 }
 
 .tradesheet__club h3 {
-  flex: 1 1 auto;
   margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
   color: var(--text-heading);
+}
+
+/* layout-exempt: the two column heads, player at the left and WAR at the right */
+.tradesheet__colheads {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--space-2) 0 0;
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
 
 .tradesheet__list {
   list-style: none;
-  margin: 0;
+  margin: 0 calc(var(--space-2) * -1);
   padding: 0;
 }
 
@@ -71,26 +107,22 @@
   grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
   gap: var(--space-2);
   align-items: center;
-  padding: var(--space-2) 0;
+  padding: var(--space-2);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* The face and name borrow the card row's classes, and with them its named
-   grid areas; in this three-column row they take the next cell instead. */
+.tradesheet__player:last-child {
+  border-bottom: 0;
+}
+
 .tradesheet__player > .shot.tradedesk__face,
 .tradesheet__player > .tradedesk__who {
   grid-area: auto;
 }
 
-/* The player the sheet is about: his name in bold ink, and "this player" in words. */
-.tradesheet__player--this .tradedesk__name {
-  font-weight: var(--w-bold);
-  background: var(--surface-event-wash);
-}
-
 .tradesheet__num {
   font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
+  font-size: var(--fs-num-lg);
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--text-heading);
@@ -107,8 +139,14 @@
 /* layout-exempt: the face beside the name and its line in the sheet head */
 .playersheet__id {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+}
+
+/* The awards keep a little air from the name. */
+.playersheet__id > .playersheet__honors {
+  margin-left: var(--space-2);
 }
 
 .playersheet__id h2,
@@ -218,7 +256,12 @@
 }
 
 .playersheet__photo {
-  margin: var(--space-3) 0 0;
+  margin: 0;
+}
+
+/* The photo and the seasons table start on one line, a step below the stat line. */
+.playersheet__grid {
+  margin-top: var(--space-4);
 }
 
 .playersheet__photo img {
@@ -375,4 +418,57 @@
 .playersheet__section .factsheet__teamname {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
+}
+
+/* The seasons table leads the sheet's main column: no rule above it, flush to the top. */
+.playersheet__main > .playersheet__section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* His awards, beside his name: a major award is an ink stamp with the stamped
+   cards' hard shadow, a team honor a highlighter chip. Year in figures, award in caps. */
+/* layout-exempt: the stamps in a wrapping row */
+.playersheet__honors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* layout-exempt: the year beside its award */
+.playersheet__honor {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-on-bright);
+}
+
+.playersheet__honor--major {
+  padding: var(--space-1h) var(--space-3);
+  border-width: var(--bw-heavy);
+  background: var(--surface-stamped-ink);
+  box-shadow: var(--shadow-stamped-soft);
+  font-size: var(--fs-small);
+  color: var(--text-on-ink-bright);
+}
+
+.playersheet__honoryr {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.playersheet__honor--major .playersheet__honoryr {
+  color: var(--marker);
 }

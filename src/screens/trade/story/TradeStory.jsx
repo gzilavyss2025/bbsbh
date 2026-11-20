@@ -4,6 +4,7 @@ import { TeamLink } from '../../../components/team/TeamLink.jsx'
 import { fetchPlayerFacts, factRequest } from '../../../api/transactions/playerFacts.js'
 import { factLines, subjectsOf } from '../../../api/transactions/templates.js'
 import { loadStoryData } from '../../../api/trade/storyData.js'
+import { teamClubName } from '../../../lib/teams.js'
 import { isoToday } from '../../../lib/dates.js'
 import { honorsOf, allStarSeasons } from './honors.js'
 import { clubSeason } from './clubs.js'
@@ -49,11 +50,19 @@ function Segments({ segs }) {
 
 // The deal written up as a beat writer files it, in the deal card where the
 // wire row was. Until the facts arrive it shows the plain wire sentence.
-// The photo's caption reads like a newspaper's: "Gunnar Henderson on Sept. 21."
+// The photo's caption, filled in like a newspaper's: "Jackson Chourio of the
+// Brewers against the Rays in the postseason on Oct. 28." Each blank drops out
+// when the game does not say it.
 const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-function captionOf(name, date) {
-  const [m, d] = (date ?? '').split('/').map(Number)
-  return MONTHS[m - 1] && d ? `${name} on ${MONTHS[m - 1]} ${d}.` : `${name}.`
+function captionOf(star, clubId, photo) {
+  const [m, d] = (photo.date ?? '').split('/').map(Number)
+  return [
+    star.name,
+    clubId && `of the ${teamClubName(clubId)}`,
+    photo.opponentId && `against the ${teamClubName(photo.opponentId)}`,
+    photo.postseason && 'in the postseason',
+    MONTHS[m - 1] && d && `on ${MONTHS[m - 1]} ${d}`,
+  ].filter(Boolean).join(' ') + '.'
 }
 
 export function TradeStory({ fallback, ...deal }) {
@@ -83,7 +92,7 @@ export function TradeStory({ fallback, ...deal }) {
           <a href={photo.data.href} target="_blank" rel="noreferrer">
             <img src={photo.data.thumb} alt={`${star.name}${photo.data.caption ? `: ${photo.data.caption}` : ''}`} loading="lazy" />
           </a>
-          <figcaption className="tradestory__credit">{captionOf(star.name, photo.data.date)}</figcaption>
+          <figcaption className="tradestory__credit">{captionOf(star, deal.sendsA.some((p) => p.id === star.id) ? deal.a : deal.b, photo.data)}</figcaption>
         </figure>
       )}
       {s.paragraphs.map((p, i) => <p key={i} className="tradestory__graf"><Segments segs={p} /></p>)}

@@ -13,6 +13,7 @@ import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Numbers } from './Numbers.jsx'
 import { TradeRecap } from './TradeSheet.jsx'
 import { ProspectStamp } from './ProspectStamp.jsx'
+import { Honors } from './side/Honors.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Ledger } from '../../components/player/Ledger.jsx'
 import { fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
@@ -51,6 +52,8 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
                   {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
                 </p>
               </div>
+              {/* His trophies sit by his name, the first thing the eye reaches. */}
+              <Honors playerId={p.id} />
               {/* A ranked prospect who has already debuted keeps his stamp up by his
                   name; one who has not gets the big stamp in the prospect lead below. */}
               {(p.topRank || p.orgRank) && p.war != null && <ProspectStamp p={p} teamId={teamId} />}

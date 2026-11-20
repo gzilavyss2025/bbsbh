@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { loadTradeSide, loadMinorLines, valueTradeSide } from '../../api/trade/side.js'
 import { dealSummary, applyRetain, wireSentence } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -14,7 +14,7 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { DepthCard } from './DepthCard.jsx'
-import { PCTS, RetainControl, Wire, Effect, StripSide, payText } from './DealParts.jsx'
+import { PCTS, RetainControl, Wire, Effect } from './DealParts.jsx'
 import '../../styles/trade/depth.css'
 import '../../styles/trade/sheets.css'
 import '../../styles/trade/columns.css'
@@ -142,19 +142,8 @@ export function TradePage() {
   const switchB = (id) => { setB(id); setPicked((s) => new Set([...s].filter((x) => picks(sideA.data).some((p) => p.id === x)))); setCashB(0) }
   const pickA = (id) => { if (id && id !== b) switchA(id) }
   const pickB = (id) => { if (id && id !== a) switchB(id) }
-  // The pinned strip repeats the columns' figures, so it hides while they are on screen.
-  const movesRef = useRef(null)
-  const hasDeal = Boolean(sideA.data && sideB.data)
-  // Nothing is in the deal yet: the deal cards wait, the rosters sit right under the strip.
+  // Nothing is in the deal yet: the deal cards wait, the rosters lead.
   const started = Boolean(picked.size || dp.size || cashA || cashB)
-  const [movesInView, setMovesInView] = useState(false)
-  useEffect(() => {
-    const el = movesRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const io = new IntersectionObserver(([e]) => setMovesInView(e.isIntersecting), { threshold: 0.2 })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [hasDeal])
   // The phone's share sheet where there is one; otherwise copy the link.
   const [shared, setShared] = useState('')
   const share = async () => {
@@ -203,9 +192,7 @@ export function TradePage() {
       </header>
 
       <Stack gap="section">
-        {deal && <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started} />}
-
-        <div className="tradedesk__sides" ref={movesRef}>
+        <div className="tradedesk__sides">
           {!a ? (
             <>
             <Card frame="stamped" label="Your club" className="tradedesk__side">
@@ -229,8 +216,50 @@ export function TradePage() {
             </>
           ) : b ? (
             <>
-              {/* Row one: each club's deal card (what it gets, what that does for it).
-                  Row two: each club's roster, so the two rosters start level. */}
+              <Side
+                part="roster"
+                bare={!started}
+                teamId={a} {...pickProps(a, b)}
+                state={sideA}
+                incoming={sends(sideB.data)}
+                incomingTeamId={b}
+                incomingCash={cashB}
+                partner={teamClubName(b)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashA}
+                onCash={setCashA}
+                after={deal?.fortyAfter.a}
+                effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
+                retainUI={retainUI}
+                change={changeA}
+                farm={farmA.data}
+                incomingFarm={farmB.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
+              />
+              <Side
+                part="roster"
+                bare={!started}
+                teamId={b} {...pickProps(b, a)}
+                state={sideB}
+                incoming={sends(sideA.data)}
+                incomingTeamId={a}
+                incomingCash={cashA}
+                partner={teamClubName(a)}
+                picked={picked}
+                onToggle={toggle}
+                cash={cashB}
+                onCash={setCashB}
+                after={deal?.fortyAfter.b}
+                effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
+                retainUI={retainUI}
+                change={changeB}
+                farm={farmB.data}
+                incomingFarm={farmA.data}
+                requestFarm={() => setWantFarm((w) => ({ ...w, b: true }))}
+              />
+              {/* The rosters lead; what each club gets follows under its own roster,
+                  and the grades ride in the tray at the foot of the screen. */}
               {started && (
               <>
               <Side
@@ -275,48 +304,6 @@ export function TradePage() {
               />
               </>
               )}
-              <Side
-                part="roster"
-                bare={!started}
-                teamId={a} {...pickProps(a, b)}
-                state={sideA}
-                incoming={sends(sideB.data)}
-                incomingTeamId={b}
-                incomingCash={cashB}
-                partner={teamClubName(b)}
-                picked={picked}
-                onToggle={toggle}
-                cash={cashA}
-                onCash={setCashA}
-                after={deal?.fortyAfter.a}
-                effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
-                retainUI={retainUI}
-                change={changeA}
-                farm={farmA.data}
-                incomingFarm={farmB.data}
-                requestFarm={() => setWantFarm((w) => ({ ...w, a: true }))}
-              />
-              <Side
-                part="roster"
-                bare={!started}
-                teamId={b} {...pickProps(b, a)}
-                state={sideB}
-                incoming={sends(sideA.data)}
-                incomingTeamId={a}
-                incomingCash={cashA}
-                partner={teamClubName(a)}
-                picked={picked}
-                onToggle={toggle}
-                cash={cashB}
-                onCash={setCashB}
-                after={deal?.fortyAfter.b}
-                effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
-                retainUI={retainUI}
-                change={changeB}
-                farm={farmB.data}
-                incomingFarm={farmA.data}
-                requestFarm={() => setWantFarm((w) => ({ ...w, b: true }))}
-              />
             </>
           ) : (
             <>
@@ -405,12 +392,11 @@ export function TradePage() {
           : <Button className="tradedesk__showdepth" onClick={() => setShowDepth(true)}>Show organization depth</Button>
         )}
       </Stack>
-      {deal && !movesInView && (
-        // The deal's three numbers, pinned so every add shows what it changed.
-        <div className="tradedesk__strip" aria-live="polite">
-          <StripSide name={teamAbbr({ id: a })} pay={payText(deal.payroll.a, deal.unpriced.a)} war={deal.war.a} forty={deal.fortyAfter.a} />
-          <StripSide name={teamAbbr({ id: b })} pay={payText(deal.payroll.b, deal.unpriced.b)} war={deal.war.b} forty={deal.fortyAfter.b} />
-          <Button size="control" skin="outline" className="tradedesk__stripshare" onClick={share}>{shared || 'Share'}</Button>
+      {deal && (
+        // The deal at a glance (grades, the meter, who gets how many), pinned to
+        // the foot of the screen while the reader picks players.
+        <div className="tradedesk__tray">
+          <Scoreboard deal={deal} a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} cashA={cashA} cashB={cashB} picksA={sentPicks(a).length} picksB={sentPicks(b).length} valued={Boolean(sideA.data?.valued && sideB.data?.valued)} started={started} />
         </div>
       )}
       <ReportFooter />

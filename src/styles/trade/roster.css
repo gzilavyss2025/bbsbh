@@ -18,13 +18,18 @@
   align-items: end;
   padding-bottom: var(--space-1);
   border-bottom: var(--bw-rule) solid var(--border-rule);
+  /* The list below keeps room for its scrollbar; the head keeps the same room,
+     so each head sits over its column. */
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 /* layout-exempt: mirrors the roster row's columns so each head sits over its figure */
 .tradedesk__sortcols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 6.5rem 3rem;
-  gap: var(--space-3);
+  gap: var(--space-2);
   align-items: end;
 }
 
@@ -113,4 +118,63 @@
   background: var(--text-heading);
   border-color: var(--border-stamped);
   color: var(--text-on-ink);
+}
+
+/* The list and its head run to the card's edges, so each row's rule goes edge
+   to edge; the rows keep a small inset so nothing touches the border. */
+.tradedesk__rostercard .tradedesk__sorthead,
+.tradedesk__rostercard .tradedesk__rosterlist {
+  margin-inline: calc(var(--space-2) * -1);
+}
+
+.tradedesk__rostercard .tradedesk__sorthead,
+.tradedesk__rostercard .tradedesk__rosterlist > li {
+  padding-inline: var(--space-2);
+}
+
+/* The list scrolls in its own panel, as Baseball Trade Values and Fanspo do:
+   the bottom rows fade into the paper so the cut reads as "more below", and
+   the last row can scroll clear of the fade. */
+.tradedesk__rostercard .tradedesk__rosterlist {
+  padding-bottom: var(--space-8);
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--space-12)), transparent);
+}
+
+/* The deal card mirrors the roster card: its list and the deal figures run to
+   the card's edges, rules edge to edge, the contents inset as the rows are. */
+.tradedesk__side:not(.tradedesk__rostercard) .tradedesk__list,
+.tradedesk__side:not(.tradedesk__rostercard) .tradedesk__effect {
+  margin-inline: calc(var(--space-2) * -1);
+}
+
+.tradedesk__side:not(.tradedesk__rostercard) .tradedesk__sent {
+  padding-inline: var(--space-2);
+}
+
+.tradedesk__side:not(.tradedesk__rostercard) .tradedesk__effect {
+  margin-bottom: calc(var(--space-4) * -1);
+  padding-inline: var(--space-2);
+}
+
+/* One left edge down both club cards: the title, the controls, the heads and
+   the figures all start where the rows' headshots do. */
+.tradedesk__side > .card__body {
+  padding-inline: var(--space-2);
+  /* Past the club stripe as well. */
+  padding-left: calc(var(--space-2) * 2);
+}
+
+/* A club card's title runs straight into what follows: no rules under it. */
+.tradedesk__side .tradedesk__clubbar,
+.tradedesk__side .tradedesk__dealbar,
+.tradedesk__side .tradedesk__sends {
+  border-bottom: 0;
+  border-top: 0;
+}
+
+/* With no rule under it, the title needs only a small gap to what follows. */
+.tradedesk__side .tradedesk__clubbar,
+.tradedesk__side .tradedesk__dealbar {
+  margin-bottom: var(--space-2);
+  padding-bottom: 0;
 }

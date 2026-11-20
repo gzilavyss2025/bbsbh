@@ -5,6 +5,7 @@ import { tradeLead } from '../../lib/trade/history.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
+import { headerThemeFor, themeKeyFor } from '../../lib/colors/headerTheme.js'
 
 const DASH = '—'
 const club = (id) => (isMlbTeamId(id) ? teamClubName(id) : 'Other club')
@@ -42,13 +43,16 @@ function Side({ teamId, players, warSeason, highlight = null }) {
   // The player this sheet is about leads his side.
   const rows = [...players].sort((x, y) => (y.id === highlight) - (x.id === highlight))
   const here = teamFullName(teamId)
+  // Drawn as the desk's club cards are: the club's colour down the left edge,
+  // its name over a column head, then the rows.
+  const theme = isMlbTeamId(teamId) ? headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')) : null
   return (
-    <section className="tradesheet__side">
+    <section className="tradesheet__side" style={{ '--club-edge': theme?.bar ?? 'var(--border-stamped)' }}>
       <header className="tradesheet__club">
         {isMlbTeamId(teamId) && <TeamLogo teamId={teamId} size={28} />}
-        <h3 className="t-label t-label--bold">{club(teamId)} got</h3>
-        <span className="tradedesk__k tradesheet__colhead">{warSeason} WAR</span>
+        <h3>{club(teamId)} got</h3>
       </header>
+      <p className="tradesheet__colheads" aria-hidden="true"><span>Player</span><span>{warSeason} WAR</span></p>
       <ul className="tradesheet__list">
         {rows.map((p) => {
           // Where he is now, only when that is somewhere else.
