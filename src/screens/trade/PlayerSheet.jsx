@@ -53,7 +53,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
                 </p>
               </div>
               {/* His trophies sit by his name, the first thing the eye reaches. */}
-              <Honors playerId={p.id} />
+              <Honors playerId={p.id} debuted={p.war != null && !(p.topRank || p.orgRank)} />
               {/* A ranked prospect who has already debuted keeps his stamp up by his
                   name; one who has not gets the big stamp in the prospect lead below. */}
               {(p.topRank || p.orgRank) && p.war != null && <ProspectStamp p={p} teamId={teamId} />}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade columns sketch</title>
+<style>
+:root{--paper:#f7f1e3;--card:#fffaf0;--ink:#0f1822;--muted:#6b6558;--rule:#cfc6b2;--mil:#ffc52f;--mil-ink:#12284b;--stl:#c41e3a;--stl-ink:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 Georgia,serif;padding:24px 16px}
+h1{font:700 22px/1.2 system-ui,sans-serif;margin:0 0 4px}h2{font:700 17px system-ui,sans-serif;margin:40px 0 4px}
+p.why{max-width:70ch;color:var(--muted);margin:0 0 14px}
+.wrap{max-width:1040px;margin:0 auto}
+.k{font:700 11px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.box{background:var(--card);border:2px solid var(--ink)}
+.ph{background:repeating-linear-gradient(45deg,#e9e1cf 0 6px,#f3ecdc 6px 12px);border:1px dashed var(--rule);color:var(--muted);font:12px system-ui;display:flex;align-items:center;justify-content:center}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)}.row:last-child{border:0}
+.face{width:30px;height:36px}.grow{flex:1}.num{font:13px ui-monospace,monospace}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.cols{grid-template-columns:1fr}}
+/* A */
+.score{display:grid;grid-template-columns:1fr auto 1fr;border:2px solid var(--ink);background:var(--card)}
+.half{display:flex;align-items:center;gap:10px;padding:12px 14px;font:700 16px system-ui}
+.half.mil{background:var(--mil);color:var(--mil-ink)}.half.stl{background:var(--stl);color:var(--stl-ink);justify-content:flex-end}
+.meter{background:var(--ink);color:#fff;padding:10px 18px;text-align:center;font:700 14px system-ui}
+.logo{width:34px;height:34px;border-radius:50%;background:currentColor;opacity:.85}
+.col{border:2px solid var(--ink);border-top:0;background:var(--card);padding:12px 14px}
+.gets{background:var(--paper);border:1px solid var(--rule);padding:8px 12px;margin-bottom:12px}
+.tabs{display:flex;gap:0;margin:8px 0}.tabs span{border:2px solid var(--ink);padding:3px 10px;font:700 11px system-ui;margin-left:-2px}.tabs span.on{background:var(--ink);color:#fff}
+.stick{height:8px}
+/* B */
+.edge{border-left:8px solid var(--c)}
+.btitle{display:flex;align-items:center;gap:8px;font:700 15px system-ui;padding:10px 14px;border-bottom:1px solid var(--rule)}
+.chip{width:22px;height:22px;border-radius:50%;background:var(--c)}
+.tray{position:sticky;bottom:0;margin-top:16px;border:2px solid var(--ink);background:var(--card);display:grid;grid-template-columns:1fr auto 1fr}
+.tray>div{padding:10px 14px}.tray .mid{background:var(--ink);color:#fff;text-align:center;font:700 13px system-ui}
+@media(max-width:700px){.tray{grid-template-columns:1fr 1fr}.tray .mid{grid-column:1/-1;order:-1}}
+</style></head><body><div class="wrap">
+<h1>Trade Simulator: one club band per side</h1>
+<p class="why">Today each club shows up three times in a row: in the scoreboard, on the deal card's bar and on the roster card's bar. Both sketches name each club once.</p>
+
+<h2>A. The scoreboard is the header for each column</h2>
+<p class="why">The scoreboard's two coloured halves become the tops of the two columns. Under each half, one card holds what that club gets, then its roster. The deal grade and trade meter stay in the middle. There are no club bars lower down.</p>
+<div class="score"><div class="half mil"><span class="logo"></span>Brewers<span class="grow"></span>B+</div><div class="meter"><div class="k" style="color:#cbd">Trade meter</div>Brewers win</div><div class="half stl">C<span class="grow"></span>Cardinals<span class="logo"></span></div></div>
+<div class="cols">
+ <div class="col">
+  <div class="gets"><div class="k">Gets from the Cardinals · $2.8M in 2027</div>
+   <div class="row"><span class="face ph"></span><span class="grow">JJ Wetherholt <small>2B · 24</small></span><span class="num">4.6 WAR ✕</span></div>
+   <div class="k" style="margin-top:6px">Better in 2027 +0.1 · Long-term +$21.0M · Payroll −$5.5M</div></div>
+  <div class="k">Brewers roster</div>
+  <div class="tabs"><span class="on">Players</span><span>Everyone</span><span class="on">40-man</span><span>Prospects</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Jacob Misiorowski</span><span class="num">6.6 +</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Brice Turang</span><span class="num">5.9 +</span></div>
+ </div>
+ <div class="col">
+  <div class="gets"><div class="k">Gets from the Brewers · $8.3M in 2027</div>
+   <div class="row"><span class="face ph"></span><span class="grow">Jackson Chourio <small>LF · 22</small></span><span class="num">4.6 WAR ✕</span></div>
+   <div class="k" style="margin-top:6px">Better in 2027 −0.1 · Long-term −$21.0M · Payroll +$5.5M</div></div>
+  <div class="k">Cardinals roster</div>
+  <div class="tabs"><span class="on">Players</span><span>Everyone</span><span class="on">40-man</span><span>Prospects</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Alec Burleson</span><span class="num">3.2 +</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Andre Pallante</span><span class="num">2.7 +</span></div>
+ </div>
+</div>
+
+<h2>B. Rosters on top, the deal in a tray at the bottom</h2>
+<p class="why">Each roster card shows its club as a coloured left edge and a small title, with no full-width bar. The deal (what each club gets, the grades and the meter) sits in a tray that stays at the bottom of the screen while you pick players. On a phone the tray stacks: the meter on top, the two clubs below.</p>
+<div class="cols">
+ <div class="box edge" style="--c:var(--mil)"><div class="btitle"><span class="chip"></span>Milwaukee Brewers<span class="grow"></span><span class="k">40-man 40/40</span></div>
+  <div style="padding:8px 14px"><div class="tabs"><span class="on">Players</span><span>Everyone</span><span class="on">40-man</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Jacob Misiorowski</span><span class="num">6.6 +</span></div>
+  <div class="row" style="opacity:.45"><span class="face ph"></span><span class="grow">Jackson Chourio</span><span class="k">Going to Cardinals −</span></div></div></div>
+ <div class="box edge" style="--c:var(--stl)"><div class="btitle"><span class="chip"></span>St. Louis Cardinals<span class="grow"></span><span class="k">40-man 40/40</span></div>
+  <div style="padding:8px 14px"><div class="tabs"><span class="on">Players</span><span>Everyone</span><span class="on">40-man</span></div>
+  <div class="row" style="opacity:.45"><span class="face ph"></span><span class="grow">JJ Wetherholt</span><span class="k">Going to Brewers −</span></div>
+  <div class="row"><span class="face ph"></span><span class="grow">Alec Burleson</span><span class="num">3.2 +</span></div></div></div>
+</div>
+<div class="tray"><div><b>Brewers B+</b><br><small>Get Wetherholt · +$21.0M</small></div><div class="mid">Brewers win<div class="stick" style="background:linear-gradient(90deg,var(--mil) 55%,var(--stl) 55%);margin-top:6px"></div></div><div style="text-align:right"><b>C Cardinals</b><br><small>Get Chourio · −$21.0M</small></div></div>
+</div></body></html>
