@@ -26,11 +26,10 @@ export function Honors({ playerId, debuted = false }) {
     return SHORT[h.words] ?? h.words
   }
   const major = (key) => Boolean(HONORS.find((x) => x.key === key)?.major)
-  // A major award is an ink stamp (year over award); a team honor a highlighter chip.
   return (
     <ul className="playersheet__honors" aria-label="Awards">
       {honors.map((h) => (
-        <li key={`${h.key}-${h.season}`} className={major(h.key) ? 'playersheet__honor playersheet__honor--major' : 'playersheet__honor'}>
+        <li key={`${h.key}-${h.season}`} className="playersheet__honor">
           <span className="playersheet__honoryr">{h.season}</span>
           <span>{major(h.key) && h.league ? `${h.league} ` : ''}{words(h.key)}</span>
         </li>

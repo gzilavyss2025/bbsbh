@@ -427,8 +427,8 @@
   border-top: 0;
 }
 
-/* His awards, beside his name: a major award is an ink stamp with the stamped
-   cards' hard shadow, a team honor a highlighter chip. Year in figures, award in caps. */
+/* His awards, beside his name: one highlighter chip each, all the same size.
+   Year in figures, award in caps. */
 /* layout-exempt: the stamps in a wrapping row */
 .playersheet__honors {
   display: flex;
@@ -442,10 +442,14 @@
 
 /* layout-exempt: the year beside its award */
 .playersheet__honor {
+  /* Year and award share one baseline; line-height 1 keeps every chip one height. */
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  box-sizing: border-box;
+  height: var(--space-6);
+  padding: 0 var(--space-2);
+  line-height: 1;
   border: var(--bw-rule) solid var(--border-stamped);
   background: var(--marker);
   font-family: var(--font-display);
@@ -455,20 +459,9 @@
   color: var(--text-on-bright);
 }
 
-.playersheet__honor--major {
-  padding: var(--space-1h) var(--space-3);
-  border-width: var(--bw-heavy);
-  background: var(--surface-stamped-ink);
-  box-shadow: var(--shadow-stamped-soft);
-  font-size: var(--fs-small);
-  color: var(--text-on-ink-bright);
-}
 
 .playersheet__honoryr {
-  font-family: var(--font-mono);
+  /* The chip's own caps face, so year and award sit on one line. */
   font-variant-numeric: tabular-nums;
 }
 
-.playersheet__honor--major .playersheet__honoryr {
-  color: var(--marker);
-}
