@@ -21,7 +21,7 @@ const DASH = '—'
 // One club's column, the Trade Machine's shape: the club, what it gets from
 // the other club (and what that does for it), then its own roster right
 // there, where a tap sends a player across. No modal: the roster is the page.
-export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, incomingPicks = [], teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, onLineups = null, farm = null, incomingFarm = null, requestFarm }) {
+export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Set(), onTogglePick, incomingPicks = [], teamId, state, incoming, incomingTeamId, incomingCash, partner, picked, onToggle, cash, onCash, after, effect = null, change, retainUI = null, onLineups = null, onDepth = null, farm = null, incomingFarm = null, requestFarm }) {
   const club = teamClubName(teamId)
   const data = state.data
   const theme = useMemo(() => headerThemeFor(teamId, themeKeyFor(teamId, 'home', 'main')), [teamId])
@@ -180,6 +180,9 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
           <Button size="control" skin="outline" className="tradedesk__lineups" aria-label={`${club} lineup after the deal`} onClick={onLineups}>
             <LineupsGlyph /><span>Lineup</span>
           </Button>
+        )}
+        {onDepth && (
+          <Button size="control" skin="outline" className="tradedesk__lineups" onClick={onDepth}>Depth</Button>
         )}
         <p className="tradedesk__dealfig">
           <span className="tradedesk__dealk">40-man</span>

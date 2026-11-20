@@ -165,8 +165,9 @@ export function TradePage() {
   // Start over: the partner, every player, pick and cash amount, and any
   // retained salary go. The button also clears your club, for a blank desk.
   const dirty = Boolean(a || b || picked.size || dp.size || cashA || cashB)
-  const startOver = () => {
-    setB(null)
+  // Clear the deal: both clubs stay, everything moving between them goes.
+  const hasDeal = Boolean(picked.size || dp.size || cashA || cashB)
+  const clearDeal = () => {
     setPicked(new Set())
     setDp(new Set())
     setCashA(0)
@@ -175,6 +176,7 @@ export function TradePage() {
     setSidePct({ a: 0, b: 0 })
     setRetainOpen(false)
   }
+  const startOver = () => { setB(null); clearDeal() }
   // X on your club: the partner (and what it sends) stays in its own column;
   // with no partner yet, the desk empties.
   const clearA = () => {
@@ -193,6 +195,7 @@ export function TradePage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Trade Simulator</h1>
+        {hasDeal && <Button size="control" skin="ghost" onClick={clearDeal}>Clear deal</Button>}
         {dirty && <Button size="control" skin="ghost" onClick={() => { startOver(); setA(null) }}>Start over</Button>}
       </header>
 
@@ -283,6 +286,7 @@ export function TradePage() {
                 effect={deal && <Effect club={teamClubName(a)} side="a" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 onLineups={() => setShowLineups(0)}
+                onDepth={() => setShowDepth((v) => !v)}
                 change={changeA}
                 farm={farmA.data}
                 incomingFarm={farmB.data}
@@ -304,6 +308,7 @@ export function TradePage() {
                 effect={deal && <Effect club={teamClubName(b)} side="b" deal={deal} nextYear={sideA.data.nextYear} />}
                 retainUI={retainUI}
                 onLineups={() => setShowLineups(1)}
+                onDepth={() => setShowDepth((v) => !v)}
                 change={changeB}
                 farm={farmB.data}
                 incomingFarm={farmA.data}
@@ -362,7 +367,7 @@ export function TradePage() {
         </div>
 
         {deal && started && (
-          <Card frame="stamped" label="The deal" className="tradedesk__moves">
+          <Card frame="stamped" className="tradedesk__moves">
             <Wire text={wireText}>
               {wireStory && (
                 <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} nextYear={sideA.data.nextYear} fallback={wireText} />
@@ -377,17 +382,10 @@ export function TradePage() {
                     options={PCTS.map((v) => ({ value: v, label: `${teamClubName(id)} keep ${v * 100}%` }))} />
                 ))}
               </div>
-            ) : (
-              <Button size="control" skin="ghost" className="tradedesk__retainlink" onClick={() => setRetainOpen(true)}>Retain salary…</Button>
-            )}
-            <div className="tradedesk__actions">
-              <Button skin="ink" onClick={share}>{shared || 'Share this deal'}</Button>
-              <Button onClick={swap}>Swap sides</Button>
-            </div>
+            ) : null}
           </Card>
         )}
-        {deal && started && (showDepth
-          ? (
+        {deal && started && showDepth && (
             <DepthCard
               clubs={[
                 { teamId: a, data: sideA.data, sends: sends(sideA.data) },
@@ -395,8 +393,6 @@ export function TradePage() {
               ]}
               onClose={() => setShowDepth(false)}
             />
-          )
-          : <Button className="tradedesk__showdepth" onClick={() => setShowDepth(true)}>Show organization depth</Button>
         )}
       </Stack>
       {deal && (

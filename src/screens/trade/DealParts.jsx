@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
-import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 
@@ -27,24 +25,11 @@ export function RetainControl({ mode, p, value, onChange }) {
   )
 }
 
-// The deal as the transaction wire would print it, and a button that copies
-// it as plain text. The copy names what happened in its own label.
-// The deal's sentence and its Copy button. `children` (the trade story)
-// stands in the sentence's place; Copy still copies the plain wire sentence.
+// The deal's sentence; `children` (the trade story) stands in its place.
 export function Wire({ text, children = null }) {
-  const [copied, setCopied] = useState(false)
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-    } catch {
-      setCopied(false)
-    }
-  }
   return (
     <div className={children ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
       {children ?? <p className="tradedesk__wiretext">{text}</p>}
-      <Button size="control" onClick={copy}>{copied ? 'Copied' : 'Copy'}</Button>
     </div>
   )
 }

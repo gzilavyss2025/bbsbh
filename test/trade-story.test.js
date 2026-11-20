@@ -63,3 +63,23 @@ test('a rank the wire note already gives is not said twice', () => {
   const t = text(buildStory({ a: MIL, b: AZ, sendsA: [], sendsB: [ranked], clubs: {}, nextYear: 2027, date: '2026-11-19' }))
   assert.equal(t.match(/No\. 84/g).length, 1)
 })
+
+test('awards from one season share one year, not one each', () => {
+  const same = { families: [
+    { key: 'Silver Slugger', years: { 2026: [{ league: 'NL', playerId: 7 }] } },
+    { key: 'Gold Glove', years: { 2026: [{ league: 'NL', playerId: 7 }] } },
+    { key: 'All-MLB First Team', years: { 2026: [{ playerId: 7 }] } },
+  ] }
+  const star = { id: 7, name: 'Jackson Chourio', war: 4, note: 'Chourio, 22, hit .291.', honors: honorsOf(7, same), allStars: [] }
+  const t = text(buildStory({ a: MIL, b: AZ, sendsA: [star], sendsB: [kid], clubs: {}, date: '2026-11-19' }))
+  assert.match(t, /He won a Silver Slugger and a Gold Glove and made the All-MLB First Team in 2026\./)
+  assert.doesNotMatch(t, /in 2026 and .* in 2026/)
+})
+
+test('the money paragraph says who comes out ahead by surplus value', () => {
+  const base = { a: MIL, b: AZ, sendsA: [miz], sendsB: [carroll], clubs: {}, nextYear: 2027, date: '2026-11-19' }
+  const read = (v) => text(buildStory({ ...base, deal: { ...deal, value: { a: v, b: -v } } }))
+  assert.match(read(5e6), /By surplus value, the deal comes out close to even\./)
+  assert.match(read(-33e6), /By surplus value, the Diamondbacks come out ahead by about \$33\.0M\./)
+  assert.match(read(120e6), /By surplus value, the Brewers come out well ahead, by about \$120\.0M\./)
+})

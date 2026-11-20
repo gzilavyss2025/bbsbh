@@ -1,6 +1,7 @@
 import { teamClubName, teamFullName, teamLocationName } from '../../../lib/teams.js'
 import { num, word, variant } from '../../../api/transactions/voice.js'
 import { money } from '../../../lib/trade/deal.js'
+import { verdictOf } from '../../../lib/trade/value.js'
 import { HONORS, honorWeight } from './honors.js'
 
 // The trade simulator's "news story": the deal as a beat writer files it.
@@ -22,22 +23,32 @@ function starOf(players) {
 }
 
 // "won the 2026 NL Cy Young Award, a Silver Slugger in 2025 and two Gold
-// Gloves", then "made the All-MLB First Team in 2023": one verb per kind.
+// Gloves". Single honors from one season share its year: "won a Silver Slugger
+// and a Gold Glove and made the All-MLB First Team in 2026".
 function honorClauses(honors) {
   const won = []
   const made = []
+  const mixed = []
+  const bySeason = new Map()
+  const slot = (season) => bySeason.get(season) ?? bySeason.set(season, { won: [], made: [] }).get(season)
   for (const h of HONORS) {
     const mine = honors.filter((x) => x.key === h.key)
     if (!mine.length) continue
     if (h.major) {
       for (const x of mine) won.push(`the ${x.season} ${x.league ? `${x.league} ` : ''}${h.words}`)
-    } else if (h.team) {
-      made.push(`the ${h.words} ${mine.length === 1 ? `in ${mine[0].season}` : `${word(mine.length)} times`}`)
+    } else if (mine.length > 1) {
+      if (h.team) made.push(`the ${h.words} ${word(mine.length)} times`)
+      else won.push(`${word(mine.length)} ${h.plural}`)
     } else {
-      won.push(mine.length === 1 ? `a ${h.words} in ${mine[0].season}` : `${word(mine.length)} ${h.plural}`)
+      slot(mine[0].season)[h.team ? 'made' : 'won'].push(h.team ? `the ${h.words}` : `a ${h.words}`)
     }
   }
-  return [won.length ? `won ${listOf(won)}` : null, made.length ? `made ${listOf(made)}` : null].filter(Boolean)
+  for (const [season, g] of [...bySeason].sort(([x], [y]) => x - y)) {
+    if (g.won.length && g.made.length) mixed.push(`won ${listOf(g.won)} and made ${listOf(g.made)} in ${season}`)
+    else if (g.won.length) won.push(`${listOf(g.won)} in ${season}`)
+    else made.push(`${listOf(g.made)} in ${season}`)
+  }
+  return [won.length ? `won ${listOf(won)}` : null, made.length ? `made ${listOf(made)}` : null, ...mixed].filter(Boolean)
 }
 
 // His honors in one sentence. After his wire note he is "He"; alone, his last name.
@@ -156,7 +167,18 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
     const parts = []
     if (moved >= 1e5) parts.push(`The deal moves ${money(moved)} of ${nextYear} payroll to ${teamLocationName(gainer) ?? club(gainer)}`)
     if (over) parts.push(`${parts.length ? ', and the' : 'The'} ${club(over[0])} will have to clear ${num(over[1])} 40-man ${over[1] === 1 ? 'spot' : 'spots'}`)
-    money_ = parts.length ? [{ text: `${parts.join('')}.` }] : null
+    // What it means: who comes out ahead by surplus value (value.js's bands).
+    const v = deal.value?.a
+    let means = null
+    if (Number.isFinite(v)) {
+      const verdict = verdictOf(v)
+      const ahead = club(v > 0 ? a : b)
+      means = verdict === 'fair'
+        ? 'By surplus value, the deal comes out close to even.'
+        : `By surplus value, the ${ahead} come out ${verdict === 'win' ? 'ahead' : 'well ahead,'} by about ${money(Math.abs(v))}.`
+    }
+    const sentences = [parts.length ? `${parts.join('')}.` : null, means].filter(Boolean)
+    money_ = sentences.length ? [{ text: sentences.join(' ') }] : null
   }
 
   // The record, as the wire prints it, set last.
