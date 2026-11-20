@@ -173,6 +173,7 @@ export async function loadMinorLines(teamId, { season = new Date().getFullYear()
     lines.set(e.id, {
       level: e.levels.map((id) => LEVEL[id]).filter(Boolean).join(' · '),
       club: nameOf.get(e.teamId) ?? null,
+      clubId: e.teamId ?? null,
       ranked: top ? { sport: top.sport.id, isPitcher, ops: top.stat.ops ?? null, era: top.stat.era ?? null, pa: top.stat.plateAppearances ?? null, outs: top.stat.outs ?? null } : null,
       ...farmLine(isPitcher ? null : e.hitting, isPitcher ? e.pitching : null),
     })

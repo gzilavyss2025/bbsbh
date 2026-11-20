@@ -80,13 +80,15 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         {/* A ranked prospect with no big-league record: the deal row's stamp, the same rule. */}
         {stamped ? <ProspectStamp p={p} teamId={teamId} /> : (
           <>
+            {/* The list head names the columns, so a row prints only what differs:
+                the years as a figure, and the label only for a minor-league line. */}
             <span className="tradedesk__money">
               <span className={!p.onForty && p.payUsd == null ? 'tradedesk__salary tradedesk__salary--milb' : 'tradedesk__salary'}>{salaryText(p)}</span>
-              <span className="tradedesk__years">{yearsText(p)}</span>
+              <span className="tradedesk__years">{p.control != null && (p.onForty || p.contract) ? `${p.control} ${p.control === 1 ? 'yr' : 'yrs'}` : ''}</span>
             </span>
             <span className="tradedesk__figcol">
               <span className="tradedesk__war">{fig.value}</span>
-              <span className="tradedesk__warlabel">{fig.label}</span>
+              {fig.label !== (warSeason ? `${warSeason} WAR` : 'WAR') && <span className="tradedesk__warlabel">{fig.label}</span>}
             </span>
           </>
         )}

@@ -23,13 +23,13 @@ const VERDICT = {
 // The grade's colour class: green for an A, red from a C down.
 const GRADE_TONE = { A: 'a', B: 'b', C: 'c', D: 'd', F: 'f' }
 
-function Club({ teamId, gets, grade, side, ready }) {
+function Club({ teamId, gets, grade, side, ready, started = true }) {
   return (
     <div className={`tradeboard__club tradeboard__club--${side}`}>
       <TeamLogo teamId={teamId} size={48} />
       <div className="tradeboard__clubtext">
         <span className="tradeboard__name">{teamClubName(teamId)}</span>
-        <span className="tradeboard__sub">{gets ? `Gets ${gets}` : 'Nobody yet'}</span>
+        {started && <span className="tradeboard__sub">{gets ? `Gets ${gets}` : 'Nobody yet'}</span>}
       </div>
       {ready && (
         <span className="tradeboard__gradebox">
@@ -41,7 +41,7 @@ function Club({ teamId, gets, grade, side, ready }) {
   )
 }
 
-export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true }) {
+export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true, started = true }) {
   // A side is in once it sends a player, cash or a draft pick.
   const built = Boolean((sendsA.length || cashA || picksA) && (sendsB.length || cashB || picksB))
   // The grade waits for both sides' values (valueTradeSide), so it never flashes a provisional one.
@@ -55,7 +55,12 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
   const colorB = teamPrimaryColor(b) || 'var(--graphite)'
   return (
     <section className="tradeboard" aria-label="The deal at a glance">
-      <Club side="a" teamId={a} gets={sendsB.length} grade={gradeOf(value)} ready={ready} />
+      <Club side="a" teamId={a} gets={sendsB.length} grade={gradeOf(value)} ready={ready} started={started} />
+      {!started ? (
+        <div className="tradeboard__mid">
+          <span className="tradeboard__score tradeboard__score--wait">Tap a player on either roster to start</span>
+        </div>
+      ) : (
       <div className="tradeboard__mid">
         <span className="tradeboard__k">Trade meter</span>
         <span className={`tradeboard__score tradeboard__score--${ready ? verdict : 'wait'}`}>
@@ -65,7 +70,8 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
           <span className="tradeboard__tug" />
         </span>
       </div>
-      <Club side="b" teamId={b} gets={sendsA.length} grade={gradeOf(-value)} ready={ready} />
+      )}
+      <Club side="b" teamId={b} gets={sendsA.length} grade={gradeOf(-value)} ready={ready} started={started} />
     </section>
   )
 }

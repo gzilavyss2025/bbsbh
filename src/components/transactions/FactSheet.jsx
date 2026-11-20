@@ -42,12 +42,13 @@ const SCOPES = [
   { value: 'post', label: 'Postseason', total: 'Postseason', none: 'Has not played in the postseason.' },
 ]
 
-function Club({ teamId, level }) {
+// A big-league club is its logo; a minor-league stop adds the team's own name
+// ("Delmarva Shorebirds"), its level having a column of its own.
+function Club({ teamId, name = null }) {
   return (
     <span className="factsheet__club">
       <TeamLogo teamId={teamId} size={20} />
-      {level && <span className="factsheet__level">{level}</span>}
-      <span className="sr-only">{teamAbbr({ id: teamId })}</span>
+      {name ? <span className="factsheet__teamname">{name}</span> : <span className="sr-only">{teamAbbr({ id: teamId })}</span>}
     </span>
   )
 }
@@ -96,8 +97,21 @@ export function FactSheet({ people, warByYear = null, frame = 'stamped' }) {
       live = false
     }
   }, [scope, key, read, facts.id, facts.pitcher])
+  // Postseason rows load up front (one cached call), so a player who never
+  // played in October gets a dimmed tab instead of an empty table.
+  const postKey = `${facts.id}|post`
+  useEffect(() => {
+    if (read[postKey]) return undefined
+    let live = true
+    fetchScopeRows(facts.id, 'post', facts.pitcher).then((got) => live && setRead((r) => ({ ...r, [postKey]: got })))
+    return () => {
+      live = false
+    }
+  }, [postKey, read, facts.id, facts.pitcher])
+  const empty = (value) => scope !== value && (value === 'mlb' ? !facts.rows?.length : value === 'post' ? read[postKey]?.rows?.length === 0 : false)
   const view = scope === 'mlb' ? { rows: facts.rows, total: facts.careerLine } : read[key]
   const meta = SCOPES.find((s) => s.value === scope)
+  const milb = scope === 'milb'
   const withWar = scope === 'mlb' && warByYear && Object.keys(warByYear).length > 0
   const warTotal = withWar ? Object.values(warByYear).reduce((t, w) => t + (Number.isFinite(w) ? w : 0), 0).toFixed(1) : null
   // A note that already says where he was drafted keeps its own wording.
@@ -110,7 +124,8 @@ export function FactSheet({ people, warByYear = null, frame = 'stamped' }) {
           label="Show seasons for"
           value={scope}
           onChange={setScope}
-          options={SCOPES.map(({ value, label }) => ({ value, label }))}
+          // A scope with no seasons (no big-league games, no postseason) is dimmed.
+          options={SCOPES.map(({ value, label }) => ({ value, label, disabled: empty(value) }))}
         />
         {people.length > 1 ? (
           <Stepper
@@ -133,13 +148,15 @@ export function FactSheet({ people, warByYear = null, frame = 'stamped' }) {
       ) : view.rows.length ? (
         <Ledger
           label={`${facts.name}'s ${meta.label} seasons`}
-          leftCols={2}
-          head={['Year', 'Team', ...cols.map(([head]) => head), ...(withWar ? ['WAR'] : [])]}
+          leftCols={milb ? 3 : 2}
+          head={['Year', ...(milb ? ['Lvl'] : []), 'Team', ...cols.map(([head]) => head), ...(withWar ? ['WAR'] : [])]}
           rows={view.rows.map((r, i) => ({
             key: `${r.season}-${r.teamId}`,
             cells: [
               r.season,
-              <Club key="club" teamId={r.teamId} level={r.level} />,
+              // The level reads down its own column, so a climb shows at a glance.
+              ...(milb ? [r.level ?? '—'] : []),
+              <Club key="club" teamId={r.teamId} name={milb ? r.teamName : null} />,
               ...cols.map(([, get]) => get(r.line)),
               ...(withWar ? [view.rows.findIndex((x) => x.season === r.season) === i && Number.isFinite(warByYear[r.season]) ? warByYear[r.season].toFixed(1) : ''] : []),
             ],

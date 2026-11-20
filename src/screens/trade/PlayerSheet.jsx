@@ -9,6 +9,7 @@ import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Numbers } from './Numbers.jsx'
 import { TradeRecap } from './TradeSheet.jsx'
 import { ProspectStamp } from './ProspectStamp.jsx'
@@ -32,7 +33,9 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
   // His seasons, the way the transactions wire's sheet draws them: MLB, Minors
   // and Postseason, each by club with a career total. One read, shared with the wire.
   const today = isoToday()
-  const facts = useAsync(() => fetchPlayerFacts(p.id, { season: Number(today.slice(0, 4)), teamId, asOf: today }).catch(() => null), [p.id, teamId, today])
+  // No `asOf`: that adds the season-to-date and last-game reads (seconds of
+  // calls) this sheet never shows; the seasons and the draft need only the person.
+  const facts = useAsync(() => fetchPlayerFacts(p.id, { season: Number(today.slice(0, 4)), teamId }).catch(() => null), [p.id, teamId, today])
   const pedigree = pedigreeLine(p.how, p.draft, (id) => (isMlbTeamId(id) ? teamAbbr({ id }) : null))
 
   return (
@@ -72,9 +75,11 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           </div>
           <div className="playersheet__main">
 
+          {/* His seasons take a few calls to gather; say so rather than leave a gap. */}
+          {facts.loading && !facts.data && <p className="hint playersheet__section" role="status">Reading his seasons…</p>}
           {facts.data && (
             <div className="playersheet__section">
-              <h3 className="t-label">Seasons</h3>
+              <h3 className="sr-only">Seasons</h3>
               <FactSheet people={[{ facts: facts.data, note: null }]} warByYear={p.warByYear} frame="ledger" />
             </div>
           )}
@@ -209,10 +214,28 @@ function rule5Text(p, now = new Date()) {
 // then the four facts a prospect has instead: his value by rank, where he
 // plays now, and how his club got him (unless the draft sentence under his
 // photo already says so).
+// "Plays at": his highest level spelled out as the figure, his club there (its
+// own mark and name) under it. The parent club is the sheet's already.
+const LEVEL_WORDS = { ROK: 'Rookie', A: 'Single-A', 'A+': 'High-A', AA: 'Double-A', AAA: 'Triple-A' }
+function PlaysAt({ level, club, clubId }) {
+  const top = String(level).split(' · ').at(-1)
+  return (
+    <>
+      {LEVEL_WORDS[top] ?? top}
+      {club && (
+        <span className="playersheet__tileteam">
+          {clubId && <TeamLogo teamId={clubId} size={18} />}
+          {club}
+        </span>
+      )}
+    </>
+  )
+}
+
 function ProspectLead({ p, teamId, farm, pedigree }) {
   const facts = [
     ['Prospect value', money(p.value.surplusUsd)],
-    (farm?.level ?? p.level) ? ['Plays at', farm?.level ?? p.level] : null,
+    (farm?.level ?? p.level) ? ['Plays at', <PlaysAt key="at" level={farm?.level ?? p.level} club={farm?.club} clubId={farm?.clubId} />] : null,
     rule5Text(p) ? ['Rule 5', rule5Text(p)] : null,
     pedigree ? ['Came up', pedigree] : null,
   ].filter(Boolean)

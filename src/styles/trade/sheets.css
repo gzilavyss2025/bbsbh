@@ -331,3 +331,48 @@
   margin-top: var(--space-2);
   color: var(--text-caption);
 }
+
+/* The seasons ledger in the trade sheet wears its switch's frame: square, with
+   the same heavy ink edge as MLB / Minors / Postseason (system/segmented). */
+.playersheet__section .factsheet.card--ledger {
+  --card-radius: 0;
+  --card-edge: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* The switch sits on the box's top-left corner and shares its edge, like a tab. */
+.playersheet__section .factsheet .segmented {
+  margin: calc(var(--bw-heavy) * -1) 0 0 calc(var(--bw-heavy) * -1);
+}
+
+/* One frame, one switch, one table: the head row takes the card's colour, a rule under it. */
+.playersheet__section .factsheet .ledger thead th {
+  background: var(--surface-card);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+
+/* The club mark sits level with its level label. */
+.playersheet__section .factsheet__club {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  vertical-align: middle;
+}
+
+/* The club under the "Plays at" level: its mark and name, one size down. */
+.playersheet__tileteam {
+  /* layout-exempt: a club mark beside its name */
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* A minor-league stop's team name beside its mark. */
+.playersheet__section .factsheet__teamname {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}

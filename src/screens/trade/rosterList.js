@@ -32,10 +32,11 @@ const atSpot = (p, spot) => spot === 'all'
 
 // Which players the roster list holds: the 40-man, the club's ranked
 // prospects (on the 40-man or not), or the whole organization.
+// Widest first: everyone, then the two slices of it.
 export const SHOW = [
+  { value: 'all', label: 'Everyone' },
   { value: 'forty', label: '40-man' },
   { value: 'prospects', label: 'Prospects' },
-  { value: 'all', label: 'Everyone' },
 ]
 // Sort keys; 'line' reads OPS for hitters and ERA for pitchers.
 export const SORT = [
