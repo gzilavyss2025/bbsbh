@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { money } from '../../lib/trade/deal.js'
-import { Button } from '../../components/ui/control/Button.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 
@@ -27,24 +25,11 @@ export function RetainControl({ mode, p, value, onChange }) {
   )
 }
 
-// The deal as the transaction wire would print it, and a button that copies
-// it as plain text. The copy names what happened in its own label.
-// The deal's sentence and its Copy button. `children` (the trade story)
-// stands in the sentence's place; Copy still copies the plain wire sentence.
+// The deal's sentence; `children` (the trade story) stands in its place.
 export function Wire({ text, children = null }) {
-  const [copied, setCopied] = useState(false)
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-    } catch {
-      setCopied(false)
-    }
-  }
   return (
     <div className={children ? 'tradedesk__wire tradedesk__wire--story' : 'tradedesk__wire'}>
       {children ?? <p className="tradedesk__wiretext">{text}</p>}
-      <Button size="control" onClick={copy}>{copied ? 'Copied' : 'Copy'}</Button>
     </div>
   )
 }
@@ -61,55 +46,38 @@ export function Wire({ text, children = null }) {
 // is. Green is better, red worse; cost is drawn in plain ink, since spending
 // is neither. The method sits behind the info button.
 const SHEET = [
-  { key: 'projWar', ask: (y) => `Better in ${y}`, reach: 15, fmt: (v) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)} WAR`, toned: true },
-  { key: 'value', ask: () => 'Long-term value', reach: 150e6, fmt: (v) => signedMoney(v), toned: true },
-  { key: 'payroll', ask: (y) => `${y} payroll`, reach: 60e6, fmt: (v) => signedMoney(v), toned: false },
+  // Each label names what changes; each figure says which way, in words where a sign would be ambiguous.
+  { key: 'projWar', ask: (y) => `${y} WAR`, reach: 15, fmt: (v) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)}`, toned: true },
+  { key: 'value', ask: () => 'Value over cost', reach: 150e6, fmt: (v) => signedMoney(v), toned: true },
+  { key: 'payroll', ask: (y) => `${y} payroll`, reach: 60e6, fmt: (v) => (v === 0 ? 'No change' : `${money(Math.abs(v))} ${v < 0 ? 'lower' : 'higher'}`), toned: false },
 ]
 
+// What the deal does for one club, as three figures in a row: a fair deal sits
+// near zero on all three, so the numbers say it and no bar is drawn. The method
+// sits behind the ⓘ at the row's end.
 export function Effect({ club, side, deal, nextYear }) {
   const unset = deal.unpriced[side]
   return (
     <div className="tradedesk__effect dealsheet" aria-label={`What the deal does for the ${club}`}>
-      {SHEET.map(({ key, ask, reach, fmt, toned }) => {
-        const v = deal[key][side]
-        const pull = Math.max(-1, Math.min(1, v / reach)) * 50
-        const tone = !toned ? 'ink' : Math.abs(v) < reach / 100 ? 'flat' : v > 0 ? 'up' : 'down'
-        return (
-          <div key={key} className={`dealsheet__line dealsheet__line--${tone}`}>
-            <span className="dealsheet__ask">{ask(nextYear)}</span>
-            <span className="dealsheet__bar" aria-hidden="true">
-              <span className="dealsheet__fill" style={{ left: `${pull < 0 ? 50 + pull : 50}%`, width: `${Math.abs(pull)}%` }} />
-            </span>
-            <span className="dealsheet__fig">{fmt(v)}</span>
-          </div>
-        )
-      })}
+      <dl className="dealsheet__row">
+        {SHEET.map(({ key, ask, reach, fmt, toned }) => {
+          const v = deal[key][side]
+          const tone = !toned ? 'ink' : Math.abs(v) < reach / 100 ? 'flat' : v > 0 ? 'up' : 'down'
+          return (
+            <div key={key} className={`dealsheet__line dealsheet__line--${tone}`}>
+              <dt className="dealsheet__ask">{ask(nextYear)}</dt>
+              <dd className="dealsheet__fig">{fmt(v)}</dd>
+            </div>
+          )
+        })}
+        <InfoPopover label="How the deal sheet is figured" className="infopop--paper dealsheet__how">
+          {nextYear} WAR: how many more (or fewer) wins the {club} project next season. Value over cost: what the players they get are worth beyond their salaries, minus the same for the players they give up, over the years each is under control (rough, within about $15M). {nextYear} payroll: how much their {nextYear} salaries change{unset ? `, leaving out ${unset} salary not set yet` : ''}.
+        </InfoPopover>
+      </dl>
       {/* A player who can veto the deal is the one roster rule worth stating here. */}
       {deal.notes.filter((n) => /10-and-5/.test(n)).map((n) => <p key={n} className="dealsheet__fine dealsheet__veto">{n}</p>)}
-      <p className="dealsheet__fine infopop-row">
-        {unset ? `${unset} salary not set yet is left out of payroll. ` : ''}How it’s figured{' '}
-        <InfoPopover label="How the deal sheet is figured" className="infopop--paper">
-          Better in {nextYear}: the projected WAR the {club} gain or lose next season. Long-term value: surplus value, each player’s projected worth less his salary over the years his new club controls him (a rough estimate, give or take $15M). Payroll: next season’s salaries in less salaries out, with pre-arbitration years at the league minimum and arbitration years estimated from projected value.
-        </InfoPopover>
-      </p>
     </div>
   )
 }
 
-export function StripSide({ name, pay, war, forty }) {
-  return (
-    <p className="tradedesk__stripside">
-      <span className="t-label t-label--bold">{name}</span>
-      <span><span className="tradedesk__k">Pay</span> {pay}</span>
-      <span><span className="tradedesk__k">WAR</span> {signedNum(war)}</span>
-      <span className={forty > 40 ? 'tradedesk__over' : ''}><span className="tradedesk__k">40-man</span> {forty}</span>
-    </p>
-  )
-}
-
-
-
-// "+$28.7M · 1 salary not set": the figure, and how many players in the deal it leaves out.
-export const payText = (v, unset) => `${signedMoney(v)}${unset ? ` + ${unset} TBD` : ''}`
 const signedMoney = (v) => (v === 0 ? '$0' : `${v < 0 ? '−' : '+'}${money(v)}`)
-const signedNum = (v) => (v === 0 ? '0.0' : `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)}`)

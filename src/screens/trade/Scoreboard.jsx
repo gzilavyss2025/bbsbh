@@ -1,6 +1,7 @@
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { teamClubName, teamPrimaryColor } from '../../lib/teams.js'
 import { gradeOf, verdictOf } from '../../lib/trade/value.js'
+import { money } from '../../lib/trade/deal.js'
 
 // The top of the trade card, read the way a sports game reads a trade: each
 // club gets a letter grade for what it takes home, and the middle gives one
@@ -23,13 +24,18 @@ const VERDICT = {
 // The grade's colour class: green for an A, red from a C down.
 const GRADE_TONE = { A: 'a', B: 'b', C: 'c', D: 'd', F: 'f' }
 
-function Club({ teamId, gets, grade, side, ready }) {
+// `gets`: what the club takes home, one line each (players, picks, cash).
+function Club({ teamId, gets, grade, side, ready, started = true }) {
   return (
     <div className={`tradeboard__club tradeboard__club--${side}`}>
       <TeamLogo teamId={teamId} size={48} />
       <div className="tradeboard__clubtext">
         <span className="tradeboard__name">{teamClubName(teamId)}</span>
-        <span className="tradeboard__sub">{gets ? `Gets ${gets}` : 'Nobody yet'}</span>
+        {started && gets.length > 0 && (
+          <ul className="tradeboard__gets" aria-label={`${teamClubName(teamId)} get`}>
+            {gets.map((g) => <li key={g}>{g}</li>)}
+          </ul>
+        )}
       </div>
       {ready && (
         <span className="tradeboard__gradebox">
@@ -41,9 +47,11 @@ function Club({ teamId, gets, grade, side, ready }) {
   )
 }
 
-export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 0, picksB = 0, valued = true }) {
+export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = [], picksB = [], valued = true, started = true }) {
   // A side is in once it sends a player, cash or a draft pick.
-  const built = Boolean((sendsA.length || cashA || picksA) && (sendsB.length || cashB || picksB))
+  const built = Boolean((sendsA.length || cashA || picksA.length) && (sendsB.length || cashB || picksB.length))
+  // What each club takes home: the other side's players, picks and cash.
+  const getsOf = (sends, picks, cash) => [...sends.map((p) => p.name), ...picks, ...(cash ? [`${money(cash * 1e6)} cash`] : [])]
   // The grade waits for both sides' values (valueTradeSide), so it never flashes a provisional one.
   const ready = built && valued
   const value = deal.value.a
@@ -55,7 +63,12 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
   const colorB = teamPrimaryColor(b) || 'var(--graphite)'
   return (
     <section className="tradeboard" aria-label="The deal at a glance">
-      <Club side="a" teamId={a} gets={sendsB.length} grade={gradeOf(value)} ready={ready} />
+      <Club side="a" teamId={a} gets={getsOf(sendsB, picksB, cashB)} grade={gradeOf(value)} ready={ready} started={started} />
+      {!started ? (
+        <div className="tradeboard__mid">
+          <span className="tradeboard__score tradeboard__score--wait">Tap a player on either roster to start</span>
+        </div>
+      ) : (
       <div className="tradeboard__mid">
         <span className="tradeboard__k">Trade meter</span>
         <span className={`tradeboard__score tradeboard__score--${ready ? verdict : 'wait'}`}>
@@ -65,7 +78,8 @@ export function Scoreboard({ deal, a, b, sendsA, sendsB, cashA, cashB, picksA = 
           <span className="tradeboard__tug" />
         </span>
       </div>
-      <Club side="b" teamId={b} gets={sendsA.length} grade={gradeOf(-value)} ready={ready} />
+      )}
+      <Club side="b" teamId={b} gets={getsOf(sendsA, picksA, cashA)} grade={gradeOf(-value)} ready={ready} started={started} />
     </section>
   )
 }

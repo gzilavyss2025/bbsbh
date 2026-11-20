@@ -1,0 +1,219 @@
+/* The Lineups sheet (side/LineupSheet.jsx): each club's lineup after the deal,
+   drawn as the desk's club cards are (stamped frame, the club's colour down the
+   left edge). Two cards side by side from 740px; a phone shows one behind a switch. */
+
+.sheet.lineupsheet {
+  max-width: 64rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* layout-exempt: the club switch, two equal tabs, phone only */
+.lineupsheet__switch {
+  display: flex;
+  margin: var(--space-3) 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* layout-exempt: a tab's club over its lineup WAR */
+.lineupsheet__tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min, 44px);
+  padding: var(--space-1h) var(--space-2);
+  border: 0;
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  cursor: pointer;
+}
+
+.lineupsheet__tab[aria-pressed='true'] {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-bright);
+}
+
+.lineupsheet__tabfig {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* layout-exempt: the two clubs side by side from 740px */
+.lineupsheet__clubs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.lineupsheet__club {
+  position: relative;
+  padding: var(--space-3) var(--space-2) var(--space-2) calc(var(--space-2) * 2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+
+.lineupsheet__club::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--space-2);
+  background: var(--club-edge, var(--border-stamped));
+}
+
+.lineupsheet__club--off {
+  display: none;
+}
+
+@media (min-width: 740px) {
+  .lineupsheet__switch {
+    display: none;
+  }
+
+  .lineupsheet__clubs {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .lineupsheet__club--off {
+    display: block;
+  }
+}
+
+/* layout-exempt: the logo beside the club's name */
+.lineupsheet__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.lineupsheet__head {
+  margin: var(--space-2) 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.lineupsheet__headfig {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineupsheet__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lineupsheet__table th {
+  padding: var(--space-1) var(--space-1h);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--text-caption);
+}
+
+.lineupsheet__table td {
+  padding: var(--space-2) var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: middle;
+}
+
+.lineupsheet__table .lineupsheet__num {
+  text-align: right;
+}
+
+.lineupsheet__spot {
+  width: var(--space-10);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.lineupsheet__name {
+  font-family: var(--font-read);
+  color: var(--text-heading);
+}
+
+.lineupsheet__tag {
+  margin-left: var(--space-2);
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--accent-positive-deep);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-positive-deep);
+}
+
+.lineupsheet__sub {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.lineupsheet__war {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+/* A new starter under 1.0 WAR: the weak spot, highlighted like a marker; its
+   NEW tag turns into a solid highlighter chip so it reads on the wash. */
+.lineupsheet__row--weak td {
+  background: var(--surface-event-wash);
+}
+
+.lineupsheet__row--weak .lineupsheet__war {
+  color: var(--accent-negative);
+}
+
+.lineupsheet__row--weak .lineupsheet__tag {
+  border-color: var(--border-stamped);
+  background: var(--marker);
+  color: var(--text-on-bright);
+}
+
+.lineupsheet__none,
+.lineupsheet__fine {
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+
+.lineupsheet__fine {
+  margin: var(--space-4) 0 0;
+}
+
+.lineupsheet__more {
+  margin-top: var(--space-2);
+}
+
+/* The deal card's own Lineup button, in its title row before the 40-man count. */
+/* layout-exempt: the glyph beside the word */
+.tradedesk__lineups {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  margin-right: var(--space-2);
+}

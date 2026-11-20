@@ -37,7 +37,7 @@ export function SiteSearchButton({ className = '' }) {
   )
 }
 
-function SearchGlyph({ size = 18 }) {
+export function SearchGlyph({ size = 18 }) {
   return (
     <svg
       width={size}

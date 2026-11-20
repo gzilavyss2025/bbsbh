@@ -114,15 +114,29 @@
   object-fit: contain;
 }
 
-/* The deal sheet (DealParts.jsx Effect): three lines, each a question, a bar
-   pulled left or right of even, and its figure. */
-/* layout-exempt: question | bar | figure, the same three columns on every line */
-.dealsheet__line {
+/* The deal sheet (DealParts.jsx Effect): three figures in one row, each label
+   over its number, the method behind an ⓘ at the row's end. */
+/* layout-exempt: the three figures and the ⓘ, side by side */
+.dealsheet__row {
+  /* The ⓘ's tip opens just above this row, across it, not from the card's top. */
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) minmax(0, 6.5rem);
-  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
   gap: var(--space-3);
-  padding: var(--space-1) 0;
+  margin: 0;
+}
+
+/* layout-exempt: a figure's label over its number */
+.dealsheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.dealsheet__line > dd {
+  margin: 0;
 }
 
 .dealsheet__ask {
@@ -132,41 +146,15 @@
   color: var(--text-caption);
 }
 
-.dealsheet__bar {
-  position: relative;
-  display: block;
-  height: var(--space-2);
-  background: var(--surface-inset);
-}
-
-/* Even, marked in the middle of every bar. */
-.dealsheet__bar::after {
-  content: '';
-  position: absolute;
-  inset-block: calc(var(--space-1) * -1);
-  left: 50%;
-  width: var(--bw-hair);
-  background: var(--text-caption);
-}
-
-.dealsheet__fill {
-  position: absolute;
-  inset-block: 0;
-  background: var(--text-heading);
-}
-
 .dealsheet__fig {
   font-family: var(--font-mono);
   font-size: var(--fs-num-md);
   font-variant-numeric: tabular-nums;
-  text-align: right;
   color: var(--text-heading);
   white-space: nowrap;
 }
 
-.dealsheet__line--up .dealsheet__fill { background: var(--accent-positive-deep); }
 .dealsheet__line--up .dealsheet__fig { color: var(--accent-positive-deep); }
-.dealsheet__line--down .dealsheet__fill { background: var(--accent-negative); }
 .dealsheet__line--down .dealsheet__fig { color: var(--accent-negative); }
 
 .dealsheet__fine {

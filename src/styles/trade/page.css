@@ -280,24 +280,7 @@
   margin: var(--space-2) 0 var(--space-3);
 }
 
-/* layout-exempt: the sort label beside its select */
-.tradedesk__sort {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .tradedesk__search {
-  min-height: var(--tap-min);
-  padding: 0 var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--fs-field);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-rule) solid var(--border-rule);
-}
-
-.tradedesk__sort select {
   min-height: var(--tap-min);
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
@@ -476,13 +459,6 @@
   color: var(--marker);
 }
 
-.tradedesk__confirm {
-  margin: var(--space-2) 0 0;
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-event-wash);
-  font-size: var(--fs-small);
-}
-
 .tradedesk__strip .tradedesk__stripshare {
   justify-self: start;
 }
@@ -546,4 +522,43 @@
 .tradedesk__partners .vsteam__strip {
   flex-wrap: wrap;
   overflow: visible;
+}
+
+/* The deal's scoreboard, pinned to the foot of the screen while the reader picks. */
+.tradedesk__tray {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  margin-top: var(--space-6);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* On a phone the tray stays one row: each club's logo and grade either side
+   of the meter, so it covers as little of the roster as it can. */
+@media (max-width: 739px) {
+  /* layout-exempt: the tray's club, meter, club in one row */
+  .tradedesk__tray .tradeboard {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .tradedesk__tray .tradeboard__club {
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .tradedesk__tray .tradeboard__clubtext,
+  .tradedesk__tray .tradeboard__gradecap,
+  .tradedesk__tray .tradeboard__k {
+    display: none;
+  }
+
+  .tradedesk__tray .tradeboard__mid {
+    padding: var(--space-2);
+  }
+}
+
+/* The desk's faces run a quarter larger than the site's smallest headshot. */
+.screen.tradedesk {
+  --shot-xs-w: calc(39px * 1.25);
+  --shot-xs-h: calc(52px * 1.25);
 }

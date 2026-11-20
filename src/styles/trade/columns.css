@@ -63,6 +63,10 @@
   max-height: 34rem;
   overflow-y: auto;
   border-top: var(--bw-hair) solid var(--border-hairline);
+  /* A thin ink thumb on the paper, no arrows, kept clear of the add buttons. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-stamped) transparent;
+  scrollbar-gutter: stable;
 }
 
 /* The roster row, Trade Machine style: face | name over position |
@@ -106,7 +110,7 @@
 
 .tradedesk__war {
   font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
+  font-size: var(--fs-num-lg);
   color: var(--text-heading);
 }
 
@@ -208,18 +212,25 @@
    workbench.css's .idlab__barmock), edge to edge across the top of the card. */
 /* layout-exempt: the mark beside the club name, centred in the bar */
 .tradedesk__clubbar {
-  height: var(--space-12);
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: var(--space-2);
-  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
-  background: var(--clubbar-fill, var(--navy));
-  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-display);
   font-size: var(--fs-title-sm);
   letter-spacing: var(--ls-caps);
-  color: var(--clubbar-ink, var(--text-on-ink-bright));
+  color: var(--text-heading);
+}
+
+/* Before the deal starts, the roster bar carries the club's X at its right end. */
+.tradedesk__clubbar .tradedesk__barx {
+  position: absolute;
+  top: var(--space-2);
+  right: 0;
+  color: var(--text-heading);
 }
 
 .tradedesk__clubbarmark {
@@ -230,15 +241,26 @@
 /* The deal card's head, the 2014 Trade Machine's team bar: club colour,
    name at the left, figures stacked label-over-number at the right. */
 .tradedesk__dealbar {
-  height: var(--space-12);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
-  padding-right: var(--space-3);
-  background: var(--clubbar-fill, var(--navy));
-  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
-  color: var(--clubbar-ink, var(--text-on-ink-bright));
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-heading);
+}
+
+/* The club lives in its colour down each card's left edge: a stripe inside the
+   ink frame, so the frame's corners stay square and unbroken. */
+/* The stamped card is already the positioned box the stripe is placed from;
+   the stripe is not the card's frame, so it names the column, not .card. */
+.tradedesk__side::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--space-2);
+  background: var(--club-edge, var(--border-stamped));
 }
 
 .tradedesk__dealname {
@@ -380,9 +402,15 @@
   color: var(--text-heading);
 }
 
-.tradeboard__sub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
+/* What the club takes home, one line each, under its name. */
+.tradeboard__gets {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-snug);
   color: var(--text-caption);
 }
 
@@ -541,6 +569,10 @@
 .tradedesk__wire--story {
   flex-wrap: nowrap;
   align-items: flex-start;
+  /* The story sits on the card's own paper: no inset fill, no ink bar. */
+  padding: 0;
+  background: transparent;
+  border-left: 0;
 }
 
 .tradedesk__wirelist {

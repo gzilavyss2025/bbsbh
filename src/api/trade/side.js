@@ -120,9 +120,11 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   }
   // A minor-league player's position for the depth grid comes from the org roster,
   // which writes pitchers as P; the prospect list writes RHP/LHP.
+  // A 40-man pitcher's role (SP / RP / CL) keeps a reliever out of the lineup's rotation.
+  const roleOf = new Map(forty.map((p) => [p.id, p.line?.role ?? null]))
   const depth = org
     .filter((r) => r.person?.id)
-    .map((r) => ({ id: r.person.id, name: r.person.fullName, pos: r.position?.abbreviation, level: levelAt(r.person.id), war: warOf(r.person.id) }))
+    .map((r) => ({ id: r.person.id, name: r.person.fullName, pos: r.position?.abbreviation, level: levelAt(r.person.id), war: warOf(r.person.id), role: roleOf.get(r.person.id) ?? null }))
 
   return { teamId, nextYear, warSeason: war?.season ?? null, fortyCount: forty.length, forty, minors, others, depth }
 }
@@ -173,6 +175,7 @@ export async function loadMinorLines(teamId, { season = new Date().getFullYear()
     lines.set(e.id, {
       level: e.levels.map((id) => LEVEL[id]).filter(Boolean).join(' · '),
       club: nameOf.get(e.teamId) ?? null,
+      clubId: e.teamId ?? null,
       ranked: top ? { sport: top.sport.id, isPitcher, ops: top.stat.ops ?? null, era: top.stat.era ?? null, pa: top.stat.plateAppearances ?? null, outs: top.stat.outs ?? null } : null,
       ...farmLine(isPitcher ? null : e.hitting, isPitcher ? e.pitching : null),
     })

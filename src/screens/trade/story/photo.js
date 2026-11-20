@@ -16,9 +16,14 @@ export async function storyPhoto(id, role, season) {
   for (let i = 0; i < Math.min(splits.length, BATCH * STEPS); i += BATCH) {
     const batch = splits.slice(i, i + BATCH)
     const games = photoGames(batch, await fetchFinalScores(batch, role))
-    const per = await Promise.all(games.map(async (g) => onlyPhotographer(photosForPlayer(await fetchGamePhotos(g.gamePk), id)).map((p) => ({ ...p, apiDate: g.apiDate }))))
+    // The game rides along for the caption: who he played, and whether it was the postseason.
+    const split = new Map(batch.map((s) => [s.game?.gamePk, s]))
+    const per = await Promise.all(games.map(async (g) => onlyPhotographer(photosForPlayer(await fetchGamePhotos(g.gamePk), id)).map((p) => ({ ...p, apiDate: g.apiDate, gamePk: g.gamePk }))))
     const first = per.flat()[0]
-    if (first) return photoCell(first)
+    if (first) {
+      const sp = split.get(first.gamePk)
+      return { ...photoCell(first), opponentId: sp?.opponent?.id ?? null, postseason: ['F', 'D', 'L', 'W'].includes(sp?.gameType) }
+    }
   }
   return null
 }
