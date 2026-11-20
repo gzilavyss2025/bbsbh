@@ -1,0 +1,116 @@
+/* The roster card's controls (#3202): the search toggle row, the list's sortable
+   column heads, and the joined ink-edged filter bars. Split from columns.css. */
+/* The roster's list tabs, with the search glass at the row's right end. */
+/* layout-exempt: one tab row with a single trailing icon */
+.tradedesk__showrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* The roster list's column heads: the row's own columns, each one a sort. */
+/* layout-exempt: the column heads, then the "More" sort at the end */
+.tradedesk__sorthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-3);
+  align-items: end;
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+
+/* layout-exempt: mirrors the roster row's columns so each head sits over its figure */
+.tradedesk__sortcols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.5rem 3rem;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+/* layout-exempt: salary and years heads side by side */
+.tradedesk__sortmoney {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tradedesk__sorthd {
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tradedesk__sorthd--on {
+  color: var(--text-heading);
+}
+
+.tradedesk__sortfig {
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tradedesk__sortmore {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+}
+
+/* layout-exempt: the Player head with the "More" sort beside it */
+.tradedesk__sortname {
+  display: flex;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+/* Holds the add button's column, so the heads sit over their figures. */
+.tradedesk__sortpad {
+  width: var(--mark-sm);
+}
+
+/* A phone stacks each row, so the heads stop mirroring columns and sit in one wrapping row. */
+@media (max-width: 739px) {
+/* layout-exempt: the heads wrap as one row on a phone */
+  .tradedesk__sortcols {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-4);
+  }
+}
+
+
+/* The roster's filter rows wear the joined black bar of the seasons switch
+   (system/segmented): one ink edge, buttons butted together, square. */
+.tradedesk__controls .chips.chips--wrap {
+  gap: 0;
+}
+
+.tradedesk__controls .chips > .btn.btn,
+.tradedesk__posrow > .btn.btn {
+  --btn-fill: var(--surface-card);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--border-stamped);
+  border-width: var(--bw-heavy);
+  border-radius: 0;
+}
+
+.tradedesk__controls .chips > .btn + .btn {
+  margin-left: calc(var(--bw-heavy) * -1);
+}
+
+.tradedesk__controls .chips > .btn[aria-pressed='true'],
+.tradedesk__posrow > .btn[aria-pressed='true'] {
+  background: var(--text-heading);
+  border-color: var(--border-stamped);
+  color: var(--text-on-ink);
+}

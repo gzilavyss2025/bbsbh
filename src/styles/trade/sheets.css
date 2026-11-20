@@ -359,8 +359,8 @@
 }
 
 /* The club under the "Plays at" level: its mark and name, one size down. */
+/* layout-exempt: a club mark beside its name */
 .playersheet__tileteam {
-  /* layout-exempt: a club mark beside its name */
   display: flex;
   align-items: center;
   gap: var(--space-1);

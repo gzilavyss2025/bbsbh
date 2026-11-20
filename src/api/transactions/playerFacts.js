@@ -649,8 +649,7 @@ export function shapeScopeRows(yearly, career, pitcher) {
   const rows = newestFirst(clubbed)
     .map((s) => ({
       season: Number(s.season),
-      teamId: s.team.id,
-      teamName: s.team.name ?? null,
+      teamId: s.team.id, teamName: s.team.name ?? null,
       level: LEVELS[s.sport?.abbreviation]?.[1] ?? null,
       line: shapeLine(s.stat, pitcher),
     }))
