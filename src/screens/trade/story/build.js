@@ -94,6 +94,18 @@ function starTag(p) {
   return `the ${best.season} ${best.league ? `${best.league} ` : ''}${h.words.replace(/ Award$/, '')} winner`
 }
 
+// The angle the lede hangs on, strongest first, with the reason it won:
+// the star's major award; a ranked prospect the taker gave up for him; a deal
+// that tilts well one way by surplus value; else the taker's season.
+function pickAngle({ star, giverGets, deal }) {
+  if (starTag(star)) return { key: 'award', reason: `${star.name} has a major award` }
+  const prospect = [...giverGets].filter((p) => p.topRank).sort((x, y) => x.topRank - y.topRank)[0]
+  if (prospect) return { key: 'prospects', reason: `the ${prospect.name} is a top-100 prospect`, player: prospect }
+  const v = deal?.value?.a
+  if (Number.isFinite(v) && ['big', 'steal'].includes(verdictOf(v))) return { key: 'value', reason: `surplus value is ${verdictOf(v)}`, value: v }
+  return { key: 'season', reason: 'nothing stronger to lead on' }
+}
+
 // One player's paragraph: the wire's note, his honors, his rank.
 const playerText = (p) => [p.note, honorsSentence(p, !!p.note), prospectSentence(p)].filter(Boolean).join(' ')
 
@@ -132,8 +144,15 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
   const giverGets = starIsB ? sendsA : sendsB
 
   // Lede: the news and the motive in one sentence.
+  const angle = pickAngle({ star, giverGets, deal })
   const tag = starTag(star)
   const leadIn = seasonLead(clubs[taker])
+  const dealWords = ` in ${/^(eight|eleven|eighteen)/.test(word(n)) ? 'an' : 'a'} ${word(n)}-player deal`
+  const close = angle.key === 'prospects'
+    ? [{ text: `${dealWords} that costs them ` }, { text: angle.player.name, playerId: angle.player.id }, { text: `, MLB Pipeline's No. ${angle.player.topRank} prospect.` }]
+    : angle.key === 'value'
+      ? [{ text: `${dealWords} that tilts well toward the ${club(angle.value > 0 ? a : b)} by surplus value.` }]
+      : [{ text: `${dealWords}.` }]
   const lede = [
     { text: `${leadIn ?? ''}${leadIn ? 'the' : 'The'} ` },
     { text: teamFullName(taker), teamId: taker },
@@ -141,22 +160,24 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
     { text: star.name, playerId: star.id },
     { text: `${tag ? `, ${tag},` : ''} from the ` },
     { text: teamFullName(giver), teamId: giver },
-    { text: ` in ${/^(eight|eleven|eighteen)/.test(word(n)) ? 'an' : 'a'} ${word(n)}-player deal.` },
+    ...close,
   ]
+  // The lede named the prospect's rank; his own paragraph does not say it again.
+  const said = (p) => (angle.key === 'prospects' && p.id === angle.player.id ? { ...p, topRank: null } : p)
 
   const starPara = playerText(star) ? [{ text: playerText(star) }] : null
   const takerRest = groupParagraph(`The ${club(taker)} also get`, takerGets.filter((p) => p.id !== star.id))
 
   // The turn: what the other club gets back, led by its best player.
-  const back = starOf(giverGets)
-  const turn = back
+  const back = said(starOf(giverGets) ?? {})
+  const turn = back.id
     ? [
         { text: `In return, the ${club(giver)}${seasonAside(clubs[giver])} get ${word(giverGets.length)} ${giverGets.length === 1 ? 'player' : 'players'}${giverGets.length > 1 ? ', led by ' : ': '}` },
         { text: back.name, playerId: back.id },
         { text: `.${playerText(back) ? ` ${playerText(back)}` : ''}` },
       ]
     : null
-  const giverRest = back ? groupParagraph(`They also get`, giverGets.filter((p) => p.id !== back.id)) : null
+  const giverRest = back.id ? groupParagraph(`They also get`, giverGets.filter((p) => p.id !== back.id).map(said)) : null
 
   // The money and the roster, in one sentence.
   let money_ = null
@@ -170,7 +191,7 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
     // What it means: who comes out ahead by surplus value (value.js's bands).
     const v = deal.value?.a
     let means = null
-    if (Number.isFinite(v)) {
+    if (Number.isFinite(v) && angle.key !== 'value') {
       const verdict = verdictOf(v)
       const ahead = club(v > 0 ? a : b)
       means = verdict === 'fair'
@@ -198,5 +219,5 @@ export function buildStory({ a, b, sendsA, sendsB, cutline, clubs = {}, deal = n
 
   const paragraphs = [lede, starPara, takerRest, turn, giverRest, money_, record, kicker ? [{ text: kicker }] : null].filter(Boolean)
   // The star rides along for the story's photo (photo.js).
-  return { headline, dek, paragraphs, star: { id: star.id, name: star.name, pos: star.pos ?? null } }
+  return { headline, dek, paragraphs, angle: { key: angle.key, reason: angle.reason }, star: { id: star.id, name: star.name, pos: star.pos ?? null } }
 }

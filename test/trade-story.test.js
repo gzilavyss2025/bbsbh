@@ -83,3 +83,35 @@ test('the money paragraph says who comes out ahead by surplus value', () => {
   assert.match(read(-33e6), /By surplus value, the Diamondbacks come out ahead by about \$33\.0M\./)
   assert.match(read(120e6), /By surplus value, the Brewers come out well ahead, by about \$120\.0M\./)
 })
+
+// The angle: what the lede hangs on, and why (story.angle.reason, for debugging).
+const lede = (s) => s.paragraphs[0].map((x) => x.text).join('')
+const plain = (id, name, war) => ({ id, name, war, note: null, honors: [], allStars: [] })
+
+test('a major award winner leads on the award', () => {
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [miz], sendsB: [kid], clubs: {}, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'award')
+  assert.match(lede(s), /Jacob Misiorowski, the 2026 NL Cy Young winner,/)
+})
+
+test('a ranked prospect paid for the star leads on what it cost', () => {
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [kid], clubs: {}, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'prospects')
+  assert.match(lede(s), /in a two-player deal that costs them Demetrio Crisantes, MLB Pipeline's No\. 84 prospect\.$/)
+  // Said once: his paragraph drops the rank the lede gave.
+  assert.equal(text(s).match(/No\. 84/g).length, 1)
+})
+
+test('a lopsided deal leads on the value, and the money paragraph does not repeat it', () => {
+  const v = 120e6
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [plain(2, 'Sam Arm', 1)], clubs: {}, deal: { ...deal, value: { a: v, b: -v } }, nextYear: 2027, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'value')
+  assert.match(lede(s), /in a two-player deal that tilts well toward the Brewers by surplus value\.$/)
+  assert.equal(text(s).match(/surplus value/g).length, 1)
+})
+
+test('with no award, prospect or lopsided value, the season frames the lede', () => {
+  const s = buildStory({ a: MIL, b: AZ, sendsA: [plain(1, 'Joe Star', 5)], sendsB: [plain(2, 'Sam Arm', 1)], clubs, date: '2026-11-19' })
+  assert.equal(s.angle.key, 'season')
+  assert.match(lede(s), /^Coming off an 86-76 season/)
+})
