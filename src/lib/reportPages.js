@@ -93,6 +93,7 @@ export const PAGE_GROUPS = [
     pages: [
       { label: 'Salaries', path: pathOf('salaries'), desc: 'Who is paid what, and each club’s payroll', keywords: 'payroll contracts' },
       { label: 'Free Agents', path: '/free-agents', desc: 'Who filed, and where each one signed', keywords: 'signings hot stove' },
+      { label: 'Trade Simulator', path: pathOf('trade'), desc: 'Build a trade and see what moves', keywords: 'trade machine card' },
       { label: 'Trade Deadline', path: '/trade-deadline', desc: 'Every deadline deal', keywords: 'trades' },
       { label: 'Top MLB Prospects', path: pathOf('prospects'), desc: 'The best players not yet in the majors', keywords: 'minors pipeline' },
       { label: 'Farm System Rankings', path: pathOf('farm-system'), desc: 'Each club’s minor-league talent, ranked', keywords: 'farm' },

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Simulator review</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:860px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.93em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+</style></head><body>
+<h1>Dashboard review: Trade Simulator</h1>
+<p>Seen rendered at /trade-simulator with a live deal (Aaron Ashby to Boston for Adley Rutschman), at 1440px, 868px, 768px and 375px. No horizontal page scroll at any of those widths. Dark mode and keyboard-only were not checked.</p>
+
+<h2>Must fix (misleading numbers)</h2>
+<table>
+<tr><th>Where</th><th>Why it matters</th><th>Fix</th></tr>
+<tr><td>Roster rows, salary column: Jeferson Quero $75K, Colton Gordon $97K, Garrett Stallings $123K, Bo Naylor $185K.</td><td>These are below the $780K league minimum. They look like pay earned in the majors this year (prorated), but they read as salary. The value model itself uses $780K, so the row and the scoreboard disagree.</td><td>Show the contract salary, with the league minimum as the floor for a pre-arbitration player. Keep earned pay off the row.</td></tr>
+<tr><td>Season labels: the rows show "WAR" and a salary with no year. The deal sheet shows "2026 WAR", "Better in 2027" and "2027 payroll". Rutschman's row says $2.1M, but his club's 2027 payroll moves by $5.2M.</td><td>Three seasons share one screen, and only some numbers say which one. A reader can't line the figures up.</td><td>Put the year on every number: "2026 WAR" in the row's column head and "2026 salary" (or 2027, matching the sheet). Use one season for money everywhere.</td></tr>
+</table>
+
+<h2>Should fix (slow to read)</h2>
+<table>
+<tr><th>Where</th><th>Why it matters</th><th>Fix</th></tr>
+<tr><td>First load, before a partner is picked: an empty yellow scoreboard bar and an empty card under it (desktop).</td><td>The page's first view is blank boxes, with no next step.</td><td>Hide the scoreboard until there is a partner. Put one line in its place: "Pick a trade partner to start."</td></tr>
+<tr><td>Trade-partner logo rail: cut off at the right edge, at desktop and phone width.</td><td>Nothing shows that it scrolls, so 20 or more clubs look missing.</td><td>Let it wrap into rows at the wide step. On a phone, fade the right edge or show half a logo.</td></tr>
+<tr><td>Scoreboard: "B" next to each club, with "Fair trade" in the middle.</td><td>The letter has no label, so it isn't clear what is being graded.</td><td>Add a small caption under each grade, such as "deal grade".</td></tr>
+<tr><td>Rows with no data (Cameron Wagoner, Tate Kuehner, Matthew Wood): "— — WAR".</td><td>Three dashes and a label say nothing.</td><td>One phrase in their place: "No big-league time". The prospect stamp already does this job for ranked prospects.</td></tr>
+</table>
+
+<h2>Nice to have</h2>
+<table>
+<tr><th>Where</th><th>Fix</th></tr>
+<tr><td>Sort menu: 8 options, including "OPS / ERA vs level".</td><td>Rename it to "Vs. his level", and drop options most readers won't use.</td></tr>
+<tr><td>"How it's figured": the page text reads "How it's figured I". The icon's letter is leaking into the accessible name.</td><td>Mark the icon <code>aria-hidden</code>.</td></tr>
+</table>
+
+<h2>Decisions (Gary, 2026-11-19)</h2>
+<ol>
+<li><strong>Salary:</strong> show the contract salary, never less than the $780K minimum.</li>
+<li><strong>Season:</strong> salary is for 2027. WAR is 2026 until the 2027 season starts, then 2027. Label the year on every figure.</li>
+<li><strong>First view:</strong> hide the scoreboard until a partner is picked, and show "Pick a trade partner to start."</li>
+<li><strong>Logo strip:</strong> wrap all 29 clubs into rows.</li>
+<li><strong>Grade:</strong> caption "Deal grade" under each letter.</li>
+<li><strong>No-data rows:</strong> show his minors line in the stat slot, for example "AA · 3.12 ERA".</li>
+<li><strong>Polish:</strong> rename the sort option to "Vs. his level", and hide the icon from screen readers.</li>
+</ol>
+
+<h2>What works</h2>
+<ul>
+<li>The tug-of-war meter and the club-coloured header give the verdict in one glance.</li>
+<li>A traded player stays in his roster row, greyed out, with "Being traded to Red Sox". The deal's state is clear without leaving the list.</li>
+<li>The deal sheet uses three lines (wins, long-term value, payroll), mirrored on each side. That is the right small number of figures.</li>
+</ul>
+</body></html>

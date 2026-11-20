@@ -1,0 +1,63 @@
+/* The trade card's motion (/trade). Outside src/styles/motion/, which is at its
+   file cap, the way styles/scout/motion.css is. Two moves, both on a change the
+   reader caused (docs/motion.md, "The one-shot gate"):
+
+   - A player the reader adds stamps into his club's sends list, reusing the
+     stamped card's keyframe (motion/stamp-in.css). PlayerRow sets
+     .tradedesk__row--enter only for a player added after the page loaded; a
+     shared link or a reload does not replay it.
+   - A depth-grid count that changes ticks: the cell is keyed by its count, so
+     a change remounts it, and the new number drops in from above.
+
+   The resting look is trade/page.css and trade/depth.css. */
+
+@keyframes tradedesk-tick {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tradedesk__row--enter {
+    animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp-in) backwards;
+  }
+
+  .tradedesk__cell--up > span,
+  .tradedesk__cell--down > span {
+    display: inline-block;
+    animation: tradedesk-tick var(--dur-med) var(--ease-out) backwards;
+  }
+}
+
+/* The trade sheet's arrows slide a step the way they point as it opens: the
+   sheet opens on a tap, so this is a change the reader caused. */
+@keyframes tradesheet-push {
+  from {
+    opacity: 0;
+    translate: calc(var(--space-2) * -1) 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tradesheet__swap .tradesheet__arrow {
+    animation: tradesheet-push var(--dur-stamp-in) var(--ease-out) calc(var(--stagger-step) * 2) backwards;
+  }
+}
+
+/* A position group's positions slide out beside its chip when it is picked
+   (TradePage.jsx): a reader's own tap, so the motion answers it. */
+@keyframes tradedesk-spots-out {
+  from { opacity: 0; transform: translateX(calc(var(--space-6) * -1)); }
+  to { opacity: 1; transform: none; }
+}
+
+.tradedesk__spots {
+  animation: tradedesk-spots-out var(--dur-base, 200ms) var(--ease-out, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tradedesk__spots {
+    animation: none;
+  }
+}

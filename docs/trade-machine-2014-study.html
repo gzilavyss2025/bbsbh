@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Machine Study</title>
+<style>
+:root{--bg:#F6EFDC;--card:#FBF6E9;--ink:#1B2A3A;--mute:#6B6558;--rule:#CBC1A7;--clay:#B4453A;--field:#2F6E4F}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#121212;--ink:#E3E3E3;--mute:#8C8C8C;--rule:#3D3D3D;--clay:#EB7A6C;--field:#5DB88A;color-scheme:dark}}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 ui-monospace,"JetBrains Mono",monospace;margin:0;padding:24px 16px}
+main{max-width:900px;margin:auto}h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.06em}
+h1{font-size:2rem;margin:0}h2{border-bottom:2px solid var(--ink);padding-bottom:4px;margin-top:2em}
+.box{background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 16px;margin:1em 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--rule)}
+th{color:var(--mute)}.scroll{overflow-x:auto}code{font-size:.9em}li{margin:.35em 0}
+</style></head><body><main>
+<h1>The 2014 ESPN Trade Machine, and what to borrow</h1>
+<p>Studied from the Wayback Machine copy of <code>espn.go.com/nba/tradeMachine</code> dated 2014-01-01. The building screen still runs there. The result screen didn't: the call that returns the verdict was never archived. Its wording, colours and layout come from the page's own archived code. I found no working shared-trade link in the archive. The 2011 and 2016 copies weren't checked.</p>
+
+<h2>How it worked</h2>
+<div class="box">
+<b>Building</b>
+<ul>
+<li>Teams are columns side by side, each headed in club colour with "Cap Room" and "Over Tax Line".</li>
+<li>Clicking a player moves him into the column of the team that <b>gets</b> him, under an "Acquiring 1 Player $12,000,000" bar.</li>
+<li>His old roster row darkens with "Being Traded To Boston Celtics".</li>
+<li>Players who can't be traded are greyed out with a ⊘ and the rule ("A free agent can not be traded until December 15…").</li>
+<li>One centred "Try This Trade" button.</li>
+</ul>
+<b>Result</b>
+<ul>
+<li>One banner on top: "This Trade is Successful!" on green, or "This Trade Failed" on red with each team's reasons.</li>
+<li>The rosters hide; each column keeps only what that team acquires.</li>
+<li>Each column gets "Hollinger's Analysis: +3 Wins" and a sentence: "With this trade you have increased this team's projected wins by 3."</li>
+<li>A footnote explains the method.</li>
+</ul>
+<b>Sharing</b>
+<ul>
+<li>"Save Trade" gives a link that reopens straight into the result, with only "New Trade" on offer.</li>
+</ul>
+</div>
+
+<h2>Why it felt easy</h2>
+<ul>
+<li>One click per player, and the column is the destination.</li>
+<li>Totals update live.</li>
+<li>Bad picks are greyed out before you try them, not after.</li>
+<li>The answer is one banner, and the result screen hides everything that isn't the deal.</li>
+</ul>
+
+<h2>What to borrow, mapped to our card</h2>
+<div class="scroll"><table>
+<tr><th>Trade Machine</th><th>Our card today</th><th>Change</th></tr>
+<tr><td>Columns say what each team <b>gets</b> ("Acquiring 2 Players $X")</td><td>Cards say what each club <b>sends</b></td><td>Flip to "Brewers get", so each card reads as that club's haul, the way fans read a trade. What moves stays mirrored below.</td></tr>
+<tr><td>One verdict banner on top</td><td>No verdict, on purpose</td><td>A factual banner instead of a judgment: "Fits both 40-man rosters" or "Red Sox must clear 1 spot · Callahan can block it (no-trade)". Green when nothing blocks the deal; clay when something must happen first. Still no "who wins".</td></tr>
+<tr><td>A small coloured effect per team, plus a plain sentence</td><td>A WAR ± row in the ledger</td><td>One sentence per club under its figures: "Brewers add 0.3 WAR and $28.7M for 2027."</td></tr>
+<tr><td>Untradeable players greyed out with the reason</td><td>Nothing is greyed out</td><td>In the roster sheet, mark a player with the reason: 10-and-5 rights, a no-trade clause where we know it, or a just-signed free agent. Shown, not blocked, since the card is read-only.</td></tr>
+<tr><td>"Being traded to…" on the old roster row</td><td>The roster sheet shows "Remove" for picked players</td><td>Put "In the deal → Red Sox" on that row so the sheet shows where he's going.</td></tr>
+<tr><td>A shared link opens straight into the result</td><td>The link opens the full page</td><td>Already close: the deal and What moves are at the top. Nothing to do.</td></tr>
+</table></div>
+
+<h2>Recommendation</h2>
+<p>Build the first three: "gets" columns, the factual banner and the one sentence per club. They're the parts that made the Trade Machine readable in two seconds, and none of them adds a value judgment.</p>
+</main></body></html>

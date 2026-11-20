@@ -86,7 +86,7 @@ export function rosterStatusView(person, onDate, { isMlbTeamId, teamFullName = (
 // freezes it at death for deceased players. A retired page needs neither a
 // death date nor a clock. Measure the final roster date against birth date
 // once, and the Overview can keep saying a stable baseball fact.
-function ageOn(birthDate, throughDate) {
+export function ageOn(birthDate, throughDate) {
   const birth = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate ?? '')
   const through = /^(\d{4})-(\d{2})-(\d{2})$/.exec(throughDate ?? '')
   if (!birth || !through) return null

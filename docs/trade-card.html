@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/*
+  Tally Baseball tokens (src/tokens/colors.css, typography.css, spacing.css),
+  copied as local names so this page stands alone. Each local name maps to one
+  app token, noted beside it. The stamp stays the page's one signature.
+*/
+:root{
+  --form:#F6EFDC;   /* --paper-0, app canvas */
+  --sheet:#FBF6E9;  /* --surface-card */
+  --print:#1B2A3A;  /* --navy / --accent-primary */
+  --type:#1B2A3A;   /* --text-body */
+  --pencil:#6B6558; /* --text-caption (graphite) */
+  --line:#CBC1A7;   /* --border-rule */
+  --stamp:#B4453A;  /* --accent-negative (clay) */
+  --edge:#0F1822;   /* --border-stamped */
+  --focus:#2F6E4F;  /* --focus-ring (field) */
+  --printface:"Barlow Condensed","Arial Narrow",sans-serif; /* --font-display */
+  --typeface:"JetBrains Mono",ui-monospace,monospace;       /* --font-body */
+}
+@media (prefers-color-scheme:dark){:root{
+  --form:#000000;--sheet:#121212;--print:#F2F2F2;--type:#E3E3E3;--pencil:#8C8C8C;--line:#3D3D3D;--stamp:#EB7A6C;--edge:#F2F2F2;--focus:#5DB88A;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--form);color:var(--type);font:16px/1.5 var(--printface)}
+.wrap{max-width:980px;margin:0 auto;padding:32px max(16px,env(safe-area-inset-left)) 64px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;border-bottom:3px double var(--print);padding-bottom:12px}
+h1{margin:0;font:700 clamp(1.9rem,5vw,2.8rem)/1 var(--printface);color:var(--print);letter-spacing:-.01em}
+.formno{color:var(--print);font-size:.9rem}
+.sub{color:var(--pencil);max-width:60ch;margin:12px 0 0}
+.sample{color:var(--stamp)}
+
+.sheet{position:relative;background:var(--sheet);border:2px solid var(--edge);box-shadow:4px 4px 0 var(--edge);margin-top:24px;padding:20px}
+h1,.club-head label,.moves h2,th,.roster summary,.btn{text-transform:uppercase;letter-spacing:.09em}
+body{font-family:var(--typeface);font-size:15px}
+.stamp{position:absolute;top:14px;right:18px;font:700 1.5rem/1 var(--printface);letter-spacing:.12em;
+  padding:6px 14px;border:3px solid currentColor;border-radius:4px;transform:rotate(-7deg);color:var(--pencil);
+  opacity:.85;cursor:pointer;background:none;transition:transform .25s,color .25s}
+.stamp.official{color:var(--stamp);transform:rotate(-3deg) scale(1.06)}
+.stamp:focus-visible{outline:2px dashed var(--print);outline-offset:4px}
+@media (prefers-reduced-motion:reduce){.stamp{transition:none}}
+
+.clubs{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px}
+@media (max-width:720px){.clubs{grid-template-columns:1fr}.stamp{font-size:1.1rem}}
+.club{min-width:0}
+.club-head{display:flex;gap:8px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--print);padding-bottom:4px}
+.club-head label{color:var(--print);font-weight:600}
+select{font:1.05rem var(--typeface);color:var(--type);background:transparent;border:0;border-bottom:1px dashed var(--line);padding:2px 0}
+.roomnum{color:var(--pencil);font-size:.88rem;white-space:nowrap}
+.roomnum.over{color:var(--stamp);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-weight:600;color:var(--print);font-size:.8rem;text-align:right;padding:8px 4px 4px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+td{font:.95rem var(--typeface);text-align:right;padding:7px 4px;border-bottom:1px solid var(--line)}
+td .pos{color:var(--pencil);margin-left:6px;font-size:.8rem}
+.flag{font:600 .72rem var(--printface);color:var(--stamp);border:1px solid var(--stamp);padding:0 4px;margin-left:6px;white-space:nowrap}
+.flag.pros{color:var(--print);border-color:var(--print)}
+td.x{width:44px;padding:0}
+td.x button{border:0;background:none;color:var(--pencil);cursor:pointer;font-size:1.25rem;width:44px;height:44px}
+/* Phone: each player is a two-line row (name, then labelled numbers) with the remove button on the right. */
+@media (max-width:560px){
+  .ptab tr:first-child{display:none!important}
+  .ptab tr:not(.empty){display:grid;grid-template-columns:repeat(4,auto) 1fr 44px;grid-template-areas:"n n n n n x" "a p c w . x";column-gap:14px;border-bottom:1px solid var(--line);padding:6px 0}
+  .ptab td{border:0;padding:2px 0;text-align:left}
+  .ptab td:nth-child(1){grid-area:n}.ptab td:nth-child(2){grid-area:a}.ptab td:nth-child(3){grid-area:p}
+  .ptab td:nth-child(4){grid-area:c}.ptab td:nth-child(5){grid-area:w}.ptab td.x{grid-area:x;align-self:center}
+  .ptab td[data-l]::before{content:attr(data-l)" ";font:600 .72rem var(--printface);color:var(--pencil)}
+  .ptab tr.empty td{display:block}
+}
+.empty td{color:var(--pencil);font-family:var(--printface);text-align:left;font-style:italic}
+
+.roster{margin-top:10px}
+.roster summary{cursor:pointer;color:var(--print);font-weight:600;padding:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font:.9rem var(--printface);background:transparent;color:var(--type);border:1px solid var(--line);padding:0 12px;min-height:44px;cursor:pointer}
+.roster summary{min-height:44px;display:flex;align-items:center}
+.btn{min-height:44px}
+.chip:hover{border-color:var(--print)}
+.chip[aria-pressed="true"]{background:var(--print);color:var(--sheet);border-color:var(--print)}
+button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.moves{margin-top:28px;border-top:3px double var(--print);padding-top:8px}
+.moves h2{margin:0 0 4px;font:700 1.15rem var(--printface);color:var(--print)}
+.moves td.mid{font:.85rem var(--printface);color:var(--pencil);text-align:center}
+.moves td:last-child{text-align:right}
+.moves td:first-child{text-align:left}
+.neg{color:var(--stamp)}
+
+.notes{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px;max-width:72ch}
+.notes li{padding-left:18px;position:relative}
+.notes li::before{content:"";position:absolute;left:2px;top:.55em;width:8px;height:8px;border:2px solid var(--stamp);border-radius:50%}
+.notes li.none::before{border-color:var(--line)}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{font:600 .95rem var(--printface);border:1px solid var(--print);background:transparent;color:var(--print);padding:8px 14px;cursor:pointer}
+.btn.primary{background:var(--print);color:var(--sheet)}
+.toast{color:var(--pencil);align-self:center;min-height:1.5em}
+.partner .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px;margin-top:8px}
+.team{min-height:44px;font:600 .9rem var(--printface);letter-spacing:.06em;background:transparent;color:var(--type);border:1px solid var(--line);cursor:pointer}
+.team:not(:disabled):hover{border-color:var(--print)}
+.team:disabled{color:var(--line);cursor:default}
+.hint{color:var(--pencil);font-size:.8rem;margin:6px 0 0}
+.club-head .t{color:var(--print);font:600 1rem var(--printface);text-transform:uppercase;letter-spacing:.09em}
+.change{font:600 .85rem var(--printface);background:none;border:0;color:var(--print);text-decoration:underline;min-height:44px;cursor:pointer}
+.cash{display:flex;align-items:center;gap:10px;margin-top:8px}
+.cash label{color:var(--pencil);font:600 .85rem var(--printface);text-transform:uppercase;letter-spacing:.09em}
+.cash input{width:6em;min-height:44px;font:1rem var(--typeface);color:var(--type);background:var(--form);border:1px solid var(--line);padding:0 8px}
+ul.roster{list-style:none;margin:10px 0 0;padding:0;max-height:320px;overflow:auto;border-top:1px solid var(--line)}
+ul.roster li{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:2px 0}
+ul.roster small{color:var(--pencil)}
+.add{min-height:44px;min-width:76px;font:600 .85rem var(--printface);text-transform:uppercase;letter-spacing:.09em;background:transparent;color:var(--print);border:1px solid var(--print);cursor:pointer}
+.add[aria-pressed="true"]{background:var(--print);color:var(--sheet)}
+.btn:disabled{opacity:.4;cursor:default}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Trade card</h1>
+      <p class="sub">Pick a trade partner, then add players or cash from each side. The card shows what moves each way and what the deal would set off. It does not say who wins. <span class="sample">Sample players and numbers.</span></p>
+    </div>
+  </header>
+
+  <section class="sheet" aria-label="Proposed trade">
+    <button class="stamp" id="stamp" aria-pressed="false" title="">Reported</button>
+
+    <div class="clubs">
+      <div class="club" data-side="a"></div>
+      <div class="club" data-side="b"></div>
+    </div>
+
+    <div class="moves">
+      <h2>What moves</h2>
+      <div class="scroll"><table id="moves"></table></div>
+      <ul class="notes" id="notes"></ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="copy">Copy link</button>
+      <button class="btn" id="swap">Swap sides</button>
+      <span class="toast" id="toast" role="status"></span>
+    </div>
+  </section>
+</div>
+
+<script>
+// Sample rosters only. The real page would read contracts, WAR and 40-man status.
+const CLUBS = {
+  MIL:{name:'Brewers', forty:39, payroll:118.4, tax:null, players:[
+    {id:1,n:'Ray Delgado',p:'SP',age:29,sal:11.5,ctl:2,war:3.4},
+    {id:2,n:'Tomás Ibarra',p:'SS',age:21,sal:0.8,ctl:6,war:0,pros:4,forty:false},
+    {id:3,n:'Owen Hartley',p:'RP',age:27,sal:2.1,ctl:3,war:0.9},
+    {id:4,n:'Cal Brenner',p:'1B',age:33,sal:15.0,ctl:1,war:1.2,tenFive:true},
+    {id:5,n:'Jalen Moore',p:'C',age:24,sal:0.8,ctl:5,war:1.8}]},
+  BOS:{name:'Red Sox', forty:40, payroll:232.0, tax:241.0, players:[
+    {id:11,n:'Wes Callahan',p:'CF',age:31,sal:22.0,ctl:3,war:4.1,ntc:true},
+    {id:12,n:'Dario Pena',p:'SP',age:26,sal:3.4,ctl:4,war:2.2},
+    {id:13,n:'Luke Avery',p:'2B',age:22,sal:0.8,ctl:6,war:0,pros:2,forty:false},
+    {id:14,n:'Griff Stone',p:'RP',age:34,sal:8.0,ctl:1,war:0.4}]},
+  CHC:{name:'Cubs', forty:38, payroll:205.5, tax:241.0, players:[
+    {id:21,n:'Ezra Quinn',p:'3B',age:28,sal:9.75,ctl:2,war:2.9},
+    {id:22,n:'Milo Ferris',p:'SP',age:30,sal:18.0,ctl:4,war:3.0,ntc:true},
+    {id:23,n:'Ty Okafor',p:'OF',age:20,sal:0.8,ctl:6,war:0,pros:1,forty:false}]}
+};
+// All 30 clubs for the partner grid; only the sample clubs above have rosters.
+const ABBR = ['ATH','ATL','AZ','BAL','BOS','CHC','CIN','CLE','COL','CWS','DET','HOU','KC','LAA','LAD','MIA','MIL','MIN','NYM','NYY','PHI','PIT','SD','SEA','SF','STL','TB','TEX','TOR','WSH'];
+
+// The link carries the deal: ?team=MIL&with=BOS&p=1,2,11&ca=0&cb=2.5
+// With no link, the card opens on your favorite team (the Brewers by default) with nothing picked.
+function fromLink(){
+  const q = new URLSearchParams(location.search), ids = new Set((q.get('p')||'').split(',').filter(Boolean).map(Number));
+  const team = (q.get('team')||'MIL').toUpperCase(), a = CLUBS[team]?team:'MIL';
+  const w = (q.get('with')||'').toUpperCase(), b = CLUBS[w]&&w!==a ? w : null;
+  const mine = c => c ? new Set(CLUBS[c].players.filter(p=>ids.has(p.id)).map(p=>p.id)) : new Set();
+  return {a:{club:a,picked:mine(a),cash:+q.get('ca')||0}, b:{club:b,picked:mine(b),cash:+q.get('cb')||0}, official:false};
+}
+const state = fromLink();
+
+const $ = s => document.querySelector(s);
+const money = v => (v<0?'−':'+')+'$'+Math.abs(v).toFixed(1)+'M';
+const signed = v => (v<0?'−':'+')+Math.abs(v).toFixed(1);
+const picked = side => state[side].club ? CLUBS[state[side].club].players.filter(p=>state[side].picked.has(p.id)) : [];
+const other = side => side==='a'?'b':'a';
+const flags = p => `${p.pros?`<span class="flag pros">No. ${p.pros} prospect</span>`:''}${p.ntc?'<span class="flag">No-trade</span>':''}${p.tenFive?'<span class="flag">10-and-5</span>':''}`;
+const blankB = () => ({club:null,picked:new Set(),cash:0});
+
+function partnerGrid(){
+  return `<div class="partner"><div class="club-head"><span class="t">Pick a trade partner</span></div>
+    <div class="grid">${ABBR.map(k=>{const has=CLUBS[k]&&k!==state.a.club;
+      return `<button class="team" data-team="${k}" ${has?'':'disabled'}>${k}</button>`}).join('')}</div>
+    <p class="hint">Sample rosters exist for ${Object.keys(CLUBS).filter(k=>k!==state.a.club).join(' and ')} only.</p></div>`;
+}
+
+function renderSide(side){
+  const el = document.querySelector(`.club[data-side="${side}"]`);
+  const s = state[side];
+  if(!s.club){
+    el.innerHTML = partnerGrid();
+    el.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{ state.b={club:b.dataset.team,picked:new Set(),cash:0}; render(); });
+    return;
+  }
+  const club = CLUBS[s.club], after = fortyAfter(side);
+  const head = side==='a'
+    ? `<label for="club-a">${club.name} send</label><select id="club-a">${Object.entries(CLUBS).map(([k,c])=>`<option value="${k}" ${k===s.club?'selected':''}>${c.name}</option>`).join('')}</select>`
+    : `<span class="t">${club.name} send</span><button class="change" id="change-b">Change partner</button>`;
+  const rows = picked(side).map(p=>`<tr>
+      <td>${p.n}<span class="pos">${p.p}</span>${flags(p)}</td>
+      <td data-l="Age">${p.age}</td><td data-l="2027 pay">$${p.sal.toFixed(1)}M</td><td data-l="Control">${p.ctl===6?'6+':p.ctl} yr</td><td data-l="WAR">${p.war?p.war.toFixed(1):'—'}</td>
+      <td class="x"><button aria-label="Take ${p.n} off the card" data-rm="${p.id}">×</button></td></tr>`).join('')
+    || `<tr class="empty"><td colspan="6">No one yet.</td></tr>`;
+  el.innerHTML = `
+    <div class="club-head">${head}</div>
+    <div class="roomnum ${after>40?'over':''}">40-man now ${club.forty}/40 · after ${after}/40</div>
+    <div class="scroll"><table class="ptab">
+      <tr><th>Player</th><th>Age</th><th>2027 pay</th><th>Control</th><th>WAR</th><th></th></tr>${rows}
+    </table></div>
+    <div class="cash"><label for="cash-${side}">+ Cash in 2027 ($M)</label>
+      <input id="cash-${side}" type="number" min="0" step="0.5" inputmode="decimal" value="${s.cash||''}" placeholder="0"></div>
+    <ul class="roster" aria-label="${club.name} roster">${club.players.map(p=>`<li>
+      <span><b>${p.n}</b> <small>${p.p} · ${p.forty===false?'minors':'40-man'}</small></span>
+      <button class="add" data-add="${p.id}" aria-pressed="${s.picked.has(p.id)}">${s.picked.has(p.id)?'Remove':'Add'}</button></li>`).join('')}</ul>`;
+  const sel = el.querySelector('select');
+  if(sel) sel.onchange = e => { s.club=e.target.value; s.picked=new Set(); if(state.b.club===s.club) state.b=blankB(); render(); };
+  const ch = el.querySelector('#change-b'); if(ch) ch.onclick = () => { state.b=blankB(); render(); };
+  el.querySelector(`#cash-${side}`).onchange = e => { s.cash=Math.max(0,+e.target.value||0); render(); };
+  el.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const id=+b.dataset.add; s.picked.has(id)?s.picked.delete(id):s.picked.add(id); render();});
+  el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{s.picked.delete(+b.dataset.rm); render();});
+}
+
+// 40-man after: lose your outgoing 40-man players, gain the incoming ones.
+function fortyAfter(side){
+  const on40 = ps => ps.filter(p=>p.forty!==false).length;
+  return CLUBS[state[side].club].forty - on40(picked(side)) + on40(picked(other(side)));
+}
+
+function render(){
+  renderSide('a'); renderSide('b');
+  $('#swap').disabled = !state.b.club;
+  if(!state.b.club){ $('#moves').innerHTML=''; $('#notes').innerHTML='<li class="none">Pick a trade partner to start the deal.</li>'; return; }
+  const A=CLUBS[state.a.club], B=CLUBS[state.b.club], pa=picked('a'), pb=picked('b');
+  const sum=(ps,k)=>ps.reduce((t,p)=>t+p[k],0);
+  // Club A's payroll change: salaries in minus out, then cash it sends minus cash it receives.
+  const pay = sum(pb,'sal')-sum(pa,'sal') + state.a.cash - state.b.cash, war = sum(pb,'war')-sum(pa,'war');
+  const cls = v => v<0?'neg':'';
+  $('#moves').innerHTML = `
+    <tr><th>${A.name}</th><th style="text-align:center"></th><th>${B.name}</th></tr>
+    <tr><td class="${cls(pay)}">${money(pay)}</td><td class="mid">2027 payroll</td><td class="${cls(-pay)}">${money(-pay)}</td></tr>
+    <tr><td class="${cls(war)}">${signed(war)}</td><td class="mid">WAR last season</td><td class="${cls(-war)}">${signed(-war)}</td></tr>
+    <tr><td>${sum(pb,'ctl')} in · ${sum(pa,'ctl')} out</td><td class="mid">years of control</td><td>${sum(pa,'ctl')} in · ${sum(pb,'ctl')} out</td></tr>
+    <tr><td>${fortyAfter('a')}/40</td><td class="mid">40-man after</td><td>${fortyAfter('b')}/40</td></tr>`;
+  const notes=[];
+  [...pa,...pb].forEach(p=>{
+    if(p.ntc) notes.push(`${p.n} has a no-trade clause and would have to approve the deal.`);
+    if(p.tenFive) notes.push(`${p.n} has 10-and-5 rights and can block any trade.`);
+    if(p.forty===false) notes.push(`${p.n} is not on the 40-man roster, so he moves without taking a spot.`);
+  });
+  [['a',A],['b',B]].forEach(([side,c])=>{ if(state[side].cash) notes.push(`The ${c.name} send $${state[side].cash.toFixed(1)}M in cash.`); });
+  [['a',A,-pay],['b',B,pay]].forEach(([side,c,d])=>{
+    if(fortyAfter(side)>40) notes.push(`The ${c.name} go to ${fortyAfter(side)} on the 40-man and must clear a spot.`);
+    if(c.tax){const left=c.tax-(c.payroll-d); notes.push(left>=0?`The ${c.name} stay $${left.toFixed(1)}M under the first tax line.`:`The ${c.name} go $${(-left).toFixed(1)}M over the first tax line.`);}
+  });
+  if((!pa.length&&!state.a.cash)||(!pb.length&&!state.b.cash)) notes.unshift('Add a player or cash from each club to see the full deal.');
+  $('#notes').innerHTML = notes.map(n=>`<li>${n}</li>`).join('');
+}
+
+$('#stamp').onclick = e => {
+  state.official=!state.official;
+  e.currentTarget.classList.toggle('official',state.official);
+  e.currentTarget.textContent = state.official?'Official':'Reported';
+  e.currentTarget.setAttribute('aria-pressed',state.official);
+};
+$('#swap').onclick = () => { [state.a,state.b]=[state.b,state.a]; render(); };
+$('#copy').onclick = async () => {
+  const q = `?team=${state.a.club}${state.b.club?`&with=${state.b.club}`:''}&p=${[...state.a.picked,...state.b.picked].join(',')}${state.a.cash?`&ca=${state.a.cash}`:''}${state.b.cash?`&cb=${state.b.cash}`:''}`;
+  try{ await navigator.clipboard.writeText(location.origin+location.pathname+q); $('#toast').textContent='Link copied.'; }
+  catch{ $('#toast').textContent='Copy failed. The link is '+q; }
+};
+render();
+</script>
+</body>
+</html>

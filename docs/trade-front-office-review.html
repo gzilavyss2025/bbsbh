@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Front-office review</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:860px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2,h3{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.93em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+code,pre{background:#ece3cc;padding:0 4px;font-size:.88em}pre{padding:10px;overflow-x:auto}
+.flag{font:600 .75em system-ui;border:1px solid #b5462f;color:#b5462f;padding:0 5px}
+</style></head><body>
+<h1>Trade Simulator: front-office review</h1>
+<p>A subagent played a veteran MLB front-office executive and read the page's code and data sources. It edited nothing. Its view, condensed below, is that <strong>the scoreboard's "WAR swing" is the wrong headline</strong>, that the player pop-up has <strong>no multi-season stats</strong>, and that value should rank above everything else on the page. I confirmed the two code claims: the pop-up shows one season's figures, and minor leaguers count as 0 WAR in the deal sum.</p>
+
+<h2>1. Valuation</h2>
+<p>"Last season's WAR moved" is unsound as the one number:</p>
+<ul>
+<li><strong>Prospects count as zero</strong> (<code>side.js</code> <code>warOf</code> → null → 0 in <code>dealSummary</code>). Every veteran-for-prospects deal reads as a win for the club taking the veteran. <span class="flag">wrong on the most common deadline trade</span></li>
+<li><strong>It ignores money and years.</strong> A 3-WAR rental at $25M scores the same as a 3-WAR pre-arb player with five years of control, who is worth $60M+ more.</li>
+<li><strong>It is one noisy past season</strong>, unregressed, and its label sits beside "2027 payroll", so it reads like a forecast.</li>
+<li><strong>Payroll drops arbitration and pre-arb players</strong> (<code>unsetSalary</code>), so a cheap star looks free to his new club.</li>
+</ul>
+<table>
+<tr><th>What clubs weigh</th><th>Can a fan site do it honestly?</th></tr>
+<tr><td>Projected WAR (Steamer/ZiPS)</td><td>Yes, roughly: a Marcel (5/4/3 weights over 3 seasons, regressed toward ~1 WAR per 600 PA / 180 IP, plus aging).</td></tr>
+<tr><td>$/WAR</td><td>Yes: a public ~$8–9M per WAR, growing ~4% a year.</td></tr>
+<tr><td>Salary over control</td><td>Mostly: Cot's for signed deals; pre-arb = league minimum; arbitration ≈ 25/40/60% of market value for arb 1/2/3.</td></tr>
+<tr><td>Prospect value</td><td>Roughly: a surplus table by rank bucket (there is no FV grade in our data).</td></tr>
+<tr><td>Aging</td><td>Yes: about −0.5 WAR a year after 30.</td></tr>
+<tr><td>Injury, makeup, positional need, competitive window, CBT</td><td>No. Show the facts (IL days, CBT line vs payroll), never fold them into a score.</td></tr>
+</table>
+<h3>Proposed headline: surplus value moved ($M)</h3>
+<pre>projWAR_y = marcel(war[t], war[t-1], war[t-2]) + age_adj(age + k)   // k = years ahead
+value_y   = projWAR_y * 8.5M * 1.04^k
+salary_y  = cots_value ?? (preArb ? 0.78M : arbPct[n] * max(value_y, 0.78M))
+surplus   = Σ_y (value_y - salary_y) / 1.08^k
+prospect  = rankTable(topRank ?? orgRank)   // 1-10 ≈ $80M, 11-25 ≈ $55M, 26-50 ≈ $40M,
+                                            // 51-100 ≈ $25M, org top 10 ≈ $5M, else ≈ $1M
+side net  = Σ surplus in − Σ surplus out − cash sent + retained by the other club</pre>
+<p>Caveats belong next to the number: it's a rough estimate (±$15M is typical), prospect values are bucket averages, relievers are capped at ~1.5 projected WAR, and it is not a contender's view (a contender rationally pays for this year's wins). Show "Projected WAR next season" under it as the win-now line. Last season's WAR moves into the player pop-up. <em>Every dollar figure here is a rough public approximation, to be calibrated before shipping.</em></p>
+
+<h2>2. Stats in the pop-up</h2>
+<p>Today <code>PlayerSheet.jsx</code> shows a header, one line of single-season figures (<code>Numbers</code>), "How he got here", and the contract. <strong>It has no multi-season stats</strong>, which is the biggest hole for judging a trade.</p>
+<ul>
+<li><strong>Above the fold:</strong> name, position, age, bats/throws, service time, control ("thru 2029, 3 yrs"), then one strip: projected WAR, surplus $M, prospect rank or level.</li>
+<li><strong>Hitters</strong> (last 3 MLB seasons + career): Year, Team, G, PA, AVG/OBP/SLG, OPS+, HR, SB, BB%, K%, WAR. OPS+ over raw OPS.</li>
+<li><strong>Starters:</strong> Year, GS, IP, ERA, FIP, K%, BB%, HR/9, WAR. IP is the durability signal.</li>
+<li><strong>Relievers:</strong> Year, G, IP, ERA, FIP, K%, BB%, SV/HLD, WAR; flag any season under 30 IP as a small sample.</li>
+<li><strong>Prospects and minor leaguers:</strong> one row per level per season (2–3 seasons) with <strong>age versus level</strong> as a signed, shaded column ("−2.1" = 2.1 years young for the level). Hitters: Level, Age, Δage, PA, slash line, ISO, BB%, K%. Pitchers: Level, Age, Δage, IP, ERA, K%, BB%, K−BB%. K% and BB% matter more than ERA/OPS in the minors. The level percentile belongs here as a column.</li>
+<li><strong>Players who went up and down:</strong> one table with MLB rows in bold, in date order.</li>
+<li><strong>Contract:</strong> keep it, below the stats or as a tab, with options left and 10-and-5 rights there, not buried in notes.</li>
+</ul>
+
+<h2>3. What matters most on the page</h2>
+<ol>
+<li>Who moves and their value (surplus $M, projected WAR).</li>
+<li>Control and cost per player (years and dollars owed), now split between the row and the pop-up.</li>
+<li>Prospect rank and level of anyone young moving.</li>
+<li>Payroll change, next season and in total, with arbitration and pre-arb estimated, not dropped.</li>
+<li>Roster mechanics: 40-man fit, options, 10-and-5 (notes are the right place).</li>
+<li>Depth after the deal (<code>DepthCard.jsx</code>), below the fold.</li>
+</ol>
+<p><strong>Noise or misleading today:</strong></p>
+<ul>
+<li>The WAR-swing meter in <code>Scoreboard.jsx</code>: the most prominent thing on the page, and wrong for every prospect deal.</li>
+<li>"Control +14 / −8" in <code>DealParts.jsx</code>: raw summed years, so five years of a replacement reliever outweigh two of an ace. Weight it by value or drop it.</li>
+<li>The payroll figure leaving out unset salaries: a footnote doesn't fix a biased headline.</li>
+<li>Rows show last season's salary next to next-season control, mixing two years.</li>
+<li>The wire sentence and the 40-man check in the scoreboard: fine, but neither should outrank value.</li>
+</ul>
+
+<h2>Their top 5 changes, by impact</h2>
+<ol>
+<li>Replace the WAR swing in <code>Scoreboard.jsx</code> / <code>dealSummary</code> with <strong>net surplus value ($M)</strong>, caveat beside it.</li>
+<li><strong>Value prospects</strong> by rank bucket in <code>deal.js</code>.</li>
+<li>Add a <strong>3-season MLB table and a level-by-level minor-league table with age versus level</strong> to <code>PlayerSheet.jsx</code>, above the contract.</li>
+<li><strong>Estimate pre-arb and arbitration salaries</strong> instead of dropping them, marked "~".</li>
+<li>Add <strong>projected next-season WAR</strong> as the win-now line; relabel or remove the raw WAR and control-year totals.</li>
+</ol>
+
+<h2>Things to decide before building</h2>
+<ul>
+<li><strong>A grade, or not.</strong> Surplus value is the closest to "good or bad trade" you asked for. It's an estimate built on assumptions, which moves further from the original "facts only" rule than the WAR swing did.</li>
+<li><strong>Where the numbers come from.</strong> $/WAR, the arbitration percentages and the prospect table are assumptions we'd publish. OPS+, FIP and wRC+ aren't all in the free MLB feed; FIP can be computed, OPS+ needs league and park factors.</li>
+<li><strong>Data on hand.</strong> The multi-season tables can reuse what the transactions "More" sheet already reads (<code>FactSheet.jsx</code>'s MLB / Minors register), so they don't need a new data source.</li>
+</ul>
+</body></html>

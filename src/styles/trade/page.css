@@ -1,0 +1,549 @@
+/* The trade card (/trade, src/screens/trade/). Imported by the page itself.
+   Two stamped club cards side by side from 900px, stacked on a phone, then
+   the "What moves" card across the bottom. */
+
+/* layout-exempt: the two club cards, one column on a phone and two from 900px */
+.tradedesk__sides {
+  display: grid;
+  gap: var(--space-8);
+}
+
+@media (min-width: 900px) {
+  /* layout-exempt: the two club cards side by side */
+  .tradedesk__sides {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+/* layout-exempt: logo, roster count and the change button wrap on a phone */
+.tradedesk__club {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* layout-exempt: the 40-man label over its figure */
+.tradedesk__count {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.tradedesk__countfig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.tradedesk__after {
+  color: var(--text-muted);
+}
+
+.tradedesk__after--over {
+  color: var(--accent-negative);
+}
+
+.tradedesk__sends {
+  margin-top: var(--space-3);
+  border-top: var(--bw-rule) solid var(--border-stamped);
+}
+
+/* layout-exempt: the Sends label and the side's sum on one line */
+.tradedesk__sendshead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+.tradedesk__sendssum {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* layout-exempt: a player in the deal: the open button, then the remove */
+.tradedesk__sent {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.tradedesk__sent > .tradedesk__open {
+  grid-area: auto;
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+}
+
+/* layout-exempt: the WAR label over its figure, at the row's right */
+.tradedesk__sentwar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.tradedesk__sentfig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.tradedesk__none {
+  margin: var(--space-3) 0;
+  color: var(--text-muted);
+}
+
+.tradedesk__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* layout-exempt: one player row is name, three figures, and its button */
+.tradedesk__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'open btn';
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.shot.tradedesk__face {
+  grid-area: shot;
+  display: block;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border: var(--bw-rule) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-inset);
+  overflow: hidden;
+}
+
+/* layout-exempt: name over its attribute line in one grid cell */
+.tradedesk__who {
+  grid-area: who;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tradedesk__name {
+  font-family: var(--font-read);
+  font-size: var(--fs-field);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* The "By level" percentile: highlighter marker, the house rank emphasis. */
+.tradedesk__rank {
+  align-self: flex-start;
+  padding: 0 var(--space-1);
+  background: var(--marker);
+  color: var(--text-on-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradedesk__meta {
+  color: var(--text-caption);
+}
+
+/* layout-exempt: the figures run on and wrap under the name on a narrow card */
+.tradedesk__nums {
+  grid-area: nums;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  align-items: baseline;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tradedesk__nums:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.tradedesk__k {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.tradedesk__detail {
+  grid-column: 2 / -1;
+  margin: var(--space-1) 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+.tradedesk__summary {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+
+.tradedesk__facts {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.tradedesk__years {
+  width: 100%;
+  margin-top: var(--space-2);
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__years tr:nth-child(odd) {
+  background: var(--surface-row-hover);
+}
+
+.tradedesk__years th,
+.tradedesk__years td {
+  padding: var(--space-1) var(--space-2);
+}
+
+.tradedesk__years th {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-align: left;
+}
+
+.tradedesk__years td {
+  text-align: right;
+}
+
+.tradedesk__cash {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.tradedesk__cash input {
+  width: 6em;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-rule) solid var(--border-rule);
+}
+
+.tradedesk__roster {
+  margin-top: var(--space-4);
+}
+
+.tradedesk__roster summary {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* layout-exempt: the roster's filter rows stack */
+.tradedesk__controls {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+/* layout-exempt: the sort label beside its select */
+.tradedesk__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradedesk__search {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-rule) solid var(--border-rule);
+}
+
+.tradedesk__sort select {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-rule) solid var(--border-rule);
+}
+
+.tradedesk__filter {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.tradedesk__sub {
+  margin: var(--space-4) 0 var(--space-1);
+}
+
+.tradedesk__totals {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__totals th,
+.tradedesk__totals td {
+  padding: var(--space-2) var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: middle;
+}
+
+.tradedesk__totals thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+  text-align: left;
+  border-bottom: var(--bw-rule) solid var(--border-stamped);
+}
+
+.tradedesk__totals thead th > * {
+  vertical-align: middle;
+  margin-right: var(--space-2);
+}
+
+.tradedesk__totals thead th:last-child > * {
+  margin: 0 0 0 var(--space-2);
+}
+
+.tradedesk__totals thead th:last-child,
+.tradedesk__totals td:last-child {
+  text-align: right;
+}
+
+.tradedesk__totals tbody th {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-align: center;
+  width: 34%;
+}
+
+.tradedesk__fig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  color: var(--text-heading);
+}
+
+.tradedesk__fig--up {
+  color: var(--accent-positive-deep);
+}
+
+.tradedesk__fig--down {
+  color: var(--accent-negative);
+}
+
+.tradedesk__fignote {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.btn.tradedesk__retainlink {
+  display: flex;
+  justify-content: flex-start;
+  padding-inline: 0;
+}
+
+/* layout-exempt: a club card's two buttons share one row, wrapping on a phone */
+.tradedesk__clubactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* A player in the deal stays on his roster, grayed out with where he goes
+   laid over the row, the way the 2014 Trade Machine marked him. */
+.tradedesk__row--going {
+  position: relative;
+  background: var(--surface-inset);
+}
+
+.tradedesk__row--going .tradedesk__open {
+  opacity: 0.35;
+}
+
+/* His figures give way to the label, as on the Machine. */
+.tradedesk__row--going .tradedesk__money,
+.tradedesk__row--going .tradedesk__figcol {
+  visibility: hidden;
+}
+
+.tradedesk__going {
+  position: absolute;
+  inset-block: 0;
+  right: calc(var(--space-6) * 2);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.tradedesk__browse {
+  margin-top: 0;
+}
+
+.tradedesk__notes {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* The deal strip: pinned to the foot of the screen while a deal exists, one
+   line per club. It sits above the page, below a sheet's scrim. */
+/* layout-exempt: the two clubs' lines stack in the strip */
+.tradedesk__strip {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-6);
+  padding: var(--space-2) var(--space-3);
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* layout-exempt: a club's three numbers on one line */
+.tradedesk__stripside {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  align-items: baseline;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__strip .tradedesk__k {
+  color: var(--text-on-ink-dim);
+}
+
+.tradedesk__strip .tradedesk__over {
+  color: var(--marker);
+}
+
+.tradedesk__confirm {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-event-wash);
+  font-size: var(--fs-small);
+}
+
+.tradedesk__strip .tradedesk__stripshare {
+  justify-self: start;
+}
+
+.tradedesk__browse {
+  margin-top: var(--space-4);
+}
+
+/* The row's one tap target: face, name, attribute line and numbers. */
+/* layout-exempt: face beside the name block, the whole thing one button */
+.tradedesk__open {
+  grid-area: open;
+  display: grid;
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tradedesk__open:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.tradedesk__open .shot.tradedesk__face,
+.tradedesk__open .tradedesk__who,
+.tradedesk__open .tradedesk__nums {
+  grid-area: auto;
+}
+
+.tradedesk__kept {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* layout-exempt: the retain switches stack */
+.tradedesk__retainbar {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* layout-exempt: the two deal buttons wrap on a phone */
+.tradedesk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* The trade-partner picker: every club in view, wrapping into rows, not a strip that scrolls off the edge. */
+/* layout-exempt: 29 logos wrap into rows */
+.tradedesk__partners .vsteam__strip {
+  flex-wrap: wrap;
+  overflow: visible;
+}

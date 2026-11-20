@@ -1644,6 +1644,18 @@ don't run these by hand.
   own weekly crons until 2026-08-28 — but running them on a cadence made the
   nightly steps that READ their output impossible to gate on them, so as of
   2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team/fetch.js`.
+- `trade/gen-level-lines.mjs` → `public/data/level-lines.json` — for the season in play,
+  each level's (MLB, AAA, AA, A+, A, Rk) qualified OPS and ERA as 101 percentile cut points,
+  with prospect-trend's floor (40 PA, 30 outs). 12 requests; ~7 KB out against ~10 MB of
+  splits. Nightly, structural data block. Math: `src/lib/trade/levelPct.js`; read by
+  `/trade` through `src/api/trade/levelLines.js`.
+- `trade/gen-trade-pedigree.mjs` → `public/data/trade-pedigree/{orgId}.json` (+ `index.json`
+  stamp) — for every player each MLB organization holds (rosterType=fullRoster), how he
+  joined it (draft, trade, international signing, free agent, waivers, Rule 5,
+  purchase) and his latest draft pick (year, round, overall). One people call per 60
+  players with `hydrate=draft,transactions` (~1.6 MB per org upstream, ~25 KB out).
+  Nightly, structural data block. The rule is `src/lib/trade/pedigree.js`; `/trade`
+  reads it through `src/api/trade/pedigree.js`.
 - `gen-milb-ballparks.mjs` → `src/lib/data/park-keys.json` and
   `src/lib/data/milb-ballparks.json`. The first pins one store key per MLB and
   MiLB venue id, append-only: a rename keeps the key and adds the new name, and

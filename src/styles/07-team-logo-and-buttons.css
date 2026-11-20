@@ -66,6 +66,18 @@
   object-fit: contain;
 }
 
+/* A tinted mono mark (TeamLogo's `tint`): the knockout art as a mask filled
+   with the text colour beside it, so a light bar's mark matches its name.
+   The art is already a flat silhouette (ADR-0031); this paints it, it does
+   not filter full-colour art. Its width follows the art's square viewBox. */
+.teamlogo--tint {
+  display: block;
+  aspect-ratio: 1;
+  background-color: currentColor;
+  -webkit-mask: var(--teamlogo-src, none) center / contain no-repeat;
+  mask: var(--teamlogo-src, none) center / contain no-repeat;
+}
+
 .teamlogo--fallback {
   display: inline-flex;
   align-items: center;

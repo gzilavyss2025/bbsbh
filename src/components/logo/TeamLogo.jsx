@@ -56,6 +56,10 @@ export function TeamLogo({
   // (every caller but the game route) or a season outside the table changes
   // nothing.
   season = null,
+  // A mono mark painted in the text colour beside it (currentColor) instead of
+  // its own ink, so on a light bar it matches the club name. Club art is a
+  // mask, not a filter (ADR-0031); a custom override keeps its own colours.
+  tint = false,
 }) {
   const cropSquare = crop === true
   const cropBar = crop === 'bar'
@@ -154,7 +158,19 @@ export function TeamLogo({
     )
   }
 
-  const img = (
+  // The hidden <img> keeps the fallback chain: a mask that fails to load
+  // fires no error, the probe does. A base fallback is full-colour art and
+  // draws as itself, never as a silhouette.
+  const img = tint && stage === 'variant' && variant === 'mono' ? (
+    <span
+      key={url}
+      className={`teamlogo teamlogo--tint ${cropBar ? 'teamlogo--crop-bar' : ''} ${crop ? '' : className}`}
+      style={{ ...(crop ? null : style), '--teamlogo-src': `url("${url}")` }}
+      aria-hidden="true"
+    >
+      <img src={url} alt="" hidden onError={onError} />
+    </span>
+  ) : (
     <img
       key={url}
       className={`teamlogo ${cropSquare ? 'teamlogo--crop' : ''} ${cropBar ? 'teamlogo--crop-bar' : ''} ${bwClass} ${crop ? '' : className}`}

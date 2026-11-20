@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade story plan</title>
+<style>
+body{font:16px/1.55 Georgia,serif;max-width:860px;margin:2rem auto;padding:0 16px;color:#1b2a3a;background:#f7f1e3}
+h1,h2{font-family:system-ui,sans-serif}h2{margin-top:2rem;border-bottom:2px solid #1b2a3a}
+table{border-collapse:collapse;width:100%;font-size:.92em}td,th{padding:6px 8px;border-bottom:1px solid #cbbf9f;text-align:left;vertical-align:top}
+code{background:#ece3cc;padding:0 3px;font-size:.88em}
+.story{background:#fffaf0;border:2px solid #1b2a3a;padding:16px 20px}.story h3{font:700 24px/1.2 system-ui;margin:0 0 6px}.story .dek{font-style:italic;margin:0 0 12px}
+.ph{background:#f6e3c8;padding:0 3px;font-family:monospace;font-size:.85em}
+</style></head><body>
+<h1>A "news story" for every simulated trade</h1>
+<p>A subagent who is both a programmer and an MLB beat writer read the repo and planned a cookie-cutter story about the deal, written the way a beat writer would file it. It edited nothing. I checked its key data claims against the files: the award rows for Misiorowski (2026) and Carroll (2023, 2025, 2026) are in <code>awards-history.json</code>, and <code>postseason-history.json</code> has the Brewers (158) as 2026 champions.</p>
+
+<h2>Data the repo already has</h2>
+<table>
+<tr><th>Fact</th><th>Where</th><th>Simulator reads it now?</th></tr>
+<tr><td>Age, last season's line, options, contract</td><td><code>api/transactions/playerFacts.js</code> + <code>templates.js</code> <code>factLines</code></td><td>Yes</td></tr>
+<tr><td>Major awards 2022–2026 (MVP, Cy Young, ROY, Silver Slugger, Gold Glove, All-MLB)</td><td><code>api/awards/history.js</code> <code>loadAwardsHistory</code> → <code>/data/awards-history.json</code></td><td>No</td></tr>
+<tr><td>Career awards, any year</td><td><code>api/person/awards.js</code> (<code>awardsView</code>, <code>MAJOR_AWARDS</code>), from the person fetch's awards hydrate</td><td>No (player page uses it)</td></tr>
+<tr><td>All-Star selections</td><td><code>api/awards/allStarRosters.js</code>, <code>allStarLegacy.js</code></td><td>No</td></tr>
+<tr><td>Club W-L, runs, run differential, postseason path</td><td><code>public/data/run-differential.json</code> (no loader yet)</td><td>No</td></tr>
+<tr><td>Postseason series and champion</td><td><code>public/data/postseason-history.json</code></td><td>No</td></tr>
+<tr><td>Division finish</td><td><code>api/team/fetch.js</code> <code>fetchLeagueStandings</code>; <code>team-records/{yr}/{id}.json</code></td><td>No</td></tr>
+<tr><td>Payroll, salaries, WAR, prospect rank, depth, 40-man</td><td><code>salaries.js</code>, <code>war.js</code>, <code>prospects/top100.js</code>, <code>lib/trade/depth.js</code>, <code>api/trade/side.js</code></td><td>Yes</td></tr>
+<tr><td>Number words, varied phrasing, ordinals</td><td><code>api/transactions/voice.js</code> (<code>variant</code>, <code>num</code>, <code>ordinal</code>)</td><td>Yes</td></tr>
+</table>
+<p>The subagent found no 2026 Arizona row in <code>run-differential.json</code>, so the Diamondbacks' record would come from the standings or the team-records file. Worth checking why it's missing.</p>
+
+<h2>What to add</h2>
+<ul>
+<li><code>src/api/team/runDifferential.js</code>: a memoized reader plus a pure <code>clubSeason(data, teamId, season)</code>.</li>
+<li>A pure <code>honorsOf(playerId, awards, allStars)</code> returning <code>[{key, season, league}]</code>. No new MLB call for 2022 onward; older honors come through the batched person read.</li>
+<li>The final standings for last season (a live call that already exists) and a phrase for how the postseason ended: "won the World Series", "lost in the NLCS", "missed the postseason".</li>
+</ul>
+
+<h2>The template</h2>
+<ul>
+<li><strong>Headline:</strong> "{Club A} acquire {star} in {n}-player deal with {Club B}". The star is the biggest name: top award, else most WAR.</li>
+<li><strong>Dek:</strong> what the other club lands, plus its best honor if there is one.</li>
+<li><strong>Lede:</strong> who got what, and why it matters (the hole it fills, from the depth chart). The "why" is dropped if there's no gap.</li>
+<li><strong>The haul:</strong> one paragraph per side: a count by role, total WAR and payroll added.</li>
+<li><strong>Player by player:</strong> the wire's line, then honors ("won the 2026 NL Cy Young", "a three-time All-Star"), contract or control, and prospect rank.</li>
+<li><strong>Team context:</strong> record, division finish and postseason result. Run differential only when it's 50 or more either way.</li>
+<li><strong>What it means:</strong> per club, the hole filled, the payroll change and the 40-man count after the deal.</li>
+<li><strong>Kicker:</strong> one of three closers, chosen by <code>variant</code>. For example, a reunion with a club the player once played for, or a defending-champion angle.</li>
+</ul>
+<p>Every sentence is dropped when its data is missing, so nothing prints "undefined" or a guess. Numbers under ten are words, and the story says "postseason", never "playoffs".</p> <!-- word-choice-exempt: states the rule -->
+
+<h2>How to code it</h2>
+<ul>
+<li><strong>Builder:</strong> a pure <code>src/screens/trade/tradeStory.js</code> returns <code>{headline, dek, paragraphs}</code>. Each paragraph is a list of <code>{text, playerId?, teamId?}</code> pieces, the same shape the wire row's sentence uses, so names become links. Each sentence builder returns null when it's missing data. Sentence families go in small files (<code>honors.js</code>, <code>clubs.js</code>) to stay under the file-size limits.</li>
+<li><strong>Varied wording:</strong> 2–4 phrasings per sentence, picked with <code>variant</code>. Stable for one deal, varied across deals.</li>
+<li><strong>Fetching:</strong> one hook, <code>useTradeStory</code>, loads awards, All-Stars, run differential, standings, contracts and each player's facts in parallel. All of them are memoized, so reopening the story is free.</li>
+<li><strong>Tests:</strong> node tests with inline fixtures. A full deal produces every paragraph; removing awards, contract or club data drops exactly those sentences; no output contains "undefined", "null", "NaN" or "playoffs"; the wording is stable; small numbers are words.</li> <!-- word-choice-exempt: states the rule -->
+<li><strong>On the page:</strong> a "Read the story" button under the wire row opens a sheet laid out as a newspaper column, with player and club links.</li>
+</ul>
+
+<h2>Sample story</h2>
+<p>Highlighted text is a placeholder for a fact the subagent couldn't read from the repo's data.</p>
+<div class="story">
+<h3>Brewers acquire Corbin Carroll in seven-player deal with Diamondbacks</h3>
+<p class="dek">Arizona lands Jacob Misiorowski, the reigning NL Cy Young Award winner, as the World Series champions trade pitching for an outfield cornerstone</p>
+<p>MILWAUKEE — The Milwaukee Brewers acquired right fielder Corbin Carroll, right-hander Brandon Pfaadt, catcher Gabriel Moreno, shortstop Geraldo Perdomo and shortstop prospect Demetrio Crisantes from the Arizona Diamondbacks, sending right-hander Jacob Misiorowski and left-hander Aaron Ashby to Arizona. <span class="ph">{depth gap, e.g. "The deal fills Milwaukee's hole in right field."}</span></p>
+<p>Carroll, <span class="ph">{age}</span>, was the 2023 NL Rookie of the Year and made the All-MLB First Team that season. He won a Silver Slugger in 2025 and the NL Gold Glove in 2026, when he hit .239 with 22 homers. <span class="ph">{contract}</span></p>
+<p>Pfaadt, 28, posted a 3.77 ERA over 136 innings in 29 games for the Diamondbacks in 2026. <span class="ph">{Moreno, Perdomo, Crisantes lines}</span></p>
+<p>Misiorowski, 24, won the 2026 NL Cy Young after posting a 1.80 ERA over 174.2 innings in 30 games, with 16 wins and 252 strikeouts. He also made the All-MLB First Team and the NL All-Star team. <span class="ph">{contract}</span></p>
+<p>The Brewers went 103-59 in 2026, outscored opponents 832-618, and won the World Series. Arizona went <span class="ph">{w-l}</span>, <span class="ph">{finish}</span> in the NL West, and missed the postseason.</p>
+<p>For Milwaukee, the deal adds <span class="ph">{payroll change}</span> to the payroll and puts the 40-man at 43, which means three corresponding moves. Arizona gets a Cy Young winner at the top of its rotation.</p>
+<p><span class="ph">{kicker}</span></p>
+</div>
+<p>The award stat line for Misiorowski (16 W, 252 K) comes from <code>awards-history.json</code>. The 1.80 ERA, the innings and the 40-man count come from what the page already shows.</p>
+</body></html>

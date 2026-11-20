@@ -1,0 +1,333 @@
+/* The trade card's sheets (src/screens/trade/): the trade that brought a
+   player (TradeSheet), and one player's details (PlayerSheet). Each is a stamped card on the app's .scrim/.sheet contract.
+   Imported by the page. */
+
+/* The trade sheet: a stamped card (square, 2px ink, hard shadow) like the
+   cards on the page, holding a two-column ledger of what each club got. */
+.sheet.tradesheet {
+  border-radius: var(--radius-square);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  background: var(--surface-card);
+}
+
+.tradesheet__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* The trade in place (TradeSheet.jsx TradeRecap): one lead sentence, then the
+   two sides as one-line rows. Side by side at the wide step, stacked below it. */
+.traderecap__lead {
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+#root .traderecap__lead { text-transform: none } /* caps-exempt: a sentence, read as prose */
+
+/* layout-exempt: the two sides, stacked on a phone */
+.tradesheet__sides {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 740px) {
+  .tradesheet__sides {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+/* layout-exempt: logo, the club, and the WAR column head at the right */
+.tradesheet__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-rule) solid var(--border-stamped);
+}
+
+.tradesheet__club h3 {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--text-heading);
+}
+
+.tradesheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* layout-exempt: face | name over its line | WAR, one line a player */
+.tradesheet__player {
+  display: grid;
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The face and name borrow the card row's classes, and with them its named
+   grid areas; in this three-column row they take the next cell instead. */
+.tradesheet__player > .shot.tradedesk__face,
+.tradesheet__player > .tradedesk__who {
+  grid-area: auto;
+}
+
+/* The player the sheet is about: his name in bold ink, and "this player" in words. */
+.tradesheet__player--this .tradedesk__name {
+  font-weight: var(--w-bold);
+  background: var(--surface-event-wash);
+}
+
+.tradesheet__num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-heading);
+}
+
+.tradesheet__extra {
+  padding: var(--space-2) 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* layout-exempt: the face beside the name and its line in the sheet head */
+.playersheet__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.playersheet__id h2,
+.playersheet__id p {
+  margin: 0;
+}
+
+.playersheet__nums {
+  margin: var(--space-3) 0 0;
+}
+
+.playersheet__section {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.playersheet__section h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--text-heading);
+}
+
+.playersheet__pedigree {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-small);
+}
+
+.playersheet__actions {
+  margin-top: var(--space-5);
+}
+
+
+/* The trade story (story/TradeStory.jsx): a newspaper column in the deal card. */
+.tradestory__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flow-root;
+}
+
+.tradestory__headline {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.tradestory__dek {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.tradestory__graf {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+#root .tradestory__dek, #root .tradestory__graf, #root .tradestory__graf * { text-transform: none } /* caps-exempt: the story reads as prose */
+/* A name in the story reads as the wire's names do. */
+.tradestory__graf .plink {
+  font-weight: var(--w-bold);
+}
+
+/* The story's art: one game photo of the headline player. Full width on a
+   phone; at the wide step it sits right and the story wraps beside it. */
+.tradestory__art {
+  margin: 0 0 var(--space-3);
+}
+
+@media (min-width: 740px) {
+  .tradestory__art {
+    float: right;
+    width: min(45%, 28rem);
+    margin: var(--space-1) 0 var(--space-3) var(--space-4);
+  }
+}
+
+.tradestory__art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.tradestory__credit {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+
+/* The player sheet takes most of the page: his action photo in a column at
+   the wide step, his numbers, seasons and contract beside it. */
+.sheet.tradesheet.playersheet {
+  max-width: min(72rem, calc(100vw - var(--space-4) * 2));
+  /* Taller than the window, it scrolls inside itself: the scrim docks a sheet
+     to the bottom, so without a cap its top runs off the screen. */
+  max-height: calc(100dvh - var(--space-8));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.playersheet__photo {
+  margin: var(--space-3) 0 0;
+}
+
+.playersheet__photo img {
+  display: block;
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+  object-position: top;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.playersheet__photo--loading {
+  display: none;
+}
+
+.playersheet__main {
+  min-width: 0;
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: a fixed photo column beside the sheet's body */
+  .playersheet__grid:has(> .playersheet__side > .playersheet__photo:not(.playersheet__photo--loading)) {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .playersheet__photo img {
+    max-height: none;
+  }
+}
+
+/* The sheet's lead tiles: the trade case, big figure over small label. */
+/* layout-exempt: up to four tiles across, two on a phone */
+.playersheet__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.playersheet__tile {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.playersheet__tilefig {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+/* The seasons table sits flat in the sheet: no stamp, no second shadow, and no
+   second copy of the name the sheet's title already gives. */
+.playersheet .factsheet .card__body {
+  padding: 0;
+}
+
+.playersheet .factsheet__name {
+  display: none;
+}
+
+/* The draft sentence moves under the photo (.playersheet__draft). */
+.playersheet .factsheet__note {
+  display: none;
+}
+
+.playersheet__draft {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+#root .playersheet__draft { text-transform: none } /* caps-exempt: a sentence, read as prose */
+
+/* Add / Remove stays in reach: stuck to the foot of the scrolling sheet. */
+.playersheet .playersheet__actions {
+  position: sticky;
+  bottom: calc(var(--space-5) * -1);
+  margin-inline: calc(var(--space-5) * -1);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+@media (min-width: 740px) {
+  /* The photo and its sentence stay put while the column beside it scrolls,
+     but only as a column beside a photo: without one the side is a plain line
+     in the flow, and pinning it laid it over everything that scrolled under. */
+  .playersheet__grid:has(> .playersheet__side > .playersheet__photo:not(.playersheet__photo--loading)) > .playersheet__side {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* The contract, drawn like the seasons table above it: a summary line, the
+   Ledger, then its notes in the same small type. */
+.playersheet__contractsum {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+.playersheet__contract .table + .playersheet__contractsum {
+  margin-top: var(--space-2);
+  color: var(--text-caption);
+}

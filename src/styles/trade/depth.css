@@ -1,0 +1,134 @@
+/* The trade card's organization depth card (src/screens/trade/DepthCard.jsx).
+   Grid: positions down, levels across, the count after the deal with the count
+   before struck beside it. Ladder: the same cells as names. Imported by the page. */
+
+/* layout-exempt: the club switch and the view switch wrap on a phone */
+.tradedesk__depthbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.tradedesk__gridwrap {
+  overflow-x: auto;
+}
+
+.tradedesk__grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__grid th {
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.tradedesk__grid tbody th {
+  text-align: left;
+  color: var(--text-heading);
+}
+
+.tradedesk__grid tbody tr {
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.tradedesk__cell {
+  padding: var(--space-1) var(--space-2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tradedesk__zero {
+  color: var(--text-caption);
+}
+
+.tradedesk__was {
+  margin-right: var(--space-1);
+  color: var(--text-caption);
+}
+
+.tradedesk__cell--up {
+  background: var(--accent-tint);
+  color: var(--accent-positive-deep);
+}
+
+.tradedesk__cell--down {
+  background: var(--surface-event-wash);
+  color: var(--accent-negative);
+}
+
+.tradedesk__needbar {
+  margin-top: var(--space-4);
+}
+
+.tradedesk__needs {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  font-size: var(--fs-small);
+}
+
+.tradedesk__needs li {
+  padding: var(--space-1) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.tradedesk__need--new {
+  color: var(--accent-negative);
+}
+
+.tradedesk__ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* layout-exempt: a position's label beside its levels, wrapping under it on a phone */
+.tradedesk__rung {
+  display: grid;
+  grid-template-columns: var(--space-12) minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.tradedesk__rungslot {
+  color: var(--text-heading);
+}
+
+.tradedesk__rungrow {
+  min-width: 0;
+}
+
+/* layout-exempt: one level's names run on and wrap */
+.tradedesk__rungcell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-small);
+}
+
+/* Names run on in a level, so each but the last ends in a comma. */
+.tradedesk__rungcell > :not(.tradedesk__k, .tradedesk__more, :last-child)::after {
+  content: ',';
+}
+
+.tradedesk__in {
+  color: var(--accent-positive-deep);
+}
+
+.tradedesk__out {
+  color: var(--accent-negative);
+}
+
+.tradedesk__more {
+  color: var(--text-caption);
+}

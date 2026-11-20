@@ -8,20 +8,15 @@
 //
 // The `<data value>` wrapper carries the exact figure for anything reading the
 // page rather than looking at it, with the full dollars on hover.
+import { moneyLabel } from '../../lib/format.js'
+
+export { moneyLabel }
+
 const exact = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   maximumFractionDigits: 0,
 })
-const millions = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
-const thousands = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
-
-export function moneyLabel(value) {
-  if (value == null || !Number.isFinite(value)) return '—'
-  if (Math.abs(value) < 1_000_000) return `$${thousands.format(Math.round(value / 1000))}k`
-  return `$${millions.format(value / 1_000_000)}M`
-}
-
 function exactMoney(value) {
   return value == null || !Number.isFinite(value) ? '—' : exact.format(value)
 }

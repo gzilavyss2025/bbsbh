@@ -25,6 +25,11 @@
   filter: var(--mark-filter, none);
 }
 
+/* A tinted mark (TeamLogo's `tint`) is already the text's colour: no re-ink. */
+.sectionhead__mark:has(.teamlogo--tint) {
+  filter: none;
+}
+
 /* A club's own uploaded City Connect masthead override (teams.js's
    cityConnectMastheadUrl) is already finished art, deliberately colored for
    its own bar — not a flat silhouette the theme's ink re-inks, but the

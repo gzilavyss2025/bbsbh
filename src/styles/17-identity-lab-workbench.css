@@ -138,7 +138,7 @@
 }
 
 /* The club's mono knockout mark, drawn exactly as the real masthead draws it —
-   white art, re-inked to black on a light bar (.idlab__barmock--darkmark, the
+   white art, painted in the bar's text colour (TeamLogo's `tint`, the
    lab's copy of .is-themed--dark .sectionhead__mark). Same caveat as there: this
    is not the brightness(0) invert(1) whitening ADR-0031 forbids, because the
    art arrives already flat.
@@ -150,10 +150,6 @@
 .idlab__barmock__logo {
   flex: 0 0 auto;
   height: 100%;
-}
-
-.idlab__barmock--darkmark .idlab__barmock__logo {
-  filter: brightness(0);
 }
 
 /* The City Connect bar's own uploaded override (HeaderBarMock's overrideUrl)

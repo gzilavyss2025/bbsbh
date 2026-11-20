@@ -1,0 +1,552 @@
+/* The trade card's columns, the 2014 Trade Machine's shape
+   (src/screens/trade/TradePage.jsx): the banner on top, each club's effect
+   under its haul, and its roster inline with Trade Machine rows. Imported by
+   the page. */
+
+/* What the deal does for one club, under its haul. */
+.tradedesk__effect {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-inset);
+  border-top: var(--bw-rule) solid var(--border-stamped);
+}
+
+/* layout-exempt: the club's three figures on one line, wrapping on a phone */
+.tradedesk__effectfigs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+
+/* layout-exempt: a figure's label over its value */
+.tradedesk__effectfigs > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.tradedesk__sentence {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+
+.tradedesk__info {
+  max-width: 40rem;
+  margin: var(--space-2) auto 0;
+}
+
+/* The club's own roster, inside its column, in a box that scrolls. */
+.tradedesk__roster {
+  margin: 0;
+}
+
+/* layout-exempt: the roster's name, its (i) and the cash button on one line */
+.tradedesk__rosterhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradedesk__rosterhead h3 {
+  margin: 0;
+  color: var(--text-heading);
+}
+
+.tradedesk__rosterhead > .tradedesk__cash {
+  margin: 0 0 0 auto;
+}
+
+.tradedesk__rosterlist {
+  max-height: 34rem;
+  overflow-y: auto;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The roster row, Trade Machine style: face | name over position |
+   salary over years | WAR | Add. Columns line up down the list. */
+.tradedesk__rosterlist .tradedesk__open,
+.tradedesk__sent > .tradedesk__open.tradedesk__open {
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) 6.5rem 3rem;
+  gap: var(--space-2);
+}
+
+/* layout-exempt: the salary over its years, both on one left edge */
+.tradedesk__money,
+.tradedesk__figcol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__figcol {
+  align-items: flex-end;
+}
+
+.tradedesk__salary {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.tradedesk__years,
+.tradedesk__warlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+.tradedesk__war {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+
+/* The roster row's + and −: the small mark (its tap area stays --tap-min).
+   The glyph sits dead centre; hover inks + in field green (add) and − in clay
+   (take out), the deal's two directions. */
+.btn.tradedesk__pm {
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--accent-tint);
+  --btn-edge-hover: var(--accent-positive-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+.btn.tradedesk__pm:hover {
+  color: var(--accent-positive-deep);
+}
+
+.btn.tradedesk__pm--on {
+  --btn-fill: var(--surface-stamped-ink);
+  --btn-edge: var(--surface-stamped-ink);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: var(--accent-negative);
+  --btn-edge-hover: var(--accent-negative);
+}
+
+.btn.tradedesk__pm--on:hover {
+  color: var(--text-on-ink);
+}
+
+/* The + and − are drawn, not typed: a font's glyph sits off its own centre,
+   two crossed bars sit dead centre in the circle. */
+.tradedesk__pmglyph {
+  position: relative;
+  display: block;
+  width: 0.75em;
+  height: 0.75em;
+}
+
+.tradedesk__pmglyph::before,
+.tradedesk__pmglyph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  background: currentColor;
+}
+
+.tradedesk__pmglyph::before {
+  width: 100%;
+  height: var(--bw-heavy);
+}
+
+.tradedesk__pmglyph::after {
+  width: var(--bw-heavy);
+  height: 100%;
+}
+
+.tradedesk__pmglyph--minus::after {
+  content: none;
+}
+
+.tradedesk__rosterlist {
+  overflow-x: hidden;
+}
+
+/* A minor leaguer has no salary on file: "MiLB", muted, so it never reads as pay. */
+.tradedesk__salary--milb {
+  color: var(--text-caption);
+}
+
+/* The deal as the wire would print it, with its copy button. */
+/* layout-exempt: the sentence beside its copy button, wrapping on a phone */
+.tradedesk__wire {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.tradedesk__wiretext {
+  flex: 1 1 18rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* The roster card's club bar: the Identity Lab's main bar (17-identity-lab-
+   workbench.css's .idlab__barmock), edge to edge across the top of the card. */
+/* layout-exempt: the mark beside the club name, centred in the bar */
+.tradedesk__clubbar {
+  height: var(--space-12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  background: var(--clubbar-fill, var(--navy));
+  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: var(--clubbar-ink, var(--text-on-ink-bright));
+}
+
+.tradedesk__clubbarmark {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+/* The deal card's head, the 2014 Trade Machine's team bar: club colour,
+   name at the left, figures stacked label-over-number at the right. */
+.tradedesk__dealbar {
+  height: var(--space-12);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  padding-right: var(--space-3);
+  background: var(--clubbar-fill, var(--navy));
+  border-bottom: var(--bw-heavy) solid var(--clubbar-accent, var(--band-rule));
+  color: var(--clubbar-ink, var(--text-on-ink-bright));
+}
+
+.tradedesk__dealname {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: inherit;
+}
+
+/* layout-exempt: a bar figure, its label over its number */
+.tradedesk__dealfig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tradedesk__dealk {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradedesk__dealbar .tradedesk__after {
+  color: inherit;
+}
+
+/* Over 40 after the deal: the count in a highlighter chip, which reads on any
+   club's bar (the scoreboard no longer says it). */
+.tradedesk__dealbar .tradedesk__after--over {
+  padding: 0 var(--space-1);
+  background: var(--marker);
+  color: var(--text-on-bright);
+}
+
+.tradedesk__dealbar .btn {
+  --btn-ink: currentColor;
+  color: inherit;
+}
+
+/* At the wide step the page takes the slate's wide measure (report/research.css
+   does the same), so each club's roster column has room for its figures. */
+@media (min-width: 740px) {
+  .screen.tradedesk {
+    max-width: 1272px;
+  }
+}
+
+/* A Competitive Balance pick on the roster card (DraftPicks.jsx): a lettered
+   badge where a face would be, then the pick, over the players. */
+.tradedesk__picks {
+  margin-bottom: var(--space-3);
+}
+
+/* layout-exempt: the head line, label and its info button on one row */
+.tradedesk__pickshead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* layout-exempt: badge then the pick's name, as a player row's face then name */
+.tradedesk__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  grid-area: open;
+}
+
+.tradedesk__pickbadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--shot-xs-w);
+  aspect-ratio: 1;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-tint);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+
+/* The Trade Machine's small ✕ in the bar's corner: take this club out and pick another. */
+.btn.tradedesk__barx {
+  --btn-edge: currentColor;
+  align-self: flex-start;
+  margin-top: var(--space-1);
+  font-size: var(--fs-label);
+}
+
+/* The bar's ✕ is the drawn + turned a quarter, so it sits dead centre too. */
+.tradedesk__pmglyph--x {
+  transform: rotate(45deg);
+}
+
+/* The scoreboard header (Scoreboard.jsx): club | WAR swing | club, the game
+   page's score header turned to a deal. */
+/* layout-exempt: three cells, club | swing | club, the middle sized to its figure */
+.tradeboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, auto) minmax(0, 1fr);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+
+/* layout-exempt: logo, name over its line, the WAR figure */
+.tradeboard__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 0;
+}
+
+.tradeboard__club--b {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* layout-exempt: the name over its line */
+.tradeboard__clubtext {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tradeboard__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.tradeboard__sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: the middle cell stacks its label, figure, meter and status */
+.tradeboard__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  text-align: center;
+}
+
+.tradeboard__k {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradeboard__score {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink-bright);
+}
+
+/* The tug-of-war: club A's colour from the left, club B's from the right,
+   meeting where the deal pulls them (--tug-share, Scoreboard.jsx). */
+.tradeboard__meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--space-3);
+  background: linear-gradient(to right, var(--tug-a, var(--navy)) 0 var(--tug-share, 50%), var(--tug-b, var(--graphite)) var(--tug-share, 50%) 100%);
+  border: var(--bw-hair) solid var(--text-on-ink);
+}
+
+/* The knot in the rope: a bright mark where the two colours meet. */
+.tradeboard__tug {
+  position: absolute;
+  inset-block: calc(var(--space-1) * -1);
+  left: var(--tug-share, 50%);
+  width: var(--space-2);
+  margin-left: calc(var(--space-1) * -1);
+  background: var(--marker);
+  border: var(--bw-hair) solid var(--surface-stamped-ink);
+  transition: left var(--dur-base, 200ms) ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tradeboard__tug {
+    transition: none;
+  }
+}
+
+/* A club's grade for what it takes home, big, like a game's trade screen. */
+.tradeboard__grade {
+  flex: 0 0 auto;
+  min-width: var(--space-12);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
+  text-align: center;
+  color: var(--text-heading);
+}
+
+/* layout-exempt: the letter over its caption */
+.tradeboard__gradebox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.tradeboard__gradecap {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.tradeboard__grade--a {
+  color: var(--accent-positive-deep);
+}
+
+.tradeboard__grade--c,
+.tradeboard__grade--d,
+.tradeboard__grade--f {
+  color: var(--accent-negative);
+}
+
+/* layout-exempt: the verdict and its info button on one line */
+.tradeboard__score {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tradeboard__score--steal,
+.tradeboard__score--big {
+  color: var(--marker);
+}
+
+/* A phone stacks the board: club, swing, club. */
+@media (max-width: 739px) {
+  .tradeboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tradeboard__club--b {
+    flex-direction: row;
+    text-align: left;
+  }
+}
+
+/* A phone has no room for name, salary and WAR side by side: the name takes
+   the first line, salary and WAR share the second, the face spans both. */
+@media (max-width: 739px) {
+  /* layout-exempt: named areas, name over salary and WAR on a phone */
+  .tradedesk__rosterlist .tradedesk__open,
+  .tradedesk__sent > .tradedesk__open.tradedesk__open {
+    grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+    grid-template-areas:
+      'face who who'
+      'face money fig';
+    row-gap: var(--space-1);
+  }
+
+  .tradedesk__open > .tradedesk__face {
+    grid-area: face;
+  }
+
+  .tradedesk__open > .tradedesk__who {
+    grid-area: who;
+  }
+
+  .tradedesk__open > .tradedesk__money {
+    grid-area: money;
+    flex-direction: row;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .tradedesk__open > .tradedesk__figcol {
+    grid-area: fig;
+    flex-direction: row;
+    gap: var(--space-1);
+    align-items: baseline;
+  }
+}
+
+/* The deal drawn as a wire story: the feed's own row, the Copy button beside it. */
+.tradedesk__wire--story {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.tradedesk__wirelist {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

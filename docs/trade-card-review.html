@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Card Review</title>
+<style>
+:root{--bg:#f4f6f7;--fg:#1d1d1f;--mute:#5d636b;--line:#c9d1d8;--hi:#b3261e;--md:#9a6a00;--lo:#27408b}
+@media (prefers-color-scheme:dark){:root{--bg:#161b22;--fg:#e9e6df;--mute:#a3a9b1;--line:#334;--hi:#ff7b70;--md:#e3b25a;--lo:#8fa8ec;color-scheme:dark}}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif;margin:0;padding:24px 16px}
+main{max-width:860px;margin:auto}h1{margin:0 0 .2em}p.lede{color:var(--mute)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:600;font-size:.8rem}.s{font-weight:700;white-space:nowrap}.hi{color:var(--hi)}.md{color:var(--md)}.lo{color:var(--lo)}
+.scroll{overflow-x:auto}code{font-size:.85em}
+</style></head><body><main>
+<h1>Trade card review</h1>
+<p class="lede">A UI/UX review of <code>docs/trade-card.html</code>, checked against the ui-ux-pro-max priority list (accessibility, touch, layout, type and colour, forms, navigation). Phone checked at 375 px, desktop at 800 px. 2026-11-18.</p>
+
+<p><b>Verdict:</b> the layout and the carbon-form look hold up. The real problems are at phone width: the player table is cut off, and the tap targets are too small. Fix those two before this becomes the app page.</p>
+
+<div class="scroll"><table>
+<tr><th>Severity</th><th>Area</th><th>Finding</th><th>Fix</th></tr>
+<tr><td class="s hi">High</td><td>Layout</td><td>At 375 px the six-column player table runs past the edge. The WAR column and the × remove button are cut off, and two-word names wrap onto two lines.</td><td>On phones, show each player as a two-line row: name and tags on line 1, then age · pay · control · WAR on line 2. Put the remove button on the right.</td></tr>
+<tr><td class="s hi">High</td><td>Touch</td><td>The × remove button is about 20 px, and the roster chips are about 28 px tall. Both are under the 44 px minimum, and the × sits right against the WAR number.</td><td>Make both at least 44 px tall. Give each chip at least 8 px of space.</td></tr>
+<tr><td class="s hi">High</td><td>Contrast</td><td>The grey text (40-man line, positions, "What moves" labels) is about 3.9:1 on the paper, under the 4.5:1 that small text needs.</td><td>Darken the grey to about <code>#5d636b</code> in light mode.</td></tr>
+<tr><td class="s md">Medium</td><td>Clarity</td><td>The stamp is the only way to switch between Reported and Official, but it looks like decoration. Nothing says you can tap it.</td><td>In the app it should flip on its own when the trade reaches the wire. For a manual "I heard about this" case, add a labelled toggle near it.</td></tr>
+<tr><td class="s md">Medium</td><td>Flow</td><td>Once a side has a player, its roster folds shut. Adding a second player takes an extra tap, and the main action is hidden.</td><td>Keep the roster open on desktop. On phones, use a sticky "Add player" button that opens a sheet with search.</td></tr>
+<tr><td class="s md">Medium</td><td>Deep link</td><td>"Copy link" builds <code>?a=&amp;b=&amp;p=</code>, but the page never reads those values when it loads. A shared link opens the default trade.</td><td>Read the query string when the page loads. In the app, this is the route's search params.</td></tr>
+<tr><td class="s md">Medium</td><td>Accessibility</td><td>Each club picker has both a <code>&lt;label for&gt;</code> and an <code>aria-label</code> ("Club one"), so a screen reader hears "Club one" instead of "Brewers send". The totals do not announce when they change.</td><td>Drop the <code>aria-label</code>. Add <code>aria-live="polite"</code> to the notes list.</td></tr>
+<tr><td class="s md">Medium</td><td>Data</td><td>A real 40-man roster has 40+ names. A wall of chips will not scale.</td><td>Group by position (SP, RP, C, IF, OF, prospects) and add a search box.</td></tr>
+<tr><td class="s lo">Low</td><td>Colour</td><td>Negative numbers are red, but each also has a minus sign, so meaning does not rely on colour alone. Red also marks a no-trade clause, which reads as "bad" when it is only a fact.</td><td>Keep red for the stamp and for flags that block the deal. Show minus amounts in ink.</td></tr>
+<tr><td class="s lo">Low</td><td>Copy</td><td>"Form T-2 · two-club deal" is decoration that looks like data.</td><td>Cut it, or use it for the trade date.</td></tr>
+<tr><td class="s lo">Low</td><td>Design system</td><td>The page uses its own fonts and colours, not the app's tokens (<code>src/styles/</code>). Special Elite and Archivo Narrow are not in the app.</td><td>When it's built in the app, map it to the paper-scorebook tokens and keep only the stamp as the page's signature.</td></tr>
+<tr><td class="s lo">Low</td><td>Motion</td><td>The stamp turn is the only animation, and it respects reduced motion. Good.</td><td>None.</td></tr>
+</table></div>
+
+<p><b>What works:</b> the empty-state line tells you what to do. The notes are plain sentences, not a score. Swap sides and the disabled duplicate-club option prevent an impossible trade. Focus rings are visible.</p>
+</main></body></html>

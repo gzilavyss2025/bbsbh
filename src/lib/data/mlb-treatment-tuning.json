@@ -1629,9 +1629,9 @@
         "offsetX": -1,
         "offsetY": 4,
         "header": {
-          "bar": "#12284B",
-          "accent": "#A6801F",
-          "onBar": "#F8F8F5",
+          "bar": "#ffc52f",
+          "accent": "#12284b",
+          "onBar": "#12284b",
           "markScale": 1.15
         },
         "note": "cream, not any of the three brand swatches"

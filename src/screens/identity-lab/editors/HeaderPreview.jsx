@@ -71,6 +71,7 @@ export function HeaderBarMock({ teamId, name, colors, unset, overrideUrl, markSc
         name={name}
         variant="mono"
         crop="bar"
+        tint
         overrideUrl={overrideUrl}
         className={`idlab__barmock__logo${overrideUrl ? ' idlab__barmock__logo--custom' : ''}`}
       />
