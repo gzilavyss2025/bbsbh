@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T07:55:58.523Z",
+  "generatedAt": "2026-11-20T07:55:50.721Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -25,7 +25,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".323, 25 HR, 91 RBI",
-      "age": 20,
+      "age": 21,
       "number": null
     },
     {
@@ -494,7 +494,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".289, 19 HR, 85 RBI",
       "age": 22,
-      "number": "96"
+      "number": "14"
     },
     {
       "rank": 42,
@@ -982,7 +982,7 @@
       "name": "Demetrio Crisantes",
       "teamId": 109,
       "team": "ari",
-      "position": "2B",
+      "position": "SS",
       "levelRaw": "ALL (4)",
       "statLine": ".292, 10 HR, 53 RBI",
       "age": 22,
@@ -1356,7 +1356,7 @@
       "name": "Raudi Rodriguez",
       "teamId": 108,
       "team": "ana",
-      "position": "OF",
+      "position": "CF",
       "levelRaw": "ALL (2)",
       "statLine": ".264, 16 HR, 64 RBI",
       "age": 23,
@@ -1476,7 +1476,7 @@
       "name": "Demetrio Crisantes",
       "teamId": 109,
       "team": "ari",
-      "position": "2B",
+      "position": "SS",
       "levelRaw": "ALL (4)",
       "statLine": ".292, 10 HR, 53 RBI",
       "age": 22,
@@ -1656,7 +1656,7 @@
       "name": "Cristofer Torin",
       "teamId": 109,
       "team": "ari",
-      "position": "SS",
+      "position": "2B",
       "levelRaw": "AA",
       "statLine": ".281, 16 HR, 61 RBI",
       "age": 21,
@@ -1716,7 +1716,7 @@
       "name": "Druw Jones",
       "teamId": 109,
       "team": "ari",
-      "position": "OF",
+      "position": "CF",
       "levelRaw": "AA",
       "statLine": ".271, 7 HR, 54 RBI",
       "age": 22,
@@ -2004,7 +2004,7 @@
       "name": "Enrique Bradfield Jr.",
       "teamId": 110,
       "team": "bal",
-      "position": "OF",
+      "position": "CF",
       "levelRaw": "ALL (3)",
       "statLine": ".262, 5 HR, 38 RBI",
       "age": 24,
@@ -2139,7 +2139,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".323, 25 HR, 91 RBI",
-      "age": 20,
+      "age": 21,
       "topRank": 2
     },
     {
@@ -3192,7 +3192,7 @@
       "name": "Jaison Chourio",
       "teamId": 114,
       "team": "cle",
-      "position": "OF",
+      "position": "CF",
       "levelRaw": "ALL (2)",
       "statLine": ".274, 9 HR, 56 RBI",
       "age": 21,
@@ -4608,7 +4608,7 @@
       "name": "Carson Roccaforte",
       "teamId": 118,
       "team": "kc",
-      "position": "OF",
+      "position": "CF",
       "levelRaw": "ALL (2)",
       "statLine": ".257, 35 HR, 96 RBI",
       "age": 24,
@@ -6980,6 +6980,18 @@
     },
     {
       "orgRank": 27,
+      "playerId": 692137,
+      "name": "L.P. Langevin",
+      "teamId": 136,
+      "team": "sea",
+      "position": "RHP",
+      "levelRaw": "A+",
+      "statLine": "55.1 IP, 3.42 ERA, 106 SO",
+      "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 28,
       "playerId": 808750,
       "name": "Casey Hintz",
       "teamId": 136,
@@ -6991,7 +7003,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 30,
       "playerId": 837869,
       "name": "Jarvis Gomez",
       "teamId": 136,
@@ -7000,18 +7012,6 @@
       "levelRaw": "ROK",
       "statLine": ".368, 6 HR, 46 RBI",
       "age": 17,
-      "topRank": null
-    },
-    {
-      "orgRank": 30,
-      "playerId": 806836,
-      "name": "Po-Chun Lin",
-      "teamId": 136,
-      "team": "sea",
-      "position": "RHP",
-      "levelRaw": "ROK",
-      "statLine": "45.0 IP, 5.00 ERA, 59 SO",
-      "age": 20,
       "topRank": null
     },
     {
@@ -10527,7 +10527,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "119.2 IP, 5.34 ERA, 139 SO",
-      "age": 24,
+      "age": 25,
       "topRank": null
     },
     {
@@ -10596,7 +10596,7 @@
       "name": "Luke Adams",
       "teamId": 158,
       "team": "mil",
-      "position": "1B",
+      "position": "3B",
       "levelRaw": "ALL (2)",
       "statLine": ".267, 16 HR, 43 RBI",
       "age": 22,
