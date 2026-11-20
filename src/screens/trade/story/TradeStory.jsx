@@ -55,15 +55,15 @@ function Segments({ segs }) {
 
 // The deal written up as a beat writer files it, in the deal card where the
 // wire row was. Until the facts arrive it shows the plain wire sentence.
-// The photo's caption, filled in like a newspaper's: "Jackson Chourio of the
-// Brewers against the Rays in the postseason on Oct. 28." Each blank drops out
-// when the game does not say it.
+const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
 // "Nov. 20, 2026" for the byline, AP style.
 const longDate = (iso) => {
   const [y, m, d] = iso.split('-').map(Number)
   return `${MONTHS[m - 1]} ${d}, ${y}`
 }
-const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
+// The photo's caption, filled in like a newspaper's: "Jackson Chourio of the
+// Brewers against the Rays in the postseason on Oct. 28." Each blank drops out
+// when the game does not say it.
 function captionOf(star, clubId, photo) {
   const [m, d] = (photo.date ?? '').split('/').map(Number)
   const rest = [
@@ -96,7 +96,7 @@ export function TradeStory({ fallback, ...deal }) {
   if (!s) return <p className="tradedesk__wiretext">{fallback}</p>
   return (
     <article className="tradestory__body" aria-busy={state.loading}>
-      <h3 className="tradestory__headline">{s.headline}</h3>
+      <h2 className="tradestory__headline">{s.headline}</h2>
       {s.dek && <p className="tradestory__dek">{s.dek}</p>}
       <p className="tradestory__byline">Tally Wire <time dateTime={date}>{longDate(date)}</time></p>
       {photo.data && (

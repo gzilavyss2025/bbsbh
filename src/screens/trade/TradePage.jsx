@@ -353,7 +353,7 @@ export function TradePage() {
         </div>
 
         {deal && started && (
-          <Card frame="stamped" className="tradedesk__moves">
+          <Card frame="stamped" className="tradedesk__moves" aria-label="The trade story">
             <Wire text={wireText}>
               {wireStory && (
                 <TradeStory a={a} b={b} sendsA={sends(sideA.data)} sendsB={sends(sideB.data)} story={wireStory} deal={deal} depthA={sideA.data.depth} depthB={sideB.data.depth} nextYear={sideA.data.nextYear} fallback={wireText} />
