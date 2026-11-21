@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T07:54:36.401Z",
+  "generatedAt": "2026-11-21T16:10:25.079Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -3068,18 +3068,6 @@
     },
     {
       "orgRank": 25,
-      "playerId": 699114,
-      "name": "Leo Balcazar",
-      "teamId": 113,
-      "team": "cin",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".239, 12 HR, 69 RBI",
-      "age": 22,
-      "topRank": null
-    },
-    {
-      "orgRank": 26,
       "playerId": 813958,
       "name": "Edgar Colon",
       "teamId": 113,
@@ -3091,7 +3079,7 @@
       "topRank": null
     },
     {
-      "orgRank": 27,
+      "orgRank": 26,
       "playerId": 823851,
       "name": "Hansel Jimenez",
       "teamId": 113,
@@ -3103,7 +3091,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 806474,
       "name": "Ty Horn",
       "teamId": 113,
@@ -3115,7 +3103,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 28,
       "playerId": 812151,
       "name": "Deivi Villafana",
       "teamId": 113,
@@ -3127,7 +3115,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 832723,
       "name": "Ysaias Escalona",
       "teamId": 113,
@@ -3136,6 +3124,18 @@
       "levelRaw": "ROK",
       "statLine": "63.1 IP, 0.99 ERA, 59 SO",
       "age": 20,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 825620,
+      "name": "Angel Salio",
+      "teamId": 113,
+      "team": "cin",
+      "position": "SS",
+      "levelRaw": "ROK",
+      "statLine": ".325, 3 HR, 46 RBI",
+      "age": 18,
       "topRank": null
     },
     {
@@ -5720,14 +5720,14 @@
     },
     {
       "orgRank": 30,
-      "playerId": 697811,
-      "name": "Dylan Ross",
+      "playerId": 822038,
+      "name": "Ryan Lambert",
       "teamId": 121,
       "team": "nym",
       "position": "RHP",
-      "levelRaw": "ALL (4)",
-      "statLine": "49.0 IP, 5.69 ERA, 57 SO",
-      "age": 26,
+      "levelRaw": "ALL (3)",
+      "statLine": "29.0 IP, 8.07 ERA, 38 SO",
+      "age": 24,
       "topRank": null
     },
     {
@@ -5835,7 +5835,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".230, 12 HR, 53 RBI",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
@@ -5912,18 +5912,6 @@
     },
     {
       "orgRank": 19,
-      "playerId": 814305,
-      "name": "Yunior Tur",
-      "teamId": 133,
-      "team": "oak",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "74.0 IP, 7.66 ERA, 91 SO",
-      "age": 27,
-      "topRank": null
-    },
-    {
-      "orgRank": 20,
       "playerId": 813833,
       "name": "Cole Conn",
       "teamId": 133,
@@ -5935,7 +5923,7 @@
       "topRank": null
     },
     {
-      "orgRank": 21,
+      "orgRank": 20,
       "playerId": 823990,
       "name": "Zane Taylor",
       "teamId": 133,
@@ -5947,7 +5935,7 @@
       "topRank": null
     },
     {
-      "orgRank": 22,
+      "orgRank": 21,
       "playerId": 700579,
       "name": "Nathan Dettmer",
       "teamId": 133,
@@ -5959,7 +5947,7 @@
       "topRank": null
     },
     {
-      "orgRank": 23,
+      "orgRank": 22,
       "playerId": 829048,
       "name": "Darwing Ozuna",
       "teamId": 133,
@@ -5971,7 +5959,7 @@
       "topRank": null
     },
     {
-      "orgRank": 24,
+      "orgRank": 23,
       "playerId": 804119,
       "name": "Bobby Boser",
       "teamId": 133,
@@ -5983,7 +5971,7 @@
       "topRank": null
     },
     {
-      "orgRank": 25,
+      "orgRank": 24,
       "playerId": 686533,
       "name": "Jackson Finley",
       "teamId": 133,
@@ -5995,7 +5983,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 25,
       "playerId": 701548,
       "name": "Ali Camarillo",
       "teamId": 133,
@@ -6007,7 +5995,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 827759,
       "name": "Daniel Bucciero",
       "teamId": 133,
@@ -6019,7 +6007,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 28,
       "playerId": 806227,
       "name": "Alex Sosa",
       "teamId": 133,
@@ -6031,7 +6019,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 813895,
       "name": "Corey Avant",
       "teamId": 133,
@@ -6040,6 +6028,18 @@
       "levelRaw": "AA",
       "statLine": "115.1 IP, 5.70 ERA, 141 SO",
       "age": 25,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 678163,
+      "name": "Ryan Magdic",
+      "teamId": 133,
+      "team": "oak",
+      "position": "LHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "110.0 IP, 4.25 ERA, 99 SO",
+      "age": 26,
       "topRank": null
     },
     {
@@ -6668,6 +6668,18 @@
     },
     {
       "orgRank": 29,
+      "playerId": 840332,
+      "name": "Joe Tiroly",
+      "teamId": 135,
+      "team": "sd",
+      "position": "2B",
+      "levelRaw": "A",
+      "statLine": ".323, 7 HR, 16 RBI",
+      "age": 21,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
       "playerId": 695256,
       "name": "Josh Mallitz",
       "teamId": 135,
@@ -6676,18 +6688,6 @@
       "levelRaw": "AA",
       "statLine": "61.2 IP, 4.09 ERA, 63 SO",
       "age": 25,
-      "topRank": null
-    },
-    {
-      "orgRank": 30,
-      "playerId": 678184,
-      "name": "Garrett Hawkins",
-      "teamId": 135,
-      "team": "sd",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "54.1 IP, 5.47 ERA, 65 SO",
-      "age": 26,
       "topRank": null
     },
     {
@@ -9591,7 +9591,7 @@
       "position": "OF",
       "levelRaw": "A",
       "statLine": ".250, 4 HR, 48 RBI",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
