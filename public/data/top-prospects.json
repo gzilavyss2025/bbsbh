@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T16:10:25.079Z",
+  "generatedAt": "2026-11-22T16:17:51.001Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -3003,7 +3003,7 @@
       "position": "OF",
       "levelRaw": "ROK",
       "statLine": ".299, 3 HR, 31 RBI",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
@@ -3027,7 +3027,7 @@
       "position": "OF",
       "levelRaw": "ALL (2)",
       "statLine": ".267, 15 HR, 51 RBI",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -3675,7 +3675,7 @@
       "position": "OF",
       "levelRaw": "A+",
       "statLine": ".237, 12 HR, 47 RBI",
-      "age": 20,
+      "age": 21,
       "topRank": null
     },
     {
@@ -8955,19 +8955,19 @@
       "position": "SS",
       "levelRaw": "ROK",
       "statLine": ".311, 3 HR, 34 RBI",
-      "age": 17,
+      "age": 18,
       "topRank": null
     },
     {
       "orgRank": 30,
-      "playerId": 691627,
-      "name": "Ricardo Olivar",
+      "playerId": 814414,
+      "name": "Kyle DeBarge",
       "teamId": 142,
       "team": "min",
-      "position": "C",
-      "levelRaw": "ALL (2)",
-      "statLine": ".274, 12 HR, 42 RBI",
-      "age": 25,
+      "position": "2B",
+      "levelRaw": "AA",
+      "statLine": ".221, 12 HR, 49 RBI",
+      "age": 23,
       "topRank": null
     },
     {
