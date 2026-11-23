@@ -6,7 +6,7 @@ import { ChampionSlide } from './ChampionSlide.jsx'
 
 // The offseason's top stories, hand-entered until a feed carries them (Gary, 2026-11-23).
 const STORIES = [
-  { kind: 'signing', id: 'skubal-mets', tab: 'Skubal to the Mets', playerId: 669373, photo: '/art/stories/skubal-mets.webp', name: 'Tarik Skubal', teamId: 121,
+  { kind: 'signing', season: 2026, id: 'skubal-mets', tab: 'Skubal to the Mets', playerId: 669373, photo: '/art/stories/skubal-mets.webp', name: 'Tarik Skubal', teamId: 121,
     head: 'Skubal joins the Mets', terms: [['9', 'years'], ['$450M', 'total'], ['$50M', 'a year']],
     note: 'leaves the Dodgers with two Cy Young Awards and the richest contract a pitcher has ever signed.' },
 ]
@@ -39,18 +39,24 @@ function SigningSlide({ s }) {
 // time, with an arrow on each side. It turns every 8 seconds, pausing while a pointer or focus is on it;
 // never under reduced motion.
 export function StoryDeck({ bracket }) {
-  const slides = [{ id: 'ws', tab: 'World Series' }, ...STORIES]
+  // A winter's stories show only beside that season's champion.
+  const slides = [{ id: 'ws', tab: 'World Series' }, ...STORIES.filter((s) => s.season === bracket.season)]
   const [at, setAt] = useState(0)
-  const [held, setHeld] = useState(false)
+  // Hover and focus each pause it; a touch ends with pointerleave while focus stays inside, so the
+  // two are kept apart. Paused stops it for good (WCAG 2.2.2), as does using an arrow.
+  const [hover, setHover] = useState(false)
+  const [focus, setFocus] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const held = hover || focus || paused
   useEffect(() => {
-    if (held || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
+    if (held || slides.length < 2 || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
     const t = setTimeout(() => setAt((i) => (i + 1) % slides.length), ROTATE_MS)
     return () => clearTimeout(t)
   }, [at, held, slides.length])
-  const hold = () => setHeld(true)
   return (
     <section className="deck" aria-roledescription="carousel" aria-label="Top offseason stories"
-      onPointerEnter={hold} onPointerLeave={() => setHeld(false)} onFocus={hold} onBlur={() => setHeld(false)}>
+      onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)}
+      onFocus={() => setFocus(true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocus(false) }}>
       <div className="deck__slides">
         {slides.map((s, i) => (
           <div key={s.id} className="deck__slide" aria-hidden={i !== at} inert={i !== at} data-on={i === at || undefined}>
@@ -61,10 +67,15 @@ export function StoryDeck({ bracket }) {
       {slides.length > 1 && ['prev', 'next'].map((dir) => (
         <button key={dir} type="button" className={`deck__arrow deck__arrow--${dir}`}
           aria-label={dir === 'prev' ? 'Previous story' : 'Next story'}
-          onClick={() => setAt((i) => (i + (dir === 'prev' ? slides.length - 1 : 1)) % slides.length)}>
+          onClick={() => { setPaused(true); setAt((i) => (i + (dir === 'prev' ? slides.length - 1 : 1)) % slides.length) }}>
           <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3"><path d={dir === 'prev' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>
         </button>
       ))}
+      {slides.length > 1 && (
+        <button type="button" className="deck__pause" aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
+          {paused ? 'Play' : 'Pause'}
+        </button>
+      )}
     </section>
   )
 }

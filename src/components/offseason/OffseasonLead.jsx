@@ -85,7 +85,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
     }
     return windows.current.get(key)
   }
-  const { data, loading } = useAsync(
+  const { data, loading, error } = useAsync(
     () => Promise.all(ends.map(windowOf)).then((all) => all.flat()),
     [endDate, sportId, pages],
   )
@@ -187,7 +187,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
                 <MoveItems items={shown} marks />
               ) : (
                 // Still reaching back for this club's moves: say so, not "none".
-                loading || pages < reachCap
+                !error && (loading || pages < reachCap)
                   ? <li className="oseason__none" aria-busy="true">Looking further back…</li>
                   : <li className="oseason__none">{`No moves for this club in the last ${span * pages} days.`}</li>
               )}

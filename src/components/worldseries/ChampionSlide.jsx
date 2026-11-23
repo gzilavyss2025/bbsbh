@@ -3,7 +3,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useSeriesLog } from '../../hooks/postseason/useSeriesLog.js'
 import { TEAM_COLOR_PAIRS } from '../../lib/colors/brandColors.js'
 import { useRouteLink } from '../../lib/nav.js'
-import { mvpStatLine, MVP_PHOTOS, mvpPhotoUrl } from '../../lib/postseason/mvpLine.js'
+import { championPhotoUrl, mvpStatLine, MVP_PHOTOS } from '../../lib/postseason/mvpLine.js'
 import { decidedHero } from '../../lib/postseason/worldseries/hero.js'
 import { seriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -42,7 +42,7 @@ export function ChampionSlide({ bracket }) {
   return (
     <article className="deck-sign" style={pair ? { '--club-a': pair[0], '--club-b': pair[1] } : undefined} aria-label={`${winner} win the World Series`}>
       <div className="deck-sign__photo">
-        {photo && <img src={mvpPhotoUrl(photo.id, 1400).replace('h_1400', 'h_788').replace('g_center', 'g_faces')} alt="" decoding="async" fetchPriority="high" />}
+        {photo && <img src={championPhotoUrl(photo.id)} alt="" decoding="async" fetchPriority="high" />}
         <div className="deck-sign__cap">
           <h2 className="deck-sign__head">{`${winner} win the World Series`}</h2>
         </div>

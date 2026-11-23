@@ -63,8 +63,8 @@ export function SeasonRecord({ sportId, season, dateStr }) {
   const { bracket, loading } = usePostseasonBracket(inward ? dateStr : null, { season })
   const champion = bracket?.champion ?? null
   const labelled = recordRowIsLabelled(champion)
-  // MLB with a champion: the series page's World Series hero (ChampionHero,
-  // the MVP and the clubs). Its doors stand apart, under the countdown
+  // MLB with a champion: the story deck (StoryDeck.jsx), the World Series
+  // slide first, then the winter's top stories. Its doors stand apart, under the countdown
   // (OffseasonLead.jsx renders RecordDoors there).
   if (inward && champion) return <StoryDeck bracket={bracket} />
   // The champion's hero is ~650px at 390px wide and lands after the bracket read; a small
