@@ -16,7 +16,7 @@ const LABEL = { AVG: 'avg', H: 'hits', RBI: 'RBI', HR: 'homers', BB: 'walks', IP
 function threeFigures(stats) {
   const by = Object.fromEntries(stats)
   const pick = by.AVG != null ? ['AVG', 'H', 'RBI'] : stats.slice(0, 3).map(([k]) => k)
-  return pick.filter((k) => by[k] != null).map((k) => [by[k], LABEL[k] ?? k.toLowerCase()])
+  return pick.filter((k) => by[k] != null).map((k) => [by[k], LABEL[k] ?? k])
 }
 
 // The decided World Series as a story slide, in the same template as a signing (StoryDeck.jsx): the
