@@ -34,7 +34,7 @@
 .deck__arrow:active { translate: 2px calc(-50% + 2px); box-shadow: 1px 1px 0 var(--text-heading); }
 .deck__arrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (max-width: 739px) {
-  .deck__arrow { width: 44px; height: 44px; }
+  .deck__arrow { top: calc(100cqw * 9 / 32); width: 44px; height: 44px; }
   .deck__arrow--prev { left: var(--space-2); }
   .deck__arrow--next { right: var(--space-2); }
 }
@@ -81,8 +81,10 @@
 .deck-sign__note { margin: 0; font-size: var(--fs-small); line-height: var(--lh-body); color: var(--text-caption); }
 .deck-sign__note a { color: var(--text-heading); }
 @media (max-width: 739px) {
+  /* A phone's photo is 4:3, so a two-line headline has room under the arrows. */
+  .deck-sign__photo { min-height: calc(100cqw * 3 / 4); }
   .deck-sign__cap { padding: var(--space-5) var(--space-3) var(--space-3); }
-  .deck-sign__head { font-size: var(--fs-display-lg); }
+  .deck-sign__head { font-size: clamp(1.5rem, 8.5cqw, 2.25rem); }
   .deck-sign__deal { padding: var(--space-3); }
   .deck-sign__terms > div { padding-right: var(--space-2); margin-right: var(--space-2); }
 }
