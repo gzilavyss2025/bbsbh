@@ -10,6 +10,10 @@ import { loadCombinedPoolForTeams } from '../statsLevels.js'
 import { fetchTeamContracts } from '../salaries.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { playerValue, leagueLine } from '../../lib/trade/value.js'
+import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
+import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/trade/deal.js'
+import { fetchTradePedigree } from './pedigree.js'
+import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
 // This season's league OPS and ERA, for the OPS / ERA sort's one scale
 // (lib/trade/value.js lineIndex). Two calls, the 30 clubs' totals each; once a
@@ -24,10 +28,6 @@ function fetchLeagueLine(season) {
   }
   return leagueLoads.get(season)
 }
-import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
-import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/trade/deal.js'
-import { fetchTradePedigree } from './pedigree.js'
-import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
 // Players this club signed as free agents since its ledger's season ended
 // (statsapi transactions, SFA/SGN). The wire says who signed, never for how
@@ -90,10 +90,13 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   const ageOf = new Map(org.map((r) => [r.person?.id, r.person?.currentAge]))
   const signees = await fetchNewSignees(teamId, nextYear - 1).catch(() => new Set())
   // The ledger already carries hand-entered deals (newDeal, lib/trade/signings.js).
-  // Any other new signee's Cot's row is his old contract: no ledger, labelled below.
+  // Any other new signee whose Cot's row has no figure for next season is on his
+  // old contract there: no ledger, labelled below. One Cot's already priced
+  // (an extension, a re-signing it has caught up on) keeps his row.
+  const priced = (row) => row?.cells?.some((c) => c.year === nextYear && c.value != null)
   const ledgerFor = (id) => {
     const row = byId.get(id)
-    return row?.newDeal || !signees.has(id) ? row : null
+    return row?.newDeal || !signees.has(id) || priced(row) ? row : null
   }
   const warOf = (id) => {
     const bat = war?.bat?.[id], pit = war?.pit?.[id]

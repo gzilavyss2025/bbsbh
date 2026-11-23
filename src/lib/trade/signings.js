@@ -12,24 +12,30 @@ const PAID = new Set(['salary', 'guaranteed'])
 
 // One cell per ledger year, in order, as the generator writes them: the grid
 // draws cells by position, so a missing year would shift every figure left.
-function signingRow(id, s, years) {
+// A re-signing (`old`, his row on this club already) keeps that row's cells
+// for the years the new deal does not cover (this season's pay), and his age.
+function signingRow(id, s, years, old = null) {
   const byYear = new Map(s.cells.map((c) => [c.year, c]))
+  const oldCell = (year) => old?.cells?.find((c) => c.year === year)
+  const cells = years.map((year) => (byYear.has(year)
+    ? { year, kind: 'guaranteed', value: byYear.get(year).value }
+    : oldCell(year) ?? { year, kind: 'none' }))
   return {
     id: Number(id),
     name: s.name,
-    pos: s.pos ?? null,
-    age: null,
-    salary: null,
+    pos: s.pos ?? old?.pos ?? null,
+    age: old?.age ?? null,
+    salary: old?.salary ?? null,
     cbt: null,
     regime: 'signed',
     estimated: s.cells.some((c) => c.rough),
     terms: s.terms,
     total: s.cells.reduce((t, c) => t + (c.value ?? 0), 0),
     aav: null,
-    service: null,
-    options: null,
-    cells: years.map((year) => (byYear.has(year) ? { year, kind: 'guaranteed', value: byYear.get(year).value } : { year, kind: 'none' })),
-    committed: s.cells.reduce((t, c) => t + (c.value ?? 0), 0),
+    service: old?.service ?? null,
+    options: old?.options ?? null,
+    cells,
+    committed: cells.reduce((t, c) => t + (c.value ?? 0), 0),
     newDeal: true,
   }
 }
@@ -41,7 +47,10 @@ export function applySignings(ledger, teamId, signings = NEW_SIGNINGS) {
   const rows = Object.entries(signings)
     .filter(([id, s]) => !id.startsWith('_') && s.teamId === teamId)
     .filter(([id]) => !have.get(Number(id))?.cells?.some((c) => c.year === nextYear && c.value != null))
-    .map(([id, s]) => ({ row: signingRow(id, s, ledger.years), group: s.group ?? 'offRoster' }))
+    .map(([id, s]) => {
+      const old = have.get(Number(id)) ?? null
+      return { row: signingRow(id, s, ledger.years, old), old, group: s.group ?? 'offRoster' }
+    })
   if (!rows.length) return ledger
 
   const groups = ledger.groups.map((g) => ({ ...g, players: g.players.filter((p) => !rows.some((r) => r.row.id === p.id)) }))
@@ -50,12 +59,22 @@ export function applySignings(ledger, teamId, signings = NEW_SIGNINGS) {
     if (!g) groups.push((g = { key: group, label: group, players: [] }))
     g.players = [...g.players, row].sort((a, b) => (b.committed ?? 0) - (a.committed ?? 0))
   }
-  const added = rows.map((r) => r.row)
+  // Each year moves by the new row less the row it replaces (none, for a new arrival),
+  // so a re-signing's kept cells are not counted twice.
+  const cellOf = (r, year) => r?.cells?.find((c) => c.year === year)
   const totals = ledger.totals.map((t) => {
-    const cells = added.map((r) => r.cells.find((c) => c.year === t.year)).filter((c) => c?.value != null)
-    return { ...t, committed: t.committed + cells.reduce((s, c) => s + c.value, 0), players: t.players + cells.length }
+    let committed = t.committed
+    let players = t.players
+    for (const { row, old } of rows) {
+      const now = cellOf(row, t.year)?.value ?? null
+      const was = cellOf(old, t.year)?.value ?? null
+      committed += (now ?? 0) - (was ?? 0)
+      players += (now != null ? 1 : 0) - (was != null ? 1 : 0)
+    }
+    return { ...t, committed, players }
   })
-  const paid = added.reduce((n, r) => n + r.cells.filter((c) => PAID.has(c.kind)).length, 0)
+  const paidIn = (r) => (r?.cells ?? []).filter((c) => PAID.has(c.kind)).length
+  const paid = rows.reduce((n, { row, old }) => n + paidIn(row) - paidIn(old), 0)
   return {
     ...ledger,
     groups,

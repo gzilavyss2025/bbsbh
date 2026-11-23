@@ -88,14 +88,16 @@ export function leagueLine(hitting, pitching) {
 // One scale for hitters and pitchers, 100 the league average and higher
 // better: OPS / league OPS for a hitter, league ERA / ERA for a pitcher (the
 // OPS+ / ERA+ idea, without the park adjustment). Null with no line or league.
+// statsapi writes ".---" / "-.--" for a line with no at-bats or innings: no index.
 export function lineIndex(line, league) {
   if (!line || !league) return null
-  if (line.ops != null && league.ops) return (100 * Number(line.ops)) / league.ops
-  if (line.era != null && league.era) {
+  let idx = null
+  if (line.ops != null && league.ops) idx = (100 * Number(line.ops)) / league.ops
+  else if (line.era != null && league.era) {
     const era = Number(line.era)
-    return era > 0 ? (100 * league.era) / era : null
+    idx = era > 0 ? (100 * league.era) / era : null
   }
-  return null
+  return Number.isFinite(idx) ? idx : null
 }
 
 // The change in WAR from one season to the next at a given age: the FanGraphs
