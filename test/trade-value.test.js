@@ -21,8 +21,17 @@ test('with playing time, the projection is a regressed rate times next season\'s
   assert.equal(marcel(war, 2026, pa).toFixed(3), (rate * next).toFixed(3))
   // He keeps more of the breakout than the flat-mean version gave him.
   assert.ok(marcel(war, 2026, pa) > marcel(war, 2026))
-  // A pitcher's floor is 100 batters faced, not 200.
-  assert.ok(marcel(war, 2026, pa, true) < marcel(war, 2026, pa))
+  // A reliever's floor is 100 batters faced, not 200.
+  assert.ok(marcel(war, 2026, pa, 'rp') < marcel(war, 2026, pa))
+})
+
+test('a starter\'s playing-time floor is 250 batters faced, a reliever\'s 100', () => {
+  // Payton Tolle: 4.1 WAR in 603 BF (2026) after -0.2 in 74 (2025).
+  const war = { 2026: 4.1, 2025: -0.2 }
+  const bf = { 2026: 603, 2025: 74 }
+  const rate = (5 * 4.1 + 4 * -0.2 + 1200 * (2 / 600)) / (5 * 603 + 4 * 74 + 1200)
+  assert.equal(marcel(war, 2026, bf, 'sp').toFixed(3), (rate * (0.5 * 603 + 0.1 * 74 + 250)).toFixed(3))
+  assert.equal(marcel(war, 2026, bf, 'rp').toFixed(3), (rate * (0.5 * 603 + 0.1 * 74 + 100)).toFixed(3))
 })
 
 test('a season with no playing time on file falls back to the flat-mean version', () => {

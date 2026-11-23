@@ -21,6 +21,8 @@ import { FactSheet } from '../../components/transactions/FactSheet.jsx'
 import { draftSentence } from '../../api/transactions/templates.js'
 import { isoToday } from '../../lib/dates.js'
 import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
+import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
+import { VALUE } from '../../lib/trade/value.js'
 
 const DASH = '—'
 
@@ -46,31 +48,34 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
           <div className="tradesheet__head">
             <div className="playersheet__id">
               <Headshot personId={p.id} name={p.name} teamId={teamId} isMlb={p.onForty} className="tradedesk__face" />
-              <div>
+              {/* One column by the photo: name, his attribute line, then his trophies under them. */}
+              <div className="playersheet__who">
                 <h2 className="sheet__title"><PlayerLink id={p.id} name={p.name}>{p.name}</PlayerLink></h2>
                 <p className="t-label tradedesk__meta">
                   {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
                 </p>
+                <Honors playerId={p.id} debuted={p.war != null && !(p.topRank || p.orgRank)} />
+                {/* A ranked prospect who has already debuted keeps his stamp up by his
+                    name; one who has not gets the big stamp in the prospect lead below. */}
+                {(p.topRank || p.orgRank) && p.war != null && <ProspectStamp p={p} teamId={teamId} />}
+                {/* The trade case sits beside the photo, filling its height: what he
+                    projects to, what he is worth, how long, for what. */}
+                {p.value?.prospect && (p.topRank || p.orgRank)
+                  ? <ProspectLead p={p} teamId={teamId} farm={farm} pedigree={facts.data && draftSentence(facts.data) ? null : pedigree} />
+                  : <ValueTiles p={p} nextYear={nextYear} />}
+                {!(p.value?.prospect && (p.topRank || p.orgRank)) && <p className="tradedesk__nums playersheet__nums">
+                  {/* The tiles already say next season's pay and how long he is held. */}
+                  <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full noContract />
+                  {/* Whether a club can send him down sits with his other roster facts. */}
+                  {p.contract && optionStatus(p.contract.service, p.contract.options) && <span>{optionStatus(p.contract.service, p.contract.options)}</span>}
+                  {rule5Text(p) && <span><span className="tradedesk__k">Rule 5</span> {rule5Text(p)}</span>}
+                </p>}
               </div>
-              {/* His trophies sit by his name, the first thing the eye reaches. */}
-              <Honors playerId={p.id} debuted={p.war != null && !(p.topRank || p.orgRank)} />
-              {/* A ranked prospect who has already debuted keeps his stamp up by his
-                  name; one who has not gets the big stamp in the prospect lead below. */}
-              {(p.topRank || p.orgRank) && p.war != null && <ProspectStamp p={p} teamId={teamId} />}
             </div>
+            {/* His club's mark fills the head's top corner, beside the close. */}
+            {teamId && <TeamLogo teamId={teamId} size={64} className="playersheet__club" />}
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
-
-          {/* The trade case first: what he projects to, what he is worth, how long, for what. */}
-          {p.value?.prospect && (p.topRank || p.orgRank)
-            ? <ProspectLead p={p} teamId={teamId} farm={farm} pedigree={facts.data && draftSentence(facts.data) ? null : pedigree} />
-            : <ValueTiles p={p} nextYear={nextYear} />}
-          {!(p.value?.prospect && (p.topRank || p.orgRank)) && <p className="tradedesk__nums playersheet__nums">
-            <Numbers p={p} nextYear={nextYear} farm={farm} warSeason={warSeason} full />
-            {/* Whether a club can send him down sits with his other roster facts. */}
-            {p.contract && optionStatus(p.contract.service, p.contract.options) && <span>{optionStatus(p.contract.service, p.contract.options)}</span>}
-            {rule5Text(p) && <span><span className="tradedesk__k">Rule 5</span> {rule5Text(p)}</span>}
-          </p>}
 
           <div className="playersheet__grid">
           <div className="playersheet__side">
@@ -185,16 +190,25 @@ function ValueTiles({ p, nextYear }) {
   if (!v) return null
   const pay = p.payUsd ?? p.payEstUsd
   const tiles = [
-    v.projWar != null ? [`${nextYear} proj. WAR`, v.projWar.toFixed(1)] : null,
+    v.projWar != null ? [`${nextYear} Proj. WAR`, v.projWar.toFixed(1)] : null,
     [v.prospect ? 'Prospect value' : 'Surplus value', `${v.surplusUsd < 0 ? '−' : ''}${money(v.surplusUsd)}`],
-    p.thru ? ['Control', `thru ${p.thru}${p.control ? ` · ${p.control} yr` : ''}`] : null,
+    p.thru ? ['Control thru', `${p.thru}${p.control ? ` · ${p.control} yr` : ''}`] : null,
     pay != null ? [`${nextYear} pay`, money(pay)] : p.payLabel ? [`${nextYear} pay`, p.payLabel] : null,
   ].filter(Boolean)
   return (
-    <dl className="playersheet__tiles">
+    <dl className="playersheet__tiles infopop-row">
       {tiles.map(([label, value]) => (
         <div key={label} className="playersheet__tile">
-          <dt className="tradedesk__k">{label}</dt>
+          <dt className="tradedesk__k">
+            {label}
+            {label === 'Surplus value' && (
+              <InfoPopover label="About surplus value" className="infopop--paper infopop--down">
+                What he is worth less what he is paid, added up over the years his new club
+                controls him and discounted to next season. Worth is projected WAR at
+                {` ${money(VALUE.perWar)}`} a win. Below zero, he costs more than his projected play is worth.
+              </InfoPopover>
+            )}
+          </dt>
           <dd className="playersheet__tilefig">{value}</dd>
         </div>
       ))}

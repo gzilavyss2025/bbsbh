@@ -4,7 +4,8 @@ const DASH = '—'
 
 // The row's one line: next season's salary, the last year the club holds him
 // and WAR; a minor leaguer's level and season line instead.
-export function Numbers({ p, nextYear, farm, warSeason = null, full = false }) {
+// `noContract` drops the pay and thru figures, for the sheet whose tiles show them.
+export function Numbers({ p, nextYear, farm, warSeason = null, full = false, noContract = false }) {
   if (!p.onForty && !p.contract) {
     if (!farm) return <span>{p.level ?? 'Minor leagues'}</span>
     return (
@@ -21,8 +22,8 @@ export function Numbers({ p, nextYear, farm, warSeason = null, full = false }) {
   }
   return (
     <>
-      <span><span className="tradedesk__k">{nextYear}</span> {p.payUsd != null ? money(p.payUsd) : p.payLabel ?? 'No contract on file'}</span>
-      {p.thru && <span><span className="tradedesk__k">{p.signed ? 'Signed thru' : 'Thru'}</span> {p.thru}</span>}
+      {!noContract && <span><span className="tradedesk__k">{nextYear}</span> {p.payUsd != null ? money(p.payUsd) : p.payLabel ?? 'No contract on file'}</span>}
+      {!noContract && p.thru &&<span><span className="tradedesk__k">{p.signed ? 'Signed thru' : 'Thru'}</span> {p.thru}</span>}
       <span><span className="tradedesk__k">{warSeason ? `${warSeason} WAR` : 'WAR'}</span> {p.war != null ? p.war.toFixed(1) : p.onForty ? 'No MLB time' : DASH}</span>
       {full && p.line?.ops && <span><span className="tradedesk__k">OPS</span> {p.line.ops}</span>}
       {full && p.line?.era && <span><span className="tradedesk__k">ERA</span> {p.line.era}</span>}

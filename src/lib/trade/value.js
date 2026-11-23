@@ -36,13 +36,15 @@ const WEIGHTS = [5, 4, 3]
 // fixed 1200 PA of an average regular's rate (2 WAR a full season), so a
 // full-time player keeps more of his own record than a part-timer. Next
 // season's playing time is half of last year's, a tenth of the year before,
-// plus a floor (200 PA; 100 BF for a pitcher).
-export const PLAYING_TIME = { regress: 1200, meanRate: 2 / 600, floor: { bat: 200, pit: 100 } }
+// plus a floor: 200 PA for a hitter; for a pitcher Marcel's innings floors as
+// batters faced, about 60 IP (250 BF) for a starter and 25 IP (100 BF) for a reliever.
+export const PLAYING_TIME = { regress: 1200, meanRate: 2 / 600, floor: { bat: 200, sp: 250, rp: 100 } }
 
 // The projected WAR for the season after `lastSeason`, or null with no seasons on file.
 // With `pa` ({ season: PA or BF }) covering every weighted season, the
 // playing-time version; without it, two seasons' weight of a 1-WAR mean.
-export function marcel(byYear, lastSeason, pa = null, pitcher = false) {
+// `kind` picks the playing-time floor: 'bat', 'sp' or 'rp'.
+export function marcel(byYear, lastSeason, pa = null, kind = 'bat') {
   let num = 0
   let den = 0
   let time = 0
@@ -61,7 +63,7 @@ export function marcel(byYear, lastSeason, pa = null, pitcher = false) {
   if (pa && timed) {
     const { regress, meanRate, floor } = PLAYING_TIME
     const rate = (num + regress * meanRate) / (time + regress)
-    const next = 0.5 * (pa[lastSeason] ?? 0) + 0.1 * (pa[lastSeason - 1] ?? 0) + floor[pitcher ? 'pit' : 'bat']
+    const next = 0.5 * (pa[lastSeason] ?? 0) + 0.1 * (pa[lastSeason - 1] ?? 0) + (floor[kind] ?? floor.bat)
     return rate * next
   }
   return (num + VALUE.meanWeight * VALUE.mean) / (den + VALUE.meanWeight)
@@ -105,7 +107,7 @@ function controlledYears(contract, nextYear, contractYears) {
  */
 export function playerValue(p, { nextYear, warSeason, contractYears }) {
   const reliever = p.role === 'RP' || p.role === 'CL'
-  const base = marcel(p.warByYear, warSeason ?? nextYear - 1, p.paByYear ?? null, p.pitcher ?? false)
+  const base = marcel(p.warByYear, warSeason ?? nextYear - 1, p.paByYear ?? null, !p.pitcher ? 'bat' : p.role === 'SP' ? 'sp' : 'rp')
   const ranked = p.topRank || p.orgRank
   // No big-league track record: a prospect is his rank; anyone else is a minimum-salary unknown.
   if (base == null) {

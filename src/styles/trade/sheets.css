@@ -138,15 +138,57 @@
 
 /* layout-exempt: the face beside the name and its line in the sheet head */
 .playersheet__id {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
-/* The awards keep a little air from the name. */
-.playersheet__id > .playersheet__honors {
-  margin-left: var(--space-2);
+/* The sheet's face is the photo, not a row thumbnail: 3.5 times the row's,
+   so it ends with the column beside it (name, chips, tiles, stats line). */
+.playersheet__id > .shot.tradedesk__face {
+  width: calc(var(--shot-xs-w) * 3.5);
+  height: calc(var(--shot-xs-h) * 3.5);
+}
+
+/* layout-exempt: name, attribute line and trophies stack in one column by the photo */
+.playersheet__who {
+  flex: 1 1 20rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* The club mark sits top right, before the close. */
+.playersheet .playersheet__club {
+  flex: none;
+  align-self: flex-start;
+}
+
+/* The tiles span the column's full width. */
+.playersheet__who > .playersheet__tiles,
+.playersheet__who > .playersheet__prospect {
+  align-self: stretch;
+  margin: var(--space-1) 0 0;
+}
+
+/* Two tiles a row on a phone, four across beside the photo. */
+.playersheet__who > .playersheet__tiles {
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+}
+
+.playersheet__who > .playersheet__nums {
+  margin: 0;
+}
+
+/* The name leads the column: a step up from the sheets' --fs-h2 title. */
+.playersheet__who .sheet__title {
+  margin: 0;
+  font-size: var(--fs-h1);
 }
 
 .playersheet__id h2,
