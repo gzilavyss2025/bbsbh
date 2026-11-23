@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club strip critique</title>
+<style>
+:root { --paper:#FBF6E9; --ink:#1B2A3A; --soft:#3C4A5A; --rule:#CBC1A7; --red:#A8322D; --amber:#8A5E14; --green:#3D6B3A; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:32px 16px 48px; }
+h1 { font-size:26px; margin:0 0 6px; } h2 { font-size:19px; margin:28px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+table { width:100%; border-collapse:collapse; font-size:15px; } th, td { text-align:left; vertical-align:top; padding:8px; border-bottom:1px solid var(--rule); }
+th { font-size:13px; color:var(--soft); } .sev { font-weight:700; white-space:nowrap; } .hi { color:var(--red); } .md { color:var(--amber); } .lo { color:var(--green); }
+.lead { font-size:17px; color:var(--soft); } li { margin:4px 0; }
+@media (max-width:600px){ table, tbody, tr, td { display:block; } thead { display:none; } td { border:0; padding:2px 0; } tr { border-bottom:1px solid var(--rule); padding:8px 0; } }
+</style>
+</head>
+<body><main>
+<h1>Club strip on /leaders: critique</h1>
+<p class="lead">It now matches the home page and the pick works: tapping the Brewers highlights Jake Bauers and dims every other row. The biggest problem is the order: 30 logos in alphabetical order by city, split across a ragged second line, so finding a club means scanning every logo.</p>
+
+<h2>Usability</h2>
+<table>
+<thead><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>The clubs run alphabetically by city (Arizona, Athletics, Atlanta…) and wrap after 20, so line 2 holds 10 and the break means nothing.</td><td class="sev hi">High</td><td>Two rows by league: AL on one line, NL on the next, 15 each, in division order or by city. The break then carries meaning, and the rows come out even.</td></tr>
+<tr><td>When a club is picked, "All" drops to plain text with no box, so the way back reads as a label, not a button.</td><td class="sev md">Medium</td><td>Keep All's outline in both states; only the fill changes when it's pressed, the way the club buttons behave.</td></tr>
+<tr><td>Nothing says the strip highlights rather than filters. Rows don't disappear, they dim, which is right but unexplained.</td><td class="sev lo">Low</td><td>Leave it: the dimming shows it at once, and the house rule cuts helper text.</td></tr>
+</tbody></table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the heavy stamped box. It's the loudest frame between the scope tabs and the leader cards, for what is a secondary control.</li>
+<li><strong>Reading flow:</strong> scope tabs → "Who is standing out" door → strip → Leaders. The door sits tight against the strip's top edge.</li>
+<li><strong>Emphasis:</strong> the picked club (ink edge, amber wash) stands out clearly from the 29 others.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<thead><tr><th>Element</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Component location</td><td><code>ClubStrip</code> lives in <code>components/offseason/</code> but is now shared by the leaders page.</td><td>Move it to <code>components/team/</code> next to TeamFilterStrip, and plan to retire the old one.</td></tr>
+<tr><td>Frame</td><td>The stamped box is declared twice: once for the home wire (<code>.oseason__ledger</code>), once for leaders.</td><td>Give ClubStrip a <code>framed</code> option that owns the box, so the two can't drift.</td></tr>
+<tr><td>Other pages</td><td>Six pages still use the old gray tray.</td><td>Move them over once the strip's order is settled.</td></tr>
+</tbody></table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Touch targets:</strong> club buttons are 40×36 px and All is 36×36 px, under the app's 44 px minimum (<code>--tap-min</code>), with 4 px between. Easy to miss on a phone.</li>
+<li><strong>Labels:</strong> buttons announce "MIL", "AZ". The old strip said "Milwaukee Brewers". A full name reads better to a screen reader.</li>
+<li><strong>Contrast:</strong> the "All" text is ink on a light amber wash, which passes easily. The logos are images and carry no text.</li>
+<li><strong>State:</strong> the pick uses <code>aria-pressed</code>, which is announced correctly.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>Full-color logos are much faster to find than the old gray tray.</li>
+<li>All 30 visible at once on desktop: no hidden sideways scroll.</li>
+<li>The pressed club is unmistakable, and pressing it again goes back to All.</li>
+</ul>
+
+<h2>Priority fixes</h2>
+<ol>
+<li><strong>Two rows by league, AL then NL.</strong> Fixes the ragged break and makes a club findable by where it plays.</li>
+<li><strong>44 px buttons and full-name labels.</strong> Phone taps and screen readers.</li>
+<li><strong>All keeps its outline</strong> when a club is picked, so the way back always looks like a button.</li>
+<li><strong>Move ClubStrip to <code>components/team/</code></strong> with a <code>framed</code> option, then migrate the six old trays.</li>
+</ol>
+</main></body></html>

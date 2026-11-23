@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>League marks critique</title>
+<style>
+:root { --paper:#FBF6E9; --ink:#1B2A3A; --soft:#3C4A5A; --rule:#CBC1A7; --red:#A8322D; --amber:#8A5E14; --green:#3D6B3A; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:32px 16px 48px; }
+h1 { font-size:26px; margin:0 0 6px; } h2 { font-size:19px; margin:28px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+table { width:100%; border-collapse:collapse; font-size:15px; } th, td { text-align:left; vertical-align:top; padding:8px; border-bottom:1px solid var(--rule); }
+th { font-size:13px; color:var(--soft); } .sev { font-weight:700; white-space:nowrap; } .hi { color:var(--red); } .md { color:var(--amber); } .lo { color:var(--green); }
+.lead { font-size:17px; color:var(--soft); } li { margin:4px 0; }
+pre { background:#fff; border:1px solid var(--rule); padding:12px; overflow-x:auto; font-size:13px; }
+@media (max-width:600px){ table, tbody, tr, td { display:block; } thead { display:none; } td { border:0; padding:2px 0; } tr { border-bottom:1px solid var(--rule); padding:8px 0; } }
+</style>
+</head>
+<body><main>
+<h1>AL and NL marks on the club strip: critique</h1>
+<p class="lead">Your instinct is right. The league marks sit at the wrong end of the row, at the same size as the club logos, in a busier style. They read as a 16th club pinned to the far edge, not as labels for the rows.</p>
+
+<h2>Usability</h2>
+<table>
+<thead><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>The marks close the row on the right, after a wide gap. A label belongs where the eye starts a line, on the left. On the right, it's the last thing seen and is detached from the row it names.</td><td class="sev hi">High</td><td>Move the league label to the start of each row.</td></tr>
+<tr><td>At 40 px, the same as a club button, the crests look tappable, and tapping does nothing.</td><td class="sev md">Medium</td><td>Make the label clearly not a button: text, or a much smaller, flatter mark.</td></tr>
+<tr><td>"All" sits at the start of the AL row only, so it reads as part of the AL line.</td><td class="sev md">Medium</td><td>Give All its own column, spanning both rows, to the left of the labels.</td></tr>
+</tbody></table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the two full-color crests. Their banners, stars and fine detail are the busiest marks on the strip, and they shouldn't be.</li>
+<li><strong>Reading flow:</strong> All, then 15 clubs, then a gap, then a crest. The meaning arrives last.</li>
+<li><strong>Emphasis:</strong> the labels should be the quietest thing in the strip. They only sort; they don't pick.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<thead><tr><th>Element</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>League naming</td><td>The standings page just started saying "AL East" and "NL Central" in condensed caps labels. This strip uses crests instead.</td><td>Use the same words in the same label style: "AL" and "NL", condensed caps, caption ink.</td></tr>
+<tr><td>Mark style</td><td>The crests come from MLB's full-color "on light" set. Every other league mark in the app (the standings bars) is the flat one-color version.</td><td>If you keep a mark, use the flat one-color mark at about 20 px.</td></tr>
+</tbody></table>
+
+<h2>Accessibility</h2>
+<ul>
+<li>The marks are hidden from screen readers, which is right. The group would still read better with each row named "American League" or "National League".</li>
+<li>Dark mode: the "on light" crests will look washed out on black. Text labels use ink tokens and need no dark-mode handling.</li>
+</ul>
+
+<h2>Recommended layout</h2>
+<pre>[ALL]  AL  (A's)(BAL)(BOS)(CWS)(CLE)(DET)(HOU)(KC)(LAA)(MIN)(NYY)(SEA)(TB)(TEX)(TOR)
+       NL  (AZ)(ATL)(CHC)(CIN)(COL)(LAD)(MIA)(MIL)(NYM)(PHI)(PIT)(SD)(SF)(STL)(WSH)</pre>
+<ul>
+<li>All on the left, centered across both rows.</li>
+<li>"AL" and "NL" as small condensed labels at the start of each row, aligned to each other.</li>
+<li>The clubs line up in two even columns of 15, so the rows read as a grid.</li>
+</ul>
+
+<h2>Priority fixes</h2>
+<ol>
+<li><strong>Replace the right-hand crests with "AL" and "NL" labels at the start of each row,</strong> in the standings' label style.</li>
+<li><strong>Move All into its own column</strong> spanning both rows.</li>
+<li><strong>Name each row for screen readers</strong> ("American League" / "National League").</li>
+</ol>
+</main></body></html>
