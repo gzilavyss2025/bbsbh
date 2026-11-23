@@ -1,5 +1,6 @@
 /* The home slate's offseason story deck (StoryDeck.jsx): every slide in one grid cell, so the deck
    holds the tallest slide's height and never jumps as it turns. */
+/* layout-exempt: the deck frame the arrows are placed against */
 .deck { position: relative; display: grid; container-type: inline-size; }
 /* layout-exempt: slides stacked in one cell */
 .deck__slides { display: grid; }
@@ -10,6 +11,7 @@
 }
 /* The arrows: paper tabs stamped like the page's cards (ink edge, hard offset shadow), straddling the
    deck's edges at the middle of the photo (a 16:9 photo is 9/32 of the width down to its middle). */
+/* layout-exempt: a chevron centred in a square button */
 .deck__arrow {
   position: absolute;
   top: calc(100cqw * 9 / 32);
@@ -38,6 +40,7 @@
 }
 
 /* A signing: the art full bleed, growing to fill the deck's height so the deal never floats in space, with the headline on it, the deal below on the page's own paper. */
+/* layout-exempt: photo over a paper strip, filling the slide */
 .deck-sign {
   display: flex;
   flex-direction: column;
@@ -60,7 +63,7 @@
   background: linear-gradient(to top, var(--club-a, var(--surface-stamped-ink)) 35%, transparent);
   color: var(--text-on-ink-cream);
 }
-.deck-sign__head { margin: 0; font-family: var(--font-display); font-size: var(--fs-hero-2xl, var(--fs-display-lg)); line-height: var(--lh-solid); letter-spacing: var(--ls-tight-display); }
+.deck-sign__head { margin: 0; font-family: var(--font-display); font-size: clamp(1.75rem, 7.5cqw, 3.25rem); line-height: var(--lh-solid); letter-spacing: var(--ls-tight-display); }
 /* layout-exempt: three figures over a one-line note */
 .deck-sign__deal {
   display: grid;
@@ -69,10 +72,11 @@
   padding: var(--space-3) var(--space-5) var(--space-4);
   border-top: var(--space-1) solid var(--club-b, var(--text-heading));
 }
-.deck-sign__terms { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; margin: 0; }
+/* layout-exempt: three figures that wrap on a phone */
+.deck-sign__terms { display: flex; flex-wrap: wrap; row-gap: var(--space-1); margin: 0; }
 .deck-sign__terms > div { display: flex; align-items: baseline; gap: var(--space-1); padding-right: var(--space-4); margin-right: var(--space-4); border-right: var(--bw-hair) solid var(--text-heading); }
 .deck-sign__terms > div:last-child { border-right: 0; margin-right: 0; }
-.deck-sign__terms dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: var(--lh-solid); color: var(--club-a, var(--text-heading)); font-variant-numeric: tabular-nums; }
+.deck-sign__terms dd { margin: 0; font-family: var(--font-display); font-size: clamp(1.375rem, 6.5cqw, 2.25rem); line-height: var(--lh-solid); color: var(--club-a, var(--text-heading)); font-variant-numeric: tabular-nums; }
 .deck-sign__terms dt { font-size: var(--fs-small); color: var(--text-caption); }
 .deck-sign__note { margin: 0; font-size: var(--fs-small); line-height: var(--lh-body); color: var(--text-caption); }
 .deck-sign__note a { color: var(--text-heading); }
@@ -82,3 +86,20 @@
   .deck-sign__deal { padding: var(--space-3); }
   .deck-sign__terms > div { padding-right: var(--space-2); margin-right: var(--space-2); }
 }
+/* The Series' games, one winner mark each, a link to that game's lineups. */
+/* layout-exempt: game chips that wrap */
+.deck-games { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.deck-games__game {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--text-heading);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+.deck-games__game:hover { background: var(--surface-stamped-tint); }
+.deck-games__game:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
