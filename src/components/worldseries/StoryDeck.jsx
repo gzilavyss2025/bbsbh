@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import '../../styles/worldseries/deck.css'
 import { TEAM_COLOR_PAIRS } from '../../lib/colors/brandColors.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
-import { ChampionHero } from './ChampionHero.jsx'
+import { ChampionSlide } from './ChampionSlide.jsx'
 
 // The offseason's top stories, hand-entered until a feed carries them (Gary, 2026-11-23).
 const STORIES = [
@@ -54,7 +54,7 @@ export function StoryDeck({ bracket }) {
       <div className="deck__slides">
         {slides.map((s, i) => (
           <div key={s.id} className="deck__slide" aria-hidden={i !== at} inert={i !== at} data-on={i === at || undefined}>
-            {s.id === 'ws' ? <ChampionHero bracket={bracket} /> : <SigningSlide s={s} />}
+            {s.id === 'ws' ? <ChampionSlide bracket={bracket} /> : <SigningSlide s={s} />}
           </div>
         ))}
       </div>
