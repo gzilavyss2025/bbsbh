@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useAsync } from '../../../hooks/useAsync.js'
+import { Button } from '../../../components/ui/control/Button.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { TeamLink } from '../../../components/team/TeamLink.jsx'
 import { fetchPlayerFacts, factRequest } from '../../../api/transactions/playerFacts.js'
@@ -81,21 +83,45 @@ export function TradeStory({ fallback, ...deal }) {
   // Everything the story says: the players, the wire's sentence (picks and cash
   // ride in it), and the deal's payroll and 40-man counts.
   const key = [
-    Boolean(deal.depthA), Boolean(deal.depthB), deal.a, deal.b, ...deal.sendsA.map((p) => p.id), '|', ...deal.sendsB.map((p) => p.id),
-    (deal.story?.cutline ?? []).map((s) => s.text).join(''),
+    // Ids sorted: taking a player out and putting him back is the same deal.
+    Boolean(deal.depthA), Boolean(deal.depthB), deal.a, deal.b, ...deal.sendsA.map((p) => p.id).sort(), '|', ...deal.sendsB.map((p) => p.id).sort(),
+    // The sentence's pieces, in any order (it names players in the order they were added).
+    (deal.story?.cutline ?? []).map((s) => s.text).sort().join('|'),
     deal.deal?.payroll.a, deal.deal?.fortyAfter.a, deal.deal?.fortyAfter.b,
   ].join(',')
-  const state = useAsync(() => loadStory(deal, date), [key, date])
+  // Written on request, not on every change: the reader builds a deal a player
+  // at a time, and each story is a dozen reads. `written` is the deal the story
+  // on screen was written for; a deal that has moved on since shows the
+  // rewrite bar above the headline instead of rewriting itself.
+  const [written, setWritten] = useState(null)
+  const state = useAsync(() => (written ? loadStory(deal, date) : Promise.resolve(null)), [written, date])
   const s = state.data
+  const stale = written != null && written !== key
   // The art: one game photo of the headline player, loaded after the words so it never holds them up.
   const star = s?.star
   const photo = useAsync(
     () => (star ? storyPhoto(star.id, ['P', 'TWP', 'SP', 'RP'].includes(star.pos) ? 'pitching' : 'hitting', storySeason()).catch(() => null) : Promise.resolve(null)),
     [star?.id],
   )
-  if (!s) return <p className="tradedesk__wiretext">{fallback}</p>
+  // Not asked for yet, or a write that failed: the sentence and the button (again).
+  if (written == null || (!s && !state.loading)) {
+    return (
+      <div className="tradestory__ask">
+        <p className="tradedesk__wiretext">{fallback}</p>
+        <Button size="control" skin="ink" onClick={() => setWritten(key)}>Write the story</Button>
+      </div>
+    )
+  }
+  if (!s) return <p className="tradedesk__wiretext" aria-busy="true">{fallback}</p>
   return (
     <article className="tradestory__body" aria-busy={state.loading}>
+      {stale && (
+        <div className="tradestory__stale" role="status">
+          <span className="tradestory__stalemark" aria-hidden="true">↻</span>
+          <span>The deal changed since this story was written</span>
+          <Button size="control" skin="ink" onClick={() => setWritten(key)}>Rewrite</Button>
+        </div>
+      )}
       <h2 className="tradestory__headline">{s.headline}</h2>
       {s.dek && <p className="tradestory__dek">{s.dek}</p>}
       <p className="tradestory__byline">Tally Wire <time dateTime={date}>{longDate(date)}</time></p>

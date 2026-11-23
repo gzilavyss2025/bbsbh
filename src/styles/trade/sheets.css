@@ -263,6 +263,49 @@
   min-width: 0;
 }
 
+/* layout-exempt: the deal's sentence, then its Write the story button under it */
+.tradestory__ask {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* The rewrite bar is a notification, not part of the story: the app's ink
+   band run edge to edge across the card's top, a ↻ mark, the note, and a
+   marker-gold Rewrite at its end. It sticks while the reader scrolls the story.
+   layout-exempt: the bar's mark, note and button on one line, wrapping on a phone */
+.tradestory__stale {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: calc(var(--space-3) * -1) calc(var(--space-4) * -1) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-band);
+  color: var(--text-on-band);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradestory__stalemark {
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+}
+
+.tradestory__stale > .btn {
+  --btn-fill: var(--marker);
+  --btn-edge: var(--marker);
+  --btn-ink: var(--text-on-bright);
+  --btn-fill-hover: var(--marker);
+  --btn-edge-hover: var(--text-on-band);
+  margin-left: auto;
+}
+
 /* The headline is the hero: the biggest type on the card, as a sentence. */
 .tradestory__headline {
   margin: 0 0 var(--space-2);

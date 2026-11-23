@@ -15,6 +15,7 @@ import { ReplyQuotes, moveAnchor, useReplies } from './ReplyQuote.jsx'
 // The player notes and their sheet load on their own, off the first load: a
 // ledger row draws its plain sentence until they arrive.
 const WireFacts = lazyNamed(() => import('./WireFacts.jsx'), 'WireFacts')
+const WireGrade = lazyNamed(() => import('./WireGrade.jsx'), 'WireGrade')
 
 // A notes chunk that fails to load (a 404 after a deploy, a phone gone offline)
 // leaves the row its plain sentence, never takes the ledger down
@@ -270,6 +271,15 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
     marks && story.type === 'trade'
       ? story.cutline?.find((seg) => seg.teamId && seg.teamId !== story.teamId)?.teamId
       : null
+  // A trade's grade, run on in its notes just before More (WireGrade.jsx). Its
+  // own boundary: a grade that fails takes nothing else down.
+  const grade = date && story.type === 'trade' ? (
+    <WireFactsBoundary fallback={null}>
+      <Suspense fallback={null}>
+        <WireGrade story={factsStory} />
+      </Suspense>
+    </WireFactsBoundary>
+  ) : null
   return (
     <li
       className={`wire__row${compact ? ' wire__row--compact' : ''}${line ? ' wire__row--line' : ''}`}
@@ -316,7 +326,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
           <WireFactsBoundary fallback={<Cutline segments={story.cutline} />}>
             <Suspense fallback={<Cutline segments={story.cutline} />}>
               {/* A 27th man's trip is told in his note, so even a one-line row runs it on. */}
-              <WireFacts story={factsStory} date={date} line={line && !quotes?.some((q) => q.game)}>
+              <WireFacts story={factsStory} date={date} line={line && !quotes?.some((q) => q.game)} extra={grade}>
                 {(tail, notes, toggle) =>
                   notes?.size > 1 ? (
                     <>
@@ -329,7 +339,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
                             <Cutline
                               key={i}
                               segments={clause}
-                              tail={<>{note && `${note} `}{i === all.length - 1 && toggle}</>}
+                              tail={<>{note && `${note} `}{i === all.length - 1 && <>{grade}{toggle}</>}</>}
                             />
                           )
                         })}
