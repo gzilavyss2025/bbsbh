@@ -119,3 +119,24 @@
   cursor: pointer;
 }
 .deck__pause:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* The Series MVP: face and name on the left, his line beside them, one bordered unit so the
+   figures belong to him. Stacks on a narrow card. */
+/* layout-exempt: face, name and line in one row, wrapping on a phone */
+.deck-mvp {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--text-heading);
+}
+.deck-mvp__face { width: 52px; height: 52px; border-radius: var(--radius-pill, 50%); border: 2px solid var(--club-a, var(--text-heading)); background: var(--surface-stamped-tint); object-fit: cover; }
+/* layout-exempt: name over its role */
+.deck-mvp__who { display: grid; padding-right: var(--space-3); border-right: 2px solid var(--club-b, var(--text-heading)); }
+.deck-mvp__name { font-family: var(--font-display); font-size: var(--fs-h3); line-height: var(--lh-snug); color: var(--text-heading); }
+.deck-mvp__role { font-size: var(--fs-small); color: var(--club-a, var(--text-caption)); }
+@container (max-width: 520px) {
+  .deck-mvp { grid-template-columns: auto minmax(0, 1fr); }
+  .deck-mvp__who { border-right: 0; padding-right: 0; }
+  .deck-mvp__line { grid-column: 1 / -1; }
+}

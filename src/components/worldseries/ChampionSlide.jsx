@@ -8,6 +8,7 @@ import { decidedHero } from '../../lib/postseason/worldseries/hero.js'
 import { seriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
 const WORDS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven']
@@ -48,13 +49,23 @@ export function ChampionSlide({ bracket }) {
         </div>
       </div>
       <div className="deck-sign__deal">
-        {figures.length > 0 && (
-          <dl className="deck-sign__terms">
-            {figures.map(([v, k]) => <div key={k}><dd>{v}</dd><dt>{k}</dt></div>)}
-          </dl>
+        {/* The MVP's own block: his face and name lead, and his Series line sits under them, so the
+            figures read as his, not the club's. */}
+        {mvp && (
+          <section className="deck-mvp" aria-label={`${mvp.name}, Series MVP`}>
+            <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} className="deck-mvp__face" />
+            <div className="deck-mvp__who">
+              <PlayerLink id={mvp.playerId} className="deck-mvp__name">{mvp.name}</PlayerLink>
+              <span className="deck-mvp__role">Series MVP</span>
+            </div>
+            {figures.length > 0 && (
+              <dl className="deck-sign__terms deck-mvp__line">
+                {figures.map(([v, k]) => <div key={k}><dd>{v}</dd><dt>{k}</dt></div>)}
+              </dl>
+            )}
+          </section>
         )}
         <p className="deck-sign__note">
-          {mvp && <><PlayerLink id={mvp.playerId}>{mvp.name}</PlayerLink>{', Series MVP. '}</>}
           {`The ${winner} beat the ${teamClubNameShort(loserId)} in ${WORDS[hero.gamesPlayed] ?? hero.gamesPlayed}.`}
         </p>
         {games.length > 0 && (
