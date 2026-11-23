@@ -130,6 +130,7 @@
 
 /* Cash or a player to be named, in a player row: a stamped square the size of
    the face beside it, its mark in the figures' mono. */
+/* layout-exempt: centres one glyph in a fixed face-sized square */
 .tradesheet__extramark {
   display: grid;
   place-items: center;

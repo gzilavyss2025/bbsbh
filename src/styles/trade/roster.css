@@ -148,8 +148,8 @@
 }
 
 .tradedesk__sortmore:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--ring-offset, 2px);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .tradedesk__sortmore--on {

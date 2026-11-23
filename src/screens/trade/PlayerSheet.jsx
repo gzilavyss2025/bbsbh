@@ -61,7 +61,7 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
                 {/* The trade case sits beside the photo, filling its height: what he
                     projects to, what he is worth, how long, for what. */}
                 {p.value?.prospect && (p.topRank || p.orgRank)
-                  ? <ProspectLead p={p} teamId={teamId} farm={farm} pedigree={facts.data && draftSentence(facts.data) ? null : pedigree} />
+                  ? <ProspectLead p={p} farm={farm} pedigree={facts.data && draftSentence(facts.data) ? null : pedigree} />
                   : <ValueTiles p={p} nextYear={nextYear} />}
                 {!(p.value?.prospect && (p.topRank || p.orgRank)) && <p className="tradedesk__nums playersheet__nums">
                   {/* The tiles already say next season's pay and how long he is held. */}
@@ -274,12 +274,12 @@ function CameUp({ p, fallback }) {
   )
 }
 
-function ProspectLead({ p, teamId, farm, pedigree }) {
+function ProspectLead({ p, farm, pedigree }) {
   const facts = [
     ['Prospect value', money(p.value.surplusUsd)],
     (farm?.level ?? p.level) ? ['Plays at', <PlaysAt key="at" level={farm?.level ?? p.level} club={farm?.club} clubId={farm?.clubId} />] : null,
     // "Rule 5 eligible" over "Dec 2027", so the tile keeps to one line.
-    rule5Text(p) ? ['Rule 5 eligible', rule5Text(p).replace(/^Eligible /, '').replace(/^./, (c) => c.toUpperCase())] : null,
+    rule5Text(p) ? ['Rule 5 eligible', rule5Text(p).replace(/^Eligible /, '').replace(/^./, (c) => c.toUpperCase())] : null, // caps-js-exempt: sentence capitalization of the leftover phrase ("Now", "This December")
     pedigree ? ['Acquired', <CameUp key="up" p={p} fallback={pedigree} />] : null,
   ].filter(Boolean)
   // The stamp sits in the head's corner (PlayerSheet); the tiles run under his name.
