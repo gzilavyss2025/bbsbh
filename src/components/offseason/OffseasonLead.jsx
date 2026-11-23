@@ -57,6 +57,9 @@ const forClub = (days, id) =>
 // days, so a reader can keep going through the winter.
 const STEP = 10
 const MAX_BACKFILL = 6
+// A picked club reaches further back for its first ten moves: a quiet club in
+// November can go weeks without one (20 windows, 60 days at MLB).
+const MAX_CLUB_BACKFILL = 20
 
 export function OffseasonLead({ endDate, sportId, winter, children }) {
   const [pages, setPages] = useState(1)
@@ -69,11 +72,21 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   // One window per page, newest first, each ending where the last began. It
   // may reach back past the winter's first day: October's moves are moves too.
   const ends = Array.from({ length: pages }, (_, i) => shiftDays(endDate, -i * span))
+  // Each window is read once: a reach-back fetches only the new one, not every
+  // window again (a club's fill can reach back twenty).
+  const windows = useRef(new Map())
+  const windowOf = (end) => {
+    const key = `${end}-${sportId}`
+    if (!windows.current.has(key)) {
+      windows.current.set(key, fetchLeagueMoves(end, sportId, { singleDay: false }).catch((e) => {
+        windows.current.delete(key)
+        throw e
+      }))
+    }
+    return windows.current.get(key)
+  }
   const { data, loading } = useAsync(
-    (signal) =>
-      Promise.all(ends.map((end) => fetchLeagueMoves(end, sportId, { signal, singleDay: false }))).then(
-        (all) => all.flat(),
-      ),
+    () => Promise.all(ends.map(windowOf)).then((all) => all.flat()),
     [endDate, sportId, pages],
   )
   // A different day or level starts the ledger over.
@@ -91,28 +104,25 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   if (data && data !== kept) setKept(data)
   const days = data ?? kept
   const items = flattenDays(forClub(days, teamId))
-  // The clubs in hand, the same strip as the longest at-bats (LongAtBats.jsx).
-  const clubs = [
-    ...new Set(
-      (days ?? []).flatMap((day) =>
-        (day.stories ?? []).flatMap((st) => [st.teamId, ...(st.cutline ?? []).map((seg) => seg.teamId)]),
-      ),
-    ),
-  ]
-    .filter((id) => MLB_CLUBS.has(id))
-    .sort((x, y) => teamAbbr({ id: x }).localeCompare(teamAbbr({ id: y })))
+  // Every club, the same strip as the longest at-bats (LongAtBats.jsx): one
+  // with no move in the windows in hand reaches back for its own (below).
+  const clubs = [...MLB_CLUBS].sort((x, y) => teamAbbr({ id: x }).localeCompare(teamAbbr({ id: y })))
+  // The data the reach-back last ran on, so it runs once per landed fetch.
+  const [filled, setFilled] = useState(null)
   const pickClub = (id) => {
     setTeamId(id)
     setVisible(STEP)
     setCap(null)
+    // The fill below runs again for the club's own first ten.
+    setFilled(null)
   }
   const total = items.filter((item) => item.kind === 'story').length
   // A quiet window (one move on a Monday in November) left the card a single
   // row tall on a phone. Reach back, a window at a time, until the first ten
   // are in hand — capped so a club with no winter news stops looking.
   // Once per landed fetch, so a render before the next fetch starts cannot skip ahead.
-  const [filled, setFilled] = useState(null)
-  if (data && data !== filled && !loading && total < visible && pages < MAX_BACKFILL) {
+  const reachCap = teamId == null ? MAX_BACKFILL : MAX_CLUB_BACKFILL
+  if (data && data !== filled && !loading && total < visible && pages < reachCap) {
     setFilled(data)
     setPages((n) => n + 1)
   }
@@ -176,7 +186,10 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
               {total > 0 ? (
                 <MoveItems items={shown} marks />
               ) : (
-                <li className="oseason__none">{`No moves for this club in the last ${span * pages} days.`}</li>
+                // Still reaching back for this club's moves: say so, not "none".
+                loading || pages < reachCap
+                  ? <li className="oseason__none" aria-busy="true">Looking further back…</li>
+                  : <li className="oseason__none">{`No moves for this club in the last ${span * pages} days.`}</li>
               )}
             </ul>
             <button

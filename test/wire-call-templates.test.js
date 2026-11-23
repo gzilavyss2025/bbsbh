@@ -321,3 +321,21 @@ test('a note keeps its wording for the same player and move, and varies across t
   const seen = new Set([...Array(60).keys()].map((id) => variant({ id }, ctx.moveDate, 3)))
   assert.deepEqual([...seen].sort(), [0, 1, 2])
 })
+
+test('an offseason selection is a 40-man add: no call-up, last season in the past tense', () => {
+  const callLine = { level: ['Double-A'], team: null, line: { games: 95, avg: '.257', hr: 18 } }
+  const wood = facts({
+    pitcher: false,
+    debut: null,
+    lastName: 'Wood',
+    prospect: null,
+    draft: { teamId: 158, year: 2022, round: 4, pick: null, school: 'Penn State' },
+    arrivals: [],
+    callLine,
+  })
+  const note = callStory(wood, { kind: 'selected', moveDate: '2026-11-17' })
+  assert.doesNotMatch(note, /call-up|call to the majors|is hitting/)
+  assert.match(note, /hit \.257 with 18 homers in 95 games in Double-A in 2026\./)
+  // The protection lead still reads as a selection.
+  assert.equal(templateOf(clause('Added three to the 40-man roster ahead of the Rule 5 draft: C ', '.')), 'selected')
+})

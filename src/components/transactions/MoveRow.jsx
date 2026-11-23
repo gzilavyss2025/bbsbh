@@ -114,7 +114,7 @@ export function flattenDays(days) {
     if (!day.stories?.length) continue
     items.push({ kind: 'date', key: `d-${day.date}`, date: day.date, count: day.stories.length })
     // A club's run of same-kind one-player moves reads as one card (combineMoves.js).
-    for (const story of combineBatches(day.stories)) {
+    for (const story of combineBatches(day.stories, day.date)) {
       items.push({ kind: 'story', key: story.id, story, date: day.date })
     }
   }
@@ -263,7 +263,10 @@ function clubTabFor(teamId) {
 // `day` is the row's own date, which a same-day quote leaves off.
 // `factsStory` is the story with its club filled in, for the notes (MoveItems).
 export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null, factsStory = story }) {
-  const tone = TYPE_TONE[story.type]
+  // A November selection is Rule 5 protection (combineMoves.js): it keeps its
+  // label even on the winter ledger, which hides the others.
+  const protect = story.typeLabel === 'Rule 5 protection'
+  const tone = TYPE_TONE[story.type] ?? (protect ? 'add' : undefined)
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
   const markSize = marks ? 28 : 18
@@ -319,7 +322,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
             </TeamLink>
           )}
           {tone && (
-            <span className={`wire__type wire__type--${tone}`}>{story.typeLabel}</span>
+            <span className={`wire__type wire__type--${tone}${protect ? ' wire__type--keep' : ''}`}>{story.typeLabel}</span>
           )}
         </div>
         {date ? (

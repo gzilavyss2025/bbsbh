@@ -69,3 +69,21 @@ test('three names take commas and a final "and"; a multi-player story is never f
   assert.equal(text(out[0]), 'Released LHP One, RHP Two and C Three.')
   assert.equal(out[1], two)
 })
+
+test('November selections read as Rule 5 protection: one lead naming them all', () => {
+  // The Brewers' adds, Nov. 17, 2026, from two affiliates.
+  const day = [
+    solo('a', 158, SEL, 'C', 'Matthew Wood', 1, from('Biloxi Shuckers', 5015)),
+    solo('b', 158, SEL, '2B', "Dylan O'Rae", 2, from('Biloxi Shuckers', 5015)),
+    solo('c', 158, SEL, 'LHP', 'Tate Kuehner', 3, from('Nashville Sounds', 556)),
+  ]
+  const [story] = combineBatches(day, '2026-11-17')
+  assert.equal(text(story), "Added three to the 40-man roster ahead of the Rule 5 draft: C Matthew Wood, 2B Dylan O'Rae and LHP Tate Kuehner.")
+  assert.equal(story.typeLabel, 'Rule 5 protection')
+  assert.deepEqual(story.rail.map((r) => r.playerId), [1, 2, 3])
+  // One add alone gets the same treatment.
+  const [one] = combineBatches([day[0]], '2026-11-17')
+  assert.equal(text(one), 'Added C Matthew Wood to the 40-man roster ahead of the Rule 5 draft.')
+  // In-season, the same rows stay selections.
+  assert.match(text(combineBatches(day, '2026-09-01')[0]), /^Selected the contracts of/)
+})
