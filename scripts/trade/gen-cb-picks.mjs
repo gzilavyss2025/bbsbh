@@ -13,7 +13,6 @@
 // Nightly, in the structural data block of update-nightly-data.yml (1 request).
 // Run by hand: node scripts/trade/gen-cb-picks.mjs [year]
 import { join } from 'node:path'
-import { readFile } from 'node:fs/promises'
 import { writeJsonAtomic } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { cbPicksOf } from '../../src/lib/trade/deal.js'
@@ -25,11 +24,8 @@ const year = Number(process.argv[2]) || now.getUTCFullYear() + (now.getUTCMonth(
 
 const picks = cbPicksOf(await getJson(`/api/v1/draft/${year}`), year)
 
-// Only rewrite when the picks change, so the nightly run doesn't churn the file.
-const prev = JSON.parse(await readFile(out, 'utf8').catch(() => '{}'))
-if (prev.year === year && JSON.stringify(prev.picks) === JSON.stringify(picks)) {
-  console.log(`cb-picks: ${year} unchanged (${picks.length} picks)`)
-} else {
-  await writeJsonAtomic(out, { generatedAt: now.toISOString(), year, picks })
-  console.log(`cb-picks: ${picks.length} picks for ${year}`)
-}
+// Always rewrite: the fresh stamp is what check-data-freshness.mjs reads on the
+// working tree, and the nightly commit step drops a stamp-only change
+// (nightly/drop-stamp-only.mjs), so a quiet night still commits nothing.
+await writeJsonAtomic(out, { generatedAt: now.toISOString(), year, picks })
+console.log(`cb-picks: ${picks.length} picks for ${year}`)
