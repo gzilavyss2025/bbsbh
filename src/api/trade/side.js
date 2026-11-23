@@ -14,6 +14,7 @@ import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
 import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
 import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
+import { fetchTradePerson } from './person.js'
 
 // This season's league OPS and ERA, for the OPS / ERA sort's one scale
 // (lib/trade/value.js lineIndex). Two calls, the 30 clubs' totals each; once a
@@ -169,6 +170,68 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   return { teamId, nextYear, warSeason: war?.season ?? null, league, fortyCount: forty.length, forty, minors, others, depth }
 }
 
+// Players a link places on this side who are not on its rosters (?a= / ?b=,
+// TradePage): a trade already made, replayed with each player back on the
+// club that sent him. Each is read alone (person.js) and joins the 40-man
+// list as `placed`, his contract from this club's ledger or his current
+// club's, so he is priced and valued like anyone listed. One who cannot be
+// read is left out. `elsewhere` are the ids placed on the OTHER side: they come
+// off this side's lists, or a player still on this roster would go both ways.
+export async function addPlacedPlayers(side, ids, elsewhere = []) {
+  if (!side) return side
+  if (elsewhere.length) {
+    const gone = new Set(elsewhere)
+    const keep = (rows) => rows.filter((p) => !gone.has(p.id))
+    // The roster as it was before the trade: his 40-man spot goes with him.
+    const left = side.forty.filter((p) => gone.has(p.id) && p.onForty).length
+    side = { ...side, forty: keep(side.forty), minors: keep(side.minors), others: keep(side.others), fortyCount: side.fortyCount - left }
+  }
+  if (!ids?.length) return side
+  const listed = new Set([...side.forty, ...side.minors, ...side.others].map((p) => p.id))
+  const missing = ids.filter((id) => !listed.has(id))
+  if (!missing.length) return side
+  const [own, war, prospects] = await Promise.all([
+    fetchTeamContracts(side.teamId).catch(() => null),
+    fetchWarData().catch(() => null),
+    fetchTopProspects().catch(() => null),
+  ])
+  const rowsOf = (ledger) => new Map((ledger?.groups ?? []).flatMap((g) => g.players).map((r) => [r.id, r]))
+  const ownRows = rowsOf(own)
+  const placed = await Promise.all(missing.map(async (id) => {
+    const person = await fetchTradePerson(id).catch(() => null)
+    if (!person) return null
+    let ledger = ownRows.get(id) ?? null
+    if (!ledger && person.currentTeamId && person.currentTeamId !== side.teamId) {
+      ledger = rowsOf(await fetchTeamContracts(person.currentTeamId).catch(() => null)).get(id) ?? null
+    }
+    const bat = war?.bat?.[id], pit = war?.pit?.[id]
+    const row = tradePlayer(
+      { id, name: person.name, position: person.pos, onForty: ledger != null },
+      {
+        ledger,
+        war: bat == null && pit == null ? null : (bat ?? 0) + (pit ?? 0),
+        topRank: prospectRankById(prospects?.players ?? [], id) ?? null,
+        orgRank: (prospects?.orgProspects ?? []).find((p) => p.playerId === id)?.orgRank ?? null,
+        line: person.line,
+        nextYear: side.nextYear,
+      },
+    )
+    return { ...row, age: row.age ?? person.age, paByYear: person.pa, placed: true }
+  }))
+  const add = placed.filter(Boolean)
+  if (!add.length) return side
+  // A big-league contract puts him on the 40-man list and its count; anyone
+  // else (a prospect) joins the club's other players, as its minor leaguers do.
+  const forty = add.filter((p) => p.onForty)
+  const others = add.filter((p) => !p.onForty)
+  return {
+    ...side,
+    forty: [...forty, ...side.forty],
+    others: [...others, ...side.others],
+    fortyCount: side.fortyCount + forty.length,
+  }
+}
+
 // What each player is worth to a club that gets him (lib/trade/value.js),
 // added after the roster draws: his WAR by season from the stored history
 // (one shard per hundred ids, so a club's 40-man and ranked prospects read up
@@ -213,7 +276,8 @@ export async function valueTradeSide(side) {
     if (withHistory) {
       const pitcher = pitcherPos(p)
       row.warByYear = warByYearFor(p.id, pitcher ? 'pitching' : 'hitting', war, history)
-      row.paByYear = time.get(p.id)?.[pitcher ? 'pitching' : 'hitting'] ?? null
+      // A placed player is on no roster here: his own read carries his playing time.
+      row.paByYear = time.get(p.id)?.[pitcher ? 'pitching' : 'hitting'] ?? p.paByYear ?? null
       row.pitcher = pitcher
     }
     row.value = playerValue(row, { nextYear: side.nextYear, warSeason, contractYears })

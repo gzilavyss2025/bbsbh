@@ -6,32 +6,12 @@
 // never states, counts as nothing (the line says so). Players are valued as
 // they stand today, not on the day of the deal.
 // Null when a player cannot be read, so a deal that cannot be scored gets no line.
-import { getJson } from '../statsapi.js'
 import { fetchTeamContracts } from '../salaries.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
-import { roleFromCounts } from '../../lib/roster/pitcherRole.js'
+import { fetchTradePerson } from './person.js'
 import { tradePlayer, contractYears } from '../../lib/trade/deal.js'
 import { playerValue } from '../../lib/trade/value.js'
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
-
-const PITCHER = new Set(['P', 'SP', 'RP', 'TWP'])
-
-async function personFacts(id) {
-  const data = await getJson(`/api/v1/people/${id}?hydrate=currentAge,stats(type=yearByYear,group=[hitting,pitching],sportId=1)`)
-  const p = data.people?.[0]
-  if (!p) return null
-  const pitcher = PITCHER.has(p.primaryPosition?.abbreviation)
-  const group = (p.stats ?? []).find((g) => g.group?.displayName === (pitcher ? 'pitching' : 'hitting'))
-  const pa = {}
-  let last = null
-  for (const s of group?.splits ?? []) {
-    if (!s.team) continue
-    pa[s.season] = (pa[s.season] ?? 0) + (Number(pitcher ? s.stat?.battersFaced : s.stat?.plateAppearances) || 0)
-    if (!last || s.season >= last.season) last = s
-  }
-  const role = pitcher && last ? roleFromCounts(last.stat?.gamesStarted, last.stat?.gamesPitched, last.stat?.saves) : null
-  return { id, name: p.fullName, pos: p.primaryPosition?.abbreviation ?? '', age: p.currentAge ?? null, pitcher, pa, role }
-}
 
 const loads = new Map()
 
@@ -59,7 +39,7 @@ async function grade({ clubId, otherId, got, gave }) {
   const nextYear = season + 1
   const warSeason = war?.season ?? season
   const value = async (id) => {
-    const [facts, history] = await Promise.all([personFacts(id), fetchWarHistory(id).catch(() => null)])
+    const [facts, history] = await Promise.all([fetchTradePerson(id).catch(() => null), fetchWarHistory(id).catch(() => null)])
     if (!facts) throw new Error(`no person ${id}`)
     const ledger = rows.get(id) ?? null
     // A big-league contract on file means a 40-man player; anyone else is a minor leaguer.

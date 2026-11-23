@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadTradeSide, loadMinorLines, valueTradeSide } from '../../api/trade/side.js'
+import { loadTradeSide, loadMinorLines, valueTradeSide, addPlacedPlayers } from '../../api/trade/side.js'
 import { dealSummary, applyRetain, wireSentence } from '../../lib/trade/deal.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -38,22 +38,33 @@ const CLUBS_AZ = [...ALL_MLB_TEAM_IDS].sort((x, y) => teamFullName(x).localeComp
 
 // The deal lives in the address, so a link rebuilds it:
 // /trade-simulator?team=MIL&with=BOS&p=1,2,3&ca=0&cb=2.5&dp=2027-A-33 (cash in $M; dp: draft picks).
+// a= and b= place players on a side by id even when that club's rosters no
+// longer hold them (a trade already made, replayed the right way round); a
+// placed player starts in the deal.
+const idList = (v) => (v || '').split(',').filter(Boolean).map(Number).filter(Number.isFinite)
 function readLink() {
   const q = new URLSearchParams(window.location.search)
   return {
     a: idOf(q.get('team')),
     b: idOf(q.get('with')),
-    picked: new Set((q.get('p') || '').split(',').filter(Boolean).map(Number)),
+    // With p= the deal is exactly p=; without it, every placed player is in it.
+    picked: new Set(q.has('p') ? idList(q.get('p')) : [...idList(q.get('a')), ...idList(q.get('b'))]),
+    // One id in both lists stays on the first side only, or he would go both ways.
+    placed: { a: idList(q.get('a')), b: idList(q.get('b')).filter((id) => !idList(q.get('a')).includes(id)) },
     cashA: Number(q.get('ca')) || 0,
     cashB: Number(q.get('cb')) || 0,
     dp: new Set((q.get('dp') || '').split(',').filter(Boolean)),
   }
 }
-function writeLink({ a, b, picked, cashA, cashB, dp }) {
+function writeLink({ a, b, picked, placed, cashA, cashB, dp }) {
   const q = new URLSearchParams()
   if (a) q.set('team', teamAbbr({ id: a }))
   if (b) q.set('with', teamAbbr({ id: b }))
-  if (picked.size) q.set('p', [...picked].join(','))
+  // A placed player keeps his place in the link; p= is the whole deal, so one
+  // taken out of it stays out on a reload.
+  if (placed.a.length) q.set('a', placed.a.join(','))
+  if (placed.b.length) q.set('b', placed.b.join(','))
+  if (picked.size || placed.a.length || placed.b.length) q.set('p', [...picked].join(','))
   if (cashA) q.set('ca', String(cashA))
   if (cashB) q.set('cb', String(cashB))
   if (dp.size) q.set('dp', [...dp].join(','))
@@ -64,8 +75,15 @@ function writeLink({ a, b, picked, cashA, cashB, dp }) {
 // One club's side in two steps: the roster draws as soon as it loads, and each
 // player's value (valueTradeSide) fills in when the WAR history arrives.
 // Until then the side reads as unvalued: no surplus, no estimated pay.
-function useTradeSide(teamId) {
-  const roster = useAsync(() => (teamId ? loadTradeSide(teamId) : Promise.resolve(null)), [teamId])
+// `placed` are player ids a link puts on this side though its rosters no
+// longer hold them (side.js addPlacedPlayers), read before the values.
+// `elsewhere` are the ids placed on the other side, taken off this one.
+function useTradeSide(teamId, placed = [], elsewhere = []) {
+  const placedKey = `${placed.join(',')}|${elsewhere.join(',')}`
+  const roster = useAsync(
+    () => (teamId ? loadTradeSide(teamId).then((side) => addPlacedPlayers(side, placed, elsewhere)) : Promise.resolve(null)),
+    [teamId, placedKey],
+  )
   const valued = useAsync(() => valueTradeSide(roster.data), [roster.data])
   return { ...roster, data: valued.data?.teamId === roster.data?.teamId && valued.data ? valued.data : roster.data }
 }
@@ -81,6 +99,8 @@ export function TradePage() {
   const [a, setA] = useState(start.a ?? null)
   const [b, setB] = useState(start.b && start.b !== start.a ? start.b : null)
   const [picked, setPicked] = useState(start.picked)
+  // Players the link placed on each side (a= / b=); a club switch drops its own.
+  const [placed, setPlaced] = useState(start.placed)
   const [cashA, setCashA] = useState(start.cashA)
   const [cashB, setCashB] = useState(start.cashB)
   // Competitive Balance picks in the deal, by key. A pick goes with the club
@@ -100,10 +120,10 @@ export function TradePage() {
   // null, or which club's lineup a phone shows first (0 or 1).
   const [showLineups, setShowLineups] = useState(null)
 
-  useEffect(() => writeLink({ a, b, picked, cashA, cashB, dp }), [a, b, picked, cashA, cashB, dp])
+  useEffect(() => writeLink({ a, b, picked, placed, cashA, cashB, dp }), [a, b, picked, placed, cashA, cashB, dp])
 
-  const sideA = useTradeSide(a)
-  const sideB = useTradeSide(b)
+  const sideA = useTradeSide(a, placed.a, placed.b)
+  const sideB = useTradeSide(b, placed.b, placed.a)
   // Each club's minor-league lines load the first time its roster reaches past
   // the 40-man; the page holds them so the other column can read them too.
   const [wantFarm, setWantFarm] = useState({ a: false, b: false })
@@ -143,8 +163,8 @@ export function TradePage() {
   const wireStory = deal ? dealStory({ a, b, sendsA: sends(sideA.data), sendsB: sends(sideB.data), picksA: sentPicks(a), picksB: sentPicks(b), cashA, cashB }) : null
 
   // A club is picked from a picker only while its side is empty, so a pick never drops anyone.
-  const switchA = (id) => { setA(id); setPicked((s) => new Set([...s].filter((x) => picks(sideB.data).some((p) => p.id === x)))); setCashA(0) }
-  const switchB = (id) => { setB(id); setPicked((s) => new Set([...s].filter((x) => picks(sideA.data).some((p) => p.id === x)))); setCashB(0) }
+  const switchA = (id) => { setA(id); setPlaced((x) => ({ ...x, a: [] })); setPicked((s) => new Set([...s].filter((x) => picks(sideB.data).some((p) => p.id === x)))); setCashA(0) }
+  const switchB = (id) => { setB(id); setPlaced((x) => ({ ...x, b: [] })); setPicked((s) => new Set([...s].filter((x) => picks(sideA.data).some((p) => p.id === x)))); setCashB(0) }
   const pickA = (id) => { if (id && id !== b) switchA(id) }
   const pickB = (id) => { if (id && id !== a) switchB(id) }
   // Nothing is in the deal yet: the deal cards wait, the rosters lead.
@@ -163,7 +183,7 @@ export function TradePage() {
     setSidePct({ a: 0, b: 0 })
     setRetainOpen(false)
   }
-  const startOver = () => { setB(null); clearDeal() }
+  const startOver = () => { setB(null); setPlaced({ a: [], b: [] }); clearDeal() }
   // X on your club: the partner (and what it sends) stays in its own column;
   // with no partner yet, the desk empties.
   const clearA = () => {

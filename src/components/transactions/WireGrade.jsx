@@ -35,11 +35,12 @@ export function WireGrade({ story }) {
   if (!parties) return null
   if (!graded) return <span ref={ref} aria-hidden="true" />
   const text = gradeLine({ club: teamClubName(parties.clubId), other: teamClubName(parties.otherId), valueUsd: graded.valueUsd, cash: parties.cash, toBeNamed: parties.toBeNamed }, gradeOf)
-  // The players picked too. The simulator deals from today's rosters, where
-  // each already sits with his new club, so the deal opens reversed: the
-  // trade undone, its grades mirrored (Gary's call, 2026-11-23).
-  const ids = [...parties.got, ...parties.gave].join(',')
-  const path = `${pathOf('trade')}?team=${teamAbbr({ id: parties.clubId })}&with=${teamAbbr({ id: parties.otherId })}${ids ? `&p=${ids}` : ''}`
+  // The trade replayed as made: each player placed back on the club that sent
+  // him (?a= / ?b=, TradePage), so the simulator's grade is the one printed here.
+  const q = new URLSearchParams({ team: teamAbbr({ id: parties.clubId }), with: teamAbbr({ id: parties.otherId }) })
+  if (parties.gave.length) q.set('a', parties.gave.join(','))
+  if (parties.got.length) q.set('b', parties.got.join(','))
+  const path = `${pathOf('trade')}?${q.toString().replace(/%2C/g, ',')}`
   // Runs on in the notes' sentence, ahead of More (WireFacts' `extra`).
   return (
     <span className="wire__grade">
