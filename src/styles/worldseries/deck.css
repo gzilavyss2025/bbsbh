@@ -1,0 +1,84 @@
+/* The home slate's offseason story deck (StoryDeck.jsx): every slide in one grid cell, so the deck
+   holds the tallest slide's height and never jumps as it turns. */
+.deck { position: relative; display: grid; container-type: inline-size; }
+/* layout-exempt: slides stacked in one cell */
+.deck__slides { display: grid; }
+.deck__slide { grid-area: 1 / 1; visibility: hidden; opacity: 0; }
+.deck__slide[data-on] { visibility: visible; opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .deck__slide { transition: opacity var(--dur-slow) var(--ease-out), visibility var(--dur-slow); }
+}
+/* The arrows: paper tabs stamped like the page's cards (ink edge, hard offset shadow), straddling the
+   deck's edges at the middle of the photo (a 16:9 photo is 9/32 of the width down to its middle). */
+.deck__arrow {
+  position: absolute;
+  top: calc(100cqw * 9 / 32);
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  translate: 0 -50%;
+  border: 2px solid var(--text-heading);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  box-shadow: 3px 3px 0 var(--text-heading);
+  cursor: pointer;
+}
+.deck__arrow svg { width: 22px; height: 22px; }
+.deck__arrow--prev { left: -24px; }
+.deck__arrow--next { right: -24px; }
+.deck__arrow:hover { background: var(--surface-stamped-ink); color: var(--text-on-ink-cream); }
+.deck__arrow:active { translate: 2px calc(-50% + 2px); box-shadow: 1px 1px 0 var(--text-heading); }
+.deck__arrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (max-width: 739px) {
+  .deck__arrow { width: 44px; height: 44px; }
+  .deck__arrow--prev { left: var(--space-2); }
+  .deck__arrow--next { right: var(--space-2); }
+}
+
+/* A signing: the art full bleed, growing to fill the deck's height so the deal never floats in space, with the headline on it, the deal below on the page's own paper. */
+.deck-sign {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px solid var(--text-heading);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  overflow: hidden;
+}
+.deck-sign__photo { position: relative; flex: 1; min-height: calc(100cqw * 9 / 16); background: var(--club-a, var(--surface-stamped-ink)); }
+.deck-sign__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* layout-exempt: mark beside the headline, laid on the photo's foot */
+.deck-sign__cap {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5) var(--space-4);
+  background: linear-gradient(to top, var(--club-a, var(--surface-stamped-ink)) 35%, transparent);
+  color: var(--text-on-ink-cream);
+}
+.deck-sign__head { margin: 0; font-family: var(--font-display); font-size: var(--fs-hero-2xl, var(--fs-display-lg)); line-height: var(--lh-solid); letter-spacing: var(--ls-tight-display); }
+/* layout-exempt: three figures over a one-line note */
+.deck-sign__deal {
+  display: grid;
+  align-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: var(--space-1) solid var(--club-b, var(--text-heading));
+}
+.deck-sign__terms { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; margin: 0; }
+.deck-sign__terms > div { display: flex; align-items: baseline; gap: var(--space-1); padding-right: var(--space-4); margin-right: var(--space-4); border-right: var(--bw-hair) solid var(--text-heading); }
+.deck-sign__terms > div:last-child { border-right: 0; margin-right: 0; }
+.deck-sign__terms dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: var(--lh-solid); color: var(--club-a, var(--text-heading)); font-variant-numeric: tabular-nums; }
+.deck-sign__terms dt { font-size: var(--fs-small); color: var(--text-caption); }
+.deck-sign__note { margin: 0; font-size: var(--fs-small); line-height: var(--lh-body); color: var(--text-caption); }
+.deck-sign__note a { color: var(--text-heading); }
+@media (max-width: 739px) {
+  .deck-sign__cap { padding: var(--space-5) var(--space-3) var(--space-3); }
+  .deck-sign__head { font-size: var(--fs-display-lg); }
+  .deck-sign__deal { padding: var(--space-3); }
+  .deck-sign__terms > div { padding-right: var(--space-2); margin-right: var(--space-2); }
+}
