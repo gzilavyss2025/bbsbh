@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Header bar critique</title>
+<style>
+:root { --paper:#FBF6E9; --ink:#1B2A3A; --soft:#3C4A5A; --rule:#CBC1A7; --red:#A8322D; --amber:#8A5E14; --green:#3D6B3A; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:32px 16px 48px; }
+h1 { font-size:26px; margin:0 0 6px; } h2 { font-size:19px; margin:28px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+table { width:100%; border-collapse:collapse; font-size:15px; } th, td { text-align:left; vertical-align:top; padding:8px; border-bottom:1px solid var(--rule); }
+th { font-size:13px; color:var(--soft); } .sev { font-weight:700; white-space:nowrap; } .hi { color:var(--red); } .md { color:var(--amber); } .lo { color:var(--green); }
+.lead { font-size:17px; color:var(--soft); } li { margin:4px 0; }
+@media (max-width:600px){ table, tbody, tr, td { display:block; } thead { display:none; } td { border:0; padding:2px 0; } tr { border-bottom:1px solid var(--rule); padding:8px 0; } }
+</style>
+</head>
+<body><main>
+<h1>Home slate header bar: critique</h1>
+<p class="lead">The pieces are right: the logo, search, Game Log and menu, with every control 44 px tall. What looks off is the bar itself. At the top of the page it's a solid paper box, 960 px wide, sitting on the graph-paper grid with no edge, so it reads as a patch where the grid was erased rather than as a header.</p>
+
+<h2>What I measured</h2>
+<ul>
+<li>The bar is 960 × 76 px, filled with plain paper (#F6EFDC), sticky, with a transparent 2 px bottom border and no shadow.</li>
+<li>The cards below are inset 16 px from the bar's edges, so the bar's blank box sticks out past the content on both sides.</li>
+<li>Once you scroll, the bar becomes the compact version: the level picker and date move into it, and a heavy ink rule and shadow appear under it. That version reads well.</li>
+</ul>
+
+<h2>Usability</h2>
+<table>
+<thead><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>At rest, the bar's paper fill hides the grid in a box wider than the content. It looks like a mistake, not a header.</td><td class="sev hi">High</td><td>Either let the grid show through (transparent at rest, paper fill only once it sticks), or run the bar the full window width so it reads as a band.</td></tr>
+<tr><td>Game Log is the only item with a text label; search and menu are icons only. The row has two rules for the same kind of thing.</td><td class="sev lo">Low</td><td>Fine as a deliberate choice: Game Log is the app's own feature, so it earns a name. Leave it.</td></tr>
+</tbody></table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the red TALLY logo, which is right for a home page.</li>
+<li><strong>Reading flow:</strong> logo on the left, three controls on the right, with a wide empty middle. That's the normal header shape.</li>
+<li><strong>Emphasis:</strong> the empty paper box around them competes with the logo. It's the box, not the content, that the eye snags on.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<thead><tr><th>Element</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Edges</td><td>The bar is 960 px wide but the cards below are inset 16 px, so its left and right edges line up with nothing.</td><td>Match the content edges, or go full width.</td></tr>
+<tr><td>Two states</td><td>Scrolled, the bar has an ink rule and a shadow, like the stamped cards. At rest it has no edge at all.</td><td>Keep the rule-and-shadow treatment for the scrolled state only, and make the resting state transparent.</td></tr>
+</tbody></table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Touch targets:</strong> search, Game Log and menu are 44 px tall; search and menu are 44 × 44. Passes.</li>
+<li><strong>Contrast:</strong> ink and red on paper both pass easily.</li>
+<li><strong>Labels:</strong> the logo link reads "Tally, today", and search and menu have labels. Good.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>The compact scrolled bar is a smart use of space: level and date stay reachable without the big masthead.</li>
+<li>Three controls only, all full-size targets.</li>
+</ul>
+
+<h2>Priority fixes</h2>
+<ol>
+<li><strong>Make the bar transparent until it sticks,</strong> so the grid runs behind the logo and the "patch" disappears. The paper fill and ink rule appear only in the scrolled state, where they're needed to keep content from showing through.</li>
+<li><strong>Line the bar's edges up with the content</strong> if any fill stays at rest.</li>
+</ol>
+</main></body></html>

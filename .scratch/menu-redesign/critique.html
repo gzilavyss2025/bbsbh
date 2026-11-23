@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu mockup critique</title>
+<style>
+:root { --paper:#FBF6E9; --ink:#1B2A3A; --soft:#3C4A5A; --rule:#CBC1A7; --red:#A8322D; --amber:#9A6A1F; --green:#3D6B3A; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:32px 16px 48px; }
+h1 { font-size:28px; margin:0 0 6px; } h2 { font-size:20px; margin:32px 0 10px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+p { margin:6px 0; } ul, ol { padding-left:22px; } li { margin:4px 0; }
+table { width:100%; border-collapse:collapse; font-size:15px; } th, td { text-align:left; vertical-align:top; padding:8px; border-bottom:1px solid var(--rule); }
+th { font-size:13px; color:var(--soft); }
+.sev { font-weight:700; white-space:nowrap; } .hi { color:var(--red); } .md { color:var(--amber); } .lo { color:var(--green); }
+.lead { font-size:18px; color:var(--soft); }
+@media (max-width:600px){ table, tbody, tr, td { display:block; } thead { display:none; } td { border:0; padding:2px 0; } tr { border-bottom:1px solid var(--rule); padding:8px 0; } }
+</style>
+</head>
+<body><main>
+<h1>Site menu mockup: critique</h1>
+<p class="lead">The structure is right: 6 groups, search, plain names. The biggest problems are space: on desktop the search box pushes the second row of groups off the screen, and on phone the top three rows come before any page link.</p>
+
+<h2>Usability</h2>
+<table>
+<thead><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>On a 600 px tall desktop window, the second row of groups (Rosters & money, Postseason, Record book) is below the fold. The 3×2 grid was meant to remove scrolling.</td><td class="sev hi">High</td><td>Cut the search box to about 28 px type on desktop, drop the "Find a page" label (the placeholder says it), and move "Most opened" into the empty search state.</td></tr>
+<tr><td>On phone, your buttons (2 rows), search and "Most opened" (3 lines) fill the first screen before any group.</td><td class="sev hi">High</td><td>Show "Most opened" only while the search box is focused and empty. Put the 4 Yours buttons on one row that scrolls sideways.</td></tr>
+<tr><td>Search has no keyboard path: Enter does nothing, and arrow keys don't move through results.</td><td class="sev md">Medium</td><td>Enter opens the first match. Down arrow moves into the list.</td></tr>
+<tr><td>Collapsed groups on phone don't say how much is inside.</td><td class="sev md">Medium</td><td>Add a count after each name, e.g. "Postseason 5".</td></tr>
+<tr><td>"Most opened" repeats pages already in the groups and is a guess, not visit data.</td><td class="sev md">Medium</td><td>Keep it only inside the empty search state, or replace it with "Recently opened" from this device.</td></tr>
+<tr><td>"(was Pressure Moments)" adds a line of noise to 6 rows for every visit, forever.</td><td class="sev lo">Low</td><td>Keep the old name as a search word only, and show "(was …)" only in search results.</td></tr>
+</tbody></table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the search box. That's correct for "hard to find", but it's too big for how often people will type.</li>
+<li><strong>Reading flow:</strong> Yours → search → most opened → groups → footer. Three rows of chrome come before the content.</li>
+<li><strong>Emphasis:</strong> the filled My Tally button reads as the menu's main action. It's one destination among four, so make all four the same outlined style.</li>
+<li><strong>Group blurbs</strong> ("Who is winning, and who is out in front") repeat what the name says, and with page descriptions under every row, the grid is dense. Cut the group blurbs.</li>
+</ul>
+
+<h2>Consistency with the house system</h2>
+<table>
+<thead><tr><th>Element</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Yours buttons</td><td>Hand-rolled chips. The house rule is one door: things that open a page are <code>.door</code>.</td><td>Build them as doors.</td></tr>
+<tr><td>Close ✕</td><td>A bare button.</td><td>Use <code>IconButton</code> (ghost), per <code>src/CLAUDE.md</code>.</td></tr>
+<tr><td>Colours</td><td>Raw hex in the mockup.</td><td>Expected in a mockup; use semantic tokens in the build.</td></tr>
+<tr><td>Labels</td><td>Uppercase comes from CSS, which matches the caps invariant (ADR-0017).</td><td>Keep it.</td></tr>
+</tbody></table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Contrast:</strong> body and description text pass (ink on paper is about 13:1, soft ink is about 8:1, graphite is about 5.4:1). The placeholder (#CBC1A7 on paper) is about 1.6:1 and fails. Darken it to graphite.</li>
+<li><strong>Touch targets:</strong> page rows are about 50 px tall and pass. The Yours buttons (about 32 px), the close button (40 px) and the inline footer links (about 20 px) are under 44 px.</li>
+<li><strong>Text:</strong> descriptions at 14 px and "(was …)" at 12 px are small on a phone. Use 15 px minimum and drop the 12 px text.</li>
+<li><strong>Search:</strong> the result count is announced (aria-live). Good.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>Search that matches descriptions and old names fixes the actual complaint.</li>
+<li>Every group has 5–8 pages, so each column can be scanned at a glance.</li>
+<li>The pencil-line search box and paper look feel like Tally, not a generic menu.</li>
+<li>Collapsing groups on phone with the first two open is the right default.</li>
+</ul>
+
+<h2>Priority fixes</h2>
+<ol>
+<li><strong>Make the whole grid fit on desktop.</strong> Shrink the search box and fold "Most opened" into the empty search state.</li>
+<li><strong>Get page links onto the first phone screen.</strong> Put Yours on one row, hide "Most opened" until search is focused, and add group counts.</li>
+<li><strong>Fix the failing placeholder contrast and the small touch targets.</strong></li>
+<li><strong>Trim the noise.</strong> Cut the group blurbs, show "(was …)" only in search, and give the four Yours buttons equal weight.</li>
+</ol>
+</main></body></html>

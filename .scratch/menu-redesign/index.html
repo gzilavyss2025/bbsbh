@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site menu mockup</title>
+<!-- The app's own stylesheet, through Vite: every class below is a real one
+     (sheet, card--sheet, dirhd, dirglyph, dirlink, navdir__trail, btn,
+     searchfield, navdir__everything). Only the PROPOSED rules in <style> are
+     new, and they read tokens only. -->
+<script type="module">import '/src/index.css'</script>
+<style>
+/* ---- page furniture for the mockup only ---- */
+body { margin: 0; background: var(--bg-canvas); }
+#root { padding: var(--space-4) var(--space-2); }
+.mock { max-width: 1040px; margin: 0 auto; }
+.mock .sheet.sitemenusheet { width: 100%; margin: 0; max-height: none; animation: none; }
+
+/* ---- PROPOSED additions to 08a-site-menu.css ---- */
+/* Yours: the reader's own pages as a row of outline buttons under the title. */
+.sitemenusheet__yours { display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; padding: var(--space-3) var(--space-4) 0; }
+.sitemenusheet__yours .btn { flex: none; }
+/* Find: the existing search field, inside the sheet. */
+.sitemenusheet__find { padding: var(--space-3) var(--space-4); border-bottom: var(--bw-hair) solid var(--border-rule); background: var(--surface-card); }
+.sitemenusheet__count { margin: var(--space-1) 0 0; font-size: var(--fs-small); color: var(--text-caption); min-height: 1.2em; }
+/* Groups: 3 across from tablet up, one column on a phone. */
+.sheet.sitemenusheet .sitemenusheet__scroll { display: grid; gap: var(--space-3); grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 760px) { .sheet.sitemenusheet .sitemenusheet__scroll { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* A row with its one-line description under the name. */
+.dirlink.dirlink--described { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; text-align: left; }
+.dirlink__desc { font-size: var(--fs-small); font-weight: var(--w-regular); color: var(--text-caption); }
+.dirlink__was { display: none; }
+.is-searching .dirlink__was { display: inline; }
+.dirhd__count { color: var(--text-caption); font-weight: var(--w-regular); }
+/* Phone: groups fold. The heading is the summary. */
+.sitemenusheet__group > summary { list-style: none; cursor: pointer; }
+.sitemenusheet__group > summary::-webkit-details-marker { display: none; }
+@media (min-width: 760px) { .sitemenusheet__group > summary { cursor: default; pointer-events: none; } }
+.sitemenusheet__empty { grid-column: 1 / -1; margin: 0; color: var(--text-muted); }
+.is-hidden { display: none !important; }
+/* Square corners throughout the menu, as on the slate. */
+.mock .sheet.sitemenusheet, .mock .sitemenusheet .card, .mock .sitemenusheet .btn, .mock .sitemenusheet .searchfield,
+.mock .sitemenusheet .searchfield__input, .mock .sitemenusheet .dirglyph, .mock .sitemenusheet .dirlink,
+.mock .sitemenusheet .dirtag, .mock .sitemenusheet .navdir__everything { border-radius: 0 !important; }
+</style>
+</head>
+<body>
+<div id="root"><div class="mock">
+  <p style="margin:0 0 var(--space-2)"><button type="button" class="btn btn--ghost" onclick="const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark'">Light / dark</button></p>
+  <div class="sheet sitemenusheet" role="dialog" aria-label="Site menu">
+    <div class="sitemenusheet__head">
+      <div>
+        <p class="sitemenusheet__note">Tally Baseball</p>
+        <h2 class="sheet__title">Site menu</h2>
+      </div>
+      <button type="button" class="btn btn--ghost btn--icon" aria-label="Close"><span aria-hidden="true">✕</span></button>
+    </div>
+
+    <nav class="sitemenusheet__yours" aria-label="Yours">
+      <a class="btn" href="#">My Tally</a>
+      <a class="btn" href="#">Game Log</a>
+      <a class="btn" href="#">My First Scorebook</a>
+      <a class="btn" href="#">Game Photos</a>
+    </nav>
+
+    <div class="sitemenusheet__find">
+      <div class="searchfield">
+        <span class="searchfield__glyph" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="2"/><path d="m12 12 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        <input id="q" type="search" class="searchfield__input" placeholder="Find a page" aria-label="Find a page" autocomplete="off">
+      </div>
+      <p class="sitemenusheet__count" id="count" aria-live="polite"></p>
+    </div>
+
+    <div class="sitemenusheet__scroll" id="groups"></div>
+
+    <div class="sitemenusheet__foot">
+      <div class="navdir__trail">
+        <div class="navdir__trail-group">
+          <h3 class="dirhd"><span class="dirglyph" aria-hidden="true" data-glyph="guides"></span><span class="dirhd__label">Learn</span><span class="dirhd__rule"></span></h3>
+          <a class="dirlink dirlink--trail" href="#">How to score a game <span class="dirtag">Guide</span></a>
+          <a class="dirlink dirlink--trail" href="#">All 11 guides <span class="dirtag">Guide</span></a>
+        </div>
+        <div class="navdir__trail-group">
+          <h3 class="dirhd"><span class="dirglyph" aria-hidden="true" data-glyph="tools"></span><span class="dirhd__label">The site</span><span class="dirhd__rule"></span></h3>
+          <a class="dirlink dirlink--trail" href="#">Logo Sheet</a>
+          <a class="dirlink dirlink--trail" href="#">About</a>
+        </div>
+        <button type="button" class="navdir__everything">Everything, on one page</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<script>
+const S = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'
+// Existing DirectoryHeading glyphs, plus three drawn in the same hand for the new groups.
+const GLYPH = {
+  standings: `<svg ${S}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3.5v3M16 3.5v3M4 9h16"/><path d="m12 11 3 3-3 3-3-3 3-3Z"/></svg>`,
+  lookup: `<svg ${S}><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/><path d="M8 10.5h5M10.5 8v5"/></svg>`,
+  field: `<svg ${S}><rect x="4.5" y="4" width="15" height="8" rx="1.5"/><path d="M8 7h.01M12 7h.01M16 7h.01M8 9.5h.01M12 9.5h.01M16 9.5h.01"/><path d="M12 12v7.5"/><path d="M9 20h6"/></svg>`,
+  rosters: `<svg ${S}><path d="M4.5 18.5 10 13l3 3 6.5-8"/><path d="M15.5 8h4v4"/><circle cx="5" cy="18.5" r="1.5"/><circle cx="10" cy="13" r="1.5"/></svg>`,
+  postseason: `<svg ${S}><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1.5A2.5 2.5 0 0 0 8 10M16 6h3v1.5A2.5 2.5 0 0 1 16 10"/><path d="M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg>`,
+  record: `<svg ${S}><path d="M3.5 5.5h5.2c1.8 0 3.3 1.1 3.3 2.5v12c0-1.4-1.5-2.5-3.3-2.5H3.5v-12Z"/><path d="M20.5 5.5h-5.2C13.5 5.5 12 6.6 12 8v12c0-1.4 1.5-2.5 3.3-2.5h5.2v-12Z"/><path d="M6.5 9h2.7M6.5 12h2.7M14.8 9h2.7M14.8 12h2.7"/></svg>`,
+  guides: `<svg ${S}><path d="M3.5 5.5h5.2c1.8 0 3.3 1.1 3.3 2.5v12c0-1.4-1.5-2.5-3.3-2.5H3.5v-12Z"/><path d="M20.5 5.5h-5.2C13.5 5.5 12 6.6 12 8v12c0-1.4 1.5-2.5 3.3-2.5h5.2v-12Z"/><path d="m16 16 2.5-2.5"/></svg>`,
+  tools: `<svg ${S}><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 8.5h17M7 6.5h.01M9.5 6.5h.01"/><path d="M8 12v4M11 12v4M14 12v4M17 12v4"/></svg>`,
+}
+document.querySelectorAll('[data-glyph]').forEach((el) => { el.innerHTML = GLYPH[el.dataset.glyph] })
+
+// [group, glyph, pages: [name, description, search words, old name]]
+const GROUPS = [
+  ['Standings & leaders', 'standings', [
+    ['Standings', 'Every division and the wild card', 'games back'],
+    ['Postseason Race', 'The six-club field, and who is chasing it', 'wild card clinch'],
+    ['League Leaders', 'Top of every batting and pitching category', 'home runs era avg'],
+    ['Run Value Leaders', 'Bat, glove, legs and arm on one scale of runs', 'war value'],
+    ['Hot & Cold', 'Who is far above or below his normal level', 'outliers', 'Standing Out'],
+    ['Situational Records', 'Each club in one game situation, ranked', 'one-run extra innings'],
+    ['Biggest At-Bats', 'The season’s highest-pressure plate appearances', 'leverage clutch', 'Pressure Moments'],
+  ]],
+  ['Look it up', 'lookup', [
+    ['Ask the Play Log', 'Search every play by batter, pitcher, count and more', 'query', 'Research'],
+    ['Matchup Scout', 'One pitcher against one hitter', 'pitch zones'],
+    ['Streak Finder', 'Any club, any stat, so many games in a row', 'consecutive'],
+    ['Best Stretch', 'A player’s best run of games, across seasons', 'span'],
+    ['Best Stretch by Club', 'A club’s best run of games', 'team span', 'Club Stretch'],
+    ['Foul Tracker', 'Who fouls off the most pitches', 'fouls'],
+    ['Six Degrees of Teammates', 'Link any two players through teammates', 'connections'],
+    ['Where They’re From', 'Players by birthplace', 'hometown country'],
+  ]],
+  ['On the field', 'field', [
+    ['Bullpen Availability', 'Who can pitch tonight, by recent work', 'relievers rest'],
+    ['Umpire Rankings', 'Every umpire’s called pitches against the zone', 'umps strike zone'],
+    ['ABS Challenges', 'Each challenged call, and who wins them', 'robot zone'],
+    ['Pace of Play', 'How long games take, club by club', 'clock time'],
+    ['Attendance', 'Crowds at every park', 'fans'],
+    ['Doubleheaders', 'What two games in a day does to a club', 'twin bill'],
+    ['Game Notes', 'Each club’s pregame notes', 'pdf press'],
+  ]],
+  ['Rosters & money', 'rosters', [
+    ['Salaries', 'Who is paid what, and each club’s payroll', 'payroll contracts'],
+    ['Free Agents', 'Who filed, and where each one signed', 'signings hot stove'],
+    ['Trade Deadline', 'Every deadline deal', 'trades'],
+    ['Top MLB Prospects', 'The best players not yet in the majors', 'minors pipeline'],
+    ['Farm System Rankings', 'Each club’s minor-league talent, ranked', 'farm'],
+    ['Rehab Assignments', 'Injured players on minor-league rehab', 'injured list il'],
+  ]],
+  ['Postseason', 'postseason', [
+    ['Postseason History', 'Every bracket and champion', 'world series october'],
+    ['Postseason Leaders', 'Career leaders in October', 'october'],
+    ['Postseason Records', 'Single-game and series records', 'october'],
+    ['Best Clubs in October', 'How the best regular-season clubs fared', 'run differential', 'Run Differential'],
+    ['What Champions Share', 'Nine traits every champion had', 'nine keys', 'Nine Keys'],
+  ]],
+  ['Record book', 'record', [
+    ['Milestone Watch', 'Who is close to a round number', '500 3000 career'],
+    ['Awards History', 'MVP, Cy Young and more, every year', 'mvp cy young'],
+    ['All Star Game', 'This year’s rosters', 'all-star'],
+    ['All-Star Legacy', 'Every All-Star, every year', 'all-star history'],
+    ['Notable Games', 'No-hitters, cycles and other rare games', 'no-hitter cycle'],
+    ['No Outfield Outs', 'Games with no out made by an outfielder', 'infield', 'Kept It in the Infield'],
+    ['Games After Elimination', 'What clubs did after they were out', 'eliminated'],
+  ]],
+]
+
+const groupsEl = document.getElementById('groups')
+const wide = matchMedia('(min-width: 760px)')
+groupsEl.innerHTML = GROUPS.map(([title, glyph, pages]) => `
+  <details class="card card--sheet sitemenusheet__group">
+    <summary><h3 class="dirhd"><span class="dirglyph" aria-hidden="true">${GLYPH[glyph]}</span><span class="dirhd__label">${title} <span class="dirhd__count">${pages.length}</span></span><span class="dirhd__rule"></span></h3></summary>
+    <ul class="navdir__list">${pages.map(([n, d, kw, was]) => `
+      <li data-s="${`${n} ${d} ${kw} ${was || ''}`.toLowerCase()}"><a class="dirlink dirlink--described sitemenusheet__item" href="#">${n}<span class="dirlink__desc">${d}${was ? `<span class="dirlink__was"> (was ${was})</span>` : ''}</span></a></li>`).join('')}
+    </ul>
+  </details>`).join('') + '<p class="sitemenusheet__empty is-hidden" id="empty">No page matches that. Try a stat, a club word, or “umpire”.</p>'
+
+const groups = [...groupsEl.querySelectorAll('details')]
+const setOpen = () => groups.forEach((g, i) => { g.open = wide.matches || i < 2 })
+setOpen(); wide.addEventListener('change', setOpen)
+
+const q = document.getElementById('q')
+q.addEventListener('input', () => {
+  const t = q.value.trim().toLowerCase()
+  let n = 0
+  groups.forEach((g) => {
+    let any = 0
+    g.querySelectorAll('li').forEach((li) => {
+      const hit = !t || li.dataset.s.includes(t)
+      li.classList.toggle('is-hidden', !hit)
+      if (hit) { any++; n++ }
+    })
+    g.classList.toggle('is-hidden', !any)
+    if (t) g.open = true
+  })
+  if (!t) setOpen()
+  document.querySelector('.sitemenusheet').classList.toggle('is-searching', !!t)
+  document.getElementById('empty').classList.toggle('is-hidden', !t || n > 0)
+  document.getElementById('count').textContent = t ? `${n} page${n === 1 ? '' : 's'}` : ''
+})
+q.addEventListener('keydown', (e) => {
+  const first = groupsEl.querySelector('li:not(.is-hidden) a')
+  if (e.key === 'Enter' && first) first.click()
+  if (e.key === 'ArrowDown' && first) { e.preventDefault(); first.focus() }
+})
+</script>
+</body>
+</html>
