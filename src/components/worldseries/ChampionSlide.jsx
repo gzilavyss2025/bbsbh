@@ -65,16 +65,13 @@ export function ChampionSlide({ bracket }) {
             )}
           </section>
         )}
-        <p className="deck-sign__note">
-          {`The ${winner} beat the ${teamClubNameShort(loserId)} in ${WORDS[hero.gamesPlayed] ?? hero.gamesPlayed}.`}
-        </p>
         {games.length > 0 && (
-          <ol className="deck-games" aria-label="Game by game">
+          <ol className="deck-games" aria-label={`Game by game: the ${winner} beat the ${teamClubNameShort(loserId)} in ${WORDS[hero.gamesPlayed] ?? hero.gamesPlayed}`}>
             {games.map((d) => (
               <li key={d.key}>
                 <a {...link(d.path)} className="deck-games__game">
-                  <span className="deck-games__n">{`G${d.gameNumber}`}</span>
-                  <TeamLogo teamId={d.winnerId} name="" size={22} />
+                  <span className="deck-games__n" aria-hidden="true">{`Game ${d.gameNumber}`}</span>
+                  <TeamLogo teamId={d.winnerId} name="" size={36} />
                   <span className="sr-only">{`Game ${d.gameNumber}, won by ${teamClubNameShort(d.winnerId)}, lineups`}</span>
                 </a>
               </li>

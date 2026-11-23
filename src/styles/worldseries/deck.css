@@ -88,13 +88,13 @@
 }
 /* The Series' games, one winner mark each, a link to that game's lineups. */
 /* layout-exempt: game chips that wrap */
-.deck-games { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.deck-games { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .deck-games__game {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  min-height: 36px;
-  padding: 0 var(--space-2);
+  padding: var(--space-2) var(--space-1);
   border: var(--bw-hair) solid var(--text-heading);
   color: var(--text-heading);
   font-family: var(--font-display);
