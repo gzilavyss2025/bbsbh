@@ -44,8 +44,9 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
   useEffect(() => { if (part === 'roster' && data?.forty?.some((p) => p.war == null)) requestFarm() }, [part, data]) // eslint-disable-line react-hooks/exhaustive-deps
   const pickShow = (v) => { setShow(v); if (v === 'prospects' || v === 'all') requestFarm(); if (v === 'prospects' && sort === 'war') setSort('prospect') }
   const byLevel = sort === 'level'
-  // OPS / ERA with hitters and pitchers together reads on one league scale (rosterList).
-  const lineIndexed = group === 'all' && Boolean(data?.league)
+  // The line sort reads on one league scale (rosterList) under every filter, so
+  // the number never changes meaning as the reader narrows the list.
+  const lineIndexed = Boolean(data?.league)
   const lineByIndex = sort === 'line' && lineIndexed
   const cuts = useAsync(() => (byLevel ? fetchLevelLines() : Promise.resolve(null)), [byLevel])
   // A player the reader adds stamps into the column that gets him. The ones a
