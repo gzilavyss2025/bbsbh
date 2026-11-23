@@ -1,0 +1,29 @@
+{
+  "_readme": "Hand-entered offseason deals Cot's has not posted yet. Keyed by MLB person id. The trade card reads an entry ahead of the Cot's ledger; delete it once the nightly contracts carry the deal. Each cell is one season: kind 'salary' with value in dollars. pos and group (lineup, rotation, bullpen) place him on the club's contract page. Set rough: true when the per-year split is a guess (an even split of a reported total).",
+  "543243": {
+    "name": "Sonny Gray",
+    "teamId": 142,
+    "pos": "SP",
+    "group": "rotation",
+    "terms": "2 y/$55M (27-28)",
+    "source": "Jon Heyman via MLB.com, 2026-11-18; per-year split not reported",
+    "cells": [
+      { "year": 2027, "kind": "salary", "value": 27500000, "rough": true },
+      { "year": 2028, "kind": "salary", "value": 27500000, "rough": true }
+    ]
+  },
+  "641343": {
+    "name": "Jake Bauers",
+    "teamId": 111,
+    "pos": "1B",
+    "group": "lineup",
+    "terms": "4 y/$58M (27-30)",
+    "source": "ESPN / Red Sox announcement, 2026-11-17",
+    "cells": [
+      { "year": 2027, "kind": "salary", "value": 16000000 },
+      { "year": 2028, "kind": "salary", "value": 16000000 },
+      { "year": 2029, "kind": "salary", "value": 15000000 },
+      { "year": 2030, "kind": "salary", "value": 11000000 }
+    ]
+  }
+}

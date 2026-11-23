@@ -34,7 +34,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           <span className="tradedesk__who">
             <span className="tradedesk__name">{p.name}</span>
             <span className="t-label tradedesk__meta">
-              {[p.pos, p.age != null ? `${p.age} yrs` : null].filter(Boolean).join(' · ')}
+              {[posText(p), p.age != null ? `${p.age} yrs` : null].filter(Boolean).join(' · ')}
               {p.retainedUsd ? ` · keeps ${money(p.retainedUsd)}` : ''}
             </span>
           </span>
@@ -72,7 +72,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         <span className="tradedesk__who">
           <span className="tradedesk__name">{p.name}</span>
           <span className="t-label tradedesk__meta">
-            {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
+            {posText(p) || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
             {!stamped && (p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : '')}
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
@@ -105,6 +105,9 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
   )
 }
 
+
+// A pitcher's role (SP/RP/CL, the same one the roster filter uses) in place of a bare "P".
+const posText = (p) => (p.pos === 'P' && p.line?.role) || p.pos
 
 // The line under the salary, as the Trade Machine wrote it: "3 Years", how
 // long the club holds him (a signed deal's years, or an arbitration or pre-arb

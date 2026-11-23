@@ -12,6 +12,32 @@ test('the projection weights recent seasons 5/4/3 and regresses toward the mean'
   assert.equal(marcel({}, 2026), null)
 })
 
+test('with playing time, the projection is a regressed rate times next season\'s playing time', () => {
+  // A 2026 breakout after two part-time years (the Jake Bauers line).
+  const war = { 2026: 3.6, 2025: 0.8, 2024: 0.1 }
+  const pa = { 2026: 578, 2025: 218, 2024: 346 }
+  const rate = (5 * 3.6 + 4 * 0.8 + 3 * 0.1 + 1200 * (2 / 600)) / (5 * 578 + 4 * 218 + 3 * 346 + 1200)
+  const next = 0.5 * 578 + 0.1 * 218 + 200
+  assert.equal(marcel(war, 2026, pa).toFixed(3), (rate * next).toFixed(3))
+  // He keeps more of the breakout than the flat-mean version gave him.
+  assert.ok(marcel(war, 2026, pa) > marcel(war, 2026))
+  // A pitcher's floor is 100 batters faced, not 200.
+  assert.ok(marcel(war, 2026, pa, true) < marcel(war, 2026, pa))
+})
+
+test('a season with no playing time on file falls back to the flat-mean version', () => {
+  const war = { 2026: 3, 2025: 2 }
+  assert.equal(marcel(war, 2026, { 2026: 600 }), marcel(war, 2026))
+})
+
+test('aging steepens from 35: -0.5 a year at 30-34, -0.75 from 35', () => {
+  const flat = { 2026: 3, 2025: 3, 2024: 3 }
+  const at = (age) => playerValue(star({ age, warByYear: flat }), { nextYear: 2027, warSeason: 2026 }).projWar
+  const base = (5 * 3 + 4 * 3 + 3 * 3 + 2) / 14
+  assert.equal(at(34).toFixed(3), (base - 0.5).toFixed(3))
+  assert.equal(at(35).toFixed(3), (base - 0.75).toFixed(3))
+})
+
 const star = (over = {}) => ({
   age: 26,
   onForty: true,

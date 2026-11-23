@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projected WAR Research</title>
+<style>
+  :root { --paper:#f7f1e3; --ink:#1b2a3a; --muted:#5d6670; --rule:#d9cfb8; --mark:#e9dcae; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#151c24; --ink:#e8e2d4; --muted:#9aa3ad; --rule:#33404d; --mark:#3a3520; } }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 Georgia, serif; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font:700 26px/1.2 system-ui, sans-serif; margin:0 0 4px; }
+  h2 { font:700 15px/1.3 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.04em; margin:32px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  table { width:100%; border-collapse:collapse; font:14px/1.4 system-ui, sans-serif; margin:8px 0; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th { font-size:12px; text-transform:uppercase; color:var(--muted); }
+  td.n { text-align:right; font-family:ui-monospace, monospace; }
+  .call { background:var(--mark); padding:12px 14px; border-radius:4px; }
+  .note { color:var(--muted); font-size:13px; }
+  ol li, ul li { margin-bottom:6px; }
+  a { color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<h1>How others project future WAR</h1>
+<p class="sub">Research for the trade simulator's Proj. WAR column (<code>src/lib/trade/value.js</code>). 2026-11-23.</p>
+
+<p class="call"><strong>Bottom line:</strong> our age penalty (−0.5 WAR a year from 30) is the industry's standard rule of thumb. What makes Bauers look low is the first step: a flat pull toward 1 WAR that doesn't care how much he played. Fix that first; the age step is close to right, but should get steeper after 35.</p>
+
+<h2>What the sites do</h2>
+<table>
+<thead><tr><th>Who</th><th>Starting point</th><th>Aging</th></tr></thead>
+<tbody>
+<tr><td>Marcel (Tom Tango)</td><td>Last 3 seasons weighted 5/4/3; regressed toward league average by a fixed amount of playing time (so a full-time player is pulled less than a part-timer)</td><td>A small percentage per year of age, up before 29 and down after <span class="note">(from Tango's published description, recalled, not re-checked today)</span></td></tr>
+<tr><td>ZiPS (FanGraphs)</td><td>Up to 4 seasons, comparable-player model</td><td>Steep for stars: one projection drops about 1.2 WAR in a year, then about 1 a year after</td></tr>
+<tr><td>Steamer (FanGraphs)</td><td>Weighted history plus regression</td><td>Gentler than ZiPS; one study found it tends to over-project</td></tr>
+<tr><td>FanGraphs Library (rule of thumb)</td><td>Any one-year projection</td><td>About −0.5 WAR a year from 30, with wide spread between players</td></tr>
+<tr><td>FanGraphs free-agent $/WAR study, 2026</td><td>Best of Steamer, ZiPS, OOPSY, Marcel</td><td>−0.4 WAR a year (the average decline across multi-year ZiPS)</td></tr>
+<tr><td>Yahoo Sports free-agent piece</td><td>Projection</td><td>−0.5 a year ages 30–34, −0.75 a year 35 and up</td></tr>
+<tr><td>Older FanGraphs contract posts</td><td>Projection</td><td>A percentage instead: keep 90% a year through 30, 85% at 31–35, 80% from 36</td></tr>
+</tbody>
+</table>
+<p class="note">A FanGraphs piece, "Players Don't Become Terrible at 30", argues the decline at 30–33 is milder than for older players, and curves have flattened in recent years.</p>
+
+<h2>Ours, side by side</h2>
+<table>
+<thead><tr><th>Step</th><th>Tally today</th><th>Common practice</th></tr></thead>
+<tbody>
+<tr><td>History</td><td>3 seasons, 5/4/3</td><td>Same (Marcel)</td></tr>
+<tr><td>Pull toward average</td><td>Always 2 seasons' worth of 1.0 WAR</td><td>Scaled by playing time; a full-time player keeps more of his own record</td></tr>
+<tr><td>Age under 27</td><td>+0.3 a year</td><td>Small gain, peaking about 27–29</td></tr>
+<tr><td>Age 30–34</td><td>−0.5 a year</td><td>−0.4 to −0.5 a year</td></tr>
+<tr><td>Age 35+</td><td>−0.5 a year</td><td>−0.75 a year, or 80% a year</td></tr>
+<tr><td>$ per WAR</td><td>$8.5M, +4% a year</td><td>About $8M is the long-time FanGraphs figure; 2025–26 market estimates run $7.7M to $12.8M depending on method</td></tr>
+</tbody>
+</table>
+
+<h2>Bauers under each rule</h2>
+<table>
+<thead><tr><th>Rule</th><th class="n">2027</th><th class="n">2028</th><th class="n">2029</th><th class="n">2030</th><th class="n">Total</th></tr></thead>
+<tbody>
+<tr><td>Ours (start 1.7, −0.5)</td><td class="n">1.2</td><td class="n">0.7</td><td class="n">0.2</td><td class="n">0.0</td><td class="n">2.0</td></tr>
+<tr><td>Same start, −0.4</td><td class="n">1.3</td><td class="n">0.9</td><td class="n">0.5</td><td class="n">0.1</td><td class="n">2.8</td></tr>
+<tr><td>Same start, 85% a year</td><td class="n">1.4</td><td class="n">1.2</td><td class="n">1.0</td><td class="n">0.9</td><td class="n">4.6</td></tr>
+</tbody>
+</table>
+<p class="note">All three share our 1.7 starting point, which is where most of the gap to his 3.6 season comes from.</p>
+
+<h2>Recommendation</h2>
+<ol>
+<li><strong>Scale the pull toward average by playing time.</strong> Weight each season by its plate appearances or innings, as Marcel does, so a full season counts for more than a cup of coffee. This is the change that matters for Bauers.</li>
+<li><strong>Keep −0.5 for ages 30–34; make it −0.75 from 35.</strong> That matches the published curves and is barely any code.</li>
+<li><strong>Leave $8.5M per WAR.</strong> It sits inside the range of current estimates.</li>
+</ol>
+
+<h2>Sources</h2>
+<ul class="note">
+<li><a href="https://library.fangraphs.com/principles/aging-curve">FanGraphs Library: Aging Curve</a></li>
+<li><a href="https://blogs.fangraphs.com/players-dont-become-terrible-at-30">FanGraphs: Players Don't Become Terrible at 30</a></li>
+<li><a href="https://blogs.fangraphs.com/what-are-teams-paying-for-a-win-in-free-agency-2026-edition/">FanGraphs: What Are Teams Paying For A Win In Free Agency? 2026 Edition</a></li>
+<li><a href="https://blogs.fangraphs.com/2026-trade-value-nos-1-10/">FanGraphs: 2026 Trade Value, Nos. 1–10</a></li>
+<li><a href="https://blogs.fangraphs.com/valuing-gerrit-coles-opt-out/">FanGraphs: Valuing Gerrit Cole's Opt Out</a></li>
+<li><a href="http://www.fangraphs.com/blogs/the-cost-of-a-win-in-the-2014-off-season/">FanGraphs: The Cost of a Win in the 2014 Off-Season</a></li>
+<li><a href="https://sports.yahoo.com/articles/types-free-agents-over-undervalued-140329511.html">Yahoo Sports: Which types of free agents will be over/undervalued</a></li>
+<li><a href="https://www.paraballnotes.com/blog/dollar-per-war-2025-2026">Paraball Notes: Dollar per WAR 2025/2026</a></li>
+<li><a href="https://blogs.fangraphs.com/hitters-no-longer-peak-only-decline">FanGraphs: Are Aging Curves Changing?</a></li>
+</ul>
+</main>
+</body>
+</html>

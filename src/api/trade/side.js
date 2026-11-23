@@ -15,6 +15,17 @@ import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/t
 import { fetchTradePedigree } from './pedigree.js'
 import { LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
+// Players this club signed as free agents since its ledger's season ended
+// (statsapi transactions, SFA/SGN). The wire says who signed, never for how
+// much: such a player reads "New deal" until Cot's or new-signings.json has it.
+async function fetchNewSignees(teamId, ledgerSeason) {
+  const today = new Date().toISOString().slice(0, 10)
+  const data = await getJson(`/api/v1/transactions?teamId=${teamId}&startDate=${ledgerSeason}-10-01&endDate=${today}`)
+  return new Set((data.transactions ?? [])
+    .filter((t) => (t.typeCode === 'SFA' || t.typeCode === 'SGN') && t.toTeam?.id === teamId && !/minor league contract/i.test(t.description ?? ''))
+    .map((t) => t.person?.id))
+}
+
 // Everyone the organization holds, every level (rosterType=fullRoster: ~250
 // for an MLB club), each with his current affiliate. Verified against
 // teams/158 on 2026-11-18: person.currentTeam names the affiliate.
@@ -61,6 +72,14 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
   const byId = new Map((ledger?.groups ?? []).flatMap((g) => g.players).map((p) => [p.id, p]))
   // The ledger is one season's; the card prices the season after it.
   const nextYear = (ledger?.season ?? season) + 1
+  const ageOf = new Map(org.map((r) => [r.person?.id, r.person?.currentAge]))
+  const signees = await fetchNewSignees(teamId, nextYear - 1).catch(() => new Set())
+  // The ledger already carries hand-entered deals (newDeal, lib/trade/signings.js).
+  // Any other new signee's Cot's row is his old contract: no ledger, labelled below.
+  const ledgerFor = (id) => {
+    const row = byId.get(id)
+    return row?.newDeal || !signees.has(id) ? row : null
+  }
   const warOf = (id) => {
     const bat = war?.bat?.[id], pit = war?.pit?.[id]
     return bat == null && pit == null ? null : (bat ?? 0) + (pit ?? 0)
@@ -78,12 +97,15 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
 
   const forty = roster
     .filter((r) => r.person?.id)
-    .map((r) =>
-      tradePlayer(
+    .map((r) => {
+      const row = tradePlayer(
         { id: r.person.id, name: r.person.fullName, position: r.position?.abbreviation },
-        { ledger: byId.get(r.person.id), war: warOf(r.person.id), orgRank: orgRank.get(r.person.id) ?? null, topRank: topRank(r.person.id), line: lineOf(r.person, r.position?.type === 'Pitcher' || r.position?.abbreviation === 'P'), nextYear },
-      ),
-    )
+        { ledger: ledgerFor(r.person.id), war: warOf(r.person.id), orgRank: orgRank.get(r.person.id) ?? null, topRank: topRank(r.person.id), line: lineOf(r.person, r.position?.type === 'Pitcher' || r.position?.abbreviation === 'P'), nextYear },
+      )
+      // A hand-entered or brand-new deal has no Cot's age: the org roster's currentAge.
+      const aged = row.age == null ? { ...row, age: ageOf.get(r.person.id) ?? r.person.currentAge ?? null } : row
+      return aged.contract == null && signees.has(r.person.id) ? { ...aged, payLabel: 'New deal' } : aged
+    })
   const onForty = new Set(forty.map((p) => p.id))
   const minors = orgList
     .filter((p) => !onForty.has(p.playerId))
@@ -136,14 +158,46 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
 // over his years of control. Answers a new side with new player rows, so a
 // page holding the first answer re-renders when this one lands.
 const pitcherPos = (p) => ['P', 'SP', 'RP', 'TWP', 'RHP', 'LHP'].includes(p.pos)
+
+// Each 40-man player's MLB playing time by season, for the projection's
+// playing-time regression: plate appearances for a hitter, batters faced for a
+// pitcher. One roster call per club (~320 KB). A season split across clubs
+// sums its per-club rows (the feed also sends a team-less total; skipped).
+async function fetchPlayingTime(teamId, season) {
+  const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=40Man&season=${season}&hydrate=person(stats(type=yearByYear,group=[hitting,pitching],sportId=1))`)
+  const out = new Map()
+  for (const r of data.roster ?? []) {
+    const by = { hitting: {}, pitching: {} }
+    for (const g of r.person?.stats ?? []) {
+      const into = by[g.group?.displayName]
+      if (!into) continue
+      for (const s of g.splits ?? []) {
+        if (!s.team) continue
+        const n = Number(s.stat?.plateAppearances ?? s.stat?.battersFaced) || 0
+        into[s.season] = (into[s.season] ?? 0) + n
+      }
+    }
+    out.set(r.person?.id, by)
+  }
+  return out
+}
+
 export async function valueTradeSide(side) {
   if (!side) return null
-  const war = await fetchWarData().catch(() => null)
+  const [war, time] = await Promise.all([
+    fetchWarData().catch(() => null),
+    fetchPlayingTime(side.teamId, side.nextYear - 1).catch(() => new Map()),
+  ])
   const warSeason = war?.season ?? side.nextYear - 1
   const value = async (p, withHistory) => {
     const history = withHistory ? await fetchWarHistory(p.id).catch(() => null) : null
     const row = { ...p, role: p.line?.role ?? null }
-    if (withHistory) row.warByYear = warByYearFor(p.id, pitcherPos(p) ? 'pitching' : 'hitting', war, history)
+    if (withHistory) {
+      const pitcher = pitcherPos(p)
+      row.warByYear = warByYearFor(p.id, pitcher ? 'pitching' : 'hitting', war, history)
+      row.paByYear = time.get(p.id)?.[pitcher ? 'pitching' : 'hitting'] ?? null
+      row.pitcher = pitcher
+    }
     row.value = playerValue(row, { nextYear: side.nextYear, warSeason, contractYears })
     // Next season's pay when the ledger has no figure: the estimate.
     if (row.payUsd == null && row.onForty && row.value.payEstUsd != null) row.payEstUsd = row.value.payEstUsd
