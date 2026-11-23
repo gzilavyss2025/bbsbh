@@ -1,0 +1,110 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Play Log feedback</title>
+<style>
+:root{--paper:#F6EFDC;--card:#FBF6E9;--ink:#0F1822;--ink2:#3C4A5A;--gr:#5f6368;--clay:#B4453A;--marker:#F2C14E;--rule:#D9CFB4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px 48px}h1{font-size:28px;margin:0 0 4px}h2{font-size:19px;margin:32px 0 8px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.lede{color:var(--ink2);margin:0 0 16px}
+.item{background:var(--card);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:12px 14px;margin:14px 0}
+.item h3{margin:0 0 6px;font-size:16px}.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;margin-left:6px;border:1.5px solid var(--ink);vertical-align:2px}
+.both{background:var(--marker)}.design{background:#fff}.research{background:#e8eef5}
+.item p{margin:4px 0}.q{margin-top:8px;padding:6px 10px;border-left:3px solid var(--clay);background:#fff8}.q b{color:var(--clay)}
+.size{font-size:12px;color:var(--gr)}
+</style></head><body><main>
+<h1>Ask the Play Log: harmonized feedback</h1>
+<p class="lede">Two reviews merged: the design critique (layout) and a baseball researcher's read of the code (what it can answer and how). Tags say where each point came from. Each item ends with the question to settle when we walk through it. Two of the researcher's code claims were spot-checked and hold: exit velocity and launch angle are loaded but have no filter, and "ahead / even / behind" reads only the final count.</p>
+
+<h2>Gary's answers (2026-11-18 interview)</h2>
+<div class="item"><h3>Data stream: what the play log can answer</h3>
+<p><b>1. Lead facts:</b> a sentence built from any mix of filters won't read well. Maybe three labeled facts (Last · Before that · Times since 2015). Needs a mockup before a decision.</p>
+<p><b>2. Baseline:</b> yes, the league rate for the same result over the same seasons.</p>
+<p><b>3. Small samples:</b> under 50 PAs, skip the percent and say "5 of 20 PAs".</p>
+<p><b>4. Row links:</b> link to the at-bat itself, and to video where the clip rules allow. No citation copy.</p>
+<p><b>5. Statcast filters:</b> all three: exit velocity, pitch speed, launch angle.</p>
+<p><b>6. Final pitch vs every pitch:</b> undecided. Research more first.</p>
+<p><b>7. Counts:</b> split into "Count reached" and "Final count"; 3-2 counts as even.</p>
+<p><b>8. New filters:</b> all four: relief vs starter, pinch hitter / position, times through the order, rookie / debut.</p>
+<p><b>14. Follow a question:</b> filed as issue #3192.</p></div>
+<div class="item"><h3>Design stream: how the page is laid out</h3>
+<p><b>9–13:</b> Gary wants to spend time designing a better way to lay out the filters and ways of slicing the data before anything is built. The layout, phone order, tab placement, coverage note and wording all belong to that stream, and the new data-stream filters (items 5 and 8) have to fit into it.</p></div>
+
+<h2>A. The answer: make it something you'd quote</h2>
+<div class="item"><h3>1. Frame "last time" as a claim<span class="tag research">RESEARCHER</span></h3>
+<p>The list is newest-first with a per-season count. It never says "first since…" or "4th time since 2015", which is the sentence a broadcaster wants.</p>
+<p>Change: a lead sentence above the list: "Last: date, players. Before that: date. N times since 2015."</p>
+<p class="size">Size: small. The data is already in the result.</p>
+<div class="q"><b>Ask Gary:</b> Is the lead sentence the answer, with the list as proof below it?</div></div>
+
+<div class="item"><h3>2. Give "how often" a league baseline<span class="tag research">RESEARCHER</span></h3>
+<p>"12.3% of 4,100 PAs" can't tell you whether that's unusual.</p>
+<p>Change: add the league rate for the same result over the same seasons, and the player's own overall rate when one is picked.</p>
+<p class="size">Size: medium (a second count over the same data).</p>
+<div class="q"><b>Ask Gary:</b> League only, or league plus the player's own rate?</div></div>
+
+<div class="item"><h3>3. Flag small samples<span class="tag research">RESEARCHER</span></h3>
+<p>A rate on 20 PAs prints with a decimal and no warning.</p>
+<p>Change: "small sample (n=20)" beside the number, and a rounded figure.</p>
+<p class="size">Size: small.</p>
+<div class="q"><b>Ask Gary:</b> What counts as small: under 50 PAs?</div></div>
+
+<div class="item"><h3>4. Link each row to the at-bat, and let you cite it<span class="tag research">RESEARCHER</span></h3>
+<p>Rows open the box score only.</p>
+<p>Change: link to that at-bat in the play-by-play; video where the clip policy allows; a "copy" that gives date, game, inning, count and source.</p>
+<p class="size">Size: medium. Video has terms-of-use limits already on file.</p>
+<div class="q"><b>Ask Gary:</b> Copy as a citation line, or as a sentence ready to read on air?</div></div>
+
+<h2>B. The questions: let it ask what people actually ask</h2>
+<div class="item"><h3>5. Add exit velocity, launch angle and pitch speed filters<span class="tag research">RESEARCHER</span></h3>
+<p>The data already loads them, but there's no filter, so "105+ and an out" or "homers off 100+ fastballs" can't be asked. Show EV and LA in the results too.</p>
+<p class="size">Size: medium. Game mode already has range cards to copy.</p>
+<div class="q"><b>Ask Gary:</b> Which first: exit velo, launch angle, or pitch speed?</div></div>
+
+<div class="item"><h3>6. Say "final pitch" where it means final pitch<span class="tag research">RESEARCHER</span></h3>
+<p>"Sinker" and location read the pitch that ended the at-bat. A sinker thrown earlier in it doesn't count, and nothing counts single pitches (whiffs, called strikes).</p>
+<p>Change now: rename to "Final pitch type" and "Final pitch location". Later: a pitch-by-pitch mode.</p>
+<p class="size">Size: rename is tiny; a pitch mode is large.</p>
+<div class="q"><b>Ask Gary:</b> Rename now and park the pitch mode, or plan the pitch mode?</div></div>
+
+<div class="item"><h3>7. One rule per count card<span class="tag research">RESEARCHER</span></h3>
+<p>"0-2" matches any at-bat that passed through it; "Batter ahead" reads only the final count; 3-2 is in no group.</p>
+<p>Change: split into "Count reached" and "Final count", and put 3-2 in "Even".</p>
+<p class="size">Size: small.</p>
+<div class="q"><b>Ask Gary:</b> Agree 3-2 counts as even?</div></div>
+
+<div class="item"><h3>8. Missing everyday filters<span class="tag research">RESEARCHER</span></h3>
+<p>Position, pinch hitter, starter vs reliever, rookie or debut, catcher, umpire, times through the order, specific dates.</p>
+<p class="size">Size: varies. Not confirmed which the ask box already understands.</p>
+<div class="q"><b>Ask Gary:</b> Pick your top two.</div></div>
+
+<h2>C. The page: one way in</h2>
+<div class="item"><h3>9. One way in: the question box first<span class="tag both">BOTH</span></h3>
+<p>Question box and filter column compete. Make the box full width and first; show what your question became as filter chips you can edit; fold the full filter list under it. The researcher adds that the plain-English box is the page's best edge over Savant and Stathead, so lead with it.</p>
+<p class="size">Size: large. A redesign: mock up first.</p>
+<div class="q"><b>Ask Gary:</b> Mock this up before anything else in section C?</div></div>
+
+<div class="item"><h3>10. Phone order<span class="tag design">DESIGN</span></h3>
+<p>Today five filter boxes come first on a phone. Order: question, "Try one", then filters behind a button.</p>
+<p class="size">Size: small once 9 is settled.</p>
+<div class="q"><b>Ask Gary:</b> Fine to fold the filters on a phone?</div></div>
+
+<div class="item"><h3>11. Tabs above the box<span class="tag design">DESIGN</span></h3>
+<p>Plays / Games / Streaks change the kind of question but sit under the box.</p>
+<p class="size">Size: small.</p>
+<div class="q"><b>Ask Gary:</b> Move them up, or let the question pick the mode?</div></div>
+
+<div class="item"><h3>12. One coverage note<span class="tag both">BOTH</span></h3>
+<p>Design: the data line floats between tabs and card. Researcher: it mixes 2015–2026 Statcast with older Retrosheet years, which lack pitch type and location. Change: one note at the foot of results naming the seasons searched and which filters didn't apply to which years; flag a "first since" that sits on the edge of the data.</p>
+<p class="size">Size: small to medium.</p>
+<div class="q"><b>Ask Gary:</b> Foot of results, or an info button?</div></div>
+
+<div class="item"><h3>13. Words<span class="tag both">BOTH</span></h3>
+<p>Cut the "For example" and "Build your own" lines (house rule). Researcher's renames: "Who most" → "Leaders"; "What happens" → "What happened next"; "Horizontal location" → "Inside / Middle / Away"; "Tying" → "Game-tying"; make "Lefty v lefty sinker" say who threw it; explain GIDP vs Double play. Design: "Anyone" vs "Any", pick one.</p>
+<p class="size">Size: small.</p>
+<div class="q"><b>Ask Gary:</b> Take all the renames, or go one by one?</div></div>
+
+<h2>D. Later: reasons to come back</h2>
+<div class="item"><h3>14. Follow a question<span class="tag research">RESEARCHER</span></h3>
+<p>"Tell me when this happens again", and lean on what Savant and Stathead don't do well: postseason context and streaks mixed with situations.</p>
+<p class="size">Size: large.</p>
+<div class="q"><b>Ask Gary:</b> Worth an issue now?</div></div>
+</main></body></html>
