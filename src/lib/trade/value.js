@@ -69,6 +69,35 @@ export function marcel(byYear, lastSeason, pa = null, kind = 'bat') {
   return (num + VALUE.meanWeight * VALUE.mean) / (den + VALUE.meanWeight)
 }
 
+// The league's OPS and ERA from the 30 clubs' season totals (statsapi
+// teams/stats, group hitting and pitching): rebuilt from the counts, not an
+// average of 30 club rates, so a club with more trips to the plate weighs more.
+export function leagueLine(hitting, pitching) {
+  const sum = (rows, k) => rows.reduce((t, r) => t + (Number(r?.[k]) || 0), 0)
+  const h = hitting ?? [], p = pitching ?? []
+  const onBase = sum(h, 'hits') + sum(h, 'baseOnBalls') + sum(h, 'hitByPitch')
+  const chances = sum(h, 'atBats') + sum(h, 'baseOnBalls') + sum(h, 'hitByPitch') + sum(h, 'sacFlies')
+  const ab = sum(h, 'atBats')
+  const outs = sum(p, 'outs')
+  return {
+    ops: chances && ab ? onBase / chances + sum(h, 'totalBases') / ab : null,
+    era: outs ? (9 * sum(p, 'earnedRuns')) / (outs / 3) : null,
+  }
+}
+
+// One scale for hitters and pitchers, 100 the league average and higher
+// better: OPS / league OPS for a hitter, league ERA / ERA for a pitcher (the
+// OPS+ / ERA+ idea, without the park adjustment). Null with no line or league.
+export function lineIndex(line, league) {
+  if (!line || !league) return null
+  if (line.ops != null && league.ops) return (100 * Number(line.ops)) / league.ops
+  if (line.era != null && league.era) {
+    const era = Number(line.era)
+    return era > 0 ? (100 * league.era) / era : null
+  }
+  return null
+}
+
 // The change in WAR from one season to the next at a given age: the FanGraphs
 // rule of thumb (−0.5 a year from 30), steeper from 35 (docs/war-projection-research.html).
 const ageStep = (age) => (age == null ? 0 : age < 27 ? 0.3 : age < 30 ? 0 : age < 35 ? -0.5 : -0.75)

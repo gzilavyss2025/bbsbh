@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { salaryText, money } from '../src/lib/trade/deal.js'
-import { marcel, playerValue, prospectValue, gradeOf, verdictOf, VALUE } from '../src/lib/trade/value.js'
+import { marcel, leagueLine, lineIndex, playerValue, prospectValue, gradeOf, verdictOf, VALUE } from '../src/lib/trade/value.js'
 
 test('the projection weights recent seasons 5/4/3 and regresses toward the mean', () => {
   // (5*6 + 4*4 + 3*2 + 2*1) / (5+4+3+2) = 54/14
@@ -45,6 +45,29 @@ test('aging steepens from 35: -0.5 a year at 30-34, -0.75 from 35', () => {
   const base = (5 * 3 + 4 * 3 + 3 * 3 + 2) / 14
   assert.equal(at(34).toFixed(3), (base - 0.5).toFixed(3))
   assert.equal(at(35).toFixed(3), (base - 0.75).toFixed(3))
+})
+
+test('league OPS and ERA are rebuilt from the clubs\' counts', () => {
+  const hit = [
+    { hits: 100, baseOnBalls: 40, hitByPitch: 5, atBats: 400, sacFlies: 5, totalBases: 160 },
+    { hits: 50, baseOnBalls: 10, hitByPitch: 5, atBats: 200, sacFlies: 5, totalBases: 70 },
+  ]
+  const pit = [{ earnedRuns: 50, outs: 300 }, { earnedRuns: 30, outs: 150 }]
+  const lg = leagueLine(hit, pit)
+  // OBP (150+50+10)/(600+50+10+10) + SLG 230/600; ERA 9 * 80 / 150.
+  assert.equal(lg.ops.toFixed(4), (210 / 670 + 230 / 600).toFixed(4))
+  assert.equal(lg.era.toFixed(3), ((9 * 80) / 150).toFixed(3))
+  assert.deepEqual(leagueLine([], []), { ops: null, era: null })
+})
+
+test('hitters and pitchers share one index: 100 is league average, higher is better', () => {
+  const lg = { ops: 0.710, era: 4.10 }
+  // .830 OPS beats the league by 17%; a 3.03 ERA by 35%, so the pitcher ranks first.
+  assert.equal(Math.round(lineIndex({ ops: '.830' }, lg)), 117)
+  assert.equal(Math.round(lineIndex({ era: '3.03' }, lg)), 135)
+  assert.equal(Math.round(lineIndex({ era: '4.10' }, lg)), 100)
+  assert.equal(lineIndex({ era: '0.00' }, lg), null)
+  assert.equal(lineIndex({ ops: '.830' }, null), null)
 })
 
 const star = (over = {}) => ({

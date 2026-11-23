@@ -128,6 +128,28 @@
   color: var(--text-heading);
 }
 
+/* Cash or a player to be named, in a player row: a stamped square the size of
+   the face beside it, its mark in the figures' mono. */
+.tradesheet__extramark {
+  display: grid;
+  place-items: center;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-stamped-head);
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  color: var(--text-heading);
+}
+
+/* Franklin fills the face slot edge to edge, as a player's silo photo does. */
+.tradesheet__cashface > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .tradesheet__extra {
   padding: var(--space-2) 0;
   font-family: var(--font-display);
@@ -169,6 +191,11 @@
   align-self: flex-start;
 }
 
+/* In the corner a prospect's seal speaks alone: its sr-only line still names the list. */
+.playersheet__club .prospectstamp__text {
+  display: none;
+}
+
 /* The tiles span the column's full width. */
 .playersheet__who > .playersheet__tiles,
 .playersheet__who > .playersheet__prospect {
@@ -177,7 +204,8 @@
 }
 
 /* Two tiles a row on a phone, four across beside the photo. */
-.playersheet__who > .playersheet__tiles {
+.playersheet__who > .playersheet__tiles,
+.playersheet__who .playersheet__tiles--prospect {
   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
 }
 

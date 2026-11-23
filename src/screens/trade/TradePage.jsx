@@ -24,7 +24,6 @@ import '../../styles/trade/lineup.css'
 import '../../styles/trade/stamp.css'
 import '../../styles/trade/motion.css'
 import { Side } from './side/Side.jsx'
-import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Scoreboard } from './Scoreboard.jsx'
 import { dealStory } from './dealStory.js'
 import { TradeStory } from './story/TradeStory.jsx'
@@ -172,7 +171,8 @@ export function TradePage() {
     setA(null); setCashA(0); setSidePct((x) => ({ ...x, a: 0 }))
   }
   // Each club bar's X: clears that side only.
-  const xButton = (onClick) => <IconButton mark="sm" className="tradedesk__barx" onClick={onClick} label="Change club"><span className="tradedesk__pmglyph tradedesk__pmglyph--x" aria-hidden="true" /></IconButton>
+  // Says what it does: a ✕ on the club bar read as "close".
+  const xButton = (onClick) => <Button size="control" skin="ghost" className="tradedesk__barx" onClick={onClick} aria-label="Change club">Change</Button>
   const changeA = xButton(clearA)
   const changeB = xButton(() => switchB(null))
 

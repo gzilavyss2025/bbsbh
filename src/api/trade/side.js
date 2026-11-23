@@ -9,7 +9,21 @@ import { fetchTeamRoster, fetchAffiliates, fetchComplexAffiliates } from '../tea
 import { loadCombinedPoolForTeams } from '../statsLevels.js'
 import { fetchTeamContracts } from '../salaries.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
-import { playerValue } from '../../lib/trade/value.js'
+import { playerValue, leagueLine } from '../../lib/trade/value.js'
+
+// This season's league OPS and ERA, for the OPS / ERA sort's one scale
+// (lib/trade/value.js lineIndex). Two calls, the 30 clubs' totals each; once a
+// season per session. Null on any failure: the sort falls back to hitters then pitchers.
+const leagueLoads = new Map()
+function fetchLeagueLine(season) {
+  if (!leagueLoads.has(season)) {
+    const group = (g) => getJson(`/api/v1/teams/stats?stats=season&group=${g}&season=${season}&sportIds=1`).then((d) => (d.stats?.[0]?.splits ?? []).map((s) => s.stat))
+    leagueLoads.set(season, Promise.all([group('hitting'), group('pitching')])
+      .then(([h, p]) => { const lg = leagueLine(h, p); return lg.ops && lg.era ? lg : null })
+      .catch(() => { leagueLoads.delete(season); return null }))
+  }
+  return leagueLoads.get(season)
+}
 import { fetchTopProspects, prospectRankById } from '../prospects/top100.js'
 import { tradePlayer, farmLine, farmIsPitcher, contractYears } from '../../lib/trade/deal.js'
 import { fetchTradePedigree } from './pedigree.js'
@@ -60,7 +74,7 @@ async function fetchOrgLevels(teamId, season) {
 }
 
 export async function loadTradeSide(teamId, { season = new Date().getFullYear() } = {}) {
-  const [roster, ledger, war, prospects, org, levels, pedigree] = await Promise.all([
+  const [roster, ledger, war, prospects, org, levels, pedigree, league] = await Promise.all([
     fetchTeamRoster(teamId, season, { rosterType: '40Man' }).catch(() => []),
     fetchTeamContracts(teamId).catch(() => null),
     fetchWarData().catch(() => null),
@@ -68,6 +82,7 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     fetchOrgRoster(teamId, season).catch(() => []),
     fetchOrgLevels(teamId, season),
     fetchTradePedigree(teamId).catch(() => ({})),
+    fetchLeagueLine(season),
   ])
   const byId = new Map((ledger?.groups ?? []).flatMap((g) => g.players).map((p) => [p.id, p]))
   // The ledger is one season's; the card prices the season after it.
@@ -148,7 +163,7 @@ export async function loadTradeSide(teamId, { season = new Date().getFullYear() 
     .filter((r) => r.person?.id)
     .map((r) => ({ id: r.person.id, name: r.person.fullName, pos: r.position?.abbreviation, level: levelAt(r.person.id), war: warOf(r.person.id), role: roleOf.get(r.person.id) ?? null }))
 
-  return { teamId, nextYear, warSeason: war?.season ?? null, fortyCount: forty.length, forty, minors, others, depth }
+  return { teamId, nextYear, warSeason: war?.season ?? null, league, fortyCount: forty.length, forty, minors, others, depth }
 }
 
 // What each player is worth to a club that gets him (lib/trade/value.js),

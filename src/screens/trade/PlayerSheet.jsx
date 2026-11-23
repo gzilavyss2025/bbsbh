@@ -72,8 +72,11 @@ export function PlayerSheet({ p, teamId, nextYear, farm, warSeason = null, picke
                 </p>}
               </div>
             </div>
-            {/* His club's mark fills the head's top corner, beside the close. */}
-            {teamId && <TeamLogo teamId={teamId} size={64} className="playersheet__club" />}
+            {/* The head's top corner: a ranked prospect's stamp (inked in his club's
+                colour), else his club's mark. */}
+            {p.value?.prospect && (p.topRank || p.orgRank)
+              ? <span className="playersheet__club"><ProspectStamp p={p} teamId={teamId} big /></span>
+              : teamId && <TeamLogo teamId={teamId} size={64} className="playersheet__club" />}
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
           </div>
 
@@ -251,16 +254,37 @@ function PlaysAt({ level, club, clubId }) {
   )
 }
 
+// "Acquired" (how his club got him; "Came up" read as a call-up) the way "Plays at" reads: the year as the figure, how in plain
+// words on the small line under it ("International signing", "Drafted, round 2,
+// No. 50", "Trade from NYM"). Falls back to the short pedigree line.
+const HOW_WORDS = { intl: 'International signing', fa: 'Free agent', waivers: 'Waiver claim', rule5: 'Rule 5 pick', purchase: 'Purchased', signed: 'Signed' }
+function CameUp({ p, fallback }) {
+  const year = p.how?.date?.slice(0, 4) ?? p.draft?.year ?? null
+  if (!year) return fallback
+  const from = p.how?.fromId && isMlbTeamId(p.how.fromId) ? teamAbbr({ id: p.how.fromId }) : null
+  const how = !p.how || p.how.kind === 'draft'
+    ? ['Drafted', p.draft?.round ? `round ${p.draft.round}` : null, p.draft?.pick ? `No. ${p.draft.pick}` : null].filter(Boolean).join(', ')
+    : p.how.kind === 'trade' ? `Trade${from ? ` from ${from}` : ''}`
+      : HOW_WORDS[p.how.kind] ?? 'Joined'
+  return (
+    <>
+      {year}
+      <span className="playersheet__tileteam">{how}</span>
+    </>
+  )
+}
+
 function ProspectLead({ p, teamId, farm, pedigree }) {
   const facts = [
     ['Prospect value', money(p.value.surplusUsd)],
     (farm?.level ?? p.level) ? ['Plays at', <PlaysAt key="at" level={farm?.level ?? p.level} club={farm?.club} clubId={farm?.clubId} />] : null,
-    rule5Text(p) ? ['Rule 5', rule5Text(p)] : null,
-    pedigree ? ['Came up', pedigree] : null,
+    // "Rule 5 eligible" over "Dec 2027", so the tile keeps to one line.
+    rule5Text(p) ? ['Rule 5 eligible', rule5Text(p).replace(/^Eligible /, '').replace(/^./, (c) => c.toUpperCase())] : null,
+    pedigree ? ['Acquired', <CameUp key="up" p={p} fallback={pedigree} />] : null,
   ].filter(Boolean)
+  // The stamp sits in the head's corner (PlayerSheet); the tiles run under his name.
   return (
     <div className="playersheet__prospect">
-      <ProspectStamp p={p} teamId={teamId} big />
       <dl className="playersheet__tiles playersheet__tiles--prospect">
         {facts.map(([label, value]) => (
           <div key={label} className="playersheet__tile">

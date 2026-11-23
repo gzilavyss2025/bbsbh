@@ -32,7 +32,6 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
   const [show, setShow] = useState('forty')
   // The player list last picked, so backing out to cash and returning keeps it.
   const [slice, setSlice] = useState('forty')
-  const [folded, setFolded] = useState(true)
   const kind = show === 'cash' || show === 'picks' ? show : 'players'
   // Best first: WAR on the 40-man, rank on the prospect list (pickShow).
   const [sort, setSort] = useState('war')
@@ -45,6 +44,9 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
   useEffect(() => { if (part === 'roster' && data?.forty?.some((p) => p.war == null)) requestFarm() }, [part, data]) // eslint-disable-line react-hooks/exhaustive-deps
   const pickShow = (v) => { setShow(v); if (v === 'prospects' || v === 'all') requestFarm(); if (v === 'prospects' && sort === 'war') setSort('prospect') }
   const byLevel = sort === 'level'
+  // OPS / ERA with hitters and pitchers together reads on one league scale (rosterList).
+  const lineIndexed = group === 'all' && Boolean(data?.league)
+  const lineByIndex = sort === 'line' && lineIndexed
   const cuts = useAsync(() => (byLevel ? fetchLevelLines() : Promise.resolve(null)), [byLevel])
   // A player the reader adds stamps into the column that gets him. The ones a
   // shared link or a reload brought are already there and do not replay it
@@ -61,12 +63,20 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
             wears: its bar colour, accent edge and ink, the mono mark bleeding the
             bar's full height, the full club name centred. Default navy when the
             club has no tuned bar. */}
-        <h2 className="tradedesk__clubbar">
-          <TeamLogo teamId={teamId} size={28} />
-          <span>{teamFullName(teamId)}</span>
-          {/* With the deal cards waiting, the roster bar carries the club's X. */}
+        {/* One line: the club, what it adds (players, picks or cash), and Change. */}
+        <div className="tradedesk__clubrow">
+          <h2 className="tradedesk__clubbar">
+            <TeamLogo teamId={teamId} size={28} />
+            <span>{teamFullName(teamId)}</span>
+          </h2>
+          {data && (
+            <Chips label={`${club} adds`} className="tradedesk__kinds" value={kind}
+              options={KINDS.filter((k) => k.value !== 'picks' || draftPicks.length).map((k) => (k.value === 'cash' && cash ? { ...k, label: `Cash · ${money(cash * 1e6)}` } : k))}
+              onChange={(k) => pickShow(k === 'players' ? slice : k)} />
+          )}
+          {/* With the deal cards waiting, the roster bar carries Change. */}
           {bare && change}
-        </h2>
+        </div>
       {state.loading && !data && <p className="hint" role="status">Reading the {club} roster…</p>}
       {state.error && !data && (
         <EmptyState role="alert"><p>The {club} roster did not load.</p><Button skin="ink" onClick={state.reload}>Try again</Button></EmptyState>
@@ -74,35 +84,27 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
         {data && (
           <div className="tradedesk__roster">
             <div className="tradedesk__controls">
-              {/* Players, then the club's tradable picks and its cash, as one row of tabs. */}
-              <div className="tradedesk__showrow">
-                {/* What to add: players, cash or picks. Picking one folds the row to
-                    that chip (players slide out their three lists beside it, as a
-                    position group does); tapping the chip again backs out. */}
-                {folded ? (
-                  <div className="tradedesk__posrow">
-                    <Button size="control" skin="ink" pressed onClick={() => setFolded(false)}>
-                      {KINDS.find((k) => k.value === kind).label}{kind === 'cash' && cash ? ` · ${money(cash * 1e6)}` : ''}
-                    </Button>
-                    {kind === 'players' && (
-                      <div className="tradedesk__spots">
-                        <Chips label={`${club} list`} options={SHOW} value={show} onChange={(v) => { setSlice(v); pickShow(v) }} layout="wrap" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Chips label={`${club} adds`} layout="wrap" value={kind}
-                    options={KINDS.filter((k) => k.value !== 'picks' || draftPicks.length).map((k) => (k.value === 'cash' && cash ? { ...k, label: `Cash · ${money(cash * 1e6)}` } : k))}
-                    onChange={(k) => { setFolded(true); pickShow(k === 'players' ? slice : k) }} />
-                )}
-                {/* The search field stays tucked away behind its glass until tapped. */}
-                {players && (
+              {/* The card's top choice, what the club adds: players, its tradable
+                  picks or cash. Tabs, always in view, so the filters under them
+                  read as filters of the player list. */}
+              {/* Which list, the order it reads in, and the search glass, on one line. */}
+              {players && (
+                <div className="tradedesk__showrow">
+                  <Chips label={`${club} list`} options={SHOW} value={show} onChange={(v) => { setSlice(v); pickShow(v) }} className="tradedesk__lists" />
+                  <select className={MORE_SORTS.some((o) => o.value === sort) ? 'tradedesk__sortmore tradedesk__sortmore--on' : 'tradedesk__sortmore'} aria-label="More ways to sort"
+                    value={MORE_SORTS.some((o) => o.value === sort) ? sort : ''}
+                    onChange={(e) => { if (!e.target.value) return; setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
+                    <option value="">Sort by…</option>
+                    {/* The line sort names what the column will show: the league index with hitters and pitchers together. */}
+                    {MORE_SORTS.map((o) => <option key={o.value} value={o.value}>{o.value === 'line' && lineIndexed ? 'OPS+ / ERA+' : o.label}</option>)}
+                  </select>
+                  {/* The search field stays tucked away behind its glass until tapped. */}
                   <IconButton className="tradedesk__searchbtn" aria-expanded={searching} onClick={() => { if (searching) setQuery(''); setSearching(!searching) }}
                     label={searching ? `Close ${club} search` : `Search ${club} players`}>
                     <SearchGlyph />
                   </IconButton>
-                )}
-              </div>
+                </div>
+              )}
               {/* A group with positions under it (infield, outfield, pitchers) folds the
                   row to that one chip and slides its positions out beside it; tapping
                   the chip again folds them back in. */}
@@ -116,7 +118,7 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
                   </div>
                 </div>
               ) : (
-                <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={(g) => { setGroup(g); setSpot('all') }} layout="wrap" />
+                <Chips label={`${club} positions`} options={POS_GROUPS} value={group} onChange={(g) => { setGroup(g); setSpot('all') }} />
               ))}
               {players && searching && <input type="search" className="tradedesk__search" value={query} onChange={(e) => setQuery(e.target.value)}
                 autoFocus onBlur={() => { if (!query) setSearching(false) }}
@@ -141,18 +143,15 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
                 <span className="tradedesk__sortcols">
                   <span className="tradedesk__sortname">
                     <SortHead value="name" sort={sort} onSort={setSort}>Player</SortHead>
-                    <select className="tradedesk__sortmore" aria-label="More ways to sort"
-                      value={MORE_SORTS.some((o) => o.value === sort) ? sort : ''}
-                      onChange={(e) => { if (!e.target.value) return; setSort(e.target.value); if (e.target.value === 'level') requestFarm() }}>
-                      <option value="">More</option>
-                      {MORE_SORTS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
                   </span>
                   <span className="tradedesk__sortmoney">
                     <SortHead value="pay" sort={sort} onSort={setSort}>Salary</SortHead>
                     <SortHead value="control" sort={sort} onSort={setSort}>Yrs</SortHead>
                   </span>
-                  <SortHead value="war" sort={sort} onSort={setSort} className="tradedesk__sortfig">WAR</SortHead>
+                  {/* The figure column shows what the list is ordered by: OPS / ERA when that sort is on. */}
+                  {sort === 'line'
+                    ? <SortHead value="line" sort={sort} onSort={setSort} className="tradedesk__sortfig">{lineByIndex ? 'OPS+ / ERA+' : 'OPS / ERA'}</SortHead>
+                    : <SortHead value="war" sort={sort} onSort={setSort} className="tradedesk__sortfig">WAR</SortHead>}
                 </span>
                 <span className="tradedesk__sortpad" aria-hidden="true" />
               </div>
@@ -160,7 +159,7 @@ export function Side({ bare = false, part = 'deal', draftPicks = [], dp = new Se
             {players && <ul className="tradedesk__list tradedesk__rosterlist">
               {rosterList(data, { show, group, spot, sort, query, farm, minimum, cuts: cuts.data }).map((p) => (
                 <PlayerRow key={p.id} p={p} teamId={teamId} picked={picked.has(p.id)} onToggle={onToggle} nextYear={data.nextYear} warSeason={data.warSeason}
-                  farm={farm?.get(p.id)} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
+                  farm={farm?.get(p.id)} figBy={sort === 'line' ? 'line' : null} league={lineByIndex ? data.league : null} rank={sort === 'level' ? levelRank(p, farm, cuts.data) : null} goingTo={picked.has(p.id) ? partner : null} />
               ))}
             </ul>}
           </div>

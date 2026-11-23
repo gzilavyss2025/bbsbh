@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Roster Controls</title>
+<style>
+  :root { --paper:#f7f1e3; --ink:#1b2a3a; --muted:#5d6670; --rule:#d9cfb8; --mark:#e9dcae; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#151c24; --ink:#e8e2d4; --muted:#9aa3ad; --rule:#33404d; --mark:#3a3520; } }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 Georgia, serif; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font:700 26px/1.2 system-ui, sans-serif; margin:0 0 4px; }
+  h2 { font:700 15px/1.3 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.04em; margin:28px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  .call { background:var(--mark); padding:12px 14px; border-radius:4px; }
+  ol li { margin-bottom:12px; }
+  pre { font:13px/1.35 ui-monospace, monospace; background:var(--mark); padding:10px 12px; overflow-x:auto; }
+  .where { color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Trade roster card: control hierarchy</h1>
+<p class="sub">The head of each roster card on /trade-simulator (club bar, what to add, which list, position, search, sort). Reviewed on Twins vs Tigers at desktop width and at 375 px. 2026-11-23.</p>
+
+<p class="call"><strong>Verdict:</strong> the order is right (what to add → which list → position → sort), but every level wears the same chip, so nothing says which choice is the big one. On a phone the controls take half the screen before the first player, and the sort row breaks.</p>
+
+<h2>What the card asks, in order</h2>
+<pre>Club bar        Minnesota Twins                      ✕ (change club)
+1 What to add   [Players] → folds open: Players · Picks · Cash
+2 Which list    Everyone · 40-man · Prospects        🔍
+3 Position      All · Pitchers · Catchers · Infield · Outfield
+4 Sort          Player  [Sort by…]   Salary  Yrs   WAR ▾</pre>
+
+<h2>Must fix</h2>
+<ol>
+<li><strong>The sort row breaks on a phone.</strong> <span class="where">Roster list head, 375 px.</span> "WAR ▾" drops to a second line under "Player", and the Sort by box crowds Salary. Made worse by the outlined Sort by box added today. <em>Fix:</em> on a phone, move Sort by out of the column heads into the position row's end (or under it), and keep the heads to one line over their figures.</li>
+<li><strong>Half a phone screen of controls before the first player.</strong> <span class="where">Rows 1–4, 375 px: about 270 px of a 406 px card.</span> Outfield wraps onto its own line. <em>Fix:</em> make the position row one line that scrolls sideways, and fold "What to add" into the same line as "Which list" (it already folds to one chip).</li>
+</ol>
+
+<h2>Should fix</h2>
+<ol start="3">
+<li><strong>The top-level choice looks like any other chip.</strong> <span class="where">"Players" chip, row 1.</span> It is the biggest decision on the card (add players, picks or cash), but it looks like a selected filter, and nothing says that tapping it shows Picks and Cash. <em>Fix:</em> draw Players · Picks · Cash as tabs across the top of the card (the underline tab the player page uses), always visible; the list and position chips stay below as filters.</li>
+<li><strong>Two filter rows, same look, no grouping.</strong> <span class="where">Rows 2 and 3.</span> "Which list" and "Position" are separate questions but are identical bordered chip strips. <em>Fix:</em> once row 1 is tabs, keep rows 2 and 3 as chips; a little more space between row 2 and row 3 than inside each makes them read as two groups.</li>
+<li><strong>The search glass floats.</strong> <span class="where">Right edge, between rows 1 and 2 on a phone.</span> It belongs to the list, but it is not lined up with anything. <em>Fix:</em> put it at the end of the "Which list" row, on the same line, at every width.</li>
+<li><strong>The ✕ in the club bar reads as "close".</strong> <span class="where">Club bar, top right.</span> It actually changes the club. <em>Fix:</em> the club name itself as the door ("Minnesota Twins ▾"), or a "Change" text button, instead of an ✕.</li>
+</ol>
+
+<h2>Nice to have</h2>
+<ol start="7">
+<li><strong>Column heads don't look tappable.</strong> <span class="where">Player, Salary, Yrs, WAR.</span> Only the active one shows ▾. A faint ▾ on hover/focus would hint the rest sort too.</li>
+<li><strong>"Everyone" is vague.</strong> <span class="where">Row 2.</span> It means the whole organization. "Whole org" or "All levels" says what it adds over 40-man and Prospects.</li>
+</ol>
+
+<h2>Suggested shape</h2>
+<pre>Minnesota Twins ▾
+ Players   Picks   Cash                 (tabs)
+[40-man] Everyone  Prospects        🔍
+[All] Pitchers Catchers Infield Outf…→  (one line, scrolls)
+Player             Salary  Yrs   WAR ▾   [Sort by…]</pre>
+</main>
+</body>
+</html>
