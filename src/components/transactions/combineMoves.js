@@ -73,9 +73,47 @@ function merge(group) {
   }
 }
 
+// RULE 5 PROTECTION. Each November, clubs add players to the 40-man roster so
+// another club cannot take them in December's Rule 5 draft; the wire files
+// each as "Selected the contract of…", which read as a call-up (the Brewers'
+// six, Nov. 17, 2026). A November selection is that add, so its lead says
+// so, one sentence naming them all, under a "Rule 5 protection" label:
+//
+//   Added six to the 40-man roster ahead of the Rule 5 draft: C Matthew Wood,
+//   2B Dylan O'Rae, SS Jett Williams, 3B Luke Adams, RHP Cameron Wagoner and
+//   LHP Tate Kuehner.
+//
+// The players' notes still read as selections (templates.js matches this lead).
+const SELECTED = /^selected the contract of $/i
+const COUNT = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+export const isProtectionDay = (date) => /^\d{4}-11-/.test(date ?? '')
+
+function protection(group) {
+  const n = group.length
+  const names = []
+  group.forEach((m, i) => {
+    if (i) names.push({ text: i === n - 1 ? ' and ' : ', ' })
+    names.push({ text: `${m.pos} ` }, m.player)
+  })
+  const cutline = n === 1
+    ? [{ text: 'Added ' }, ...names, { text: ' to the 40-man roster ahead of the Rule 5 draft.' }]
+    : [{ text: `Added ${COUNT[n] ?? n} to the 40-man roster ahead of the Rule 5 draft: ` }, ...names, { text: '.' }]
+  const first = group[0].story
+  return {
+    ...first,
+    id: n > 1 ? `${first.id}+${n - 1}` : first.id,
+    codes: [...new Set(group.flatMap((m) => m.story.codes ?? []))],
+    moves: group.flatMap((m) => m.story.moves ?? []),
+    rail: group.flatMap((m) => m.story.rail),
+    cutline,
+    typeLabel: 'Rule 5 protection',
+  }
+}
+
 // One day's stories in, the same day's stories out, with each foldable run
-// merged into one story at the position of its first member.
-export function combineBatches(stories) {
+// merged into one story at the position of its first member. `date` is the
+// day's: a November selection reads as Rule 5 protection (above).
+export function combineBatches(stories, date = null) {
   const groups = new Map()
   const keyOf = new Map()
   for (const story of stories ?? []) {
@@ -91,6 +129,13 @@ export function combineBatches(stories) {
   for (const story of stories ?? []) {
     const key = keyOf.get(story)
     const group = key && groups.get(key)
+    // A club's November selections, even one alone, read as its protection.
+    if (group && isProtectionDay(date) && SELECTED.test(group[0].verb)) {
+      if (done.has(key)) continue
+      done.add(key)
+      out.push(protection(group))
+      continue
+    }
     if (!group || group.length < 2) {
       out.push(story)
       continue

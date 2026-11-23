@@ -1,4 +1,5 @@
 import { sortPlayers, lineIsSmall } from '../../lib/trade/deal.js'
+import { lineIndex } from '../../lib/trade/value.js'
 import { positionGroup } from '../../api/free-agents/freeAgents.js'
 import { percentileFromCuts, LEVEL_OF_SPORT } from '../../lib/trade/levelPct.js'
 
@@ -91,6 +92,18 @@ export function rosterList(data, { show, group, spot = 'all', sort, query = '', 
       ...sortPlayers(rows.filter(small), key),
       ...rows.filter((p) => !p.line && !farm?.get(p.id)),
     ].map((p) => list.find((x) => x.id === p.id))
+    // Big-league lines share one scale against the league (lineIndex, 100 =
+    // average), under every filter: with All, the best hitter or pitcher leads.
+    // Minor-league and small-sample lines follow as before.
+    if (data.league) {
+      const ranked = list.filter((p) => p.line && !small(p) && lineIndex(p.line, data.league) != null)
+      const rest = list.filter((p) => !ranked.includes(p))
+      return [
+        ...ranked.sort((a, b) => lineIndex(b.line, data.league) - lineIndex(a.line, data.league)),
+        ...tiers(rest.filter((p) => !isPitcher(p)), 'ops'),
+        ...tiers(rest.filter(isPitcher), 'era'),
+      ]
+    }
     return [...tiers(list.filter((p) => !isPitcher(p)), 'ops'), ...tiers(list.filter(isPitcher), 'era')]
   }
   if (sort === 'level') {

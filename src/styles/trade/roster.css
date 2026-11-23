@@ -9,6 +9,76 @@
   gap: var(--space-2);
 }
 
+/* The list chips take the row's slack and scroll sideways if it runs short;
+   Sort by and the glass keep their size at the row's end. */
+.tradedesk__showrow > .tradedesk__lists {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tradedesk__showrow > .tradedesk__sortmore,
+.tradedesk__showrow > .tradedesk__searchbtn {
+  flex: none;
+}
+
+/* layout-exempt: the club, what it adds (Players / Picks / Cash) and Change on one
+   line, the card's top choice above the hairline; the rows under it filter the list.
+   Rows size to the card, never the card to them (each scrolls inside). */
+.tradedesk__clubrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.tradedesk__clubrow > .tradedesk__clubbar {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tradedesk__clubrow > .tradedesk__kinds {
+  flex: none;
+}
+
+/* The same chips the filters wear; the editorial Players / Cash join them. */
+.tradedesk__clubrow .chips > .btn.btn {
+  --btn-fill: var(--surface-card);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  border-width: var(--bw-heavy);
+  border-radius: 0;
+}
+
+.tradedesk__clubrow .chips {
+  gap: 0;
+}
+
+.tradedesk__clubrow .chips > .btn + .btn {
+  margin-left: calc(var(--bw-heavy) * -1);
+}
+
+.tradedesk__clubrow .chips > .btn[aria-pressed='true'] {
+  background: var(--text-heading);
+  color: var(--text-on-ink);
+}
+
+.tradedesk__clubrow > .btn.tradedesk__barx {
+  flex: none;
+  align-self: center;
+  margin: 0;
+}
+
+.tradedesk__showrow,
+.tradedesk__controls > .chips {
+  contain: inline-size;
+}
+
 /* The roster list's column heads: the row's own columns, each one a sort. */
 /* layout-exempt: the column heads, then the "More" sort at the end */
 .tradedesk__sorthead {
@@ -30,7 +100,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 6.5rem 3rem;
   gap: var(--space-2);
-  align-items: end;
+  align-items: baseline;
 }
 
 /* layout-exempt: salary and years heads side by side */
@@ -48,6 +118,8 @@
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
   cursor: pointer;
+  /* One fixed leading, so the sorted head's ▾ cannot make it taller than the rest. */
+  line-height: var(--lh-solid);
 }
 
 .tradedesk__sorthd--on {
@@ -60,20 +132,36 @@
   white-space: nowrap;
 }
 
+/* A control, not a column head: outlined like the filter chips above it, so it
+   reads as something to tap; ink fill once one of its sorts is the list's order. */
 .tradedesk__sortmore {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-  background: none;
-  border: 0;
+  color: var(--text-heading);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  min-height: var(--control-min);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.tradedesk__sortmore:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.tradedesk__sortmore--on {
+  color: var(--surface-card);
+  background: var(--text-heading);
 }
 
 /* layout-exempt: the Player head with the "More" sort beside it */
 .tradedesk__sortname {
   display: flex;
   gap: var(--space-3);
-  align-items: end;
+  align-items: baseline;
 }
 
 /* Holds the add button's column, so the heads sit over their figures. */
@@ -94,8 +182,17 @@
 
 /* The roster's filter rows wear the joined black bar of the seasons switch
    (system/segmented): one ink edge, buttons butted together, square. */
-.tradedesk__controls .chips.chips--wrap {
+.tradedesk__controls .chips {
   gap: 0;
+}
+
+/* The club bar's Change and the Sort by menu wear the same chip: square,
+   control height, the heavy ink edge. */
+.btn.tradedesk__barx {
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-edge-hover: var(--border-stamped);
+  border-width: var(--bw-heavy);
 }
 
 .tradedesk__controls .chips > .btn.btn,
@@ -130,6 +227,13 @@
 .tradedesk__rostercard .tradedesk__sorthead,
 .tradedesk__rostercard .tradedesk__rosterlist > li {
   padding-inline: var(--space-2);
+}
+
+/* Zebra rows, so the eye holds a row across from name to figure. The stamped
+   tables' faint ink tone: --surface-inset is lighter than this card's paper and
+   barely shows on it. */
+.tradedesk__rostercard .tradedesk__rosterlist > li:nth-child(even) {
+  background: var(--surface-stamped-head);
 }
 
 /* The list scrolls in its own panel, as Baseball Trade Values and Fanspo do:

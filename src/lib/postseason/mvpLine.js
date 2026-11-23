@@ -36,4 +36,6 @@ export const MVP_PHOTOS = { 2026: { id: 'cz7beynol16rtuq2neot', club: 158 } } //
 export const mvpPhotoUrl = (id, w = 900) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_${w},h_${w},f_jpg,q_auto:good,c_fill,g_center/mlb/${id}.jpg`
 // 450 for a 1x screen, 900 for 2x and up (the phone slab is about 360 CSS px wide).
 export const mvpPhotoSrcSet = (id) => `${mvpPhotoUrl(id, 450)} 450w, ${mvpPhotoUrl(id)} 900w`
+// The home story deck's wide crop of the same photo (StoryDeck.jsx), which the slate also preloads.
+export const championPhotoUrl = (id) => id && `https://img.mlbstatic.com/mlb-images/image/upload/w_1400,h_788,f_jpg,q_auto:good,c_fill,g_faces/mlb/${id}.jpg`
 export const MVP_PHOTO_SIZES = '(max-width: 739px) 100vw, 450px'

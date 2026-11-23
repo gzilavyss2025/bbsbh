@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { money, salaryText } from '../../lib/trade/deal.js'
 import { ordinal } from '../../lib/format.js'
+import { lineIndex } from '../../lib/trade/value.js'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerSheet } from './PlayerSheet.jsx'
@@ -12,7 +13,7 @@ const DASH = '—'
 // attribute line and one line of numbers open the player sheet (contract,
 // pedigree, the trade that brought him, retained salary). Add or Remove is the
 // row's only other control.
-export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeason = null, enter = false, rank = null, compact = false, goingTo = null, children = null }) {
+export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeason = null, enter = false, rank = null, compact = false, goingTo = null, figBy = null, league = null, children = null }) {
   const [open, setOpen] = useState(false)
   const sheet = open && (
     <PlayerSheet p={p} teamId={teamId} nextYear={nextYear} farm={farm} warSeason={warSeason} picked={picked} onToggle={onToggle} onClose={() => setOpen(false)}>
@@ -34,7 +35,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
           <span className="tradedesk__who">
             <span className="tradedesk__name">{p.name}</span>
             <span className="t-label tradedesk__meta">
-              {[p.pos, p.age != null ? `${p.age} yrs` : null].filter(Boolean).join(' · ')}
+              {[posText(p), p.age != null ? `${p.age} yrs` : null].filter(Boolean).join(' · ')}
               {p.retainedUsd ? ` · keeps ${money(p.retainedUsd)}` : ''}
             </span>
           </span>
@@ -61,7 +62,8 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
     )
   }
   const stamped = p.war == null && Boolean(p.topRank || p.orgRank)
-  const fig = figText(p, farm, warSeason)
+  // Sorted by OPS / ERA, the figure is that line, so the order reads at a glance.
+  const fig = (figBy === 'line' && lineFig(p, league)) || figText(p, farm, warSeason)
   return (
     <li className={['tradedesk__row', enter && 'tradedesk__row--enter', goingTo && 'tradedesk__row--going'].filter(Boolean).join(' ')}>
       <button type="button" className="tradedesk__open" onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -72,7 +74,7 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
         <span className="tradedesk__who">
           <span className="tradedesk__name">{p.name}</span>
           <span className="t-label tradedesk__meta">
-            {p.pos || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
+            {posText(p) || DASH}{p.age != null ? ` · ${p.age} yrs` : ''}
             {!stamped && (p.topRank ? ` · No. ${p.topRank} MLB` : p.orgRank ? ` · No. ${p.orgRank} org` : '')}
             {rank ? <span className="tradedesk__rank">{ordinal(rank.pct)} · {rank.level}</span> : null}
           </span>
@@ -106,6 +108,9 @@ export function PlayerRow({ p, teamId, picked, onToggle, nextYear, farm, warSeas
 }
 
 
+// A pitcher's role (SP/RP/CL, the same one the roster filter uses) in place of a bare "P".
+const posText = (p) => (p.pos === 'P' && p.line?.role) || p.pos
+
 // The line under the salary, as the Trade Machine wrote it: "3 Years", how
 // long the club holds him (a signed deal's years, or an arbitration or pre-arb
 // player's years until free agency). A count past the ledger is estimated from service time.
@@ -114,6 +119,18 @@ function yearsText(p, short = false) {
   if (p.control == null || (!p.onForty && !p.contract)) return ''
   const n = p.control
   return short ? `${n} ${n === 1 ? 'yr' : 'yrs'}` : `${n} ${n === 1 ? 'Year' : 'Years'}`
+}
+
+// His big-league line as the figure, labelled: OPS for a hitter, ERA for a pitcher.
+// With `league` (hitters and pitchers listed together), the index against it
+// instead: 100 is average, higher better (value.js lineIndex), so one column
+// reads one way. Null with no line, so a minor leaguer falls back to figText.
+function lineFig(p, league = null) {
+  const idx = league ? lineIndex(p.line, league) : null
+  if (idx != null) return { value: String(Math.round(idx)), label: p.line.ops != null ? 'OPS+' : 'ERA+' }
+  if (p.line?.ops) return { value: p.line.ops, label: 'OPS' }
+  if (p.line?.era) return { value: p.line.era, label: 'ERA' }
+  return null
 }
 
 // The one figure: WAR for the season war.json holds (this season until the next

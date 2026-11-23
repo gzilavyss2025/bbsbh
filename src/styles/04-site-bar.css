@@ -453,6 +453,19 @@
   color: var(--text-body);
   text-wrap: pretty;
 }
+/* A trade's grade, run on at the end of its notes before More, in the same
+   serif voice. "Grades" opens the Trade Simulator: an underlined link in the
+   heading ink, not bold, since bold in this paragraph means a player's name
+   (WireGrade.jsx). */
+#root .wire__grade,
+#root .wire__grade .wire__gradelabel {
+  text-transform: none; /* caps-exempt: the grade line reads as a sentence, its label and club nicknames in natural case */
+}
+.wire__gradelabel {
+  color: var(--text-heading);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
 /* #root ties the ID component of #root *'s specificity — a plain selector
    loses to the ALL-CAPS INVARIANT and is a silent no-op. Same technique and
    the same split the club ledger's cutline uses. */

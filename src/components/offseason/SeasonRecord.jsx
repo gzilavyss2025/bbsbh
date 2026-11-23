@@ -4,7 +4,7 @@ import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracke
 import { Card } from '../ui/frame/Card.jsx'
 import { recordRowIsLabelled } from '../../lib/postseason/bracketDisplay.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
-import { ChampionHero } from '../worldseries/ChampionHero.jsx'
+import { StoryDeck } from '../worldseries/StoryDeck.jsx'
 
 // THE SEASON RECORD — the one door on the offseason page that opens onto
 // results (issue #1078, step 4 of #1038; the MLB champion, #1224 slice 7).
@@ -63,10 +63,10 @@ export function SeasonRecord({ sportId, season, dateStr }) {
   const { bracket, loading } = usePostseasonBracket(inward ? dateStr : null, { season })
   const champion = bracket?.champion ?? null
   const labelled = recordRowIsLabelled(champion)
-  // MLB with a champion: the series page's World Series hero (ChampionHero,
-  // the MVP and the clubs). Its doors stand apart, under the countdown
+  // MLB with a champion: the story deck (StoryDeck.jsx), the World Series
+  // slide first, then the winter's top stories. Its doors stand apart, under the countdown
   // (OffseasonLead.jsx renders RecordDoors there).
-  if (inward && champion) return <ChampionHero bracket={bracket} />
+  if (inward && champion) return <StoryDeck bracket={bracket} />
   // The champion's hero is ~650px at 390px wide and lands after the bracket read; a small
   // card here first pushed the countdown down by the difference (#2907). Hold its height.
   if (inward && loading) return <div className="srecord-reserve" aria-hidden="true" />

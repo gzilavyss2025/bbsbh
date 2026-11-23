@@ -298,7 +298,9 @@ export function cbPicksOf(data, year) {
 export function salaryText(p) {
   if (p.payUsd != null) return money(p.payUsd)
   if (p.payEstUsd != null) return money(p.payEstUsd)
-  if (p.onForty) return p.payLabel && p.payLabel !== 'Pre-arb' ? p.payLabel : money(VALUE.minSalary)
+  // Only a pre-arb year is the minimum. No ledger (a contract the card could not
+  // find, e.g. a player just traded) is unknown, never $780k.
+  if (p.onForty) return p.payLabel === 'Pre-arb' ? money(VALUE.minSalary) : p.payLabel || '—'
   // A minor leaguer has no salary on file (MiLB pay is the level minimum, not
   // tracked per player), so the column says so rather than guessing a figure.
   return 'MiLB'

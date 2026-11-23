@@ -22,7 +22,7 @@
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
 import { apDate } from '../../lib/time/apDate.js'
-import { an, gamesText, homers, ipText, nameAge, nowText, num, optionsSentence, optionsTail, ordinal, pickPhrase, roundPhrase, variant, word } from './voice.js'
+import { an, gamesText, homers, ipText, nameAge, nowText, num, didText, minorsWhere, offseasonMonth, optionsSentence, optionsTail, ordinal, pickPhrase, roundPhrase, variant, word } from './voice.js'
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
@@ -43,7 +43,7 @@ const CLAUSE_TEMPLATES = [
   ['il-activated', /activated .*from the .*injured list/i],
   ['recall', /recalled/i],
   ['option', /optioned/i],
-  ['selected', /selected the contract/i],
+  ['selected', /selected the contract|to the 40-man roster ahead of the rule 5 draft/i],
   ['retired', /retired/i],
   ['minor-deal', /minor league contract/i],
   // From an independent club: no trade, so nothing went the other way.
@@ -103,15 +103,10 @@ export function dealPhrase(terms) {
   return `${word(Number(m[1]))}-year, ${money}`
 }
 
-
 // A short big-league stint: "pitched once", "pitched in 9 games", "played 9 games".
 const playedText = (g, pitcher) => (pitcher ? `pitched ${TIMES[g] ?? `in ${g} games`}` : `played ${gamesText(g)}`)
 
 // What he did, in words: "hit .212 with 26 homers in 125 games".
-function didText(line, pitcher) {
-  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${ipText(line.ip)} innings in ${gamesText(line.games)}`
-  return `hit ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
-}
 
 // A season this short says little on its own: below it the note says how
 // little he played and why, and reaches back to his last full season.
@@ -274,11 +269,6 @@ export function seasonSentence(facts, moveDate = null, { named = false } = {}) {
 }
 
 // "in Double-A with the Biloxi Shuckers", or "across High-A and Double-A".
-function minorsWhere(m) {
-  if (m.team) return `in ${m.level[0]} with the ${m.team}`
-  return m.level.length > 1 ? `across ${m.level.slice(0, -1).join(', ')} and ${m.level[m.level.length - 1]}` : `in ${m.level[0]}`
-}
-
 
 // WHERE HE CAME FROM — a minor leaguer's origin: the club that drafted him
 // (round and school) or signed him, then each trade or claim since, up to the
@@ -543,6 +533,7 @@ function lastGameSentence(facts, name, v) {
   return v === 0 ? `${name} ${did}${when}.` : `${last('outing')}${name} ${did}.`
 }
 const longDate = (iso) => `${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
+
 export function callStory(facts, { kind, moveDate }) {
   const name = facts.lastName ?? 'He'
   const v = variant(facts, moveDate, 3)
@@ -569,6 +560,14 @@ export function callStory(facts, { kind, moveDate }) {
     if (line?.games) return `${name} ${didText(line, facts.pitcher)} ${c?.up ? 'on this trip' : 'this season'}${optionsTail(facts)}.`
     if (c?.up) return `${name} did not ${facts.pitcher ? 'pitch' : 'play'} on this trip${optionsTail(facts)}.`
     return optionsSentence(facts) ?? ''
+  }
+  // Nov-Feb a selection is a 40-man add, not a call-up (Brewers, Nov. 17, 2026): his finished
+  // season, past tense, always by name, since a club's adds run on in one paragraph.
+  if (kind === 'selected' && moveDate && offseasonMonth(moveDate)) {
+    const rank = prospectPhrase(facts.prospect), lead = nameAge(facts, 0), m = facts.callLine
+    const who = rank ? `${lead.replace(/,$/, '')}, ${rank},` : lead
+    const yr = Number(moveDate.slice(0, 4)) - (Number(moveDate.slice(5, 7)) <= 2 ? 1 : 0)
+    return [m?.line?.games ? `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${yr}.` : null, originSentence(facts, name, moveDate)].filter(Boolean).join(' ')
   }
   if (kind === 'selected' && (!facts.debut || facts.debut >= moveDate)) {
     const rank = prospectPhrase(facts.prospect)

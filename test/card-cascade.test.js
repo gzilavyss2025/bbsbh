@@ -1868,9 +1868,9 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
 test('C6c: the offseason card names are label SectionHeads', () => {
   assert.doesNotMatch(read('78-offseason.css'), /\.(seasonnote|srecord)__title/)
   // The record row lost its heading and tagline (2026-11-02): at MLB with a
-  // champion it is the World Series hero, whose own tab names it.
+  // champion it is the story deck (2026-11-23), whose World Series slide names it.
   assert.doesNotMatch(src('components/offseason/SeasonRecord.jsx'), /Season record<\/SectionHead>/)
-  assert.match(src('components/offseason/SeasonRecord.jsx'), /if \(inward && champion\) return <ChampionHero bracket=\{bracket\} \/>/)
+  assert.match(src('components/offseason/SeasonRecord.jsx'), /if \(inward && champion\) return <StoryDeck bracket=\{bracket\} \/>/)
   // The notebook is one card since the 2026-11-03 redesign, named by its SectionHead.
   assert.match(src('components/offseason/LongAtBats.jsx'), /<SectionHead as="h3" className="oseason__head">\s*Longest at-bats of \{season\}/)
   assert.match(src('components/offseason/YoungestRegulars.jsx'), /<SectionHead look="label" as="h4">/)

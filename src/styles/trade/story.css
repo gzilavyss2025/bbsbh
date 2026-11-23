@@ -1,0 +1,141 @@
+/* The trade story (story/TradeStory.jsx): a newspaper column in the deal card.
+   The card itself is the column's width, centred, so no empty strips flank it. */
+.tradedesk__moves {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.tradestory__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* layout-exempt: the deal's sentence, then its Write the story button under it */
+.tradestory__ask {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* The rewrite bar is a notification, not part of the story: the app's ink
+   band run edge to edge across the card's top, a ↻ mark, the note, and a
+   marker-gold Rewrite at its end. It sticks while the reader scrolls the story.
+   layout-exempt: the bar's mark, note and button on one line, wrapping on a phone */
+.tradestory__stale {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: calc(var(--space-3) * -1) calc(var(--space-4) * -1) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-band);
+  color: var(--text-on-band);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.tradestory__stalemark {
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+}
+
+.tradestory__stale > .btn {
+  --btn-fill: var(--marker);
+  --btn-edge: var(--marker);
+  --btn-ink: var(--text-on-bright);
+  --btn-fill-hover: var(--marker);
+  --btn-edge-hover: var(--text-on-band);
+  margin-left: auto;
+}
+
+/* The headline is the hero: the biggest type on the card, as a sentence. */
+.tradestory__headline {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-read);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  .tradestory__headline {
+    font-size: var(--fs-display);
+  }
+}
+#root .tradestory__headline { text-transform: none } /* caps-exempt: a news headline reads as a sentence, like .gamestory__headline */
+
+.tradestory__byline {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.tradestory__byline time {
+  margin-left: var(--space-2);
+}
+
+/* "SAN DIEGO — ": the wire's dateline opens the first paragraph. */
+#root .tradestory__graf .tradestory__dateline {
+  text-transform: uppercase;
+  font-weight: var(--w-bold);
+}
+
+.tradestory__dek {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.tradestory__graf {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+#root .tradestory__dek, #root .tradestory__graf, #root .tradestory__graf * { text-transform: none } /* caps-exempt: the story reads as prose */
+/* A name in the story reads as the wire's names do. */
+.tradestory__graf .plink {
+  font-weight: var(--w-bold);
+}
+
+/* The story's art: one game photo of the headline player, the column's
+   full width under the byline, as a news article leads. */
+.tradestory__art {
+  margin: 0 0 var(--space-4);
+}
+
+.tradestory__art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+.tradestory__credit {
+  /* A newspaper photo caption: a hairline over it, the subject's name in bold
+     leading a plain sentence, a step smaller than the story. */
+  margin-top: var(--space-1h);
+  padding-top: var(--space-1h);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+#root .tradestory__credit, #root .tradestory__credit * { text-transform: none } /* caps-exempt: a photo caption reads as a sentence, like the story */
+
+.tradestory__credit b {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}

@@ -27,6 +27,10 @@
   .oseason__list .wire__type {
     display: none;
   }
+  /* Rule 5 protection keeps its label beside the mark (winter-home.css). */
+  .oseason__list .wire__type.wire__type--keep {
+    display: inline;
+  }
   /* layout-exempt: a long trade's faces wrap rather than run off a phone */
   .oseason__list .wire__faces {
     grid-column: 2;

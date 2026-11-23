@@ -54,7 +54,8 @@ function useNearView(ref, watch) {
 }
 
 // `children` draws the move's sentence, given what runs on after it.
-export function WireFacts({ story, date, line: oneLine = false, children }) {
+// `extra` runs on after the notes and before More: a trade's grade (WireGrade.jsx).
+export function WireFacts({ story, date, line: oneLine = false, extra = null, children }) {
   const subjects = subjectsOf(story)
   // A one-player send-down or cash deal runs its note on even as a one-line
   // move: his last game, his season, his time with the club are the context the
@@ -112,6 +113,7 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
       {children(
         <>
           {note && `${note} `}
+          {extra}
           {toggle}
         </>,
         notes,

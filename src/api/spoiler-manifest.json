@@ -1569,9 +1569,17 @@
       "class": "spoiler-free",
       "why": "How each player joined his organization and his draft pick (trade-pedigree/{orgId}.json). Roster history, no game result (ADR-0034)."
     },
+    "trade/person.js": {
+      "class": "spoiler-free",
+      "why": "One player for the trade tools: position, age, current club, MLB playing time by season and last season's line. Season stats, no game result (ADR-0034)."
+    },
     "trade/side.js": {
       "class": "spoiler-free",
       "why": "The trade card's one side: the live 40-man and organization rosters joined to Cot's contracts, war.json, org prospect ranks and each affiliate's season lines. Roster state, contracts and season totals, no game result (ADR-0034)."
+    },
+    "trade/wireGrade.js": {
+      "class": "spoiler-free",
+      "why": "The Trade Simulator grade for a real trade on the wire: contracts, WAR history and season playing time. Valuation, no game result (ADR-0034)."
     },
     "free-agents/freeAgents.js": {
       "class": "spoiler-free",

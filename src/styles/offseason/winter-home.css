@@ -95,6 +95,11 @@
 .oseason__list .wire__type {
   display: none;
 }
+/* Rule 5 protection keeps its label: the one move the sentence alone undersells. */
+.oseason__list .wire__type.wire__type--keep {
+  display: block;
+  margin: 0;
+}
 .oseason__list .wire__cutline {
   font-size: var(--fs-h3);
   line-height: var(--lh-snug);

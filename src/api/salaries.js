@@ -1,4 +1,5 @@
 import { staticJsonBy } from './staticJson.js'
+import { applySignings } from '../lib/trade/signings.js'
 
 // The two salary files scripts/fever/gen-salaries.mjs writes: one ledger per
 // club (/team/{id}/contracts) and one league rollup (/salaries).
@@ -60,7 +61,9 @@ export async function fetchLeagueSalaries(season = null) {
 
 export async function fetchTeamContracts(teamId, season = null) {
   if (teamId == null) return null
-  return usableLedger(await fetchClub(`${teamId}:${season ?? ''}`))
+  const ledger = usableLedger(await fetchClub(`${teamId}:${season ?? ''}`))
+  // The live ledger only: hand-entered deals Cot's has not posted yet (lib/trade/signings.js).
+  return season ? ledger : applySignings(ledger, Number(teamId))
 }
 
 // ---------------------------------------------------------------- selectors

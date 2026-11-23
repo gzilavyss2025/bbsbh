@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Sheet Critique</title>
+<style>
+  :root { --paper:#f7f1e3; --ink:#1b2a3a; --muted:#5d6670; --rule:#d9cfb8; --mark:#e9dcae; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#151c24; --ink:#e8e2d4; --muted:#9aa3ad; --rule:#33404d; --mark:#3a3520; } }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 Georgia, serif; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font:700 26px/1.2 system-ui, sans-serif; margin:0 0 4px; }
+  h2 { font:700 15px/1.3 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.04em; margin:28px 0 8px; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  table { width:100%; border-collapse:collapse; font:14px/1.4 system-ui, sans-serif; margin:8px 0; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th { font-size:12px; text-transform:uppercase; color:var(--muted); }
+  .call { background:var(--mark); padding:12px 14px; border-radius:4px; }
+  ol li, ul li { margin-bottom:6px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Trade player sheet: header critique</h1>
+<p class="sub">The head of the player sheet on /trade-simulator: photo, name, award chips, four tiles, the line under them. Reviewed on Jake Bauers, desktop and phone, after the photo went to 4x. 2026-11-23.</p>
+
+<p class="call"><strong>Overall:</strong> the bigger photo gives the sheet a real face, and the four tiles are clear. The biggest problem: the photo now outweighs the name, and the line under the tiles repeats two of them.</p>
+
+<h2>Usability</h2>
+<table>
+<thead><tr><th>Finding</th><th>Severity</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>The line under the tiles says "2027 $16.0M" and "Signed thru 2030" again. The 2027 pay and Control tiles already show both.</td><td>🟡 Moderate</td><td>Cut the repeats. Keep only what is new there (2026 WAR 3.6, OPS .873), or move those into the name's attribute line.</td></tr>
+<tr><td>"Surplus value −$22.0M" has no hint of what it means or whether negative is bad. The value model's assumptions are the page's to explain.</td><td>🟡 Moderate</td><td>An InfoPopover (tap) on the label: value over salary across his years of control, with the $/WAR and aging rule.</td></tr>
+<tr><td>The ✕ close is a small glyph at the far top right, well away from the name and tiles.</td><td>🟢 Minor</td><td>Check it meets the 44 px tap target (the same issue as #3129).</td></tr>
+</tbody>
+</table>
+
+<h2>Visual hierarchy</h2>
+<ul>
+<li><strong>What draws the eye first:</strong> the photo, at 156 × 208 px. Fine for "who is this", but the name beside it is the smallest heading in the sheet, so the name reads as a caption to the photo.</li>
+<li><strong>Reading flow:</strong> photo → chips (bright marker gold) → tiles. The name is skipped on the way: the gold chips out-shout it.</li>
+<li><strong>Whitespace:</strong> the name, meta and chips sit vertically centred on the photo in one row, which leaves about 400 px of empty paper to their right on desktop and a tall blank band above and below them.</li>
+<li><strong>Emphasis:</strong> the tiles give the four numbers equal weight. For a trade, Proj. WAR and Surplus value are the decision; Control and 2027 pay support them.</li>
+</ul>
+
+<h2>Consistency</h2>
+<table>
+<thead><tr><th>Element</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Tile labels</td><td>"2027 proj. WAR" is lowercase while "Surplus value", "Control" and "2027 pay" are title case.</td><td>One casing for all four labels.</td></tr>
+<tr><td>Name row</td><td>The chips sit in the same row as the name, so on desktop they read as part of the heading; on the phone they drop under it. Two different layouts for one block.</td><td>Stack name, meta, chips in one column next to the photo at every width.</td></tr>
+<tr><td>Photo size</td><td>156 × 208 has no token; it is 4 × the xs rung. The player page header uses --shot-xl (104 × 139).</td><td>If this size stays, make it a named rung in tokens/layout.css (a design call for Gary).</td></tr>
+</tbody>
+</table>
+
+<h2>Accessibility</h2>
+<ul>
+<li><strong>Contrast:</strong> navy on paper and ink on marker gold both pass in the design system's checked pairings.</li>
+<li><strong>Touch targets:</strong> the tiles are not interactive, good. The ✕ needs a check (above).</li>
+<li><strong>Readability:</strong> the meta line "1B · 31 YRS" is small display caps under a large photo; it is easy to miss.</li>
+</ul>
+
+<h2>What works well</h2>
+<ul>
+<li>The heavy rule between the head and the tiles cleanly separates "who" from "what he's worth".</li>
+<li>Mono tabular figures in the tiles line up and read fast.</li>
+<li>On the phone the photo above the name is a strong card-like opening.</li>
+</ul>
+
+<h2>Priority recommendations</h2>
+<ol>
+<li><strong>Cut the repeated line.</strong> Drop "2027 $16.0M · Signed thru 2030"; keep 2026 WAR and OPS somewhere once.</li>
+<li><strong>Give the name its weight back.</strong> Stack name, meta and chips in a column aligned to the photo's top, name one step larger. Or take the photo to 3× (117 × 156) so it stops outweighing the column.</li>
+<li><strong>Explain Surplus value</strong> with an InfoPopover, and make Proj. WAR and Surplus the two lead tiles.</li>
+</ol>
+</main>
+</body>
+</html>

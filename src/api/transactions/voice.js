@@ -73,3 +73,19 @@ export function optionsTail(facts) {
   if (left == null) return ''
   return left === 0 ? ', and he is out of options' : `, with ${word(left)} option${left === 1 ? '' : 's'} left`
 }
+
+// The finished season's line, past tense: "hit .257 with 18 homers in 95 games".
+export function didText(line, pitcher) {
+  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${ipText(line.ip)} innings in ${gamesText(line.games)}`
+  return `hit ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
+}
+
+// Where in the minors a line was made: "in Double-A with the Biloxi Shuckers", or across levels.
+export function minorsWhere(m) {
+  if (m.team) return `in ${m.level[0]} with the ${m.team}`
+  return m.level.length > 1 ? `across ${m.level.slice(0, -1).join(', ')} and ${m.level[m.level.length - 1]}` : `in ${m.level[0]}`
+}
+
+// November through February: the season is over and the next not begun.
+// Not October: a postseason club's selection then is a real call-up.
+export const offseasonMonth = (iso) => { const m = Number(iso.slice(5, 7)); return m >= 11 || m <= 2 }

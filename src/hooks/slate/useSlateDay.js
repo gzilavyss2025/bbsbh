@@ -11,7 +11,7 @@ import { fetchAffiliates } from '../../api/team/fetch.js'
 import { fetchLevelCounts } from '../../api/slate/levelCounts.js'
 import { initialSlateDay, loadSlateDay } from '../../lib/slate/day.js'
 import { readSeasonRow, saveSeasonRow } from '../../lib/time/seasonRows.js'
-import { MVP_PHOTOS, MVP_PHOTO_SIZES, mvpPhotoSrcSet, mvpPhotoUrl } from '../../lib/postseason/mvpLine.js'
+import { MVP_PHOTOS, championPhotoUrl } from '../../lib/postseason/mvpLine.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 
 // The thin React half of the slate-day loader (lib/slate/day.js, #3035): it wires the real
@@ -88,10 +88,10 @@ export function useSlateDay({ dateStr, sportId, leagueId = null, favoriteTeamId 
       : initialSlateDay({ dateStr, sportId, leagueId, favoriteTeamId }, readSeasonRow, state.raw)
   const ctl = state.key === key ? state.ctl : null
 
-  // The MLB winter opens on the champion hero, whose photo URL is static: start it now, not after
+  // The MLB winter opens on the story deck's champion slide, whose photo URL is static: start it now, not after
   // the hero's chunk and the postseason schedule land (its LCP, #3042). React dedupes the call.
   const pick = sportId === SPORT_IDS.MLB ? MVP_PHOTOS[value.offseason.phase?.seasonEnded] : null
-  if (pick) preload(mvpPhotoUrl(pick.id), { as: 'image', imageSrcSet: mvpPhotoSrcSet(pick.id), imageSizes: MVP_PHOTO_SIZES, fetchPriority: 'high' })
+  if (pick) preload(championPhotoUrl(pick.id), { as: 'image', fetchPriority: 'high' })
 
   return { ...value, reloadSlate: () => ctl?.reload('slate') }
 }
